@@ -38,8 +38,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**Propagator channeling a graph and an array of variables
  *
@@ -95,7 +94,7 @@ public class PropRelationGraph extends Propagator {
 
 	@Override
 	public ESat isEntailed() {
-		INeighbors nei;
+		ISet nei;
 		for(int i=0; i<n; i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -117,13 +116,13 @@ public class PropRelationGraph extends Propagator {
 	//***********************************************************************************
 
 	private void checkVar(int i) throws ContradictionException {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		ISet ker = g.getKernelGraph().getActiveNodes();
+		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 			if(!g.getKernelGraph().arcExists(i, j)){
 				switch(relation.isEntail(i,j)){
 					case TRUE:
-						if(ker.isActive(i) && ker.isActive(j)){
+						if(ker.contain(i) && ker.contain(j)){
 							g.enforceArc(i, j, this);
 						}break;
 					case FALSE: g.removeArc(i, j, this);break;

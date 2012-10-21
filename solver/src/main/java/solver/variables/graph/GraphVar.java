@@ -66,6 +66,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
+
 	public GraphVar(Solver solver) {
 		super("G", solver);
 		solver.associates(this);
@@ -81,11 +82,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		if (getEnvelopOrder() != getKernelOrder()) {
 			return false;
 		}
-		INeighbors suc;
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		ISet suc;
+		ISet act = getEnvelopGraph().getActiveNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			suc = envelop.getSuccessorsOf(i);
-			if (suc.neighborhoodSize() != getKernelGraph().getSuccessorsOf(i).neighborhoodSize()) {
+			if (suc.getSize() != getKernelGraph().getSuccessorsOf(i).getSize()) {
 				return false;
 			}
 		}
@@ -94,14 +95,14 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	@Override
 	public boolean removeNode(int x, ICause cause) throws ContradictionException {
-		if (kernel.getActiveNodes().isActive(x)) {
+		if (kernel.getActiveNodes().contain(x)) {
 			this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
 			return true;
-		} else if (!envelop.getActiveNodes().isActive(x)) {
+		} else if (!envelop.getActiveNodes().contain(x)) {
 			return false;
 		}
 		if (reactOnModification) {
-			INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+			ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
 			for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
 				removeArc(x, i, cause);
 				removeArc(i, x, cause);
@@ -120,7 +121,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	@Override
 	public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-		if (envelop.getActiveNodes().isActive(x)) {
+		if (envelop.getActiveNodes().contain(x)) {
 			if (kernel.activateNode(x)) {
 				if (reactOnModification) {
 					delta.add(x,IGraphDelta.NE,cause);
@@ -141,12 +142,12 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	@Override
 	public int getEnvelopOrder() {
-		return envelop.getActiveNodes().neighborhoodSize();
+		return envelop.getActiveNodes().getSize();
 	}
 
 	@Override
 	public int getKernelOrder() {
-		return kernel.getActiveNodes().neighborhoodSize();
+		return kernel.getActiveNodes().getSize();
 	}
 
 	@Override
@@ -225,41 +226,39 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		solver.getEngine().fails(cause, this, message);
 	}
 
-	public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
-		int n = value.length;
-//		for (int i = 0; i < n; i++) {
-//			for (int j = 0; j < n; j++) {
-//				if (value[i][j]) {
-//					enforceArc(i, j, cause);
-//				} else {
-//					removeArc(i, j, cause);
-//				}
-//			}
-//		}
-		INeighbors nei;
-		for(int i=0;i<n;i++){
-			nei = getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if (value[i][j]) {
+	//***********************************************************************************
+	// STORE AND RESOTRE
+	//***********************************************************************************
+
+	public void instantiateTo(boolean[][] values, ICause cause) throws ContradictionException {
+		int n = values.length-1;
+		for (int i = 0; i < n; i++) {
+			if(values[n][i]){//nodes
+				enforceNode(i,cause);
+			}else{
+				removeNode(i,cause);
+			}
+			for (int j = 0; j < n; j++) {
+				if (values[i][j]) {//arcs
 					enforceArc(i, j, cause);
 				} else {
 					removeArc(i, j, cause);
 				}
 			}
 		}
-
 	}
 
 	public boolean[][] getValue() {
 		int n = getEnvelopGraph().getNbNodes();
-		boolean[][] vals = new boolean[n][n];
-		IActiveNodes kerNodes = getKernelGraph().getActiveNodes();
-		INeighbors kerSuccs;
+		boolean[][] vals = new boolean[n+1][n];
+		ISet kerNodes = getKernelGraph().getActiveNodes();
+		ISet kerSuccs;
 		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
 			kerSuccs = getKernelGraph().getSuccessorsOf(i);
 			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-				vals[i][j] = true;
+				vals[i][j] = true; // arc in
 			}
+			vals[n][i] = true; // node in
 		}
 		return vals;
 	}

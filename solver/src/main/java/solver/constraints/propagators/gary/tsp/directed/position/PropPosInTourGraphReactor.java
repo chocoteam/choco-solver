@@ -49,7 +49,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
@@ -71,7 +71,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     private PairProcedure arcEnforced, arcRemoved;
     IStateInt nR;
     IStateInt[] sccOf;
-    INeighbors[] outArcs;
+    ISet[] outArcs;
     IDirectedGraph rg;
     // data for algorithms
     BitSet done;
@@ -96,7 +96,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     }
 
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver,
-                                     IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs, IDirectedGraph rg) {
+                                     IStateInt nR, IStateInt[] sccOf, ISet[] outArcs, IDirectedGraph rg) {
         this(intVars, graph, constraint, solver);
         this.nR = nR;
         this.sccOf = sccOf;
@@ -187,7 +187,7 @@ public class PropPosInTourGraphReactor extends Propagator {
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
                 intVars[x].updateLowerBound(level, this);
-                INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
                         nextSet.add(j);
@@ -221,7 +221,7 @@ public class PropPosInTourGraphReactor extends Propagator {
                     nbNode++;
                     x = currentSet.get(i);
                     intVars[x].updateLowerBound(level, this);
-                    INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                    ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {
                             done.set(j);
@@ -264,7 +264,7 @@ public class PropPosInTourGraphReactor extends Propagator {
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
                 intVars[x].updateUpperBound(level, this);
-                INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+                ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
                         nextSet.add(j);
@@ -298,7 +298,7 @@ public class PropPosInTourGraphReactor extends Propagator {
                     nbNodes--;
                     x = currentSet.get(i);
                     intVars[x].updateUpperBound(level, this);
-                    INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+                    ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {
                             done.set(j);

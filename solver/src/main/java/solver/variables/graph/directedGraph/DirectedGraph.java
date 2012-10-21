@@ -29,18 +29,17 @@ package solver.variables.graph.directedGraph;
 
 import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
+import solver.variables.graph.graphStructure.FullSet;
 import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
 import solver.variables.graph.graphStructure.adjacencyList.IntDoubleLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
 /**
  * Created by IntelliJ IDEA.
- * User: chameau
+ * User: chameau, Jean-Guillaume
  * Date: 9 f�vr. 2011
  *
  * *
@@ -52,18 +51,20 @@ public class DirectedGraph implements IDirectedGraph {
 	// VARIABLES
 	//***********************************************************************************
 
-	INeighbors[] successors;
-	INeighbors[] predecessors;
+	ISet[] successors;
+	ISet[] predecessors;
 	/** activeIdx represents the nodes available in the graph */
-	IActiveNodes activeIdx;
+	ISet nodes;
+	int n;
 	GraphType type;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraph(int nbits, GraphType type) {
+	public DirectedGraph(int nbits, GraphType type, boolean allNodes) {
 		this.type = type;
+		this.n = nbits;
 		switch (type) {
 			// ARRAY SWAP
 			case ENVELOPE_SWAP_ARRAY:
@@ -114,14 +115,15 @@ public class DirectedGraph implements IDirectedGraph {
 			default:
 				throw new UnsupportedOperationException();
 		}
-		this.activeIdx = new ActiveNodes(nbits);
-		for (int i = 0; i < nbits; i++) {
-			this.activeIdx.activate(i);
+		if(allNodes){
+			this.nodes = new FullSet(nbits);
+		}else{
+			this.nodes = new BitSetNeighbors(nbits);
 		}
 	}
 
-	public DirectedGraph(int order, boolean[][] matrix, GraphType type) {
-		this(order,type);
+	public DirectedGraph(int order, boolean[][] matrix, GraphType type, boolean allNodes) {
+		this(order,type,allNodes);
 		for (int i = 0; i < order; i++) {
 			for (int j = 0; j < order; j++) {
 				if (matrix[i][j]) {
@@ -145,7 +147,7 @@ public class DirectedGraph implements IDirectedGraph {
 
 	public String toStringSuccs() {
 		String res = "";
-		for (int i = activeIdx.getFirstElement(); i>=0; i = activeIdx.getNextElement()) {
+		for (int i = nodes.getFirstElement(); i>=0; i = nodes.getNextElement()) {
 			res += "pot-" + i + ": ";
 			for(int j=successors[i].getFirstElement();j>=0; j=successors[i].getNextElement()){
 				res += j + " ";
@@ -157,7 +159,7 @@ public class DirectedGraph implements IDirectedGraph {
 
 	public String toStringPreds() {
 		String res = "";
-		for (int i = activeIdx.getFirstElement(); i>=0; i = activeIdx.getNextElement()) {
+		for (int i = nodes.getFirstElement(); i>=0; i = nodes.getNextElement()) {
 			res += "pot-" + i + ": ";
 			for(int j=predecessors[i].getFirstElement();j>=0; j=predecessors[i].getNextElement()){
 				res += j + " ";
@@ -172,15 +174,15 @@ public class DirectedGraph implements IDirectedGraph {
 	 * @inheritedDoc
 	 */
 	public int getNbNodes() {
-		return activeIdx.nbNodes();
+		return n;
 	}
 
 	@Override
 	/**
 	 * @inheritedDoc
 	 */
-	public IActiveNodes getActiveNodes() {
-		return activeIdx;
+	public ISet getActiveNodes() {
+		return nodes;
 	}
 
 	@Override
@@ -193,15 +195,15 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean activateNode(int x) {
-		if(activeIdx.isActive(x))return false;
-		activeIdx.activate(x);
+		if(nodes.contain(x))return false;
+		nodes.add(x);
 		return true;
 	}
 
 	@Override
 	public boolean desactivateNode(int x) {
-		if(!activeIdx.isActive(x))return false;
-		activeIdx.desactivate(x);
+		if(!nodes.contain(x))return false;
+		nodes.remove(x);
 		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
 			predecessors[j].remove(x);
 		}
@@ -242,9 +244,8 @@ public class DirectedGraph implements IDirectedGraph {
 			predecessors[to].remove(from);
 			return true;
 		}
-		if ((successors[from].contain(to)) || (predecessors[to].contain(from))){
-			throw new UnsupportedOperationException("incoherent directed graph");
-		}
+		assert (!((successors[from].contain(to)) || (predecessors[to].contain(from)))):
+				"incoherent directed graph";
 		return false;
 	}
 
@@ -260,17 +261,15 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addArc(int from, int to) {
-//		TODO
-//		activateNode(from);
-//		activateNode(to);
+		activateNode(from);
+		activateNode(to);
 		if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))){
 			successors[from].add(to);
 			predecessors[to].add(from);
 			return true;
 		}
-		if ((!successors[from].contain(to)) || (!predecessors[to].contain(from))){
-			throw new UnsupportedOperationException("incoherent directed graph");
-		}
+		assert (!((!successors[from].contain(to)) || (!predecessors[to].contain(from)))):
+			"incoherent directed graph";
 		return false;
 	}
 
@@ -279,17 +278,17 @@ public class DirectedGraph implements IDirectedGraph {
 	 * @inheritedDoc
 	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
 	 */
-	public INeighbors getNeighborsOf(int x) {
+	public ISet getNeighborsOf(int x) {
 		return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes());
 	}
 
 	@Override
-	public INeighbors getSuccessorsOf(int x) {
+	public ISet getSuccessorsOf(int x) {
 		return successors[x];
 	}
 
 	@Override
-	public INeighbors getPredecessorsOf(int x) {
+	public ISet getPredecessorsOf(int x) {
 		return predecessors[x];
 	}
 }

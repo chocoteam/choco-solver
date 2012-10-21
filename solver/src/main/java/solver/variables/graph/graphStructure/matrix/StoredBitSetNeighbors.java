@@ -30,14 +30,14 @@ package solver.variables.graph.graphStructure.matrix;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.S64BitSet;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 févr. 2011
  */
-public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
+public class StoredBitSetNeighbors extends S64BitSet implements ISet {
 
 	protected int current;	//enables to iterate
 	protected IStateInt card;	// enables to get the cardinality in O(1)
@@ -72,7 +72,7 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
     }
 
     @Override
-    public int neighborhoodSize() {
+    public int getSize() {
         return this.card.get();
     }
 

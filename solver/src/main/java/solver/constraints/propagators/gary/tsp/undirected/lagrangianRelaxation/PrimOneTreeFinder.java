@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 public class PrimOneTreeFinder extends PrimMSTFinder {
 
@@ -60,7 +60,7 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 		}
 		chooseOneNode();
 		inTree.set(oneNode);
-		INeighbors nei = g.getSuccessorsOf(oneNode);
+		ISet nei = g.getSuccessorsOf(oneNode);
 		int min1 = -1;
 		int min2 = -1;
 		boolean b1=false,b2=false;
@@ -102,12 +102,12 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 				maxTArc = Math.max(maxTArc, costs[oneNode][min2]);
 			}
 		}
-//		boolean findCuts = nei.neighborhoodSize()==2; // TAG: cut, not very helpful
+//		boolean findCuts = nei.getSize()==2; // TAG: cut, not very helpful
 		int first=-1,sizeFirst=n+1;
 		for(int i=0;i<n;i++){
-			if(i!=oneNode && g.getSuccessorsOf(i).neighborhoodSize()<sizeFirst){
+			if(i!=oneNode && g.getSuccessorsOf(i).getSize()<sizeFirst){
 				first = i;
-				sizeFirst = g.getSuccessorsOf(i).neighborhoodSize();
+				sizeFirst = g.getSuccessorsOf(i).getSize();
 			}
 		}
 		if(first==-1){
@@ -128,7 +128,7 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 		}
 		addArc(oneNode,min1);
 		addArc(oneNode,min2);
-		if(Tree.getNeighborsOf(oneNode).neighborhoodSize()!=2){
+		if(Tree.getNeighborsOf(oneNode).getSize()!=2){
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -160,9 +160,9 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 //		int size = 0;
 //		int s;
 //		for(int i=0;i<n;i++){
-//			s = g.getSuccessorsOf(i).neighborhoodSize();
+//			s = g.getSuccessorsOf(i).getSize();
 //			if(s>size){
-//				size = g.getSuccessorsOf(i).neighborhoodSize();
+//				size = g.getSuccessorsOf(i).getSize();
 //				oneNode = i;
 //			}
 //		}

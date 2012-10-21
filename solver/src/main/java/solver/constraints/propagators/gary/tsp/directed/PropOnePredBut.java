@@ -45,7 +45,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -89,16 +89,16 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		INeighbors preds;
+		ISet preds;
 		int pre;
 		for(int i=0;i<n;i++){
 			if(i!=but){
 				pre = g.getKernelGraph().getPredecessorsOf(i).getFirstElement();
 				preds = g.getEnvelopGraph().getPredecessorsOf(i);
-				if (preds.neighborhoodSize()==0){
+				if (preds.getSize()==0){
 					this.contradiction(g,i+" has no predecessor");
 				}
-				else if (preds.neighborhoodSize()==1){
+				else if (preds.getSize()==1){
 					g.enforceArc(preds.getFirstElement(),i,this);
 				}
 				else if (pre!=-1){
@@ -134,10 +134,10 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 		boolean done = true;
 		for(int i=0;i<n;i++){
 			if(i!=but){
-				if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()>1){
+				if(g.getEnvelopGraph().getPredecessorsOf(i).getSize()<1 || g.getKernelGraph().getPredecessorsOf(i).getSize()>1){
 					return ESat.FALSE;
 				}
-				if(g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()){
+				if(g.getKernelGraph().getPredecessorsOf(i).getSize()!=g.getEnvelopGraph().getPredecessorsOf(i).getSize()){
 					done = false;
 				}
 			}
@@ -161,7 +161,7 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 		@Override
 		public void execute(int from, int to) throws ContradictionException {
 			if(to!=but){
-				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
+				ISet preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(int i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
 						g.removeArc(i,to,p);
@@ -180,11 +180,11 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 		@Override
 		public void execute(int from, int to) throws ContradictionException {
 			if(to!=but){
-				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
-				if (preds.neighborhoodSize()==0){
+				ISet preds = g.getEnvelopGraph().getPredecessorsOf(to);
+				if (preds.getSize()==0){
 					p.contradiction(g,to+" has no predecessor");
 				}
-				if (preds.neighborhoodSize()==1){
+				if (preds.getSize()==1){
 					g.enforceArc(preds.getFirstElement(),to,p);
 				}
 			}

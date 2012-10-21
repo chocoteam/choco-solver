@@ -31,7 +31,7 @@ import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 
 import java.util.Arrays;
@@ -49,13 +49,13 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 	// REDUCED GRAPH STRUCTURE
 	protected IStateInt nR;
 	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
+	protected ISet[] outArcs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalBST_GAC(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public KruskalBST_GAC(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
 		super(nbNodes,propagator);
 		indexOfArc = new int[n][n];
 		links = new TIntArrayList();
@@ -87,11 +87,11 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 			Tree.getPredecessorsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size+=g.getSuccessorsOf(i).neighborhoodSize();
+			size+=g.getSuccessorsOf(i).getSize();
 		}
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -187,7 +187,7 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 				}
 			}
 		}
-		INeighbors nei;
+		ISet nei;
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

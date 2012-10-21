@@ -27,28 +27,19 @@
 
 package samples.graph;
 
-import gnu.trove.impl.hash.TIntIntHash;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 //import ilog.concert.*;
 //import ilog.cplex.*;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.procedure.PairProcedure;
-import solver.Solver;
+		import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.IRelaxation;
-import solver.constraints.propagators.gary.basic.PropKCC;
-import solver.constraints.propagators.gary.basic.PropMaxDiameter;
-import solver.constraints.propagators.gary.basic.PropMaxDiameterFromNode;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
+		import solver.constraints.propagators.gary.basic.PropKCC;
+		import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.flow.PropGCC_LowUp_undirected;
-import solver.constraints.propagators.gary.flow.PropGCC_cost_LowUp_undirected;
-import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
+		import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
 import solver.exception.ContradictionException;
@@ -58,9 +49,7 @@ import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
+		import solver.propagation.generator.Sort;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -74,15 +63,12 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
-import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
+		import solver.variables.graph.GraphType;
+import solver.variables.graph.ISet;
+		import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.BitSet;
+		import java.util.BitSet;
 import java.util.LinkedList;
 
 /**
@@ -112,7 +98,7 @@ public class DCMST {
 	private static long TIMELIMIT = 10000000;
 	//	private static final long TIMELIMIT = 14400000;
 	private static String outFile;
-	private static PropTreeHeldKarp hk;
+	private static PropLagr_DCMST hk;
 	private static boolean optGiven = false;
 	static boolean moreHK;
 
@@ -138,7 +124,7 @@ public class DCMST {
 		File folder = new File(dir+"/"+type);
 		String[] list = folder.list();
 		nMin = 100;
-		nMax = 9000;
+		nMax = 900;
 		for (String s : list) {
 			File file = new File(dir+"/"+type+"/"+s);
 //			if(!(s.contains("500_2")||s.contains("500_1")))
@@ -208,7 +194,7 @@ public class DCMST {
 	private static void out(String s){
 		HCP_Parser.clearFile(s);
 		HCP_Parser.writeTextInto("1\n\n", s);
-		final UndirectedGraph undi = new UndirectedGraph(n, GraphType.LINKED_LIST);
+		final UndirectedGraph undi = new UndirectedGraph(n, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			for(int j=i+1;j<n;j++){
 				if(dist[i][j]!=-1 && !(dMax[i]==1 && dMax[j]==1)){
@@ -218,7 +204,7 @@ public class DCMST {
 		}
 		int m = 0;
 		for(int i=0;i<n;i++){
-			m+=undi.getSuccessorsOf(i).neighborhoodSize();
+			m+=undi.getSuccessorsOf(i).getSize();
 		}
 		m/=2;
 		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
@@ -228,7 +214,7 @@ public class DCMST {
 		}
 		HCP_Parser.writeTextInto(deg, s);
 		for(int i=0;i<n;i++){
-			INeighbors nei = undi.getSuccessorsOf(i);
+			ISet nei = undi.getSuccessorsOf(i);
 			String neist = "";
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j)
@@ -243,7 +229,7 @@ public class DCMST {
 		HCP_Parser.writeTextInto("1\n\n", s);
 		int m = 0;
 		for(int i=0;i<n;i++){
-			m+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+			m+=g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 		}
 		m/=2;
 		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
@@ -253,7 +239,7 @@ public class DCMST {
 		}
 		HCP_Parser.writeTextInto(deg, s);
 		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			String neist = "";
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j)
@@ -542,7 +528,7 @@ public class DCMST {
 //		}
 //		lb = 12640;
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST,true);
 //		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
@@ -676,8 +662,8 @@ public class DCMST {
 //					int nbK = 0;
 //					INeighbors nei;
 //					for(int i=0;i<n;i++){
-//						nbK += undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-//						nbX += undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//						nbK += undi.getKernelGraph().getSuccessorsOf(i).getSize();
+//						nbX += undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
 //					}
 //					nbX /= 2;
 //					nbK /= 2;
@@ -691,7 +677,7 @@ public class DCMST {
 //						gsol.getNeighborsOf(i).clear();
 //					}
 //					for(int i=0;i<n;i++){
-//						dm[i] = dMax[i] - undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+//						dm[i] = dMax[i] - undi.getKernelGraph().getSuccessorsOf(i).getSize();
 //						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
 //						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //							if(i<j){
@@ -716,7 +702,7 @@ public class DCMST {
 //					//cons
 //					cplex.addEq(cplex.sum(x),n-1-nbK);
 //					for(int i=0;i<n;i++){
-//						if(undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+//						if(undi.getEnvelopGraph().getSuccessorsOf(i).getSize()>undi.getKernelGraph().getSuccessorsOf(i).getSize()){
 //							list[i] = new TIntArrayList();
 //						}else{
 //							list[i] = null;
@@ -725,7 +711,7 @@ public class DCMST {
 //					index = 0;
 //					for(int i=0;i<n;i++){
 //						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-//						if(nei.neighborhoodSize()>undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+//						if(nei.getSize()>undi.getKernelGraph().getSuccessorsOf(i).getSize()){
 //							for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //								if(i<j){
 //									if(!undi.getKernelGraph().arcExists(i,j)){
@@ -748,7 +734,7 @@ public class DCMST {
 //								arr[k] = x[list[i].get(k)];
 //							}
 //							cplex.addLe(cplex.sum(arr), dm[i]);
-//							if(undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()==0){
+//							if(undi.getKernelGraph().getSuccessorsOf(i).getSize()==0){
 //								cplex.addGe(cplex.sum(arr), 1);
 //							}
 //						}
@@ -913,8 +899,8 @@ public class DCMST {
 //					seen[i] = false;
 //
 //				node = 0;
-//				while(undi.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()==
-//						undi.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()){
+//				while(undi.getEnvelopGraph().getSuccessorsOf(node).getSize()==
+//						undi.getKernelGraph().getSuccessorsOf(node).getSize()){
 //					node++;
 //				}
 //				for (index = 0; index < n; index++) {
@@ -978,7 +964,7 @@ public class DCMST {
 
 //		Constraint gc2 = GraphConstraintFactory.makeConstraint(solver);
 
-		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk = PropLagr_DCMST.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk);
 
@@ -1003,7 +989,7 @@ public class DCMST {
 
 //PropBIStrongTreeHeldKarp2 hk2 = PropBIStrongTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 //		PropTreeHeldKarpLMR hk2 = PropTreeHeldKarpLMR.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
-		PropTreeHeldKarp2DON_Grid hk2 = PropTreeHeldKarp2DON_Grid.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		PropLagr_DCMST_withCuts hk2 = PropLagr_DCMST_withCuts.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 //		PropTreeHeldKarp2 hk2 = PropTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk2.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk2);
@@ -1053,11 +1039,11 @@ public class DCMST {
 				int nkarc = 0;
 				int maxD = 0;
 				for(int i=0;i<n;i++){
-					narc += undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-					if(maxD < undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()){
-						maxD = undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+					narc += undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
+					if(maxD < undi.getEnvelopGraph().getSuccessorsOf(i).getSize()){
+						maxD = undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
 					}
-					nkarc+= undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+					nkarc+= undi.getKernelGraph().getSuccessorsOf(i).getSize();
 				}
 				narc /= 2;
 				nkarc/= 2;
@@ -1189,12 +1175,12 @@ public class DCMST {
 		}
 
 		private void minDelta(){
-			INeighbors nei;
+			ISet nei;
 			int minDelta = 5*n;
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).getSize();
 				if(e!=k && e>dMax[i])
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
@@ -1206,13 +1192,13 @@ public class DCMST {
 			}
 			int minDeg = 3*n;
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).getSize()!=k && dMax[i]-k==minDelta)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							int d = g.getEnvelopGraph().getNeighborsOf(i).getSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).getSize();
 							if(d<minDeg){
 								minDeg = d;
 								from = i;
@@ -1225,9 +1211,9 @@ public class DCMST {
 				return;
 			}
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).getSize();
 				if(e!=k)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
@@ -1238,13 +1224,13 @@ public class DCMST {
 					}
 			}
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).getSize()!=k && dMax[i]-k==minDelta)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							int d = g.getEnvelopGraph().getNeighborsOf(i).getSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).getSize();
 							if(d<minDeg){
 								minDeg = d;
 								from = i;
@@ -1256,13 +1242,13 @@ public class DCMST {
 		}
 
 		private void minDelta2(){
-			INeighbors nei;
+			ISet nei;
 			int minDelta = 5*n;
 			int maxDeg = 0;
 			from = -1;
 			for(int i=0;i<n;i++){
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).getSize();
 				if(e!=k && e>dMax[i] && e>maxDeg){
 					maxDeg = e;
 					from = e;
@@ -1270,8 +1256,8 @@ public class DCMST {
 			}
 			if(from==-1){
 				for(int i=0;i<n;i++){
-					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-					int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+					int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+					int e = g.getEnvelopGraph().getNeighborsOf(i).getSize();
 					if(e!=k && e>maxDeg){
 						maxDeg = e;
 						from = e;
@@ -1283,11 +1269,11 @@ public class DCMST {
 			}
 			int minDeg = 3*n;
 			nei = g.getEnvelopGraph().getSuccessorsOf(from);
-//			nei = hk.getMST().getSuccessorsOf(i);
-			int k = g.getKernelGraph().getNeighborsOf(from).neighborhoodSize();
+//			nei = hk.getSupport().getSuccessorsOf(i);
+			int k = g.getKernelGraph().getNeighborsOf(from).getSize();
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!g.getKernelGraph().arcExists(from,j)){
-					int d = g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+					int d = g.getEnvelopGraph().getNeighborsOf(j).getSize();
 					if(d<minDeg){
 						minDeg = d;
 						to = j;
@@ -1303,12 +1289,12 @@ public class DCMST {
 		}
 
 		private void original(){
-			INeighbors nei;
+			ISet nei;
 			int minDelta = 5*n;
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).getSize();
 				if(e!=k)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
@@ -1320,13 +1306,13 @@ public class DCMST {
 			}
 			int minDeg = 0;//3*n;
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+				nei = hk.getSupport().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).getSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).getSize()!=k && dMax[i]-k==minDelta)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							int d = g.getEnvelopGraph().getNeighborsOf(i).getSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).getSize();
 							if(d>minDeg){
 								minDeg = d;
 								from = i;
@@ -1354,17 +1340,17 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			int minCost = 0;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-//						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+//						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1375,13 +1361,13 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()<env.neighborhoodSize()
-						&& ker.neighborhoodSize()<dMax[i]-1){
+				if(ker.getSize()<env.getSize()
+						&& ker.getSize()<dMax[i]-1){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-//						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+//						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1394,7 +1380,7 @@ public class DCMST {
 //			for(int i=0;i<n;i++){
 //				ker = g.getKernelGraph().getSuccessorsOf(i);
 //				env = g.getEnvelopGraph().getSuccessorsOf(i);
-//				if(ker.neighborhoodSize()==0){
+//				if(ker.getSize()==0){
 //					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 //						int cost = dist[i][j];
 //						if(to==-1 || cost<minCost){
@@ -1409,7 +1395,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
+				if(env.getSize()!=ker.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(i<j && !ker.contain(j)){
 							int cost = dist[i][j];
@@ -1432,16 +1418,16 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			int minCost = 0;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()<dMax[i]-1)
-					if(ker.neighborhoodSize()==0){
+				if(ker.getSize()<dMax[i]-1)
+					if(ker.getSize()==0){
 						for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 							int cost = dist[i][j];
-							if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+							if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 								if(to==-1 || cost<minCost){
 									minCost = cost;
 									from = i;
@@ -1458,7 +1444,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
 						if(to==-1 || cost<minCost){
@@ -1476,7 +1462,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
+				if(env.getSize()!=ker.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(i<j && !ker.contain(j)){
 							int cost = dist[i][j];
@@ -1507,15 +1493,15 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			int minCost = 0;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 							if(to==-1 || cost>minCost){
 								minCost = cost;
 								from = i;
@@ -1529,7 +1515,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
 						if(to==-1 || cost>minCost){
@@ -1544,7 +1530,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
+				if(env.getSize()!=ker.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(i<j && !ker.contain(j)){
 							int cost = dist[i][j];
@@ -1574,13 +1560,13 @@ public class DCMST {
 		public boolean computeNextArc() {
 			from = -1;
 			to = -1;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			int next = -1;
 			int dM = 0;
 			for(int i=0;i<n;i++){
-				if(hk.getMST().getNeighborsOf(i).neighborhoodSize()-dMax[i]>dM){
-					dM = hk.getMST().getNeighborsOf(i).neighborhoodSize()-dMax[i];
+				if(hk.getSupport().getNeighborsOf(i).getSize()-dMax[i]>dM){
+					dM = hk.getSupport().getNeighborsOf(i).getSize()-dMax[i];
 					next = i;
 				}
 			}
@@ -1588,7 +1574,7 @@ public class DCMST {
 				int i = next;
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()!=env.neighborhoodSize()){
+				if(ker.getSize()!=env.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(!ker.contain(j)){
 							from = i;
@@ -1601,7 +1587,7 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()!=env.neighborhoodSize()){
+				if(ker.getSize()!=env.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(!ker.contain(j)){
 							from = i;
@@ -1684,7 +1670,7 @@ public class DCMST {
 			preprocessOneNodes();
 			UndirectedGraphVar g = vars[0];
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				if(oneNode.get(i))
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(oneNode.get(j)){
@@ -1707,7 +1693,7 @@ public class DCMST {
 		}
 
 		private void preprocessOneNodes() {
-			INeighbors nei;
+			ISet nei;
 			oneNode.clear();
 			for(int i = 0;i<n;i++){
 				counter[i] = 0;
@@ -1758,10 +1744,10 @@ public class DCMST {
 //			return computeNextInverse();
 		}
 		public boolean computeNext() {
-			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).getSize()!=g.getKernelGraph().getSuccessorsOf(from).getSize()){
 				to = -1;
 				int i = from;
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1815,7 +1801,7 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1828,7 +1814,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1841,7 +1827,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1854,7 +1840,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1867,7 +1853,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j)){
@@ -1881,10 +1867,10 @@ public class DCMST {
 			return false;
 		}
 		public boolean computeNextInverse() {
-			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).getSize()!=g.getKernelGraph().getSuccessorsOf(from).getSize()){
 				to = -1;
 				int i = from;
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1915,7 +1901,7 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -1928,7 +1914,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j)){
@@ -1940,7 +1926,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						from = i;
@@ -1952,10 +1938,10 @@ public class DCMST {
 			return false;
 		}
 		public boolean computePatat() {
-			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).getSize()!=g.getKernelGraph().getSuccessorsOf(from).getSize()){
 				to = -1;
 				int i = from;
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -2009,7 +1995,7 @@ public class DCMST {
 			from = -1;
 			to = -1;
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -2022,7 +2008,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -2035,7 +2021,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -2048,7 +2034,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j))
@@ -2061,7 +2047,7 @@ public class DCMST {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!g.getKernelGraph().edgeExists(i,j)){
 						if(!hk.contains(i,j)){
@@ -2078,8 +2064,8 @@ public class DCMST {
 			from = -1;
 			int minDelta = 0;
 			for(int i=0;i<n;i++){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()!= k){
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()!= k){
 					if(dMax[i]-k>minDelta){
 						minDelta = dMax[i]-k;
 						from = i;
@@ -2091,9 +2077,9 @@ public class DCMST {
 			}
 			to = -1;
 			minDelta = 0;
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(from);
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if(!g.getKernelGraph().edgeExists(from,i)){
 					if(!hk.contains(from,i))
 					if(dMax[i]-k>minDelta){
@@ -2104,7 +2090,7 @@ public class DCMST {
 			}
 			if(to==-1)
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if(!g.getKernelGraph().edgeExists(from,i)){
 					if(dMax[i]-k>minDelta){
 						minDelta = dMax[i]-k;
@@ -2121,8 +2107,8 @@ public class DCMST {
 			from = -1;
 			int minDelta = n*2;
 			for(int i=0;i<n;i++){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()!= k){
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()!= k){
 					if(dMax[i]-k<minDelta){
 						minDelta = dMax[i]-k;
 						from = i;
@@ -2134,9 +2120,9 @@ public class DCMST {
 			}
 			to = -1;
 			minDelta = 2*n;
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(from);
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if(!g.getKernelGraph().edgeExists(from,i)){
 					if(!hk.contains(from,i))
 					if(dMax[i]-k<minDelta){
@@ -2147,7 +2133,7 @@ public class DCMST {
 			}
 			if(to==-1)
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				int k = g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if(!g.getKernelGraph().edgeExists(from,i)){
 					if(dMax[i]-k<minDelta){
 						minDelta = dMax[i]-k;

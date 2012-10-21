@@ -27,9 +27,7 @@
 
 package solver.variables.graph.graphStructure.adjacencyList;
 
-import solver.variables.graph.INeighbors;
-
-import java.util.LinkedList;
+import solver.variables.graph.ISet;
 
 /**Linked list of m elements with double link (predecessor and successor)
  * add : O(1)
@@ -41,7 +39,7 @@ import java.util.LinkedList;
  * User: Jean-Guillaume Fages
  * Date: 17/11/2011
  */
-public class IntDoubleLinkedList implements INeighbors {
+public class IntDoubleLinkedList implements ISet {
 
 	/**
 	 * The first cell of the linked list
@@ -80,7 +78,7 @@ public class IntDoubleLinkedList implements INeighbors {
 	 * The number of elements in the linked list
 	 * @return the number of cells
 	 */
-	public int neighborhoodSize() {
+	public int getSize() {
 		return this.size;
 	}
 

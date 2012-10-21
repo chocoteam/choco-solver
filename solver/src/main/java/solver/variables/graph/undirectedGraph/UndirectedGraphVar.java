@@ -52,11 +52,11 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public UndirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
+	public UndirectedGraphVar(Solver solver, int nbNodes,
+							  GraphType typeEnv, GraphType typeKer, boolean allNodes) {
 		super(solver);
-    	envelop = new StoredUndirectedGraph(environment, nbNodes, typeEnv);
-    	kernel = new StoredUndirectedGraph(environment, nbNodes, typeKer);
-    	kernel.activeIdx.clear();
+    	envelop = new StoredUndirectedGraph(environment, nbNodes, typeEnv,allNodes);
+    	kernel = new StoredUndirectedGraph(environment, nbNodes, typeKer,allNodes);
     }
 
 	//***********************************************************************************

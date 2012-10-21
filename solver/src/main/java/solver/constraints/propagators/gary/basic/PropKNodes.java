@@ -38,7 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.ISet;
 
 /**Propagator that ensures that K nodes belong to the final graph
  * @author Jean-Guillaume Fages
@@ -68,15 +68,15 @@ public class PropKNodes extends Propagator {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
+		int env = g.getEnvelopGraph().getActiveNodes().getSize();
+		int ker = g.getKernelGraph().getActiveNodes().getSize();
 		k.updateLowerBound(ker,this);
 		k.updateUpperBound(env,this);
 		if(ker==env){
 			setPassive();
 		}else if (k.instantiated()){
 			int v = k.getValue();
-			IActiveNodes envNodes = g.getEnvelopGraph().getActiveNodes();
+			ISet envNodes = g.getEnvelopGraph().getActiveNodes();
 			if(v == env){
 				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
 					g.enforceNode(i,this);
@@ -84,9 +84,9 @@ public class PropKNodes extends Propagator {
 				setPassive();
 			}
 			else if(v == ker){
-				IActiveNodes kerNodes = g.getKernelGraph().getActiveNodes();
+				ISet kerNodes = g.getKernelGraph().getActiveNodes();
 				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
-					if(!kerNodes.isActive(i)){
+					if(!kerNodes.contain(i)){
 						g.removeNode(i, this);
 					}
 				}
@@ -111,8 +111,8 @@ public class PropKNodes extends Propagator {
 
 	@Override
 	public ESat isEntailed() {
-		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
+		int env = g.getEnvelopGraph().getActiveNodes().getSize();
+		int ker = g.getKernelGraph().getActiveNodes().getSize();
 		if(env<k.getLB() || ker>k.getUB()){
 			return ESat.FALSE;
 		}

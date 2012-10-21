@@ -46,7 +46,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.BitSet;
@@ -110,7 +110,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 			size[i].set(1);
 			mate[i] = -1;
 		}
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getNeighborsOf(i);
 			for(int j = nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -161,7 +161,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 		mate[i] = j;
 		while(idxFirst<idxLast){
 			x = fifo[idxFirst++];
-			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(x);
+			ISet nei = g.getEnvelopGraph().getNeighborsOf(x);
 			for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
 				if(k!=mate[x]){
 					ck = color[k].get();

@@ -38,7 +38,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**Propagator that ensures that the relation of the graph is transitive
@@ -127,9 +127,9 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 			}
 		}
 		private void apply(int node, int mate) throws ContradictionException {
-			INeighbors ker = g.getKernelGraph().getNeighborsOf(node);
-			INeighbors env = g.getEnvelopGraph().getNeighborsOf(node);
-			INeighbors envMate = g.getEnvelopGraph().getNeighborsOf(mate);
+			ISet ker = g.getKernelGraph().getNeighborsOf(node);
+			ISet env = g.getEnvelopGraph().getNeighborsOf(node);
+			ISet envMate = g.getEnvelopGraph().getNeighborsOf(mate);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
 				if(i!=mate){
 					if(ker.contain(i)){
@@ -159,7 +159,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 		}
 
 		private void apply(int node, int mate) throws ContradictionException {
-			INeighbors ker = g.getKernelGraph().getPredecessorsOf(node);
+			ISet ker = g.getKernelGraph().getPredecessorsOf(node);
 			for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
 				g.enforceArc(i, mate, p);
 			}
@@ -186,7 +186,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 			}
 		}
 		private void apply(int node, int mate) throws ContradictionException {
-			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(node);
+			ISet nei = g.getEnvelopGraph().getNeighborsOf(node);
 			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
 				if(g.getKernelGraph().edgeExists(i, mate)){
 					g.removeArc(node, i, p);
@@ -206,7 +206,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 		@Override
 		public void execute(int from, int to) throws ContradictionException {
 			if(from != to){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(from);
 				for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
 					if(g.getKernelGraph().arcExists(from,i)){
 						g.removeArc(i, to, p);

@@ -27,13 +27,12 @@
 package solver.search.strategy.strategy.graph;
 
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.ISet;
 
 public abstract class NodeStrategy<G extends GraphVar> {
 	
 	protected G g;
-	protected IActiveNodes envNodes;
-	protected IActiveNodes kerNodes;
+	protected ISet envNodes,kerNodes;
 
 	public NodeStrategy(G g){
 		this.g = g;

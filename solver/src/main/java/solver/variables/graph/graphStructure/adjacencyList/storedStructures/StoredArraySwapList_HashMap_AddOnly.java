@@ -62,7 +62,8 @@ public class StoredArraySwapList_HashMap_AddOnly extends ArraySwapList_HashMap{
 		return super.remove(element);
 	}
 
-	protected int getSize(){
+	@Override
+	public int getSize(){
 		return size.get();
 	}
 	protected void setSize(int s){

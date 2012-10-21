@@ -41,7 +41,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -104,7 +104,7 @@ public class PropEvalObj extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        INeighbors succ;
+        ISet succ;
 		minSum.set(0);
         for (int i = 0; i < n - 1; i++) {
             succ = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -124,7 +124,7 @@ public class PropEvalObj extends Propagator {
         }
         sum.updateLowerBound(minSum.get(), this);
         // filter the graph
-        INeighbors succs;
+        ISet succs;
         int delta = minSum.get() - sum.getUB();
         int curMin;
         for (int i = 0; i < n - 1; i++) {
@@ -160,7 +160,7 @@ public class PropEvalObj extends Propagator {
         }
         if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
             // filter the graph
-            INeighbors succs;
+            ISet succs;
             int delta = minSum.get() - sum.getUB();
             int curMin;
             for (int i = 0; i < n - 1; i++) {
@@ -176,7 +176,7 @@ public class PropEvalObj extends Propagator {
     }
 
     private void findMin(int i) throws ContradictionException {
-        INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
+        ISet succ = g.getEnvelopGraph().getSuccessorsOf(i);
         int min = succ.getFirstElement();
         if (min == -1) {
 //			throw new UnsupportedOperationException("n'a pas fait le point fixe");

@@ -30,7 +30,7 @@ package solver.search.strategy.assignments;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 import java.io.Serializable;
 
@@ -120,7 +120,7 @@ public abstract class GraphAssignment implements Serializable{
 	public static GraphAssignment graph_split = new GraphAssignment() {
 		@Override
 		public void apply(GraphVar var, int node, int highestIdx, ICause cause) throws ContradictionException {
-			INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
+			ISet nei = var.getEnvelopGraph().getSuccessorsOf(node);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(j>highestIdx){
 					var.removeArc(node,j,cause);
@@ -129,7 +129,7 @@ public abstract class GraphAssignment implements Serializable{
 		}
 		@Override
 		public void unapply(GraphVar var, int node, int highestIdx, ICause cause) throws ContradictionException {
-			INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
+			ISet nei = var.getEnvelopGraph().getSuccessorsOf(node);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(j<=highestIdx){
 					var.removeArc(node,j,cause);

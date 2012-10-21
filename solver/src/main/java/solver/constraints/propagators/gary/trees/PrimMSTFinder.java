@@ -27,11 +27,11 @@
 
 package solver.constraints.propagators.gary.trees;
 
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 import java.util.BitSet;
@@ -53,7 +53,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimMSTFinder(int nbNodes, HeldKarp propagator) {
+	public PrimMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		heap = new FastArrayHeap(nbNodes);
 		inTree = new BitSet(n);
@@ -111,7 +111,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 	protected void addNode(int i) {
 		if(!inTree.get(i)){
 			inTree.set(i);
-			INeighbors nei = g.getSuccessorsOf(i);
+			ISet nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!inTree.get(j)){
 					if(propHK.isMandatory(i,j)){
@@ -127,7 +127,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 	public void performPruning(double UB) throws ContradictionException{
 		if(FILTER){
 			double delta = UB-treeCost;
-			INeighbors nei;
+			ISet nei;
 			for(int i=0;i<n;i++){
 				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

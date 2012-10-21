@@ -28,14 +28,14 @@
 package solver.variables.graph.graphStructure.matrix;
 
 import java.util.BitSet;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 févr. 2011
  */
-public class BitSetNeighbors extends BitSet implements INeighbors {
+public class BitSetNeighbors extends BitSet implements ISet {
 
 	private int current;//enables to iterate
 	private int card;	// enable to get the cardinality in O(1)
@@ -75,7 +75,7 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
     }
 
     @Override
-    public int neighborhoodSize() {
+    public int getSize() {
         return this.card;
     }
 

@@ -34,6 +34,8 @@
 
 package solver.constraints.propagators.gary;
 
+import solver.variables.graph.IGraph;
+
 public interface IGraphRelaxation {
 
 	/**
@@ -52,4 +54,9 @@ public interface IGraphRelaxation {
 	 * assumes that (i,j) does not belong to the current solution of the relaxation
  	 */
 	double getMarginalCost(int i, int j);
+
+	/**
+	 * @return the (graph) support of the relaxation
+	 */
+	IGraph getSupport();
 }

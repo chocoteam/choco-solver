@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 import java.util.BitSet;
 
@@ -80,7 +80,7 @@ public class PropMaxDiameterFromNode extends Propagator<GraphVar> {
 		visited.clear();
 		set.add(i);
 		visited.set(i);
-		INeighbors nei;
+		ISet nei;
 		int depth = 0;
 		while(!set.isEmpty() && depth<maxDiam){
 			for(i=set.size()-1;i>=0;i--){

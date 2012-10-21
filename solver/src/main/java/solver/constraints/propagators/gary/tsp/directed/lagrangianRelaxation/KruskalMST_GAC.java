@@ -31,7 +31,7 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 
@@ -79,7 +79,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		// CCtree
 		ccN = 2*n+1;
 		// backtrable
-		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST);
+		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST,false);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
 		useful = new BitSet(n);
@@ -110,11 +110,11 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 			Tree.getSuccessorsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size+=g.getSuccessorsOf(i).neighborhoodSize();
+			size+=g.getSuccessorsOf(i).getSize();
 		}
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -164,7 +164,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 
 	protected void prepareMandArcDetection(){
 		// RECYCLING ccTp is used to model the compressed path
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			ccTp[i] = -1;
 		}
@@ -292,7 +292,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 				}
 			}
 		}
-		INeighbors nei;
+		ISet nei;
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

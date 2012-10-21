@@ -29,9 +29,8 @@ package solver.variables.graph.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
  * it uses Tarjan algorithm in a non recursive way and can be performed in O(M+N) time c.f. Gondrand Minoux
@@ -45,7 +44,7 @@ public class ConnectivityFinder {
 
 	private int n;
 	private IGraph graph;
-	private INeighbors[] neighbors;
+	private ISet[] neighbors;
 	private int[] CC_firstNode, CC_nextNode, node_CC, p;
 	private int nbCC;
 	//bonus biconnection
@@ -59,7 +58,7 @@ public class ConnectivityFinder {
 	public ConnectivityFinder(IGraph g){
 		graph = g;
 		n = g.getNbNodes();
-		neighbors = new INeighbors[n];
+		neighbors = new ISet[n];
 		p = new int[n];
 		for (int i = graph.getActiveNodes().getFirstElement(); i>=0; i = graph.getActiveNodes().getNextElement()) {
 			neighbors[i] = graph.getSuccessorsOf(i);
@@ -96,7 +95,7 @@ public class ConnectivityFinder {
 			CC_nextNode = new int[n];
 			node_CC = new int[n];
 		}
-		IActiveNodes act = graph.getActiveNodes();
+		ISet act = graph.getActiveNodes();
 		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			p[i] = -1;
 		}
@@ -159,7 +158,7 @@ public class ConnectivityFinder {
 			numOfNode = new int[n];
 			inf = new int[n];
 		}
-		IActiveNodes act = graph.getActiveNodes();
+		ISet act = graph.getActiveNodes();
 		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			inf[i] = Integer.MAX_VALUE;
 			p[i] = -1;
@@ -183,7 +182,7 @@ public class ConnectivityFinder {
 			}
 			if(j<0){
 				if(i==start){
-					if(k<act.neighborhoodSize()-1){
+					if(k<act.getSize()-1){
 						return false;// NOT EVEN CONNECTED
 					}else{
 						return true;
@@ -234,7 +233,7 @@ public class ConnectivityFinder {
 			L  = new int[n];
 			H  = new int[n];
 		}
-		IActiveNodes act = graph.getActiveNodes();
+		ISet act = graph.getActiveNodes();
 		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			p[i] = -1;
 		}
@@ -256,7 +255,7 @@ public class ConnectivityFinder {
 			}
 			if(j<0){
 				if(i==start){
-					if(k<act.neighborhoodSize()-1){
+					if(k<act.getSize()-1){
 						return false;
 					}else{
 						break;
@@ -284,7 +283,7 @@ public class ConnectivityFinder {
 			ND[currentNode] = 1;
 			L[currentNode]  = i;
 			H[currentNode]  = i;
-			INeighbors nei = neighbors[currentNode];
+			ISet nei = neighbors[currentNode];
 			for(int s=nei.getFirstElement(); s>=0; s = nei.getNextElement()){
 				if (p[s]==currentNode){
 					ND[currentNode] += ND[s];
@@ -437,10 +436,10 @@ public class ConnectivityFinder {
 //					}
 //				}
 //			}
-//			if(indexTo>graph.getActiveNodes().neighborhoodSize()-1){
+//			if(indexTo>graph.getActiveNodes().getSize()-1){
 //				throw new UnsupportedOperationException();
 //			}
-//			if(indexTo<graph.getActiveNodes().neighborhoodSize()-1){
+//			if(indexTo<graph.getActiveNodes().getSize()-1){
 //				return false;
 //			}
 //		}

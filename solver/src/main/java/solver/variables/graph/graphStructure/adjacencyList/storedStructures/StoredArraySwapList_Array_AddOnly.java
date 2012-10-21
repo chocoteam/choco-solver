@@ -62,7 +62,8 @@ public class StoredArraySwapList_Array_AddOnly extends ArraySwapList_Array {
 		return super.remove(element);
 	}
 
-	protected int getSize(){
+	@Override
+	public int getSize(){
 		return size.get();
 	}
 	protected void setSize(int s){

@@ -35,7 +35,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
@@ -61,7 +61,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar>{
 	int n;
 	// dominators finder that contains the dominator tree
 	AbstractLengauerTarjanDominatorsFinder domFinder;
-	INeighbors[] successors;
+	ISet[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -80,7 +80,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar>{
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;
-		successors = new INeighbors[n];
+		successors = new ISet[n];
 		if(simple){
 			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
 		}else{
@@ -109,7 +109,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar>{
 
 	private void structuralPruning() throws ContradictionException {
 		if(domFinder.findDominators()){
-			INeighbors nei;
+			ISet nei;
 			for (int x=0; x<n; x++){
 				nei = g.getEnvelopGraph().getSuccessorsOf(x);
 				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){

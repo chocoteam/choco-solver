@@ -29,7 +29,6 @@ package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
@@ -43,7 +42,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -107,12 +106,12 @@ public class PropSumArcCosts extends Propagator {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors succ;
+		ISet succ;
 		minSum.set(0);
 		maxSum.set(0);
 		for (int i = 0; i < n; i++) {
 			succ = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(succ.neighborhoodSize()>0){
+			if(succ.getSize()>0){
 				int min = succ.getFirstElement();
 				int max = min;
 				if(min==-1){
@@ -139,12 +138,12 @@ public class PropSumArcCosts extends Propagator {
 		sum.updateLowerBound(minSum.get(), this);
 		sum.updateUpperBound(maxSum.get(), this);
 		// filter the graph
-		INeighbors succs;
+		ISet succs;
 		int delta = minSum.get() - sum.getUB();
 		int curMin;
 		for (int i = 0; i < n; i++) {
 			succs = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(succs.neighborhoodSize()>0){
+			if(succs.getSize()>0){
 				curMin = distMatrix[i][minCostSucc[i].get()];
 				for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 					if (delta > curMin - distMatrix[i][j]) {
@@ -176,12 +175,12 @@ public class PropSumArcCosts extends Propagator {
 		}
 		if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
 			// filter the graph
-			INeighbors succs;
+			ISet succs;
 			int delta = minSum.get() - sum.getUB();
 			int curMin;
 			for (int i = 0; i < n; i++) {
 				succs = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(succs.neighborhoodSize()>0){
+				if(succs.getSize()>0){
 					curMin = distMatrix[i][minCostSucc[i].get()];
 					for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 						if (delta > curMin - distMatrix[i][j]) {
@@ -194,7 +193,7 @@ public class PropSumArcCosts extends Propagator {
 	}
 
 	private void findMin(int i) throws ContradictionException {
-		INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
+		ISet succ = g.getEnvelopGraph().getSuccessorsOf(i);
 		int min = succ.getFirstElement();
 		if (min == -1) {
 			contradiction(g,"");

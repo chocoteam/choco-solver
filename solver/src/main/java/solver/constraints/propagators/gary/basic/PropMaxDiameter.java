@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import java.util.BitSet;
 
 public class PropMaxDiameter extends Propagator<GraphVar> {
@@ -73,7 +72,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+		ISet nodes = g.getKernelGraph().getActiveNodes();
 		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
 			BFS(i);
 		}
@@ -86,7 +85,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
 		visited.clear();
 		set.add(i);
 		visited.set(i);
-		INeighbors nei;
+		ISet nei;
 		int depth = 0;
 		while(!set.isEmpty() && depth<maxDiam){
 			for(i=set.size()-1;i>=0;i--){

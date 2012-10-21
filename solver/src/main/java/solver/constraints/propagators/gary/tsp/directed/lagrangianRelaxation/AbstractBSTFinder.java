@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 public abstract class AbstractBSTFinder extends AbstractMSTFinder {
 
@@ -40,13 +40,13 @@ public abstract class AbstractBSTFinder extends AbstractMSTFinder {
 	// REDUCED GRAPH STRUCTURE
 	protected IStateInt nR;
 	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
+	protected ISet[] outArcs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractBSTFinder(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public AbstractBSTFinder(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
 		super(nbNodes,propagator);
 		this.nR = nR;
 		this.sccOf = sccOf;

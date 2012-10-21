@@ -30,7 +30,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Random;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 public class RandomArc extends ArcStrategy<GraphVar>{
 
@@ -48,11 +48,11 @@ public class RandomArc extends ArcStrategy<GraphVar>{
 	public boolean computeNextArc() {
 		pFrom.clear();
 		pTo.clear();
-		INeighbors envSuc, kerSuc;
+		ISet envSuc, kerSuc;
 		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
 			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
 			kerSuc = g.getKernelGraph().getSuccessorsOf(i);
-			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
+			if(envSuc.getSize() != kerSuc.getSize()){
 				for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
 					if(!kerSuc.contain(j)){
 						pFrom.add(i);

@@ -50,7 +50,7 @@ public class PathTest {
 
 	public static Solver model(int n, int seed, boolean path, boolean arbo, boolean RG, long nbMaxSols) {
 		Solver s = new Solver();
-		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer);
+		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer,true);
 		for(int i=0;i<n-1;i++){
 			for(int j=1;j<n;j++){
 				g.getEnvelopGraph().addArc(i, j);

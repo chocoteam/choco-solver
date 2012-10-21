@@ -38,18 +38,16 @@ import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropSumArcCosts;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSurroSymmetricHeldKarp;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.strategy.graph.GraphStrategy;
@@ -78,7 +76,7 @@ public class TSP_CP12 {
 	private static Solver solver;
 	private static boolean allDiffAC    = false;
 	private static boolean optProofOnly = true;
-	private static PropSymmetricHeldKarp mst;
+	private static PropLagr_OneTree mst;
 	private static int search;
 	private static TSP_heuristics heuristic;
 
@@ -400,7 +398,7 @@ public class TSP_CP12 {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -420,7 +418,7 @@ public class TSP_CP12 {
 //		gc.addPropagators(mst);
 //		gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
 
-		gc.addPropagators(PropSurroSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
+		gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphRandom(undi,seed));
@@ -441,8 +439,8 @@ public class TSP_CP12 {
 				int e = 0;
 				int k = 0;
 				for(int i=0;i<n;i++){
-					e+=undi.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-					k+=undi.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					e+=undi.getEnvelopGraph().getNeighborsOf(i).getSize();
+					k+=undi.getKernelGraph().getNeighborsOf(i).getSize();
 				}
 				e/=2;
 				k/=2;
@@ -518,7 +516,7 @@ public class TSP_CP12 {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		DirectedGraphVar dir = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+		DirectedGraphVar dir = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST,true);
 		dir.getKernelGraph().activateNode(n-1);
 		for(int i=0;i<n-1;i++){
 			dir.getKernelGraph().activateNode(i);
@@ -537,7 +535,7 @@ public class TSP_CP12 {
 		if(allDiffAC){
 			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
 		}
-		gc.addPropagators(PropHeldKarp.mstBasedRelaxation(dir, 0, n - 1, totalCost, matrix, gc, solver));
+		gc.addPropagators(PropLagr_MST_BST.mstBasedRelaxation(dir, 0, n - 1, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphATSP(dir, ATSP_heuristics.enf_sparse, mst));

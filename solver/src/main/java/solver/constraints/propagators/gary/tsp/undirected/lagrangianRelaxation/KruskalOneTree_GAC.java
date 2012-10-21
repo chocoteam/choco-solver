@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.KruskalMSTFinder;
 import solver.exception.ContradictionException;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 import java.util.Arrays;
@@ -100,14 +100,14 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 			Tree.getNeighborsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size += g.getSuccessorsOf(i).neighborhoodSize();
+			size += g.getSuccessorsOf(i).getSize();
 		}
-		size -= g.getSuccessorsOf(0).neighborhoodSize();
+		size -= g.getSuccessorsOf(0).getSize();
 		if(size%2!=0){
 			throw new UnsupportedOperationException();
 		}
 		size /= 2;
-		INeighbors nei;
+		ISet nei;
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
 		for(int i=1;i<n;i++){
@@ -136,7 +136,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 
 	protected void pruning(int fi, double delta) throws ContradictionException {
 		int i;
-		INeighbors nei = g.getNeighborsOf(0);
+		ISet nei = g.getNeighborsOf(0);
 		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
 			if(i!=min1 && i!=min2){
 				if(distMatrix[0][i]-distMatrix[0][min2] > delta){
@@ -274,7 +274,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 	}
 
 	private void add0Node() throws ContradictionException {
-		INeighbors nei = g.getSuccessorsOf(0);
+		ISet nei = g.getSuccessorsOf(0);
 		min1 = -1;
 		min2 = -1;
 		boolean b1=false,b2=false;
@@ -328,7 +328,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 
 	protected void prepareMandArcDetection(){
 		// RECYCLING ccTp is used to model the compressed path
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			ccTp[i] = -1;
 		}

@@ -27,50 +27,29 @@
 
 package samples.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
-import solver.Cause;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.*;
-import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
-import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
-import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -101,7 +80,7 @@ public class Robustness {
 	// RG data structure
 	private static IStateInt nR;
 	private static IStateInt[] sccOf;
-	private static INeighbors[] outArcs;
+	private static ISet[] outArcs;
 	private static IDirectedGraph G_R;
 	private static IStateInt[] sccFirst, sccNext;
 
@@ -136,7 +115,7 @@ public class Robustness {
 	public static void createModel() {
 		// create model
 		solver = new Solver();
-		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,false);
 		try {
 			for (int i = 0; i < n - 1; i++) {
 				graph.getKernelGraph().activateNode(i);

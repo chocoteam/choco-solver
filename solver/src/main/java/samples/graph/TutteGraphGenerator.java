@@ -47,7 +47,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class TutteGraphGenerator {
 		int diam = 2;
 		boolean[][] output = new boolean[n][n];
 		Solver solver = new Solver();
-		UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
+		UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST,false);
 		Constraint c = GraphConstraintFactory.makeConstraint(solver);
 		c.addPropagators(new PropAtLeastNNeighbors(g,3,c,solver));
 		c.addPropagators(new PropAtMostNNeighbors(g,3,c,solver));
@@ -94,7 +94,7 @@ public class TutteGraphGenerator {
 		}else{
 			System.out.println(g.getEnvelopGraph());
 		}
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getNeighborsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j = nei.getNextElement()){
@@ -107,7 +107,7 @@ public class TutteGraphGenerator {
 	public static ArrayList<int[][]> createAllTutteGraphs(final int n){
 		final ArrayList<int[][]> output = new ArrayList();
 		Solver solver = new Solver();
-		final UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
+		final UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST,false);
 		Constraint c = GraphConstraintFactory.makeConstraint(solver);
 		c.addPropagators(new PropAtLeastNNeighbors(g,3,c,solver));
 		c.addPropagators(new PropAtMostNNeighbors(g,3,c,solver));
@@ -131,7 +131,7 @@ public class TutteGraphGenerator {
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
 			public void onSolution() {
 				int[][] sol = new int[n][3];
-				INeighbors nei;
+				ISet nei;
 				for (int i = 0; i < n; i++) {
 					int idx = 0;
 					nei = g.getEnvelopGraph().getNeighborsOf(i);

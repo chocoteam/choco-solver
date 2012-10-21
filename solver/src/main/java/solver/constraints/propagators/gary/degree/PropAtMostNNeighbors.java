@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
@@ -88,7 +87,7 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		ISet act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			checkNode(node);
 		}
@@ -113,15 +112,15 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes act = g.getKernelGraph().getActiveNodes();
+		ISet act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
+			if(g.getKernelGraph().getNeighborsOf(node).getSize()>n_neighbors[node]){
 				return ESat.FALSE;
 			}
 		}
 		act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
+			if(g.getEnvelopGraph().getNeighborsOf(node).getSize()>n_neighbors[node]){
 				return ESat.UNDEFINED;
 			}
 		}
@@ -136,12 +135,12 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 	 *  If it has N neighbors in the kernel then other incident edges
 	 *  should be removed */
 	private void checkNode(int i) throws ContradictionException {
-		INeighbors ker = g.getKernelGraph().getNeighborsOf(i);
-		INeighbors env = g.getEnvelopGraph().getNeighborsOf(i);
-		int size = ker.neighborhoodSize();
+		ISet ker = g.getKernelGraph().getNeighborsOf(i);
+		ISet env = g.getEnvelopGraph().getNeighborsOf(i);
+		int size = ker.getSize();
 		if(size>n_neighbors[i]){
 			g.removeNode(i, this);
-		}else if (size==n_neighbors[i] && env.neighborhoodSize()>size){
+		}else if (size==n_neighbors[i] && env.getSize()>size){
 			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
 				if(!ker.contain(next)){
 					g.removeArc(i, next, this);

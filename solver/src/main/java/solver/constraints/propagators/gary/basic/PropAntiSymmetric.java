@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**Ensures that the final graph is antisymmetric
@@ -75,8 +74,8 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
+		ISet ker = g.getKernelGraph().getActiveNodes();
+		ISet succ;
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
 			succ = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
@@ -100,8 +99,8 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
+		ISet ker = g.getKernelGraph().getActiveNodes();
+		ISet succ;
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
 			succ = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){

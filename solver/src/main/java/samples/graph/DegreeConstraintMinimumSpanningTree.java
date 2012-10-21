@@ -28,9 +28,6 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.tools.ArrayUtils;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -38,12 +35,9 @@ import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropIterativeMST;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.exception.ContradictionException;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
@@ -53,9 +47,6 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
@@ -237,7 +228,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -289,7 +280,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -302,7 +293,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
 		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
-		gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
+		gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse_corrected, null);

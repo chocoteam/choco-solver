@@ -34,13 +34,10 @@
 
 package samples.graph;
 
-import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.IRelaxation;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropBIStrongTreeHeldKarp2;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
-import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.GraphVar;
 
@@ -74,13 +71,13 @@ public class GraphStrategyBench2 extends GraphStrategy {
 	int n;
 	int mode;
 	int[][] costs;
-	IRelaxation relax;
+	IGraphRelaxation relax;
 	boolean usetrick,constructive;
 	GraphAssignment decisionType;
 	int from,to;
 	int value;
 
-	public GraphStrategyBench2(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation) {
+	public GraphStrategyBench2(GraphVar graphVar, int[][] costMatrix, IGraphRelaxation relaxation) {
 		super(graphVar,null,null,null);
 		costs = costMatrix;
 		relax = relaxation;
@@ -154,7 +151,7 @@ public class GraphStrategyBench2 extends GraphStrategy {
 	public boolean computeTrickyNextArc() {
 		if(from == -1
 		|| g.getKernelGraph().edgeExists(from,to)//TODO remettre
-		|| g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize() == g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()
+		|| g.getEnvelopGraph().getSuccessorsOf(from).getSize() == g.getKernelGraph().getSuccessorsOf(from).getSize()
 				){
 			return false;
 		}
@@ -189,8 +186,8 @@ public class GraphStrategyBench2 extends GraphStrategy {
 //						return true;
 //					case MIN_P_DEGREE:
 //					case MAX_P_DEGREE:
-//						v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-//								+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+//						v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
+//								+ g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 //						if(from==-1 || (v<value && mode==MIN_P_DEGREE) || (v>value && mode==MAX_P_DEGREE)){
 //							value = v;
 //							from = i;
@@ -198,8 +195,8 @@ public class GraphStrategyBench2 extends GraphStrategy {
 //						}break;
 //					case MIN_M_DEGREE:
 //					case MAX_M_DEGREE:
-//						v = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
-//								+ g.getKernelGraph().getPredecessorsOf(j).neighborhoodSize();
+//						v = g.getKernelGraph().getSuccessorsOf(i).getSize()
+//								+ g.getKernelGraph().getPredecessorsOf(j).getSize();
 //						if(from==-1 || (v<value && mode==MIN_M_DEGREE) || (v>value && mode==MAX_M_DEGREE)){
 //							value = v;
 //							from = i;
@@ -279,8 +276,8 @@ public class GraphStrategyBench2 extends GraphStrategy {
 						return true;
 					case MIN_P_DEGREE:
 					case MAX_P_DEGREE:
-						v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-								+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+						v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
+								+ g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 						if(from==-1 || (v<value && mode==MIN_P_DEGREE) || (v>value && mode==MAX_P_DEGREE)){
 							value = v;
 							from = i;
@@ -288,8 +285,8 @@ public class GraphStrategyBench2 extends GraphStrategy {
 						}break;
 					case MIN_M_DEGREE:
 					case MAX_M_DEGREE:
-						v = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
-								+ g.getKernelGraph().getPredecessorsOf(j).neighborhoodSize();
+						v = g.getKernelGraph().getSuccessorsOf(i).getSize()
+								+ g.getKernelGraph().getPredecessorsOf(j).getSize();
 						if(from==-1 || (v<value && mode==MIN_M_DEGREE) || (v>value && mode==MAX_M_DEGREE)){
 							value = v;
 							from = i;

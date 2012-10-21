@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphStructure.adjacencyList;
 
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * List of m elements based on Array int_swaping
@@ -39,7 +39,7 @@ import solver.variables.graph.INeighbors;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public abstract class ArraySwapList implements INeighbors {
+public abstract class ArraySwapList implements ISet {
 
 	protected int arrayLength,sizeMax,currentIdx,size;
 	protected int[] array;
@@ -57,11 +57,7 @@ public abstract class ArraySwapList implements INeighbors {
 	}
 
 	@Override
-	public int neighborhoodSize() {
-		return getSize();
-	}
-
-	protected int getSize(){
+	public int getSize() {
 		return size;
 	}
 

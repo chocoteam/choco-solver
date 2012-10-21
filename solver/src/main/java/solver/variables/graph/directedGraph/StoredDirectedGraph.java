@@ -30,9 +30,9 @@ package solver.variables.graph.directedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
+import solver.variables.graph.graphStructure.FullSet;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
-import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
 
 /**Class representing a directed graph with a backtrable structure
  * @author Jean-Guillaume Fages */
@@ -48,8 +48,9 @@ public class StoredDirectedGraph extends DirectedGraph implements IStoredGraph{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public StoredDirectedGraph(IEnvironment env, int nb, GraphType type) {
+	public StoredDirectedGraph(IEnvironment env, int nb, GraphType type, boolean allNodes) {
 		super();
+		this.n = nb;
 		this.type = type;
 		environment = env;
 		switch (type) {
@@ -115,9 +116,10 @@ public class StoredDirectedGraph extends DirectedGraph implements IStoredGraph{
 			default:
 				throw new UnsupportedOperationException();
 		}
-		this.activeIdx = new StoredActiveNodes(environment, nb);
-		for (int i = 0; i < nb; i++) {
-			this.activeIdx.activate(i);
+		if(allNodes){
+			this.nodes = new FullSet(nb);
+		}else{
+			this.nodes = new StoredBitSetNeighbors(env,nb);
 		}
 	}
 

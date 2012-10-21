@@ -38,8 +38,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -93,11 +92,11 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		IActiveNodes kerAct = g.getKernelGraph().getActiveNodes();
+		ISet act = g.getEnvelopGraph().getActiveNodes();
+		ISet kerAct = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			checkNode(node);
-			if(kerAct.isActive(node)){
+			if(kerAct.contain(node)){
 				enforceNode(node);
 			}
 		}
@@ -127,15 +126,15 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes act = g.getKernelGraph().getActiveNodes();
+		ISet act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<n_succs[node]){
+			if(g.getEnvelopGraph().getSuccessorsOf(node).getSize()<n_succs[node]){
 				return ESat.FALSE;
 			}
 		}
 		act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()<n_succs[node]){
+			if(g.getKernelGraph().getSuccessorsOf(node).getSize()<n_succs[node]){
 				return ESat.UNDEFINED;
 			}
 		}
@@ -150,11 +149,11 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 	 * if it has less than N successors then a contradiction should be raised
 	 * if it has N successors in the envelop then they must figure in the kernel */
 	private void enforceNode(int i) throws ContradictionException {
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int size = nei.neighborhoodSize();
+		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		int size = nei.getSize();
 		if(size<n_succs[i]){
 			contradiction(g,"");
-		}else if(size==n_succs[i] && g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()<size){
+		}else if(size==n_succs[i] && g.getKernelGraph().getSuccessorsOf(i).getSize()<size){
 			for(int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()){
 				g.enforceArc(i, s, this);
 			}
@@ -165,12 +164,12 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 	 *  If it has N successors and is in the kernel then its incident edges
 	 *  should be enforced */
 	private void checkNode(int i) throws ContradictionException {
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int size = nei.neighborhoodSize();
+		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		int size = nei.getSize();
 		if(size<n_succs[i]){
 			g.removeNode(i, this);
-		}else if (size==n_succs[i] && g.getKernelGraph().getActiveNodes().isActive(i)
-				&& g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()<size){
+		}else if (size==n_succs[i] && g.getKernelGraph().getActiveNodes().contain(i)
+				&& g.getKernelGraph().getSuccessorsOf(i).getSize()<size){
 			for(int s = nei.getFirstElement(); s>=0; s = nei.getNextElement()){
 				g.enforceArc(i, s, this);
 			}

@@ -30,9 +30,7 @@ package samples.graph;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -46,7 +44,7 @@ import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
 import solver.exception.ContradictionException;
 import solver.objective.MinObjectiveManager;
 import solver.objective.strategies.BottomUp_Minimization;
@@ -70,9 +68,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.BufferedReader;
@@ -105,7 +102,7 @@ public class DCMST_lds {
 	private static long TIMELIMIT = 600000;
 	//	private static final long TIMELIMIT = 14400000;
 	private static String outFile;
-	private static PropTreeHeldKarp hk;
+	private static PropLagr_DCMST hk;
 	private static boolean optGiven = true;
 
 	//***********************************************************************************
@@ -293,7 +290,7 @@ public class DCMST_lds {
 		// variables
 //		lb = ub;
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -425,8 +422,8 @@ public class DCMST_lds {
 //					int nbK = 0;
 //					INeighbors nei;
 //					for(int i=0;i<n;i++){
-//						nbK += undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-//						nbX += undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//						nbK += undi.getKernelGraph().getSuccessorsOf(i).getSize();
+//						nbX += undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
 //					}
 //					nbX /= 2;
 //					nbK /= 2;
@@ -440,7 +437,7 @@ public class DCMST_lds {
 //						gsol.getNeighborsOf(i).clear();
 //					}
 //					for(int i=0;i<n;i++){
-//						dm[i] = dMax[i] - undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+//						dm[i] = dMax[i] - undi.getKernelGraph().getSuccessorsOf(i).getSize();
 //						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
 //						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //							if(i<j){
@@ -465,7 +462,7 @@ public class DCMST_lds {
 //					//cons
 //					cplex.addEq(cplex.sum(x),n-1-nbK);
 //					for(int i=0;i<n;i++){
-//						if(undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+//						if(undi.getEnvelopGraph().getSuccessorsOf(i).getSize()>undi.getKernelGraph().getSuccessorsOf(i).getSize()){
 //							list[i] = new TIntArrayList();
 //						}else{
 //							list[i] = null;
@@ -474,7 +471,7 @@ public class DCMST_lds {
 //					index = 0;
 //					for(int i=0;i<n;i++){
 //						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-//						if(nei.neighborhoodSize()>undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+//						if(nei.getSize()>undi.getKernelGraph().getSuccessorsOf(i).getSize()){
 //							for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //								if(i<j){
 //									if(!undi.getKernelGraph().arcExists(i,j)){
@@ -497,7 +494,7 @@ public class DCMST_lds {
 //								arr[k] = x[list[i].get(k)];
 //							}
 //							cplex.addLe(cplex.sum(arr), dm[i]);
-//							if(undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()==0){
+//							if(undi.getKernelGraph().getSuccessorsOf(i).getSize()==0){
 //								cplex.addGe(cplex.sum(arr), 1);
 //							}
 //						}
@@ -662,8 +659,8 @@ public class DCMST_lds {
 //					seen[i] = false;
 //
 //				node = 0;
-//				while(undi.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()==
-//						undi.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()){
+//				while(undi.getEnvelopGraph().getSuccessorsOf(node).getSize()==
+//						undi.getKernelGraph().getSuccessorsOf(node).getSize()){
 //					node++;
 //				}
 //				for (index = 0; index < n; index++) {
@@ -705,7 +702,7 @@ public class DCMST_lds {
 //			}
 //		};
 
-		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk = PropLagr_DCMST.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk);
 
@@ -733,11 +730,11 @@ public class DCMST_lds {
 				int nkarc = 0;
 				int maxD = 0;
 				for(int i=0;i<n;i++){
-					narc += undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-					if(maxD < undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()){
-						maxD = undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+					narc += undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
+					if(maxD < undi.getEnvelopGraph().getSuccessorsOf(i).getSize()){
+						maxD = undi.getEnvelopGraph().getSuccessorsOf(i).getSize();
 					}
-					nkarc+= undi.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+					nkarc+= undi.getKernelGraph().getSuccessorsOf(i).getSize();
 				}
 				narc /= 2;
 				nkarc/= 2;
@@ -860,7 +857,7 @@ public class DCMST_lds {
 			int nbBad = 0;
 			int nbGood = 0;
 			for(int i=0;i<n;i++){
-				INeighbors nei = graph.getKernelGraph().getNeighborsOf(i);
+				ISet nei = graph.getKernelGraph().getNeighborsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(i<j){
 						double rc = hk.rc[i][j];
@@ -873,7 +870,7 @@ public class DCMST_lds {
 				}
 			}
 			for(int i=0;i<n;i++){
-				INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+				ISet nei = graph.getEnvelopGraph().getNeighborsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(i<j){
 						double rc = hk.rc[i][j];
@@ -894,7 +891,7 @@ public class DCMST_lds {
 			if(card.instantiated()){
 				if(card.getUB()==nbBad){
 					for(int i=0;i<n;i++){
-						INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+						ISet nei = graph.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 							if(i<j && !graph.getKernelGraph().edgeExists(i,j)){
 								double rc = hk.rc[i][j];
@@ -954,7 +951,7 @@ public class DCMST_lds {
 			double offSet = 0;
 			for(int i=0;i<n;i++){
 				rcOf.clear();
-				INeighbors nei = graph.getKernelGraph().getNeighborsOf(i);
+				ISet nei = graph.getKernelGraph().getNeighborsOf(i);
 				int nbGood = 0;
 				int nbBad = 0;
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -1047,7 +1044,7 @@ public class DCMST_lds {
 			double rcOfMand = 0;
 			int nbBad = 0;
 			int nbGood = 0;
-			INeighbors nei = graph.getKernelGraph().getNeighborsOf(node);
+			ISet nei = graph.getKernelGraph().getNeighborsOf(node);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(node<j){
 					double rc = hk.rc[node][j];
@@ -1134,7 +1131,7 @@ public class DCMST_lds {
 		public void propagate(int evtmask) throws ContradictionException {
 			// edges in mst
 			for(int i=0;i<n;i++){
-				INeighbors nei = hk.getMST().getNeighborsOf(i);
+				ISet nei = hk.getSupport().getNeighborsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(i<j){
 						from.add(i);
@@ -1150,9 +1147,9 @@ public class DCMST_lds {
 				oldRC = minRC;
 				minRC = obj.getUB()*2;
 				for(int i=0;i<n;i++){
-					INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+					ISet nei = graph.getEnvelopGraph().getNeighborsOf(i);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(i<j && !hk.getMST().edgeExists(i,j)){
+						if(i<j && !hk.getSupport().edgeExists(i,j)){
 							double rc = hk.getMarginalCost(i,j);
 							if(rc<=-obj.getUB()*2){
 								throw new UnsupportedOperationException();
@@ -1164,9 +1161,9 @@ public class DCMST_lds {
 					}
 				}
 				for(int i=0;i<n;i++){
-					INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+					ISet nei = graph.getEnvelopGraph().getNeighborsOf(i);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(i<j && !hk.getMST().edgeExists(i,j)){
+						if(i<j && !hk.getSupport().edgeExists(i,j)){
 							double rc = hk.getMarginalCost(i,j);
 							if(rc==minRC){
 								from.add(i);
@@ -1229,7 +1226,7 @@ public class DCMST_lds {
 		@Override
 		public void propagate(int evtmask) throws ContradictionException {
 			// edges in mst
-			INeighbors nei = hk.getMST().getNeighborsOf(node);
+			ISet nei = hk.getSupport().getNeighborsOf(node);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(node<j){
 					neighbors.add(j);
@@ -1244,7 +1241,7 @@ public class DCMST_lds {
 				oldRC = minRC;
 				minRC = obj.getUB()*2;
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(node<j && !hk.getMST().edgeExists(node,j)){
+					if(node<j && !hk.getSupport().edgeExists(node,j)){
 						double rc = hk.getMarginalCost(node,j);
 						if(rc<=-obj.getUB()*2){
 							throw new UnsupportedOperationException();
@@ -1255,7 +1252,7 @@ public class DCMST_lds {
 					}
 				}
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(node<j && !hk.getMST().edgeExists(node,j)){
+					if(node<j && !hk.getSupport().edgeExists(node,j)){
 						double rc = hk.getMarginalCost(node,j);
 						if(rc==minRC){
 							neighbors.add(j);
@@ -1337,17 +1334,17 @@ public class DCMST_lds {
 			from = -1;
 			to = -1;
 			int minCost = 0;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-//						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+//						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1358,13 +1355,13 @@ public class DCMST_lds {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()<env.neighborhoodSize()
-					&& ker.neighborhoodSize()<dMax[i]-1){
+				if(ker.getSize()<env.getSize()
+					&& ker.getSize()<dMax[i]-1){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-//						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+//						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1377,7 +1374,7 @@ public class DCMST_lds {
 //			for(int i=0;i<n;i++){
 //				ker = g.getKernelGraph().getSuccessorsOf(i);
 //				env = g.getEnvelopGraph().getSuccessorsOf(i);
-//				if(ker.neighborhoodSize()==0){
+//				if(ker.getSize()==0){
 //					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 //						int cost = dist[i][j];
 //						if(to==-1 || cost<minCost){
@@ -1392,7 +1389,7 @@ public class DCMST_lds {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
+				if(env.getSize()!=ker.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(i<j && !ker.contain(j)){
 							int cost = dist[i][j];
@@ -1415,16 +1412,16 @@ public class DCMST_lds {
 			from = -1;
 			to = -1;
 			int minCost = 0;
-			INeighbors env,ker;
+			ISet env,ker;
 			//new
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()<dMax[i]-1)
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()<dMax[i]-1)
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
-						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+						if(g.getKernelGraph().getSuccessorsOf(j).getSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost){
 							minCost = cost;
 							from = i;
@@ -1441,7 +1438,7 @@ public class DCMST_lds {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
+				if(ker.getSize()==0){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
 						if(to==-1 || cost<minCost){
@@ -1459,7 +1456,7 @@ public class DCMST_lds {
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
+				if(env.getSize()!=ker.getSize()){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						if(i<j && !ker.contain(j)){
 							int cost = dist[i][j];

@@ -35,7 +35,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
@@ -108,7 +108,7 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar>{
 
 	private void structuralPruning() throws ContradictionException {
 		if(domFinder.findPostDominators()){
-			INeighbors nei;
+			ISet nei;
 			for (int x=0; x<n; x++){
 				nei = g.getEnvelopGraph().getSuccessorsOf(x);
 				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){

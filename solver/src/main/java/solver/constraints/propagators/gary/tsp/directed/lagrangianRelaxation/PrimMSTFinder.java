@@ -31,7 +31,7 @@ import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 
 import java.util.BitSet;
@@ -126,7 +126,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	private void addNode(int i) {
 		if(!inTree.get(i)){
 			inTree.set(i);
-			INeighbors nei = g.getSuccessorsOf(i);
+			ISet nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!inTree.get(j)){
 					if(propHK.isMandatory(i,j)){
@@ -152,7 +152,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	public void performPruning(double UB) throws ContradictionException{
 		if(FILTER){
 			double delta = UB-treeCost;
-			INeighbors nei;
+			ISet nei;
 			for(int i=0;i<n;i++){
 				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

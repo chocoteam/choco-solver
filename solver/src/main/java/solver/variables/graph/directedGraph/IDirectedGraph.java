@@ -28,7 +28,7 @@
 package solver.variables.graph.directedGraph;
 
 import solver.variables.graph.IGraph;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * @author Jean-Guillaume Fages
@@ -55,13 +55,13 @@ public interface IDirectedGraph extends IGraph {
      * @param x
      * @return successors of x in the graph 
      */
-    INeighbors getSuccessorsOf(int x);
+    ISet getSuccessorsOf(int x);
     
     /**Get the predecessors of node x in the graph
      * @param x
      * @return predecessors of x in the graph 
      */
-    INeighbors getPredecessorsOf(int x);
+    ISet getPredecessorsOf(int x);
     
     /**Test whether arc (x,y) exists or not in the graph
      * @param x

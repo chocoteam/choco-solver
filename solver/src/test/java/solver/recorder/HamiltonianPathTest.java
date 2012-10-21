@@ -77,7 +77,7 @@ public class HamiltonianPathTest {
 		Solver solver = new Solver();
 		int n = matrix.length;
 		// build model
-		DirectedGraphVar graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+		DirectedGraphVar graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST,false);
 		try{
 			graph.getKernelGraph().activateNode(n-1);
 			for(int i=0; i<n-1; i++){
@@ -145,7 +145,7 @@ public class HamiltonianPathTest {
 			if(y==-1){
 				if(x!=n-1 || nb!=n){
 					for(int i=0;i<n;i++){
-						if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+						if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()>1){
 							this.from = i;
 							this.to = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
 							return true;

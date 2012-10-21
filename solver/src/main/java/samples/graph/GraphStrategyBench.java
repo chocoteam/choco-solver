@@ -35,8 +35,7 @@
 package samples.graph;
 
 import choco.kernel.memory.IStateInt;
-import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
 
@@ -50,7 +49,7 @@ public class GraphStrategyBench extends ArcStrategy {
 	int n;
 	int mode;
 	int[][] costs;
-	IRelaxation relax;
+	IGraphRelaxation relax;
 	final int LEX = 0;
 	final int MIN_DEGREE = 1;
 	final int MAX_DEGREE = 2;
@@ -62,7 +61,7 @@ public class GraphStrategyBench extends ArcStrategy {
 //	TIntArrayList stack;
 	boolean usetrick;
 
-	public GraphStrategyBench(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation, int policy,boolean useTrick) {
+	public GraphStrategyBench(GraphVar graphVar, int[][] costMatrix, IGraphRelaxation relaxation, int policy,boolean useTrick) {
 		super(graphVar);
 		this.usetrick = useTrick;
 		mode = policy;
@@ -110,8 +109,8 @@ public class GraphStrategyBench extends ArcStrategy {
 							return true;
 						case MIN_DEGREE:
 						case MAX_DEGREE:
-							int v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+							int v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
+									+ g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 							if(from==-1 || (v<value && mode==MIN_DEGREE) || (v>value && mode==MAX_DEGREE)){
 								value = v;
 								from = i;
@@ -146,12 +145,12 @@ public class GraphStrategyBench extends ArcStrategy {
 	}
 
 	public boolean computeTrickyNextArc() {
-//		while(stack.size()>0 && from != -1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-//				         g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+//		while(stack.size()>0 && from != -1 && g.getEnvelopGraph().getSuccessorsOf(from).getSize()==
+//				         g.getKernelGraph().getSuccessorsOf(from).getSize()){
 //			from = stack.removeAt(stack.size()-1);
 //		}
-		if(from == -1 || g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-				         g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+		if(from == -1 || g.getEnvelopGraph().getSuccessorsOf(from).getSize()==
+				         g.getKernelGraph().getSuccessorsOf(from).getSize()){
 			return false;
 		}
 		to = -1;
@@ -166,8 +165,8 @@ public class GraphStrategyBench extends ArcStrategy {
 						return true;
 					case MIN_DEGREE:
 					case MAX_DEGREE:
-						int v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-								+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+						int v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
+								+ g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 						if(to==-1 || (v<value && mode==MIN_DEGREE) || (v>value && mode==MAX_DEGREE)){
 							value = v;
 							from = i;

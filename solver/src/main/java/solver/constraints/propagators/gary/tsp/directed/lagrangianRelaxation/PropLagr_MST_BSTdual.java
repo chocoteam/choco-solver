@@ -40,7 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -102,7 +102,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 	protected IStateInt[] sccOf;
 	protected IStateInt nr;
 	/** BST based HK */
-	public static PropLagr_MST_BSTdual bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public static PropLagr_MST_BSTdual bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
 		PropLagr_MST_BSTdual phk = mstBasedRelaxation(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.sccOf = sccOf;
 		phk.nr = nR;
@@ -205,7 +205,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 
 	protected void resetMA() {
 		mandatoryArcsList.clear();
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -225,8 +225,8 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 		}
 		int inDeg,outDeg;
 		for(int i=0;i<n;i++){
-			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
-			outDeg = mst.getSuccessorsOf(i).neighborhoodSize();
+			inDeg = mst.getPredecessorsOf(i).getSize();
+			outDeg = mst.getSuccessorsOf(i).getSize();
 			if(i==source){
 				nb2viol += (1-outDeg)*(1-outDeg);
 			}else if(i==sink){
@@ -256,8 +256,8 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 		int inDeg,outDeg;
 //		double max = 10000;
 		for(int i=0;i<n;i++){
-			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
-			outDeg = mst.getSuccessorsOf(i).neighborhoodSize();
+			inDeg = mst.getPredecessorsOf(i).getSize();
+			outDeg = mst.getSuccessorsOf(i).getSize();
 			inPenalities[i] += (inDeg-1)*step;
 //			inPenalities[i] = Math.min(inPenalities[i], max);
 //			inPenalities[i] = Math.max(inPenalities[i],-max);
@@ -279,7 +279,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 	}
 
 	protected void updateCostMatrix() {
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -297,11 +297,11 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 	}
 
 	protected boolean tourFound() {
-		if(mst.getSuccessorsOf(source).neighborhoodSize()*mst.getPredecessorsOf(sink).neighborhoodSize()!=1){
+		if(mst.getSuccessorsOf(source).getSize()*mst.getPredecessorsOf(sink).getSize()!=1){
 			return false;
 		}
 		for(int i=0;i<n;i++){
-			if(i!=sink && i!=source && mst.getSuccessorsOf(i).neighborhoodSize()*mst.getPredecessorsOf(i).neighborhoodSize()!=1){
+			if(i!=sink && i!=source && mst.getSuccessorsOf(i).getSize()*mst.getPredecessorsOf(i).getSize()!=1){
 				return false;
 			}
 		}

@@ -48,7 +48,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
@@ -69,7 +69,7 @@ public class PropPosGraphWithPreds extends Propagator {
 	IntVar[] intVars;
 	IStateInt nR;
 	IStateInt[] sccOf;
-	INeighbors[] outArcs;
+	ISet[] outArcs;
 	IDirectedGraph rg;
 	// data for algorithms
 	BitSet done;
@@ -106,7 +106,7 @@ public class PropPosGraphWithPreds extends Propagator {
 	}
 
 	public PropPosGraphWithPreds(IntVar[] intVars, DirectedGraphVar graph, int[][] dist, Constraint constraint, Solver solver,
-								 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs, IDirectedGraph rg) {
+								 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs, IDirectedGraph rg) {
 		this(intVars, graph, dist, constraint, solver);
 		this.nR = nR;
 		this.sccOf = sccOf;
@@ -182,7 +182,7 @@ public class PropPosGraphWithPreds extends Propagator {
 					intVars[x].updateLowerBound(level,this);
 					return;
 				}
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
 				for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 					if (!done.get(j)) {
 						nextSet.add(j);
@@ -223,7 +223,7 @@ public class PropPosGraphWithPreds extends Propagator {
 						intVars[x].updateLowerBound(intVars[from].getLB()+level, this);
 						return;
 					}
-					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+					ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
 					for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 						if (!done.get(j)) {
 							done.set(j);
@@ -276,7 +276,7 @@ public class PropPosGraphWithPreds extends Propagator {
 					intVars[x].updateUpperBound(level, this);
 					return;
 				}
-				INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+				ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
 				for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 					if (!done.get(j)) {
 						nextSet.add(j);
@@ -317,7 +317,7 @@ public class PropPosGraphWithPreds extends Propagator {
 						intVars[x].updateUpperBound(intVars[to].getUB()-level, this);
 						return;
 					}
-					INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+					ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
 					for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 						if (!done.get(j)) {
 							done.set(j);

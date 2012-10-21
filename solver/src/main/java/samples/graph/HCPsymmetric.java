@@ -50,7 +50,7 @@ import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -214,7 +214,7 @@ public class HCPsymmetric {
 		}
 		solver = new Solver();
 		// variables
-		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -271,7 +271,7 @@ public class HCPsymmetric {
 		}
 		solver = new Solver();
 		// variables
-		DirectedGraphVar dir = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		DirectedGraphVar dir = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		dir.getKernelGraph().activateNode(n-1);
 		for(int i=0;i<n-1;i++){
 			dir.getKernelGraph().activateNode(i);
@@ -396,7 +396,7 @@ public class HCPsymmetric {
 
 		@Override
 		public boolean computeNextArc() {
-			INeighbors suc;
+			ISet suc;
 			int from;
 			if(g.isDirected()){
 				from = nextFromDir();
@@ -431,12 +431,12 @@ public class HCPsymmetric {
 			return true;
 		}
 		public int nextFromDir() {
-			INeighbors suc;
+			ISet suc;
 			int from = -1;
 			int difMax = -1;
 			for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()>1) {
+				if (suc.getSize()>1) {
 					int best = getBest(i,-2,-2, suc);
 					int secondBest = getBest(i,best,-2, suc);
 					if(dist[i][secondBest]-dist[i][best]>difMax){
@@ -449,12 +449,12 @@ public class HCPsymmetric {
 		}
 
 		public int nextFromUndir() {
-			INeighbors suc;
+			ISet suc;
 			int from = -1;
 			int difMax = -1;
 			for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()>2) {
+				if (suc.getSize()>2) {
 					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 					int best = mand;
 					if(mand==-1){
@@ -497,7 +497,7 @@ public class HCPsymmetric {
 			return from;
 		}
 
-		private int getBest(int from, int not1, int not2, INeighbors nei) {
+		private int getBest(int from, int not1, int not2, ISet nei) {
 			int best = -1;
 			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 				if(j!=not1 && j!=not2){
@@ -523,12 +523,12 @@ public class HCPsymmetric {
 
 		@Override
 		public boolean computeNextArc() {
-			INeighbors suc;
+			ISet suc;
 			int from = -1;
 			int size = n + 1;
 			int sizi;
 			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()-g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize()-g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if (sizi < size && sizi>0) {
 					from = i;
 					size = sizi;
@@ -578,8 +578,8 @@ public class HCPsymmetric {
 				return false;
 			}
 			int minSuc = -1;
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
-			if(nei.neighborhoodSize()-g.getKernelGraph().getSuccessorsOf(x).neighborhoodSize()<=0){
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
+			if(nei.getSize()-g.getKernelGraph().getSuccessorsOf(x).getSize()<=0){
 				return false;
 			}
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

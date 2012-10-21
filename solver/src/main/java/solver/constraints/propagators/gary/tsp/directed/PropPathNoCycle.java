@@ -46,7 +46,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -136,19 +136,19 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 		}
 		int x;
 		int nb = 0;
-		INeighbors nei;
+		ISet nei;
 		int y = source;
 		while(y!=sink){
 			nb++;
 			x = y;
 			nei = g.getEnvelopGraph().getSuccessorsOf(x);
 			y = nei.getFirstElement();
-			if(nei.neighborhoodSize()!=1 || y==x){
+			if(nei.getSize()!=1 || y==x){
 				return ESat.FALSE;
 			}
 		}
 		nb++;
-		if(nb!=g.getEnvelopOrder() || g.getEnvelopGraph().getSuccessorsOf(sink).neighborhoodSize()>0){
+		if(nb!=g.getEnvelopOrder() || g.getEnvelopGraph().getSuccessorsOf(sink).getSize()>0){
 			return ESat.FALSE;
 		}
 		return ESat.TRUE;

@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
 import solver.constraints.propagators.gary.trees.KruskalMST_GAC;
 import solver.constraints.propagators.gary.trees.PrimMSTFinder;
@@ -42,7 +42,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.util.Random;
@@ -50,7 +50,7 @@ import java.util.Random;
 /**
  * Lagrangian relaxation of the DCMST problem
  */
-public class PropLagr_DCMST extends Propagator implements HeldKarp {
+public class PropLagr_DCMST extends Propagator implements GraphLagrangianRelaxation {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -114,7 +114,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		}
 		// initialisation
 		mandatoryArcsList.clear();
-		INeighbors nei;
+		ISet nei;
 //		if(firstPropag){
 //			totalPenalities = 0;
 //			for(int i=0;i<n;i++){
@@ -197,7 +197,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		for(int k=0;k<coef;k++){
 			int i = rd.nextInt(n);
 			penalities[i] = n*rd.nextDouble();
-			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
+			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).getSize() <= maxDegree[i]){
 				penalities[i] = 0;
 			}
 			if(penalities[i]>maxPen){
@@ -207,7 +207,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		}
 		// initialisation
 		mandatoryArcsList.clear();
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -299,7 +299,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		}
 		int deg;
 		for(int i=0;i<n;i++){
-			deg = mst.getNeighborsOf(i).neighborhoodSize();
+			deg = mst.getNeighborsOf(i).getSize();
 			if(deg>maxDegree[i] || penalities[i]>0){
 				nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 			}
@@ -315,9 +315,9 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		double maxPen = 2*obj.getUB();
 		totalPenalities = 0;
 		for(int i=0;i<n;i++){
-			deg = mst.getNeighborsOf(i).neighborhoodSize();
+			deg = mst.getNeighborsOf(i).getSize();
 			penalities[i] += (deg-maxDegree[i])*step;
-			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
+			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).getSize() <= maxDegree[i]){
 				penalities[i] = 0;
 			}
 			if(penalities[i]>maxPen){
@@ -331,7 +331,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		if(totalPenalities>Double.MAX_VALUE/(n-1) || totalPenalities<0){
 			throw new UnsupportedOperationException();
 		}
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -406,7 +406,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		return mst.edgeExists(i,j);
 	}
 
-	public UndirectedGraph getMST(){
+	public UndirectedGraph getSupport(){
 		return mst;
 	}
 
@@ -425,7 +425,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		rc = new double[n][n];
 		rlb = HKfilter.getBound()-totalPenalities;
 		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j && !mst.edgeExists(i,j))
 				rc[i][j] = rc[j][i] = getMarginalCost(i,j);
@@ -442,7 +442,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		obj.updateLowerBound((int) lb,this);
 		double delta = obj.getUB()-(rlb+offset);
 		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j && !g.getKernelGraph().edgeExists(i,j))
 				if(rc[i][j]-maxBasisRC>delta+0.001){
@@ -461,7 +461,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		obj.updateLowerBound((int) lb,this);
 		double delta = obj.getUB()-(rlb+offset);
 		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j && !g.getKernelGraph().edgeExists(i,j))
 				if(rc[i][j]-maxBasisRC[i]>delta+0.001){
@@ -479,7 +479,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		lb = Math.ceil(lb);
 		obj.updateLowerBound((int) lb,this);
 		double delta = obj.getUB()-(rlb+offset);
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(node);
+		ISet nei = g.getEnvelopGraph().getSuccessorsOf(node);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 			if(node<j && !g.getKernelGraph().edgeExists(node,j))
 				if(rc[node][j]-maxBasisRC>delta+0.001){
@@ -492,7 +492,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 		if(maxRC!=null){
 			double ub = obj.getUB()+0.001;
 			for(int i=0;i<n;i++){
-				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(i<j && !g.getKernelGraph().edgeExists(i,j)){
 						if(maxRC[i][j]>ub){
@@ -509,7 +509,7 @@ public class PropLagr_DCMST extends Propagator implements HeldKarp {
 			maxRC = new double[n][n];
 		}
 		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j && !mst.edgeExists(i,j))
 					if(getMarginalCost(i,j)+hkb>maxRC[i][j]){

@@ -34,25 +34,70 @@
 
 package solver.variables.graph.graphStructure;
 
-public class FullSet {
+import solver.variables.graph.ISet;
+
+public class FullSet implements ISet{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	int n;
+	int current;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
+	public FullSet(int n){
+		this.n = n;
+		current = 0;
+	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
+	@Override
+	public void add(int element) {}
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+	@Override
+	public boolean remove(int element) {
+		throw new UnsupportedOperationException();
+	}
 
+	@Override
+	public boolean contain(int element) {
+		return true;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public int getSize() {
+		return n;
+	}
+
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getFirstElement() {
+		current = 0;
+		return 0;
+	}
+
+	@Override
+	public int getNextElement() {
+		current++;
+		if(current<n)
+			return current;
+		else
+			return -1;
+	}
 }

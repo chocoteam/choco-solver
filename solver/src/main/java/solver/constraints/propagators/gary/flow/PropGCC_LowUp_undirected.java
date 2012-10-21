@@ -40,7 +40,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
@@ -108,7 +108,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 			throw new UnsupportedOperationException();
 		}
 		fifo = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST);
+		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
 		remProc = new DirectedRemProc();
 		father = new int[n2];
 		in = new BitSet(n2);
@@ -146,7 +146,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 		}
 		totalFlow.set(0);
 		for (int i = 0; i < n; i++) {
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				digraph.addArc(i,j+n);
 			}
@@ -225,7 +225,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
 		int x, y;
-		INeighbors succs;
+		ISet succs;
 		while (indexFirst != indexLast) {
 			x = fifo[indexFirst++];
 			succs = digraph.getSuccessorsOf(x);
@@ -272,7 +272,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
 		int x, y;
-		INeighbors succs;
+		ISet succs;
 		while (indexFirst != indexLast) {
 			x = fifo[indexFirst++];
 			succs = digraph.getPredecessorsOf(x);
@@ -324,7 +324,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 		}
 		buildSCC();
 		for (int i = 0; i < n; i++) {
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if ((nodeSCC[i] != nodeSCC[j+n] && digraph.arcExists(j+n,i))
 						||	(nodeSCC[i+n] != nodeSCC[j] && digraph.arcExists(i+n,j))){

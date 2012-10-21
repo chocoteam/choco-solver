@@ -49,7 +49,7 @@ public class GraphTools {
 	 */
 	public static int[] performDFS(int root, IDirectedGraph graph){
 		int nb = graph.getNbNodes();
-		INeighbors[] neighbors = new INeighbors[nb];
+		ISet[] neighbors = new ISet[nb];
 		int[] father = new int[nb];
 		int[] num = new int[nb];
 		BitSet notFirstTime = new BitSet(nb);
@@ -100,9 +100,9 @@ public class GraphTools {
 	 * @param reverse if all arcs should be reversed
 	 * @returna new graph which is a subraph of graph deduced from a subset and some parameters.
 	 */
-	public static IDirectedGraph createSubgraph(IDirectedGraph graph, INeighbors subset, boolean skipFirst, boolean reverse){
-		int nb = subset.neighborhoodSize();
-		if(subset.neighborhoodSize()==0){
+	public static IDirectedGraph createSubgraph(IDirectedGraph graph, ISet subset, boolean skipFirst, boolean reverse){
+		int nb = subset.getSize();
+		if(subset.getSize()==0){
 			throw new UnsupportedOperationException("error ");
 		}
 		if (skipFirst){
@@ -125,7 +125,7 @@ public class GraphTools {
 		}
 		nodeInNewGraph = 0;
 		first = true;
-		INeighbors nei;
+		ISet nei;
 		for(int k=subset.getFirstElement(); k>=0;k=subset.getNextElement()){
 			if(first && skipFirst){
 				first = false;
@@ -143,7 +143,7 @@ public class GraphTools {
 				nodeInNewGraph++;
 			}
 		}
-		return new DirectedGraph(nb, matrix, graph.getType());
+		return new DirectedGraph(nb, matrix, graph.getType(),false);
 	}
 
 	/**Create a new directed graph which is a subraph of an undirected graph
@@ -154,8 +154,8 @@ public class GraphTools {
 	 * @param subset of nodes to keep in the subgraph
 	 * @returna new directed graph which is a subraph of an undirected graph deduced from a subset.
 	 */
-	public static IDirectedGraph createSubgraph(IGraph undirectedGraph, INeighbors subset){
-		int nb = subset.neighborhoodSize();
+	public static IDirectedGraph createSubgraph(IGraph undirectedGraph, ISet subset){
+		int nb = subset.getSize();
 		boolean[][] matrix = new boolean[nb][nb];
 		int[] indexes = new int[nb];
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
@@ -166,7 +166,7 @@ public class GraphTools {
 			nodeInNewGraph++;
 		}
 		nodeInNewGraph = 0;
-		INeighbors nei;
+		ISet nei;
 		for(int j=subset.getFirstElement(); j>=0;j=subset.getNextElement()){
 			indexes[nodeInNewGraph] = j;
 			map.put(j, nodeInNewGraph);
@@ -179,7 +179,7 @@ public class GraphTools {
 			}
 			nodeInNewGraph++;
 		}
-		return new DirectedGraph(nb, matrix, undirectedGraph.getType());
+		return new DirectedGraph(nb, matrix, undirectedGraph.getType(),false);
 	}
 
 	//***********************************************************************************
@@ -194,7 +194,7 @@ public class GraphTools {
 	 * @return a new INeighbors which is the result of the merging of n1 and n2
 	 * this new INeighbors is a BitSet to avoid duplicated elements
 	 */
-	public static INeighbors mergeNeighborhoods(INeighbors n1, INeighbors n2, int nbNodes){
+	public static ISet mergeNeighborhoods(ISet n1, ISet n2, int nbNodes){
 		BitSetNeighbors merged = new BitSetNeighbors(nbNodes);
 		for(int j=n1.getFirstElement(); j>=0;j=n1.getNextElement()){
 			merged.add(j);

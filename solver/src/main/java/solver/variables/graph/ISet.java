@@ -27,9 +27,9 @@
 
 package solver.variables.graph;
 
-/**Class representing the neighborhood (a set of nodes) of a node
+/**Class representing a set (of nodes)
  * Created by IntelliJ IDEA.
- * User: chameau
+ * User: chameau, Jean-Guillaume Fages
  * Date: 9 févr. 2011
  */
 public interface ISet {
@@ -60,7 +60,7 @@ public interface ISet {
     /**
      * @return the number of elements in the neighborhood
      */
-    int neighborhoodSize();
+    int getSize();
 
     /**
      * Remove all elements from the neighborhood
@@ -81,6 +81,8 @@ public interface ISet {
 	 * }
 	 * 
 	 * The use of getFirstElement() is necessary to ensure a complete iteration
+	 *
+	 * WARNING cannot encapsulate two for loops (copy the set for that)
 	 * 
 	 * @return the next element of the neighborhood
 	 */

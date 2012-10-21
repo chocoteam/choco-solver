@@ -54,7 +54,7 @@ public abstract class AbstractMSTFinder {
 
 	public AbstractMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
 		n = nbNodes;
-		Tree = new DirectedGraph(n,GraphType.LINKED_LIST);
+		Tree = new DirectedGraph(n,GraphType.LINKED_LIST,false);
 		propHK = propagator;
 	}
 

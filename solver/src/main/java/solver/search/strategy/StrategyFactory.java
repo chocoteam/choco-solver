@@ -30,7 +30,7 @@ package solver.search.strategy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IEnvironment;
 import solver.Solver;
-import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
@@ -289,18 +289,18 @@ public final class StrategyFactory {
         return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.RANDOM);
     }
 
-    public static AbstractStrategy graphATSP(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax) {
+    public static AbstractStrategy graphATSP(DirectedGraphVar g, ATSP_heuristics heur, IGraphRelaxation relax) {
         return new ATSPSearch(g, heur, relax);
     }
 
     private static class ATSPSearch extends AbstractStrategy {
         ATSP_heuristics heuristic;
-        IRelaxation relaxation;
+        IGraphRelaxation relaxation;
         DirectedGraphVar g;
         int n;
         PoolManager<GraphDecision> pool;
 
-        ATSPSearch(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax) {
+        ATSPSearch(DirectedGraphVar g, ATSP_heuristics heur, IGraphRelaxation relax) {
             super(new GraphVar[]{g});
             this.g = g;
             this.heuristic = heur;
@@ -323,18 +323,18 @@ public final class StrategyFactory {
         }
     }
 
-    public static AbstractStrategy graphTSP(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax) {
+    public static AbstractStrategy graphTSP(UndirectedGraphVar g, TSP_heuristics heur, IGraphRelaxation relax) {
         return new TSPSearch(g, heur, relax);
     }
 
     private static class TSPSearch extends AbstractStrategy {
         TSP_heuristics heuristic;
-        IRelaxation relaxation;
+        IGraphRelaxation relaxation;
         UndirectedGraphVar g;
         int n;
         PoolManager<GraphDecision> pool;
 
-        TSPSearch(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax) {
+        TSPSearch(UndirectedGraphVar g, TSP_heuristics heur, IGraphRelaxation relax) {
             super(new GraphVar[]{g});
             this.g = g;
             this.heuristic = heur;

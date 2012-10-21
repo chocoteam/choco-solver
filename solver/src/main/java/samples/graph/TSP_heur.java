@@ -31,18 +31,11 @@ import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.directed.PropSumArcCosts;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSurroSymmetricHeldKarp;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
@@ -50,15 +43,10 @@ import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
@@ -76,7 +64,7 @@ public class TSP_heur {
 	private static IntVar totalCost;
 	private static Solver solver;
 	private static boolean optProofOnly = true;
-	private static PropSymmetricHeldKarp mst;
+	private static PropLagr_OneTree mst;
 	private static int search;
 	private static boolean decisionType, trick, constructive;
 
@@ -198,7 +186,7 @@ public class TSP_heur {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -211,7 +199,7 @@ public class TSP_heur {
 		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
-		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		mst.waitFirstSolution(search!=0);
 		gc.addPropagators(mst);
 		solver.post(gc);
@@ -270,7 +258,7 @@ public class TSP_heur {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,Integer.MAX_VALUE/4,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -283,7 +271,7 @@ public class TSP_heur {
 		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
-		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		mst.waitFirstSolution(true);
 		gc.addPropagators(mst);
 		solver.post(gc);

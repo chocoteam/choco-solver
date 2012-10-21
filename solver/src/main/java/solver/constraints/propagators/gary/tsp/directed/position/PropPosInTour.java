@@ -43,7 +43,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -119,7 +119,7 @@ public class PropPosInTour extends Propagator {
 				enfVarPos(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(!intVars[p].contains(val-1)){
 					g.removeArc(p,var,this);
@@ -132,7 +132,7 @@ public class PropPosInTour extends Propagator {
 				enfVarPos(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(!intVars[s].contains(val+1)){
 					g.removeArc(var,s,this);
@@ -148,7 +148,7 @@ public class PropPosInTour extends Propagator {
 				upUB(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getLB()>val-1){
 					g.removeArc(p,var,this);
@@ -161,7 +161,7 @@ public class PropPosInTour extends Propagator {
 				upUB(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getLB()>val+1){
 					g.removeArc(var,s,this);
@@ -176,7 +176,7 @@ public class PropPosInTour extends Propagator {
 				upLB(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getUB()<val-1){
 					g.removeArc(p,var,this);
@@ -189,7 +189,7 @@ public class PropPosInTour extends Propagator {
 				upLB(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getUB()<val+1){
 					g.removeArc(var,s,this);

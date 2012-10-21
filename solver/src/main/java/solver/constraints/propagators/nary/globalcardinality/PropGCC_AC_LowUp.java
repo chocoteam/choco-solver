@@ -41,7 +41,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
@@ -127,7 +127,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		}
 		n2 = idx;
 		fifo = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST);
+		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
 		remProc = new DirectedRemProc();
 		father = new int[n2];
 		in = new BitSet(n2);
@@ -245,7 +245,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
 		int x, y;
-		INeighbors succs;
+		ISet succs;
 		while (indexFirst != indexLast) {
 			x = fifo[indexFirst++];
 			succs = digraph.getSuccessorsOf(x);
@@ -287,7 +287,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
 		int x, y;
-		INeighbors succs;
+		ISet succs;
 		while (indexFirst != indexLast) {
 			x = fifo[indexFirst++];
 			succs = digraph.getPredecessorsOf(x);
@@ -340,7 +340,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 					if (nodeSCC[i] != nodeSCC[j]) {
 						if (digraph.arcExists(j,i)) {
 							v.instantiateTo(k,this);
-							INeighbors nei = digraph.getSuccessorsOf(i);
+							ISet nei = digraph.getSuccessorsOf(i);
 							for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 								digraph.removeArc(i,s);
 							}

@@ -41,7 +41,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
@@ -51,8 +51,8 @@ import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarpBST;
+import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
+import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
@@ -67,7 +67,7 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -93,11 +93,11 @@ public class SCC_ATSP {
 	// RG data structure
 	private static IStateInt nR;
 	private static IStateInt[] sccOf;
-	private static INeighbors[] outArcs;
+	private static ISet[] outArcs;
 	private static IDirectedGraph G_R;
 	private static IStateInt[] sccFirst, sccNext;
 	// Branching data structure
-	private static IRelaxation relax;
+	private static IGraphRelaxation relax;
 
 	//***********************************************************************************
 	// MODEL CONFIGURATION
@@ -144,7 +144,7 @@ public class SCC_ATSP {
 		// create model
 		solver = new Solver();
 		System.out.println("initial UB : "+initialUB);
-		graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST,true);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		int ct = 0;
 		try {
@@ -198,8 +198,8 @@ public class SCC_ATSP {
 			gc.addPropagators(SCCP);
 		}
 		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.MATRIX,GraphType.LINKED_LIST);
-			INeighbors nei;
+			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.MATRIX,GraphType.LINKED_LIST,true);
+			ISet nei;
 			for(int i=0;i<n-1;i++){
 				undi.getKernelGraph().activateNode(i);
 				nei = graph.getEnvelopGraph().getSuccessorsOf(i);
@@ -248,7 +248,7 @@ public class SCC_ATSP {
 
 		if(config.get(rg) && bst){// BST-based HK
 			System.out.println("BST");
-			PropHeldKarpBST propHK_bst = PropHeldKarpBST.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc2, solver, nR, sccOf, outArcs);
+			PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc2, solver, nR, sccOf, outArcs);
 //			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 			propHK_bst.waitFirstSolution(true);//search!=1 && initialUB!=optimum);
 			gc2.addPropagators(propHK_bst);
@@ -256,14 +256,14 @@ public class SCC_ATSP {
 		}
 		else{
 			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc2, solver);
+			PropLagr_MST_BST propHK_mst = PropLagr_MST_BST.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc2, solver);
 			propHK_mst.waitFirstSolution(true);//search!=1 && initialUB!=optimum);
 			gc2.addPropagators(propHK_mst);
 			relax = propHK_mst;
 		}
 
 //			System.out.println("MST");
-		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+		PropLagr_MST_BST propHK_mst = PropLagr_MST_BST.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver);
 		propHK_mst.waitFirstSolution(true);//search!=1 && initialUB!=optimum);
 		gc.addPropagators(propHK_mst);
 		relax = propHK_mst;
@@ -309,7 +309,7 @@ public class SCC_ATSP {
 				lbini = totalCost.getLB();
 				int ct = 0;
 				for(int i=0;i<n;i++){
-					ct+=graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+					ct+=graph.getEnvelopGraph().getSuccessorsOf(i).getSize();
 				}
 				m = ct;
 				System.out.println(ct+" arcs remaining");

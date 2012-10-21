@@ -39,8 +39,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * Propagator that ensures that each node of the given subset of nodes has a loop
@@ -57,13 +56,13 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     GraphDeltaMonitor gdm;
 	private IntProcedure enfNode;
 	private PairProcedure remArc;
-	private INeighbors concernedNodes;
+	private ISet concernedNodes;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
+	public PropEachNodeHasLoop(GraphVar graph, ISet concernedNodes, Solver sol, Constraint constraint) {
 		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
 		this.g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -82,11 +81,11 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		ISet env = g.getEnvelopGraph().getActiveNodes();
 		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
 			if (concernedNodes.contain(i)) {
 				if(g.getEnvelopGraph().arcExists(i,i)){
-					if(g.getKernelGraph().getActiveNodes().isActive(i)){
+					if(g.getKernelGraph().getActiveNodes().contain(i)){
 						g.enforceArc(i,i,this);
 					}
 				}else{
@@ -120,7 +119,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		ISet ker = g.getKernelGraph().getActiveNodes();
 		for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
 			if (concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)) {
 				return ESat.FALSE;

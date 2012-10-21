@@ -30,9 +30,9 @@ package solver.variables.graph.undirectedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
+import solver.variables.graph.graphStructure.FullSet;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
-import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
 
 /**Class representing an undirected graph with a backtrable structure
  * @author Jean-Guillaume Fages */
@@ -49,8 +49,9 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public StoredUndirectedGraph(IEnvironment env, int nbits, GraphType type) {
+	public StoredUndirectedGraph(IEnvironment env, int nbits, GraphType type, boolean allNodes) {
 		this.type = type;
+		this.n = nbits;
 		environment = env;
 		switch (type) {
 			// SWAP ARRAYS
@@ -101,9 +102,10 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 			default:
 				throw new UnsupportedOperationException();
 		}
-		this.activeIdx = new StoredActiveNodes(environment, nbits);
-		for (int i = 0; i < nbits; i++) {
-			this.activeIdx.activate(i);
+		if(allNodes){
+			this.nodes = new FullSet(nbits);
+		}else{
+			this.nodes = new StoredBitSetNeighbors(environment, nbits);
 		}
 	}
 

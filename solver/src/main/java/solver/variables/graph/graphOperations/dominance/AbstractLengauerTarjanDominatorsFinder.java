@@ -29,7 +29,7 @@ package solver.variables.graph.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
@@ -46,8 +46,8 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	protected IDirectedGraph T;
 	protected int root, n, k;
 	protected int[] parent,vertex,bucket,ancestor,label,semi,dom;
-	protected INeighbors[] succs;
-	protected INeighbors[] preds;
+	protected ISet[] succs;
+	protected ISet[] preds;
 	protected TIntArrayList list;
 
 	//***********************************************************************************
@@ -66,9 +66,9 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		label = new int[n];
 		vertex = new int[n];
 		bucket= new int[n];
-		succs = new INeighbors[n];
-		preds = new INeighbors[n];
-		T = new DirectedGraph(n, GraphType.LINKED_LIST);
+		succs = new ISet[n];
+		preds = new ISet[n];
+		T = new DirectedGraph(n, GraphType.LINKED_LIST,false);
 		list  = new TIntArrayList();
 	}
 
@@ -167,7 +167,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	protected void findAllIdom(){
 		int w,v,u;
-		INeighbors prds;
+		ISet prds;
 		for (int i=n-1; i>=1; i--){
 			w = vertex[i];
 			prds = preds[w];

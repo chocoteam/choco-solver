@@ -36,20 +36,17 @@ package solver.search.strategy;
 
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
-import solver.ICause;
-import solver.constraints.propagators.gary.IRelaxation;
-import solver.exception.ContradictionException;
-import solver.search.strategy.assignments.Assignment;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 public enum ATSP_heuristics {
 	enf_MaxRepCost {
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			INeighbors suc;
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			ISet suc;
 			double maxRepCost = -1;
 			double repCost;
 			int to = -1;
@@ -82,8 +79,8 @@ public enum ATSP_heuristics {
 	/** Heuristic introduced by Benchimol et. al.
 	 */
 	rem_MaxRepCost  {
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			INeighbors suc;
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			ISet suc;
 			double maxRepCost = -1;
 			double repCost;
 			int to = -1;
@@ -118,8 +115,8 @@ public enum ATSP_heuristics {
 	},
 
 	rem_MaxMargCost  {
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			INeighbors suc;
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			ISet suc;
 			double maxRepCost = -1;
 			double repCost;
 			int to = -1;
@@ -154,18 +151,18 @@ public enum ATSP_heuristics {
 	},
 
 	enf_MinDeg {
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			INeighbors suc;
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			ISet suc;
 			int size = 2*n + 1;
 			int sizi;
 			int to = -1;
 			int from=-1;
 			for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(suc.neighborhoodSize()>1){
+				if(suc.getSize()>1){
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 						if(!g.getKernelGraph().arcExists(i,j)){
-							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+							sizi = suc.getSize()+g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 							if (sizi < size) {
 								size = sizi;
 								to = j;
@@ -185,8 +182,8 @@ public enum ATSP_heuristics {
 	},
 
 	enf_MinDegMaxRepCost  {
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			INeighbors suc;
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			ISet suc;
 			int size = 2*n + 1;
 			int sizi;
 			double repCost=0,repCostij;
@@ -194,11 +191,11 @@ public enum ATSP_heuristics {
 			int from=-1;
 			for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(suc.neighborhoodSize()>1){
+				if(suc.getSize()>1){
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 						if(relax.contains(i,j) &&!g.getKernelGraph().arcExists(i,j)){
 							repCostij = relax.getReplacementCost(i, j);
-							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+							sizi = suc.getSize()+g.getEnvelopGraph().getPredecessorsOf(j).getSize();
 							if (sizi == size) {
 								if(repCost<repCostij){
 									repCost = repCostij;
@@ -232,11 +229,11 @@ public enum ATSP_heuristics {
 		private int[] e;
 
 		private int getNextSparseNode(GraphVar g, int n) {
-			INeighbors nei;
+			ISet nei;
 			int s = n;
 			int si;
 			for (int i = 0; i < n; i++) {
-				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 				if(si<s && si>1){
 					s = si;
 				}
@@ -245,7 +242,7 @@ public enum ATSP_heuristics {
 				e[i] = 0;
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
 				for(int j=0;j<n;j++){
-					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).getSize()==s){
 						e[i]++;
 					}
 				}
@@ -254,7 +251,7 @@ public enum ATSP_heuristics {
 			int score;
 			int node = -1;
 			for (int i = 0; i < n; i++) {
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()==s){
 					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					score = 0;
 					for(int j=0;j<n;j++){
@@ -272,17 +269,17 @@ public enum ATSP_heuristics {
 			return node;
 		}
 
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==1){
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).getSize()==1){
 				currentNode = getNextSparseNode(g,n);
 			}
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
-			if(nei.neighborhoodSize() > 5){
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			if(nei.getSize() > 5){
 				int count = 0;
 				for(int j=0;j<n;j++){
 					if(g.getEnvelopGraph().arcExists(currentNode,j)){
 						count++;
-						if(count==nei.neighborhoodSize()/2){
+						if(count==nei.getSize()/2){
 							GraphDecision fd = pool.getE();
 							if(fd==null){
 								fd = new GraphDecision(pool);
@@ -314,11 +311,11 @@ public enum ATSP_heuristics {
 		private int[] e;
 
 		private int getNextSparseNode(GraphVar g, int n) {
-			INeighbors nei;
+			ISet nei;
 			int s = n;
 			int si;
 			for (int i = 0; i < n; i++) {
-				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 				if(si<s && si>1){
 					s = si;
 				}
@@ -327,7 +324,7 @@ public enum ATSP_heuristics {
 				e[i] = 0;
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).getSize()==s){
 						e[i]++;
 					}
 				}
@@ -336,7 +333,7 @@ public enum ATSP_heuristics {
 			int score;
 			int node = -1;
 			for (int i = 0; i < n; i++) {
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()==s){
 					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					score = 0;
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -354,20 +351,20 @@ public enum ATSP_heuristics {
 			return node;
 		}
 
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
 //			currentNode.set(last);//trick to be more efficient
-			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).neighborhoodSize()==1){
+			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).getSize()==1){
 				currentNode.set(getNextSparseNode(g,n));
 			}
 			int currentNode = this.currentNode.get();
 			last = currentNode;
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
-			if(nei.neighborhoodSize() > 5){
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			if(nei.getSize() > 5){
 				int count = 0;
 				for(int j=0;j<n;j++){
 					if(g.getEnvelopGraph().arcExists(currentNode,j)){
 						count++;
-						if(count==nei.neighborhoodSize()/2){
+						if(count==nei.getSize()/2){
 							GraphDecision fd = pool.getE();
 							if(fd==null){
 								fd = new GraphDecision(pool);
@@ -399,11 +396,11 @@ public enum ATSP_heuristics {
 		private int[] e;
 
 		private int getNextSparseNode(GraphVar g, int n) {
-			INeighbors nei;
+			ISet nei;
 			int s = n;
 			int si;
 			for (int i = 0; i < n; i++) {
-				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 				if(si<s && si>1){
 					s = si;
 				}
@@ -412,7 +409,7 @@ public enum ATSP_heuristics {
 				e[i] = 0;
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
 				for(int j=0;j<n;j++){
-					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).getSize()==s){
 						e[i]++;
 					}
 				}
@@ -421,7 +418,7 @@ public enum ATSP_heuristics {
 			int score;
 			int node = -1;
 			for (int i = 0; i < n; i++) {
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()==s){
 					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					score = 0;
 					for(int j=0;j<n;j++){
@@ -439,12 +436,12 @@ public enum ATSP_heuristics {
 			return node;
 		}
 
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==1){
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).getSize()==1){
 				currentNode = getNextSparseNode(g,n);
 			}
 //			int currentNode = getNextSparseNode(g,n);
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
 			int maxE = -1;
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(maxE == -1 || e[maxE]<e[j]){
@@ -472,11 +469,11 @@ public enum ATSP_heuristics {
 		private int[] e;
 
 		private int getNextSparseNode(GraphVar g, int n) {
-			INeighbors nei;
+			ISet nei;
 			int s = n;
 			int si;
 			for (int i = 0; i < n; i++) {
-				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 				if(si<s && si>1){
 					s = si;
 				}
@@ -485,7 +482,7 @@ public enum ATSP_heuristics {
 				e[i] = 0;
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).getSize()==s){
 						e[i]++;
 					}
 				}
@@ -494,7 +491,7 @@ public enum ATSP_heuristics {
 			int score;
 			int node = -1;
 			for (int i = 0; i < n; i++) {
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()==s){
 					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					score = 0;
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -512,13 +509,13 @@ public enum ATSP_heuristics {
 			return node;
 		}
 
-		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).neighborhoodSize()==1){
+		public Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).getSize()==1){
 				currentNode.set(getNextSparseNode(g,n));
 			}
 //			int currentNode = getNextSparseNode(g,n);
 			int currentNode = this.currentNode.get();
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
 			int maxE = -1;
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(maxE == -1 || e[maxE]<e[j]){
@@ -541,6 +538,6 @@ public enum ATSP_heuristics {
 		}
 	};
 
-	public abstract Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool);
+	public abstract Decision getDecision(GraphVar g, int n, IGraphRelaxation relax, PoolManager<GraphDecision> pool);
 	public void init(GraphVar g, int n){}
 }

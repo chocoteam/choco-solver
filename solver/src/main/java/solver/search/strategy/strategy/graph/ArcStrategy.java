@@ -27,12 +27,12 @@
 package solver.search.strategy.strategy.graph;
 
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.ISet;
 
 public abstract class ArcStrategy<G extends GraphVar> {
 
 	protected G g;
-	protected IActiveNodes envNodes;
+	protected ISet envNodes;
 
 	protected int from,to;
 

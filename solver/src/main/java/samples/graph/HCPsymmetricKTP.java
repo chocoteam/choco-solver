@@ -29,22 +29,14 @@ package samples.graph;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
@@ -53,9 +45,7 @@ import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
@@ -64,17 +54,12 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.*;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-import solver.variables.view.Views;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.BitSet;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
@@ -125,7 +110,7 @@ public class HCPsymmetricKTP {
 		}
 		solver = new Solver();
 		// variables
-		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -262,12 +247,12 @@ public class HCPsymmetricKTP {
 
 		@Override
 		public boolean computeNextArc() {
-			INeighbors suc;
+			ISet suc;
 			int from = -1;
 			int size = n + 1;
 			int sizi;
 			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()-g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize()-g.getKernelGraph().getSuccessorsOf(i).getSize();
 				if (sizi < size && sizi>0) {
 					from = i;
 					size = sizi;

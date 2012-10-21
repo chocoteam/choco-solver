@@ -40,7 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -129,7 +129,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 	}
 
 	protected void setCosts() {
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -212,7 +212,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 		mandatoryArcsList.clear();
 	}
 	protected void rebuildGraph() {
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -230,7 +230,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 		}
 		int deg;
 		for(int i=0;i<n;i++){
-			deg = mst.getNeighborsOf(i).neighborhoodSize();
+			deg = mst.getNeighborsOf(i).getSize();
 			nb2viol += (2-deg)*(2-deg);
 		}
 		if(nb2viol == 0){
@@ -247,7 +247,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 		double sumPenalities = 0;
 		int deg;
 		for(int i=0;i<n;i++){
-			deg = mst.getNeighborsOf(i).neighborhoodSize();
+			deg = mst.getNeighborsOf(i).getSize();
 			penalities[i] += (deg-2)*step;
 			if(penalities[i]>Double.MAX_VALUE/(n-1) || penalities[i]<-Double.MAX_VALUE/(n-1)){
 				throw new UnsupportedOperationException();
@@ -258,7 +258,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 	}
 
 	protected void updateCostMatrix() {
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){

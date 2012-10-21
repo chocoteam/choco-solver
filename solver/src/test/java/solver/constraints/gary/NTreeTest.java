@@ -47,7 +47,7 @@ public class NTreeTest {
 
 	public static void model(int n, int tmin, int tmax,int seed) {
 		Solver s = new Solver();
-		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer);
+		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer,false);
 		for(int i=0;i<n;i++){
 			for(int j=0;j<n;j++){
 				g.getEnvelopGraph().addArc(i, j);

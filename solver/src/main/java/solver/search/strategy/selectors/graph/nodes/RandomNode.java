@@ -42,11 +42,11 @@ public class RandomNode extends NodeStrategy<GraphVar>{
 	
 	@Override
 	public int nextNode() {
-		int delta = envNodes.neighborhoodSize() - kerNodes.neighborhoodSize();
+		int delta = envNodes.getSize() - kerNodes.getSize();
 		if(delta!=0){
 			delta = rd.nextInt(delta);
 			for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
-				if(!kerNodes.isActive(i)){
+				if(!kerNodes.contain(i)){
 					if(delta == 0){
 						return i;
 					}else{

@@ -28,10 +28,10 @@
 package solver.constraints.propagators.gary.trees;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
@@ -69,7 +69,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public KruskalMSTFinder(int nbNodes, HeldKarp propagator) {
+	public KruskalMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];
@@ -80,7 +80,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 		// CCtree
 		ccN = 2*n+1;
 		// backtrable
-		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST);
+		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST,false);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
 		useful = new BitSet(n);
@@ -123,13 +123,13 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 				Tree.getNeighborsOf(i).clear();
 				ccTree.desactivateNode(i);
 				ccTree.activateNode(i);
-				size += g.getSuccessorsOf(i).neighborhoodSize();
+				size += g.getSuccessorsOf(i).getSize();
 			}
 			if(size%2!=0){
 				throw new UnsupportedOperationException();
 			}
 			size /= 2;
-			INeighbors nei;
+			ISet nei;
 			Integer[] integers = new Integer[size];
 			int idx  = 0;
 			for(int i=0;i<n;i++){

@@ -40,12 +40,18 @@ import solver.variables.graph.IGraph;
 
 public interface GraphLagrangianRelaxation extends IGraphRelaxation {
 
-	IGraph getSupport();
+
+	/**
+	 * @param b true iff the relaxation should not be triggered before a first solution is found
+	 */
+	void waitFirstSolution(boolean b);
+	// mandatory arcs
 	boolean isMandatory(int i, int j);
 	TIntArrayList getMandatoryArcsList();
-	void contradiction() throws ContradictionException;
-	void remove(int i, int i1) throws ContradictionException;
+	// get a default minimal value
 	double getMinArcVal();
-	void waitFirstSolution(boolean b);
+	// some primitives
+	void contradiction() throws ContradictionException;
+	void remove(int i, int j) throws ContradictionException;
 	void enforce(int i, int j)throws ContradictionException;
 }

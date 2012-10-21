@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphStructure.adjacencyList;
 
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.ISet;
 
 /**
  * LinkedList of m elements
@@ -39,7 +39,7 @@ import solver.variables.graph.INeighbors;
  * User: chameau
  * Date: 9 f�vr. 2011
  */
-public class IntLinkedList implements INeighbors {
+public class IntLinkedList implements ISet {
 
 	/**
 	 * The first cell of the linked list
@@ -70,7 +70,7 @@ public class IntLinkedList implements INeighbors {
 	 * The number of elements in the linked list
 	 * @return the number of cells
 	 */
-	public int neighborhoodSize() {
+	public int getSize() {
 		return this.size;
 	}
 

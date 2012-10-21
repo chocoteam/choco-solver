@@ -51,11 +51,11 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
+	public DirectedGraphVar(Solver solver, int nbNodes,
+							GraphType typeEnv, GraphType typeKer,boolean allNodes) {
 		super(solver);
-		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv);
-		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer);
-		kernel.getActiveNodes().clear();
+		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv,allNodes);
+		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer,allNodes);
 	}
 
 	//***********************************************************************************
