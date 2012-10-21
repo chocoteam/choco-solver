@@ -135,12 +135,12 @@ public class GraphStrategyBench2 extends GraphStrategy {
 			}
 		from = to = -1;
 		value = -1;
-		for(int i=0;i<n;i++){
-			if(DCMST.dMax[i]==1)
-			if(evaluateNeighbors(i)){
-				return;
-			}
-		}
+//		for(int i=0;i<n;i++){
+//			if(DCMST.dMax[i]==1)
+//			if(evaluateNeighbors(i)){
+//				return;
+//			}
+//		}
 		for(int i=0;i<n;i++){
 			if(evaluateNeighbors(i)){
 				return;

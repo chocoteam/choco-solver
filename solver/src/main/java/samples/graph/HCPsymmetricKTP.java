@@ -32,6 +32,7 @@ import choco.kernel.common.util.PoolManager;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -72,6 +73,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.view.Views;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.BitSet;
 
 /**
@@ -83,12 +85,12 @@ public class HCPsymmetricKTP {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 10000;
+	private static final long TIMELIMIT = 100000;
 	private static final int MAX_SIZE = 200000;
 	private static String outFile;
 	private static Solver solver;
-	private static boolean alldifferentAC;
-	private static boolean useRestarts;
+	private static boolean activeBools = true;
+	private static boolean activeGraphs = true;
 
 	//***********************************************************************************
 	// METHODS
@@ -102,21 +104,17 @@ public class HCPsymmetricKTP {
 	private static void kingTour() {
 		outFile = "KING_TOUR.csv";
 		HCP_Parser.clearFile(outFile);
-		HCP_Parser.writeTextInto("instance;nbSols;nbFails;time;orientation;allDiffAC;\n", outFile);
-//		int size = 50;
-//		int[] sizes = {10,20,50,100,200,500};
-//		for(int size:sizes){
+		HCP_Parser.writeTextInto("instance;nbSols;nbNodes;nbFails;props;time;model;\n", outFile);
 		for(int size=10; size<500;size+=10){
 			String s = "king_"+size+"x"+size;
 			System.out.println(s);
 			boolean[][] matrix = HCPsymmetric.generateKingTourInstance(size);
-			alldifferentAC = false;
+			if(activeGraphs)
 			solveUndiGraph(matrix, s);
+//			System.exit(0);
+			if(activeBools)
 			solveBooleans(matrix, s);
 //			System.exit(0);
-//			solveDirected(matrix,s);
-//			alldifferentAC = true;
-//			solveDirected(matrix,s);
 		}
 	}
 
@@ -148,18 +146,20 @@ public class HCPsymmetricKTP {
         IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		if(useRestarts){
-			solver.getSearchLoop().plugSearchMonitor(new MyMon());
-		}
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
-//		solver.findAllSolutions();
 		solver.findSolution();
 		check(solver, undi);
 		//output
-		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";undirected;"+alldifferentAC+";\n";
+		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+				+ (int)(solver.getMeasures().getFailCount()) + ";"
+				+ (int)(solver.getMeasures().getPropagationsCount()+solver.getMeasures().getEventsCount()) + ";"
+				+ (int)(solver.getMeasures().getTimeCount()) + ";graph;\n";
 		HCP_Parser.writeTextInto(txt, outFile);
+		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+			activeGraphs = false;
+			System.exit(0);
+		}
 	}
 
 	private static void solveBooleans(boolean[][] matrix, String instanceName) {
@@ -187,6 +187,16 @@ public class HCPsymmetricKTP {
 				}
 			}
 		}
+		ArrayList<BoolVar>[] gl = new ArrayList[n];
+		for(int i=0;i<n;i++){
+			ArrayList<BoolVar> l = new ArrayList();
+			for(int j=0;j<n;j++){
+				if(matrix[i][j]){
+					l.add(graph[i][j]);
+				}
+			}
+			gl[i] = l;
+		}
 		// constraints
 		Constraint gc = new Constraint(solver);
 		IntVar two = VariableFactory.bounded("2",2,2,solver);
@@ -207,27 +217,23 @@ public class HCPsymmetricKTP {
 		gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
 		solver.post(gc);
 		// config
-		// TODO
-		solver.set(new MinNeighBool(decisionVars,graph));
-//		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
-
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+		solver.set(new MinNeighBool(decisionVars,gl));
+//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		if(useRestarts){
-			solver.getSearchLoop().plugSearchMonitor(new MyMon());
-		}
-//		SearchMonitorFactory.log(solver, true, false);
 		// resolution
-//		solver.findAllSolutions();
 		solver.findSolution();
 		System.out.println(solver.getMeasures());
 		check(solver, decisionVars);
-//		System.exit(0);
 		//output
-		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";undirected;"+alldifferentAC+";\n";
+		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+				+ (int)(solver.getMeasures().getFailCount()) + ";"
+				+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
+				+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
 		HCP_Parser.writeTextInto(txt, outFile);
+		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+			activeBools = false;
+		}
 	}
 
 	private static void check(Solver solver, Variable... vars) {
@@ -238,21 +244,6 @@ public class HCPsymmetricKTP {
 			for(Variable v:vars)
 			if(!v.instantiated()){
 				throw new UnsupportedOperationException();
-			}
-		}
-	}
-
-	//***********************************************************************************
-	// HEURISTICS
-	//***********************************************************************************
-
-	private static class MyMon extends VoidSearchMonitor implements ISearchMonitor {
-		int nbFails = 0;
-		public void onContradiction(ContradictionException cex){
-			nbFails++;
-			if(nbFails==100){
-				nbFails=0;
-				solver.getSearchLoop().restart();
 			}
 		}
 	}
@@ -307,19 +298,18 @@ public class HCPsymmetricKTP {
 				throw new UnsupportedOperationException();
 			}
 			return true;
-//			throw new UnsupportedOperationException();
 		}
 	}
 
 	private static class MinNeighBool extends AbstractStrategy<BoolVar> {
 		int n;
-		BoolVar[][] g;
 		PoolManager<FastDecision> pool;
+		ArrayList<BoolVar>[] gl;
 
-		public MinNeighBool(BoolVar[] vars, BoolVar[][] g) {
+		public MinNeighBool(BoolVar[] vars, ArrayList<BoolVar>[] gl) {
 			super(vars);
-			n = g.length;
-			this.g = g;
+			n = gl.length;
+			this.gl = gl;
 			pool = new PoolManager<FastDecision>();
 		}
 
@@ -332,17 +322,13 @@ public class HCPsymmetricKTP {
 			int size = n + 1;
 			int sizi;
 			for (int i = 0; i < n; i++) {
-				int k = 0;
-				int e = 0;
-				for(int j=0;j<n;j++){
-					if(g[i][j]!=null && g[i][j].getUB()==1 && g[i][j].getLB()==0){
-						e++;
-						if(g[i][j].getLB()==1){
-							k++;
-						}
+				sizi = 0;
+				ArrayList<BoolVar> l = gl[i];
+				for(BoolVar bv:l){
+					if(bv.getUB()==1 && bv.getLB()==0){
+						sizi++;
 					}
 				}
-				sizi = e-k;
 				if (sizi < size && sizi>0) {
 					from = i;
 					size = sizi;
@@ -352,14 +338,14 @@ public class HCPsymmetricKTP {
 				System.out.println("over");
 				return null;
 			}
-			for (int j = 0;j<n;j++) {
-				if(g[from][j]!=null && g[from][j].getUB()==1 && g[from][j].getLB()==0){
-					int to = j;
+			ArrayList<BoolVar> l = gl[from];
+			for(BoolVar bv:l){
+				if(bv.getUB()==1 && bv.getLB()==0){
 					FastDecision dec = pool.getE();
 					if(dec == null){
 						dec = new FastDecision(pool);
 					}
-					dec.set(g[from][j],1, Assignment.int_eq);
+					dec.set(bv,1, Assignment.int_eq);
 					return dec;
 				}
 			}
@@ -390,7 +376,7 @@ public class HCPsymmetricKTP {
 		 * @param constraint
 		 * @param solver   */
 		public PropBoolNoSubtour(int[] mapping, BoolVar[] decVars, BoolVar[][] graph, Constraint constraint, Solver solver) {
-			super(decVars, solver, constraint, PropagatorPriority.UNARY);
+			super(decVars, solver, constraint, PropagatorPriority.UNARY,true);
 			g = graph;
 			this.mapping = mapping;
 			this.n = graph.length;

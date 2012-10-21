@@ -111,7 +111,7 @@ public class PropBoolSum extends Propagator<IntVar> {
 						vars[i].instantiateTo(0,this);
 					}
 				}
-				setPassive();
+//				setPassive(); // inutile et ne marche pas de toute facon...
 			}
 			if(sum.getValue()==ub){
 				for(int i=0;i<n;i++){
@@ -119,7 +119,7 @@ public class PropBoolSum extends Propagator<IntVar> {
 						vars[i].instantiateTo(1,this);
 					}
 				}
-				setPassive();
+//				setPassive(); // inutile et ne marche pas de toute facon...
 			}
 		}
 	}

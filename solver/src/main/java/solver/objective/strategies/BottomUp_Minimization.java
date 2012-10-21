@@ -92,6 +92,7 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 		if(val>UB){
 			return null;
 		}
+		val = Math.max(val,obj.getLB());
 		MinObjectiveManager man = (MinObjectiveManager)obj.getSolver().getSearchLoop().getObjectivemanager();
 		man.updateLB(val);
 		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val+"  tps: "+(int)(obj.getSolver().getMeasures().getTimeCount()/1000)+"s");

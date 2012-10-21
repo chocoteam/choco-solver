@@ -137,7 +137,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 				}
 			}
 		}else{
-//			throw new UnsupportedOperationException("bound computation only, no filtering!");
+			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
 	}
 }
