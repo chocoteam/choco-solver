@@ -38,7 +38,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-public class DCMST_Inst {
+public class DCMST_Utils {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -47,13 +47,13 @@ public class DCMST_Inst {
 	public int[][] costs;
 	public int[] dMax;
 	public int n;
-	public int lb,ub;
+	public int lb,ub,optimum=-1;
 
 	//***********************************************************************************
 	// hard instances (Euclidean) T DE (Random) DR
 	//***********************************************************************************
 
-	public boolean parse_T_DE_DR(File file, int nMin, int nMax) {
+	public boolean parse_T_DE_DR(File file, int nMin, int nMax, String dirOpt, String type, String s) {
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();
@@ -94,6 +94,7 @@ public class DCMST_Inst {
 			}
 			lb = (n-1)*min;
 			ub = (n-1)*max;
+			setUB(dirOpt+"/"+type,s);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -102,6 +103,91 @@ public class DCMST_Inst {
 		throw new UnsupportedOperationException();
 	}
 
+	private void setUB(String dir, String inst) {
+		if(dir.contains("ham")){
+			setHamUB(dir,inst);
+			return;
+		}
+		File file = new File(dir+"/bounds.csv");
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			String[] numbers;
+			line = buf.readLine();
+			while(line!=null){
+				numbers = line.split(";");
+				if(n==Integer.parseInt(numbers[0])){
+					if(inst.contains("0_1")){
+						// nothing to do
+					}else if(inst.contains("0_2")){
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_3")){
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_4")){
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_5")){
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else{
+						throw new UnsupportedOperationException(inst);
+					}
+					optimum = Integer.parseInt(numbers[2]);
+					System.out.println("optimum : "+optimum);
+					return;
+				}
+				line = buf.readLine();
+			}
+			System.out.println("no bound");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+
+	private void setHamUB(String dir, String inst) {
+		File file = new File(dir+"/bounds.csv");
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			String[] numbers;
+			line = buf.readLine();
+			while(line!=null){
+				numbers = line.split(";");
+				if(n==Integer.parseInt(numbers[0])){
+					if(inst.contains("0_0")){
+						// nothing to do
+					}else if(inst.contains("0_1")){
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_2")){
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else{
+						throw new UnsupportedOperationException(inst);
+					}
+					ub = Integer.parseInt(numbers[2]);
+					System.out.println("ub : "+ub);
+					return;
+				}
+				line = buf.readLine();
+			}
+			System.out.println("no bound");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
 	//***********************************************************************************
 	// small instances
 	//***********************************************************************************
