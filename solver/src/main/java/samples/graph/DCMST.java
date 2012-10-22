@@ -31,7 +31,6 @@ package samples.graph;
 //import ilog.cplex.*;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
-import samples.graph.input.HCP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,9 +38,9 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 		import solver.constraints.propagators.gary.basic.PropKCC;
-		import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-		import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
 import solver.exception.ContradictionException;
@@ -543,8 +542,8 @@ public class DCMST {
 		}
 		// constraints
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropAtLeastNNeighbors(undi, 1, gc, solver));
-		gc.addPropagators(new PropAtMostNNeighbors(undi, dMax, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 1, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(undi, dMax, gc, solver));
 		gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
 		gc.addPropagators(new PropKCC(undi, solver, gc, VariableFactory.bounded("1",1,1,solver)));
 		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, dist, gc, solver));

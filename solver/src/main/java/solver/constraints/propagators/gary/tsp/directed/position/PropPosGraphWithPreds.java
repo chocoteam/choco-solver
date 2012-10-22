@@ -192,7 +192,6 @@ public class PropPosGraphWithPreds extends Propagator {
 			}
 			level++;
 		}
-//		throw new UnsupportedOperationException(from+" fail "+to);
 		contradiction(g,"");
 	}
 

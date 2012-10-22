@@ -33,8 +33,8 @@ import samples.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
@@ -92,8 +92,16 @@ public class HamiltonianPathTest {
 			e.printStackTrace();System.exit(0);
 		}
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addPropagators(new PropOnePredBut(graph,0,gc,solver));
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
 		gc.addPropagators(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		solver.post(gc);
 		

@@ -34,11 +34,12 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
-import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
-import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphTools;
+import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -81,8 +82,8 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 //				new PropNLoopsTree(graph, nTree, solver, this),
 //				new PropNTree(graph, nTree,solver,this));
 		setPropagators(
-				(Propagator) new PropAtLeastNSuccessors(graph, 1, this, solver),
-				(Propagator) new PropAtMostNSuccessors(graph, 1, this, solver),
+				(Propagator) new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
+				(Propagator) new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
 				new PropNLoopsTree(graph, nTree, solver, this),
 				new PropNTree(graph, nTree,solver,this));
 		this.g = graph;

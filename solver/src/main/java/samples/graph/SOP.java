@@ -30,7 +30,6 @@ package samples.graph;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
-import samples.graph.input.ATSP_Utils;
 import samples.graph.input.SOP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Cause;
@@ -40,20 +39,25 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
+import solver.constraints.propagators.gary.basic.PropTransitiveClosureFastMaintenance;
+import solver.constraints.propagators.gary.basic.PropTransitivity;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.basic.PropAntiSymmetric;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.PropAtLeastNPredecessors;
-import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
-import solver.constraints.propagators.gary.degree.PropAtMostNPredecessors;
-import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.*;
+import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosGraphWithPreds;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.generator.PArc;
+import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.assignments.Assignment;
@@ -64,10 +68,10 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-
 import java.io.*;
 import java.util.BitSet;
 
@@ -112,6 +116,7 @@ public class SOP {
 	private static boolean bst;
 	private static boolean khun;
 	private static int noVal;
+	private static DirectedGraphVar transGraph;
 
 	public static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -175,10 +180,10 @@ public class SOP {
 			succs[i] = preds[i] = 1;
 		}
 		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropAtMostNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtLeastNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtMostNPredecessors(graph,preds,gc,solver));
-		gc.addPropagators(new PropAtLeastNPredecessors(graph,preds,gc,solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -223,50 +228,58 @@ public class SOP {
 		}else{
 			gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
 		}
-//		if(config.get(rg)){
-//			gc.addPropagators(new PropPosGraphWithPreds(pos, graph, distanceMatrix,gc, solver, nR, sccOf, outArcs, G_R));
-//		}else{
+		if(config.get(rg)){
+			gc.addPropagators(new PropPosGraphWithPreds(pos, graph, distanceMatrix,gc, solver, nR, sccOf, outArcs, G_R));
+		}else{
 			gc.addPropagators(new PropPosGraphWithPreds(pos, graph, distanceMatrix,gc, solver));
-//		}
+		}
 		// COST BASED FILTERING
 		if(khun){
 			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
 			gc.addPropagators(map);
-//			relax = map;
 		}
-// else{
-//			System.out.println("MST");
-//			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-//			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-//			gc.addPropagators(propHK_mst);
-//			relax = propHK_mst;
-//		if(config.get(rg) && bst){// BST-based HK
-//			System.out.println("BST");
-//			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
-//			propHK_bst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
-//			gc.addPropagators(propHK_bst);
-//		}
-//		else{
-//			System.out.println("MST");
-//			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-//			propHK_mst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
-//			gc.addPropagators(propHK_mst);
-//		}
-//			System.out.println("MST");
-		PropLagr_MST_BST propHK_mst = PropLagr_MST_BST.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver);
-		propHK_mst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
-		gc.addPropagators(propHK_mst);
-//		relax = propHK_mst;
-//		}
+		if(config.get(rg) && bst){// BST-based HK
+			System.out.println("BST");
+			PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+			propHK_bst.waitFirstSolution(initialUB!=optimum);
+			relax = propHK_bst;
+			gc.addPropagators(propHK_bst);
+		}else{
+			System.out.println("MST");
+			PropLagr_MST_BSTdual propHK_mst = PropLagr_MST_BSTdual.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+			propHK_mst.waitFirstSolution(initialUB!=optimum);
+			relax = propHK_mst;
+			gc.addPropagators(propHK_mst);
+		}
 		solver.post(gc);
+	}
+
+	public static void addTransitionGraph(){
+		transGraph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.ENVELOPE_SWAP_ARRAY,true);
+		try {
+			for (int i = 0; i < n - 1; i++) {
+				for (int j = 1; j < n; j++) {
+					if (distanceMatrix[i][j] != noVal) {
+						graph.getEnvelopGraph().addArc(i, j);
+					}
+				}
+				graph.getEnvelopGraph().removeArc(i, i);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		gc.addPropagators(new PropAntiSymmetric(transGraph,gc,solver));
+		gc.addPropagators(new PropTransitivity(transGraph,solver,gc));
+		gc.addPropagators(new PropTransitiveClosureFastMaintenance(graph,transGraph,solver,gc));
 	}
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
 		GraphStrategies mainStrat = new GraphStrategies(graph,distanceMatrix,relax);
 		mainStrat.configure(policy,true,true,true);
-//		mainStrat = StrategyFactory.ABSrandom(positions,solver,0.999d, 0.2d, 8, 1.1d, 1, 0);
-//		mainStrat = new MySearch(positions,solver);
+//		AbstractStrategy mainStrat = StrategyFactory.ABSrandom(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);
+//		AbstractStrategy mainStrat = new MySearch(positions,solver);
 		switch (main_search){
 			case 0: solver.set(mainStrat);break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),mainStrat));break;
@@ -274,9 +287,9 @@ public class SOP {
 				break;
 			default: throw new UnsupportedOperationException();
 		}
-//		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-//		PArc allArcs = new PArc(pengine, gc);
-//		solver.set(pengine.set(new Sort(allArcs).clearOut()));
+		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+		PArc allArcs = new PArc(pengine, gc);
+		solver.set(pengine.set(new Sort(allArcs).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
@@ -319,13 +332,12 @@ public class SOP {
 	public static void main(String[] args) {
 		TextWriter.clearFile(outFile);
 		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-		test();
-		System.exit(0);
+//		test();
 		String dir = "/Users/jfages07/github/In4Ga/ALL_sop";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		main_search = 0;
-		khun = true;
+		khun = false;
 		policy = 4;
 		configParameters(0);
 		for (String s : list) {
@@ -334,17 +346,17 @@ public class SOP {
 					loadInstance(dir + "/" + s);
 					if(n>0 && n<400){
 						bst = false;
-						configParameters((1<<allDiff));
-						solve();
+//						configParameters((1<<allDiff));
+//						solve();
 //						configParameters((1<<arbo)+(1<<allDiff));
 //						solve();
 //						configParameters((1<<rg)+(1<<allDiff));
 //						solve();
 //						bst = true;
-						configParameters((1<<allDiff)+(1<<rg));
-						solve();
-//						configParameters((1<<rg)+(1<<arbo)+(1<<allDiff));
+//						configParameters((1<<allDiff)+(1<<rg));
 //						solve();
+						configParameters((1<<rg)+(1<<arbo)+(1<<allDiff));
+						solve();
 					}
 				}
 		}
@@ -418,7 +430,6 @@ public class SOP {
 		distanceMatrix[5][4] = distanceMatrix[4][5] = 5;
 		distanceMatrix[3][6] = 4;
 		distanceMatrix[5][6] = 2;
-
 
 //		distanceMatrix[5][3] = -1;
 //		distanceMatrix[4][3] = -1;

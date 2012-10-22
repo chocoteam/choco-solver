@@ -137,6 +137,47 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 		return true;
 	}
 
+	public enum IncidentNodes{
+		PREDECESSORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getPredecessorsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(to,from,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(to,from,cause);
+			}
+		},
+		SUCCESSORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getSuccessorsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(from,to,cause);
+			}
+		},
+		NEIGHBORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getNeighborsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+				gv.removeArc(to,from,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(from,to,cause);
+				gv.enforceArc(to,from,cause);
+			}
+		};
+		public abstract ISet getSet(IGraph graph, int i);
+		public abstract void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
+		public abstract void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
+	}
+
 	//***********************************************************************************
 	// ACCESSORS
 	//***********************************************************************************

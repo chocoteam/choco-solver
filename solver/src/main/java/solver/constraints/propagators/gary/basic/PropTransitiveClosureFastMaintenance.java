@@ -39,7 +39,7 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**Propagator that maintains the transitive closure of a directed graph
+/**(incomplete) Propagator that maintains the transitive closure of a directed graph
  * No GAC, no complete checker neither, but fast
  * @author Jean-Guillaume Fages
  */
@@ -58,7 +58,7 @@ public class PropTransitiveClosureFastMaintenance extends Propagator<DirectedGra
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, boolean lightMaintenance, Solver solver, Constraint constraint) {
+	public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, Solver solver, Constraint constraint) {
 		super(new DirectedGraphVar[]{graph,transitiveClosure}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
         gdmG = (GraphDeltaMonitor) g.monitorDelta(this);

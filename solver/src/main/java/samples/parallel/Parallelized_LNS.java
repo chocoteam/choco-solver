@@ -29,8 +29,8 @@ package samples.parallel;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.propagation.IPropagationEngine;
@@ -148,8 +148,8 @@ public class Parallelized_LNS {
 		// constraints
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
 		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
 		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
 		solver.post(gc);
 		// config

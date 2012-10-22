@@ -37,8 +37,8 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
@@ -123,8 +123,8 @@ public class KTP_Graph_Bool {
 		// constraints
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
 		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));

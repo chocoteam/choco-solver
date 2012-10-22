@@ -40,7 +40,8 @@ import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.*;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
@@ -62,6 +63,7 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -226,10 +228,10 @@ public class ATSP {
 			succs[i] = preds[i] = 1;
 		}
 		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropAtMostNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtLeastNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtMostNPredecessors(graph,preds,gc,solver));
-		gc.addPropagators(new PropAtLeastNPredecessors(graph,preds,gc,solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -267,8 +269,8 @@ public class ATSP {
 				}
 			}
 			gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-			gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-			gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+			gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+			gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
 			gc.addPropagators(new PropCyclePathChanneling(graph, undi, gc, solver));
 		}
 		if(config.get(pos)){

@@ -29,12 +29,13 @@ package solver.constraints.gary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.PropKCliques;
-import solver.constraints.propagators.gary.PropTransitivity;
+import solver.constraints.propagators.gary.basic.PropTransitivity;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
-import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
-import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -71,8 +72,8 @@ public class GraphConstraintFactory {
 	 */
 	public static Constraint nTrees(DirectedGraphVar graph, IntVar n, Solver solver) {
 		Constraint tree = makeConstraint(solver);
-		tree.addPropagators(new PropAtMostNSuccessors(graph, 1, tree, solver));
-		tree.addPropagators(new PropAtLeastNSuccessors(graph,1, tree, solver));
+		tree.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
+		tree.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
 		tree.addPropagators(new PropNLoopsTree(graph, n, solver, tree));
 		tree.addPropagators(new PropNTree(graph,n,solver,tree));
 		return tree;

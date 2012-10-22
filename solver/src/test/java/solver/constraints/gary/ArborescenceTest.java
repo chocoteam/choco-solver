@@ -32,10 +32,12 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import static org.testng.Assert.assertEquals;
@@ -54,7 +56,13 @@ public class ArborescenceTest {
 			}
 		}
 		Constraint gc = GraphConstraintFactory.makeConstraint(s);
-		gc.addPropagators(new PropOnePredBut(g,0,gc,s));
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			preds[i] = 1;
+		}
+		preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS,preds,gc,s));
+		gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS,preds,gc,s));
 		if(naive){
 			gc.addPropagators(new PropArborescence_NaiveForm(g,0,gc,s));
 		}else{

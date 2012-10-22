@@ -40,6 +40,8 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
@@ -47,6 +49,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -144,8 +147,16 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             System.exit(0);
         }
         gc = GraphConstraintFactory.makeConstraint(solver);
-        gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
-        gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
         gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
     }
 

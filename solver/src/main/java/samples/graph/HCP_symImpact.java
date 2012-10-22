@@ -33,10 +33,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
@@ -88,14 +86,13 @@ public class HCP_symImpact {
 		outFile = "KING_TOUR.csv";
 		TextWriter.clearFile(outFile);
 		TextWriter.writeTextInto("instance;nbSols;nbFails;time;orientation;allDiffAC;\n", outFile);
+		alldifferentAC = true;
+		useRestarts = false;
 		for(int size=10; size<500;size+=10){
 			String s = "king_"+size+"x"+size;
 			System.out.println(s);
 			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
-			alldifferentAC = false;
 			solveUndirected(matrix,s);
-//			solveDirected(matrix,s);
-//			alldifferentAC = true;
 //			solveDirected(matrix,s);
 		}
 	}
@@ -110,12 +107,11 @@ public class HCP_symImpact {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		useRestarts = false;
+		alldifferentAC = true;
 		for (String s : list) {
 			if (s.contains(".hcp")){
 				boolean[][] matrix = HCP_Utils.parseTSPLIBInstance(dir + "/" + s);
-				alldifferentAC = false;
 				solveUndirected(matrix,s);
-//				alldifferentAC = true;
 //				solveDirected(matrix,s);
 			}
 		}
@@ -139,8 +135,8 @@ public class HCP_symImpact {
 		// constraints
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
 		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
@@ -153,7 +149,6 @@ public class HCP_symImpact {
 		}
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
-//		solver.findAllSolutions();
 		solver.findSolution();
 		checkUndirected(solver, undi);
 		//output
@@ -193,8 +188,16 @@ public class HCP_symImpact {
 		}
 		// constraints
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropOneSuccBut(dir, n - 1, gc, solver));
-		gc.addPropagators(new PropOnePredBut(dir, 0, gc, solver));
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(dir, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(dir, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(dir, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(dir, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
 		gc.addPropagators(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
 		if(alldifferentAC){
 			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
