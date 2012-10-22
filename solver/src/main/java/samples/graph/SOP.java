@@ -30,6 +30,8 @@ package samples.graph;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
+import samples.graph.input.ATSP_Utils;
+import samples.graph.input.SOP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
@@ -41,6 +43,10 @@ import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.degree.PropAtLeastNPredecessors;
+import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
+import solver.constraints.propagators.gary.degree.PropAtMostNPredecessors;
+import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosGraphWithPreds;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
@@ -50,7 +56,6 @@ import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -101,11 +106,12 @@ public class SOP {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	public static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
-	public static int NB_PARAM = 5;
+	private static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
+	private static int NB_PARAM = 5;
 	private static BitSet config = new BitSet(NB_PARAM);
-	public static boolean bst;
-	public static boolean khun;
+	private static boolean bst;
+	private static boolean khun;
+	private static int noVal;
 
 	public static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -122,7 +128,7 @@ public class SOP {
 	//***********************************************************************************
 
 	private static int main_search;
-	private static ATSP_heuristics heuristic;
+	private static int policy;
 	private static String[] searchMode = new String[]{"top-down","bottom-up","dichotomic"};
 
 	//***********************************************************************************
@@ -133,6 +139,7 @@ public class SOP {
 		createModel();
 		addPropagators();
 		configureAndSolve();
+		printOutput();
 	}
 
 	public static void createModel() {
@@ -140,21 +147,19 @@ public class SOP {
 		solver = new Solver();
 		initialUB = optimum;
 		System.out.println("initial UB : "+optimum);
-		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
+		graph = new DirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST,true);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
 			for (int i = 0; i < n - 1; i++) {
-				graph.getKernelGraph().activateNode(i);
 				for (int j = 1; j < n; j++) {
-					if (distanceMatrix[i][j] != -1) {
+					if (distanceMatrix[i][j] != noVal) {
 						graph.getEnvelopGraph().addArc(i, j);
 					}
 				}
 				graph.getEnvelopGraph().removeArc(i, i);
 			}
-			graph.getKernelGraph().activateNode(n-1);
-//			graph.getEnvelopGraph().removeArc(0, n-1);
-//			graph.getEnvelopGraph().removeArc(n-1,0);
+			graph.getEnvelopGraph().removeArc(0, n-1);
+			graph.getEnvelopGraph().removeArc(n-1,0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -164,9 +169,16 @@ public class SOP {
 
 	public static void addPropagators() {
 		// BASIC MODEL
-		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
-		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
-
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropAtMostNSuccessors(graph,succs,gc,solver));
+		gc.addPropagators(new PropAtLeastNSuccessors(graph,succs,gc,solver));
+		gc.addPropagators(new PropAtMostNPredecessors(graph,preds,gc,solver));
+		gc.addPropagators(new PropAtLeastNPredecessors(graph,preds,gc,solver));
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -262,7 +274,6 @@ public class SOP {
 				break;
 			default: throw new UnsupportedOperationException();
 		}
-
 //		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
 //		PArc allArcs = new PArc(pengine, gc);
 //		solver.set(pengine.set(new Sort(allArcs).clearOut()));
@@ -273,26 +284,15 @@ public class SOP {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 				System.out.println("obj after initial prop : "+totalCost);
-//				for(int i=0;i<n;i++){
-//					System.out.println(positions[i]);
-//				}
-//				System.exit(0);
 			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
-//		solver.findSolution();
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-//			throw new UnsupportedOperationException();
-		}
-		// OUTPUT
+	}
+
+	public static void printOutput() {
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
-//		int bestCost = totalCost.getLB();
-		int m = 0;
-		for(int i=0;i<n;i++){
-			m+=graph.getEnvelopGraph().getSuccessorsOf(i).getSize();
-		}
 		String configst = "";
 		for(int i=0;i<NB_PARAM;i++){
 			if(config.get(i)){
@@ -308,7 +308,7 @@ public class SOP {
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
+				+ (int)(solver.getMeasures().getTimeCount())+";" + bestCost+";"+searchMode[main_search]+";"+configst+";\n";
 		TextWriter.writeTextInto(txt, outFile);
 	}
 
@@ -317,45 +317,22 @@ public class SOP {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		resetFile();
-		bench();
-//		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
-//		testInstance(instance);
-//		trans();
-
-	}
-
-	public static void resetFile() {
 		TextWriter.clearFile(outFile);
 		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-	}
-	public static void reset(int[][] m, String s, int p, int cp, int ub) {
-		distanceMatrix = m;
-		instanceName = s;
-		policy = p;
-		n = distanceMatrix.length;
-		configParameters(cp);
-		optimum = initialUB = ub;
-	}
-
-	static int policy;
-	private static void bench() {
-//		test();
+		test();
+		System.exit(0);
 		String dir = "/Users/jfages07/github/In4Ga/ALL_sop";
 		File folder = new File(dir);
 		String[] list = folder.list();
-//		heuristic = ATSP_heuristics.enf_sparse;
 		main_search = 0;
 		khun = true;
 		policy = 4;
 		configParameters(0);
 		for (String s : list) {
-//			if(s.contains("ft53"))
 			if(!s.contains("43.1"))
-				if ((s.contains(".sop"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
-//				if(s.contains("p43.atsp"))System.exit(0);
+				if ((s.contains(".sop"))){
 					loadInstance(dir + "/" + s);
-					if(n>0 && n<400){// || s.contains("p43.atsp")){
+					if(n>0 && n<400){
 						bst = false;
 						configParameters((1<<allDiff));
 						solve();
@@ -374,63 +351,18 @@ public class SOP {
 	}
 
 	private static void loadInstance(String url) {
-		File file = new File(url);
-		try {
-			BufferedReader buf = new BufferedReader(new FileReader(file));
-			String line = buf.readLine();
-			instanceName = line.split(":")[1].replaceAll(" ", "");
-			System.out.println("parsing instance " + instanceName + "...");
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
-			n = Integer.parseInt(line.split(":")[1].replaceAll(" ", ""));
-			distanceMatrix = new int[n][n];
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
-			String[] lineNumbers;
-			for (int i = 0; i < n; i++) {
-				int nbSuccs = 0;
-				while (nbSuccs < n) {
-					line = buf.readLine();
-					line = line.replaceAll(" * ", " ");
-					lineNumbers = line.split(" ");
-					for (int j = 1; j < lineNumbers.length; j++) {
-						if (nbSuccs == n) {
-							i++;
-							if (i == n) break;
-							nbSuccs = 0;
-						}
-						distanceMatrix[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
-						nbSuccs++;
-					}
-				}
-			}
-			//TODO remove for atsp->tsp convertion
-			int maxVal = 0;
-			distanceMatrix[0][n-1] = -1;
-			for (int i = 0; i < n; i++) {
-				distanceMatrix[i][i] = -1;
-				for (int j = 0; j < n; j++) {
-					if (distanceMatrix[i][j] > maxVal) {
-						maxVal = distanceMatrix[i][j];
-					}
-				}
-			}
-			line = buf.readLine();
-			line = buf.readLine();
-			initialUB = maxVal*n;
-			optimum = Integer.parseInt(line.replaceAll(" ", ""));
-			System.out.println(optimum);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
+		SOP_Utils inst = new SOP_Utils();
+		inst.loadTSPLIBInstance(url);
+		n = inst.n;
+		instanceName = inst.instanceName;
+		distanceMatrix = inst.distanceMatrix;
+		noVal = inst.noVal;
+		initialUB = inst.initialUB;
+		optimum = inst.optimum;
 	}
 
 	//***********************************************************************************
-	// RECORDING RESULTS
+	// Search n Test
 	//***********************************************************************************
 
 	private static class MySearch extends AbstractStrategy<IntVar> {

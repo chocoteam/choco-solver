@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.degree;
+package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
@@ -37,68 +37,79 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**
- * Propagator that ensures that a node has at most N successors
- *
+/**Propagator that maintains the transitive closure of a directed graph
+ * No GAC, no complete checker neither, but fast
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNSuccessors extends Propagator<DirectedGraphVar> {
+public class PropTransitiveClosureFastMaintenance extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private DirectedGraphVar g;
-    GraphDeltaMonitor gdm;
-	private PairProcedure enf_proc;
-	private int[] n_Succs;
+	private DirectedGraphVar g,tc;
+    GraphDeltaMonitor gdmG,gdmTC;
+	private PairProcedure arcEnforcedInG;
+	private PairProcedure arcRemovedFromTC;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNSuccessors(DirectedGraphVar graph, int nbSuccs, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, boolean lightMaintenance, Solver solver, Constraint constraint) {
+		super(new DirectedGraphVar[]{graph,transitiveClosure}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		int n = g.getEnvelopGraph().getNbNodes();
-		n_Succs = new int[n];
-		for(int i=0;i<n;i++){
-			n_Succs[i] = nbSuccs;
-		}
-		enf_proc = new ArcEnf();
-	}
-
-	public PropAtMostNSuccessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
-		g = graph;
-        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		n_Succs = nbSuccs;
-		enf_proc = new ArcEnf();
+        gdmG = (GraphDeltaMonitor) g.monitorDelta(this);
+		tc = transitiveClosure;
+		gdmTC = (GraphDeltaMonitor) transitiveClosure.monitorDelta(this);
+		final PropTransitiveClosureFastMaintenance cause = this;
+		arcEnforcedInG = new PairProcedure() {
+			@Override
+			public void execute(int from, int to) throws ContradictionException {
+				tc.enforceArc(from,to,cause);
+			}
+		};
+		arcRemovedFromTC = new PairProcedure() {
+			@Override
+			public void execute(int from, int to) throws ContradictionException {
+				g.removeArc(from, to, cause);
+			}
+		};
 	}
 
 	//***********************************************************************************
 	// PROPAGATIONS
 	//***********************************************************************************
 
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-		ISet act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			checkNode(node);
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int n = g.getEnvelopGraph().getNbNodes();
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(g.getKernelGraph().arcExists(i,j)){
+					tc.enforceArc(i, j, this);
+				}else if(!tc.getEnvelopGraph().arcExists(i,j)){
+					g.removeArc(i, j, this);
+				}
+			}
 		}
-		gdm.unfreeze();
+		gdmG.unfreeze();
+		gdmTC.unfreeze();
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		gdm.freeze();
-		gdm.forEachArc(enf_proc, EventType.ENFORCEARC);
-        gdm.unfreeze();
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(idxVarInProp==0){
+			gdmG.freeze();
+			gdmG.forEachArc(arcEnforcedInG, EventType.ENFORCEARC);
+			gdmG.unfreeze();
+		}else{
+			gdmTC.freeze();
+			gdmTC.forEachArc(arcRemovedFromTC, EventType.REMOVEARC);
+			gdmTC.unfreeze();
+		}
 	}
 
 	//***********************************************************************************
@@ -107,52 +118,15 @@ public class PropAtMostNSuccessors extends Propagator<DirectedGraphVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		if(vIdx==0){
+			return EventType.ENFORCEARC.mask;
+		}else{
+			return EventType.REMOVEARC.mask;
+		}
 	}
 
 	@Override
 	public ESat isEntailed() {
-		ISet act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getSuccessorsOf(node).getSize()>n_Succs[node]){
-				return ESat.FALSE;
-			}
-		}
-		act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getSuccessorsOf(node).getSize()>n_Succs[node]){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
-
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
-	/** When a node has more than N successors then it must be removed,
-	 *  If it has N successors in the kernel then other incident edges
-	 *  should be removed */
-	private void checkNode(int i) throws ContradictionException {
-		ISet ker = g.getKernelGraph().getSuccessorsOf(i);
-		ISet env = g.getEnvelopGraph().getSuccessorsOf(i);
-		int size = ker.getSize();
-		if(size>n_Succs[i]){
-			g.removeNode(i, this);
-		}else if (size==n_Succs[i] && env.getSize()>size){
-			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
-				if(!ker.contain(next)){
-					g.removeArc(i, next, this);
-				}
-			}
-		}
-	}
-	
-	private class ArcEnf implements PairProcedure{
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			checkNode(i);
-		}
+		return ESat.UNDEFINED;
 	}
 }

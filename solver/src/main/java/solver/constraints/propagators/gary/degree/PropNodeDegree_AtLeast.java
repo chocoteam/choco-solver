@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,59 +38,92 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.setDataStructures.ISet;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.IGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 /**
- * Propagator that ensures that a node has at most N predecessors
+ * Propagator that ensures that a node has at most N successors/predecessors/neighbors
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
+public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private DirectedGraphVar g;
+	private GraphVar g;
     GraphDeltaMonitor gdm;
 	private PairProcedure enf_proc;
-	private int[] n_Preds;
+	private int[] degrees;
+	private IncidentNodes target;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNPredecessors(DirectedGraphVar graph, int nbPreds, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
-		g = graph;
-        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
+	public PropNodeDegree_AtLeast make(DirectedGraphVar graph, IncidentNodes setType, int degree, Constraint constraint, Solver solver){
 		int n = g.getEnvelopGraph().getNbNodes();
-		n_Preds = new int[n];
+		int[] degrees = new int[n];
 		for(int i=0;i<n;i++){
-			n_Preds[i] = nbPreds;
+			degrees[i] = degree;
 		}
-		enf_proc = new ArcEnf();
+		return new PropNodeDegree_AtLeast(graph,setType,degrees,constraint,solver);
 	}
 
-	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbPreds, Constraint constraint, Solver solver) {
+	public PropNodeDegree_AtLeast(DirectedGraphVar graph, IncidentNodes setType, int[] degrees, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		target = setType;
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		n_Preds = nbPreds;
-		enf_proc = new ArcEnf();
+		this.degrees = degrees;
+		switch (target){
+			case SUCCESSORS:enf_proc = new PairProcedure(){
+				public void execute(int i, int j) throws ContradictionException {
+					checkAtMost(i);
+				}
+			};break;
+			case PREDECESSORS:enf_proc = new PairProcedure(){
+				public void execute(int i, int j) throws ContradictionException {
+					checkAtMost(j);
+				}
+			};break;
+			case NEIGHBORS:enf_proc = new PairProcedure(){
+				public void execute(int i, int j) throws ContradictionException {
+					checkAtMost(i);
+					checkAtMost(j);
+				}
+			};break;
+			default:throw new UnsupportedOperationException();
+		}
+	}
+
+	public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int[] degrees, Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		target = IncidentNodes.NEIGHBORS;
+		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
+		this.degrees = degrees;
+		enf_proc = new PairProcedure(){
+			public void execute(int i, int j) throws ContradictionException {
+				checkAtMost(i);
+				checkAtMost(j);
+			}
+		};
 	}
 
 	//***********************************************************************************
 	// PROPAGATIONS
 	//***********************************************************************************
 
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		ISet act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			checkNode(node);
+			checkAtMost(node);
 		}
 		gdm.unfreeze();
 	}
@@ -112,17 +146,13 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		ISet act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getPredecessorsOf(node).getSize()>n_Preds[node]){
+		for(int i=0;i<g.getEnvelopGraph().getNbNodes();i++){
+			if(target.getSet(g.getEnvelopGraph(),i).getSize()>degrees[i]){
 				return ESat.FALSE;
 			}
 		}
-		act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getPredecessorsOf(node).getSize()>n_Preds[node]){
-				return ESat.UNDEFINED;
-			}
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
 		}
 		return ESat.TRUE;
 	}
@@ -131,28 +161,52 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 	// PROCEDURES
 	//***********************************************************************************
 
-	/** When a node has more than N predecessors then it must be removed,
-	 *  If it has N predecessors in the kernel then other incident edges
+	/** When a node has more than N successors/predecessors/neighbors then it must be removed,
+	 *  If it has N successors/predecessors/neighbors in the kernel then other incident edges
 	 *  should be removed */
-	private void checkNode(int i) throws ContradictionException {
-		ISet ker = g.getKernelGraph().getPredecessorsOf(i);
-		ISet env = g.getEnvelopGraph().getPredecessorsOf(i);
+	private void checkAtMost(int i) throws ContradictionException {
+		ISet ker = target.getSet(g.getKernelGraph(), i);
+		ISet env = target.getSet(g.getEnvelopGraph(),i);
 		int size = ker.getSize();
-		if(size>n_Preds[i]){
+		if(size>degrees[i]){
 			g.removeNode(i, this);
-		}else if (size==n_Preds[i] && env.getSize()>size){
-			for(int p = env.getFirstElement(); p>=0; p = env.getNextElement()){
-				if(!ker.contain(p)){
-					g.removeArc(p,i, this);
+		}else if (size==degrees[i] && env.getSize()>size){
+			for(int other = env.getFirstElement(); other>=0; other = env.getNextElement()){
+				if(!ker.contain(other)){
+					g.removeArc(i, other, this);
+					target.remove(g,i,other,this);
 				}
 			}
 		}
 	}
-	
-	private class ArcEnf implements PairProcedure{
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			checkNode(j);
-		}
+
+	public enum IncidentNodes{
+		PREDECESSORS(){
+			protected ISet getSet(IGraph graph, int i){
+				return graph.getPredecessorsOf(i);
+			}
+			protected void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(to,from,cause);
+			}
+		},
+		SUCCESSORS(){
+			protected ISet getSet(IGraph graph, int i){
+				return graph.getSuccessorsOf(i);
+			}
+			protected void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+			}
+		},
+		NEIGHBORS(){
+			protected ISet getSet(IGraph graph, int i){
+				return graph.getNeighborsOf(i);
+			}
+			protected void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+				gv.removeArc(to,from,cause);
+			}
+		};
+		protected abstract ISet getSet(IGraph graph, int i);
+		protected abstract void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
 	}
 }
