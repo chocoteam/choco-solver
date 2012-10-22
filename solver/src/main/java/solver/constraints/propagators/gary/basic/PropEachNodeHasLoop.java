@@ -39,7 +39,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that each node of the given subset of nodes has a loop

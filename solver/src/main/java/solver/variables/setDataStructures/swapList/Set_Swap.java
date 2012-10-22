@@ -25,10 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.setDataStructures.swapList;
+
+import solver.variables.setDataStructures.ISet;
 
 /**
- * List of m elements based on Array int_swaping with an additionnal array
+ * List of m elements based on Array int_swaping
  * add : O(1)
  * testPresence: O(1)
  * remove: O(1)
@@ -37,69 +39,71 @@ package solver.variables.graph.graphStructure.adjacencyList;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class ArraySwapList_Array extends ArraySwapList{
+public abstract class Set_Swap implements ISet {
 
-	protected int[] map;
+	protected int arrayLength,sizeMax,currentIdx,size;
+	protected int[] array;
 
-	public ArraySwapList_Array(int n) {
-		super(n);
-		map = new int[n];
-		for(int i=0;i<n;i++){
-			map[i]=-1;
-		}
+	public Set_Swap(int n) {
+		size=0;
+		sizeMax = n;
+		arrayLength = 16;
+		array = new int[arrayLength];
 	}
 
 	@Override
-	public boolean contain(int element) {
-		if(map[element]>=0){
-			return map[element]<getSize() && array[map[element]]==element;
-		}
-		return false;
+	public boolean isEmpty() {
+		return getSize() == 0;
 	}
 
 	@Override
-	public void add(int element) {
-		if(contain(element)){
-			Exception e = new Exception("element already in list");
-			e.printStackTrace();
-			System.exit(0);
-			return;
-		}
+	public int getSize() {
+		return size;
+	}
+
+	protected void setSize(int s){
+		size = s;
+	}
+
+	protected void addSize(int delta){
+		size += delta;
+	}
+
+	@Override
+	public String toString() {
 		int size = getSize();
-		if(getSize()==arrayLength){
-			int[] tmp = array;
-			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
-			array = new int[ns];
-			arrayLength = ns;
-			System.arraycopy(tmp,0,array,0,size);
+		if(size==0){
+			return "empty";
 		}
-		array[size] = element;
-		map[element] = size;
-		addSize(1);
+		String res = "";
+		for(int i=0;i<size-1;i++){
+			res += array[i]+" -> ";
+		}
+		res += array[size-1];
+		return res;
 	}
 
 	@Override
-	public boolean remove(int element) {
-		int size = getSize();
-		if(map[element]>=0){
-			if(size==1){
-				setSize(0);
-				return true;
-			}
-			int idx = map[element];
-			if(idx<size){
-				int replacer = array[size-1];
-				map[replacer] = idx;
-				array[idx]	  = replacer;
-				map[element] = size-1;
-				array[size-1] = element;
-				addSize(-1);
-				if(idx==currentIdx){
-					currentIdx--;
-				}
-				return true;
-			}
+	public void clear() {
+		setSize(0);
+	}
+
+	// --- Iterations	
+	@Override
+	public int getFirstElement() {
+		if(getSize()==0){
+			return -1;
 		}
-		return false;
+		currentIdx = 0;
+		return array[currentIdx];
+	}
+
+	@Override
+	public int getNextElement() {
+		currentIdx++;
+		if(currentIdx>=getSize()){
+			return -1;
+		}
+		return array[currentIdx];
 	}
 }

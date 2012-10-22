@@ -28,7 +28,7 @@
 package solver.variables.graph.directedGraph;
 
 import solver.variables.graph.IGraph;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * @author Jean-Guillaume Fages

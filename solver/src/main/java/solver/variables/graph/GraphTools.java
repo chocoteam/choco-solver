@@ -31,7 +31,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.matrix.Set_BitSet;
 
 /**Class containing some static methods to manipulate graphs
  * @author Jean-Guillaume Fages */
@@ -195,7 +196,7 @@ public class GraphTools {
 	 * this new INeighbors is a BitSet to avoid duplicated elements
 	 */
 	public static ISet mergeNeighborhoods(ISet n1, ISet n2, int nbNodes){
-		BitSetNeighbors merged = new BitSetNeighbors(nbNodes);
+		Set_BitSet merged = new Set_BitSet(nbNodes);
 		for(int j=n1.getFirstElement(); j>=0;j=n1.getNextElement()){
 			merged.add(j);
 		}

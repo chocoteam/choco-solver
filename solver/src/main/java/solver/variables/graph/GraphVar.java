@@ -41,6 +41,7 @@ import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.view.IView;
 
 

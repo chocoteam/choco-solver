@@ -25,11 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+package solver.variables.setDataStructures.swapList;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 
 /**
  * Backtrable List of m elements based on Array int_swaping
@@ -41,25 +40,25 @@ import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class StoredArraySwapList_Array_AddOnly extends ArraySwapList_Array {
+public class Set_Std_Swap_Hash_RemoveOnly extends Set_Swap_Hash {
 
 	protected IStateInt size;
 	protected IEnvironment env;
 
-	public StoredArraySwapList_Array_AddOnly(IEnvironment e, int n) {
+	public Set_Std_Swap_Hash_RemoveOnly(IEnvironment e, int n) {
 		super(n);
 		env = e;
 		size = e.makeInt(0);
 	}
 
 	@Override
-	public boolean remove(int element) {
+	public void add(int element) {
 		if(env.getWorldIndex()!=0){
-			Exception e = new Exception("cannot remove elements after world 0");
+			Exception e = new Exception("cannot add elements after world 0");
 			e.printStackTrace();
 			System.exit(0);
 		}
-		return super.remove(element);
+		super.add(element);
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 
 import java.util.BitSet;

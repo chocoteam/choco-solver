@@ -39,8 +39,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.util.BitSet;
 
 public class PropNoTriangle extends Propagator<UndirectedGraphVar> {

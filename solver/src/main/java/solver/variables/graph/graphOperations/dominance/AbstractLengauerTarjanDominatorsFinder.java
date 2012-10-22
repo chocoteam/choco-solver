@@ -29,7 +29,7 @@ package solver.variables.graph.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 

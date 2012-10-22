@@ -37,7 +37,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 public class PropMaxDiameter extends Propagator<GraphVar> {

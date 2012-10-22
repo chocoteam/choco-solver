@@ -30,7 +30,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Random;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 public class RandomArc extends ArcStrategy<GraphVar>{
 

@@ -25,85 +25,77 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
-
-import solver.variables.graph.ISet;
-
 /**
- * List of m elements based on Array int_swaping
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
  * Created by IntelliJ IDEA.
  * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * Date: 21/10/12
+ * Time: 18:43
  */
-public abstract class ArraySwapList implements ISet {
 
-	protected int arrayLength,sizeMax,currentIdx,size;
-	protected int[] array;
+package solver.variables.setDataStructures;
 
-	public ArraySwapList(int n) {
-		size=0;
-		sizeMax = n;
-		arrayLength = 16;
-		array = new int[arrayLength];
+public class FullSet implements ISet{
+
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
+	int n;
+	int current;
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	public FullSet(int n){
+		this.n = n;
+		current = 0;
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	@Override
+	public void add(int element) {}
+
+	@Override
+	public boolean remove(int element) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return true;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return getSize() == 0;
+		return false;
 	}
 
 	@Override
 	public int getSize() {
-		return size;
-	}
-
-	protected void setSize(int s){
-		size = s;
-	}
-
-	protected void addSize(int delta){
-		size += delta;
-	}
-
-	@Override
-	public String toString() {
-		int size = getSize();
-		if(size==0){
-			return "empty";
-		}
-		String res = "";
-		for(int i=0;i<size-1;i++){
-			res += array[i]+" -> ";
-		}
-		res += array[size-1];
-		return res;
+		return n;
 	}
 
 	@Override
 	public void clear() {
-		setSize(0);
+		throw new UnsupportedOperationException();
 	}
 
-	// --- Iterations	
 	@Override
 	public int getFirstElement() {
-		if(getSize()==0){
-			return -1;
-		}
-		currentIdx = 0;
-		return array[currentIdx];
+		current = 0;
+		return 0;
 	}
 
 	@Override
 	public int getNextElement() {
-		currentIdx++;
-		if(currentIdx>=getSize()){
+		current++;
+		if(current<n)
+			return current;
+		else
 			return -1;
-		}
-		return array[currentIdx];
 	}
 }

@@ -46,7 +46,7 @@ public class TSP_Utils {
 	// GENERATOR
 	//***********************************************************************************
 
-	public static int[][] generate(int n, int s, int max) {
+	public static int[][] generateRandomCosts(int n, int s, int max) {
 		Random rd = new Random(s);
 		int[][] costs = new int[n][n];
 		for(int i=0;i<n;i++){

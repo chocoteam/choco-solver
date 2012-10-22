@@ -30,12 +30,15 @@ package solver.variables.graph.undirectedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.ISet;
-import solver.variables.graph.graphStructure.FullSet;
-import solver.variables.graph.graphStructure.adjacencyList.*;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.FullSet;
+import solver.variables.setDataStructures.linkedlist.Set_2LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_2LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_LinkedList;
+import solver.variables.setDataStructures.swapList.*;
+import solver.variables.setDataStructures.matrix.Set_BitSet;
+import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -75,47 +78,47 @@ public class UndirectedGraph implements IGraph {
 		switch (type) {
 			// SWAP ARRAYS
 			case ENVELOPE_SWAP_ARRAY:
-				neighbors = new StoredArraySwapList_Array_RemoveOnly[nbits];
+				neighbors = new Set_Std_Swap_Array_RemoveOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_Array_RemoveOnly(env,nbits);
+					neighbors[i] = new Set_Std_Swap_Array_RemoveOnly(env,nbits);
 				}
 				break;
 			case ENVELOPE_SWAP_HASH:
-				neighbors = new StoredArraySwapList_HashMap_RemoveOnly[nbits];
+				neighbors = new Set_Std_Swap_Hash_RemoveOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_HashMap_RemoveOnly(env,nbits);
+					neighbors[i] = new Set_Std_Swap_Hash_RemoveOnly(env,nbits);
 				}
 				break;
 			case KERNEL_SWAP_ARRAY:
-				neighbors = new StoredArraySwapList_Array_AddOnly[nbits];
+				neighbors = new Set_Std_Swap_Array_AddOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_Array_AddOnly(env,nbits);
+					neighbors[i] = new Set_Std_Swap_Array_AddOnly(env,nbits);
 				}
 				break;
 			case KERNEL_SWAP_HASH:
-				neighbors = new StoredArraySwapList_HashMap_AddOnly[nbits];
+				neighbors = new Set_Std_Swap_Hash_AddOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_HashMap_AddOnly(env,nbits);
+					neighbors[i] = new Set_Std_Swap_Hash_AddOnly(env,nbits);
 				}
 				break;
 			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
-				this.neighbors = new StoredDoubleIntLinkedList[nbits];
+				this.neighbors = new Set_Std_2LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new StoredDoubleIntLinkedList(env);
+					this.neighbors[i] = new Set_Std_2LinkedList(env);
 				}
 				break;
 			case LINKED_LIST:
-				this.neighbors = new StoredIntLinkedList[nbits];
+				this.neighbors = new Set_Std_LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new StoredIntLinkedList(env);
+					this.neighbors[i] = new Set_Std_LinkedList(env);
 				}
 				break;
 			// MATRIX
 			case MATRIX:
-				this.neighbors = new StoredBitSetNeighbors[nbits];
+				this.neighbors = new Set_Std_BitSet[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new StoredBitSetNeighbors(env,nbits);
+					this.neighbors[i] = new Set_Std_BitSet(env,nbits);
 				}
 				break;
 			default:
@@ -124,7 +127,7 @@ public class UndirectedGraph implements IGraph {
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
 		}else{
-			this.nodes = new StoredBitSetNeighbors(env, nbits);
+			this.nodes = new Set_Std_BitSet(env, nbits);
 		}
 	}
 
@@ -142,37 +145,37 @@ public class UndirectedGraph implements IGraph {
 			case KERNEL_SWAP_ARRAY:
 			case ENVELOPE_SWAP_ARRAY:
 			case SWAP_ARRAY:
-				neighbors = new ArraySwapList_Array[nbits];
+				neighbors = new Set_Swap_Array[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new ArraySwapList_Array(nbits);
+					neighbors[i] = new Set_Swap_Array(nbits);
 				}
 				break;
 			case KERNEL_SWAP_HASH:
 			case ENVELOPE_SWAP_HASH:
 			case SWAP_HASH:
-				neighbors = new ArraySwapList_HashMap[nbits];
+				neighbors = new Set_Swap_Hash[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new ArraySwapList_HashMap(nbits);
+					neighbors[i] = new Set_Swap_Hash(nbits);
 				}
 				break;
 			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
-				this.neighbors = new IntDoubleLinkedList[nbits];
+				this.neighbors = new Set_2LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new IntDoubleLinkedList();
+					this.neighbors[i] = new Set_2LinkedList();
 				}
 				break;
 			case LINKED_LIST:
-				this.neighbors = new IntLinkedList[nbits];
+				this.neighbors = new Set_LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new IntLinkedList();
+					this.neighbors[i] = new Set_LinkedList();
 				}
 				break;
 			// MATRIX
 			case MATRIX:
-				this.neighbors = new BitSetNeighbors[nbits];
+				this.neighbors = new Set_BitSet[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new BitSetNeighbors(nbits);
+					this.neighbors[i] = new Set_BitSet(nbits);
 				}
 				break;
 			default:
@@ -181,7 +184,7 @@ public class UndirectedGraph implements IGraph {
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
 		}else{
-			this.nodes = new BitSetNeighbors(nbits);
+			this.nodes = new Set_BitSet(nbits);
 		}
 	}
 

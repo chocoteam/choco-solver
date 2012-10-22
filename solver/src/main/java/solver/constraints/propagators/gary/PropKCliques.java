@@ -39,7 +39,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**Propagator that ensures that the final graph consists in K cliques

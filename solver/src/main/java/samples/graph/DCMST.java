@@ -31,7 +31,9 @@ package samples.graph;
 //import ilog.cplex.*;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
-		import solver.Solver;
+import samples.graph.input.HCP_Utils;
+import samples.graph.output.TextWriter;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
@@ -64,9 +66,10 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
 		import solver.variables.graph.GraphType;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 		import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 		import java.util.BitSet;
 import java.util.LinkedList;
@@ -119,8 +122,8 @@ public class DCMST {
 		}else{
 			search = 1;
 		}
-		HCP_Parser.clearFile(outFile = type+"botup_minCostTieBreak_s"+search+".csv");
-		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
+		TextWriter.clearFile(outFile = type + "botup_minCostTieBreak_s" + search + ".csv");
+		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
 		File folder = new File(dir+"/"+type);
 		String[] list = folder.list();
 		nMin = 100;
@@ -167,8 +170,8 @@ public class DCMST {
 		}else{
 			search = 1;
 		}
-		HCP_Parser.clearFile(outFile);
-		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
+		TextWriter.clearFile(outFile);
+		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
 		File folder = new File(dir+"/"+type);
 		String[] list = folder.list();
 		nMin = 100;
@@ -192,8 +195,8 @@ public class DCMST {
 
 
 	private static void out(String s){
-		HCP_Parser.clearFile(s);
-		HCP_Parser.writeTextInto("1\n\n", s);
+		TextWriter.clearFile(s);
+		TextWriter.writeTextInto("1\n\n", s);
 		final UndirectedGraph undi = new UndirectedGraph(n, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			for(int j=i+1;j<n;j++){
@@ -207,12 +210,12 @@ public class DCMST {
 			m+=undi.getSuccessorsOf(i).getSize();
 		}
 		m/=2;
-		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
+		TextWriter.writeTextInto(n + "\t" + m + "\n", s);
 		String deg = "";
 		for(int i=0;i<n;i++){
 			deg += dMax[i]+"\n";
 		}
-		HCP_Parser.writeTextInto(deg, s);
+		TextWriter.writeTextInto(deg, s);
 		for(int i=0;i<n;i++){
 			ISet nei = undi.getSuccessorsOf(i);
 			String neist = "";
@@ -220,24 +223,24 @@ public class DCMST {
 				if(i<j)
 					neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
 			}
-			HCP_Parser.writeTextInto(neist, s);
+			TextWriter.writeTextInto(neist, s);
 		}
 	}
 
 	private static void setRCInput(UndirectedGraphVar g, String s){
-		HCP_Parser.clearFile(s);
-		HCP_Parser.writeTextInto("1\n\n", s);
+		TextWriter.clearFile(s);
+		TextWriter.writeTextInto("1\n\n", s);
 		int m = 0;
 		for(int i=0;i<n;i++){
 			m+=g.getEnvelopGraph().getSuccessorsOf(i).getSize();
 		}
 		m/=2;
-		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
+		TextWriter.writeTextInto(n + "\t" + m + "\n", s);
 		String deg = "";
 		for(int i=0;i<n;i++){
 			deg += dMax[i]+"\n";
 		}
-		HCP_Parser.writeTextInto(deg, s);
+		TextWriter.writeTextInto(deg, s);
 		for(int i=0;i<n;i++){
 			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			String neist = "";
@@ -245,7 +248,7 @@ public class DCMST {
 				if(i<j)
 					neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
 			}
-			HCP_Parser.writeTextInto(neist, s);
+			TextWriter.writeTextInto(neist, s);
 		}
 	}
 
@@ -1154,7 +1157,7 @@ public class DCMST {
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
 				+ solver.getMeasures().getNodeCount() + ";"+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost +";"+bestLB+";"+bestUB+";"+search+";\n";
-		HCP_Parser.writeTextInto(txt, outFile);
+		TextWriter.writeTextInto(txt, outFile);
 	}
 
 	private static class MST_MinDeg extends ArcStrategy<UndirectedGraphVar>{

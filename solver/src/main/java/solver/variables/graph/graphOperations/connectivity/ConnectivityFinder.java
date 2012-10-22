@@ -30,7 +30,7 @@ package solver.variables.graph.graphOperations.connectivity;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 /**Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
  * it uses Tarjan algorithm in a non recursive way and can be performed in O(M+N) time c.f. Gondrand Minoux

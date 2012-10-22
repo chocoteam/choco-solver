@@ -30,7 +30,7 @@ package solver.search.strategy.assignments;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 import java.io.Serializable;
 

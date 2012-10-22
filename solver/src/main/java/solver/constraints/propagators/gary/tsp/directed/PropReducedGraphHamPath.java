@@ -46,12 +46,12 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_2LinkedList;
 
 import java.util.BitSet;
 
@@ -109,7 +109,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 			sccFirst[i] = environment.makeInt(-1);
 			sccNext[i]  = environment.makeInt(-1);
 			G_R.getActiveNodes().remove(i);
-			mates[i] = new StoredDoubleIntLinkedList(environment);
+			mates[i] = new Set_Std_2LinkedList(environment);
 		}
 		arcRemoved = new RemArc(this);
 		sccComputed = new BitSet(n);

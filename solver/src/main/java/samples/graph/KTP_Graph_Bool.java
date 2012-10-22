@@ -72,7 +72,7 @@ public class KTP_Graph_Bool {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 100000;
+	private static final long TIMELIMIT = 10000;
 	private static final int MAX_SIZE = 200000;
 	private static String outFile;
 	private static Solver solver;
@@ -114,7 +114,6 @@ public class KTP_Graph_Bool {
 		// variables
 		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
-			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
 				if(matrix[i][j]){
 					undi.getEnvelopGraph().addEdge(i,j);
@@ -339,6 +338,10 @@ public class KTP_Graph_Bool {
 			throw new UnsupportedOperationException();
 		}
 	}
+
+	//***********************************************************************************
+	// PROPAGATORS
+	//***********************************************************************************
 
 	private static class PropBoolNoSubtour extends Propagator<BoolVar> {
 

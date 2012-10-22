@@ -25,51 +25,75 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+package solver.variables.setDataStructures.matrix;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
+import java.util.BitSet;
+import solver.variables.setDataStructures.ISet;
 
 /**
- * Backtrable List of m elements based on Array int_swaping
- * add : O(1) only at root node!
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * User: chameau
+ * Date: 9 févr. 2011
  */
-public class StoredArraySwapList_HashMap_RemoveOnly extends ArraySwapList_HashMap{
+public class Set_BitSet extends BitSet implements ISet {
 
-	protected IStateInt size;
-	protected IEnvironment env;
+	private int current;//enables to iterate
+	private int card;	// enable to get the cardinality in O(1)
+    
+	public Set_BitSet(int nbits) {
+        super(nbits);
+        card = 0;
+        current = 0;
+    }
 
-	public StoredArraySwapList_HashMap_RemoveOnly(IEnvironment e, int n) {
-		super(n);
-		env = e;
-		size = e.makeInt(0);
+    @Override
+    public void add(int element) {
+    	if(!get(element)){
+    		card++;
+            this.set(element, true);
+    	}
+    }
+
+    @Override
+    public boolean remove(int element) {
+        boolean isIn = this.get(element);
+        if (isIn) {
+            this.set(element, false);
+            card--;
+        }
+        return isIn;
+    }
+
+    @Override
+    public boolean contain(int element) {
+        return this.get(element);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.cardinality() == 0;
+    }
+
+    @Override
+    public int getSize() {
+        return this.card;
+    }
+
+	@Override
+	public int getFirstElement() {
+		current = nextSetBit(0);
+		return current;
 	}
 
 	@Override
-	public void add(int element) {
-		if(env.getWorldIndex()!=0){
-			Exception e = new Exception("cannot add elements after world 0");
-			e.printStackTrace();
-			System.exit(0);
-		}
-		super.add(element);
+	public int getNextElement() {
+		current = nextSetBit(current+1);
+		return current;
 	}
 
 	@Override
-	public int getSize(){
-		return size.get();
-	}
-	protected void setSize(int s){
-		size.set(s);
-	}
-	protected void addSize(int delta){
-		size.add(delta);
+	public void clear() {
+		card = 0;
+		super.clear();
 	}
 }

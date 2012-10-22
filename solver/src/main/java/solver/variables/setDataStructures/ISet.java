@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables.setDataStructures;
 
 /**Class representing a set (of nodes)
  * Created by IntelliJ IDEA.

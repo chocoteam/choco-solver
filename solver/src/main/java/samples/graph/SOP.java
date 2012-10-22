@@ -30,6 +30,7 @@ package samples.graph;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
+import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -50,17 +51,15 @@ import solver.objective.strategies.Dichotomic_Minimization;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
@@ -252,7 +251,8 @@ public class SOP {
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
-		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy,false), GraphStrategy.NodeArcPriority.ARCS);
+		GraphStrategies mainStrat = new GraphStrategies(graph,distanceMatrix,relax);
+		mainStrat.configure(policy,true,true,true);
 //		mainStrat = StrategyFactory.ABSrandom(positions,solver,0.999d, 0.2d, 8, 1.1d, 1, 0);
 //		mainStrat = new MySearch(positions,solver);
 		switch (main_search){
@@ -309,7 +309,7 @@ public class SOP {
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
-		writeTextInto(txt, outFile);
+		TextWriter.writeTextInto(txt, outFile);
 	}
 
 	//***********************************************************************************
@@ -326,8 +326,8 @@ public class SOP {
 	}
 
 	public static void resetFile() {
-		clearFile(outFile);
-		writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+		TextWriter.clearFile(outFile);
+		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
 	}
 	public static void reset(int[][] m, String s, int p, int cp, int ub) {
 		distanceMatrix = m;
@@ -432,27 +432,6 @@ public class SOP {
 	//***********************************************************************************
 	// RECORDING RESULTS
 	//***********************************************************************************
-
-	public static void writeTextInto(String text, String file) {
-		try {
-			FileWriter out = new FileWriter(file, true);
-			out.write(text);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void clearFile(String file) {
-		try {
-			FileWriter out = new FileWriter(file, false);
-			out.write("");
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	private static class MySearch extends AbstractStrategy<IntVar> {
 		private PoolManager<FastDecision> pool;

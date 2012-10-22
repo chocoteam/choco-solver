@@ -28,8 +28,6 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
-import samples.graph.GraphStrategies;
-import samples.graph.TSP_ATSP.ATSP_ISMP;
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Solver;
@@ -95,7 +93,6 @@ public class TSP {
 		allDiffAC = false;
 		search = 0;
 		policy = 8;
-		ATSP_ISMP.resetFile();
 		for (String s : list) {
 //			if(s.contains("pr299.tsp"))
 				if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){

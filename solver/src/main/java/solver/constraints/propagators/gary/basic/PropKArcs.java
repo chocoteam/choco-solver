@@ -41,7 +41,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K arcs/edges belong to the final graph

@@ -27,6 +27,8 @@
 
 package solver.variables.graph;
 
+import solver.variables.setDataStructures.ISet;
+
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
  * 

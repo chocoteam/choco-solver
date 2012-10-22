@@ -35,7 +35,6 @@
 package solver.objective.strategies;
 
 import choco.kernel.common.util.PoolManager;
-import samples.graph.HCP_Parser;
 import solver.objective.MinObjectiveManager;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;

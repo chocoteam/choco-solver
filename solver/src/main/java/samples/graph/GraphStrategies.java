@@ -118,11 +118,6 @@ public class GraphStrategies extends GraphStrategy {
 //		}else{
 //			mode = 4;
 //		}
-//		if(DCMST.totalCost.getUB()>=12645){
-//			mode = 14;
-//		}else{
-//			mode = 10;
-//		}
 		if(constructive){
 			constructivePath();
 		}
@@ -173,97 +168,6 @@ public class GraphStrategies extends GraphStrategy {
 		}
 		from = x;
 	}
-
-//	public boolean evaluateNeighborsKONE(int i) {
-//		int v;
-//		for(int j=0;j<n;j++){
-//			if(DCMST.dMax[j]>1)
-//			if(g.getEnvelopGraph().arcExists(i,j)&&!g.getKernelGraph().arcExists(i,j)){
-//				switch (mode){
-//					case LEX:
-//						from = i;
-//						to = j;
-//						return true;
-//					case MIN_P_DEGREE:
-//					case MAX_P_DEGREE:
-//						v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
-//								+ g.getEnvelopGraph().getPredecessorsOf(j).getSize();
-//						if(from==-1 || (v<value && mode==MIN_P_DEGREE) || (v>value && mode==MAX_P_DEGREE)){
-//							value = v;
-//							from = i;
-//							to = j;
-//						}break;
-//					case MIN_M_DEGREE:
-//					case MAX_M_DEGREE:
-//						v = g.getKernelGraph().getSuccessorsOf(i).getSize()
-//								+ g.getKernelGraph().getPredecessorsOf(j).getSize();
-//						if(from==-1 || (v<value && mode==MIN_M_DEGREE) || (v>value && mode==MAX_M_DEGREE)){
-//							value = v;
-//							from = i;
-//							to = j;
-//						}break;
-//					case MIN_COMMON:
-//					case MAX_COMMON:
-//						v = 0;
-//						for(int k=0;k<n;k++){
-//							if(g.getEnvelopGraph().getSuccessorsOf(k).contain(i)){
-//								v++;
-//							}
-//							if(g.getEnvelopGraph().getSuccessorsOf(k).contain(j)){
-//								v++;
-//							}
-//						}
-//						if(from==-1 || (v<value && mode==MIN_COMMON) || (v>value && mode==MAX_COMMON)){
-//							value = v;
-//							from = i;
-//							to = j;
-//						}break;
-//					case MIN_COST:
-//					case MAX_COST:
-//						v = costs[i][j];
-//						if(from==-1 || (v<value && mode==MIN_COST) || (v>value && mode==MAX_COST)){
-//							value = v;
-//							from = i;
-//							to = j;
-//						}break;
-//					case IN_SUPPORT_LEX:
-//						if(relax.contains(i,j)){
-//							from = i;
-//							to = j;
-//							return true;
-//						}break;
-//					case OUT_SUPPORT_LEX:
-//						if(!relax.contains(i,j)){
-//							from = i;
-//							to = j;
-//							return true;
-//						}break;
-//					case MIN_REDUCED_COST:
-//					case MAX_REDUCED_COST:
-//						if(!relax.contains(i,j)){
-//							v = (int)relax.getMarginalCost(i,j);
-//							if(from==-1 || (v<value && mode==MIN_REDUCED_COST) || (v>value && mode==MAX_REDUCED_COST)){
-//								value = v;
-//								from = i;
-//								to = j;
-//							}
-//						}break;
-//					case MIN_REPLACEMENT_COST:
-//					case MAX_REPLACEMENT_COST:
-//						if(relax.contains(i,j)){
-//							v = (int)relax.getReplacementCost(i,j);
-//							if(from==-1 || (v<value && mode==MIN_REPLACEMENT_COST) || (v>value && mode==MAX_REPLACEMENT_COST)){
-//								value = v;
-//								from = i;
-//								to = j;
-//							}
-//						}break;
-//					default : throw new UnsupportedOperationException("mode "+mode+" does not exist");
-//				}
-//			}
-//		}
-//		return false;
-//	}
 
 	public boolean evaluateNeighbors(int i) {
 		int v;

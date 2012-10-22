@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;

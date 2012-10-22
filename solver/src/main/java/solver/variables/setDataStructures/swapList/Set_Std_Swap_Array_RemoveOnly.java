@@ -25,11 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+package solver.variables.setDataStructures.swapList;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 
 /**
  * Backtrable List of m elements based on Array int_swaping
@@ -41,12 +40,12 @@ import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class StoredArraySwapList_Array_RemoveOnly extends ArraySwapList_Array {
+public class Set_Std_Swap_Array_RemoveOnly extends Set_Swap_Array {
 
 	protected IStateInt size;
 	protected IEnvironment env;
 
-	public StoredArraySwapList_Array_RemoveOnly(IEnvironment e, int n) {
+	public Set_Std_Swap_Array_RemoveOnly(IEnvironment e, int n) {
 		super(n);
 		env = e;
 		size = e.makeInt(0);

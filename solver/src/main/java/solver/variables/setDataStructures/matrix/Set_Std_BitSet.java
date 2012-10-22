@@ -25,81 +25,72 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.setDataStructures.matrix;
 
-import gnu.trove.map.hash.TIntIntHashMap;
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.structure.S64BitSet;
+import solver.variables.setDataStructures.ISet;
 
 /**
- * List of m elements based on Array int_swaping with an HashMap
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * User: chameau
+ * Date: 9 févr. 2011
  */
-public class ArraySwapList_HashMap extends ArraySwapList{
+public class Set_Std_BitSet extends S64BitSet implements ISet {
 
-	protected TIntIntHashMap map;
+	protected int current;	//enables to iterate
+	protected IStateInt card;	// enables to get the cardinality in O(1)
+	
+    public Set_Std_BitSet(IEnvironment environment, int nbits) {
+        super(environment, nbits);
+        current = 0;
+        card = environment.makeInt(0);
+    }
 
-	public ArraySwapList_HashMap(int n) {
-		super(n);
-		map = new TIntIntHashMap();
+    @Override
+    public void add(int element) {
+    	if(!get(element)){
+    		card.add(1);
+    		this.set(element,true);
+    	}
+    }
+
+    @Override
+    public boolean remove(int element) {
+        boolean isIn = this.get(element);
+        if (isIn) {
+            this.set(element, false);
+            card.add(-1);
+        }
+        return isIn;
+    }
+
+    @Override
+    public boolean contain(int element) {
+        return this.get(element);
+    }
+
+    @Override
+    public int getSize() {
+        return this.card.get();
+    }
+
+    @Override
+	public int getFirstElement() {
+    	current = nextSetBit(0);
+		return current;
 	}
 
 	@Override
-	public boolean contain(int element) {
-		if(map.containsKey(element)){
-			return array[map.get(element)]==element && map.get(element)<getSize();
-		}
-		return false;
+	public int getNextElement() {
+		current = nextSetBit(current+1);
+		return current;
 	}
-
+	
 	@Override
-	public void add(int element) {
-		if(contain(element)){
-			Exception e = new Exception("element already in list");
-			e.printStackTrace();
-			System.exit(0);
-			return;
-		}
-		int size = getSize();
-		if(getSize()==arrayLength){
-			int[] tmp = array;
-			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
-			array = new int[ns];
-			arrayLength = ns;
-			System.arraycopy(tmp,0,array,0,size);
-		}
-		array[size] = element;
-		map.remove(element);
-		map.put(element, size);
-		addSize(1);
-	}
-
-	@Override
-	public boolean remove(int element) {
-		int size = getSize();
-		if(map.containsKey(element)){
-			int idx = map.get(element);
-			if(idx<size){
-				if(size==1){
-					setSize(0);
-					return true;
-				}
-				int replacer = array[size-1];
-				map.adjustValue(replacer,idx-size+1);
-				array[idx]	  = replacer;
-				map.adjustValue(element,size-1-idx);
-				array[size-1] = element;
-				addSize(-1);
-				if(idx==currentIdx){
-					currentIdx--;
-				}
-				return true;
-			}
-		}
-		return false;
-	}
+    public void clear() {
+		super.clear();
+		card.set(0);
+    }
 }

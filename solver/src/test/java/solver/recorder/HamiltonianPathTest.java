@@ -29,7 +29,7 @@ package solver.recorder;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.graph.GraphGenerator;
+import samples.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;

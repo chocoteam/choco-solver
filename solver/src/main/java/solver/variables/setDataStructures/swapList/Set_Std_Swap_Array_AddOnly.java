@@ -25,79 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package solver.variables.setDataStructures.swapList;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+
 /**
+ * Backtrable List of m elements based on Array int_swaping
+ * add : O(1) only at root node!
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
  * User: Jean-Guillaume Fages
- * Date: 21/10/12
- * Time: 18:43
+ * Date: 18/11/2011
  */
+public class Set_Std_Swap_Array_AddOnly extends Set_Swap_Array {
 
-package solver.variables.graph.graphStructure;
+	protected IStateInt size;
+	protected IEnvironment env;
 
-import solver.variables.graph.ISet;
-
-public class FullSet implements ISet{
-
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	int n;
-	int current;
-
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
-
-	public FullSet(int n){
-		this.n = n;
-		current = 0;
+	public Set_Std_Swap_Array_AddOnly(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
 	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-	public void add(int element) {}
 
 	@Override
 	public boolean remove(int element) {
-		throw new UnsupportedOperationException();
+		if(env.getWorldIndex()!=0){
+			Exception e = new Exception("cannot remove elements after world 0");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		return super.remove(element);
 	}
 
 	@Override
-	public boolean contain(int element) {
-		return true;
+	public int getSize(){
+		return size.get();
 	}
-
-	@Override
-	public boolean isEmpty() {
-		return false;
+	protected void setSize(int s){
+		size.set(s);
 	}
-
-	@Override
-	public int getSize() {
-		return n;
-	}
-
-	@Override
-	public void clear() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getFirstElement() {
-		current = 0;
-		return 0;
-	}
-
-	@Override
-	public int getNextElement() {
-		current++;
-		if(current<n)
-			return current;
-		else
-			return -1;
+	protected void addSize(int delta){
+		size.add(delta);
 	}
 }

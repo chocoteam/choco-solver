@@ -30,7 +30,7 @@ package choco;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;
-import samples.graph.GraphGenerator;
+import samples.graph.input.GraphGenerator;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;

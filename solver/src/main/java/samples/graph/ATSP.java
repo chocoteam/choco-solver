@@ -28,13 +28,10 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
-import samples.graph.input.ATSP_TSPLIB;
+import samples.graph.input.ATSP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Cause;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -51,7 +48,6 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.exception.ContradictionException;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
@@ -60,17 +56,12 @@ import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -78,7 +69,6 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
 import java.util.BitSet;
-import java.util.Random;
 
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
@@ -387,7 +377,7 @@ public class ATSP {
 
 	// RANDOM INSTANCES
 	private static void generateInstance(int size, int maxCost, long seed) {
-		ATSP_TSPLIB inst = new ATSP_TSPLIB();
+		ATSP_Utils inst = new ATSP_Utils();
 		inst.generateInstance(size,maxCost,seed);
 		n = inst.n;
 		instanceName = inst.instanceName;
@@ -399,7 +389,7 @@ public class ATSP {
 
 	// TSPLIB INSTANCES
 	private static void loadTSPLIBInstance(String url) {
-		ATSP_TSPLIB inst = new ATSP_TSPLIB();
+		ATSP_Utils inst = new ATSP_Utils();
 		inst.loadTSPLIB(url);
 		n = inst.n;
 		instanceName = inst.instanceName;
@@ -420,7 +410,7 @@ public class ATSP {
 		configParameters(0);
 		for (String s : list) {
 			File file = new File(dir + "/" + s);
-			if(ATSP_TSPLIB.canParse(s))
+			if(ATSP_Utils.canParse(s))
 				if(file.isFile() && !(file.isHidden() || s.contains(".xls") || s.contains(".csv")))
 					if ((s.contains(".atsp") || true)){
 						loadNewInstance(file.getAbsolutePath());
@@ -438,7 +428,7 @@ public class ATSP {
 		}
 	}
 	private static void loadNewInstance(String name) {
-		ATSP_TSPLIB inst = new ATSP_TSPLIB();
+		ATSP_Utils inst = new ATSP_Utils();
 		inst.loadNewInstancesBUG(name,"/Users/jfages07/github/In4Ga/newATSP/optima.csv");
 		n = inst.n;
 		instanceName = inst.instanceName;

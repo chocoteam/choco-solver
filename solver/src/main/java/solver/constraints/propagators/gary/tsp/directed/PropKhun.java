@@ -39,7 +39,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
