@@ -33,10 +33,6 @@ import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
@@ -47,6 +43,7 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -72,7 +69,7 @@ public class TSP {
 	private static boolean optProofOnly = true;
 	private static PropLagr_OneTree mst;
 	private static int search;
-	static int policy;
+	private static int policy;
 
 	//***********************************************************************************
 	// METHODS
@@ -92,7 +89,7 @@ public class TSP {
 		optProofOnly = true;
 		allDiffAC = false;
 		search = 0;
-		policy = 8;
+		policy = GraphStrategies.MAX_COST;
 		for (String s : list) {
 //			if(s.contains("pr299.tsp"))
 				if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
@@ -112,15 +109,6 @@ public class TSP {
 
 	private static void solve(int[][] matrix, String instanceName) {
 		final int n = matrix.length;
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(matrix[i][j] != matrix[j][i]){
-					System.out.println(i+" : "+j);
-					System.out.println(matrix[i][j]+" != "+matrix[j][i]);
-					throw new UnsupportedOperationException();
-				}
-			}
-		}
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
@@ -132,11 +120,7 @@ public class TSP {
 			}
 		}
 		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
-		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
+		Constraint gc = GraphConstraintFactory.tsp(undi,totalCost,matrix,0,solver);
 		mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		mst.waitFirstSolution(search!=0);
 		gc.addPropagators(mst);

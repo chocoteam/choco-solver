@@ -45,8 +45,6 @@ import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.basic.PropAntiSymmetric;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosGraphWithPreds;
@@ -65,13 +63,13 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 import java.io.*;
 import java.util.BitSet;
 
@@ -101,7 +99,7 @@ public class SOP {
 	private static IStateInt nR;
 	private static IStateInt[] sccOf;
 	private static ISet[] outArcs;
-	private static IDirectedGraph G_R;
+	private static DirectedGraph G_R;
 	private static IStateInt[] sccFirst, sccNext;
 	// Branching data structure
 	private static IGraphRelaxation relax;
@@ -143,6 +141,7 @@ public class SOP {
 	public static void solve() {
 		createModel();
 		addPropagators();
+		addTransitionGraph();
 		configureAndSolve();
 		printOutput();
 	}
@@ -169,23 +168,11 @@ public class SOP {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = GraphConstraintFactory.makeConstraint(solver);
+		gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
 	}
 
 	public static void addPropagators() {
 		// BASIC MODEL
-		int[] succs = new int[n];
-		int[] preds = new int[n];
-		for(int i=0;i<n;i++){
-			succs[i] = preds[i] = 1;
-		}
-		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
 			gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
 		}
@@ -255,19 +242,16 @@ public class SOP {
 	}
 
 	public static void addTransitionGraph(){
-		transGraph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.ENVELOPE_SWAP_ARRAY,true);
-		try {
-			for (int i = 0; i < n - 1; i++) {
-				for (int j = 1; j < n; j++) {
-					if (distanceMatrix[i][j] != noVal) {
-						graph.getEnvelopGraph().addArc(i, j);
-					}
-				}
-				graph.getEnvelopGraph().removeArc(i, i);
+		transGraph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.KERNEL_SWAP_ARRAY,true);
+		for (int j = 1; j < n; j++) {
+			transGraph.getEnvelopGraph().addArc(0, j);
+			transGraph.getKernelGraph().addArc(0, j);
+		}
+		for (int i = 1; i < n - 1; i++) {
+			for (int j = 1; j < n; j++) {
+				if(i!=j && distanceMatrix[i][j]!=noVal)
+					transGraph.getEnvelopGraph().addArc(i, j);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
 		}
 		gc.addPropagators(new PropAntiSymmetric(transGraph,gc,solver));
 		gc.addPropagators(new PropTransitivity(transGraph,solver,gc));
@@ -278,6 +262,8 @@ public class SOP {
 		//SOLVER CONFIG
 		GraphStrategies mainStrat = new GraphStrategies(graph,distanceMatrix,relax);
 		mainStrat.configure(policy,true,true,true);
+//		GraphStrategies mainStrat = new GraphStrategies(transGraph,distanceMatrix,relax);
+//		mainStrat.configure(GraphStrategies.MAX_DELTA_DEGREE,true,true,false);
 //		AbstractStrategy mainStrat = StrategyFactory.ABSrandom(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);
 //		AbstractStrategy mainStrat = new MySearch(positions,solver);
 		switch (main_search){
@@ -338,7 +324,7 @@ public class SOP {
 		String[] list = folder.list();
 		main_search = 0;
 		khun = false;
-		policy = 4;
+		policy = GraphStrategies.MAX_DELTA_DEGREE;
 		configParameters(0);
 		for (String s : list) {
 			if(!s.contains("43.1"))

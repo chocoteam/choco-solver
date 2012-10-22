@@ -30,7 +30,6 @@ package solver.variables.graph;
 import java.util.BitSet;
 import java.util.HashMap;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.matrix.Set_BitSet;
 
@@ -48,7 +47,7 @@ public class GraphTools {
 	 * @param graph to perform a dfs on
 	 * @return num an array to represent node numbers in the dfs tree
 	 */
-	public static int[] performDFS(int root, IDirectedGraph graph){
+	public static int[] performDFS(int root, DirectedGraph graph){
 		int nb = graph.getNbNodes();
 		ISet[] neighbors = new ISet[nb];
 		int[] father = new int[nb];
@@ -101,7 +100,7 @@ public class GraphTools {
 	 * @param reverse if all arcs should be reversed
 	 * @returna new graph which is a subraph of graph deduced from a subset and some parameters.
 	 */
-	public static IDirectedGraph createSubgraph(IDirectedGraph graph, ISet subset, boolean skipFirst, boolean reverse){
+	public static DirectedGraph createSubgraph(DirectedGraph graph, ISet subset, boolean skipFirst, boolean reverse){
 		int nb = subset.getSize();
 		if(subset.getSize()==0){
 			throw new UnsupportedOperationException("error ");
@@ -155,7 +154,7 @@ public class GraphTools {
 	 * @param subset of nodes to keep in the subgraph
 	 * @returna new directed graph which is a subraph of an undirected graph deduced from a subset.
 	 */
-	public static IDirectedGraph createSubgraph(IGraph undirectedGraph, ISet subset){
+	public static DirectedGraph createSubgraph(IGraph undirectedGraph, ISet subset){
 		int nb = subset.getSize();
 		boolean[][] matrix = new boolean[nb][nb];
 		int[] indexes = new int[nb];

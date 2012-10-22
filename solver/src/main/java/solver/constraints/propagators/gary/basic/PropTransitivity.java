@@ -60,7 +60,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 	//***********************************************************************************
 
 	public PropTransitivity(V graph, Solver solver, Constraint constraint) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR,false);
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		arcEnforced = new PairProcedure() {
@@ -93,7 +93,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 				}
 			}
 		}
-//		gdm.unfreeze();
+		gdm.unfreeze();
 	}
 
 	@Override
@@ -132,18 +132,26 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 			ISet env = g.getEnvelopGraph().getPredecessorsOf(node);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
 				if(ker.contain(i)){
-					g.enforceArc(i, succ, this);
+					if(g.enforceArc(i, succ, this)){
+						enfArc(i,succ);
+					}
 				}else if(!g.getEnvelopGraph().arcExists(i,succ)){
-					g.removeArc(i,node,this);
+					if(g.removeArc(i,node,this)){
+						remArc(i,node);
+					}
 				}
 			}
 			ker = g.getKernelGraph().getSuccessorsOf(succ);
 			env = g.getEnvelopGraph().getSuccessorsOf(succ);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
 				if(ker.contain(i)){
-					g.enforceArc(node,i, this);
+					if(g.enforceArc(node,i, this)){
+						enfArc(node,i);
+					}
 				}else if(!g.getEnvelopGraph().arcExists(node,i)){
-					g.removeArc(succ,i,this);
+					if(g.removeArc(succ,i,this)){
+						remArc(succ,i);
+					}
 				}
 			}
 		}
@@ -154,11 +162,15 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 		if(from != to){
 			ISet nei = g.getKernelGraph().getSuccessorsOf(from);
 			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-				g.removeArc(i, to,this);
+				if(g.removeArc(i, to,this)){
+					remArc(i,to);
+				}
 			}
 			nei = g.getKernelGraph().getPredecessorsOf(to);
 			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-				g.removeArc(from,i,this);
+				if(g.removeArc(from,i,this)){
+					remArc(from,i);
+				}
 			}
 		}
 	}

@@ -30,6 +30,7 @@ package solver.variables.graph.directedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.FullSet;
 import solver.variables.setDataStructures.swapList.Set_Swap_Array;
@@ -49,7 +50,7 @@ import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
  * *
  * Specific implementation of a directed graph
  */
-public class DirectedGraph implements IDirectedGraph {
+public class DirectedGraph implements IGraph {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -311,7 +312,11 @@ public class DirectedGraph implements IDirectedGraph {
 		return b;
 	}
 
-	@Override
+	/**remove arc (from,to) from the graph
+     * @param from
+     * @param to
+     * @return true iff arc (from,to) was in the graph
+     */
 	public boolean removeArc(int from, int to) {
 		if ((successors[from].contain(to)) && (predecessors[to].contain(from))){
 			successors[from].remove(to);
@@ -323,7 +328,11 @@ public class DirectedGraph implements IDirectedGraph {
 		return false;
 	}
 
-	@Override
+	/**Test whether arc (from,to) exists or not in the graph
+     * @param from
+     * @param to
+     * @return true iff arc (from,to) exists in the graph
+     */
 	public boolean arcExists(int from, int to){
 		if (successors[from].contain(to) || predecessors[to].contain(from)){
 			if (successors[from].contain(to) && predecessors[to].contain(from)){
@@ -333,7 +342,11 @@ public class DirectedGraph implements IDirectedGraph {
 		}return false;
 	}
 
-	@Override
+	/**add arc (from,to) to the graph
+     * @param from
+     * @param to
+     * @return true iff arc (from,to) was not already in the graph
+     */
 	public boolean addArc(int from, int to) {
 		activateNode(from);
 		activateNode(to);

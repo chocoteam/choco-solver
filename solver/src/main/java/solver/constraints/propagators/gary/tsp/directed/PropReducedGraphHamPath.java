@@ -49,7 +49,6 @@ import solver.variables.graph.GraphType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.setDataStructures.linkedlist.Set_Std_2LinkedList;
 
@@ -76,7 +75,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 	private IStateInt[] sccOf;		// SCC of each node
 	private IStateInt[] sccFirst,sccNext; // nodes of each scc
 	private ISet[] mates;		// arcs of G that fit with outgoing arcs of a node in G_R
-	private IDirectedGraph G_R; 	// reduced graph
+	private DirectedGraph G_R; 	// reduced graph
 	private IStateInt n_R; 			// number of nodes G_R
 	private PairProcedure arcRemoved;// incremental procedure
 	private BitSet sccComputed;		// enable incrementation
@@ -293,7 +292,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 		return sccNext;
 	}
 
-	public IDirectedGraph getReducedGraph() {
+	public DirectedGraph getReducedGraph() {
 		return G_R;
 	}
 

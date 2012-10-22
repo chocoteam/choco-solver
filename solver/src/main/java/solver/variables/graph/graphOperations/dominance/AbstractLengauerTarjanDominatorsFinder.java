@@ -31,7 +31,6 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.GraphType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 /**Class that finds dominators of a given flow graph g(s) */
 public abstract class AbstractLengauerTarjanDominatorsFinder {
@@ -41,9 +40,9 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	//***********************************************************************************
 
 	// flow graph
-	protected IDirectedGraph g;
+	protected DirectedGraph g;
 	// dominator tree
-	protected IDirectedGraph T;
+	protected DirectedGraph T;
 	protected int root, n, k;
 	protected int[] parent,vertex,bucket,ancestor,label,semi,dom;
 	protected ISet[] succs;
@@ -55,7 +54,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	//***********************************************************************************
 
 	/**Object that finds dominators of the given flow graph g(s)*/
-	public AbstractLengauerTarjanDominatorsFinder(int s, IDirectedGraph g){
+	public AbstractLengauerTarjanDominatorsFinder(int s, DirectedGraph g){
 		root = s;
 		n = g.getNbNodes();
 		this.g = g;
@@ -249,7 +248,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	 * such that x is the immediate dominator of y
 	 * @return the dominator of the flow graph
 	 */
-	public IDirectedGraph getDominatorTree(){
+	public DirectedGraph getDominatorTree(){
 		return T;
 	}
 

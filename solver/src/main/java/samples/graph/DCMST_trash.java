@@ -29,6 +29,7 @@ package samples.graph;
 
 //import ilog.concert.*;
 //import ilog.cplex.*;
+
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import samples.graph.output.TextWriter;
@@ -37,12 +38,13 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-		import solver.constraints.propagators.gary.basic.PropKCC;
+import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropLagr_DCMST_withCuts;
 import solver.exception.ContradictionException;
 import solver.objective.MinObjectiveManager;
 import solver.objective.strategies.BottomUp_Minimization;
@@ -50,7 +52,7 @@ import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
-		import solver.propagation.generator.Sort;
+import solver.propagation.generator.Sort;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -64,13 +66,15 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
-		import solver.variables.graph.GraphType;
-import solver.variables.setDataStructures.ISet;
-		import solver.variables.graph.undirectedGraph.UndirectedGraph;
+import solver.variables.graph.GraphType;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
-import java.io.*;
-		import java.util.BitSet;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.BitSet;
 import java.util.LinkedList;
 
 /**

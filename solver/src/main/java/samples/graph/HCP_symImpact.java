@@ -33,10 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
@@ -53,7 +49,6 @@ import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
 
 /**
@@ -93,12 +88,11 @@ public class HCP_symImpact {
 			System.out.println(s);
 			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
 			solveUndirected(matrix,s);
-//			solveDirected(matrix,s);
+			solveDirected(matrix,s);
 		}
 	}
 
 	// TSP LIB
-
 	private static void tsplib_bench() {
 		outFile = "HCP_TSPLIB.csv";
 		TextWriter.clearFile(outFile);
@@ -112,7 +106,7 @@ public class HCP_symImpact {
 			if (s.contains(".hcp")){
 				boolean[][] matrix = HCP_Utils.parseTSPLIBInstance(dir + "/" + s);
 				solveUndirected(matrix,s);
-//				solveDirected(matrix,s);
+				solveDirected(matrix,s);
 			}
 		}
 	}
@@ -133,10 +127,7 @@ public class HCP_symImpact {
 			}
 		}
 		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
+		Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi,solver);
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
@@ -187,18 +178,7 @@ public class HCP_symImpact {
 			}
 		}
 		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		int[] succs = new int[n];
-		int[] preds = new int[n];
-		for(int i=0;i<n;i++){
-			succs[i] = preds[i] = 1;
-		}
-		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropNodeDegree_AtLeast(dir, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(dir, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(dir, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(dir, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
+		Constraint gc = GraphConstraintFactory.hamiltonianPath(dir,0,n-1,solver);
 		if(alldifferentAC){
 			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
 		}

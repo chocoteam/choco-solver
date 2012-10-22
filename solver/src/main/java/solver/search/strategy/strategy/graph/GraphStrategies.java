@@ -38,7 +38,6 @@ import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.GraphVar;
 
 public class GraphStrategies extends GraphStrategy {

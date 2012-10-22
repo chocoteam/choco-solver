@@ -27,15 +27,15 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
 public class StrongConnectivityFinder {
 
 	// input
-	private IDirectedGraph graph;
+	private DirectedGraph graph;
 	private BitSet restriction;
 	private int n;
 	// output
@@ -47,7 +47,7 @@ public class StrongConnectivityFinder {
 	int[] stack,p,inf,nodeOfDfsNum,dfsNumOfNode;
 	BitSet inStack;
 
-	public StrongConnectivityFinder(IDirectedGraph graph){
+	public StrongConnectivityFinder(DirectedGraph graph){
 		this.graph = graph;
 		this.n = graph.getNbNodes();
 		//

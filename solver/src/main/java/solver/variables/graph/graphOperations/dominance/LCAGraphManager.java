@@ -27,8 +27,8 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 /**Class enabling to compute LCA queries in constant time over the DFS tree of a given graph
  * use a O(n+m) time preprocessing
@@ -43,7 +43,7 @@ public class LCAGraphManager {
 
 	//
 	private int root;
-	private IDirectedGraph graph;
+	private DirectedGraph graph;
 	private int nbNodes,nbActives;
 	//
 	private int[] father;
@@ -70,7 +70,7 @@ public class LCAGraphManager {
 		h = new int[nbNodes];
 	}
 
-	public void preprocess(int r, IDirectedGraph g){
+	public void preprocess(int r, DirectedGraph g){
 		root = r;
 		graph = g;
 		initParams();

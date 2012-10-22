@@ -63,10 +63,9 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
@@ -97,7 +96,7 @@ public class ATSP {
 	private static IStateInt nR;
 	private static IStateInt[] sccOf;
 	private static ISet[] outArcs;
-	private static IDirectedGraph G_R;
+	private static DirectedGraph G_R;
 	private static IStateInt[] sccFirst, sccNext;
 	// Branching data structure
 	private static IGraphRelaxation relax;
@@ -146,7 +145,7 @@ public class ATSP {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		main_search = 0;
-		configParameters(0);
+		khun = false;
 		for (String s : list) {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
@@ -210,30 +209,15 @@ public class ATSP {
 				}
 				graph.getEnvelopGraph().removeArc(i, i);
 			}
-			graph.getKernelGraph().activateNode(n-1);
 			graph.getEnvelopGraph().removeArc(0, n-1);
-			graph.getEnvelopGraph().removeArc(n-1,0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = GraphConstraintFactory.makeConstraint(solver);
+		gc = GraphConstraintFactory.atsp(graph,totalCost,distanceMatrix,0,n-1,solver);
 	}
 
 	public static void addPropagators() {
-		// BASIC MODEL
-		int[] succs = new int[n];
-		int[] preds = new int[n];
-		for(int i=0;i<n;i++){
-			succs[i] = preds[i] = 1;
-		}
-		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
 			gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
 		}
@@ -341,6 +325,9 @@ public class ATSP {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 			}
+//			public void onContradiction(ContradictionException cex) {
+//				throw new UnsupportedOperationException();
+//			}
 //			public void onSolution() {
 //				System.out.println("youhou");
 //			}

@@ -280,6 +280,6 @@ public final class StrategyFactory {
     }
 
     public static <G extends GraphVar> AbstractStrategy graphRandom(G g, long seed) {
-        return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.RANDOM);
+        return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.ARCS);
     }
 }

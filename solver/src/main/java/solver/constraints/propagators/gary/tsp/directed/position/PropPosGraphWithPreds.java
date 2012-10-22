@@ -48,9 +48,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
@@ -70,7 +70,7 @@ public class PropPosGraphWithPreds extends Propagator {
 	IStateInt nR;
 	IStateInt[] sccOf;
 	ISet[] outArcs;
-	IDirectedGraph rg;
+	DirectedGraph rg;
 	// data for algorithms
 	BitSet done;
 	TIntArrayList nextSCCnodes = new TIntArrayList();
@@ -106,7 +106,7 @@ public class PropPosGraphWithPreds extends Propagator {
 	}
 
 	public PropPosGraphWithPreds(IntVar[] intVars, DirectedGraphVar graph, int[][] dist, Constraint constraint, Solver solver,
-								 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs, IDirectedGraph rg) {
+								 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs, DirectedGraph rg) {
 		this(intVars, graph, dist, constraint, solver);
 		this.nR = nR;
 		this.sccOf = sccOf;

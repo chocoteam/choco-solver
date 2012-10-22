@@ -56,10 +56,10 @@ public class TutteGraphGenerator {
 
 	public static boolean[][] createTutteGraph(int n){
 //		int nodeDiam = 4;
-		int diam = 2;
+		int diam = 8;
 		boolean[][] output = new boolean[n][n];
 		Solver solver = new Solver();
-		UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST,false);
+		UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST,true);
 		Constraint c = GraphConstraintFactory.makeConstraint(solver);
 		c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
 		c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
@@ -69,13 +69,11 @@ public class TutteGraphGenerator {
 		c.addPropagators(new PropBiconnected(g, c, solver));
 
 		for(int i=0;i<n;i++){
-			g.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
 				g.getEnvelopGraph().addEdge(i,j);
 			}
 		}
 		for(int i=0;i<n;i+=4){
-//			c.addPropagators(new PropMaxDiameterFromNode(g,nodeDiam,0,c,solver));
 			if(i+1<n)
 			g.getKernelGraph().addEdge(i,i+1);
 			if(i+2<n)
@@ -107,7 +105,7 @@ public class TutteGraphGenerator {
 	public static ArrayList<int[][]> createAllTutteGraphs(final int n){
 		final ArrayList<int[][]> output = new ArrayList();
 		Solver solver = new Solver();
-		final UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST,false);
+		final UndirectedGraphVar g = new UndirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST,true);
 		Constraint c = GraphConstraintFactory.makeConstraint(solver);
 		c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
 		c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
@@ -115,12 +113,10 @@ public class TutteGraphGenerator {
 		c.addPropagators(new PropMaxDiameter(g,8,c,solver));
 		c.addPropagators(new PropBiconnected(g,c,solver));
 		// breaking some symmetries
-		g.getKernelGraph().activateNode(0);
 		for(int j=1;j<4;j++){
 			g.getEnvelopGraph().addEdge(0,j);
 		}
 		for(int i=1;i<n;i++){
-			g.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
 				g.getEnvelopGraph().addEdge(i,j);
 			}
@@ -177,7 +173,7 @@ public class TutteGraphGenerator {
 		return m;
 	}
 
-//***********************************************************************************
+	//***********************************************************************************
 	// TUTTE
 	//***********************************************************************************
 

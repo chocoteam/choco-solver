@@ -46,9 +46,9 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
@@ -69,7 +69,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	private TIntArrayList inDoors;
 	private TIntArrayList outDoors;
 	// rg data structures
-	private IStateInt nR; IStateInt[] sccOf; ISet[] outArcs; IDirectedGraph rg;
+	private IStateInt nR; IStateInt[] sccOf; ISet[] outArcs; DirectedGraph rg;
 	private IStateInt[] sccFirst, sccNext;
 
 	//***********************************************************************************
@@ -78,7 +78,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
 							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
-							 IDirectedGraph rg) {
+							 DirectedGraph rg) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -95,7 +95,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
 							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
-							 IDirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
+							 DirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
 		this(graph,constraint,solver,nR,sccOf,outArcs,rg);
 		this.sccFirst = sccFirst;
 		this.sccNext  = sccNext;
