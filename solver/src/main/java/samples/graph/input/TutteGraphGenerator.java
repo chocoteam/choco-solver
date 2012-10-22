@@ -32,7 +32,7 @@
  * Time: 14:03
  */
 
-package samples.graph;
+package samples.graph.input;
 
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -47,7 +47,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;

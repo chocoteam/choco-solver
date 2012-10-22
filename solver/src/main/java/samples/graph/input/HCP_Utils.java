@@ -25,16 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
-
-import solver.Solver;
+package samples.graph.input;
 
 import java.io.*;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class HCP_Parser {
+public class HCP_Utils {
 
 	//***********************************************************************************
 	// KING TOUR
@@ -95,7 +93,7 @@ public class HCP_Parser {
 	// TSPLIB "/Users/jfages07/Documents/code/ALL_hcp"
 	//***********************************************************************************
 
-	public static boolean[][] parseInstance(String url){
+	public static boolean[][] parseTSPLIBInstance(String url){
 		File file = new File(url);
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
@@ -132,7 +130,7 @@ public class HCP_Parser {
 	// Cycle->Path
 	//***********************************************************************************
 
-	public static boolean[][] transformMatrix(boolean[][] m) {
+	public static boolean[][] transformCycleToPath(boolean[][] m) {
 		int n=m.length+1;
 		boolean[][] matrix = new boolean[n][n];
 		for(int i=0;i<n-1;i++){
@@ -144,52 +142,5 @@ public class HCP_Parser {
 		}
 		matrix[0][n-1] = false;
 		return matrix;
-	}
-
-	//***********************************************************************************
-	// RECORDING RESULTS
-	//***********************************************************************************
-
-	/**Record results
-	 *
-	 * @param solver
-	 * @param problem String identifying the instance that has been solved
-	 * @param trick binary 0 if trick disabled 1 otherwise
-	 * @param outputFile absolute path of the CSV output file
-	 */
-	public static void record(Solver solver, String problem, int trick, String outputFile) {
-		String line = problem+";"+trick+";"
-		+solver.getMeasures().getNodeCount()+";"+solver.getMeasures().getTimeCount()+";\n";
-		writeTextInto(line,outputFile);
-	}
-
-	/**Add text at the end of file
-	 *
-	 * @param text
-	 * @param file
-	 */
-	public static void writeTextInto(String text, String file) {
-		try {
-			FileWriter out = new FileWriter(file, true);
-			out.write(text);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**Empty file
-	 *
-	 * @param file
-	 */
-	public static void clearFile(String file) {
-		try {
-			FileWriter out = new FileWriter(file, false);
-			out.write("");
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

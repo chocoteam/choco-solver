@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.graph.input;
 
 import java.util.BitSet;
 import java.util.Random;

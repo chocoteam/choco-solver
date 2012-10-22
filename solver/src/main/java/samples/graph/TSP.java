@@ -28,6 +28,10 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
+import samples.graph.GraphStrategies;
+import samples.graph.TSP_ATSP.ATSP_ISMP;
+import samples.graph.input.TSP_Utils;
+import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -43,133 +47,70 @@ import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
-import java.util.Random;
 
-public class TSP_heur {
+/**
+ * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ */
+public class TSP {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
+	private static final long TIMELIMIT = 300000;
+	private static final int MAX_SIZE = 60000;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
 	private static IntVar totalCost;
 	private static Solver solver;
+	private static boolean allDiffAC    = false;
 	private static boolean optProofOnly = true;
 	private static PropLagr_OneTree mst;
 	private static int search;
-	private static boolean decisionType, trick, constructive;
+	static int policy;
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		bench();
-//		benchRD();
-	}
+		TextWriter.clearFile(outFile = "tsp.csv");
+		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;allDiffAC;search;\n", outFile);
 
-	static int policy;
-
-	public static void bench() {
-		TSP_CP12.clearFile(outFile = "tsp_heur.csv");
-		TSP_CP12.writeTextInto("instance;sols;fails;nodes;time;obj;strat;enforce;trick;construct;\n", outFile);
-//		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
 //		String dir = "/Users/jfages07/github/In4Ga/ALL_tsp";
-		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
+//		String dir = "/Users/jfages07/github/In4Ga/mediumTSP";
+
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
 		optProofOnly = true;
+		allDiffAC = false;
 		search = 0;
-		policy = 4;
+		policy = 8;
+		ATSP_ISMP.resetFile();
 		for (String s : list) {
-//			if(s.contains("pr299"))
-			if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
-				matrix = TSP_CP12.parseInstance(dir + "/" + s);
-				if((matrix!=null && matrix.length>=0 && matrix.length<1000)){
-					if(optProofOnly){
-						setUB(s.split("\\.")[0]);
-						System.out.println("optimum : "+upperBound);
+//			if(s.contains("pr299.tsp"))
+				if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
+					matrix = TSP_Utils.parseInstance(dir + "/" + s, MAX_SIZE);
+					if((matrix!=null && matrix.length>=0 && matrix.length<4000)){
+						if(optProofOnly){
+							upperBound = TSP_Utils.getOptimum(s.split("\\.")[0], "/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv");
+							System.out.println("optimum : "+upperBound);
+						}
+						solve(matrix, s);
+					}else{
+						System.out.println("CANNOT LOAD");
 					}
-					trick = true;
-					decisionType = true;
-					constructive = false;
-					policy = 8;
-					search = 2;
-					solve(matrix, s);
-//					for(policy=GraphStrategyBench2.FIRST;policy<=GraphStrategyBench2.LAST;policy++){
-//						solve(matrix, s);
-//					}
-//					decisionType = false;
-//					for(policy=GraphStrategyBench2.FIRST;policy<=GraphStrategyBench2.LAST;policy++){
-//						solve(matrix, s);
-//					}
-				}else{
-					System.out.println("CANNOT LOAD");
 				}
-			}
 		}
-	}
-
-	public static void benchRD() {
-		TSP_CP12.clearFile(outFile = "tsp_rd.csv");
-		TSP_CP12.writeTextInto("instance;sols;fails;nodes;time;obj;strat;enforce;trick;construct;\n", outFile);
-		int[][] matrix;
-		optProofOnly = true;
-		search = 0;
-		int n = 300;
-		for (int i=0;i<100;i++) {
-			String s = n+"_"+i;
-			matrix = generate(n,i,n);
-			if(optProofOnly){
-				upperBound = findUB(matrix);
-				System.out.println("optimum : "+upperBound);
-			}
-//			trick = true;
-			decisionType = true;
-			for(policy=GraphStrategyBench2.FIRST;policy<=GraphStrategyBench2.LAST;policy++){
-				solve(matrix, s);
-			}
-			decisionType = false;
-			for(policy=GraphStrategyBench2.FIRST;policy<=GraphStrategyBench2.LAST;policy++){
-				solve(matrix, s);
-			}
-		}
-	}
-
-	private static void setUB(String s) {
-		File file = new File("/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv");
-		try {
-			BufferedReader buf = new BufferedReader(new FileReader(file));
-			String line = buf.readLine();
-			while(!line.contains(s)){
-				line = buf.readLine();
-			}
-			upperBound = Integer.parseInt(line.split(";")[1]);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
-
-	private static int[][] generate(int n, int s, int max) {
-		Random rd = new Random(s);
-		int[][] costs = new int[n][n];
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				costs[j][i] = costs[i][j] = rd.nextInt(max);
-			}
-		}
-		return costs;
 	}
 
 	private static void solve(int[][] matrix, String instanceName) {
@@ -204,8 +145,11 @@ public class TSP_heur {
 		gc.addPropagators(mst);
 		solver.post(gc);
 		// config
-		GraphStrategyBench2 strategy = new GraphStrategyBench2(undi,matrix,mst);
-		strategy.configure(policy, decisionType, trick, constructive);
+		if(search!=0){
+			throw new UnsupportedOperationException("not implemented");
+		}
+		GraphStrategies strategy = new GraphStrategies(undi,matrix,mst);
+		strategy.configure(policy,true,true,false);
 		switch (search){
 			case 0:
 				solver.set(strategy);break;
@@ -213,88 +157,38 @@ public class TSP_heur {
 			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strategy));break;
 			default: throw new UnsupportedOperationException();
 		}
+		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
+			public void afterInitialPropagation(){
+				System.out.println("cost after prop ini : "+totalCost);
+				int e = 0;
+				int k = 0;
+				for(int i=0;i<n;i++){
+					e+=undi.getEnvelopGraph().getNeighborsOf(i).getSize();
+					k+=undi.getKernelGraph().getNeighborsOf(i).getSize();
+				}
+				e/=2;
+				k/=2;
+				System.out.println(k+"/"+e);
+			}
+		});
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-		checkUndirected(solver, undi, totalCost, matrix);
+		check(solver, undi, totalCost, matrix);
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
 				+ solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";"+policy;
-		if(decisionType){
-			txt+=";1";
-		}else{
-			txt+=";0";
-		}
-		if(trick){
-			txt+=";1";
-		}else{
-			txt+=";0";
-		}
-		if(constructive){
-			txt+=";1";
-		}else{
-			txt+=";0";
-		}
-		txt+= ";\n";
-		TSP_CP12.writeTextInto(txt, outFile);
+				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";"+allDiffAC+";"+search+";\n";
+		TextWriter.writeTextInto(txt, outFile);
 	}
 
-	private static int findUB(int[][] matrix) {
-		final int n = matrix.length;
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(matrix[i][j] != matrix[j][i]){
-					System.out.println(i+" : "+j);
-					System.out.println(matrix[i][j]+" != "+matrix[j][i]);
-					throw new UnsupportedOperationException();
-				}
-			}
-		}
-		solver = new Solver();
-		// variables
-		totalCost = VariableFactory.bounded("obj",0,Integer.MAX_VALUE/4,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
-		for(int i=0;i<n;i++){
-			undi.getKernelGraph().activateNode(i);
-			for(int j=i+1;j<n;j++){
-				undi.getEnvelopGraph().addEdge(i,j);
-			}
-		}
-		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
-		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
-		mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		mst.waitFirstSolution(true);
-		gc.addPropagators(mst);
-		solver.post(gc);
-		// config
-		GraphStrategyBench2 strategy = new GraphStrategyBench2(undi,matrix,mst);
-		strategy.configure(7, true, true, false);
-		solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strategy));
-		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT*10);
-		SearchMonitorFactory.log(solver, true, false);
-		// resolution
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-		checkUndirected(solver, undi, totalCost, matrix);
-		//output
-		int sv = solver.getSearchLoop().getMeasures().getObjectiveValue();
-		return solver.getSearchLoop().getObjectivemanager().getBestValue();
-	}
-
-	private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
+	private static void check(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
 		int n = matrix.length;
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-			TSP_CP12.writeTextInto("BUG\n", outFile);
 			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount() > 0){
@@ -307,10 +201,8 @@ public class TSP_heur {
 				}
 			}
 			if(sum!=solver.getSearchLoop().getObjectivemanager().getBestValue()){
-				TSP_CP12.writeTextInto("BUG\n", outFile);
 				throw new UnsupportedOperationException();
 			}
 		}
 	}
-
 }

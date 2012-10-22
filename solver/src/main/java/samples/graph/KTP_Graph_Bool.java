@@ -30,6 +30,8 @@ package samples.graph;
 import choco.kernel.ESat;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
+import samples.graph.input.HCP_Utils;
+import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -56,7 +58,7 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.*;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.ISet;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ import java.util.ArrayList;
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class HCPsymmetricKTP {
+public class KTP_Graph_Bool {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -88,12 +90,12 @@ public class HCPsymmetricKTP {
 	// King Tour
 	private static void kingTour() {
 		outFile = "KING_TOUR.csv";
-		HCP_Parser.clearFile(outFile);
-		HCP_Parser.writeTextInto("instance;nbSols;nbNodes;nbFails;props;time;model;\n", outFile);
+		TextWriter.clearFile(outFile);
+		TextWriter.writeTextInto("instance;nbSols;nbNodes;nbFails;props;time;model;\n", outFile);
 		for(int size=10; size<500;size+=10){
 			String s = "king_"+size+"x"+size;
 			System.out.println(s);
-			boolean[][] matrix = HCPsymmetric.generateKingTourInstance(size);
+			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
 			if(activeGraphs)
 			solveUndiGraph(matrix, s);
 //			System.exit(0);
@@ -140,7 +142,7 @@ public class HCPsymmetricKTP {
 				+ (int)(solver.getMeasures().getFailCount()) + ";"
 				+ (int)(solver.getMeasures().getPropagationsCount()+solver.getMeasures().getEventsCount()) + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) + ";graph;\n";
-		HCP_Parser.writeTextInto(txt, outFile);
+		TextWriter.writeTextInto(txt, outFile);
 		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
 			activeGraphs = false;
 			System.exit(0);
@@ -215,7 +217,7 @@ public class HCPsymmetricKTP {
 				+ (int)(solver.getMeasures().getFailCount()) + ";"
 				+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
-		HCP_Parser.writeTextInto(txt, outFile);
+		TextWriter.writeTextInto(txt, outFile);
 		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
 			activeBools = false;
 		}

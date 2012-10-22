@@ -1,4 +1,4 @@
-package samples.graph;
+package samples.graph.input;
 
 import gnu.trove.list.array.TIntArrayList;
 

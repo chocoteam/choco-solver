@@ -41,7 +41,7 @@ import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.GraphVar;
 
-public class GraphStrategyBench2 extends GraphStrategy {
+public class GraphStrategies extends GraphStrategy {
 
 
 	//***********************************************************************************
@@ -77,7 +77,7 @@ public class GraphStrategyBench2 extends GraphStrategy {
 	int from,to;
 	int value;
 
-	public GraphStrategyBench2(GraphVar graphVar, int[][] costMatrix, IGraphRelaxation relaxation) {
+	public GraphStrategies(GraphVar graphVar, int[][] costMatrix, IGraphRelaxation relaxation) {
 		super(graphVar,null,null,null);
 		costs = costMatrix;
 		relax = relaxation;
