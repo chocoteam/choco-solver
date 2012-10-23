@@ -47,4 +47,12 @@ public enum ESat {
         }
     }
 
+    public static ESat not(ESat sat){
+        switch (sat){
+            case TRUE: return FALSE;
+            case FALSE: return TRUE;
+            default : return sat;
+        }
+    }
+
 }

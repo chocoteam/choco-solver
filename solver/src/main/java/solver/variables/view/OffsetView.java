@@ -55,13 +55,13 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends IntView {
+public class OffsetView<IV extends IntVar> extends IntView<IV> {
 
     final int cste;
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
 
-    public OffsetView(final IntVar var, final int cste, Solver solver) {
+    public OffsetView(final IV var, final int cste, Solver solver) {
         super("(" + var.getName() + "+" + cste + ")", var, solver);
         this.cste = cste;
     }
@@ -69,7 +69,7 @@ public final class OffsetView extends IntView {
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
-        if(var.getDelta() == NoDelta.singleton){
+        if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
         return new IntDeltaMonitor(var.getDelta(), propagator) {
@@ -95,33 +95,33 @@ public final class OffsetView extends IntView {
 //            solver.getExplainer().removeValue(this, value, cause);
 //            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
 //        } else {
-            if (inf <= value && value <= sup) {
-                EventType e = EventType.REMOVE;
+        if (inf <= value && value <= sup) {
+            EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(value - cste, this);
-                if (done) {
-                    if (value == inf) {
-                        e = EventType.INCLOW;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
-                    } else if (value == sup) {
-                        e = EventType.DECUPP;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
+            boolean done = var.removeValue(value - cste, this);
+            if (done) {
+                if (value == inf) {
+                    e = EventType.INCLOW;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
                     }
-                    if (this.instantiated()) {
-                        e = EventType.INSTANTIATE;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
+                } else if (value == sup) {
+                    e = EventType.DECUPP;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
                     }
-                    this.notifyPropagators(e, cause);
-//                    solver.getExplainer().removeValue(this, value, cause);
-                    return true;
                 }
+                if (this.instantiated()) {
+                    e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
+                }
+                this.notifyPropagators(e, cause);
+//                    solver.getExplainer().removeValue(this, value, cause);
+                return true;
             }
+        }
 //        }
         return false;
     }
@@ -163,20 +163,20 @@ public final class OffsetView extends IntView {
 //                solver.getExplainer().updateLowerBound(this, old, value, cause);
 //                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
 //            } else {
-                EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(value - cste, this);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                }
-                if (done) {
-                    this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
-                    return true;
+            EventType e = EventType.INCLOW;
+            boolean done = var.updateLowerBound(value - cste, this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            if (done) {
+                this.notifyPropagators(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                return true;
+            }
+        }
 //        }
         return false;
     }
@@ -191,20 +191,20 @@ public final class OffsetView extends IntView {
 //                solver.getExplainer().updateUpperBound(this, old - cste, value - cste, antipromo);
 //                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
 //            } else {
-                EventType e = EventType.DECUPP;
-                boolean done = var.updateUpperBound(value - cste, cause);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                }
-                if (done) {
-                    this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, old - cste, value - cste, antipromo);
-                    return true;
+            EventType e = EventType.DECUPP;
+            boolean done = var.updateUpperBound(value - cste, cause);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            if (done) {
+                this.notifyPropagators(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, old - cste, value - cste, antipromo);
+                return true;
+            }
+        }
 //        }
         return false;
     }

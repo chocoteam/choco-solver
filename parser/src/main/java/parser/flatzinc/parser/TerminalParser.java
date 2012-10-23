@@ -46,7 +46,7 @@ public final class TerminalParser {
 
     final static String[] KEYWORDS =
             {"bool", "int", "set", "of", "array", "var", "true", "false", "predicate",
-            "constraint", "solve", "satisfy", "minimize", "maximize"};
+                    "constraint", "solve", "satisfy", "minimize", "maximize"};
 
     /**
      * {@link Terminals} object for lexing and parsing the operators with names specified in
@@ -56,22 +56,31 @@ public final class TerminalParser {
 
     static final Parser<String> NUMBER = Terminals.IntegerLiteral.PARSER;
 
-    static final Parser<String> IDENTIFIER = Terminals.Identifier.PARSER;
-
-    final static Parser<?> TOKENIZER =
-            Parsers.or(
-                    TERMS.tokenizer(),
-                    Terminals.IntegerLiteral.TOKENIZER
-            );
-
     /**
      * Scanner for fzn line comment
      */
     private static final Parser<Void> COMMENT = Scanners.lineComment("%");
-    /**
-     * Scanner for a line feed character ({@code '\n'}).
-     */
-    private static final Parser<Void> BACKSLASH = Scanners.isChar('\n');
+
+    private static final Parser<Void> EOF = Scanners.isChar('\n');
+
+    private static final Parser<Void> IGNORED =
+            Parsers.or(COMMENT, Scanners.WHITESPACES, EOF).skipMany();
+
+    static final Parser<String> IDENTIFIER = Terminals.Identifier.PARSER;
+
+
+    static final Parser<?> TOKENIZER =
+            Parsers.or(
+                    Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+                    Terminals.CharLiteral.SINGLE_QUOTE_TOKENIZER,
+                    Terminals.IntegerLiteral.TOKENIZER,
+                    TERMS.tokenizer()
+            );
+
+//    /**
+//     * Scanner for a line feed character ({@code '\n'}).
+//     */
+//    private static final Parser<Void> BACKSLASH = Scanners.isChar('\n');
 
     static final Indentation INDENTATION = new Indentation();
 
@@ -82,8 +91,7 @@ public final class TerminalParser {
      * <p> {@code this} must be a token level parser.
      */
     public static <T> T parse(Parser<T> parser, String source) {
-        return parser.from(INDENTATION.lexer(TOKENIZER, Indentation.WHITESPACES.or(COMMENT).or(BACKSLASH).many()))
-                .parse(source);
+        return parser.from(TOKENIZER, IGNORED).parse(source);
     }
 
 

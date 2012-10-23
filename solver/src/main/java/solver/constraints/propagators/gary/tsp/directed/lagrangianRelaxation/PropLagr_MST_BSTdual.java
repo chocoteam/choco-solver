@@ -343,7 +343,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		initAndRun();
 	}
 	@Override

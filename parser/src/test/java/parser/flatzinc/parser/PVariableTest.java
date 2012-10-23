@@ -44,27 +44,28 @@ import solver.variables.view.IntView;
 public class PVariableTest {
 
     FZNParser fzn;
+
     @BeforeTest
-    public void before(){
+    public void before() {
         fzn = new FZNParser();
     }
 
     @Test
-    public void testBool(){
+    public void testBool() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var bool: bb::var_is_introduced::is_defined_var;");
         Object o = fzn.map.get("bb");
         Assert.assertTrue(BoolVar.class.isInstance(o));
-        BoolVar oi = (BoolVar)o;
+        BoolVar oi = (BoolVar) o;
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 1);
     }
 
     @Test
-    public void testBound(){
+    public void testBound() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 0 .. 9: A::var_is_introduced;");
         Object o = fzn.map.get("A");
         Assert.assertTrue(IntVar.class.isInstance(o));
-        IntVar oi = (IntVar)o;
+        IntVar oi = (IntVar) o;
         Assert.assertFalse(oi.hasEnumeratedDomain());
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 9);
@@ -72,11 +73,11 @@ public class PVariableTest {
     }
 
     @Test
-    public void testEnum(){
+    public void testEnum() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var {0,3,18}: B::var_is_introduced;");
         Object o = fzn.map.get("B");
         Assert.assertTrue(IntVar.class.isInstance(o));
-        IntVar oi = (IntVar)o;
+        IntVar oi = (IntVar) o;
         Assert.assertTrue(oi.hasEnumeratedDomain());
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 18);
@@ -84,13 +85,14 @@ public class PVariableTest {
     }
 
     @Test
-    public void testOutput(){
+    public void testOutput() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 123456789..987654321: num :: output_var = INT____00001;");
         Object o = fzn.map.get("num");
         Assert.assertTrue(IntView.class.isInstance(o));
     }
-//
+
+    //
 //    @Test
 //    public void testSetBound(){
 //        TerminalParser.parse(fzn.PAR_VAR_DECL, "var set of 0..9: S::var_is_introduced;");
@@ -113,28 +115,56 @@ public class PVariableTest {
 //    }
 //
     @Test
-    public void testArray(){
+    public void testArray() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);");
         Object o = fzn.map.get("C");
         Assert.assertTrue(o.getClass().isArray());
-        IntVar[] oi = (IntVar[])o;
+        IntVar[] oi = (IntVar[]) o;
         Assert.assertEquals(oi.length, 3);
         Assert.assertEquals(oi[0].getName(), "C_1");
         Assert.assertEquals(oi[0].getDomainSize(), 10);
     }
 
     @Test
-    public void testArray2(){
+    public void testArray2() {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 5: a ::output_var;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 5: b::output_var;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 5: c::output_var;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "array[1 .. 3] of var 1 .. 5: alpha = [ a, b, c];");
         Object o = fzn.map.get("alpha");
         Assert.assertTrue(o.getClass().isArray());
-        IntVar[] oi = (IntVar[])o;
+        IntVar[] oi = (IntVar[]) o;
         Assert.assertEquals(oi.length, 3);
         Assert.assertEquals(oi[0].getName(), "a");
         Assert.assertEquals(oi[0].getDomainSize(), 5);
+    }
+
+    @Test
+    public void testArray3() {
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 3..3: X1 = 3;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..10: X10;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..9: X2;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..9: X3;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..9: X4;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..9: X5;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..9: X6;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..10: X7;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..10: X8;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1..10: X9;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1..10] of var 1..10: Vars :: output_array([1..10]) = [3, X2, X3, X4, X5, X6, X7, X8, X9, X10];");
+        Object o = fzn.map.get("Vars");
+        Assert.assertTrue(o.getClass().isArray());
+        IntVar[] oi = (IntVar[]) o;
+        Assert.assertEquals(oi.length, 10);
+        Assert.assertEquals(oi[0].getName(), "X1");
+        Assert.assertEquals(oi[0].getDomainSize(), 1);
+    }
+
+    @Test
+    public void testArray4(){
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1..8] of var 1..8: queens " +
+                ":: output_array([1..8]) " +
+                ":: viz([viztype(\"vector\"), vizpos(0, 2), vizdisplay(\"expanded\"), vizwidth(8), vizheight(8), vizrange(1, 8)]);");
     }
 
 }

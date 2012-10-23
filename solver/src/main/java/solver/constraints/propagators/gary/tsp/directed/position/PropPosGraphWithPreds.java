@@ -124,7 +124,7 @@ public class PropPosGraphWithPreds extends Propagator {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 

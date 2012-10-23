@@ -701,4 +701,8 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
 
+    @Override
+    public String toString() {
+        return representedBy.toString();
+    }
 }

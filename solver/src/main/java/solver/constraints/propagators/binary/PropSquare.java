@@ -1,31 +1,32 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
@@ -34,7 +35,10 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -46,6 +50,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
@@ -55,7 +60,7 @@ public class PropSquare extends Propagator<IntVar> {
                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
         this.idms = new IIntDeltaMonitor[vars.length];
-        for(int i = 0; i < vars.length;i++){
+        for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].monitorDelta(this);
         }
         rem_proc = new RemProc(this);
@@ -81,13 +86,13 @@ public class PropSquare extends Propagator<IntVar> {
         updateLowerBoundofY();
         updateUpperBoundofY();
         updateHolesinY();
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) { // filter from X to Y
             if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
                 updateLowerBoundofY();
@@ -168,11 +173,11 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(sqr(a0), sqr(b0)), this);
+        vars[0].updateLowerBound(Math.min(sqr(a0), sqr(b0)), aCause);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), this);
+        vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), aCause);
 
     }
 
@@ -186,12 +191,12 @@ public class PropSquare extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[0].removeInterval(left, right, this);
+                        vars[0].removeInterval(left, right, aCause);
                         left = right = value;
                     }
                 }
             }
-            vars[0].removeInterval(left, right, this);
+            vars[0].removeInterval(left, right, aCause);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -201,7 +206,7 @@ public class PropSquare extends Propagator<IntVar> {
                 }
                 value = vars[0].nextValue(value);
             }
-            vars[0].updateLowerBound(nlb, this);
+            vars[0].updateLowerBound(nlb, aCause);
 
             value = vars[0].getUB();
             int nub = value + 1;
@@ -211,22 +216,22 @@ public class PropSquare extends Propagator<IntVar> {
                 }
                 value = vars[0].previousValue(value);
             }
-            vars[0].updateUpperBound(nub, this);
+            vars[0].updateUpperBound(nub, aCause);
         }
     }
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(sqr(remVal), this);
+            vars[0].removeValue(sqr(remVal), aCause);
         }
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), this);
+        vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), aCause);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
+        vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), aCause);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -239,32 +244,59 @@ public class PropSquare extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[1].removeInterval(left, right, this);
+                        vars[1].removeInterval(left, right, aCause);
                         left = right = value;
                     }
                 }
             }
-            vars[1].removeInterval(left, right, this);
+            vars[1].removeInterval(left, right, aCause);
         } else {
             int lb = vars[1].getLB();
             int ub = vars[1].getUB();
             while (!vars[0].contains(sqr(lb))) {
                 lb = vars[1].nextValue(lb + 1);
-                if(lb>ub)break;
+                if (lb > ub) break;
             }
-            vars[1].updateLowerBound(lb, this);
+            vars[1].updateLowerBound(lb, aCause);
 
             while (!vars[0].contains(sqr(ub))) {
                 ub = vars[1].nextValue(ub + 1);
-                if(ub<lb)break;
+                if (ub < lb) break;
             }
-            vars[1].updateUpperBound(ub, this);
+            vars[1].updateUpperBound(ub, aCause);
         }
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
-        vars[1].removeValue(floor_sqrt(remVal), this);
-        vars[1].removeValue(-ceil_sqrt(remVal), this);
+        vars[1].removeValue(floor_sqrt(remVal), aCause);
+        vars[1].removeValue(-ceil_sqrt(remVal), aCause);
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        //        return super.explain(d);
+        if (d.getVar() == vars[0]) {
+            Explanation explanation = Explanation.build(aCause);
+            if (d instanceof ValueRemoval) {
+                int val = (int) Math.sqrt(((ValueRemoval) d).getVal());
+                explanation.add(vars[1].explain(VariableState.REM, val));
+                explanation.add(vars[1].explain(VariableState.REM, -val));
+            } else {
+                throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        } else if (d.getVar() == vars[1]) {
+            Explanation explanation = Explanation.build(aCause);
+            if (d instanceof ValueRemoval) {
+                int val = ((ValueRemoval) d).getVal() ^ 2;
+                explanation.add(vars[0].explain(VariableState.REM, val));
+            } else {
+                throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        } else {
+            return super.explain(d);
+        }
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

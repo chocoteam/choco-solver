@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary.globalcardinality;
 
@@ -36,7 +36,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -63,29 +62,29 @@ import java.util.BitSet;
  */
 public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n, n2;
-	private DirectedGraph digraph;
-	private int[] nodeSCC;
-	//	private BitSet free;
-	private DirectedRemProc remProc;
-	protected final IIntDeltaMonitor[] idms;
-	private StrongConnectivityFinder SCCfinder;
-	// for augmenting matching (BFS)
-	private int[] father;
-	private BitSet in;
-	private TIntIntHashMap map;
-	int[] fifo;
-	private int[] lb,ub;
-	private IStateInt[] flow;
-	private TIntArrayList boundedVariables,valuesToCompute;
+    private int n, n2;
+    private DirectedGraph digraph;
+    private int[] nodeSCC;
+    //	private BitSet free;
+    private DirectedRemProc remProc;
+    protected final IIntDeltaMonitor[] idms;
+    private StrongConnectivityFinder SCCfinder;
+    // for augmenting matching (BFS)
+    private int[] father;
+    private BitSet in;
+    private TIntIntHashMap map;
+    int[] fifo;
+    private int[] lb, ub;
+    private IStateInt[] flow;
+    private TIntArrayList boundedVariables, valuesToCompute;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
 	/**
 	 * Global Cardinality Constraint (GCC) for integer variables
@@ -157,87 +156,87 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		}
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder();
-		st.append("PropGCC_LowUp_AC(");
-		int i = 0;
-		for (; i < Math.min(4, vars.length); i++) {
-			st.append(vars[i].getName()).append(", ");
-		}
-		if (i < vars.length - 2) {
-			st.append("...,");
-		}
-		st.append(vars[vars.length - 1].getName()).append(")");
-		return st.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append("PropGCC_LowUp_AC(");
+        int i = 0;
+        for (; i < Math.min(4, vars.length); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < vars.length - 2) {
+            st.append("...,");
+        }
+        st.append(vars[vars.length - 1].getName()).append(")");
+        return st.toString();
+    }
 
-	//***********************************************************************************
-	// Initialization
-	//***********************************************************************************
+    //***********************************************************************************
+    // Initialization
+    //***********************************************************************************
 
-	private void buildDigraph() throws ContradictionException {
-		digraph.desactivateNode(n2);
-		for (int i = 0; i < n2; i++) {
-			flow[i].set(0);
-			digraph.getSuccessorsOf(i).clear();
-			digraph.getPredecessorsOf(i).clear();
-		}
-		int j, ub;
-		IntVar v;
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			if(v.instantiated()){
-				j = map.get(ub);
-				if (flow[j].get()<this.ub[j]){
-					digraph.addArc(j, i);
-					flow[i].add(1);
-					flow[j].add(1);
-				} else {
-					contradiction(v, "");
-				}
-			}else{
-				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					j = map.get(k);
-					digraph.addArc(i, j);
-				}
-			}
-		}
-	}
+    private void buildDigraph() throws ContradictionException {
+        digraph.desactivateNode(n2);
+        for (int i = 0; i < n2; i++) {
+            flow[i].set(0);
+            digraph.getSuccessorsOf(i).clear();
+            digraph.getPredecessorsOf(i).clear();
+        }
+        int j, ub;
+        IntVar v;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            if (v.instantiated()) {
+                j = map.get(ub);
+                if (flow[j].get() < this.ub[j]) {
+                    digraph.addArc(j, i);
+                    flow[i].add(1);
+                    flow[j].add(1);
+                } else {
+                    contradiction(v, "");
+                }
+            } else {
+                for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                    j = map.get(k);
+                    digraph.addArc(i, j);
+                }
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// MATCHING
-	//***********************************************************************************
+    //***********************************************************************************
+    // MATCHING
+    //***********************************************************************************
 
-	private void repairMatching() throws ContradictionException {
-		for (int i=0; i<n; i++) {
-			if(flow[i].get()==0){
-				assignVariable(i);
-			}
-		}
-		for (int i=n; i<n2; i++) {
-			while(flow[i].get()<lb[i]){
-				useValue(i);
-			}
-		}
-	}
+    private void repairMatching() throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            if (flow[i].get() == 0) {
+                assignVariable(i);
+            }
+        }
+        for (int i = n; i < n2; i++) {
+            while (flow[i].get() < lb[i]) {
+                useValue(i);
+            }
+        }
+    }
 
-	private void assignVariable(int i) throws ContradictionException {
-		int mate = augmentPath_BFS(i);
-		if (mate != -1) {
-			flow[mate].add(1);
-			flow[i].add(1);
-			int tmp = mate;
-			while (tmp != i) {
-				digraph.removeArc(father[tmp], tmp);
-				digraph.addArc(tmp, father[tmp]);
-				tmp = father[tmp];
-			}
-		} else {
-			contradiction(vars[i], "no match");
-		}
-	}
+    private void assignVariable(int i) throws ContradictionException {
+        int mate = augmentPath_BFS(i);
+        if (mate != -1) {
+            flow[mate].add(1);
+            flow[i].add(1);
+            int tmp = mate;
+            while (tmp != i) {
+                digraph.removeArc(father[tmp], tmp);
+                digraph.addArc(tmp, father[tmp]);
+                tmp = father[tmp];
+            }
+        } else {
+            contradiction(vars[i], "no match");
+        }
+    }
 
 	private int augmentPath_BFS(int root) {
 		in.clear();
@@ -265,21 +264,21 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		return -1;
 	}
 
-	private void useValue(int i) throws ContradictionException {
-		int mate = swapValue_BFS(i);
-		if (mate != -1) {
-			flow[mate].add(-1);
-			flow[i].add(1);
-			int tmp = mate;
-			while (tmp != i) {
-				digraph.removeArc(tmp, father[tmp]);
-				digraph.addArc(father[tmp], tmp);
-				tmp = father[tmp];
-			}
-		} else {
-			contradiction(null, "no match");
-		}
-	}
+    private void useValue(int i) throws ContradictionException {
+        int mate = swapValue_BFS(i);
+        if (mate != -1) {
+            flow[mate].add(-1);
+            flow[i].add(1);
+            int tmp = mate;
+            while (tmp != i) {
+                digraph.removeArc(tmp, father[tmp]);
+                digraph.addArc(father[tmp], tmp);
+                tmp = father[tmp];
+            }
+        } else {
+            contradiction(null, "no match");
+        }
+    }
 
 	private int swapValue_BFS(int root) {
 		in.clear();
@@ -291,40 +290,40 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 			x = fifo[indexFirst++];
 			succs = digraph.getPredecessorsOf(x);
 //			succs = digraph.getSuccessorsOf(x);
-			for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
-				if (!in.get(y)) {
-					father[y] = x;
-					fifo[indexLast++] = y;
-					in.set(y);
-					if (flow[y].get()>this.lb[y]){
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    fifo[indexLast++] = y;
+                    in.set(y);
+                    if (flow[y].get() > this.lb[y]) {
 //					if (flow[y].get()<this.ub[y]){
-						return y;
-					}
-				}
-			}
-		}
-		return -1;
-	}
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
 
-	//***********************************************************************************
-	// PRUNING
-	//***********************************************************************************
+    //***********************************************************************************
+    // PRUNING
+    //***********************************************************************************
 
-	private void buildSCC() {
-		digraph.desactivateNode(n2);
-		digraph.activateNode(n2);
-		for (int i = n; i < n2; i++) {
-			if (flow[i].get()<ub[i]) {
-				digraph.addArc(i, n2);
-			}
-			if(flow[i].get()>lb[i]){
-				digraph.addArc(n2, i);
-			}
-		}
-		SCCfinder.findAllSCC();
-		nodeSCC = SCCfinder.getNodesSCC();
-		digraph.desactivateNode(n2);
-	}
+    private void buildSCC() {
+        digraph.desactivateNode(n2);
+        digraph.activateNode(n2);
+        for (int i = n; i < n2; i++) {
+            if (flow[i].get() < ub[i]) {
+                digraph.addArc(i, n2);
+            }
+            if (flow[i].get() > lb[i]) {
+                digraph.addArc(n2, i);
+            }
+        }
+        SCCfinder.findAllSCC();
+        nodeSCC = SCCfinder.getNodesSCC();
+        digraph.desactivateNode(n2);
+    }
 
 	private void filter() throws ContradictionException {
 		buildSCC();
@@ -371,95 +370,94 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		}
 	}
 
-	//***********************************************************************************
-	// PROPAGATION
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-			buildDigraph();
-			repairMatching();
-		}
-		filter();
-		for(int i=0;i<n;i++){
-			idms[i].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            buildDigraph();
+            repairMatching();
+        }
+        filter();
+        for (int i = 0; i < n; i++) {
+            idms[i].unfreeze();
+        }
+    }
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-		valuesToCompute.clear();
-		idms[varIdx].freeze();
-		idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-		idms[varIdx].unfreeze();
-		if(flow[varIdx].get()==0){
-			assignVariable(varIdx);
-		}
-		int val;
-		for(int i=valuesToCompute.size()-1;i>=0;i--){
-			val = valuesToCompute.get(i);
-			if(flow[val].get()<lb[val]){
-				useValue(val);
-			}
-		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        valuesToCompute.clear();
+        idms[varIdx].freeze();
+        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
+        if (flow[varIdx].get() == 0) {
+            assignVariable(varIdx);
+        }
+        int val;
+        for (int i = valuesToCompute.size() - 1; i >= 0; i--) {
+            val = valuesToCompute.get(i);
+            if (flow[val].get() < lb[val]) {
+                useValue(val);
+            }
+        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
 //		propagate(EventType.FULL_PROPAGATION.mask);
-	}
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
 
-	@Override
-	public int getPropagationConditions() {
-		return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
-	}
+    @Override
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int[] f = new int[n2];
-		if (isCompletelyInstantiated()) {
-			for (int i = 0; i < n; i++) {
-				f[map.get(vars[i].getValue())]++;
-			}
-			for (int i = n; i < n2; i++) {
-				if(f[i]<lb[i] || f[i]>ub[i]){
-					return ESat.FALSE;
-				}
-			}
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int[] f = new int[n2];
+        if (isCompletelyInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                f[map.get(vars[i].getValue())]++;
+            }
+            for (int i = n; i < n2; i++) {
+                if (f[i] < lb[i] || f[i] > ub[i]) {
+                    return ESat.FALSE;
+                }
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	private class DirectedRemProc implements UnaryIntProcedure<Integer> {
-		int idx;
+    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
+        int idx;
 
-		public void execute(int i) throws ContradictionException {
-			i = map.get(i);
-			if(digraph.arcExists(idx,i)){
-				digraph.removeArc(idx,i);
-			}
-			else if(digraph.arcExists(i,idx)){
-				digraph.removeArc(i,idx);
-				flow[idx].add(-1);
-				flow[i].add(-1);
-				if(flow[i].get()<lb[i]){
-					valuesToCompute.add(i);
-				}
-			}
-		}
+        public void execute(int i) throws ContradictionException {
+            i = map.get(i);
+            if (digraph.arcExists(idx, i)) {
+                digraph.removeArc(idx, i);
+            } else if (digraph.arcExists(i, idx)) {
+                digraph.removeArc(i, idx);
+                flow[idx].add(-1);
+                flow[i].add(-1);
+                if (flow[i].get() < lb[i]) {
+                    valuesToCompute.add(i);
+                }
+            }
+        }
 
-		@Override
-		public UnaryIntProcedure set(Integer idx) {
-			this.idx = idx;
-			return this;
-		}
-	}
+        @Override
+        public UnaryIntProcedure set(Integer idx) {
+            this.idx = idx;
+            return this;
+        }
+    }
 }

@@ -475,7 +475,7 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+	public void propagate(int varIdx, int mask) throws ContradictionException {
 		if(solver.getMeasures().getSolutionCount()==0 || true){
 			forcePropagate(EventType.FULL_PROPAGATION);
 			return;

@@ -40,6 +40,7 @@ import java.util.List;
 
 
 /**
+ * (&#8721; i &#8712; 1..n: as[i].bs[i] &#8804; c) &#8660; r where n is the common length of as and bs
  * <br/>
  *
  * @author Charles Prud'homme
@@ -52,11 +53,12 @@ public class IntLinLeReifBuilder implements IBuilder {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
+
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        return new ReifiedConstraint(r,
-                Sum.leq(bs, as, c, solver),
-                Sum.leq(bs, as, c + 1, solver),
-                solver);
+        Constraint cc = Sum.leq(bs, as, c, solver);
+        Constraint oc = Sum.geq(bs, as, c + 1, solver);
+
+        return new ReifiedConstraint(r, cc, oc, solver);
     }
 }

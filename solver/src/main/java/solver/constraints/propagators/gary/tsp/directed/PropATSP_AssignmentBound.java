@@ -341,7 +341,7 @@ public class PropATSP_AssignmentBound extends Propagator<Variable> implements IG
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+	public void propagate(int varIdx, int mask) throws ContradictionException {
 		gdm.freeze();
 		gdm.forEachArc(remProc, EventType.REMOVEARC);
 		repairMatching();

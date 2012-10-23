@@ -44,9 +44,15 @@ public class InDomainMedian implements ValueIterator<IntVar> {
      */
     @Override
     public int selectValue(IntVar var) {
-        int low = var.getLB();
-        int upp = var.getUB();
-        int mean = (low + upp) / 2;
-        return mean;
+        if (var.hasEnumeratedDomain()) {
+            int dz = var.getDomainSize();
+            int median = var.getLB();
+            for (int i = 0; i < dz / 2; i++) {
+                median = var.nextValue(median);
+            }
+            return median;
+        } else {
+            return var.getLB();
+        }
     }
 }

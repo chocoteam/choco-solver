@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -42,7 +42,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
@@ -57,20 +56,20 @@ import java.util.BitSet;
 /**
  * @PropAnn(tested = {BENCHMARK})
  * Maintain incrementally the reduced graph G_R and SCC
- *  make G_R a hamiltonian path
- *  BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
- *  O(n+m)
- *  User: Jean-Guillaume Fages
- *  Date: 17/11/2011
- * */
+ * make G_R a hamiltonian path
+ * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
+ * O(n+m)
+ * User: Jean-Guillaume Fages
+ * Date: 17/11/2011
+ */
 public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n; 					// number of nodes in G
-	private DirectedGraphVar G;					// the graph variable
+    private int n;                     // number of nodes in G
+    private DirectedGraphVar G;                    // the graph variable
     GraphDeltaMonitor gdm;
 	private IStateInt[] sccOf;		// SCC of each node
 	private IStateInt[] sccFirst,sccNext; // nodes of each scc
@@ -81,20 +80,22 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 	private BitSet sccComputed;		// enable incrementation
 	private StrongConnectivityFinder SCCfinder;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/** Maintain incrementally the reduced graph and strongly connected components of a directed graph variable
-	 * Ensures that the reduced graph is a Hamiltonian path
-	 * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
-	 * @param graph
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		G = graph;
+    /**
+     * Maintain incrementally the reduced graph and strongly connected components of a directed graph variable
+     * Ensures that the reduced graph is a Hamiltonian path
+     * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
+     *
+     * @param graph
+     * @param constraint
+     * @param solver
+     */
+    public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
+        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
@@ -115,14 +116,14 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 		SCCfinder = new StrongConnectivityFinder(G.getEnvelopGraph());
 	}
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+    }
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
@@ -191,10 +192,10 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 		gdm.unfreeze();
 	}
 
-	private void addNode(int scc, int node) {
-		sccNext[node].set(sccFirst[scc].get());
-		sccFirst[scc].set(node);
-	}
+    private void addNode(int scc, int node) {
+        sccNext[node].set(sccFirst[scc].get());
+        sccFirst[scc].set(node);
+    }
 
 	private int visit(int node, int last) throws ContradictionException {
 		if(node==-1){
@@ -228,12 +229,12 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 		return visit(next,last)+1;
 	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		sccComputed.clear();
-		if((mask & EventType.REMOVEARC.mask)!=0){
-			gdm.freeze();
-			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        sccComputed.clear();
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
+            gdm.freeze();
+            gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
             gdm.unfreeze();
 		}
 		int to,x;
@@ -268,46 +269,47 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 		return ESat.UNDEFINED;
 	}
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
 
-	public IStateInt getNSCC(){
-		return n_R;
-	}
+    public IStateInt getNSCC() {
+        return n_R;
+    }
 
 	public ISet[] getOutArcs(){
 		return mates;
 	}
 
-	public IStateInt[] getSCCOF() {
-		return sccOf;
-	}
+    public IStateInt[] getSCCOF() {
+        return sccOf;
+    }
 
-	public IStateInt[] getSCCFirst() {
-		return sccFirst;
-	}
+    public IStateInt[] getSCCFirst() {
+        return sccFirst;
+    }
 
-	public IStateInt[] getSCCNext() {
-		return sccNext;
-	}
+    public IStateInt[] getSCCNext() {
+        return sccNext;
+    }
 
 	public DirectedGraph getReducedGraph() {
 		return G_R;
 	}
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class RemArc implements PairProcedure{
-		private Propagator p;
-		private BitSet restriction;
+    private class RemArc implements PairProcedure {
+        private Propagator p;
+        private BitSet restriction;
 
-		private RemArc(Propagator p){
-			this.p = p;
-			this.restriction = new BitSet(n);
-		}
+        private RemArc(Propagator p) {
+            this.p = p;
+            this.restriction = new BitSet(n);
+        }
+
 		@Override
 		public void execute(int from, int to) throws ContradictionException {
 			int x = sccOf[from].get();

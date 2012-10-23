@@ -39,7 +39,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
 import java.util.BitSet;
 
 public class Tree extends AbstractProblem{

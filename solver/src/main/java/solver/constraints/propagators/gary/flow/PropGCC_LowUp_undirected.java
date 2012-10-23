@@ -356,7 +356,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 	boolean undone = true;
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+	public void propagate(int varIdx, int mask) throws ContradictionException {
 		if(solver.getMeasures().getSolutionCount()==0){
 			// nada!
 		}else if(undone){

@@ -46,7 +46,7 @@ import solver.propagation.generator.Sort;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -324,7 +324,7 @@ public class KTP_Graph_Bool {
 					if(dec == null){
 						dec = new FastDecision(pool);
 					}
-					dec.set(bv,1, Assignment.int_eq);
+					dec.set(bv,1, DecisionOperator.int_eq);
 					return dec;
 				}
 			}
@@ -395,7 +395,7 @@ public class KTP_Graph_Bool {
 		}
 
 		@Override
-		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 			if(vars[idxVarInProp].getLB()==1){
 				int i = mapping[idxVarInProp]/n;
 				int j = mapping[idxVarInProp]%n;

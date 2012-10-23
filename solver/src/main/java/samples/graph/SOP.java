@@ -58,7 +58,7 @@ import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -393,7 +393,7 @@ public class SOP {
 			if(dec==null){
 				dec = new FastDecision(pool);
 			}
-			dec.set(var,(var.getUB()+var.getLB())/2, Assignment.int_split);
+			dec.set(var,(var.getUB()+var.getLB())/2, DecisionOperator.int_split);
 			return dec;
 		}
 	}
