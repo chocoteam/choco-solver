@@ -38,105 +38,105 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.BitSet;
 
 public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private GraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private BitSet toCompute;
-    private TIntArrayList list;
-    private PairProcedure arcEnf;
-    private int n;
+	private GraphVar g;
+	private IGraphDeltaMonitor gdm;
+	private BitSet toCompute;
+	private TIntArrayList list;
+	private PairProcedure arcEnf;
+	private int n;
 
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public PropNoTriangle(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-        g = graph;
-        n = g.getEnvelopGraph().getNbNodes();
-        gdm = g.monitorDelta(this);
-        arcEnf = new EnfArc();
-        toCompute = new BitSet(n);
-        list = new TIntArrayList();
-    }
+	public PropNoTriangle(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		g = graph;
+		n = g.getEnvelopGraph().getNbNodes();
+		gdm = g.monitorDelta(this);
+		arcEnf = new EnfArc();
+		toCompute = new BitSet(n);
+		list = new TIntArrayList();
+	}
 
-    //***********************************************************************************
-    // PROPAGATIONS
-    //***********************************************************************************
+	//***********************************************************************************
+	// PROPAGATIONS
+	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < n; i++) {
-            check(i);
-        }
-        gdm.unfreeze();
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		for(int i=0;i<n;i++){
+			check(i);
+		}
+		gdm.unfreeze();
+	}
 
-    private void check(int i) throws ContradictionException {
-        list.clear();
-        INeighbors nei = g.getKernelGraph().getSuccessorsOf(i);
-        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-            list.add(j);
-        }
-        int nl = list.size();
-        for (int j1 = 0; j1 < nl; j1++) {
-            for (int j2 = j1 + 1; j2 < nl; j2++) {
-                if (g.getKernelGraph().getSuccessorsOf(list.get(j1)).contain(list.get(j2))) {
-                    g.removeArc(list.get(j2), i, aCause);
-                }
-            }
-        }
-    }
+	private void check(int i) throws ContradictionException {
+		list.clear();
+		ISet nei = g.getKernelGraph().getSuccessorsOf(i);
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			list.add(j);
+		}
+		int nl = list.size();
+		for(int j1=0;j1<nl;j1++){
+			for(int j2=j1+1;j2<nl;j2++){
+				if(g.getKernelGraph().getSuccessorsOf(list.get(j1)).contain(list.get(j2))){
+					g.removeArc(list.get(j2),i,this);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        toCompute.clear();
-        gdm.freeze();
-        gdm.forEachArc(arcEnf, EventType.ENFORCEARC);
-        gdm.unfreeze();
-        for (int i = toCompute.nextSetBit(0); i >= 0; i = toCompute.nextSetBit(i + 1)) {
-            check(i);
-        }
-    }
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		toCompute.clear();
+		gdm.freeze();
+		gdm.forEachArc(arcEnf,EventType.ENFORCEARC);
+		gdm.unfreeze();
+		for(int i=toCompute.nextSetBit(0);i>=0;i=toCompute.nextSetBit(i+1)){
+			check(i);
+		}
+	}
 
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ENFORCEARC.mask;
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.ENFORCEARC.mask;
+	}
 
-    @Override
-    public ESat isEntailed() {
-        if (!g.instantiated()) {
-            return ESat.UNDEFINED;
-        }
-        try {
-            propagate(0);
-            return ESat.TRUE;
-        } catch (Exception e) {
-            return ESat.FALSE;
-        }
-    }
+	@Override
+	public ESat isEntailed() {
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
+		}
+		try{
+			propagate(0);
+			return ESat.TRUE;
+		}catch (Exception e){
+			return ESat.FALSE;
+		}
+	}
 
-    private class EnfArc implements PairProcedure {
-        @Override
-        public void execute(int i, int j) throws ContradictionException {
-            toCompute.set(i);
-            toCompute.set(j);
-        }
-    }
+	private class EnfArc implements PairProcedure {
+		@Override
+		public void execute(int i, int j) throws ContradictionException {
+			toCompute.set(i);
+			toCompute.set(j);
+		}
+	}
 }

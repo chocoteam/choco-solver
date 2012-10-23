@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator channeling a graph and an array of variables
@@ -93,45 +92,42 @@ public class PropRelationGraph extends Propagator {
         return EventType.INT_ALL_MASK(); // TODO ALL_Events
     }
 
-    @Override
-    public ESat isEntailed() {
-        INeighbors nei;
-        for (int i = 0; i < n; i++) {
-            nei = g.getEnvelopGraph().getSuccessorsOf(i);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (g.getKernelGraph().arcExists(i, j) && relation.isEntail(i, j) == ESat.FALSE) {
-                    return ESat.FALSE;
-                }
-            }
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (relation.isEntail(i, j) == ESat.UNDEFINED && !g.getKernelGraph().arcExists(i, j)) {
-                    return ESat.UNDEFINED;
-                }
-            }
-        }
-        return ESat.TRUE;
-    }
+	@Override
+	public ESat isEntailed() {
+		ISet nei;
+		for(int i=0; i<n; i++){
+			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(g.getKernelGraph().arcExists(i, j) && relation.isEntail(i,j)==ESat.FALSE){
+					return ESat.FALSE;
+				}
+			}
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(relation.isEntail(i,j)==ESat.UNDEFINED && !g.getKernelGraph().arcExists(i, j)){
+					return ESat.UNDEFINED;
+				}
+			}
+		}
+		return ESat.TRUE;
+	}
 
     //***********************************************************************************
     // PROCEDURE
     //***********************************************************************************
 
-    private void checkVar(int i) throws ContradictionException {
-        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-        INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-            if (!g.getKernelGraph().arcExists(i, j)) {
-                switch (relation.isEntail(i, j)) {
-                    case TRUE:
-                        if (ker.isActive(i) && ker.isActive(j)) {
-                            g.enforceArc(i, j, aCause);
-                        }
-                        break;
-                    case FALSE:
-                        g.removeArc(i, j, aCause);
-                        break;
-                }
-            }
-        }
-    }
+	private void checkVar(int i) throws ContradictionException {
+		ISet ker = g.getKernelGraph().getActiveNodes();
+		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			if(!g.getKernelGraph().arcExists(i, j)){
+				switch(relation.isEntail(i,j)){
+					case TRUE:
+						if(ker.contain(i) && ker.contain(j)){
+							g.enforceArc(i, j, this);
+						}break;
+					case FALSE: g.removeArc(i, j, this);break;
+				}
+			}
+		}
+	}
 }

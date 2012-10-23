@@ -30,7 +30,7 @@ package solver.variables.graph;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_LinkedList;
 
 /**
  * <br/>
@@ -43,7 +43,7 @@ public class StoredIntLinkedListTest {
     @Test(groups = "1s")
     public void test1() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
-        StoredIntLinkedList llist = new StoredIntLinkedList(environment);
+        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
 
         Assert.assertFalse(llist.contain(1));
         Assert.assertFalse(llist.contain(2));
@@ -95,7 +95,7 @@ public class StoredIntLinkedListTest {
     @Test(groups = "1s")
     public void test2() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
-        StoredIntLinkedList llist = new StoredIntLinkedList(environment);
+        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
 
         int n = 100;
 
@@ -128,7 +128,7 @@ public class StoredIntLinkedListTest {
     @Test(groups = "10s")
     public void test3() {
         EnvironmentTrailing environment = new EnvironmentTrailing();
-        StoredIntLinkedList llist = new StoredIntLinkedList(environment);
+        Set_Std_LinkedList llist = new Set_Std_LinkedList(environment);
 
         int n = 49999;
 

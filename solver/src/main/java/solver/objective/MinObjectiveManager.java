@@ -47,6 +47,7 @@ import solver.variables.IntVar;
 public class MinObjectiveManager extends IObjectiveManager {
 
     private int bestKnownUpperBound;
+	private int bestKnownLowerBound;
 
     final IntVar objective;
 
@@ -55,6 +56,7 @@ public class MinObjectiveManager extends IObjectiveManager {
     public MinObjectiveManager(IntVar objective) {
         this.objective = objective;
         this.bestKnownUpperBound = objective.getUB() + 1;
+		bestKnownLowerBound = objective.getLB();
     }
 
     public void setMeasures(IMeasures measures) {
@@ -69,6 +71,13 @@ public class MinObjectiveManager extends IObjectiveManager {
         return bestKnownUpperBound;
     }
 
+	public int getBestKnownLowerBound() {
+		return bestKnownLowerBound;
+	}
+
+	public int getBestKnownUpperBound() {
+		return bestKnownUpperBound;
+	}
 
     /**
      * {@inheritDoc}
@@ -79,9 +88,14 @@ public class MinObjectiveManager extends IObjectiveManager {
         this.measures.setObjectiveValue(this.bestKnownUpperBound);
     }
 
+	public void updateLB(int lb) {
+        this.bestKnownLowerBound = Math.max(bestKnownLowerBound,lb);
+    }
+
     @Override
     public void postDynamicCut() throws ContradictionException {
         this.objective.updateUpperBound(bestKnownUpperBound - 1, this);
+        this.objective.updateLowerBound(bestKnownLowerBound, this);
     }
 
     @Override

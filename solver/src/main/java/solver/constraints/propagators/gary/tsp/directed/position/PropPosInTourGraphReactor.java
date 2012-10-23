@@ -48,9 +48,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
@@ -70,8 +70,8 @@ public class PropPosInTourGraphReactor extends Propagator {
     private PairProcedure arcEnforced, arcRemoved;
     IStateInt nR;
     IStateInt[] sccOf;
-    INeighbors[] outArcs;
-    IDirectedGraph rg;
+    ISet[] outArcs;
+    DirectedGraph rg;
     // data for algorithms
     BitSet done;
     TIntArrayList nextSCCnodes = new TIntArrayList();
@@ -95,7 +95,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     }
 
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver,
-                                     IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs, IDirectedGraph rg) {
+                                     IStateInt nR, IStateInt[] sccOf, ISet[] outArcs, DirectedGraph rg) {
         this(intVars, graph, constraint, solver);
         this.nR = nR;
         this.sccOf = sccOf;
@@ -143,7 +143,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
-                + EventType.DECUPP.mask + EventType.INCLOW.mask;
+                + EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
     }
 
     @Override
@@ -185,8 +185,8 @@ public class PropPosInTourGraphReactor extends Propagator {
             nextSet.clear();
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
-                intVars[x].updateLowerBound(level, aCause);
-                INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                intVars[x].updateLowerBound(level, this);
+                ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
                         nextSet.add(j);
@@ -219,8 +219,8 @@ public class PropPosInTourGraphReactor extends Propagator {
                 for (int i = currentSet.size() - 1; i >= 0; i--) {
                     nbNode++;
                     x = currentSet.get(i);
-                    intVars[x].updateLowerBound(level, aCause);
-                    INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                    intVars[x].updateLowerBound(level, this);
+                    ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {
                             done.set(j);
@@ -262,8 +262,8 @@ public class PropPosInTourGraphReactor extends Propagator {
             nextSet.clear();
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
-                intVars[x].updateUpperBound(level, aCause);
-                INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+                intVars[x].updateUpperBound(level, this);
+                ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
                         nextSet.add(j);
@@ -296,8 +296,8 @@ public class PropPosInTourGraphReactor extends Propagator {
                 for (int i = currentSet.size() - 1; i >= 0; i--) {
                     nbNodes--;
                     x = currentSet.get(i);
-                    intVars[x].updateUpperBound(level, aCause);
-                    INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
+                    intVars[x].updateUpperBound(level, this);
+                    ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {
                             done.set(j);

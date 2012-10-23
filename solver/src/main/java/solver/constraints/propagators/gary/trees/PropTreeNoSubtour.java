@@ -45,7 +45,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.BitSet;
@@ -86,109 +86,109 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
         super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        this.n = g.getEnvelopGraph().getNbNodes();
-        arcEnforced = new EnfArc();
-        fifo = new int[n];
-        mate = new int[n];
-        in = new BitSet(n);
-        color = new IStateInt[n];
-        size = new IStateInt[n];
-        for (int i = 0; i < n; i++) {
-            color[i] = environment.makeInt(i);
-            size[i] = environment.makeInt(1);
-        }
-    }
+		this.n = g.getEnvelopGraph().getNbNodes();
+		arcEnforced = new EnfArc();
+		fifo = new int[n];
+		mate = new int[n];
+		in = new BitSet(n);
+		color = new IStateInt[n];
+		size = new IStateInt[n];
+		for(int i=0;i<n;i++){
+			color[i] = environment.makeInt(i);
+			size[i] = environment.makeInt(1);
+		}
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < n; i++) {
-            color[i].set(i);
-            size[i].set(1);
-            mate[i] = -1;
-        }
-        INeighbors nei;
-        for (int i = 0; i < n; i++) {
-            nei = g.getKernelGraph().getNeighborsOf(i);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (i < j) {
-                    enforce(i, j);
-                }
-            }
-        }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		for(int i=0;i<n;i++){
+			color[i].set(i);
+			size[i].set(1);
+			mate[i] = -1;
+		}
+		ISet nei;
+		for(int i=0;i<n;i++){
+			nei = g.getKernelGraph().getNeighborsOf(i);
+			for(int j = nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(i<j){
+					enforce(i,j);
+				}
+			}
+		}
+		gdm.unfreeze();
+	}
+
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		gdm.freeze();
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.unfreeze();
-    }
+	}
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        gdm.freeze();
-        gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-        gdm.unfreeze();
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.ENFORCEARC.mask ;
+	}
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ENFORCEARC.mask;
-    }
+	@Override
+	public ESat isEntailed() {
+		return ESat.UNDEFINED; //TODO
+	}
 
-    @Override
-    public ESat isEntailed() {
-        return ESat.UNDEFINED; //TODO
-    }
+	private void enforce(int i, int j) throws ContradictionException {
+		if(size[color[i].get()].get()>size[color[j].get()].get()){
+			enforce(j,i);
+			return;
+		}
+		if(i==j){
+			throw new UnsupportedOperationException();
+		}
+		int ci = color[i].get();
+		int cj = color[j].get();
+		if( ci==cj){
+			contradiction(g,"");
+		}
+		int idxFirst = 0;
+		int idxLast = 0;
+		in.clear();
+		in.set(i);
+		fifo[idxLast++] = i;
+		int x,ck;
+		mate[i] = j;
+		while(idxFirst<idxLast){
+			x = fifo[idxFirst++];
+			ISet nei = g.getEnvelopGraph().getNeighborsOf(x);
+			for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
+				if(k!=mate[x]){
+					ck = color[k].get();
+					if(ck==cj){
+						g.removeArc(x,k,this);
+					}else{
+						if(ck==ci && !in.get(k)){
+							in.set(k);
+							fifo[idxLast++] = k;
+							mate[k] = x;
+						}
+					}
+				}
+			}
+			color[x].set(cj);
+		}
+		size[cj].add(size[ci].get());
+	}
 
-    private void enforce(int i, int j) throws ContradictionException {
-        if (size[color[i].get()].get() > size[color[j].get()].get()) {
-            enforce(j, i);
-            return;
-        }
-        if (i == j) {
-            throw new UnsupportedOperationException();
-        }
-        int ci = color[i].get();
-        int cj = color[j].get();
-        if (ci == cj) {
-            contradiction(g, "");
-        }
-        int idxFirst = 0;
-        int idxLast = 0;
-        in.clear();
-        in.set(i);
-        fifo[idxLast++] = i;
-        int x, ck;
-        mate[i] = j;
-        while (idxFirst < idxLast) {
-            x = fifo[idxFirst++];
-            INeighbors nei = g.getEnvelopGraph().getNeighborsOf(x);
-            for (int k = nei.getFirstElement(); k >= 0; k = nei.getNextElement()) {
-                if (k != mate[x]) {
-                    ck = color[k].get();
-                    if (ck == cj) {
-                        g.removeArc(x, k, aCause);
-                    } else {
-                        if (ck == ci && !in.get(k)) {
-                            in.set(k);
-                            fifo[idxLast++] = k;
-                            mate[k] = x;
-                        }
-                    }
-                }
-            }
-            color[x].set(cj);
-        }
-        size[cj].add(size[ci].get());
-    }
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
 
-    //***********************************************************************************
-    // PROCEDURES
-    //***********************************************************************************
-
-    private class EnfArc implements PairProcedure {
-        @Override
-        public void execute(int i, int j) throws ContradictionException {
-            enforce(i, j);
-        }
-    }
+	private class EnfArc implements PairProcedure {
+		@Override
+		public void execute(int i, int j) throws ContradictionException {
+			enforce(i,j);
+		}
+	}
 }

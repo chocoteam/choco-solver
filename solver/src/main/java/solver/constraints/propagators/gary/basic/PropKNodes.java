@@ -37,7 +37,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K nodes belong to the final graph
@@ -67,33 +67,34 @@ public class PropKNodes extends Propagator {
     // PROPAGATIONS
     //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-        int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
-        k.updateLowerBound(ker, aCause);
-        k.updateUpperBound(env, aCause);
-        if (ker == env) {
-            setPassive();
-        } else if (k.instantiated()) {
-            int v = k.getValue();
-            IActiveNodes envNodes = g.getEnvelopGraph().getActiveNodes();
-            if (v == env) {
-                for (int i = envNodes.getFirstElement(); i >= 0; i = envNodes.getNextElement()) {
-                    g.enforceNode(i, aCause);
-                }
-                setPassive();
-            } else if (v == ker) {
-                IActiveNodes kerNodes = g.getKernelGraph().getActiveNodes();
-                for (int i = envNodes.getFirstElement(); i >= 0; i = envNodes.getNextElement()) {
-                    if (!kerNodes.isActive(i)) {
-                        g.removeNode(i, aCause);
-                    }
-                }
-                setPassive();
-            }
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int env = g.getEnvelopGraph().getActiveNodes().getSize();
+		int ker = g.getKernelGraph().getActiveNodes().getSize();
+		k.updateLowerBound(ker,this);
+		k.updateUpperBound(env,this);
+		if(ker==env){
+			setPassive();
+		}else if (k.instantiated()){
+			int v = k.getValue();
+			ISet envNodes = g.getEnvelopGraph().getActiveNodes();
+			if(v == env){
+				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+					g.enforceNode(i,this);
+				}
+				setPassive();
+			}
+			else if(v == ker){
+				ISet kerNodes = g.getKernelGraph().getActiveNodes();
+				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+					if(!kerNodes.contain(i)){
+						g.removeNode(i, this);
+					}
+				}
+				setPassive();
+			}
+		}
+	}
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
@@ -109,16 +110,16 @@ public class PropKNodes extends Propagator {
         return EventType.REMOVENODE.mask + EventType.ENFORCENODE.mask + EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
     }
 
-    @Override
-    public ESat isEntailed() {
-        int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-        int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
-        if (env < k.getLB() || ker > k.getUB()) {
-            return ESat.FALSE;
-        }
-        if (env == ker) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
+	@Override
+	public ESat isEntailed() {
+		int env = g.getEnvelopGraph().getActiveNodes().getSize();
+		int ker = g.getKernelGraph().getActiveNodes().getSize();
+		if(env<k.getLB() || ker>k.getUB()){
+			return ESat.FALSE;
+		}
+		if(env==ker){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
 }

@@ -37,9 +37,8 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 import java.util.BitSet;
@@ -100,7 +99,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         this.matchingCardinality = matchingCardinality;
         matching = new int[n2];
         nodeSCC = new int[n2];
-        digraph = new StoredDirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST,false);
         free = new BitSet(n2);
         if (g.isDirected()) {
             remProc = new DirectedRemProc();
@@ -130,9 +129,9 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
     //***********************************************************************************
 
     private void buildDigraph() {
-        free.flip(0, n2);
+        free.set(0, n2);
         int j;
-        INeighbors nei;
+        ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(i);
             for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
@@ -191,7 +190,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         int lastIdx = 0;
         fifo[lastIdx++] = root;
         int x, y;
-        INeighbors succs;
+        ISet succs;
         while (firstIdx < lastIdx) {
             x = fifo[firstIdx++];
             succs = digraph.getSuccessorsOf(x);
@@ -216,7 +215,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
     private void filter() throws ContradictionException {
         SCCfinder.findAllSCC();
         nodeSCC = SCCfinder.getNodesSCC();
-        INeighbors succ;
+        ISet succ;
         int j;
         for (int node = 0; node < n; node++) {
             succ = g.getEnvelopGraph().getSuccessorsOf(node);

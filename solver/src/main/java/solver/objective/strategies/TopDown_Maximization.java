@@ -47,21 +47,25 @@ public class TopDown_Maximization extends AbstractStrategy<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar obj;
-    private int val;
-    private PoolManager<FastDecision> pool;
-    private boolean firstCall;
+	private IntVar obj;
+	private int val;
+	private PoolManager<FastDecision> pool;
+	private boolean firstCall;
+	private int LB;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public TopDown_Maximization(IntVar obj) {
-        super(new IntVar[]{obj});
-        this.obj = obj;
-        firstCall = true;
-        pool = new PoolManager<FastDecision>();
-    }
+	public TopDown_Maximization(IntVar obj) {
+		super(new IntVar[]{obj});
+		this.obj = obj;
+		firstCall = true;
+		pool = new PoolManager<FastDecision>();
+		// waits a first solution before triggering the top-down maximization
+		obj.getSolver().getSearchLoop().restartAfterEachSolution(true);
+		obj.getSolver().getSearchLoop().getLimitsBox().setSolutionLimit(2);
+	}
 
     //***********************************************************************************
     // METHODS
@@ -71,22 +75,26 @@ public class TopDown_Maximization extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    @Override
-    public Decision getDecision() {
-        if (obj.instantiated()) {
-            return null;
-        }
-        if (firstCall) {
-            firstCall = false;
-            val = obj.getUB();
-        }
-        System.out.println(obj.getLB() + " : " + obj.getUB() + " -> " + val);
-        FastDecision dec = pool.getE();
-        if (dec == null) {
-            dec = new FastDecision(pool);
-        }
-        dec.set(obj, val, DecisionOperator.int_eq);
-        val--;
-        return dec;
-    }
+	@Override
+	public Decision getDecision() {
+		if(obj.instantiated()){
+			return null;
+		}
+		if(firstCall){
+			firstCall = false;
+			val = obj.getUB();
+			LB = obj.getLB();
+		}
+		if(val<LB){
+			return null;
+		}
+		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val);
+		FastDecision dec = pool.getE();
+		if(dec==null){
+			dec = new FastDecision(pool);
+		}
+		dec.set(obj,val, DecisionOperator.int_eq);
+		val --;
+		return dec;
+	}
 }

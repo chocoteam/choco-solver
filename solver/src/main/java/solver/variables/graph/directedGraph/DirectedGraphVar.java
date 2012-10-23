@@ -40,22 +40,19 @@ import solver.variables.graph.GraphVar;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
+public class DirectedGraphVar extends GraphVar<DirectedGraph> {
 
 	////////////////////////////////// GRAPH PART ///////////////////////////////////////
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
+	public DirectedGraphVar(Solver solver, int nbNodes,
+							GraphType typeEnv, GraphType typeKer,boolean allNodes) {
 		super(solver);
-		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv);
-		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer);
-		kernel.getActiveNodes().clear();
+		envelop = new DirectedGraph(environment, nbNodes, typeEnv,allNodes);
+		kernel = new DirectedGraph(environment, nbNodes, typeKer,allNodes);
 	}
 
 	//***********************************************************************************
@@ -100,16 +97,6 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	//***********************************************************************************
 	// ACCESSORS
 	//***********************************************************************************
-
-	@Override
-	public StoredDirectedGraph getKernelGraph() {
-		return kernel;
-	}
-
-	@Override
-	public StoredDirectedGraph getEnvelopGraph() {
-		return envelop;
-	}
 
 	@Override
 	public boolean isDirected(){

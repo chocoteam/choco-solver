@@ -36,105 +36,103 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-
+import solver.variables.setDataStructures.ISet;
 import java.util.BitSet;
 
 public class PropMaxDiameter extends Propagator<GraphVar> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private GraphVar g;
-    private int maxDiam, n;
-    private BitSet visited;
-    private TIntArrayList set, nextSet;
+	private GraphVar g;
+	private int maxDiam,n;
+	private BitSet visited;
+	private TIntArrayList set,nextSet;
 
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public PropMaxDiameter(GraphVar graph, int maxDiam, Constraint constraint, Solver solver) {
-        super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-        this.g = graph;
-        this.maxDiam = maxDiam;
-        n = g.getEnvelopGraph().getNbNodes();
-        visited = new BitSet(n);
-        set = new TIntArrayList();
-        nextSet = new TIntArrayList();
-    }
+	public PropMaxDiameter(GraphVar graph, int maxDiam, Constraint constraint, Solver solver) {
+		super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		this.g = graph;
+		this.maxDiam = maxDiam;
+		n = g.getEnvelopGraph().getNbNodes();
+		visited = new BitSet(n);
+		set = new TIntArrayList();
+		nextSet = new TIntArrayList();
+	}
 
-    //***********************************************************************************
-    // PROPAGATIONS
-    //***********************************************************************************
+	//***********************************************************************************
+	// PROPAGATIONS
+	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            BFS(i);
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			BFS(i);
+		}
+	}
 
-    private void BFS(int i) throws ContradictionException {
-        nextSet.clear();
-        int idx = i;
-        set.clear();
-        visited.clear();
-        set.add(i);
-        visited.set(i);
-        INeighbors nei;
-        int depth = 0;
-        while (!set.isEmpty() && depth < maxDiam) {
-            for (i = set.size() - 1; i >= 0; i--) {
-                nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                    if (!visited.get(j)) {
-                        visited.set(j);
-                        nextSet.add(j);
-                    }
-                }
-            }
-            depth++;
-            TIntArrayList tmp = nextSet;
-            nextSet = set;
-            set = tmp;
-            nextSet.clear();
-        }
-        if (depth >= maxDiam) {
-            for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
-                g.removeNode(i, aCause);
-            }
-        }
-    }
+	private void BFS(int i) throws ContradictionException {
+		nextSet.clear();
+		int idx = i;
+		set.clear();
+		visited.clear();
+		set.add(i);
+		visited.set(i);
+		ISet nei;
+		int depth = 0;
+		while(!set.isEmpty() && depth<maxDiam){
+			for(i=set.size()-1;i>=0;i--){
+				nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!visited.get(j)){
+						visited.set(j);
+						nextSet.add(j);
+					}
+				}
+			}
+			depth++;
+			TIntArrayList tmp = nextSet;
+			nextSet = set;
+			set = tmp;
+			nextSet.clear();
+		}
+		if(depth>=maxDiam){
+			for(i=visited.nextClearBit(0);i<n;i=visited.nextClearBit(i+1)){
+				g.removeNode(i,this);
+			}
+		}
+	}
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
+	}
 
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
+	}
 
-    @Override
-    public ESat isEntailed() {
-        if (!g.instantiated()) {
-            return ESat.UNDEFINED;
-        }
-        try {
-            propagate(0);
-            return ESat.TRUE;
-        } catch (Exception e) {
-            return ESat.FALSE;
-        }
-    }
+	@Override
+	public ESat isEntailed() {
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
+		}
+		try{
+			propagate(0);
+			return ESat.TRUE;
+		}catch (Exception e){
+			return ESat.FALSE;
+		}
+	}
 }

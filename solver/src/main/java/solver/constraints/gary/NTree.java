@@ -34,14 +34,13 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
-import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
-import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphTools;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.GraphVar;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
@@ -83,8 +82,8 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 //				new PropNLoopsTree(graph, nTree, solver, this),
 //				new PropNTree(graph, nTree,solver,this));
 		setPropagators(
-				(Propagator) new PropAtLeastNSuccessors(graph, 1, this, solver),
-				(Propagator) new PropAtMostNSuccessors(graph, 1, this, solver),
+				(Propagator) new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
+				(Propagator) new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
 				new PropNLoopsTree(graph, nTree, solver, this),
 				new PropNTree(graph, nTree,solver,this));
 		this.g = graph;
@@ -103,12 +102,12 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		IntVar nTree = (IntVar) vars[1];
 		int MINTREE = calcMinTree();
 		int MAXTREE = calcMaxTree();
-		INeighbors nei;
+		ISet nei;
 		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
-			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
+			ISet act = g.getEnvelopGraph().getActiveNodes();
+			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType(),false);
 			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
+				if (g.getEnvelopGraph().getSuccessorsOf(node).getSize()<1 || g.getKernelGraph().getSuccessorsOf(node).getSize()>1){
 					return ESat.FALSE;
 				}
 				nei = g.getEnvelopGraph().getSuccessorsOf(node);
@@ -138,7 +137,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	
 	private int calcMaxTree() {
 		int ct = 0;
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		ISet act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				ct++;
@@ -156,7 +155,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		int node;
 		TIntArrayList sinks = new TIntArrayList();
 		boolean looksSink;
-		INeighbors nei;
+		ISet nei;
 		for(int scc=SCCfinder.getNbSCC()-1;scc>=0;scc--){
 			looksSink = true;
 			node = SCCfinder.getSCCFirstNode(scc);

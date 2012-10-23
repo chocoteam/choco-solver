@@ -37,7 +37,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K loops belong to the final graph
@@ -67,42 +67,42 @@ public class PropKLoops extends Propagator {
     // PROPAGATIONS
     //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        int min = 0;
-        int max = 0;
-        IActiveNodes nodes = g.getEnvelopGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            if (g.getKernelGraph().arcExists(i, i)) {
-                min++;
-                max++;
-            } else if (g.getEnvelopGraph().arcExists(i, i)) {
-                max++;
-            }
-        }
-        k.updateLowerBound(min, aCause);
-        k.updateUpperBound(max, aCause);
-        if (min == max) {
-            setPassive();
-        } else if (k.instantiated()) {
-            if (k.getValue() == max) {
-                for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-                    if (g.getEnvelopGraph().arcExists(i, i)) {
-                        g.enforceArc(i, i, aCause);
-                    }
-                }
-                setPassive();
-            }
-            if (k.getValue() == min) {
-                for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-                    if (!g.getKernelGraph().arcExists(i, i)) {
-                        g.removeArc(i, i, aCause);
-                    }
-                }
-                setPassive();
-            }
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int min = 0;
+		int max = 0;
+		ISet nodes = g.getEnvelopGraph().getActiveNodes();
+		for(int i=nodes.getFirstElement(); i>=0; i = nodes.getNextElement()){
+			if(g.getKernelGraph().arcExists(i, i)){
+				min++;
+				max++;
+			}else if(g.getEnvelopGraph().arcExists(i, i)){
+				max++;
+			}
+		}
+		k.updateLowerBound(min,this);
+		k.updateUpperBound(max,this);
+		if(min==max){
+			setPassive();
+		}else if(k.instantiated()){
+			if(k.getValue()==max){
+				for(int i=nodes.getFirstElement(); i>=0; i = nodes.getNextElement()){
+					if(g.getEnvelopGraph().arcExists(i, i)){
+						g.enforceArc(i,i,this);
+					}
+				}
+				setPassive();
+			}
+			if(k.getValue()==min){
+				for(int i=nodes.getFirstElement(); i>=0; i = nodes.getNextElement()){
+					if(!g.getKernelGraph().arcExists(i, i)){
+						g.removeArc(i,i,this);
+					}
+				}
+				setPassive();
+			}
+		}
+	}
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
@@ -119,25 +119,25 @@ public class PropKLoops extends Propagator {
                 + EventType.INCLOW.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
     }
 
-    @Override
-    public ESat isEntailed() {
-        int min = 0;
-        int max = 0;
-        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-        for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
-            if (g.getKernelGraph().arcExists(i, i)) {
-                min++;
-                max++;
-            } else if (g.getEnvelopGraph().arcExists(i, i)) {
-                max++;
-            }
-        }
-        if (k.getLB() > max || k.getUB() < min) {
-            return ESat.FALSE;
-        }
-        if (min == max) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
+	@Override
+	public ESat isEntailed() {
+		int min = 0;
+		int max = 0;
+		ISet env = g.getEnvelopGraph().getActiveNodes();
+		for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
+			if(g.getKernelGraph().arcExists(i, i)){
+				min++;
+				max++;
+			}else if(g.getEnvelopGraph().arcExists(i, i)){
+				max++;
+			}
+		}
+		if(k.getLB()>max || k.getUB()<min){
+			return ESat.FALSE;
+		}
+		if(min==max){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
 }

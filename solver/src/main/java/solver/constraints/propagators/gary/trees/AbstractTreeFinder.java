@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.gary.trees;
 
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
@@ -46,15 +46,15 @@ public abstract class AbstractTreeFinder {
 	protected UndirectedGraph Tree;
 	protected double treeCost;
 	// PROPAGATOR
-	protected HeldKarp propHK;
+	protected GraphLagrangianRelaxation propHK;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractTreeFinder(int nbNodes, HeldKarp propagator) {
+	public AbstractTreeFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
 		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
+		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST,false);
 		propHK = propagator;
 	}
 

@@ -78,31 +78,35 @@ public class Dichotomic_Maximization extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    @Override
-    public Decision getDecision() {
-        if (firstCall) {
-            firstCall = false;
-            ub = obj.getUB();
-        }
-        if (obj.getLB() == obj.getUB()) {
-            return null;
-        }
-        if (nbSols == solver.getMeasures().getSolutionCount()) {
-            return null;
-        } else {
-            nbSols = solver.getMeasures().getSolutionCount();
-            lb = obj.getLB();
-            ub = Math.min(ub, obj.getUB());//check
-            int target = (lb + ub) / 2;
-            System.out.println(lb + " : " + ub + " -> " + target);
-            FastDecision dec = pool.getE();
-            if (dec == null) {
-                dec = new FastDecision(pool);
-            }
-            dec.set(obj, target, objCut);
-            return dec;
-        }
-    }
+	@Override
+	public Decision getDecision() {
+		if(firstCall){
+			firstCall = false;
+			ub = obj.getUB();
+		}
+		if(obj.getLB()==obj.getUB()){
+			return null;
+		}
+		if(nbSols == solver.getMeasures().getSolutionCount()){
+			return null;
+		}else{
+			nbSols = solver.getMeasures().getSolutionCount();
+			lb = obj.getLB();
+			ub = Math.min(ub,obj.getUB());//check
+			if(lb>ub){// we should post a cut instead
+				solver.getSearchLoop().interrupt();
+				return null;
+			}
+			int target = (lb+ub)/2;
+			System.out.println(lb+" : "+ub+" -> "+target);
+			FastDecision dec = pool.getE();
+			if(dec==null){
+				dec = new FastDecision(pool);
+			}
+			dec.set(obj,target, objCut);
+			return dec;
+		}
+	}
 
     private DecisionOperator<IntVar> objCut = new DecisionOperator<IntVar>() {
         @Override

@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
@@ -72,38 +72,69 @@ public class PropTreeEvalObj extends Propagator {
     // METHODS
     //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        int minSum = 0;
-        INeighbors nei;
-        for (int i = 0; i < n; i++) {
-            lowestUnused[i] = 0;
-            nei = g.getEnvelopGraph().getNeighborsOf(i);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (!g.getKernelGraph().arcExists(i, j)) {
-                    if (lowestUnused[i] > distMatrix[i][j]) {
-                        lowestUnused[i] = distMatrix[i][j];
-                    }
-                }
-            }
-            nei = g.getKernelGraph().getNeighborsOf(i);
-            if (nei.neighborhoodSize() > 0) {
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                    if (i < j)
-                        minSum += distMatrix[i][j];
-                }
-            } else {
-                minSum += lowestUnused[i];
-            }
-        }
-        sum.updateLowerBound(minSum, aCause);
-        filter(minSum);
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+//		int minSum =0;
+//		INeighbors nei;
+//		for (int i = 0; i < n; i++) {
+//			lowestUnused[i] = 0;
+//			nei = g.getEnvelopGraph().getNeighborsOf(i);
+//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//				if(!g.getKernelGraph().arcExists(i,j)){
+//					if( lowestUnused[i] > distMatrix[i][j]){
+//						lowestUnused[i] = distMatrix[i][j];
+//					}
+//				}
+//			}
+//			nei = g.getKernelGraph().getNeighborsOf(i);
+//			if(nei.getSize()>0){
+//				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//					if(i<j)
+//					minSum += distMatrix[i][j];
+//				}
+//			}else{
+//				minSum += lowestUnused[i];
+//			}
+//		}
+//		sum.updateLowerBound(minSum, this);
+//		filter(minSum);
+		int min = 0;
+		int max = 0;
+		int ce = 0;
+		int ck = 0;
+		int minCost = 1000000;
+		int maxCost = 0;
+		for(int i=0;i<n;i++){
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(i<j){
+					ce++;
+					max += distMatrix[i][j];
+					if(g.getKernelGraph().edgeExists(i,j)){
+						min += distMatrix[i][j];
+						ck++;
+					}else{
+						if(distMatrix[i][j]>maxCost){
+							maxCost = distMatrix[i][j];
+						}
+						if(distMatrix[i][j]<minCost){
+							minCost = distMatrix[i][j];
+						}
+					}
+				}
+			}
+		}
+		int max2 = min + (n-1-ck)*maxCost;
+		min += (n-1-ck)*minCost;
+		sum.updateLowerBound(min,this);
+		sum.updateUpperBound(max,this);
+		sum.updateUpperBound(max2,this);
+	}
+	
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
+	}
 
     @Override
     public int getPropagationConditions(int vIdx) {
@@ -115,18 +146,18 @@ public class PropTreeEvalObj extends Propagator {
         return ESat.UNDEFINED;
     }
 
-    protected void filter(int minSum) throws ContradictionException {
-        INeighbors succs;
-        int delta = sum.getUB() - minSum;
-        for (int i = 0; i < n; i++) {
-            succs = g.getEnvelopGraph().getSuccessorsOf(i);
-            for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-                if (i < j && !g.getKernelGraph().edgeExists(i, j)) {
-                    if (distMatrix[i][j] - lowestUnused[i] > delta) {
-                        g.removeArc(i, j, aCause);
-                    }
-                }
-            }
-        }
-    }
+	protected void filter(int minSum) throws ContradictionException {
+		ISet succs;
+		int delta = sum.getUB()-minSum;
+		for (int i = 0; i < n; i++) {
+			succs = g.getEnvelopGraph().getSuccessorsOf(i);
+			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+				if(i<j && !g.getKernelGraph().edgeExists(i,j)){
+					if(distMatrix[i][j]-lowestUnused[i]>delta){
+						g.removeArc(i,j,this);
+					}
+				}
+			}
+		}
+	}
 }

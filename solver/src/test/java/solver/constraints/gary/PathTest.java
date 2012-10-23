@@ -31,13 +31,14 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import static org.testng.Assert.assertEquals;
@@ -50,15 +51,23 @@ public class PathTest {
 
 	public static Solver model(int n, int seed, boolean path, boolean arbo, boolean RG, long nbMaxSols) {
 		Solver s = new Solver();
-		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer);
+		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer,true);
 		for(int i=0;i<n-1;i++){
 			for(int j=1;j<n;j++){
 				g.getEnvelopGraph().addArc(i, j);
 			}
 		}
 		Constraint gc = GraphConstraintFactory.makeConstraint(s);
-		gc.addPropagators(new PropOnePredBut(g,0,gc,s));
-		gc.addPropagators(new PropOneSuccBut(g,n-1,gc,s));
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, s));
+		gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, s));
+		gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
+		gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
 		if(path){
 			gc.addPropagators(new PropPathNoCycle(g,0,n-1,gc,s));
 		}

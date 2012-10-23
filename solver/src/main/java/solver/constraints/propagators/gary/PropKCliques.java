@@ -38,9 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-
+import solver.variables.setDataStructures.ISet;
 import java.util.BitSet;
 
 /**
@@ -82,107 +80,107 @@ public class PropKCliques extends Propagator {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 //		int min = simpleSearch();
-        int min = efficientSearch();
-        k.updateLowerBound(min, aCause);
-        if (min == k.getUB()) {
-            filter();
-        }
-    }
+		int min = efficientSearch();
+		k.updateLowerBound(min, this);
+		if(min == k.getUB()){
+			filter();
+		}
+	}
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
+	@Override
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
+	}
 
-    private void filter() throws ContradictionException {
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-        INeighbors nei;
-        int mate;
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            if (!inMIS.get(i)) {
-                mate = -1;
-                nei = g.getEnvelopGraph().getNeighborsOf(i);
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                    if (inMIS.get(j)) {
-                        if (mate == -1) {
-                            mate = j;
-                        } else {
-                            mate = -2;
-                            break;
-                        }
-                    }
-                }
-                if (mate >= 0) {
-                    g.enforceArc(i, mate, aCause);
-                }
-            }
-        }
-    }
+	private void filter() throws ContradictionException {
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		ISet nei;
+		int mate;
+		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			if(!inMIS.get(i)){
+				mate = -1;
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(inMIS.get(j)){
+						if(mate == -1){
+							mate = j;
+						}else{
+							mate = -2;
+							break;
+						}
+					}
+				}
+				if(mate>=0){
+					g.enforceArc(i,mate,this);
+				}
+			}
+		}
+	}
 
-    private int simpleSearch() {
-        in.clear();
-        inMIS.clear();
-        int nb = 0;
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            in.set(i);
-            nb++;
-        }
-        int idx = -1;
-        INeighbors nei;
-        int min = 0;
-        while (nb > 0) {
-            idx = in.nextSetBit(idx + 1);
-            nei = g.getEnvelopGraph().getNeighborsOf(idx);
-            in.clear(idx);
-            inMIS.set(idx);
-            nb--;
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (in.get(j)) {
-                    in.clear(j);
-                    nb--;
-                }
-            }
-            min++;
-        }
-        return min;
-    }
+	private int simpleSearch(){
+		in.clear();
+		inMIS.clear();
+		int nb = 0;
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			in.set(i);
+			nb++;
+		}
+		int idx = -1;
+		ISet nei;
+		int min = 0;
+		while (nb>0){
+			idx = in.nextSetBit(idx+1);
+			nei = g.getEnvelopGraph().getNeighborsOf(idx);
+			in.clear(idx);
+			inMIS.set(idx);
+			nb--;
+			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+				if(in.get(j)){
+					in.clear(j);
+					nb--;
+				}
+			}
+			min ++;
+		}
+		return min;
+	}
 
-    private int efficientSearch() {
-        in.clear();
-        inMIS.clear();
-        int nb = 0;
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            in.set(i);
-            nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-            nb++;
-        }
-        int idx;
-        INeighbors nei;
-        TIntArrayList list = new TIntArrayList();
-        int min = 0;
-        while (nb > 0) {
-            idx = in.nextSetBit(0);
-            for (int i = in.nextSetBit(idx + 1); i >= 0; i = in.nextSetBit(i + 1)) {
-                if (nbNeighbors[i] < nbNeighbors[idx]) {
-                    idx = i;
-                }
-            }
-            nei = g.getEnvelopGraph().getNeighborsOf(idx);
-            in.clear(idx);
-            inMIS.set(idx);
-            nb--;
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (in.get(j)) {
-                    in.clear(j);
-                    nb--;
-                    list.add(j);
-                }
-            }
-            for (int i = list.size() - 1; i >= 0; i--) {
-                nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+	private int efficientSearch(){
+		in.clear();
+		inMIS.clear();
+		int nb = 0;
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			in.set(i);
+			nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).getSize();
+			nb++;
+		}
+		int idx;
+		ISet nei;
+		TIntArrayList list = new TIntArrayList();
+		int min = 0;
+		while (nb>0){
+			idx = in.nextSetBit(0);
+			for(int i=in.nextSetBit(idx+1);i>=0;i=in.nextSetBit(i+1)){
+				if(nbNeighbors[i]<nbNeighbors[idx]){
+					idx = i;
+				}
+			}
+			nei = g.getEnvelopGraph().getNeighborsOf(idx);
+			in.clear(idx);
+			inMIS.set(idx);
+			nb--;
+			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+				if(in.get(j)){
+					in.clear(j);
+					nb--;
+					list.add(j);
+				}
+			}
+			for(int i=list.size()-1;i>=0;i--){
+				nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 //					if(in.get(j)){
                     nbNeighbors[j]--;
 //					}

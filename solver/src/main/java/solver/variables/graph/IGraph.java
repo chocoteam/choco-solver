@@ -27,7 +27,7 @@
 
 package solver.variables.graph;
 
-import solver.variables.graph.IActiveNodes;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
@@ -40,7 +40,7 @@ public interface IGraph {
 	/**
 	 * @return the collection of active nodes
 	 */
-	IActiveNodes getActiveNodes();
+	ISet getActiveNodes();
 	
 	/**Activate node x
 	 * @param x
@@ -87,19 +87,19 @@ public interface IGraph {
 	 * @param x node
 	 * @return neighbors of x (predecessors and/or successors)
 	 */
-	INeighbors getNeighborsOf(int x);
+	ISet getNeighborsOf(int x);
 	
 	/**Get predecessors of x
 	 * @param x node
 	 * @return predecessors of x 
 	 */
-	INeighbors getPredecessorsOf(int x);
+	ISet getPredecessorsOf(int x);
 	
 	/**Get successors of x
 	 * @param x node
 	 * @return successors of x 
 	 */
-	INeighbors getSuccessorsOf(int x);
+	ISet getSuccessorsOf(int x);
 	
     /**
      * The number of nodes of the graph

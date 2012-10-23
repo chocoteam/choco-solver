@@ -26,7 +26,6 @@
  */
 package solver.constraints.gary.relations;
 
-import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;

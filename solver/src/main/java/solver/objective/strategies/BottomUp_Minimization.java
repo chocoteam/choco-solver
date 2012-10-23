@@ -35,6 +35,7 @@
 package solver.objective.strategies;
 
 import choco.kernel.common.util.PoolManager;
+import solver.objective.MinObjectiveManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -47,21 +48,25 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar obj;
-    private int val;
-    private PoolManager<FastDecision> pool;
-    private boolean firstCall;
+	private IntVar obj;
+	private int val;
+	private PoolManager<FastDecision> pool;
+	private boolean firstCall;
+	private int UB;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public BottomUp_Minimization(IntVar obj) {
-        super(new IntVar[]{obj});
-        this.obj = obj;
-        firstCall = true;
-        pool = new PoolManager<FastDecision>();
-    }
+	public BottomUp_Minimization(IntVar obj) {
+		super(new IntVar[]{obj});
+		this.obj = obj;
+		firstCall = true;
+		pool = new PoolManager<FastDecision>();
+		// waits a first solution before triggering the bottom-up minimization
+		obj.getSolver().getSearchLoop().restartAfterEachSolution(true);
+		obj.getSolver().getSearchLoop().getLimitsBox().setSolutionLimit(2);
+	}
 
     //***********************************************************************************
     // METHODS
@@ -71,22 +76,39 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    @Override
-    public Decision getDecision() {
-        if (obj.instantiated()) {
-            return null;
-        }
-        if (firstCall) {
-            firstCall = false;
-            val = obj.getLB();
-        }
-        System.out.println(obj.getLB() + " : " + obj.getUB() + " -> " + val);
-        FastDecision dec = pool.getE();
-        if (dec == null) {
-            dec = new FastDecision(pool);
-        }
-        dec.set(obj, val, DecisionOperator.int_eq);
-        val++;
-        return dec;
-    }
+	@Override
+	public Decision getDecision() {
+		if(obj.getSolver().getMeasures().getSolutionCount()==0){
+			return null;
+		}
+		if(obj.instantiated()){
+			return null;
+		}
+		if(firstCall){
+			firstCall = false;
+			val = obj.getLB();
+			UB = obj.getUB();
+		}
+		if(val>UB){
+			return null;
+		}
+		val = Math.max(val,obj.getLB());
+		MinObjectiveManager man = (MinObjectiveManager)obj.getSolver().getSearchLoop().getObjectivemanager();
+		man.updateLB(val);
+		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val+"  tps: "+(int)(obj.getSolver().getMeasures().getTimeCount()/1000)+"s");
+		FastDecision dec = pool.getE();
+		if(dec==null){
+			dec = new FastDecision(pool);
+		}
+		///
+//			String txt =  obj.getSolver().getMeasures().getFailCount() +";"+
+//						  obj.getSolver().getMeasures().getNodeCount() + ";"+
+//						  (int)(obj.getSolver().getMeasures().getTimeCount()) +";"+
+//						  val+";\n";
+//			HCP_Parser.writeTextInto(txt, "/Users/jfages07/Desktop/Evolution.csv");
+			///
+		dec.set(obj,val, DecisionOperator.int_eq);
+		val ++;
+		return dec;
+	}
 }

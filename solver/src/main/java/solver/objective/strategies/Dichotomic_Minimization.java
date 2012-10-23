@@ -38,6 +38,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.objective.MinObjectiveManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -80,29 +81,40 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
 
     @Override
     public Decision getDecision() {
-        if (firstCall) {
-            firstCall = false;
-            lb = obj.getLB();
-        }
-        if (obj.getLB() == obj.getUB()) {
-            return null;
-        }
-        if (nbSols == solver.getMeasures().getSolutionCount()) {
-            return null;
-        } else {
-            nbSols = solver.getMeasures().getSolutionCount();
-            ub = obj.getUB();
-            lb = Math.max(lb, obj.getLB());//check
-            int target = (lb + ub) / 2;
-            System.out.println(lb + " : " + ub + " -> " + target);
-            FastDecision dec = pool.getE();
-            if (dec == null) {
-                dec = new FastDecision(pool);
-            }
-            dec.set(obj, target, objCut);
-            return dec;
-        }
-    }
+		if(firstCall){
+			firstCall = false;
+			lb = obj.getLB();
+		}
+		if(nbSols == solver.getMeasures().getSolutionCount()){
+			return null;
+		}else{
+			nbSols = solver.getMeasures().getSolutionCount();
+			ub = obj.getUB();
+			lb = Math.max(lb,obj.getLB());//check
+			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			man.updateLB(lb);
+			if(lb==obj.getUB()){
+				return null;
+			}
+			if(lb>ub){// we should post a cut instead
+				solver.getSearchLoop().interrupt();
+				return null;
+			}
+			int target;
+			target = (lb+ub)/2;
+//			if(target<lb+10){
+//				System.out.println("dich");
+//				target = (lb+ub)/2;
+//			}
+			System.out.println(lb+" : "+ub+" -> "+target);
+			FastDecision dec = pool.getE();
+			if(dec==null){
+				dec = new FastDecision(pool);
+			}
+			dec.set(obj,target, objCut);
+			return dec;
+		}
+	}
 
     private DecisionOperator<IntVar> objCut = new DecisionOperator<IntVar>() {
         @Override
@@ -115,6 +127,9 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
             lb = value + 1;
             System.out.println("unapply objective decision");
             var.updateLowerBound(lb, cause);
+			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			man.updateLB(lb);
+			var.updateLowerBound(lb, cause);
         }
 
         @Override

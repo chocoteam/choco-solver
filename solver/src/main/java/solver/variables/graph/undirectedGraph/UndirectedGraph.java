@@ -27,17 +27,22 @@
 
 package solver.variables.graph.undirectedGraph;
 
+import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.adjacencyList.*;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.graph.graphStructure.nodes.ActiveNodes;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.FullSet;
+import solver.variables.setDataStructures.linkedlist.Set_2LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_2LinkedList;
+import solver.variables.setDataStructures.linkedlist.Set_Std_LinkedList;
+import solver.variables.setDataStructures.swapList.*;
+import solver.variables.setDataStructures.matrix.Set_BitSet;
+import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
 
 /**
  * Created by IntelliJ IDEA.
- * User: chameau
+ * User: chameau, Jean-Guillaume Fages
  * Date: 9 f�vr. 2011
  *
  * Specific implementation of an undirected graph
@@ -48,63 +53,138 @@ public class UndirectedGraph implements IGraph {
 	// VARIABLES
 	//***********************************************************************************
 
-	INeighbors[] neighbors;
+	ISet[] neighbors;
 	/** activeIdx represents the nodes available in the graph */
-	IActiveNodes activeIdx;
+	ISet nodes;
+	int n;
 	GraphType type;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	protected UndirectedGraph() {}
+//	protected UndirectedGraph() {}
 
-	public UndirectedGraph(int nbits, GraphType type) {
+	/**
+	 * Stored Graph
+	 * @param env solver environment
+	 * @param nbits max number of nodes
+	 * @param type of data structure
+	 * @param allNodes true iff all nodes will always remain in the graph
+	 */
+	public UndirectedGraph(IEnvironment env, int nbits, GraphType type, boolean allNodes) {
 		this.type = type;
+		this.n = nbits;
 		switch (type) {
-			// ARRAY SWAP
-			case KERNEL_SWAP_ARRAY:
+			// SWAP ARRAYS
 			case ENVELOPE_SWAP_ARRAY:
-			case SWAP_ARRAY:
-				neighbors = new ArraySwapList_Array[nbits];
+				neighbors = new Set_Std_Swap_Array_RemoveOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new ArraySwapList_Array(nbits);
+					neighbors[i] = new Set_Std_Swap_Array_RemoveOnly(env,nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+				neighbors = new Set_Std_Swap_Hash_RemoveOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new Set_Std_Swap_Hash_RemoveOnly(env,nbits);
+				}
+				break;
+			case KERNEL_SWAP_ARRAY:
+				neighbors = new Set_Std_Swap_Array_AddOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new Set_Std_Swap_Array_AddOnly(env,nbits);
 				}
 				break;
 			case KERNEL_SWAP_HASH:
-			case ENVELOPE_SWAP_HASH:
-			case SWAP_HASH:
-				neighbors = new ArraySwapList_HashMap[nbits];
+				neighbors = new Set_Std_Swap_Hash_AddOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new ArraySwapList_HashMap(nbits);
+					neighbors[i] = new Set_Std_Swap_Hash_AddOnly(env,nbits);
 				}
 				break;
 			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
-				this.neighbors = new IntDoubleLinkedList[nbits];
+				this.neighbors = new Set_Std_2LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new IntDoubleLinkedList();
+					this.neighbors[i] = new Set_Std_2LinkedList(env);
 				}
 				break;
 			case LINKED_LIST:
-				this.neighbors = new IntLinkedList[nbits];
+				this.neighbors = new Set_Std_LinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new IntLinkedList();
+					this.neighbors[i] = new Set_Std_LinkedList(env);
 				}
 				break;
 			// MATRIX
 			case MATRIX:
-				this.neighbors = new BitSetNeighbors[nbits];
+				this.neighbors = new Set_Std_BitSet[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new BitSetNeighbors(nbits);
+					this.neighbors[i] = new Set_Std_BitSet(env,nbits);
 				}
 				break;
 			default:
 				throw new UnsupportedOperationException();
 		}
-		this.activeIdx = new ActiveNodes(nbits);
-		for (int i = 0; i < nbits; i++) {
-			this.activeIdx.activate(i);
+		if(allNodes){
+			this.nodes = new FullSet(nbits);
+		}else{
+			this.nodes = new Set_Std_BitSet(env, nbits);
+		}
+	}
+
+	/**
+	 * Unstored Graph
+	 * @param nbits max number of nodes
+	 * @param type of data structure
+	 * @param allNodes true iff all nodes will always remain in the graph
+	 */
+	public UndirectedGraph(int nbits, GraphType type, boolean allNodes) {
+		this.type = type;
+		this.n = nbits;
+		switch (type) {
+			// ARRAY SWAP
+			case KERNEL_SWAP_ARRAY:
+			case ENVELOPE_SWAP_ARRAY:
+			case SWAP_ARRAY:
+				neighbors = new Set_Swap_Array[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new Set_Swap_Array(nbits);
+				}
+				break;
+			case KERNEL_SWAP_HASH:
+			case ENVELOPE_SWAP_HASH:
+			case SWAP_HASH:
+				neighbors = new Set_Swap_Hash[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new Set_Swap_Hash(nbits);
+				}
+				break;
+			// LINKED LISTS
+			case DOUBLE_LINKED_LIST:
+				this.neighbors = new Set_2LinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new Set_2LinkedList();
+				}
+				break;
+			case LINKED_LIST:
+				this.neighbors = new Set_LinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new Set_LinkedList();
+				}
+				break;
+			// MATRIX
+			case MATRIX:
+				this.neighbors = new Set_BitSet[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new Set_BitSet(nbits);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
+		if(allNodes){
+			this.nodes = new FullSet(nbits);
+		}else{
+			this.nodes = new Set_BitSet(nbits);
 		}
 	}
 
@@ -114,7 +194,7 @@ public class UndirectedGraph implements IGraph {
 
 	public String toString() {
 		String res = "";
-		for (int i = activeIdx.getFirstElement(); i>=0; i = activeIdx.getNextElement()) {
+		for (int i = nodes.getFirstElement(); i>=0; i = nodes.getNextElement()) {
 			res += "pot-" + i + ": "+ getNeighborsOf(i)+"\n";
 		}
 		return res;
@@ -125,15 +205,15 @@ public class UndirectedGraph implements IGraph {
 	 * @inheritedDoc
 	 */
 	public int getNbNodes() {
-		return activeIdx.nbNodes();
+		return n;
 	}
 
 	@Override
 	/**
 	 * @inheritedDoc
 	 */
-	public IActiveNodes getActiveNodes() {
-		return activeIdx;
+	public ISet getActiveNodes() {
+		return nodes;
 	}
 
 	@Override
@@ -146,16 +226,16 @@ public class UndirectedGraph implements IGraph {
 
 	@Override
 	public boolean activateNode(int x) {
-		if(activeIdx.isActive(x))return false;
-		activeIdx.activate(x);
+		if(nodes.contain(x))return false;
+		nodes.add(x);
 		return true;
 	}
 
 	@Override
 	public boolean desactivateNode(int x) {
-		if(!activeIdx.isActive(x))return false;
-		activeIdx.desactivate(x);
-		INeighbors nei = getNeighborsOf(x);
+		if(!nodes.contain(x))return false;
+		nodes.remove(x);
+		ISet nei = getNeighborsOf(x);
 		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
 			neighbors[j].remove(x);
 		}
@@ -174,20 +254,18 @@ public class UndirectedGraph implements IGraph {
 			neighbors[y].add(x);
 			return true;
 		}
-		if ((!neighbors[x].contain(y)) || (!neighbors[y].contain(x))){
-			throw new UnsupportedOperationException("asymmetric adjacency matrix in an undirected graph");
-		}
+		assert (!((!neighbors[x].contain(y)) || (!neighbors[y].contain(x)))):
+			"asymmetric adjacency matrix in an undirected graph";
 		return false;
 	}
 
 	@Override
-	public boolean edgeExists(int x, int y) {//TODO maybe remove symmetry checking
+	public boolean edgeExists(int x, int y) {
 		if(neighbors[x].contain(y) && neighbors[y].contain(x)){
 			return true;
 		}
-		if(neighbors[x].contain(y) || neighbors[y].contain(x)){
-			throw new UnsupportedOperationException("asymmetric adjacency matrix in an undirected graph");
-		}
+		assert (!(neighbors[x].contain(y) || neighbors[y].contain(x))):
+				"asymmetric adjacency matrix in an undirected graph";
 		return false;
 	}
 
@@ -210,24 +288,23 @@ public class UndirectedGraph implements IGraph {
 			neighbors[y].remove(x);
 			return true;
 		}
-		if ((neighbors[x].contain(y)) || (neighbors[y].contain(x))){
-			throw new UnsupportedOperationException("asymmetric adjacency matrix in an undirected graph");
-		}
+		assert (!((neighbors[x].contain(y)) || (neighbors[y].contain(x)))):
+				"asymmetric adjacency matrix in an undirected graph";
 		return false;
 	}
 
 	@Override
-	public INeighbors getNeighborsOf(int x) {
+	public ISet getNeighborsOf(int x) {
 		return neighbors[x];
 	}
 
 	@Override
-	public INeighbors getPredecessorsOf(int x) {
+	public ISet getPredecessorsOf(int x) {
 		return neighbors[x];
 	}
 
 	@Override
-	public INeighbors getSuccessorsOf(int x) {
+	public ISet getSuccessorsOf(int x) {
 		return neighbors[x];
 	}
 }
