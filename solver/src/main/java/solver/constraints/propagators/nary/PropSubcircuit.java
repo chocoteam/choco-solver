@@ -125,6 +125,9 @@ public class PropSubcircuit extends Propagator<IntVar> {
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
+		if (end[var].get() != var) {
+            contradiction(vars[var], "");
+        }
         if (val == start) {
             length.instantiateTo(size[start].get(), aCause);
         } else {
@@ -147,45 +150,35 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!length.instantiated()) {
-            return ESat.UNDEFINED;
-        }
-        for (int i = 0; i < n; i++) {
-            if (!vars[i].instantiated()) {
-                return ESat.UNDEFINED;
-            }
-        }
-        BitSet visited = new BitSet(n);
-        int i = 0;
-        while (i < n && vars[i].getValue() == i) {
-            i++;
-        }
-        if (i == n) {
-            if (length.getValue() == 0) {
-                return ESat.TRUE;
-            } else {
-                return ESat.FALSE;
-            }
-        }
-        int first = i;
-        int size = 0;
-        while (size != length.getValue()) {
-            size++;
-            i = vars[i].getValue();
-            if (visited.get(i)) {
-                return ESat.FALSE;
-            }
-            visited.set(i);
-        }
-        if (i == first) {
-            for (int j = 0; j < n; j++) {
-                if (vars[j].getValue() != j && !visited.get(j)) {
-                    return ESat.FALSE;
-                }
-            }
-            return ESat.TRUE;
-        } else {
-            return ESat.FALSE;
-        }
+		if(isCompletelyInstantiated()&&length.instantiated()){
+			int ct = 0;
+			int first = -1;
+			BitSet visited = new BitSet(n);
+			for(int i=0;i<n;i++){
+				if(vars[i].getValue()==i+offset){
+					visited.set(i);
+					ct++;
+				}else if(first==-1){
+					first = i;
+				}
+			}
+			if(length.getValue()+ct!=n){
+				return ESat.FALSE;
+			}
+			int x = first;
+			do{
+				if(visited.get(x)){
+					return ESat.FALSE;
+				}
+				visited.set(x);
+				x = vars[x].getValue()-offset;
+			}while(x!=first);
+			if(visited.cardinality()!=n){
+				return ESat.FALSE;
+			}
+			return ESat.TRUE;
+		}else{
+			return ESat.UNDEFINED;
+		}
     }
 }
