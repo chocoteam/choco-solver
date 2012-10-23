@@ -34,10 +34,8 @@ import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.PropEvalObj;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.directed.PropSumArcCosts;
-import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
+import solver.constraints.propagators.gary.tsp.directed.PropPathOrCircuitEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
@@ -111,7 +109,7 @@ public class GraphConstraintFactory {
 		 */
 	public static Constraint atsp(DirectedGraphVar graph, IntVar cost, int[][] costs, int from, int to, Solver solver) {
 			Constraint gc = hamiltonianPath(graph,from,to,solver);
-			gc.addPropagators(new PropSumArcCosts(graph, cost, costs, gc, solver));
+			gc.addPropagators(new PropPathOrCircuitEvalObj(graph, cost, costs, gc, solver));
 			return gc;
 		}
 

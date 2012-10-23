@@ -86,9 +86,12 @@ public class HCP_symImpact {
 		for(int size=10; size<500;size+=10){
 			String s = "king_"+size+"x"+size;
 			System.out.println(s);
+//			boolean[][] matrix = HCP_Utils.generateOpenKingTourInstance(size);
 			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
 			solveUndirected(matrix,s);
-			solveDirected(matrix,s);
+			System.gc();
+//			solveDirected(matrix,s);
+			System.gc();
 		}
 	}
 

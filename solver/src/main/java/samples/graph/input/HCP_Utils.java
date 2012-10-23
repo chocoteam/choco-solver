@@ -38,6 +38,21 @@ public class HCP_Utils {
 	// KING TOUR
 	//***********************************************************************************
 
+	public static boolean[][] generateOpenKingTourInstance(int size){
+		boolean[][] m1 = generateKingTourInstance(size);
+		int n = size*size;
+		boolean[][] m2 = new boolean[n+1][n+1];
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				m2[i][j] = m1[i][j];
+			}
+		}
+		for(int i=0;i<n;i++){
+			m2[n][i] = m2[i][n] = true;
+		}
+		return m2;
+	}
+
 	public static boolean[][] generateKingTourInstance(int size){
 		int n = size*size;
 		int node,next,a,b;

@@ -45,6 +45,9 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.util.BitSet;
 
+/**
+ * WARNING unsafe
+ */
 public class PropKhun extends Propagator implements IGraphRelaxation {
 
 	DirectedGraphVar g;

@@ -50,7 +50,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * - For minimization problem
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropSumArcCosts extends Propagator {
+public class PropPathOrCircuitEvalObj extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -80,7 +80,7 @@ public class PropSumArcCosts extends Propagator {
 	 * @param constraint
 	 * @param solver
 	 */
-	public PropSumArcCosts(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+	public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

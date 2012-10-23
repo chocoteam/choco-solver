@@ -40,15 +40,11 @@ import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
@@ -66,7 +62,6 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
 import java.util.BitSet;
@@ -106,7 +101,7 @@ public class ATSP {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	private static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
+	private static int arbo=0,rg=1,pos=2,allDiff=3;
 	private static boolean khun;
 	private static int NB_PARAM = 5;
 	private static BitSet config = new BitSet(NB_PARAM);
@@ -136,7 +131,7 @@ public class ATSP {
 	public static void main(String[] args) {
 		outFile = "atsp_fast.csv";
 		TextWriter.clearFile(outFile);
-		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;pos;adAC;bst;\n", outFile);
 		bench();
 	}
 
@@ -145,7 +140,7 @@ public class ATSP {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		main_search = 0;
-		khun = false;
+		khun = true;
 		for (String s : list) {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
@@ -238,25 +233,6 @@ public class ATSP {
 			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
 			gc.addPropagators(SCCP);
 		}
-		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST,true);
-			ISet nei;
-			for(int i=0;i<n-1;i++){
-				undi.getKernelGraph().activateNode(i);
-				nei = graph.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j==n-1){
-						undi.getEnvelopGraph().addEdge(i,0);
-					}else{
-						undi.getEnvelopGraph().addEdge(i,j);
-					}
-				}
-			}
-			gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-			gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-			gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
-			gc.addPropagators(new PropCyclePathChanneling(graph, undi, gc, solver));
-		}
 		if(config.get(pos)){
 			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
 			try{
@@ -274,9 +250,10 @@ public class ATSP {
 			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
 		}
 		if(khun){
-			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
-			gc.addPropagators(map);
-			relax = map;
+//			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
+//			gc.addPropagators(map);
+//			relax = map;
+			gc.addPropagators(new PropATSP_AssignmentBound(graph,totalCost,distanceMatrix,gc,solver));
 		}
 		// COST BASED FILTERING
 		if(instanceName.contains("rbg")){
