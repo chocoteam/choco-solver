@@ -58,9 +58,11 @@ public class BuffInt implements IStateInt {
     }
 
     @Override
-    public void add(int delta) {
+    public int add(int delta) {
         int v = current.get(idx);
-        current.save(idx, v + delta);
+        int res = v + delta;
+        current.save(idx, res);
+        return res;
     }
 
     @Override
