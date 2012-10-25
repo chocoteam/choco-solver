@@ -70,7 +70,12 @@ public final class FConstraint {
         }
     }
 
-    public static void make_constraint(Solver aSolver, String id, List<Expression> exps, List<EAnnotation> annotations) {
+    private enum Annotation {
+        name
+    }
+
+    public static void make_constraint(Solver aSolver, THashMap<String, Object> map,
+                                       String id, List<Expression> exps, List<EAnnotation> annotations) {
         //TODO: manage annotations
 //        build(id, exps, parser.solver);
         IBuilder builder;
@@ -87,7 +92,7 @@ public final class FConstraint {
         Constraint cstr = builder.build(aSolver, id, exps, annotations);
         if (cstr != null)
             aSolver.post(cstr);
-        readAnnotations(annotations);
+        readAnnotations(map, annotations, cstr);
     }
 
 
@@ -103,12 +108,24 @@ public final class FConstraint {
         }
     }
 
-    private static void readAnnotations(List<EAnnotation> annotations) {
+    private static void readAnnotations(THashMap<String, Object> map, List<EAnnotation> annotations, Constraint cstr) {
         if (annotations.size() > 0) {
             LOGGER.trace("% unsupported operation: annotation");
         }
-//        for (int i = 0; i < annotations.size(); i++) {
-//            EAnnotation annotation = annotations.get(i);
-//        }
+        for (int i = 0; i < annotations.size(); i++) {
+            EAnnotation eanno = annotations.get(i);
+            try {
+                Annotation varanno = Annotation.valueOf(eanno.id.value);
+                switch (varanno) {
+                    case name:
+                        map.put(eanno.exps.get(0).toString(), cstr);
+                        break;
+                    default:
+                        //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+                }
+            } catch (IllegalArgumentException ignored) {
+                //                        LOGGER.warn("% Unknown annotation :" + eanno.toString());
+            }
+        }
     }
 }

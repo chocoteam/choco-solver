@@ -94,13 +94,6 @@
                             <trace>false</trace>
                             <messageFormat>antlr</messageFormat>
                             <verbose>true</verbose>
-                            <!--<excludes>
-                                <exclude/>
-                            </excludes>
-                            <includes>
-                                <include/>
-                            </includes>-->
-                            <!--<sourceDirectory>src/main/antlr3/parser/flatzinc</sourceDirectory>-->
                             <outputDirectory>src/main/java</outputDirectory>
                             <!--<libDirectory>src/main/antlr3/imports</libDirectory>-->
                         </configuration>
