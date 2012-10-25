@@ -101,14 +101,16 @@ public class ATSP_Utils {
 			}
 		}
 		distanceMatrix = dist;
-		instanceName = n+";"+maxCost+";"+maxSCC+";";
+		instanceName = n+";"+maxCost+";"+maxSCC;
 		noVal = maxCost;
 		initialUB = maxCost * n;
 		optimum = -1;
+		this.n=n;
 	}
 
 	private static int[] generateSCCs(int n, int max, Random rd){
 		int[] scc = new int[n];
+		if(max==0)return scc;
 		scc[0] = 0;
 		scc[n-1] = max;
 		for(int i=1;i<n-1;i++){
