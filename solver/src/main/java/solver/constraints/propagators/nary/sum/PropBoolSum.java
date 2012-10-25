@@ -87,15 +87,15 @@ public class PropBoolSum extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int lb = 0;
-        int ub = 0;
-        for (int i = 0; i < n; i++) {
-            lb += vars[i].getLB();
-            ub += vars[i].getUB();
-        }
-        min.set(lb);
-        max.set(ub);
-        filter();
+		int lb = 0;
+		int ub = 0;
+		for (int i = 0; i < n; i++) {
+			lb += vars[i].getLB();
+			ub += vars[i].getUB();
+		}
+		min.set(lb);
+		max.set(ub);
+		filter();
     }
 
 	private void filter() throws ContradictionException {
@@ -110,7 +110,6 @@ public class PropBoolSum extends Propagator<IntVar> {
 						vars[i].instantiateTo(0,this);
 					}
 				}
-//				setPassive(); // inutile et ne marche pas de toute facon...
 			}
 			if(sum.getValue()==ub){
 				for(int i=0;i<n;i++){
@@ -118,8 +117,10 @@ public class PropBoolSum extends Propagator<IntVar> {
 						vars[i].instantiateTo(1,this);
 					}
 				}
-//				setPassive(); // inutile et ne marche pas de toute facon...
 			}
+			// remarque : ne pas mettre de setPassive() car:
+			// 1) C'est inutile : tout est instancie
+			// 2) Il faudrait verifier que tous les evenements ont bien ete depiles
 		}
 	}
 
