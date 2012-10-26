@@ -44,8 +44,8 @@ import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveManager;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -222,8 +222,8 @@ public class DCMST {
 			//ANDINST : first (if fail<100) then strat 0 truetrick
 			//RANDOM :
 			case 0: solver.set(gs);break;
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),strat));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),strat));break;
 			default: throw new UnsupportedOperationException();
 		}
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());

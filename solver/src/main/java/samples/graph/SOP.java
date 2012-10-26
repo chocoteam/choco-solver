@@ -50,8 +50,8 @@ import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.Pro
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosGraphWithPreds;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -268,8 +268,8 @@ public class SOP {
 //		AbstractStrategy mainStrat = new MySearch(positions,solver);
 		switch (main_search){
 			case 0: solver.set(mainStrat);break;
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),mainStrat));break;
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),mainStrat));
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),mainStrat));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),mainStrat));
 				break;
 			default: throw new UnsupportedOperationException();
 		}

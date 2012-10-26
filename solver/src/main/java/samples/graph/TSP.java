@@ -34,8 +34,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -132,10 +132,9 @@ public class TSP {
 		GraphStrategies strategy = new GraphStrategies(undi,matrix,mst);
 		strategy.configure(policy,true,true,false);
 		switch (search){
-			case 0:
-				solver.set(strategy);break;
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strategy));break;
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strategy));break;
+			case 0:solver.set(strategy);break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),strategy));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),strategy));break;
 			default: throw new UnsupportedOperationException();
 		}
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){

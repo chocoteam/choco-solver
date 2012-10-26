@@ -43,28 +43,24 @@ import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIn
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.exception.ContradictionException;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import java.io.*;
@@ -325,9 +321,9 @@ public class ATSP {
 			// top-down (default)
 			case 0: solver.set(mainStrat);break;
 			// bottom-up
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),mainStrat));break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),mainStrat));break;
 			// dichotomic
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),mainStrat));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),mainStrat));break;
 			default: throw new UnsupportedOperationException();
 		}
         IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
