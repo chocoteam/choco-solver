@@ -38,7 +38,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -91,7 +91,7 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
 			nbSols = solver.getMeasures().getSolutionCount();
 			ub = obj.getUB();
 			lb = Math.max(lb,obj.getLB());//check
-			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			ObjectiveManager man = (ObjectiveManager)solver.getSearchLoop().getObjectivemanager();
 			man.updateLB(lb);
 			if(lb==obj.getUB()){
 				return null;
@@ -127,7 +127,7 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
             lb = value + 1;
             System.out.println("unapply objective decision");
             var.updateLowerBound(lb, cause);
-			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			ObjectiveManager man = (ObjectiveManager)solver.getSearchLoop().getObjectivemanager();
 			man.updateLB(lb);
 			var.updateLowerBound(lb, cause);
         }

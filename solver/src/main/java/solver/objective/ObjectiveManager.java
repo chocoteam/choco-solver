@@ -28,49 +28,49 @@
 package solver.objective;
 
 import choco.kernel.ResolutionPolicy;
+import solver.ICause;
+import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.search.measure.IMeasures;
+import solver.search.strategy.decision.Decision;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 
-/**
- * An implementation of <code>IObjectiveManager</code> class for minimization problem.
- * The objective variable value has to be minimized, considering the constraints. All search long,
- * the upper bound is set to the best known value - 1, to avoid exploration of greater or equal "quality" leaves.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 27 juil. 2010
- */
 @SuppressWarnings({"unchecked"})
-public class ObjectiveManager {
+public class ObjectiveManager implements ICause{
 
     final private ResolutionPolicy policy;
-
     final IntVar objective;
 	private int bestKnownUpperBound;
 	private int bestKnownLowerBound;
 
     IMeasures measures;
 
-    public ObjectiveManager(IntVar objective, ResolutionPolicy policy) {
+	/**
+	 * Creates an optimization manager
+	 * Enables to cut "worse" solutions
+	 * @param objective variable (represent the value of a solution)
+	 * @param policy SATISFACTION / MINIMIZATION / MAXIMIZATION
+	 * @param solver
+	 */
+	public ObjectiveManager(IntVar objective, ResolutionPolicy policy, Solver solver) {
 		this.policy = policy;
-        this.objective = objective;
-		this.bestKnownLowerBound = objective.getLB();
-        this.bestKnownUpperBound = objective.getUB();
+		this.measures = solver.getMeasures();
+		this.objective = objective;
+		if(policy!=ResolutionPolicy.SATISFACTION){
+			this.bestKnownLowerBound = objective.getLB();
+			this.bestKnownUpperBound = objective.getUB();
+		}
     }
 
-    public void setMeasures(IMeasures measures) {
-        this.measures = measures;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getBestValue() {
+	/**
+	 * @return the best objective value found so far (returns the initial bound if no solution has been found yet)
+	 */
+	public int getBestValue() {
 		switch (policy){
 			case MINIMIZE:return bestKnownUpperBound;
 			case MAXIMIZE:return bestKnownLowerBound;
@@ -79,19 +79,34 @@ public class ObjectiveManager {
 		}
     }
 
-	public int getBestKnownLowerBound() {
+	/**
+	 * @return the best lower bound computed so far
+	 */
+	public int getBestLB() {
 		return bestKnownLowerBound;
 	}
 
-	public int getBestKnownUpperBound() {
+	/**
+	 * @return the best upper bound computed so far
+	 */
+	public int getBestUB() {
 		return bestKnownUpperBound;
 	}
 
-    /**
-     * {@inheritDoc}
+	/**
+     * Updates the lower (or upper) bound of the objective variable, considering its best know value.
+     *
+     * @param decision
+     * @throws ContradictionException if this application leads to a contradiction  @param decision
      */
-    @Override
-    public void update() {
+    public void apply(Decision decision) throws ContradictionException {
+        decision.apply();
+    }
+
+	/**
+	 * Informs the manager that a new solution has been found
+	 */
+	public void update() {
 		switch (policy){
 			case MINIMIZE:
 				this.bestKnownUpperBound = objective.getValue();
@@ -103,16 +118,27 @@ public class ObjectiveManager {
 		}
     }
 
+	/**
+	 * Improve the lower bound on the problem
+	 * @param lb a valid lower bound
+	 */
 	public void updateLB(int lb) {
         this.bestKnownLowerBound = Math.max(bestKnownLowerBound,lb);
     }
 
+	/**
+	 * Improve the upper bound on the problem
+	 * @param ub a valid upper bound
+	 */
 	public void updateUB(int ub) {
         this.bestKnownUpperBound = Math.max(bestKnownUpperBound,ub);
     }
 
-    @Override
-    public void postDynamicCut() throws ContradictionException {
+	/**
+	 * Prevent the solver from computing worse quality solutions
+	 * @throws ContradictionException
+	 */
+	public void postDynamicCut() throws ContradictionException {
 		int offset = 0;
 		if(measures.getSolutionCount()>0){
 			offset = 1;
@@ -128,14 +154,20 @@ public class ObjectiveManager {
 		}
     }
 
-    @Override
-    public boolean isOptimization() {
+	/**
+	 * @return true iff the problem is an optimization problem
+	 */
+	public boolean isOptimization() {
         return policy!=ResolutionPolicy.SATISFACTION;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+	/**
+	 * @return the ResolutionPolicy of the problem 
+	 */
+	public ResolutionPolicy getPolicy() {
+        return policy;
+    }
+
     @Override
     public String toString() {
 		switch (policy){
@@ -146,12 +178,26 @@ public class ObjectiveManager {
 		}
     }
 
-    @Override
-    public Explanation explain(Deduction val) {
+	public Explanation explain(Deduction val) {
 		if(policy==ResolutionPolicy.SATISFACTION){
 			return null;
 		}
 		//TODO LB + UB
         return objective.explain(VariableState.UB);
     }
+
+	@Override
+	public Constraint getConstraint() {
+		return null;
+	}
+
+	@Override
+	public boolean reactOnPromotion() {
+		return false;
+	}
+
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.VOID.getMask();
+	}
 }

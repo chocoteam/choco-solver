@@ -35,7 +35,7 @@
 package solver.objective.strategies;
 
 import choco.kernel.common.util.PoolManager;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -93,7 +93,7 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 			return null;
 		}
 		val = Math.max(val,obj.getLB());
-		MinObjectiveManager man = (MinObjectiveManager)obj.getSolver().getSearchLoop().getObjectivemanager();
+		ObjectiveManager man = (ObjectiveManager)obj.getSolver().getSearchLoop().getObjectivemanager();
 		man.updateLB(val);
 		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val+"  tps: "+(int)(obj.getSolver().getMeasures().getTimeCount()/1000)+"s");
 		FastDecision dec = pool.getE();

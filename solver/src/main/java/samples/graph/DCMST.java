@@ -43,7 +43,7 @@ import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
 import solver.exception.ContradictionException;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
@@ -243,9 +243,9 @@ public class DCMST {
 			throw new UnsupportedOperationException();
 		}
 		//output
-		MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
-		int bestLB = man.getBestKnownLowerBound();
-		int bestUB = man.getBestKnownUpperBound();
+		ObjectiveManager man = (ObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+		int bestLB = man.getBestLB();
+		int bestUB = man.getBestUB();
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
 				+ solver.getMeasures().getNodeCount() + ";"+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost +";"+bestLB+";"+bestUB+";"+search+";\n";

@@ -37,8 +37,7 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.MaxObjectiveManager;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
@@ -323,18 +322,7 @@ public class Solver implements Serializable {
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        switch (policy) {
-            case MAXIMIZE:
-                MaxObjectiveManager maom = new MaxObjectiveManager(objective);
-                maom.setMeasures(this.measures);
-                this.search.setObjectivemanager(maom);
-                break;
-            case MINIMIZE:
-                MinObjectiveManager miom = new MinObjectiveManager(objective);
-                miom.setMeasures(this.measures);
-                this.search.setObjectivemanager(miom);
-                break;
-        }
+		this.search.setObjectivemanager(new ObjectiveManager(objective,policy,this));
         return solve();
     }
 

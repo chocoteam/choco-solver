@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast;
 
+import choco.kernel.ResolutionPolicy;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.parser.FZNParser;
 
@@ -43,7 +44,7 @@ import java.util.List;
 public final class SatisfyGoal extends SolveGoal{
 
     public SatisfyGoal(FZNParser parser, List<EAnnotation> annotations) {
-        super(parser, annotations, Resolution.SATISFY, null);
+        super(parser, annotations, ResolutionPolicy.SATISFACTION, null);
     }
 
 }
