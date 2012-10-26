@@ -27,6 +27,7 @@
 
 package parser.flatzinc.parser;
 
+import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -335,8 +336,8 @@ public final class FZNParser {
                     TerminalParser.term("solve"),
                     ANNOTATIONS,
                     Parsers.or(
-                            TerminalParser.term("maximize").retn(SolveGoal.Resolution.MAXIMIZE),
-                            TerminalParser.term("minimize").retn(SolveGoal.Resolution.MINIMIZE)
+                            TerminalParser.term("maximize").retn(ResolutionPolicy.MAXIMIZE),
+                            TerminalParser.term("minimize").retn(ResolutionPolicy.MINIMIZE)
                     ),
                     expression(),
                     TerminalParser.term(";"));

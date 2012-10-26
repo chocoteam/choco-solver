@@ -39,6 +39,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Random;
 
+/**
+ * Parses and generates Asymmetric Traveling Salesman Problem instances
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class ATSP_Utils {
 
 	//***********************************************************************************

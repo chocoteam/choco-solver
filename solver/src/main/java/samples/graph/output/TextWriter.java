@@ -37,12 +37,23 @@ package samples.graph.output;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Methods for managing text outputs
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class TextWriter {
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
+	/**
+	 * Write text into file
+	 * @param text
+	 * @param file
+	 */
 	public static void writeTextInto(String text, String file) {
 		try {
 			FileWriter out = new FileWriter(file, true);
@@ -54,6 +65,10 @@ public class TextWriter {
 		}
 	}
 
+	/**
+	 * Clear file
+	 * @param file
+	 */
 	public static void clearFile(String file) {
 		try {
 			FileWriter out = new FileWriter(file, false);

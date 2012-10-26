@@ -43,9 +43,9 @@ import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
 import solver.exception.ContradictionException;
-import solver.objective.MinObjectiveManager;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.objective.ObjectiveManager;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -69,7 +69,10 @@ import java.util.BitSet;
 import java.util.LinkedList;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Degree Constrained Minimum Spanning Tree Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class DCMST {
 
@@ -222,8 +225,8 @@ public class DCMST {
 			//ANDINST : first (if fail<100) then strat 0 truetrick
 			//RANDOM :
 			case 0: solver.set(gs);break;
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),strat));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),strat));break;
 			default: throw new UnsupportedOperationException();
 		}
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
@@ -243,9 +246,9 @@ public class DCMST {
 			throw new UnsupportedOperationException();
 		}
 		//output
-		MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
-		int bestLB = man.getBestKnownLowerBound();
-		int bestUB = man.getBestKnownUpperBound();
+		ObjectiveManager man = (ObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+		int bestLB = man.getBestLB();
+		int bestUB = man.getBestUB();
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
 				+ solver.getMeasures().getNodeCount() + ";"+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost +";"+bestLB+";"+bestUB+";"+search+";\n";

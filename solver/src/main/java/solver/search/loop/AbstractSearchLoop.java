@@ -27,11 +27,11 @@
 
 package solver.search.loop;
 
+import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.objective.IObjectiveManager;
-import solver.objective.NoObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -146,13 +146,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Objective manager. Default object is no objective.
      */
-    IObjectiveManager objectivemanager = NoObjectiveManager.get();
+    ObjectiveManager objectivemanager;
 
     private boolean alive;
     public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
+		objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION,solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -392,7 +393,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setObjectivemanager(IObjectiveManager objectivemanager) {
+    public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
         this.measures.declareObjective();
     }
@@ -430,7 +431,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         return measures;
     }
 
-    public IObjectiveManager getObjectivemanager() {
+    public ObjectiveManager getObjectivemanager() {
         return objectivemanager;
     }
 

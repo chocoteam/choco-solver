@@ -34,6 +34,12 @@ import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
+/**
+ * Graph based reformulation of the NValue constraint
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class NValues extends AbstractProblem {
 
     //***********************************************************************************
