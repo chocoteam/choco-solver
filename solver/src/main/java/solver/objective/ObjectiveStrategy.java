@@ -45,6 +45,11 @@ import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 
+/**
+ * Class that defines a branching strategy over the objective variable
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
     //***********************************************************************************
@@ -85,8 +90,8 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 	public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
         super(new IntVar[]{objective});
         this.pool = new PoolManager<FastDecision>();
-        this.solver = obj.getSolver();
         this.obj = objective;
+        this.solver = obj.getSolver();
         this.firstCall = true;
 		this.coefLB = coefs[0];
 		this.coefUB = coefs[1];

@@ -74,7 +74,10 @@ import java.io.*;
 import java.util.BitSet;
 
 /**
- * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Sequential Ordering Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class SOP {
 

@@ -38,6 +38,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+/**
+ * Parses Sequential Ordering Problem instances
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class SOP_Utils {
 
 	//***********************************************************************************

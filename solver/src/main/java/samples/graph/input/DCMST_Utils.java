@@ -38,6 +38,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+/**
+ * Parses Degree Constrained Minimum Spanning Tree instances
+ * 
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class DCMST_Utils {
 
 	//***********************************************************************************

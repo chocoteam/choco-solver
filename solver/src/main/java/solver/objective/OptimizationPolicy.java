@@ -35,10 +35,21 @@
 package solver.objective;
 
 /**
- * Defines a policy to adopt for the optimization process
+ * Class which defines a policy to adopt for the optimization process
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public enum OptimizationPolicy {
+	/**
+	 * Set the objective variable to its lowest value
+	 */
 	BOTTOM_UP,
+	/**
+	 * Set the objective variable to its highest value
+	 */
 	TOP_DOWN,
+	/**
+	 * Split the domain of the objective variable
+	 */
 	DICHOTOMIC;
 }

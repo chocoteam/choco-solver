@@ -51,7 +51,10 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.io.*;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the (symmetric) Traveling Salesman Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class TSP {
 

@@ -40,6 +40,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ * Parses and generates Traveling Salesman Problem instances
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class TSP_Utils {
 
 	//***********************************************************************************

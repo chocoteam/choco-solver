@@ -52,6 +52,11 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;
 
+/**
+ * Generate Tutte graphs with CP
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class TutteGraphGenerator {
 
 	public static boolean[][] createTutteGraph(int n){

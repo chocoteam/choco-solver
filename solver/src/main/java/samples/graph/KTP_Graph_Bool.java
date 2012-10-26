@@ -61,7 +61,11 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.util.ArrayList;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Knight's Tour Problem
+ * Compares performances between a graph variable and boolean variables
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class KTP_Graph_Bool {
 

@@ -68,7 +68,10 @@ import java.util.BitSet;
 import java.util.Random;
 
 /**
- * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Asymmetric Traveling Salesman Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class ATSP {
 
@@ -336,15 +339,6 @@ public class ATSP {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 			}
-//			public void onContradiction(ContradictionException cex) {
-//				throw new UnsupportedOperationException();
-//			}
-//			public void onSolution() {
-//				System.out.println("youhou");
-//			}
-//			public void onContradiction(ContradictionException cex) {
-//				System.out.println("yaha");
-//			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE

@@ -40,7 +40,11 @@ import solver.search.strategy.decision.Decision;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-@SuppressWarnings({"unchecked"})
+/**
+ * Class that monitors the objective function and avoid exploring "worse" solutions
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class ObjectiveManager implements ICause{
 
     final private ResolutionPolicy policy;
@@ -185,18 +189,11 @@ public class ObjectiveManager implements ICause{
         return objective.explain(VariableState.DOM);
     }
 
+	// ICause methods (useless)
 	@Override
-	public Constraint getConstraint() {
-		return null;
-	}
-
+	public Constraint getConstraint() {return null;}
 	@Override
-	public boolean reactOnPromotion() {
-		return false;
-	}
-
+	public boolean reactOnPromotion() {return false;}
 	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.VOID.getMask();
-	}
+	public int getPropagationConditions(int vIdx) {return EventType.VOID.getMask();}
 }

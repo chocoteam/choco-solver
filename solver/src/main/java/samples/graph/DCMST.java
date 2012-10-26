@@ -69,7 +69,10 @@ import java.util.BitSet;
 import java.util.LinkedList;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Degree Constrained Minimum Spanning Tree Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class DCMST {
 
