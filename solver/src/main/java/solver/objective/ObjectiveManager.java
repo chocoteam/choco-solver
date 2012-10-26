@@ -182,8 +182,7 @@ public class ObjectiveManager implements ICause{
 		if(policy==ResolutionPolicy.SATISFACTION){
 			return null;
 		}
-		//TODO LB + UB
-        return objective.explain(VariableState.UB);
+        return objective.explain(VariableState.DOM);
     }
 
 	@Override
