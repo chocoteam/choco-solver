@@ -27,7 +27,7 @@
 
 package solver.objective;
 
-import solver.constraints.Constraint;
+import choco.kernel.ResolutionPolicy;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -36,29 +36,33 @@ import solver.search.measure.IMeasures;
 import solver.variables.IntVar;
 
 /**
- * An implementation of <code>IObjectiveManager</code> class for maximization problem.
- * The objective variable value has to be maximized, considering the constraints. All search long,
- * the lower bound is set to the best known value + 1, to avoid exploration of less or equal "quality" leaves.
+ * An implementation of <code>IObjectiveManager</code> class for minimization problem.
+ * The objective variable value has to be minimized, considering the constraints. All search long,
+ * the upper bound is set to the best known value - 1, to avoid exploration of greater or equal "quality" leaves.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 27 juil. 2010
  */
 @SuppressWarnings({"unchecked"})
-public class MaxObjectiveManager extends IObjectiveManager {
+public class ObjectiveManager {
 
-    private int bestKnownLowerBound;
+    final private ResolutionPolicy policy;
 
     final IntVar objective;
+	private int bestKnownUpperBound;
+	private int bestKnownLowerBound;
 
     IMeasures measures;
 
-    public MaxObjectiveManager(IntVar objective) {
+    public ObjectiveManager(IntVar objective, ResolutionPolicy policy) {
+		this.policy = policy;
         this.objective = objective;
-        this.bestKnownLowerBound = objective.getLB()-1;
+		this.bestKnownLowerBound = objective.getLB();
+        this.bestKnownUpperBound = objective.getUB();
     }
 
-    public void setMeasures(IMeasures measures){
+    public void setMeasures(IMeasures measures) {
         this.measures = measures;
     }
 
@@ -67,26 +71,66 @@ public class MaxObjectiveManager extends IObjectiveManager {
      */
     @Override
     public int getBestValue() {
-        return bestKnownLowerBound;
+		switch (policy){
+			case MINIMIZE:return bestKnownUpperBound;
+			case MAXIMIZE:return bestKnownLowerBound;
+			case SATISFACTION:
+			default:throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+		}
     }
+
+	public int getBestKnownLowerBound() {
+		return bestKnownLowerBound;
+	}
+
+	public int getBestKnownUpperBound() {
+		return bestKnownUpperBound;
+	}
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void update() {
-        this.bestKnownLowerBound = objective.getValue();
-        this.measures.setObjectiveValue(this.bestKnownLowerBound);
+		switch (policy){
+			case MINIMIZE:
+				this.bestKnownUpperBound = objective.getValue();
+				this.measures.setObjectiveValue(this.bestKnownUpperBound);
+				break;
+			case MAXIMIZE:
+				this.bestKnownLowerBound = objective.getValue();
+				this.measures.setObjectiveValue(this.bestKnownLowerBound);
+		}
+    }
+
+	public void updateLB(int lb) {
+        this.bestKnownLowerBound = Math.max(bestKnownLowerBound,lb);
+    }
+
+	public void updateUB(int ub) {
+        this.bestKnownUpperBound = Math.max(bestKnownUpperBound,ub);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        this.objective.updateLowerBound(bestKnownLowerBound+1, this);
+		int offset = 0;
+		if(measures.getSolutionCount()>0){
+			offset = 1;
+		}
+		switch (policy){
+			case MINIMIZE:
+				this.objective.updateUpperBound(bestKnownUpperBound-offset, this);
+				this.objective.updateLowerBound(bestKnownLowerBound, this);
+				break;
+			case MAXIMIZE:
+				this.objective.updateUpperBound(bestKnownUpperBound, this);
+				this.objective.updateLowerBound(bestKnownLowerBound+offset, this);
+		}
     }
 
     @Override
     public boolean isOptimization() {
-        return true;
+        return policy!=ResolutionPolicy.SATISFACTION;
     }
 
     /**
@@ -94,17 +138,20 @@ public class MaxObjectiveManager extends IObjectiveManager {
      */
     @Override
     public String toString() {
-        return String.format("Maximize %s = %d", this.objective.getName(), bestKnownLowerBound);
-    }
-
-
-    @Override
-    public Constraint getConstraint() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+		switch (policy){
+			case MINIMIZE:return String.format("Minimize %s = [%d,%d]", this.objective.getName(), bestKnownLowerBound, bestKnownUpperBound);
+			case MAXIMIZE:return String.format("Maximize %s = [%d,%d]", this.objective.getName(), bestKnownLowerBound, bestKnownUpperBound);
+			case SATISFACTION:
+			default:return "";
+		}
     }
 
     @Override
     public Explanation explain(Deduction val) {
-        return objective.explain(VariableState.LB);
+		if(policy==ResolutionPolicy.SATISFACTION){
+			return null;
+		}
+		//TODO LB + UB
+        return objective.explain(VariableState.UB);
     }
 }
