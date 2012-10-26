@@ -34,5 +34,11 @@
 
 package solver.objective;
 
+/**
+ * Defines a policy to adopt for the optimization process
+ */
 public enum OptimizationPolicy {
+	BOTTOM_UP,
+	TOP_DOWN,
+	DICHOTOMIC;
 }
