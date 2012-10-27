@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.directedGraph;
+package solver.variables.graph;
 
 import solver.ICause;
 import solver.Solver;
@@ -33,7 +33,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.setDataStructures.SetType;
-import solver.variables.graph.GraphVar;
 
 /**
  * Created by IntelliJ IDEA.

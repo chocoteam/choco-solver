@@ -25,21 +25,15 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.directedGraph;
+package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
-import solver.variables.graph.GraphTools;
+import solver.variables.graph.graphOperations.GraphTools;
 import solver.variables.setDataStructures.SetFactory;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.FullSet;
-import solver.variables.setDataStructures.swapList.Set_Swap_Array;
-import solver.variables.setDataStructures.swapList.Set_Swap_Hash;
-import solver.variables.setDataStructures.linkedlist.Set_2LinkedList;
-import solver.variables.setDataStructures.linkedlist.*;
-import solver.variables.setDataStructures.linkedlist.Set_LinkedList;
-import solver.variables.setDataStructures.swapList.*;
 import solver.variables.setDataStructures.matrix.Set_BitSet;
 import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
 
@@ -266,7 +260,7 @@ public class DirectedGraph implements IGraph {
 	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
 	 */
 	public ISet getNeighborsOf(int x) {
-		return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes());
+		return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
 	}
 
 	@Override

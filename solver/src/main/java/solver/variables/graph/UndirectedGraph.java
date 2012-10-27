@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.undirectedGraph;
+package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
 import solver.variables.setDataStructures.SetFactory;
@@ -76,7 +76,7 @@ public class UndirectedGraph implements IGraph {
 		this.n = nbits;
 		neighbors = new ISet[nbits];
 		for(int i=0;i<n;i++){
-			neighbors[i] = SetFactory.makeStoredSet(type,nbits,env);
+			neighbors[i] = SetFactory.makeStoredSet(type, nbits, env);
 		}
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
