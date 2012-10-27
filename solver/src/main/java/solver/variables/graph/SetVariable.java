@@ -36,31 +36,25 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
+import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
-import solver.variables.delta.IGraphDelta;
-import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.delta.*;
+import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.view.IView;
 
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
- */
-public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, SetVariable<E>>
-        implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
+public abstract class SetVariable extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVariable>
+	implements Variable<SetDelta, SetDeltaMonitor, IView>, SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected E envelop, kernel;
+	protected ISet envelop, kernel;
 	protected IEnvironment environment;
-	protected IGraphDelta delta;
+	protected SetDelta delta;
 	///////////// Attributes related to Variable ////////////
 	protected boolean reactOnModification;
 
@@ -68,8 +62,8 @@ public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGr
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SetVariable(Solver solver) {
-		super("G", solver);
+	public SetVariable(String name, Solver solver) {
+		super(name, solver);
 		solver.associates(this);
 		this.environment = solver.getEnvironment();
 	}
@@ -80,129 +74,78 @@ public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGr
 
 	@Override
 	public boolean instantiated() {
-		if (getEnvelopOrder() != getKernelOrder()) {
-			return false;
-		}
-		ISet suc;
-		ISet act = getEnvelopGraph().getActiveNodes();
-		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-			suc = envelop.getSuccessorsOf(i);
-			if (suc.getSize() != getKernelGraph().getSuccessorsOf(i).getSize()) {
-				return false;
-			}
-		}
-		return true;
+		return envelop.getSize() == kernel.getSize();
 	}
 
 	@Override
-	public boolean removeNode(int x, ICause cause) throws ContradictionException {
-		if (kernel.getActiveNodes().contain(x)) {
-			this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
-			return true;
-		} else if (!envelop.getActiveNodes().contain(x)) {
-			return false;
+    public boolean addToKernel(int value, ICause cause) throws ContradictionException {
+		if(!envelop.contain(value)){
+			contradiction(cause,null,"");
 		}
-		if (reactOnModification) {
-			ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
-			for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-				removeArc(x, i, cause);
-				removeArc(i, x, cause);
-			}
-		}
-		if (envelop.desactivateNode(x)) {
-			if (reactOnModification) {
-				delta.add(x,IGraphDelta.NR,cause);
-			}
-			EventType e = EventType.REMOVENODE;
-			notifyPropagators(e, cause);
+		if(!kernel.contain(value)){
+			kernel.add(value);
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-		if (envelop.getActiveNodes().contain(x)) {
-			if (kernel.activateNode(x)) {
-				if (reactOnModification) {
-					delta.add(x,IGraphDelta.NE,cause);
-				}
-				EventType e = EventType.ENFORCENODE;
-				notifyPropagators(e, cause);
-				return true;
-			}
-			return false;
+	public boolean removeFromEnveloppe(int value, ICause cause) throws ContradictionException {
+		if(kernel.contain(value)){
+			contradiction(cause,null,"");
 		}
-		this.contradiction(cause, EventType.ENFORCENODE, "enforce node which is not in the domain");
-		return true;
+		if(envelop.contain(value)){
+			envelop.remove(value);
+			return true;
+		}
+		return false;
 	}
 
-	public enum IncidentNodes{
-		PREDECESSORS(){
-			public ISet getSet(IGraph graph, int i){
-				return graph.getPredecessorsOf(i);
+	@Override
+	public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
+		boolean changed = !instantiated();
+		for(int i:value){
+			addToKernel(i,cause);
+		}
+		if(kernel.getSize()!=value.length){
+			contradiction(cause,null,"");
+		}
+		if(envelop.getSize()!=value.length){
+			for(int i=envelop.getFirstElement();i>=0;i=envelop.getNextElement()){
+				if(!kernel.contain(i)){
+					envelop.remove(i);
+				}
 			}
-			public void remove(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.removeArc(to,from,cause);
-			}
-			public void enforce(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.enforceArc(to,from,cause);
-			}
-		},
-		SUCCESSORS(){
-			public ISet getSet(IGraph graph, int i){
-				return graph.getSuccessorsOf(i);
-			}
-			public void remove(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.removeArc(from,to,cause);
-			}
-			public void enforce(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.enforceArc(from,to,cause);
-			}
-		},
-		NEIGHBORS(){
-			public ISet getSet(IGraph graph, int i){
-				return graph.getNeighborsOf(i);
-			}
-			public void remove(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.removeArc(from,to,cause);
-				gv.removeArc(to,from,cause);
-			}
-			public void enforce(SetVariable gv, int from, int to, ICause cause) throws ContradictionException {
-				gv.enforceArc(from,to,cause);
-				gv.enforceArc(to,from,cause);
-			}
-		};
-		public abstract ISet getSet(IGraph graph, int i);
-		public abstract void enforce(SetVariable gv, int from, int to, ICause cause) throws ContradictionException;
-		public abstract void remove(SetVariable gv, int from, int to, ICause cause) throws ContradictionException;
+		}
+		return changed;
+	}
+
+	@Override
+	public boolean contains(int v) {
+		return envelop.contain(v);
+	}
+
+	@Override
+	public int[] getValue() {
+		int[] lb = new int[kernel.getSize()];
+		int k = 0;
+		for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
+			lb[k++] = i;
+		}
+		return lb;
 	}
 
 	//***********************************************************************************
 	// ACCESSORS
 	//***********************************************************************************
 
-	@Override
-	public int getEnvelopOrder() {
-		return envelop.getActiveNodes().getSize();
-	}
-
-	@Override
-	public int getKernelOrder() {
-		return kernel.getActiveNodes().getSize();
-	}
-
-	@Override
-	public E getKernelGraph() {
+	public ISet getKernel() {
 		return kernel;
 	}
 
-	@Override
-	public E getEnvelopGraph() {
+	public ISet getEnvelop() {
 		return envelop;
 	}
-
-	public abstract boolean isDirected();
 
 	//***********************************************************************************
 	// VARIABLE STUFF
@@ -219,13 +162,13 @@ public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGr
 	}
 
 	@Override
-	public IGraphDelta getDelta() {
+	public SetDelta getDelta() {
 		return delta;
 	}
 
 	@Override
 	public int getTypeAndKind() {
-		return VAR + GRAPH;
+		return VAR + SET;
 	}
 
 	@Override
@@ -237,14 +180,14 @@ public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGr
     public void createDelta() {
         if (!reactOnModification) {
 			reactOnModification = true;
-			delta = new GraphDelta(solver.getSearchLoop());
+			delta = new SetDelta(solver.getSearchLoop());
 		}
     }
 
     @Override
-    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+    public SetDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new GraphDeltaMonitor(delta, propagator);
+        return new SetDeltaMonitor(delta, propagator);
     }
 
 	public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
@@ -264,44 +207,6 @@ public abstract class SetVariable<E extends IGraph> extends AbstractVariable<IGr
 
 	@Override
 	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-//        records.forEach(onContradiction.set(this, event, cause));
 		solver.getEngine().fails(cause, this, message);
-	}
-
-	//***********************************************************************************
-	// SOLUTIONS : STORE AND RESTORE
-	//***********************************************************************************
-
-	public boolean[][] getValue() {
-		int n = getEnvelopGraph().getNbNodes();
-		boolean[][] vals = new boolean[n+1][n];
-		ISet kerNodes = getKernelGraph().getActiveNodes();
-		ISet kerSuccs;
-		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-			kerSuccs = getKernelGraph().getSuccessorsOf(i);
-			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-				vals[i][j] = true; // arc in
-			}
-			vals[n][i] = true; // node in
-		}
-		return vals;
-	}
-	
-	public void instantiateTo(boolean[][] values, ICause cause) throws ContradictionException {
-		int n = values.length-1;
-		for (int i = 0; i < n; i++) {
-			if(values[n][i]){//nodes
-				enforceNode(i,cause);
-			}else{
-				removeNode(i,cause);
-			}
-			for (int j = 0; j < n; j++) {
-				if (values[i][j]) {//arcs
-					enforceArc(i, j, cause);
-				} else {
-					removeArc(i, j, cause);
-				}
-			}
-		}
 	}
 }

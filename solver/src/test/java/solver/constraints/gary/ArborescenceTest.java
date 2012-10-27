@@ -36,9 +36,9 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import static org.testng.Assert.assertEquals;
 

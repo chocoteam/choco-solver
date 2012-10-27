@@ -31,13 +31,19 @@ import solver.Configuration;
 import solver.ICause;
 import solver.search.loop.AbstractSearchLoop;
 
-public class SetDelta implements IGraphDelta {
+/**
+ * @author Jean-Guillaume Fages
+ * @since Oct 2012
+ */
+public class SetDelta implements IDelta {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-	private IntDelta[] deltaOfType;
+	public final static int KERNEL = 0;
+	public final static int ENVELOP= 1;
+	private IntDelta[] delta;
 	private long timestamp;
 	private final AbstractSearchLoop loop;
 
@@ -46,11 +52,10 @@ public class SetDelta implements IGraphDelta {
     //***********************************************************************************
 
     public SetDelta(AbstractSearchLoop loop) {
-		deltaOfType = new IntDelta[NB];
 		this.loop = loop;
-		for(int i=0;i<NB;i++){
-			deltaOfType[i] = new EnumDelta(loop);
-		}
+		delta = new IntDelta[2];
+		delta[0] = new EnumDelta(loop);
+		delta[1] = new EnumDelta(loop);
 		timestamp = loop.timeStamp;
     }
 
@@ -69,23 +74,20 @@ public class SetDelta implements IGraphDelta {
 
 	@Override
     public void clear() {
-		for(int i=0;i<NB;i++){
-			deltaOfType[i].clear();
-		}
+		delta[0].clear();
+		delta[1].clear();
 		timestamp = loop.timeStamp;
     }
 
-	@Override
-	public int getSize(int i) {
-		return deltaOfType[i].size();
+	public int getSize(int kerOrEnv) {
+		return delta[kerOrEnv].size();
 	}
 
-	@Override
-	public void add(int element, int type, ICause cause) {
+	public void add(int element, int kerOrEnv, ICause cause) {
 		if(Configuration.LAZY_UPDATE){
 			lazyClear();
 		}
-		deltaOfType[type].add(element,cause);
+		delta[kerOrEnv].add(element,cause);
 	}
 
 	public void lazyClear() {
@@ -94,14 +96,12 @@ public class SetDelta implements IGraphDelta {
 		}
 	}
 
-	@Override
-	public int get(int index, int type) {
-		return deltaOfType[type].get(index);
+	public int get(int index, int kerOrEnv) {
+		return delta[kerOrEnv].get(index);
 	}
 
-	@Override
-	public ICause getCause(int index, int type) {
-		return deltaOfType[type].getCause(index);
+	public ICause getCause(int index, int kerOrEnv) {
+		return delta[kerOrEnv].getCause(index);
 	}
 
     @Override

@@ -39,9 +39,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 public class PropLagr_MST_BST extends Propagator implements GraphLagrangianRelaxation {
 

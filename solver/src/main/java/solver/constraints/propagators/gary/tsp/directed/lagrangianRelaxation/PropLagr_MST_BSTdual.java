@@ -36,13 +36,12 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianRelaxation {
 

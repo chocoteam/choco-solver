@@ -44,11 +44,12 @@ import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 
 /**

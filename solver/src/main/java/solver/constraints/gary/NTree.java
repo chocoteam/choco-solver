@@ -38,11 +38,11 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphTools;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.graph.graphOperations.GraphTools;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 /**Constraint for tree partitioning an anti-arborscence

@@ -31,10 +31,10 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.Variable;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 public abstract class GraphRelation<V extends Variable> {
 

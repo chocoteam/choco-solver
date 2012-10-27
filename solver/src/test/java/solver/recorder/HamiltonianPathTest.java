@@ -40,9 +40,9 @@ import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
  * Find a Hamiltonian path in a sparse graph with incremental algorithm

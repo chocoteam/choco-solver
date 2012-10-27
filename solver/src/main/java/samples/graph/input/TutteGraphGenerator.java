@@ -46,9 +46,9 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;
 

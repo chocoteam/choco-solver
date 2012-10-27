@@ -38,11 +38,11 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.BitSet;
 

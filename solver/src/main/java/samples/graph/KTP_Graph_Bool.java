@@ -53,10 +53,11 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.*;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.util.ArrayList;
 
 /**

@@ -42,8 +42,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
  * @PropAnn(tested = {BENCHMARK})

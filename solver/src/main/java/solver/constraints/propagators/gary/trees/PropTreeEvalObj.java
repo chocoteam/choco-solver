@@ -36,8 +36,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
  * Compute the cost of the graph by summing edge costs

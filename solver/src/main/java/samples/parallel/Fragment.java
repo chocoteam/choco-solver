@@ -45,10 +45,10 @@ import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
  * Created by IntelliJ IDEA.

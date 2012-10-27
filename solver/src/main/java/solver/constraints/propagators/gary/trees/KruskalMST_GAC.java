@@ -30,11 +30,11 @@ package solver.constraints.propagators.gary.trees;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.UndirectedGraph;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 import java.util.Arrays;
 import java.util.BitSet;

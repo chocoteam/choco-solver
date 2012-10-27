@@ -36,9 +36,9 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.graph.UndirectedGraph;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 import java.util.BitSet;
 

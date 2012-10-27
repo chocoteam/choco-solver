@@ -41,13 +41,12 @@ import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
 import solver.constraints.propagators.gary.trees.KruskalMST_GAC;
 import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.UndirectedGraph;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.ArrayList;
 import java.util.BitSet;

@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.trees;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
+import solver.variables.graph.UndirectedGraph;
 import solver.variables.setDataStructures.SetType;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 public abstract class AbstractTreeFinder {
 

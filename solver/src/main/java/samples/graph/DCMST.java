@@ -61,9 +61,10 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 import java.util.BitSet;
 import java.util.LinkedList;

@@ -31,8 +31,8 @@ import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
+import solver.variables.graph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
-import solver.variables.graph.directedGraph.DirectedGraph;
 
 import java.util.Arrays;
 import java.util.Comparator;
