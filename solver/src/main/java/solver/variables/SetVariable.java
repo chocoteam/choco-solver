@@ -46,174 +46,189 @@ import solver.variables.setDataStructures.SetType;
 import solver.variables.view.IView;
 
 
-public abstract class SetVariable extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVar> implements SetVar {
-
-    //////////////////////////////// GRAPH PART /////////////////////////////////////////
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	protected ISet envelop, kernel;
-	protected IEnvironment environment;
-	protected SetDelta delta;
-	///////////// Attributes related to Variable ////////////
-	protected boolean reactOnModification;
-
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
-
-	public SetVariable(String name, Solver solver) {
-		this(name,0,SetType.LINKED_LIST,SetType.LINKED_LIST,solver);
-	}
-
-	public SetVariable(String name, int maximalSize, SetType envType, SetType kerType, Solver solver) {
-		super(name, solver);
-		solver.associates(this);
-		this.environment = solver.getEnvironment();
-		envelop = SetFactory.makeStoredSet(envType, maximalSize, environment);
-		kernel = SetFactory.makeStoredSet(kerType,maximalSize,environment);
-	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-	public boolean instantiated() {
-		return envelop.getSize() == kernel.getSize();
-	}
-
-	@Override
-    public boolean addToKernel(int value, ICause cause) throws ContradictionException {
-		if(!envelop.contain(value)){
-			contradiction(cause,null,"");
-		}
-		if(!kernel.contain(value)){
-			kernel.add(value);
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean removeFromEnveloppe(int value, ICause cause) throws ContradictionException {
-		if(kernel.contain(value)){
-			contradiction(cause,null,"");
-		}
-		if(envelop.contain(value)){
-			envelop.remove(value);
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
-		boolean changed = !instantiated();
-		for(int i:value){
-			addToKernel(i,cause);
-		}
-		if(kernel.getSize()!=value.length){
-			contradiction(cause,null,"");
-		}
-		if(envelop.getSize()!=value.length){
-			for(int i=envelop.getFirstElement();i>=0;i=envelop.getNextElement()){
-				if(!kernel.contain(i)){
-					envelop.remove(i);
-				}
-			}
-		}
-		return changed;
-	}
-
-	@Override
-	public boolean contains(int v) {
-		return envelop.contain(v);
-	}
-
-	@Override
-	public int[] getValue() {
-		int[] lb = new int[kernel.getSize()];
-		int k = 0;
-		for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
-			lb[k++] = i;
-		}
-		return lb;
-	}
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	public ISet getKernel() {
-		return kernel;
-	}
-
-	public ISet getEnvelop() {
-		return envelop;
-	}
-
-	//***********************************************************************************
-	// VARIABLE STUFF
-	//***********************************************************************************
-
-	@Override
-	public Explanation explain(VariableState what) {
-		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
-	}
-
-	@Override
-	public Explanation explain(VariableState what, int val) {
-		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
-	}
-
-	@Override
-	public SetDelta getDelta() {
-		return delta;
-	}
-
-	@Override
-	public int getTypeAndKind() {
-		return VAR + SET;
-	}
-
-	@Override
-	public String toString() {
-		return getName();
-	}
-
-    @Override
-    public void createDelta() {
-        if (!reactOnModification) {
-			reactOnModification = true;
-			delta = new SetDelta(solver.getSearchLoop());
-		}
-    }
-
-    @Override
-    public SetDeltaMonitor monitorDelta(ICause propagator) {
-        createDelta();
-        return new SetDeltaMonitor(delta, propagator);
-    }
-
-	public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
-        notifyMonitors(event, cause);
-        if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
-            solver.getEngine().onVariableUpdate(this, event, cause);
-        }
-        notifyViews(event, cause);
-    }
-
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event, cause);
-        }
-	}
-
-	@Override
-	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-		solver.getEngine().fails(cause, this, message);
-	}
+public abstract class SetVariable {
+//	extends
+//} AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVar> implements SetVar {
+//
+//    //////////////////////////////// GRAPH PART /////////////////////////////////////////
+//	//***********************************************************************************
+//	// VARIABLES
+//	//***********************************************************************************
+//
+//	protected ISet envelop, kernel;
+//	protected IEnvironment environment;
+//	protected SetDelta delta;
+//	///////////// Attributes related to Variable ////////////
+//	protected boolean reactOnModification;
+//
+//	//***********************************************************************************
+//	// CONSTRUCTORS
+//	//***********************************************************************************
+//
+//	/**
+//	 * Set variable based on a linked list representation
+//	 * @param name
+//	 * @param solver
+//	 */
+//	public SetVariable(String name, Solver solver) {
+//		this(name,0,SetType.LINKED_LIST,SetType.LINKED_LIST,solver);
+//	}
+//
+//	/**
+//	 * Set variable
+//	 * @param name
+//	 * @param maximalSize values will be in range [0, maximalSize-1]
+//	 * @param envType data structure of the envelope
+//	 * @param kerType data structure of the kernel
+//	 * @param solver
+//	 */
+//	public SetVariable(String name, int maximalSize, SetType envType, SetType kerType, Solver solver) {
+//		super(name, solver);
+//		solver.associates(this);
+//		this.environment = solver.getEnvironment();
+//		envelop = SetFactory.makeStoredSet(envType, maximalSize, environment);
+//		kernel = SetFactory.makeStoredSet(kerType,maximalSize,environment);
+//	}
+//
+//	//***********************************************************************************
+//	// METHODS
+//	//***********************************************************************************
+//
+//	@Override
+//	public boolean instantiated() {
+//		return envelop.getSize() == kernel.getSize();
+//	}
+//
+//	@Override
+//    public boolean addToKernel(int value, ICause cause) throws ContradictionException {
+//		if(!envelop.contain(value)){
+//			contradiction(cause,null,"");
+//		}
+//		if(!kernel.contain(value)){
+//			kernel.add(value);
+//			return true;
+//		}
+//		return false;
+//	}
+//
+//	@Override
+//	public boolean removeFromEnveloppe(int value, ICause cause) throws ContradictionException {
+//		if(kernel.contain(value)){
+//			contradiction(cause,null,"");
+//		}
+//		if(envelop.contain(value)){
+//			envelop.remove(value);
+//			return true;
+//		}
+//		return false;
+//	}
+//
+//	@Override
+//	public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
+//		boolean changed = !instantiated();
+//		for(int i:value){
+//			addToKernel(i,cause);
+//		}
+//		if(kernel.getSize()!=value.length){
+//			contradiction(cause,null,"");
+//		}
+//		if(envelop.getSize()!=value.length){
+//			for(int i=envelop.getFirstElement();i>=0;i=envelop.getNextElement()){
+//				if(!kernel.contain(i)){
+//					envelop.remove(i);
+//				}
+//			}
+//		}
+//		return changed;
+//	}
+//
+//	@Override
+//	public boolean contains(int v) {
+//		return envelop.contain(v);
+//	}
+//
+//	@Override
+//	public int[] getValue() {
+//		int[] lb = new int[kernel.getSize()];
+//		int k = 0;
+//		for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
+//			lb[k++] = i;
+//		}
+//		return lb;
+//	}
+//
+//	//***********************************************************************************
+//	// ACCESSORS
+//	//***********************************************************************************
+//
+//	public ISet getKernel() {
+//		return kernel;
+//	}
+//
+//	public ISet getEnvelop() {
+//		return envelop;
+//	}
+//
+//	//***********************************************************************************
+//	// VARIABLE STUFF
+//	//***********************************************************************************
+//
+//	@Override
+//	public Explanation explain(VariableState what) {
+//		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+//	}
+//
+//	@Override
+//	public Explanation explain(VariableState what, int val) {
+//		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+//	}
+//
+//	@Override
+//	public SetDelta getDelta() {
+//		return delta;
+//	}
+//
+//	@Override
+//	public int getTypeAndKind() {
+//		return VAR + SET;
+//	}
+//
+//	@Override
+//	public String toString() {
+//		return getName();
+//	}
+//
+//    @Override
+//    public void createDelta() {
+//        if (!reactOnModification) {
+//			reactOnModification = true;
+//			delta = new SetDelta(solver.getSearchLoop());
+//		}
+//    }
+//
+//    @Override
+//    public SetDeltaMonitor monitorDelta(ICause propagator) {
+//        createDelta();
+//        return new SetDeltaMonitor(delta, propagator);
+//    }
+//
+//	public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+//        notifyMonitors(event, cause);
+//        if ((modificationEvents & event.mask) != 0) {
+//            //records.forEach(afterModification.set(this, event, cause));
+//            solver.getEngine().onVariableUpdate(this, event, cause);
+//        }
+//        notifyViews(event, cause);
+//    }
+//
+//    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+//        for (int i = mIdx - 1; i >= 0; i--) {
+//            monitors[i].onUpdate(this, event, cause);
+//        }
+//	}
+//
+//	@Override
+//	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+//		solver.getEngine().fails(cause, this, message);
+//	}
 }

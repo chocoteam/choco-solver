@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
+import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.SetDelta;
 

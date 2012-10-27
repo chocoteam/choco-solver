@@ -71,9 +71,13 @@ public class Set_Array implements ISet{
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {
-		if(!elements[element])size++;
-		elements[element] = true;
+	public boolean add(int element) {
+		if(!elements[element]){
+			size++;
+			elements[element] = true;
+			return true;
+		}
+		return false;
 	}
 
 	@Override

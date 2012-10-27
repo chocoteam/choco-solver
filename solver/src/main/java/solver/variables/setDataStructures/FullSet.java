@@ -55,7 +55,9 @@ public class FullSet implements ISet{
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {}
+	public boolean add(int element) {
+		return false;
+	}
 
 	@Override
 	public boolean remove(int element) {

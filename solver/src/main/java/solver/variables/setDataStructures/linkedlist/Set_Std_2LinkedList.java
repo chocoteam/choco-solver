@@ -65,7 +65,7 @@ public class Set_Std_2LinkedList extends Set_2LinkedList {
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {
+	public boolean add(int element) {
 		this._add(element);
 		if(operationPoolGC.isEmpty()){
 			new ListOP(element, REMOVE);
@@ -73,6 +73,7 @@ public class Set_Std_2LinkedList extends Set_2LinkedList {
 			ListOP op = operationPoolGC.removeFirst();
 			op.set(element,REMOVE);
 		}
+		return true;
 	}
 
 	protected void _add(int element) {

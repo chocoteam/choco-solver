@@ -58,12 +58,9 @@ public class Set_Swap_Array extends Set_Swap {
 	}
 
 	@Override
-	public void add(int element) {
+	public boolean add(int element) {
 		if(contain(element)){
-			Exception e = new Exception("element already in list");
-			e.printStackTrace();
-			System.exit(0);
-			return;
+			return false;
 		}
 		int size = getSize();
 		if(getSize()==arrayLength){
@@ -76,6 +73,7 @@ public class Set_Swap_Array extends Set_Swap {
 		array[size] = element;
 		map[element] = size;
 		addSize(1);
+		return true;
 	}
 
 	@Override

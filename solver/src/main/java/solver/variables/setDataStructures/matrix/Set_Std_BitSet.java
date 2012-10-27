@@ -49,11 +49,13 @@ public class Set_Std_BitSet extends S64BitSet implements ISet {
     }
 
     @Override
-    public void add(int element) {
+    public boolean add(int element) {
     	if(!get(element)){
     		card.add(1);
     		this.set(element,true);
+			return true;
     	}
+		return false;
     }
 
     @Override

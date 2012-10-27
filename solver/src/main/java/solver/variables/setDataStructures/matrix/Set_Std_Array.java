@@ -77,9 +77,13 @@ public class Set_Std_Array implements ISet{
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {
-		if(!elements[element].get())size.add(1);
-		elements[element].set(true);
+	public boolean add(int element) {
+		if(!elements[element].get()){
+			size.add(1);
+			elements[element].set(true);
+			return true;
+		}
+		return false;
 	}
 
 	@Override

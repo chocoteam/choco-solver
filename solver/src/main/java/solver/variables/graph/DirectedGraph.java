@@ -164,24 +164,22 @@ public class DirectedGraph implements IGraph {
 
 	@Override
 	public boolean activateNode(int x) {
-		if(nodes.contain(x))return false;
-		nodes.add(x);
-		return true;
+		return nodes.add(x);
 	}
 
 	@Override
 	public boolean desactivateNode(int x) {
-		if(!nodes.contain(x))return false;
-		nodes.remove(x);
-		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
-			predecessors[j].remove(x);
-		}
-		successors[x].clear();
-		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
-			successors[j].remove(x);
-		}
-		predecessors[x].clear();
-		return true;
+		if(nodes.remove(x)){
+			for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
+				predecessors[j].remove(x);
+			}
+			successors[x].clear();
+			for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
+				successors[j].remove(x);
+			}
+			predecessors[x].clear();
+			return true;
+		}return false;
 	}
 
 	@Override

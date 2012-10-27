@@ -47,11 +47,13 @@ public class Set_BitSet extends BitSet implements ISet {
     }
 
     @Override
-    public void add(int element) {
+    public boolean add(int element) {
     	if(!get(element)){
     		card++;
             this.set(element, true);
+			return true;
     	}
+		return false;
     }
 
     @Override

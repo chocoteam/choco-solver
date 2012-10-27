@@ -143,21 +143,19 @@ public class UndirectedGraph implements IGraph {
 
 	@Override
 	public boolean activateNode(int x) {
-		if(nodes.contain(x))return false;
-		nodes.add(x);
-		return true;
+		return nodes.add(x);
 	}
 
 	@Override
 	public boolean desactivateNode(int x) {
-		if(!nodes.contain(x))return false;
-		nodes.remove(x);
-		ISet nei = getNeighborsOf(x);
-		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-			neighbors[j].remove(x);
-		}
-		neighbors[x].clear();
-		return true;
+		if(nodes.remove(x)){
+			ISet nei = getNeighborsOf(x);
+			for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+				neighbors[j].remove(x);
+			}
+			neighbors[x].clear();
+			return true;
+		}return false;
 	}
 
 	@Override

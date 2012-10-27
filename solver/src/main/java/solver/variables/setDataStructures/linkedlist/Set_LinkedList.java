@@ -98,7 +98,7 @@ public class Set_LinkedList implements ISet {
 	 * BEWARE if an element is added during an iteration, as it is before the first element, then this element will not appear
 	 * @param element an int
 	 */
-	public void add(int element) {
+	public boolean add(int element) {
 		if(poolGC==null){
 			this.first = new IntCell(element, first);
 		}else{
@@ -108,6 +108,7 @@ public class Set_LinkedList implements ISet {
 			first = recycled;
 		}
 		this.size++;
+		return true;
 	}
 
 	@Override
