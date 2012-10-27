@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
@@ -41,11 +41,12 @@ import solver.variables.Variable;
 import solver.variables.delta.*;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.SetFactory;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.view.IView;
 
 
-public abstract class SetVariable extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVariable>
-	implements Variable<SetDelta, SetDeltaMonitor, IView>, SetVar {
+public abstract class SetVariable extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************
@@ -63,9 +64,15 @@ public abstract class SetVariable extends AbstractVariable<SetDelta, SetDeltaMon
 	//***********************************************************************************
 
 	public SetVariable(String name, Solver solver) {
+		this(name,0,SetType.LINKED_LIST,SetType.LINKED_LIST,solver);
+	}
+
+	public SetVariable(String name, int maximalSize, SetType envType, SetType kerType, Solver solver) {
 		super(name, solver);
 		solver.associates(this);
 		this.environment = solver.getEnvironment();
+		envelop = SetFactory.makeStoredSet(envType, maximalSize, environment);
+		kernel = SetFactory.makeStoredSet(kerType,maximalSize,environment);
 	}
 
 	//***********************************************************************************
