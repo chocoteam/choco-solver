@@ -48,7 +48,7 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -61,7 +61,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     // VARIABLES
     //***********************************************************************************
 
-    private static GraphType gt;
+    private static SetType gt;
 
     private int n;
     private DirectedGraphVar graph;
@@ -131,7 +131,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
     private void basicModel() {
         // create model
-        graph = new DirectedGraphVar(solver, n, gt, GraphType.LINKED_LIST,true);
+        graph = new DirectedGraphVar(solver, n, gt, SetType.LINKED_LIST,true);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {
@@ -330,7 +330,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         boolean[][] matrix = transformMatrix(m);
         for (int i = 0; i < 4; i++) {
             for (int p = 0; p < 8; p++) {
-                for (GraphType type : GraphType.ENVELOPE_TYPES) {
+                for (SetType type : SetType.values()) {
                     gt = type;
                     HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
                     hcp.set(matrix, seed);

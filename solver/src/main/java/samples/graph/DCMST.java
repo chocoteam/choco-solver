@@ -61,7 +61,7 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.io.*;
@@ -165,7 +165,7 @@ public class DCMST {
 	private static void solveDCMST(String instanceName) {
 		solver = new Solver();
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST,true);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.DOUBLE_LINKED_LIST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){

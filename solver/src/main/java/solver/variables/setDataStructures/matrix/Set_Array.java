@@ -25,29 +25,45 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 27/10/12
+ * Time: 01:43
+ */
+
+package solver.variables.setDataStructures.matrix;
+
+import solver.variables.setDataStructures.ISet;
 
 /**
- * Fix Set which contains all values in range [0,n-1]
+ * Set represented by an array of booleans
  * @author Jean-Guillaume Fages
- * @since 21/10/12
+ * @since Oct 2012
  */
-public class FullSet implements ISet{
+public class Set_Array implements ISet{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	int n;
-	int current;
+	protected boolean[] elements;
+	private int n;
+	private int size;
+	protected int current;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public FullSet(int n){
+	/**
+	 * Creates a set represented by an array of booleans
+	 * @param n maximal size of the set
+	 */
+	public Set_Array(int n){
 		this.n = n;
-		current = 0;
+		this.elements = new boolean[n];
+		this.size = 0;
 	}
 
 	//***********************************************************************************
@@ -55,45 +71,59 @@ public class FullSet implements ISet{
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {}
+	public void add(int element) {
+		if(!elements[element])size++;
+		elements[element] = true;
+	}
 
 	@Override
 	public boolean remove(int element) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean contain(int element) {
-		return true;
-	}
-
-	@Override
-	public boolean isEmpty() {
+		if(elements[element]){
+			size--;
+			elements[element] = false;
+			return true;
+		}
 		return false;
 	}
 
 	@Override
+	public boolean contain(int element) {
+		return elements[element];
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return size==0;
+	}
+
+	@Override
 	public int getSize() {
-		return n;
+		return size;
 	}
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException();
+		for(int i=0;i<n && size>0;i++){
+			if(elements[i])size--;
+			elements[i] = false;
+		}
 	}
 
 	@Override
 	public int getFirstElement() {
 		current = 0;
-		return 0;
+		return getNextElement();
 	}
 
 	@Override
 	public int getNextElement() {
-		current++;
-		if(current<n)
-			return current;
-		else
-			return -1;
+		int i = current;
+		while(i<n && !elements[i]){
+			i++;
+		}
+		if(i<n){
+			current = i+1;
+			return i;
+		}return -1;
 	}
 }

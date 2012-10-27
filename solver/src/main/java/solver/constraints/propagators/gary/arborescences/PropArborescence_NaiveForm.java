@@ -34,7 +34,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -77,7 +77,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
 		this.source = source;
 		list = new LinkedList<Integer>();
 		visited = new BitSet(n);
-		domTrans= new DirectedGraph(n,GraphType.MATRIX,false);
+		domTrans= new DirectedGraph(n, SetType.BOOL_ARRAY,false);
 	}
 
 	//***********************************************************************************
@@ -124,7 +124,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
 			domTrans.getPredecessorsOf(i).clear();
 		}
 		for(int i=0;i<n;i++){
-			DirectedGraph dig = new DirectedGraph(n,GraphType.LINKED_LIST,false);
+			DirectedGraph dig = new DirectedGraph(n, SetType.LINKED_LIST,false);
 			for(int j=0; j<n; j++){
 				if(j!=i){
 					succ = g.getEnvelopGraph().getSuccessorsOf(j);

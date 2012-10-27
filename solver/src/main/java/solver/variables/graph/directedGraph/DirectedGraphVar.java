@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 /**
@@ -49,7 +49,7 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
 	//***********************************************************************************
 
 	public DirectedGraphVar(Solver solver, int nbNodes,
-							GraphType typeEnv, GraphType typeKer,boolean allNodes) {
+							SetType typeEnv, SetType typeKer,boolean allNodes) {
 		super(solver);
 		envelop = new DirectedGraph(environment, nbNodes, typeEnv,allNodes);
 		kernel = new DirectedGraph(environment, nbNodes, typeKer,allNodes);

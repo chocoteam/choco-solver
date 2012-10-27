@@ -44,7 +44,6 @@ import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.propagation.hardcoded.ConstraintEngine;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.DecisionOperator;
@@ -54,7 +53,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.*;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -112,7 +111,7 @@ public class KTP_Graph_Bool {
 		}
 		solver = new Solver();
 		// variables
-		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
+		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			for(int j=i+1;j<n;j++){
 				if(matrix[i][j]){

@@ -59,7 +59,7 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -223,7 +223,7 @@ public class ATSP {
 		solver = new Solver();
 //		initialUB = optimum;
 		System.out.println("initial UB : "+initialUB);
-		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
+		graph = new DirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
 			for (int i = 0; i < n - 1; i++) {

@@ -66,7 +66,7 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -154,7 +154,7 @@ public class SOP {
 		solver = new Solver();
 		initialUB = optimum;
 		System.out.println("initial UB : "+optimum);
-		graph = new DirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST,true);
+		graph = new DirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST,true);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
 			for (int i = 0; i < n - 1; i++) {
@@ -245,7 +245,7 @@ public class SOP {
 	}
 
 	public static void addTransitionGraph(){
-		transGraph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.KERNEL_SWAP_ARRAY,true);
+		transGraph = new DirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY,true);
 		for (int j = 1; j < n; j++) {
 			transGraph.getEnvelopGraph().addArc(0, j);
 			transGraph.getKernelGraph().addArc(0, j);

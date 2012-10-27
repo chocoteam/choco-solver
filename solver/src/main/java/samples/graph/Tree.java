@@ -37,8 +37,9 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.BitSet;
 
 /**Partitions a graph into anti-arborescences
@@ -61,7 +62,7 @@ public class Tree extends AbstractProblem{
 	private int d;
 	private Boolean sat;
 	static int seed = 0;
-	private static GraphType gtype;
+	private static SetType gtype;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -85,7 +86,7 @@ public class Tree extends AbstractProblem{
 
     @Override
 	public void buildModel() {
-		g = new DirectedGraphVar(solver,n,gtype,GraphType.LINKED_LIST,false);
+		g = new DirectedGraphVar(solver,n,gtype, SetType.LINKED_LIST,false);
 		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);
 		try{
 		for(int i=0; i<n; i++){
@@ -144,7 +145,7 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		gtype = GraphType.MATRIX;
+		gtype = SetType.BOOL_ARRAY;
 		testN();
 	}
 	

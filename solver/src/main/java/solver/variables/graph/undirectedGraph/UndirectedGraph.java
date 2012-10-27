@@ -28,7 +28,8 @@
 package solver.variables.graph.undirectedGraph;
 
 import choco.kernel.memory.IEnvironment;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetFactory;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.FullSet;
@@ -57,13 +58,11 @@ public class UndirectedGraph implements IGraph {
 	/** activeIdx represents the nodes available in the graph */
 	ISet nodes;
 	int n;
-	GraphType type;
+	SetType type;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
-
-//	protected UndirectedGraph() {}
 
 	/**
 	 * Stored Graph
@@ -72,57 +71,12 @@ public class UndirectedGraph implements IGraph {
 	 * @param type of data structure
 	 * @param allNodes true iff all nodes will always remain in the graph
 	 */
-	public UndirectedGraph(IEnvironment env, int nbits, GraphType type, boolean allNodes) {
+	public UndirectedGraph(IEnvironment env, int nbits, SetType type, boolean allNodes) {
 		this.type = type;
 		this.n = nbits;
-		switch (type) {
-			// SWAP ARRAYS
-			case ENVELOPE_SWAP_ARRAY:
-				neighbors = new Set_Std_Swap_Array_RemoveOnly[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Std_Swap_Array_RemoveOnly(env,nbits);
-				}
-				break;
-			case ENVELOPE_SWAP_HASH:
-				neighbors = new Set_Std_Swap_Hash_RemoveOnly[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Std_Swap_Hash_RemoveOnly(env,nbits);
-				}
-				break;
-			case KERNEL_SWAP_ARRAY:
-				neighbors = new Set_Std_Swap_Array_AddOnly[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Std_Swap_Array_AddOnly(env,nbits);
-				}
-				break;
-			case KERNEL_SWAP_HASH:
-				neighbors = new Set_Std_Swap_Hash_AddOnly[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Std_Swap_Hash_AddOnly(env,nbits);
-				}
-				break;
-			// LINKED LISTS
-			case DOUBLE_LINKED_LIST:
-				this.neighbors = new Set_Std_2LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_Std_2LinkedList(env);
-				}
-				break;
-			case LINKED_LIST:
-				this.neighbors = new Set_Std_LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_Std_LinkedList(env);
-				}
-				break;
-			// MATRIX
-			case MATRIX:
-				this.neighbors = new Set_Std_BitSet[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_Std_BitSet(env,nbits);
-				}
-				break;
-			default:
-				throw new UnsupportedOperationException();
+		neighbors = new ISet[nbits];
+		for(int i=0;i<n;i++){
+			neighbors[i] = SetFactory.makeStoredSet(type,nbits,env);
 		}
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
@@ -137,49 +91,12 @@ public class UndirectedGraph implements IGraph {
 	 * @param type of data structure
 	 * @param allNodes true iff all nodes will always remain in the graph
 	 */
-	public UndirectedGraph(int nbits, GraphType type, boolean allNodes) {
+	public UndirectedGraph(int nbits, SetType type, boolean allNodes) {
 		this.type = type;
 		this.n = nbits;
-		switch (type) {
-			// ARRAY SWAP
-			case KERNEL_SWAP_ARRAY:
-			case ENVELOPE_SWAP_ARRAY:
-			case SWAP_ARRAY:
-				neighbors = new Set_Swap_Array[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Swap_Array(nbits);
-				}
-				break;
-			case KERNEL_SWAP_HASH:
-			case ENVELOPE_SWAP_HASH:
-			case SWAP_HASH:
-				neighbors = new Set_Swap_Hash[nbits];
-				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new Set_Swap_Hash(nbits);
-				}
-				break;
-			// LINKED LISTS
-			case DOUBLE_LINKED_LIST:
-				this.neighbors = new Set_2LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_2LinkedList();
-				}
-				break;
-			case LINKED_LIST:
-				this.neighbors = new Set_LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_LinkedList();
-				}
-				break;
-			// MATRIX
-			case MATRIX:
-				this.neighbors = new Set_BitSet[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new Set_BitSet(nbits);
-				}
-				break;
-			default:
-				throw new UnsupportedOperationException();
+		neighbors = new ISet[nbits];
+		for(int i=0;i<n;i++){
+			neighbors[i] = SetFactory.makeSet(type,nbits);
 		}
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
@@ -220,7 +137,7 @@ public class UndirectedGraph implements IGraph {
 	/**
 	 * @inheritedDoc
 	 */
-	public GraphType getType() {
+	public SetType getType() {
 		return type;
 	}
 

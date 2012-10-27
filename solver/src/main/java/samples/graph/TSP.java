@@ -46,8 +46,9 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 
 /**
@@ -115,7 +116,7 @@ public class TSP {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){

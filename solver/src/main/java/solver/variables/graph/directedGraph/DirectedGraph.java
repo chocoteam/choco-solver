@@ -29,7 +29,8 @@ package solver.variables.graph.directedGraph;
 
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphTools;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetFactory;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.FullSet;
@@ -61,64 +62,20 @@ public class DirectedGraph implements IGraph {
 	/** activeIdx represents the nodes available in the graph */
 	ISet nodes;
 	int n;
-	GraphType type;
+	SetType type;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraph(int nbits, GraphType type, boolean allNodes) {
+	public DirectedGraph(int nbits, SetType type, boolean allNodes) {
 		this.type = type;
 		this.n = nbits;
-		switch (type) {
-			// ARRAY SWAP
-			case ENVELOPE_SWAP_ARRAY:
-			case KERNEL_SWAP_ARRAY:
-			case SWAP_ARRAY:
-				this.successors = new Set_Swap_Array[nbits];
-				this.predecessors = new Set_Swap_Array[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new Set_Swap_Array(nbits);
-					this.predecessors[i] = new Set_Swap_Array(nbits);
-				}
-				break;
-			case ENVELOPE_SWAP_HASH:
-			case KERNEL_SWAP_HASH:
-			case SWAP_HASH:
-				this.successors = new Set_Swap_Hash[nbits];
-				this.predecessors = new Set_Swap_Hash[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new Set_Swap_Hash(nbits);
-					this.predecessors[i] = new Set_Swap_Hash(nbits);
-				}
-				break;
-			// LINKED LISTS
-			case DOUBLE_LINKED_LIST:
-				this.successors = new Set_2LinkedList[nbits];
-				this.predecessors = new Set_2LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new Set_2LinkedList();
-					this.predecessors[i] = new Set_2LinkedList();
-				}
-				break;
-			case LINKED_LIST:
-				this.successors = new Set_LinkedList[nbits];
-				this.predecessors = new Set_LinkedList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new Set_LinkedList();
-					this.predecessors[i] = new Set_LinkedList();
-				}
-				break;
-			case MATRIX:
-				this.successors = new Set_BitSet[nbits];
-				this.predecessors = new Set_BitSet[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new Set_BitSet(nbits);
-					this.predecessors[i] = new Set_BitSet(nbits);
-				}
-				break;
-			default:
-				throw new UnsupportedOperationException();
+		predecessors = new ISet[nbits];
+		successors = new ISet[nbits];
+		for(int i=0;i<n;i++){
+			predecessors[i] = SetFactory.makeSet(type, nbits);
+			successors[i] = SetFactory.makeSet(type, nbits);
 		}
 		if(allNodes){
 			this.nodes = new FullSet(nbits);
@@ -127,7 +84,7 @@ public class DirectedGraph implements IGraph {
 		}
 	}
 
-	public DirectedGraph(int order, boolean[][] matrix, GraphType type, boolean allNodes) {
+	public DirectedGraph(int order, boolean[][] matrix, SetType type, boolean allNodes) {
 		this(order,type,allNodes);
 		for (int i = 0; i < order; i++) {
 			for (int j = 0; j < order; j++) {
@@ -139,71 +96,14 @@ public class DirectedGraph implements IGraph {
 		}
 	}
 
-	public DirectedGraph(IEnvironment env, int nb, GraphType type, boolean allNodes) {
+	public DirectedGraph(IEnvironment env, int nb, SetType type, boolean allNodes) {
 		this.n = nb;
 		this.type = type;
-		switch (type) {
-			// LINKED LISTS
-			case DOUBLE_LINKED_LIST:
-				this.successors = new Set_Std_2LinkedList[nb];
-				this.predecessors = new Set_Std_2LinkedList[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_2LinkedList(env);
-					this.predecessors[i] = new Set_Std_2LinkedList(env);
-				}
-				break;
-			case LINKED_LIST:
-				this.successors = new Set_Std_LinkedList[nb];
-				this.predecessors = new Set_Std_LinkedList[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_LinkedList(env);
-					this.predecessors[i] = new Set_Std_LinkedList(env);
-				}
-				break;
-			// ARRAY SWAP
-			case ENVELOPE_SWAP_ARRAY:
-				this.successors = new Set_Std_Swap_Array_RemoveOnly[nb];
-				this.predecessors = new Set_Std_Swap_Array_RemoveOnly[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_Swap_Array_RemoveOnly(env,nb);
-					this.predecessors[i] = new Set_Std_Swap_Array_RemoveOnly(env,nb);
-				}
-				break;
-			case ENVELOPE_SWAP_HASH:
-				this.successors = new Set_Std_Swap_Hash_RemoveOnly[nb];
-				this.predecessors = new Set_Std_Swap_Hash_RemoveOnly[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_Swap_Hash_RemoveOnly(env,nb);
-					this.predecessors[i] = new Set_Std_Swap_Hash_RemoveOnly(env,nb);
-				}
-				break;
-			case KERNEL_SWAP_ARRAY:
-				this.successors = new Set_Std_Swap_Array_AddOnly[nb];
-				this.predecessors = new Set_Std_Swap_Array_AddOnly[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_Swap_Array_AddOnly(env,nb);
-					this.predecessors[i] = new Set_Std_Swap_Array_AddOnly(env,nb);
-				}
-				break;
-			case KERNEL_SWAP_HASH:
-				this.successors = new Set_Std_Swap_Hash_AddOnly[nb];
-				this.predecessors = new Set_Std_Swap_Hash_AddOnly[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_Swap_Hash_AddOnly(env,nb);
-					this.predecessors[i] = new Set_Std_Swap_Hash_AddOnly(env,nb);
-				}
-				break;
-			// MATRIX
-			case MATRIX:
-				this.successors = new Set_Std_BitSet[nb];
-				this.predecessors = new Set_Std_BitSet[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new Set_Std_BitSet(env,nb);
-					this.predecessors[i] = new Set_Std_BitSet(env,nb);
-				}
-				break;
-			default:
-				throw new UnsupportedOperationException();
+		predecessors = new ISet[nb];
+		successors = new ISet[nb];
+		for(int i=0;i<n;i++){
+			predecessors[i] = SetFactory.makeStoredSet(type, nb, env);
+			successors[i] = SetFactory.makeStoredSet(type, nb, env);
 		}
 		if(allNodes){
 			this.nodes = new FullSet(nb);
@@ -264,7 +164,7 @@ public class DirectedGraph implements IGraph {
 	/**
 	 * @inheritedDoc
 	 */
-	public GraphType getType() {
+	public SetType getType() {
 		return type;
 	}
 

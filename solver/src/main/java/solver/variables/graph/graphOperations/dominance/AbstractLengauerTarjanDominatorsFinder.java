@@ -28,7 +28,7 @@
 package solver.variables.graph.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 
@@ -67,7 +67,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		bucket= new int[n];
 		succs = new ISet[n];
 		preds = new ISet[n];
-		T = new DirectedGraph(n, GraphType.LINKED_LIST,false);
+		T = new DirectedGraph(n, SetType.LINKED_LIST,false);
 		list  = new TIntArrayList();
 	}
 

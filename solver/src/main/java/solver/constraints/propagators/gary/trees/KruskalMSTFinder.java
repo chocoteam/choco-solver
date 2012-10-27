@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.trees;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
@@ -80,7 +80,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 		// CCtree
 		ccN = 2*n+1;
 		// backtrable
-		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST,false);
+		ccTree = new DirectedGraph(ccN, SetType.LINKED_LIST,false);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
 		useful = new BitSet(n);

@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.trees;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 public abstract class AbstractTreeFinder {
@@ -54,7 +54,7 @@ public abstract class AbstractTreeFinder {
 
 	public AbstractTreeFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
 		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST,false);
+		Tree = new UndirectedGraph(n, SetType.LINKED_LIST,false);
 		propHK = propagator;
 	}
 

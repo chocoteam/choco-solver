@@ -25,50 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
+package solver.variables.setDataStructures;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+public enum SetType {
+	SWAP_ARRAY,
+	SWAP_HASH,
+	LINKED_LIST,
+	DOUBLE_LINKED_LIST,
+	BITSET,
+	BOOL_ARRAY;
 
-/**
- * Backtrable List of m elements based on Array int_swaping
- * add : O(1) only at root node!
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
- */
-public class Set_Std_Swap_Hash_AddOnly extends Set_Swap_Hash {
-
-	protected IStateInt size;
-	protected IEnvironment env;
-
-	public Set_Std_Swap_Hash_AddOnly(IEnvironment e, int n) {
-		super(n);
-		env = e;
-		size = e.makeInt(0);
-	}
-
-	@Override
-	public boolean remove(int element) {
-		if(env.getWorldIndex()!=0){
-			Exception e = new Exception("cannot remove elements after world 0");
-			e.printStackTrace();
-			System.exit(0);
-		}
-		return super.remove(element);
-	}
-
-	@Override
-	public int getSize(){
-		return size.get();
-	}
-	protected void setSize(int s){
-		size.set(s);
-	}
-	protected void addSize(int delta){
-		size.add(delta);
-	}
+	public final static SetType ENVELOPE_BEST = SWAP_ARRAY;
+	public final static SetType KERNEL_BEST   = LINKED_LIST;
 }
+

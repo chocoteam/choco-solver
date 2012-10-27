@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -78,7 +78,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 		markedCol   = new BitSet(n);
 		// flow
 		n2=2*n;
-		digraph = new DirectedGraph(solver.getEnvironment(),n2, GraphType.LINKED_LIST,false);
+		digraph = new DirectedGraph(solver.getEnvironment(),n2, SetType.LINKED_LIST,false);
 		free = new BitSet(n2);
 		father = new int[n2];
 		in = new BitSet(n2);

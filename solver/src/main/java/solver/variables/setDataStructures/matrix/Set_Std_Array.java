@@ -25,29 +25,51 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 27/10/12
+ * Time: 01:43
+ */
+
+package solver.variables.setDataStructures.matrix;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateBool;
+import choco.kernel.memory.IStateInt;
+import solver.variables.setDataStructures.ISet;
 
 /**
- * Fix Set which contains all values in range [0,n-1]
+ * Set represented by an array of backtrable booleans
  * @author Jean-Guillaume Fages
- * @since 21/10/12
+ * @since Oct 2012
  */
-public class FullSet implements ISet{
+public class Set_Std_Array implements ISet{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	int n;
-	int current;
+	protected IStateBool[] elements;
+	private IStateInt size;
+	private int n;
+	protected int current;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public FullSet(int n){
+	/**
+	 * Creates a set represented by an array of backtrable booleans
+	 * @param n maximal size of the set
+	 */
+	public Set_Std_Array(IEnvironment environment,int n){
 		this.n = n;
-		current = 0;
+		this.elements = new IStateBool[n];
+		this.size = environment.makeInt(0);
+		for(int i=0;i<n;i++){
+			elements[i] = environment.makeBool(false);
+		}
 	}
 
 	//***********************************************************************************
@@ -55,45 +77,61 @@ public class FullSet implements ISet{
 	//***********************************************************************************
 
 	@Override
-	public void add(int element) {}
+	public void add(int element) {
+		if(!elements[element].get())size.add(1);
+		elements[element].set(true);
+	}
 
 	@Override
 	public boolean remove(int element) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean contain(int element) {
-		return true;
-	}
-
-	@Override
-	public boolean isEmpty() {
+		if(elements[element].get()){
+			size.add(-1);
+			elements[element].set(false);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
+	public boolean contain(int element) {
+		return elements[element].get();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return size.get()==0;
+	}
+
+	@Override
 	public int getSize() {
-		return n;
+		return size.get();
 	}
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException();
+		int s = size.get();
+		size.set(0);
+		for(int i=0;i<n && s>0;i++){
+			if(elements[i].get())s--;
+			elements[i].set(false);
+		}
 	}
 
 	@Override
 	public int getFirstElement() {
 		current = 0;
-		return 0;
+		return getNextElement();
 	}
 
 	@Override
 	public int getNextElement() {
-		current++;
-		if(current<n)
-			return current;
-		else
-			return -1;
+		int i = current;
+		while(i<n && !elements[i].get()){
+			i++;
+		}
+		if(i<n){
+			current = i+1;
+			return i;
+		}return -1;
 	}
 }

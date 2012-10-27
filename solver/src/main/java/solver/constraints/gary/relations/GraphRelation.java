@@ -31,7 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.Variable;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -83,7 +83,7 @@ public abstract class GraphRelation<V extends Variable> {
 	 * @return the initial relational graph 
 	 */
 	public GraphVar generateInitialGraph(Solver solver){
-		return generateInitialGraph(GraphType.LINKED_LIST,solver);
+		return generateInitialGraph(SetType.LINKED_LIST,solver);
 	}
 
 	/**create the initial graph representing the relation between input variables
@@ -91,10 +91,10 @@ public abstract class GraphRelation<V extends Variable> {
 	 * @param solver
 	 * @return the initial relational graph
 	 */
-	public GraphVar generateInitialGraph(GraphType envelopeGraphType, Solver solver){
+	public GraphVar generateInitialGraph(SetType envelopeGraphType, Solver solver){
 		int n = vars.length;
 		if (isDirected()){
-			DirectedGraphVar g = new DirectedGraphVar(solver, n, envelopeGraphType, GraphType.LINKED_LIST,false);
+			DirectedGraphVar g = new DirectedGraphVar(solver, n, envelopeGraphType, SetType.LINKED_LIST,false);
 			for(int i=0;i<n;i++){
 				for(int j=0;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){
@@ -107,7 +107,7 @@ public abstract class GraphRelation<V extends Variable> {
 			}
 			return g;
 		}else{
-			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, envelopeGraphType, GraphType.LINKED_LIST,false);
+			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, envelopeGraphType, SetType.LINKED_LIST,false);
 			for(int i=0;i<n;i++){
 				for(int j=i;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){

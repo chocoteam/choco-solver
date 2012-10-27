@@ -36,7 +36,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
@@ -82,7 +82,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
 		n = vars.length;
 		this.nValues = nValues;
-		digraph = new UndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST,false);
+		digraph = new UndirectedGraph(solver.getEnvironment(), n, SetType.LINKED_LIST,false);
 		in = new BitSet(n);
 		inMIS = new BitSet(n);
 		nodes = new BitSet(n);

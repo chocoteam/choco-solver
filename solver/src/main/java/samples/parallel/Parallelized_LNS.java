@@ -42,7 +42,7 @@ import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -138,7 +138,7 @@ public class Parallelized_LNS {
 		// variables
 		int max = 100*optimum;
 		IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){

@@ -32,7 +32,8 @@ import choco.kernel.memory.IStateInt;
 
 /**
  * Backtrable List of m elements based on Array int_swaping
- * add : O(1) only at root node!
+ * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
+ * add : O(1)
  * testPresence: O(1)
  * remove: O(1)
  * iteration : O(m)
@@ -40,25 +41,15 @@ import choco.kernel.memory.IStateInt;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class Set_Std_Swap_Hash_RemoveOnly extends Set_Swap_Hash {
+public class Set_Std_Swap_Hash extends Set_Swap_Hash {
 
 	protected IStateInt size;
 	protected IEnvironment env;
 
-	public Set_Std_Swap_Hash_RemoveOnly(IEnvironment e, int n) {
+	public Set_Std_Swap_Hash(IEnvironment e, int n) {
 		super(n);
 		env = e;
 		size = e.makeInt(0);
-	}
-
-	@Override
-	public void add(int element) {
-		if(env.getWorldIndex()!=0){
-			Exception e = new Exception("cannot add elements after world 0");
-			e.printStackTrace();
-			System.exit(0);
-		}
-		super.add(element);
 	}
 
 	@Override
