@@ -28,13 +28,10 @@ package parser.flatzinc.parser.ext;
 
 import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
-import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -82,14 +79,15 @@ public class T_adt_types extends GrammarExtTest {
     }
 
     public ArrayList<PropagationStrategy> adt_types(FlatzincFullExtParser parser, ArrayList in) throws RecognitionException {
-        FlatzincFullExtParser.adt_types_return r = parser.adt_types();
-        CommonTree t = (CommonTree) r.getTree();
-        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-        FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
-        walker.mSolver = mSolver;
-        walker.map = map;
-        walker.groups = groups;
-        return walker.adt_types(pe, in);
+//        FlatzincFullExtParser.adt_types_return r = parser.adt_types();
+//        CommonTree t = (CommonTree) r.getTree();
+//        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+//        FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
+//        walker.mSolver = mSolver;
+//        walker.map = map;
+//        walker.groups = groups;
+//        return walker.adt_types(pe, in);
+        return null;
     }
 
     @Test
