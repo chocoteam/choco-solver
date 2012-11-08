@@ -33,6 +33,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
@@ -63,6 +64,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
 
     protected final V[] variables;
     protected final Propagator<V>[] propagators;
+    protected IEvaluator evaluator;
 
     protected AbstractFineEventRecorder(V[] variables, Propagator<V>[] propagators, Solver solver, IPropagationEngine engine) {
         this.variables = variables;
@@ -143,5 +145,15 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
         assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
         propagator.fineERcalls++;
         propagator.propagate(idx, mask);
+    }
+
+    @Override
+    public int evaluate() {
+        return evaluator.eval(this);
+    }
+
+    @Override
+    public void attachEvaluator(IEvaluator evaluator) {
+        this.evaluator = evaluator;
     }
 }

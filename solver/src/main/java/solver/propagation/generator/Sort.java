@@ -26,6 +26,7 @@
  */
 package solver.propagation.generator;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
@@ -44,38 +45,36 @@ import java.util.Comparator;
  */
 public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    protected Comparator<S> comparator;
+    protected static Comparator<ISchedulable> comparator = new Comparator<ISchedulable>() {
+        @Override
+        public int compare(ISchedulable o1, ISchedulable o2) {
+            return o1.evaluate() - o2.evaluate();
+        }
+    };
     protected S lastPopped;
 
     protected BitSet toPropagate;
 
-    public Sort(Generator<S>... generators) {
-        this(null, generators);
-    }
-
-    @SuppressWarnings({"unchecked"})
-    public Sort(Comparator<S> comparator, Generator<S>... generators) {
-        super(generators);
-        this.comparator = comparator;
-        if (comparator != null) {
-            Arrays.sort(elements, comparator);
-        }
-        for (int e = 0; e < elements.length; e++) {
-            elements[e].setScheduler(this, e);
-        }
-        this.toPropagate = new BitSet(elements.length / 2 + 1);
-    }
-
-    public Sort(Comparator<S> comparator, S[] schedulables) {
+    private Sort(S[] schedulables) {
         super(schedulables);
-        this.comparator = comparator;
-        if (comparator != null) {
+        for (int e = 0; e < elements.length; e++) {
+            elements[e].setScheduler(this, e);
+        }
+        this.toPropagate = new BitSet(elements.length);
+    }
+
+    public Sort(boolean order, boolean reverse, S[] schedulables) {
+        super(schedulables);
+        if (order) {
             Arrays.sort(elements, comparator);
+        }
+        if (reverse) {
+            ArrayUtils.reverse(elements);
         }
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length / 2 + 1);
+        this.toPropagate = new BitSet(elements.length);
     }
 
 
@@ -196,7 +195,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public Sort duplicate() {
-        return new Sort(this.comparator);
+        return new Sort(this.elements);
     }
 
     //-->

@@ -73,41 +73,47 @@ RP:')';
 /*********************
  *  EXTENSION
  *********************/
+AS:'as';
+EACH:'each';
 
 
-ENGINE:'engine';
-MANY:'many';
 QUEUE:'queue';
 LIST:'list';
 HEAP:'heap';
+
 ONE:'one';
 WONE:'wone';
 FOR:'for';
 WFOR:'wfor';
-FILTER:'filter';
-GROUPBY:'groupBy';
-ORDERBY:'orderBy';
-AND:'and';
-OR:'or';
-NOT:'not';
+ORDERBY:'order by';
+AND:'&&';
+OR:'||';
+NOT:'!';
 IN:'in';
-INC:'inc';
-DEC:'dec';
-NQ:'!=';
-LT:'<';
-GT:'>';
+REV:'rev';
+OEQ:'==';
+ONQ:'!=';
+OLT:'<';
+OGT:'>';
+OLQ:'<=';
+OGQ:'>=';
+KEY:'key';
 
 /*********************
  *  ATTRIBUTES
  *********************/
-VIDX:'v.idx';
-VCARD:'v.cardinality';
-CIDX:'c.idx';
-CARITY:'c.arity';
-PIDX:'p.idx';
-PPRIO:'p.priority';
-PARITY:'p.arity';
-PPRIOD:'p.prioDyn';
+VNAME:'var.name';
+VCARD:'var.cardinality';
+CNAME:'cstr.name';
+CARITY:'cstr.arity';
+PPRIO:'prop.priority';
+PARITY:'prop.arity';
+PPRIOD:'prop.prioDyn';
+ANY:'any';
+MIN:'min';
+MAX:'max';
+SUM:'sum';
+SIZE:'size';
 
 
 /*********************************************
@@ -122,8 +128,8 @@ INDEX   :   '###ID###';
 EXPR    :   '###EX###';
 ANNOTATIONS:'###AS###';
 
-ADT:'###AD###';
-GRP:'###GR###';
+STRUC:'###ST###';
+STREG:'###SR###';
 
 
 /*********************************************

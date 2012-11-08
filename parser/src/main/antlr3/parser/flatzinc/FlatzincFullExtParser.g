@@ -4,6 +4,7 @@ options{
     language = Java;
     output=AST;
     tokenVocab=FlatzincFullExtLexer;
+    backtrack = true;
 }
 
 @header {
@@ -39,102 +40,143 @@ package parser.flatzinc;
 }
 
 flatzinc_ext_model
-	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (engine)? solve_goal
+	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (group_decl)* (structure)? solve_goal
 	;
 
-engine
-    :   ENGINE LP adt_decl SC (adt_decl SC)* group_decl (CM group_decl)* RP
-    ->  ^(ENGINE group_decl+ adt_decl+)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////  OUR DSL /////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//engine
+//    :   (group_decl)* //structure
+//    ->  group_decl+ //structure
+//    ;
+
+// DECLARATION OF A GROUP
+group_decl
+    :   IDENTIFIER CL predicates SC
+    ->  ^(IDENTIFIER predicates)
     ;
 
-adt_decl
-    :   IDENTIFIER CL adt_type
-    ->  ^(IDENTIFIER adt_type)
-    |   MANY adt_type
-    ->  ^(MANY adt_type)
-    ;
 
-adt_type
-    :   adt_decl
-    |    QUEUE LP qiter (CM adt_decl)? RP
-    ->  ^(QUEUE qiter (adt_decl)?)
-    |   HEAP LP qiter (CM adt_decl)? RP
-    ->  ^(HEAP qiter (adt_decl)?)
-    |   LIST LP liter (CM adt_decl)? RP
-    ->  ^(LIST liter (adt_decl)?)
-    ;
+// COMBINATION OF PREDICATES
+predicates
+	:	predicate
+	|	LP predicates (AND predicates)+ RP
+	->  ^(AND predicates+)
+	|	LP predicates (OR predicates)+ RP
+	->  ^(OR predicates+)
+	;
+
+// AVAILABLE PREDICATES
+predicate
+	:	TRUE
+	|	attribute op INT_CONST
+	|	IN LP IDENTIFIER (CM IDENTIFIER)* RP
+	->  ^(IN IDENTIFIER+)
+	|	NOT predicate
+	;
+
+// ATTRIBUTE ACCESSIBLE THROUGH THE SOLVER
+attribute
+	: 	VNAME
+    |   VCARD
+    |   CNAME
+    |   CARITY
+    |   PPRIO
+    |   PARITY
+    |   PPRIOD
+	;
+
+
+// AVAILABLE OPERATORS
+op
+    :   OEQ
+    |   ONQ
+    |   OLT
+    |   OGT
+    |   OLQ
+    |   OGQ
+	;
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//// DECLARATION OF THE STRUCTURE
+structure
+	:   struct SC!
+	|   struct_reg SC!
+	;
+
+struct
+    :	coll OF LB elt (CM elt)* RB (KEY comb_attr)?
+    ->  ^(STRUC elt+ comb_attr? coll)
+	;
+
+struct_reg
+	:	IDENTIFIER AS coll OF LB many RB (KEY comb_attr)?
+	->  ^(STREG IDENTIFIER many comb_attr? coll)
+	;
+
+//TODO: remove backtrack options
+elt
+    :	struct_reg
+    |   struct
+    |   IDENTIFIER (KEY attribute)?
+	;
+
+many
+    :	EACH attribute AS coll (OF LB m=many RB)? (KEY comb_attr)?
+    ->  {m==null}?  ^(attribute comb_attr? coll)
+    ->              ^(EACH attribute comb_attr? many coll)
+	;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//
+coll
+    :	QUEUE LP! qiter RP!
+    |	(REV)? LIST LP! liter RP!
+    |	(MIN|MAX) HEAP  LP! qiter RP!
+	;
 
 qiter
-    :   ONE
+    :	ONE
     |   WONE
     ;
 
 liter
-    :   qiter
+    :	qiter
     |   FOR
     |   WFOR
     ;
 
-group_decl
-    :   IDENTIFIER CL grp_instrs (PL grp_instrs)* SC
-    ->	^(IDENTIFIER grp_instrs+)
-    ;
 
-grp_instrs
-    :   grp_instr+
-    ->  ^(GRP grp_instr+)
-    ;
+comb_attr
+	:	attr_op (DO attr_op)*  (DO attribute)?
+	->  ^(DO attr_op* attribute?)
+	|   (attr_op DO)* attribute
+	->  ^(DO attr_op* attribute?)
+	;
 
+attr_op
+    :	ANY
+    |   MIN
+    |   MAX
+    |   SUM
+    |   SIZE
+	;
 
-grp_instr
-    :   FILTER predicates
-    ->  ^(FILTER predicates)
-    |   GROUPBY attribute
-    ->  ^(GROUPBY attribute)
-    |   ORDERBY sort attribute
-    ->  ^(ORDERBY sort attribute)
-   ;
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////  BACK TO FLATZINC  ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-sort
-    :   INC
-    |   DEC
-    ;
-
-
-predicates
-    :   predicate
-    |   AND LP predicates (CM predicates)* RP
-    ->  ^(AND predicates+)
-    |   OR LP predicates (CM predicates)* RP
-    -> ^(OR predicates+)
-    |   NOT LP predicates RP
-    ->  ^(NOT predicates)
-    ;
-
-predicate
-    :   IN LP IDENTIFIER (CM IDENTIFIER)* RP
-    ->  ^(IN IDENTIFIER+)
-    |   IN LP attribute op INT_CONST RP
-    ->  ^(IN attribute op INT_CONST)
-    ;
-
-attribute
-    :   VIDX
-    |   VCARD
-    |   CIDX
-    |   CARITY
-    |   PIDX
-    |   PPRIO
-    |   PARITY
-    |   PPRIOD
-    ;
-
-op
-    :   EQ
-    |   NQ
-    |   LT
-    |   GT
-    ;
 
 pred_decl
 	:   PREDICATE IDENTIFIER LP pred_param (CM pred_param)* RP SC

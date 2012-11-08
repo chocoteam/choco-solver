@@ -27,36 +27,44 @@
 package parser.flatzinc.parser.ext;
 
 import gnu.trove.map.hash.THashMap;
-import junit.framework.Assert;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import parser.flatzinc.FZNException;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
+import parser.flatzinc.ast.ext.CombinedAttribute;
 import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.ISchedulable;
+import solver.propagation.PropagationEngine;
+import solver.propagation.generator.*;
+import solver.recorders.fine.arc.FineArcEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/10/12
+ * @since 07/11/12
  */
-public class T_grp_instrs extends GrammarExtTest {
+public class T_coll extends GrammarExtTest {
 
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-
+    ISchedulable[] arcs;
 
     @BeforeMethod
     public void before() {
@@ -72,25 +80,90 @@ public class T_grp_instrs extends GrammarExtTest {
         }
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
+
+        IPropagationEngine pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+
+        ArrayList<Pair> pairs = Pair.populate(mSolver);
+        arcs = new ISchedulable[pairs.size()];
+        for (int i = 0; i < pairs.size(); i++) {
+            Pair p = pairs.get(i);
+            FineArcEventRecorder er = PArc.make(pe, mSolver, p.var, p.prop, p.idxVinP);
+            if (er == null) {
+                throw new FZNException("Cannot create the pair " + p);
+            }
+            arcs[i] = er;
+        }
     }
 
-    public ArrayList grp_instrs(FlatzincFullExtParser parser, ArrayList before) throws RecognitionException {
-        FlatzincFullExtParser.grp_instrs_return r = parser.grp_instrs();
+    public PropagationStrategy coll(FlatzincFullExtParser parser, ArrayList<ISchedulable> elements,
+                                    CombinedAttribute ca) throws RecognitionException {
+        FlatzincFullExtParser.coll_return r = parser.coll();
         CommonTree t = (CommonTree) r.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
         walker.mSolver = mSolver;
         walker.map = map;
         walker.groups = groups;
-        return walker.grp_instrs(before);
+        return walker.coll(elements, ca);
     }
 
     @Test
-    public void testOrdering() throws IOException, RecognitionException {
-        ArrayList<Pair> before = Pair.populate(mSolver);
-        FlatzincFullExtParser fp = parser("" +
-                "filter or(in(v_0,c_0),in(v_1,c_1),in(v_2,c_2),in(v_3,c_3)) orderBy inc c.idx");
-        ArrayList elmts = grp_instrs(fp, before);
-        Assert.assertEquals(4, elmts.size());
+    public void test1() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("queue(one)");
+
+        ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+        elements.addAll(Arrays.asList(arcs));
+
+        PropagationStrategy ps = coll(fp, elements, null);
+        Assert.assertNotNull(ps);
+        Assert.assertTrue(ps instanceof Queue);
+    }
+
+    @Test
+    public void test2() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("list(for)");
+
+        ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+        elements.addAll(Arrays.asList(arcs));
+
+        PropagationStrategy ps = coll(fp, elements, null);
+        Assert.assertNotNull(ps);
+        Assert.assertTrue(ps instanceof Sort);
+    }
+
+    @Test
+    public void test3() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("rev list(for)");
+
+        ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+        elements.addAll(Arrays.asList(arcs));
+
+        PropagationStrategy ps = coll(fp, elements, null);
+        Assert.assertNotNull(ps);
+        Assert.assertTrue(ps instanceof Sort);
+    }
+
+    @Test
+    public void test4() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("min heap(one)");
+
+        ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+        elements.addAll(Arrays.asList(arcs));
+
+        PropagationStrategy ps = coll(fp, elements, null);
+        Assert.assertNotNull(ps);
+        Assert.assertTrue(ps instanceof SortDyn);
+    }
+
+    @Test
+    public void test5() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("max heap(one)");
+
+        ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+        elements.addAll(Arrays.asList(arcs));
+
+        PropagationStrategy ps = coll(fp, elements, null);
+        Assert.assertNotNull(ps);
+        Assert.assertTrue(ps instanceof SortDyn);
     }
 }

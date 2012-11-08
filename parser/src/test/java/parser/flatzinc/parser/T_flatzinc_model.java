@@ -27,10 +27,10 @@
 package parser.flatzinc.parser;
 
 import gnu.trove.map.hash.THashMap;
-import junit.framework.Assert;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

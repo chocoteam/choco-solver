@@ -1,41 +1,40 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package samples;
 
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.Environments;
 import choco.kernel.memory.IEnvironment;
-import junit.framework.Assert;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ISolverProperties;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationStrategies;
 import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -54,7 +53,7 @@ public class AllTest {
     long nbSol;
     IEnvironment environment;
     ISolverProperties properties;
-    PropagationStrategies strat;
+//    PropagationStrategies strat;
 
 
     public AllTest() {
@@ -64,20 +63,21 @@ public class AllTest {
                 new AllSolverProp(
                         SearchLoops.BINARY,
                         ExplanationFactory.TRACERECORDER),
-                PropagationStrategies.ONE_QUEUE_WITH_ARCS, 6);
+                //PropagationStrategies.ONE_QUEUE_WITH_ARCS,
+                6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    ISolverProperties properties,
-                   PropagationStrategies strat,
+//                   PropagationStrategies strat,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
-        args = ArrayUtils.append(args, new String[]{"-policy", strat.name()});
+        args = ArrayUtils.append(args);//, new String[]{"-policy", strat.name()});
         this.environment = env;
         this.properties = properties;
-        this.strat = strat;
+//        this.strat = strat;
         this.nbSol = nbSol;
         //prob.solver.
     }
@@ -94,7 +94,7 @@ public class AllTest {
         SearchMonitorFactory.log(prob.solver, true, true);
         prob.solver.findAllSolutions();
 
-        Assert.assertEquals("incorrect nb solutions", nbSol, prob.getSolver().getMeasures().getSolutionCount());
+        Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
     }
 
     @Override

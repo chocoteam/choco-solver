@@ -27,10 +27,10 @@
 package parser.flatzinc.parser.ext;
 
 import gnu.trove.map.hash.THashMap;
-import junit.framework.Assert;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
@@ -86,13 +86,29 @@ public class T_group_decl extends GrammarExtTest {
     }
 
     @Test
-    public void testOrdering() throws IOException, RecognitionException {
+    public void test1() throws IOException, RecognitionException {
         ArrayList<Pair> before = Pair.populate(mSolver);
-        FlatzincFullExtParser fp = parser("" +
-                "L: filter or(in(v_0,c_0),in(v_1,c_1),in(v_2,c_2),in(v_3,c_3)) orderBy inc c.idx " +
-                "+ filter or(in(v_1,c_0),in(v_2,c_1),in(v_3,c_2),in(v_4,c_3)) orderBy dec c.idx;");
+        FlatzincFullExtParser fp = parser("G1: true;");
         group_decl(fp, before);
-        ArrayList elmts = groups.get("L");
+        ArrayList elmts = groups.get("G1");
         Assert.assertEquals(8, elmts.size());
+    }
+
+    @Test
+    public void test2() throws IOException, RecognitionException {
+        ArrayList<Pair> before = Pair.populate(mSolver);
+        FlatzincFullExtParser fp = parser("G1: prop.priority <= 2;");
+        group_decl(fp, before);
+        ArrayList elmts = groups.get("G1");
+        Assert.assertEquals(8, elmts.size());
+    }
+
+    @Test
+    public void test3() throws IOException, RecognitionException {
+        ArrayList<Pair> before = Pair.populate(mSolver);
+        FlatzincFullExtParser fp = parser("G1: (in(v_0,c_0) || in(v_1,c_1) || in(v_2,c_2) || in(v_3,c_3));");
+        group_decl(fp, before);
+        ArrayList elmts = groups.get("G1");
+        Assert.assertEquals(4, elmts.size());
     }
 }

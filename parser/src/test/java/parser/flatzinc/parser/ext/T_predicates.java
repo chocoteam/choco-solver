@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.BoolPredicate;
-import parser.flatzinc.ast.ext.NotPredicate;
 import parser.flatzinc.ast.ext.Predicate;
 import solver.Solver;
 
@@ -71,7 +70,7 @@ public class T_predicates extends GrammarExtTest {
 
     @Test
     public void test1() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("and(in(p.priority = 1),in(p.priority = 2))");
+        FlatzincFullExtParser fp = parser("(prop.priority == 1 && prop.priority == 2)");
         Predicate p = predicates(fp);
         Assert.assertTrue(p instanceof BoolPredicate);
         Assert.assertEquals(BoolPredicate.TYPE.AND, ((BoolPredicate) p).type);
@@ -80,17 +79,10 @@ public class T_predicates extends GrammarExtTest {
 
     @Test
     public void test2() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("or(in(p.priority = 1),in(p.priority = 2))");
+        FlatzincFullExtParser fp = parser("(prop.priority == 1 || prop.priority == 2)");
         Predicate p = predicates(fp);
         Assert.assertTrue(p instanceof BoolPredicate);
         Assert.assertEquals(BoolPredicate.TYPE.OR, ((BoolPredicate) p).type);
         Assert.assertEquals(2, ((BoolPredicate) p).predicates.size());
-    }
-
-    @Test
-    public void test3() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("not(in(p.priority = 1))");
-        Predicate p = predicates(fp);
-        Assert.assertTrue(p instanceof NotPredicate);
     }
 }

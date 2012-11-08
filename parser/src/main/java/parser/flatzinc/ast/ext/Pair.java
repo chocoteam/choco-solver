@@ -62,7 +62,9 @@ public class Pair {
                 Propagator prop = props[j];
                 Variable[] vars = prop.getVars();
                 for (int k = 0; k < vars.length; k++) {
-                    pairs.add(new Pair(vars[i], props[j], k));
+                    if ((vars[k].getTypeAndKind() & Variable.CSTE) == 0) { // this is not a constant
+                        pairs.add(new Pair(vars[k], props[j], k));
+                    }
                 }
             }
         }
@@ -78,5 +80,10 @@ public class Pair {
                 remove(orig, (ArrayList) o);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Pair(" + var + "," + prop + ")";
     }
 }

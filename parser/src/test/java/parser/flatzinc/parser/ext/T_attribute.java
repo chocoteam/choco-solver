@@ -26,10 +26,10 @@
  */
 package parser.flatzinc.parser.ext;
 
-import junit.framework.Assert;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
@@ -45,7 +45,7 @@ import java.io.IOException;
  */
 public class T_attribute extends GrammarExtTest {
 
-    public Attribute par_type(FlatzincFullExtParser parser) throws RecognitionException {
+    public Attribute attribute(FlatzincFullExtParser parser) throws RecognitionException {
         FlatzincFullExtParser.attribute_return r = parser.attribute();
         CommonTree t = (CommonTree) r.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
@@ -55,57 +55,50 @@ public class T_attribute extends GrammarExtTest {
 
     @Test
     public void test1() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("v.idx");
-        Attribute a = par_type(fp);
-        Assert.assertTrue(a == Attribute.VIDX);
+        FlatzincFullExtParser fp = parser("var.name");
+        Attribute a = attribute(fp);
+        Assert.assertTrue(a == Attribute.VNAME);
     }
 
     @Test
     public void test2() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("c.idx");
-        Attribute a = par_type(fp);
-        Assert.assertTrue(a == Attribute.CIDX);
-    }
-
-    @Test
-    public void test3() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("p.idx");
-        Attribute a = par_type(fp);
-        Assert.assertTrue(a == Attribute.PIDX);
+        FlatzincFullExtParser fp = parser("cstr.name");
+        Attribute a = attribute(fp);
+        Assert.assertTrue(a == Attribute.CNAME);
     }
 
     @Test
     public void test4() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("v.cardinality");
-        Attribute a = par_type(fp);
+        FlatzincFullExtParser fp = parser("var.cardinality");
+        Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.VCARD);
     }
 
     @Test
     public void test5() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("c.arity");
-        Attribute a = par_type(fp);
+        FlatzincFullExtParser fp = parser("cstr.arity");
+        Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.CARITY);
     }
 
     @Test
     public void test6() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("p.priority");
-        Attribute a = par_type(fp);
+        FlatzincFullExtParser fp = parser("prop.priority");
+        Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.PPRIO);
     }
 
     @Test
     public void test7() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("p.arity");
-        Attribute a = par_type(fp);
+        FlatzincFullExtParser fp = parser("prop.arity");
+        Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.PARITY);
     }
 
     @Test
     public void test8() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("p.prioDyn");
-        Attribute a = par_type(fp);
+        FlatzincFullExtParser fp = parser("prop.prioDyn");
+        Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.PPRIOD);
     }
 }

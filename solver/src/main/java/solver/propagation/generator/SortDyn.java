@@ -29,7 +29,6 @@ package solver.propagation.generator;
 import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.propagation.queues.IHeap;
 import solver.propagation.queues.MinHeap;
 
@@ -44,29 +43,17 @@ import solver.propagation.queues.MinHeap;
  */
 public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    protected IEvaluator<S> evaluator;
     protected IHeap toPropagate;
     protected S lastPopped;
-
-    @SuppressWarnings({"unchecked"})
-    public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
-        super(generators);
-        this.evaluator = evaluator;
-        for (int e = 0; e < elements.length; e++) {
-            elements[e].setScheduler(this, e);
-        }
-//        this.toPropagate = new BinaryTreeHeap(elements.length);
-        this.toPropagate = new MinHeap(elements.length + 1);
-    }
+    protected int coeff;
 
 
-    public SortDyn(IEvaluator<S> evaluator, S[] schedulables) {
+    public SortDyn(boolean min, S[] schedulables) {
         super(schedulables);
-        this.evaluator = evaluator;
+        coeff = (min ? 1 : -1);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        //        this.toPropagate = new BinaryTreeHeap(elements.length);
         this.toPropagate = new MinHeap(elements.length + 1);
     }
 
@@ -81,7 +68,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
         // CONDITION: the element must not be already present (checked in element)
         assert !element.enqueued();
         int idx = element.getIndexInScheduler();
-        toPropagate.insert(evaluator.eval(element), idx);
+        toPropagate.insert(coeff * element.evaluate(), idx);
         element.enqueue();
         if (!enqueued) {
             scheduler.schedule(this);
@@ -164,12 +151,13 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     @Override
     public void update(S element) {
         int idx = element.getIndexInScheduler();
-        toPropagate.update(evaluator.eval(element), idx);
-    }
-
-    @Override
-    public SortDyn duplicate() {
-        return new SortDyn(this.evaluator);
+        toPropagate.update(coeff * element.evaluate(), idx);
     }
     //-->
+
+
+    @Override
+    public PropagationStrategy<S> duplicate() {
+        return new SortDyn<S>(coeff == 1, elements);
+    }
 }

@@ -26,33 +26,18 @@
  */
 package parser.flatzinc.ast.ext;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-
-import java.util.ArrayList;
-
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 19/10/12
  */
-public class GroupBy implements Instruction {
+public class TruePredicate extends Predicate {
 
+    public static TruePredicate singleton = new TruePredicate();
 
-    public static ArrayList execute(Attribute a, ArrayList before) {
-        ArrayList<ArrayList> after = new ArrayList<ArrayList>();
-        TIntIntHashMap map = new TIntIntHashMap(12, .5f, -1, -1);
-        for (int i = 0; i < before.size(); i++) {
-            Object o = before.get(i);
-            int value = a.evaluate(o);
-            int idx = map.get(value);
-            if (idx == -1) {
-                after.add(new ArrayList());
-                idx = after.size() - 1;
-                map.put(value, idx);
-            }
-            after.get(idx).add(o);
-        }
-        return after;
+    @Override
+    public boolean evaluate(Pair p) {
+        return true;
     }
 }

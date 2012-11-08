@@ -29,6 +29,7 @@ package parser.flatzinc.ast.ext;
 import java.util.ArrayList;
 
 /**
+ * Filter elements from a list given a predicate
  * <br/>
  *
  * @author Charles Prud'homme
@@ -37,16 +38,20 @@ import java.util.ArrayList;
 public class Filter implements Instruction {
 
 
-    public static ArrayList execute(Predicate p, ArrayList before) {
-        ArrayList after = new ArrayList();
+    /**
+     * If an item from <code>before</code> satisfies <code>p</code>, then
+     * it is removed from it and placed into <code>after</code>, the returned list.
+     *
+     * @param p      a predicate
+     * @param before input list of Pairs
+     * @return list of pairs
+     */
+    public static ArrayList<Pair> execute(Predicate p, ArrayList<Pair> before) {
+        ArrayList<Pair> after = new ArrayList<Pair>();
         for (int i = 0; i < before.size(); i++) {
-            Object o = before.get(i);
-            if (o instanceof Pair) {
-                if (p.evaluate((Pair) o)) {
-                    after.add(o);
-                }
-            } else if (o instanceof ArrayList) {
-                after.addAll(p.evaluate((ArrayList) o));
+            Pair aPair = before.get(i);
+            if (p.evaluate(aPair)) {
+                after.add(aPair);
             }
         }
         return after;

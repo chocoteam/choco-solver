@@ -26,12 +26,12 @@
  */
 package solver.propagation.generator;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
 
 /**
  * An abstract class for DSL to define a propagation strategy.
@@ -58,19 +58,15 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued = false; // to check wether this is enqueud or not.
     protected IPropagationEngine engine;
-
-    protected PropagationStrategy(Generator<E>... generators) {
-        this.elements = (E[]) new ISchedulable[0];
-        for (int i = 0; i < generators.length; i++) {
-            Generator gen = generators[i];
-            elements = ArrayUtils.append(elements, (E[]) gen.getElements());
-        }
-    }
+    protected IEvaluator evaluator;
 
     protected PropagationStrategy(E... schedulables) {
         this.elements = schedulables;
     }
 
+    public E[] array() {
+        return elements;
+    }
 
     //<-- DSL
 
@@ -177,5 +173,15 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
 
     public PropagationStrategy<E> duplicate() {
         throw new UnsupportedOperationException("unexpected call to Switcher, should be delegated");
+    }
+
+    @Override
+    public void attachEvaluator(IEvaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+
+    @Override
+    public int evaluate() {
+        return evaluator.eval(this);
     }
 }

@@ -34,9 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.unary.Member;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -148,19 +145,6 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        /*IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        Sort ad1 = new Sort(
-                new Seq(
-                        new Increasing(EvtRecEvaluators.MinArityC),
-                        new Increasing(EvtRecEvaluators.MinDomSize)
-                ),
-                new PArc(propagationEngine, vars, new Predicate[]{new NotInCstrSet(heavy)}));
-        Sort ad2 = new Sort(new PCons(propagationEngine, heavy));
-        Sort coar = new Sort(new PCoarse(propagationEngine, heavy[2]));
-        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut())); */
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, pengine);
-        solver.set(pengine);
     }
 
     @Override

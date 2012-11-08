@@ -35,9 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
-import parser.flatzinc.ast.ext.ExtPredicate;
-import parser.flatzinc.ast.ext.IntPredicate;
-import parser.flatzinc.ast.ext.Predicate;
+import parser.flatzinc.ast.ext.*;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.variables.IntVar;
@@ -73,8 +71,15 @@ public class T_predicate extends GrammarExtTest {
     }
 
     @Test
+    public void test0() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("true");
+        Predicate p = predicate(fp);
+        Assert.assertTrue(p instanceof TruePredicate);
+    }
+
+    @Test
     public void test1() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("in(p.priority = 1)");
+        FlatzincFullExtParser fp = parser("prop.priority == 1");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof IntPredicate);
     }
@@ -88,5 +93,12 @@ public class T_predicate extends GrammarExtTest {
         FlatzincFullExtParser fp = parser("in(x,y,c)");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof ExtPredicate);
+    }
+
+    @Test
+    public void test3() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("!prop.priority == 1)");
+        Predicate p = predicate(fp);
+        Assert.assertTrue(p instanceof NotPredicate);
     }
 }

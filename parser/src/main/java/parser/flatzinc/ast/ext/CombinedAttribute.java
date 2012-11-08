@@ -26,20 +26,33 @@
  */
 package parser.flatzinc.ast.ext;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import solver.propagation.ISchedulable;
+import solver.propagation.generator.PropagationStrategy;
+import solver.recorders.fine.arc.FineArcEventRecorder;
+
+import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19/10/12
+ * @since 08/11/12
  */
-public class OrderBy implements Instruction {
+public class CombinedAttribute implements IAttribute<ISchedulable> {
 
-    public static ArrayList execute(Attribute a, ArrayList before) {
-        ArrayList after = (ArrayList) before.clone();
-        Collections.sort(after, a);
-        return after;
+    public List<AttributeOperator> operators; // must not be empty
+    public Attribute attribute; // can be null
+
+    public CombinedAttribute(List<AttributeOperator> operators, Attribute attribute) {
+        this.operators = operators;
+        this.attribute = attribute;
+    }
+
+    @Override
+    public int eval(ISchedulable element) {
+        if (operators.isEmpty()) {
+            return attribute.eval((FineArcEventRecorder) element);
+        }
+        return operators.get(0).evaluate((PropagationStrategy) element, this, 1);
     }
 }

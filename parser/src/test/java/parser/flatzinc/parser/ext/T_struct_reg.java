@@ -38,8 +38,7 @@ import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.ternary.Times;
+import solver.constraints.ConstraintFactory;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PropagationStrategy;
@@ -56,78 +55,84 @@ import java.util.ArrayList;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 23/10/12
+ * @since 07/11/12
  */
-public class T_adt_type extends GrammarExtTest {
+public class T_struct_reg extends GrammarExtTest {
+
 
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    IntVar[] vars;
-    Propagator prop;
     IPropagationEngine pe;
-
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
         map = new THashMap<String, Object>();
         groups = new THashMap<String, ArrayList>();
-        vars = VariableFactory.boundedArray("v", 3, 1, 10, mSolver);
-        Constraint cstr = new Times(vars[0], vars[1], vars[2], mSolver);
-        mSolver.post(cstr);
-        prop = cstr.propagators[0];
-        pe = new PropagationEngine(mSolver.getEnvironment());
-        pe.prepareWM(mSolver);
+        IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
+        Constraint[] cstrs = new Constraint[4];
+        for (int i = 0; i < 4; i++) {
+            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            map.put("c_" + i, cstrs[i]);
+            map.put(vars[i].getName(), vars[i]);
+        }
+        map.put(vars[4].getName(), vars[4]);
+        mSolver.post(cstrs);
+
+        pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+
+        ArrayList<Pair> pairs = Pair.populate(mSolver);
+        groups.put("G1", pairs);
+
     }
 
-    public ArrayList<PropagationStrategy> adt_type(FlatzincFullExtParser parser, ArrayList in) throws RecognitionException {
-        FlatzincFullExtParser.adt_type_return r = parser.adt_type();
+    public PropagationStrategy struct_reg(FlatzincFullExtParser parser) throws RecognitionException {
+        FlatzincFullExtParser.struct_reg_return r = parser.struct_reg();
         CommonTree t = (CommonTree) r.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
         walker.mSolver = mSolver;
         walker.map = map;
         walker.groups = groups;
-        return walker.adt_type(pe, in);
+        return walker.struct_reg(pe);
+    }
+
+
+    @Test
+    public void test1() throws IOException, RecognitionException {
+        // Simple constraint oriented engine
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        PropagationStrategy scheds = struct_reg(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof Queue);
     }
 
     @Test
-    public void test1() throws RecognitionException, IOException {
-        ArrayList before = new ArrayList() {{
-            add(new Pair(vars[0], prop, 0));
-            add(new Pair(vars[1], prop, 1));
-            add(new Pair(vars[2], prop, 2));
-        }};
-        FlatzincFullExtParser fp = parser("queue(one)");
-        ArrayList<PropagationStrategy> out = adt_type(fp, before);
-        Assert.assertEquals(1, out.size());
-        Assert.assertTrue(out.get(0) instanceof Queue);
+    public void test2() throws IOException, RecognitionException {
+        // Simple variable oriented engine
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        PropagationStrategy scheds = struct_reg(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof Queue);
     }
 
     @Test
-    public void test2() throws RecognitionException, IOException {
-        ArrayList before = new ArrayList() {{
-            add(new Pair(vars[0], prop, 0));
-            add(new Pair(vars[1], prop, 1));
-            add(new Pair(vars[2], prop, 2));
-        }};
-        FlatzincFullExtParser fp = parser("heap(wone)");
-        ArrayList<PropagationStrategy> out = adt_type(fp, before);
-        Assert.assertEquals(1, out.size());
-        Assert.assertTrue(out.get(0) instanceof SortDyn);
+    public void test3() throws IOException, RecognitionException {
+        // A Gecode-like propagation engine
+        FlatzincFullExtParser fp = parser("G1 as list(wone) of {each prop.prioDyn as queue(one)}");
+        PropagationStrategy scheds = struct_reg(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof Sort);
     }
 
     @Test
-    public void test3() throws RecognitionException, IOException {
-        ArrayList before = new ArrayList() {{
-            add(new Pair(vars[0], prop, 0));
-            add(new Pair(vars[1], prop, 1));
-            add(new Pair(vars[2], prop, 2));
-        }};
-        FlatzincFullExtParser fp = parser("list(wfor)");
-        ArrayList<PropagationStrategy> out = adt_type(fp, before);
-        Assert.assertEquals(1, out.size());
-        Assert.assertTrue(out.get(0) instanceof Sort);
+    public void test4() throws IOException, RecognitionException {
+        // A heap-based variable oriented propagation engine
+        FlatzincFullExtParser fp = parser("G1 as min heap(wone) of {each var.name as queue(one) key any.var.cardinality}");
+        PropagationStrategy scheds = struct_reg(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof SortDyn);
     }
+
 }

@@ -41,10 +41,6 @@ import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.directed.PropSCCDoorsRules;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -182,8 +178,6 @@ public class Robustness {
         AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null, new OrderedArcs(graph, seed), GraphStrategy.NodeArcPriority.ARCS);
         solver.set(mainStrat);
 //		solver.set(StrategyFactory.graphLexico(graph));
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         //SOLVE

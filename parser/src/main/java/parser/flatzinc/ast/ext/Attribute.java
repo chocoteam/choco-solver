@@ -26,10 +26,7 @@
  */
 package parser.flatzinc.ast.ext;
 
-import parser.flatzinc.FZNException;
-
-import java.util.ArrayList;
-import java.util.Comparator;
+import solver.recorders.fine.arc.FineArcEventRecorder;
 
 /**
  * <br/>
@@ -37,18 +34,24 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 22/10/12
  */
-public enum Attribute implements Comparator {
+public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
-    VIDX {
+    VNAME {
         @Override
         public int evaluate(Pair p) {
             return p.var.getId();
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.var.getId() - p2.var.getId();
+        public int eval(FineArcEventRecorder p) {
+            return p.getVariables()[0].getId();
         }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
     }, VCARD {
         @Override
         public int evaluate(Pair p) {
@@ -56,19 +59,31 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.var.getNbProps() - p2.var.getNbProps();
-        }
-    }, CIDX {
-        @Override
-        public int evaluate(Pair p) {
-            return p.prop.getId();
+        public int eval(FineArcEventRecorder p) {
+            return p.getVariables()[0].getNbProps();
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.getId() - p2.prop.getId();
+        public boolean isDynamic() {
+            return true;
         }
+
+    }, CNAME {
+        @Override
+        public int evaluate(Pair p) {
+            return p.prop.getConstraint().hashCode();
+        }
+
+        @Override
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].getConstraint().hashCode();
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
 
     }, CARITY {
         @Override
@@ -77,9 +92,15 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.getConstraint().getVariables().length - p2.prop.getConstraint().getVariables().length;
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].getConstraint().getVariables().length;
         }
+
+        @Override
+        public boolean isDynamic() {
+            return true;
+        }
+
     }, PIDX {
         @Override
         public int evaluate(Pair p) {
@@ -87,9 +108,15 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.getId() - p2.prop.getId();
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].getId();
         }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
 
     }, PPRIO {
         @Override
@@ -98,9 +125,15 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.getPriority().priority - p2.prop.getPriority().priority;
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].getPriority().priority;
         }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
     }, PARITY {
         @Override
         public int evaluate(Pair p) {
@@ -108,9 +141,15 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.getNbVars() - p2.prop.getNbVars();
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].getNbVars();
         }
+
+        @Override
+        public boolean isDynamic() {
+            return true;
+        }
+
     }, PPRIOD {
         @Override
         public int evaluate(Pair p) {
@@ -118,61 +157,19 @@ public enum Attribute implements Comparator {
         }
 
         @Override
-        public int compare(Pair p1, Pair p2) {
-            return p1.prop.dynPriority() - p2.prop.dynPriority();
+        public int eval(FineArcEventRecorder p) {
+            return p.getPropagators()[0].dynPriority();
         }
+
+        @Override
+        public boolean isDynamic() {
+            return true;
+        }
+
     };
 
     public abstract int evaluate(Pair p);
 
-    public int evaluate(ArrayList list) {
-        int value = -1;
-        Object o = list.get(0);
-        if (o instanceof Pair) {
-            value = evaluate((Pair) o);
-        } else {
-            value = evaluate((ArrayList) o);
-        }
-        for (int i = 1; i < list.size(); i++) {
-            int _v = value;
-            o = list.get(i);
-            if (o instanceof Pair) {
-                value = evaluate((Pair) o);
-            } else {
-                value = evaluate((ArrayList) o);
-            }
-            if (_v != value) {
-                return -1;
-            }
-        }
-        return value;
-    }
-
-    public int evaluate(Object o) {
-        int value = -1;
-        if (o instanceof Pair) {
-            value = evaluate((Pair) o);
-        } else {
-            value = evaluate((ArrayList) o);
-        }
-        return value;
-    }
-
-
-    @Override
-    public int compare(Object o1, Object o2) {
-        //return 0;
-        if (o1 instanceof Pair && o2 instanceof Pair) {
-            return compare((Pair) o1, (Pair) o2);
-        }
-
-        throw new FZNException("cannot compare " + o1 + " and " + o2);
-    }
-
-    public int compare(ArrayList l1, ArrayList l2) {
-        throw new FZNException("cannot compare " + l1 + " and " + l2);
-    }
-
-    public abstract int compare(Pair p1, Pair p2);
+    public abstract boolean isDynamic();
 
 }

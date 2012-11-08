@@ -48,10 +48,6 @@ import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropH
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
@@ -282,8 +278,6 @@ public class ATSP_ResolutionPolicy {
             default:
                 throw new UnsupportedOperationException();
         }
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
             public void afterInitialPropagation() {

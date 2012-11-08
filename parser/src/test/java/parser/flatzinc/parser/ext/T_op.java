@@ -26,10 +26,10 @@
  */
 package parser.flatzinc.parser.ext;
 
-import junit.framework.Assert;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
@@ -55,7 +55,7 @@ public class T_op extends GrammarExtTest {
 
     @Test
     public void test1() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("=");
+        FlatzincFullExtParser fp = parser("==");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.EQ);
     }
@@ -79,5 +79,19 @@ public class T_op extends GrammarExtTest {
         FlatzincFullExtParser fp = parser("<");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.LT);
+    }
+
+    @Test
+    public void test5() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser(">=");
+        Operator o = par_type(fp);
+        Assert.assertTrue(o == Operator.GQ);
+    }
+
+    @Test
+    public void test6() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("<=");
+        Operator o = par_type(fp);
+        Assert.assertTrue(o == Operator.LQ);
     }
 }

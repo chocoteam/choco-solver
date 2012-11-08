@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package samples;
@@ -35,22 +35,9 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.Generator;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.predicate.InCstrSet;
-import solver.propagation.generator.predicate.Predicate;
-import solver.propagation.generator.sorter.Decreasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * CSPLib prob006:<br/>
@@ -129,26 +116,6 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // <cpru 04/19/12> works fine
-
-        Predicate[] plex = new Predicate[]{new InCstrSet(lex)};
-        Predicate[] pdist = new Predicate[]{new InCstrSet(distances)};
-        Predicate[] palld = new Predicate[]{new InCstrSet(alldiff)};
-        List<Generator> gen = new ArrayList();
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, plex));
-        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, pdist));
-        for (int i = 1; i < m; i++) {
-            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, plex));
-            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, pdist));
-            for (int j = 0; j < i; j++) {
-                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, pdist));
-                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, palld));
-            }
-        }
-        Sort sort = new Sort(gen.toArray(new Generator[gen.size()]));
-        Sort _coar = new Sort(new Decreasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
-        solver.set(propagationEngine.set(new Sort(sort.clearOut(), _coar.pickOne())));
     }
 
     @Override
@@ -162,5 +129,5 @@ public class GolombRuler extends AbstractProblem {
 
     public static void main(String[] args) {
         new GolombRuler().execute(args);
-        }
     }
+}

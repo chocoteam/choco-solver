@@ -54,6 +54,16 @@ public enum Operator {
         public boolean apply(int i, int j) {
             return i > j;
         }
+    }, LQ {
+        @Override
+        public boolean apply(int i, int j) {
+            return i <= j;
+        }
+    }, GQ {
+        @Override
+        public boolean apply(int i, int j) {
+            return i >= j;
+        }
     };
 
     public abstract boolean apply(int i, int j);

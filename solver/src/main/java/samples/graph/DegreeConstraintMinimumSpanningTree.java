@@ -40,10 +40,6 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
@@ -259,8 +255,6 @@ public class DegreeConstraintMinimumSpanningTree {
             default:
                 throw new UnsupportedOperationException();
         }
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         // resolution
@@ -317,8 +311,6 @@ public class DegreeConstraintMinimumSpanningTree {
             default:
                 throw new UnsupportedOperationException();
         }
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         // resolution
