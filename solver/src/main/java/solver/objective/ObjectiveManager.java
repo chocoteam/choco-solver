@@ -61,7 +61,7 @@ public class ObjectiveManager implements ICause{
 	 * @param policy SATISFACTION / MINIMIZATION / MAXIMIZATION
 	 * @param solver
 	 */
-	public ObjectiveManager(IntVar objective, ResolutionPolicy policy, Solver solver) {
+	public ObjectiveManager(final IntVar objective, ResolutionPolicy policy, Solver solver) {
 		this.policy = policy;
 		this.measures = solver.getMeasures();
 		this.objective = objective;
@@ -75,12 +75,13 @@ public class ObjectiveManager implements ICause{
 	 * @return the best objective value found so far (returns the initial bound if no solution has been found yet)
 	 */
 	public int getBestValue() {
-		switch (policy){
-			case MINIMIZE:return bestKnownUpperBound;
-			case MAXIMIZE:return bestKnownLowerBound;
-			case SATISFACTION:
-			default:throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+		if(policy==ResolutionPolicy.MINIMIZE){
+			return bestKnownUpperBound;
 		}
+		if(policy==ResolutionPolicy.MAXIMIZE){
+			return bestKnownLowerBound;
+		}
+		throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
     }
 
 	/**
@@ -111,14 +112,13 @@ public class ObjectiveManager implements ICause{
 	 * Informs the manager that a new solution has been found
 	 */
 	public void update() {
-		switch (policy){
-			case MINIMIZE:
-				this.bestKnownUpperBound = objective.getValue();
-				this.measures.setObjectiveValue(this.bestKnownUpperBound);
-				break;
-			case MAXIMIZE:
-				this.bestKnownLowerBound = objective.getValue();
-				this.measures.setObjectiveValue(this.bestKnownLowerBound);
+		if(policy==ResolutionPolicy.MINIMIZE){
+			this.bestKnownUpperBound = objective.getValue();
+			this.measures.setObjectiveValue(this.bestKnownUpperBound);
+		}
+		else if(policy==ResolutionPolicy.MAXIMIZE){
+			this.bestKnownLowerBound = objective.getValue();
+			this.measures.setObjectiveValue(this.bestKnownLowerBound);
 		}
     }
 
@@ -147,14 +147,13 @@ public class ObjectiveManager implements ICause{
 		if(measures.getSolutionCount()>0){
 			offset = 1;
 		}
-		switch (policy){
-			case MINIMIZE:
-				this.objective.updateUpperBound(bestKnownUpperBound-offset, this);
-				this.objective.updateLowerBound(bestKnownLowerBound, this);
-				break;
-			case MAXIMIZE:
-				this.objective.updateUpperBound(bestKnownUpperBound, this);
-				this.objective.updateLowerBound(bestKnownLowerBound+offset, this);
+		if(policy==ResolutionPolicy.MINIMIZE){
+			this.objective.updateUpperBound(bestKnownUpperBound-offset, this);
+			this.objective.updateLowerBound(bestKnownLowerBound, this);
+		}
+		else if(policy==ResolutionPolicy.MAXIMIZE){
+			this.objective.updateUpperBound(bestKnownUpperBound, this);
+			this.objective.updateLowerBound(bestKnownLowerBound+offset, this);
 		}
     }
 
@@ -177,8 +176,8 @@ public class ObjectiveManager implements ICause{
 		switch (policy){
 			case MINIMIZE:return String.format("Minimize %s = [%d,%d]", this.objective.getName(), bestKnownLowerBound, bestKnownUpperBound);
 			case MAXIMIZE:return String.format("Maximize %s = [%d,%d]", this.objective.getName(), bestKnownLowerBound, bestKnownUpperBound);
-			case SATISFACTION:
-			default:return "";
+			case SATISFACTION:return "SAT";
+			default:throw new UnsupportedOperationException("no objective manager");
 		}
     }
 
