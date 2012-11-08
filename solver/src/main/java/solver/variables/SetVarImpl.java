@@ -41,6 +41,12 @@ import solver.variables.setDataStructures.SetFactory;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.view.IView;
 
+/**
+ * Set variable to represent a set of integers in the range [0,n-1]
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct 2012
+ */
 public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////

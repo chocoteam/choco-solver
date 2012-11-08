@@ -35,8 +35,10 @@ import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.nary.PropNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
@@ -79,6 +81,7 @@ public class KTP_Graph_Bool {
 	private static Solver solver;
 	private static boolean activeBools = true;
 	private static boolean activeGraphs = true;
+	private static boolean activeInts = true;
 
 	//***********************************************************************************
 	// METHODS
@@ -102,6 +105,8 @@ public class KTP_Graph_Bool {
 			solveUndiGraph(matrix, s);
 			if(activeBools)
 			solveBooleans(matrix, s);
+			if(activeInts)
+			solveIntegers(matrix,s);
 		}
 	}
 
@@ -146,79 +151,129 @@ public class KTP_Graph_Bool {
 	}
 
 	private static void solveBooleans(boolean[][] matrix, String instanceName) {
-		int n = matrix.length;
-		solver = new Solver();
-		// variables
-		BoolVar[][] graph = new BoolVar[n][n];
-		int ct = 0;
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				if(matrix[i][j]){
-					ct++;
-					graph[i][j] = graph[j][i] = VariableFactory.bool("b"+i+"-"+j,solver);
+			int n = matrix.length;
+			solver = new Solver();
+			// variables
+			BoolVar[][] graph = new BoolVar[n][n];
+			int ct = 0;
+			for(int i=0;i<n;i++){
+				for(int j=i+1;j<n;j++){
+					if(matrix[i][j]){
+						ct++;
+						graph[i][j] = graph[j][i] = VariableFactory.bool("b"+i+"-"+j,solver);
+					}
 				}
 			}
-		}
-		BoolVar[] decisionVars = new BoolVar[ct];
-		int[] mapping = new int[ct];
-		ct = 0;
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				if(matrix[i][j]){
-					decisionVars[ct++] = graph[i][j];
-					mapping[ct-1] = i*n+j;
+			BoolVar[] decisionVars = new BoolVar[ct];
+			int[] mapping = new int[ct];
+			ct = 0;
+			for(int i=0;i<n;i++){
+				for(int j=i+1;j<n;j++){
+					if(matrix[i][j]){
+						decisionVars[ct++] = graph[i][j];
+						mapping[ct-1] = i*n+j;
+					}
 				}
 			}
-		}
-		ArrayList<BoolVar>[] gl = new ArrayList[n];
-		for(int i=0;i<n;i++){
-			ArrayList<BoolVar> l = new ArrayList();
-			for(int j=0;j<n;j++){
-				if(matrix[i][j]){
-					l.add(graph[i][j]);
+			ArrayList<BoolVar>[] gl = new ArrayList[n];
+			for(int i=0;i<n;i++){
+				ArrayList<BoolVar> l = new ArrayList();
+				for(int j=0;j<n;j++){
+					if(matrix[i][j]){
+						l.add(graph[i][j]);
+					}
 				}
+				gl[i] = l;
 			}
-			gl[i] = l;
-		}
-		// constraints
-		Constraint gc = new Constraint(solver);
-		IntVar two = VariableFactory.bounded("2",2,2,solver);
-		for(int i=0;i<n;i++){
-			int k = 0;
-			for(int j=0;j<n;j++){
-				if(matrix[i][j])
-				k++;
+			// constraints
+			Constraint gc = new Constraint(solver);
+			IntVar two = VariableFactory.bounded("2",2,2,solver);
+			for(int i=0;i<n;i++){
+				int k = 0;
+				for(int j=0;j<n;j++){
+					if(matrix[i][j])
+					k++;
+				}
+				BoolVar[] bools = new BoolVar[k];
+				k = 0;
+				for(int j=0;j<n;j++){
+					if(matrix[i][j])
+					bools[k++] = graph[i][j];
+				}
+				gc.addPropagators(new PropBoolSum(bools,two,solver,gc));
 			}
-			BoolVar[] bools = new BoolVar[k];
-			k = 0;
-			for(int j=0;j<n;j++){
-				if(matrix[i][j])
-				bools[k++] = graph[i][j];
-			}
-			gc.addPropagators(new PropBoolSum(bools,two,solver,gc));
-		}
-		gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
-		solver.post(gc);
-		// config
-		solver.set(new MinNeighBool(decisionVars,gl));
+			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
+			solver.post(gc);
+			// config
+			solver.set(new MinNeighBool(decisionVars,gl));
 //        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		// resolution
-		solver.set(new ConstraintEngine(solver));
-		solver.findSolution();
-		System.out.println(solver.getMeasures());
-		check(solver, decisionVars);
-		//output
-		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getFailCount()) + ";"
-				+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
-		TextWriter.writeTextInto(txt, outFile);
-		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
-			activeBools = false;
+			solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+			// resolution
+			solver.set(new ConstraintEngine(solver));
+			solver.findSolution();
+			System.out.println(solver.getMeasures());
+			check(solver, decisionVars);
+			//output
+			String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+					+ (int)(solver.getMeasures().getFailCount()) + ";"
+					+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
+					+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
+			TextWriter.writeTextInto(txt, outFile);
+			if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+				activeBools = false;
+			}
 		}
-	}
+
+	private static void solveIntegers(boolean[][] matrix, String instanceName) {
+			int n = matrix.length;
+			solver = new Solver();
+			// variables
+			IntVar[] graph = new IntVar[n];
+			for(int i=0;i<n;i++){
+				int k = 0;
+				for(int j=0;j<n;j++){
+					if(matrix[i][j]){
+						k++;
+					}
+				}
+				int[] values = new int[k];
+				k = 0;
+				for(int j=0;j<n;j++){
+					if(matrix[i][j]){
+						values[k++] = j;
+					}
+				}
+				graph[i] = VariableFactory.enumerated("v"+i,values,solver);
+			}
+			// constraints
+			Constraint gc = new Constraint(solver);
+			solver.post(new AllDifferent(graph,solver, AllDifferent.Type.AC));
+			gc.addPropagators(new PropNoSubtour(graph,solver,gc));
+//			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
+			solver.post(gc);
+			// config
+//			solver.set(new MinNeighBool(decisionVars,gl));
+		solver.set(StrategyFactory.minDomMinVal(graph,solver.getEnvironment()));
+
+//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+			solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+			// resolution
+			solver.set(new ConstraintEngine(solver));
+			solver.findSolution();
+			System.out.println(solver.getMeasures());
+			check(solver, graph);
+			//output
+			String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+					+ (int)(solver.getMeasures().getFailCount()) + ";"
+					+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
+					+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
+			TextWriter.writeTextInto(txt, outFile);
+			if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+				activeInts = false;
+			}
+		}
 
 	private static void check(Solver solver, Variable... vars) {
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
