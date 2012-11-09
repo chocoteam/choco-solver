@@ -25,17 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision.fast;
+package solver.search.strategy.selectors;
 
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import solver.variables.IntVar;
+
+import java.io.Serializable;
 
 /**
+ * A value iterator specfies which value should be chosen to constrained the selected variable.
+ * The value chosen must belong to the domain of the selected variable.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 28 sept. 2010
  */
-public interface IFastDecision<V extends Variable> extends Decision {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public interface InValueIterator extends Serializable {
+
+    /**
+     * Selects and returns the value to constrained chosen variable with.
+     * The chosen value must belong to the domain of <code>variable</code>.
+     *
+     * @return the value, based on the domain of variable
+     */
+    public int selectValue(IntVar var);
+
 }

@@ -25,17 +25,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision.fast;
+package solver.search.strategy.strategy;
 
+import choco.kernel.common.util.PoolManager;
 import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import solver.search.strategy.decision.fast.FastDecisionReal;
+import solver.search.strategy.selectors.RealValueIterator;
+import solver.search.strategy.selectors.VariableSelector;
+import solver.variables.RealVar;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 2 juil. 2010
  */
-public interface IFastDecision<V extends Variable> extends Decision {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public class AssignmentInterval extends AbstractStrategy<RealVar> {
+
+    VariableSelector<RealVar> varselector;
+
+    RealValueIterator valueIterator;
+
+    PoolManager<FastDecisionReal> decisionPool;
+
+    public AssignmentInterval(RealVar[] vars, VariableSelector<RealVar> varselector, RealValueIterator valueIterator) {
+        super(vars);
+        this.varselector = varselector;
+        this.valueIterator = valueIterator;
+        decisionPool = new PoolManager<FastDecisionReal>();
+    }
+
+    @Override
+    public void init() {
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Override
+    public Decision getDecision() {
+        if (varselector.hasNext()) {
+            varselector.advance();
+            RealVar variable = varselector.getVariable();
+            double value = valueIterator.selectValue(variable);
+            FastDecisionReal d = decisionPool.getE();
+            if (d == null) {
+                d = new FastDecisionReal(decisionPool);
+            }
+            d.set(variable, value);
+            return d;
+        }
+        return null;
+    }
 }

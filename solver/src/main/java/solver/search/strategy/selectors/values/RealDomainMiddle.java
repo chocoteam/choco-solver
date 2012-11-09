@@ -24,18 +24,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.selectors.values;
 
-package solver.search.strategy.decision.fast;
-
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+import solver.exception.SolverException;
+import solver.search.strategy.selectors.RealValueIterator;
+import solver.variables.RealVar;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 18/07/12
  */
-public interface IFastDecision<V extends Variable> extends Decision {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public class RealDomainMiddle implements RealValueIterator {
+
+    @Override
+    public double selectValue(RealVar var) {
+        double low = var.getLB();
+        if (low == Double.NEGATIVE_INFINITY) low = -Double.MAX_VALUE;
+        double upp = var.getUB();
+        if (upp == Double.POSITIVE_INFINITY) upp = Double.MAX_VALUE;
+        double r = (low + upp) / 2.0;
+        if (r <= low || r >= upp) {
+            throw new SolverException("RealDomainMiddle: find a value outside current domain!");
+        }
+        return r;
+    }
 }

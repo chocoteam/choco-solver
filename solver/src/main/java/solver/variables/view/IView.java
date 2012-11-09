@@ -39,7 +39,7 @@ import solver.variables.delta.IDeltaMonitor;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView<D extends IDelta, DM extends IDeltaMonitor<D>, W extends IView> extends ICause, Variable<D, DM, W> {
+public interface IView<D extends IDelta, DM extends IDeltaMonitor<D>> extends ICause, Variable<D, DM> {
 
     /**
      * Return the basis variable

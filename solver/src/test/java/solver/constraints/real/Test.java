@@ -24,18 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.strategy.decision.fast;
-
-import solver.search.strategy.decision.Decision;
-import solver.variables.Variable;
+package solver.constraints.real;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 19/07/12
  */
-public interface IFastDecision<V extends Variable> extends Decision {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public class Test {
+
+    public static void main(String[] args) {
+
+        Ibex ibex = new Ibex();
+
+        ibex.add_ctr(2, "{0}+{1}=3");
+
+        double domains[] = {1.0, 10.0, 1.0, 10.0};
+        System.out.println("Before contract:");
+        System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
+
+        int result = ibex.contract(0, domains);
+
+        if (result == Ibex.FAIL) {
+            System.out.println("Failed!");
+        } else if (result == Ibex.CONTRACT) {
+            System.out.println("After contract:");
+            System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
+        } else {
+            System.out.println("Nothing.");
+        }
+        ibex.release();
+    }
 }

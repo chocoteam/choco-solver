@@ -28,11 +28,12 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import choco.kernel.common.util.iterators.ValueIterator;
 import solver.Configuration;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.selectors.ValueIterator;
+import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -46,20 +47,20 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     VariableSelector<IntVar> varselector;
 
-    ValueIterator valueIterator;
+    InValueIterator valueIterator;
 
     PoolManager<FastDecision> decisionPool;
 
     DecisionOperator assgnt = DecisionOperator.int_eq;
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
+    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
         super(vars);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
         decisionPool = new PoolManager<FastDecision>();
     }
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
+    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, InValueIterator valueIterator,
                       DecisionOperator assgnt) {
         super(vars);
         this.varselector = varselector;

@@ -56,6 +56,12 @@ public enum VariableFactory {
         }
     }
 
+    private static void checkRealVar(String name, double min, double max) {
+        if (max < min) {
+            throw new SolverException(name + ": wrong domain definition, lower bound > upper bound");
+        }
+    }
+
     /**
      * Build a boolean variable, ie domain is [0,1]
      *
@@ -156,6 +162,37 @@ public enum VariableFactory {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
             vars[i] = enumerated(name + "_" + i, values, solver);
+        }
+        return vars;
+    }
+
+    public static IntVar[][] enumeratedMatrix(String name, int dim1, int dim2, int[] values, Solver solver) {
+            IntVar[][] vars = new IntVar[dim1][];
+            for (int i = 0; i < dim1; i++) {
+                vars[i] = enumeratedArray(name + "_" + i, dim2, values, solver);
+            }
+            return vars;
+        }
+
+    public static RealVar real(String name, double min, double max, double precision, Solver solver) {
+        checkRealVar(name, min, max);
+        RealVar var = new RealVarImpl(name, min, max, precision, solver);
+        //var.setHeuristicVal(HeuristicValFactory.presetI(var));
+        return var;
+    }
+
+    public static RealVar[] realArray(String name, int size, double min, double max, double precision, Solver solver) {
+        RealVar[] vars = new RealVar[size];
+        for (int i = 0; i < size; i++) {
+            vars[i] = real(name + "_" + i, min, max, precision, solver);
+        }
+        return vars;
+    }
+
+    public static RealVar[][] realMatrix(String name, int dim1, int dim2, double min, double max, double precision, Solver solver) {
+        RealVar[][] vars = new RealVar[dim1][dim2];
+        for (int i = 0; i < dim1; i++) {
+            vars[i] = realArray(name + "_" + i, dim2, min, max, precision, solver);
         }
         return vars;
     }

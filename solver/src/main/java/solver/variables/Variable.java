@@ -46,7 +46,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView> extends Identity, Serializable {
+public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -111,7 +111,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      */
     int[] getPIndices();
 
-    W[] getViews();
+    IView[] getViews();
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -124,7 +124,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
     //todo : to complete
     void removeMonitor(IVariableMonitor monitor);
 
-    void subscribeView(W view);
+    void subscribeView(IView view);
 
     /**
      * Returns the number of constraints involving <code>this</code>
