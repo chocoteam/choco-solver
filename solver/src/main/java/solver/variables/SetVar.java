@@ -54,13 +54,6 @@ public interface SetVar extends Variable{
     boolean contains(int v);
 
     /**
-     * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
-     * @param v the value to check
-     * @return <code>true</code> if the value belongs to the domain of <code>this</code>, <code>false</code> otherwise.
-     */
-    boolean contains(int[] v);
-
-    /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
      *
      * @return the current value (or lower bound if not yet instantiated).

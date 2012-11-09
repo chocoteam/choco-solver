@@ -151,6 +151,13 @@ public final class SearchMonitorList implements ISearchMonitor {
     }
 
     @Override
+    public void afterInterrupt() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterInterrupt();
+        }
+    }
+
+    @Override
     public void beforeClose() {
         for (int i = 0; i < size; i++) {
             searchMonitors[i].beforeClose();

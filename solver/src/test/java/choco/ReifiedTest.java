@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package choco;
@@ -31,18 +31,26 @@ import choco.checker.DomainBuilder;
 import gnu.trove.set.hash.TIntHashSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.ternary.DivXYZ;
+import solver.constraints.ternary.Times;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
+import solver.exception.ContradictionException;
+import solver.propagation.hardcoded.VariableEngine;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -279,6 +287,195 @@ public class ReifiedTest {
         long sol1 = s1.getMeasures().getSolutionCount();
         long sol2 = s2.getMeasures().getSolutionCount();
         Assert.assertEquals(sol2, sol1, "nb sol incorrect");
+
+    }
+
+    @Test(groups = {"1s"})
+    public void testBACP() {
+        Solver solver = new Solver();
+        IntVar cp = VariableFactory.enumerated("cp", 1, 10, solver);
+        BoolVar[] bv = VariableFactory.boolArray("b1", 10, solver);
+        for (int i = 1; i <= 10; i++) {
+            solver.post(new
+                    ReifiedConstraint(
+                    bv[i - 1],
+                    new Arithmetic(cp, "=", i, solver),
+                    new Arithmetic(cp, "!=", i, solver),
+                    solver
+            ));
+        }
+
+        IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
+        solver.post(new Arithmetic(cp2, ">=", cp, solver));
+
+        BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
+        for (int i = 1; i <= 10; i++) {
+            solver.post(new
+                    ReifiedConstraint(
+                    bv2[i - 1],
+                    new Arithmetic(Views.fixed(i, solver), "<", cp, solver),
+                    new Arithmetic(Views.fixed(i, solver), ">=", cp, solver),
+                    solver
+            ));
+        }
+
+        solver.set(new VariableEngine(solver));
+        solver.getEngine().init(solver);
+        try {
+            solver.propagate();
+            cp.updateUpperBound(5, Cause.Null);
+            solver.propagate();
+            bv[0].instantiateTo(1, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void test_wellaweg1() {
+        Solver s = new Solver();
+
+        IntVar row[] = new IntVar[3];
+        row[0] = Views.fixed(2, s);
+        row[1] = VariableFactory.bounded("R", 0, 100, s);
+        row[2] = Views.fixed(16, s);
+
+        IntVar calc[] = new IntVar[2];
+        calc[0] = Views.offset(row[0], 2);
+        calc[1] = VariableFactory.bounded("C", 0, 80, s);
+        s.post(Sum.eq(new IntVar[]{row[0], row[1], calc[1]}, new int[]{1, 1, -1}, 0, s));
+
+        Constraint[] constraints = new Constraint[4];
+        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
+        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
+        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
+        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+
+        BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
+
+        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
+        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+
+
+        //one row must be wrong
+        int max_abs = 1;
+        s.post(Sum.eq(ab, ab.length - max_abs, s));
+
+        s.findAllSolutions();
+
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+
+    }
+
+    @Test
+    public void test_wellaweg3() {
+        Solver s = new Solver();
+
+        IntVar row[] = new IntVar[3];
+        row[0] = Views.fixed(2, s);
+        row[1] = VariableFactory.bounded("R", 0, 100, s);
+        row[2] = Views.fixed(16, s);
+
+        IntVar calc[] = new IntVar[2];
+        calc[0] = Views.scale(row[0], 2);
+        calc[1] = VariableFactory.bounded("C", 0, 1600, s);
+        s.post(new Times(row[0], row[1], calc[1], s));
+
+        Constraint[] constraints = new Constraint[4];
+        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
+        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
+        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
+        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+
+        BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
+
+        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
+        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+
+
+        //one row must be wrong
+        int max_abs = 1;
+        s.post(Sum.eq(ab, ab.length - max_abs, s));
+
+        s.findAllSolutions();
+
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+
+    }
+
+    @Test
+    public void test_wellaweg4() {
+        Solver s = new Solver();
+
+        IntVar row[] = new IntVar[3];
+        row[0] = Views.fixed(20, s);
+        row[1] = VariableFactory.bounded("R", 0, 100, s);
+        row[2] = Views.fixed(5, s);
+
+        IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
+
+        s.post(new DivXYZ(row[0], Views.fixed(2, s), calc[0], s));
+        s.post(new DivXYZ(row[0], row[1], calc[1], s));
+
+        Constraint[] constraints = new Constraint[4];
+        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
+        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
+        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
+        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+
+        BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
+
+        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
+        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+
+
+        //one row must be wrong
+        int max_abs = 1;
+        s.post(Sum.eq(ab, ab.length - max_abs, s));
+
+        SearchMonitorFactory.log(s, true, false);
+        s.findAllSolutions();
+
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+
+    }
+
+    @Test
+    public void test_wellaweg5() {
+        Solver s = new Solver();
+
+        IntVar row[] = new IntVar[3];
+        row[0] = Views.fixed(100, s);
+        row[1] = VariableFactory.bounded("R1", 0, 100, s);
+        row[2] = Views.fixed(5, s);
+
+        IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
+
+        s.post(new DivXYZ(row[0], Views.fixed(25, s), calc[0], s));
+        s.post(new DivXYZ(row[0], row[1], calc[1], s));
+
+        Constraint[] constraints = new Constraint[4];
+        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
+        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
+        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
+        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+
+        BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
+
+        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
+        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+
+
+        //one row must be wrong
+        int max_abs = 1;
+        s.post(Sum.eq(ab, ab.length - max_abs, s));
+
+        SearchMonitorFactory.log(s, true, false);
+        s.findAllSolutions();
+
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
 
     }
 

@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -43,12 +43,11 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
@@ -57,11 +56,11 @@ import java.util.BitSet;
  */
 public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private DirectedGraphVar g;
+    private DirectedGraphVar g;
     GraphDeltaMonitor gdm;
 	private int n;
 	private PairProcedure arcRemoved;
@@ -69,7 +68,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	private TIntArrayList inDoors;
 	private TIntArrayList outDoors;
 	// rg data structures
-	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph rg;
+	private IStateInt nR; IStateInt[] sccOf; ISet[] outArcs; DirectedGraph rg;
 	private IStateInt[] sccFirst, sccNext;
 
 	//***********************************************************************************
@@ -77,8 +76,8 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
-							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs,
-							 IDirectedGraph rg) {
+							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
+							 DirectedGraph rg) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -94,8 +93,8 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	}
 
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
-							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs,
-							 IDirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
+							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
+							 DirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
 		this(graph,constraint,solver,nR,sccOf,outArcs,rg);
 		this.sccFirst = sccFirst;
 		this.sccNext  = sccNext;
@@ -114,7 +113,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		sccComputed.clear();
 		gdm.freeze();
 		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
@@ -177,7 +176,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	}
 
 	private void forceInDoor(int x) throws ContradictionException {
-		INeighbors pred = g.getEnvelopGraph().getPredecessorsOf(x);
+		ISet pred = g.getEnvelopGraph().getPredecessorsOf(x);
 		int scc = sccOf[x].get();
 		for(int i=pred.getFirstElement();i>=0;i=pred.getNextElement()){
 			if(sccOf[i].get()==scc){
@@ -186,7 +185,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 		}
 	}
 	private void forceOutDoor(int x) throws ContradictionException {
-		INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(x);
+		ISet succ = g.getEnvelopGraph().getSuccessorsOf(x);
 		int scc = sccOf[x].get();
 		for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
 			if(sccOf[i].get()==scc){

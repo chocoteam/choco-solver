@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.fast;
@@ -34,6 +34,7 @@ import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
 import solver.Cause;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -44,7 +45,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.Delta;
+import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -165,7 +166,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
             if (SIZE.get() == 1) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
 //            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
             }
@@ -197,7 +198,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
             }
             this.notifyPropagators(e, cause);
-            solver.getExplainer().removeValue(this, value, antipromo);
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
         }
         return change;
     }
@@ -239,7 +240,8 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
+        if (Configuration.PLUG_EXPLANATION)
+            solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -298,7 +300,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -325,7 +327,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -357,7 +359,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -383,7 +385,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
@@ -392,7 +394,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
     @Override
     public void wipeOut(@NotNull ICause cause) throws ContradictionException {
-        removeInterval(this.getLB(), this.getUB(), cause) ;
+        removeInterval(this.getLB(), this.getUB(), cause);
     }
 
     public boolean instantiated() {
@@ -498,7 +500,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new Delta(solver.getSearchLoop());
+            delta = new EnumDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
@@ -529,7 +531,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public Explanation explain(VariableState what) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
@@ -549,7 +551,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
     @Override
     public Explanation explain(VariableState what, int val) {
-        Explanation expl = new Explanation();
+        Explanation expl = Explanation.build();
         expl.add(solver.getExplainer().explain(this, val));
         return expl;
     }

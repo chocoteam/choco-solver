@@ -28,8 +28,11 @@
 package solver.constraints;
 
 import choco.kernel.ESat;
+import com.sun.istack.internal.Nullable;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
@@ -39,6 +42,7 @@ import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.variables.Variable;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * A class can extend <code>Constraint</code> interface and specifies a list of <code>Variable</code> objects
@@ -77,153 +81,169 @@ import java.io.Serializable;
  */
 public class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static final String VAR_DEFAULT = "var_default";
-	public static final String VAL_DEFAULT = "val_default";
-	public static final String METRIC_DEFAULT = "met_default";
+    public static final String VAR_DEFAULT = "var_default";
+    public static final String VAL_DEFAULT = "val_default";
+    public static final String METRIC_DEFAULT = "met_default";
 
-	protected final Solver solver;
+    protected final Solver solver;
 
-	public V[] vars;
-	public P[] propagators;
+    public V[] vars;
+    public P[] propagators;
 
-	protected int staticPropagationPriority;
+    protected int staticPropagationPriority;
 
-	public Constraint(V[] vars, Solver solver) {
-		this.vars = vars.clone();
-		this.solver = solver;
-	}
-
-
-	//BEWARE : ONLY FOR GRAPH CONSTRAINTS
-	public Constraint(Solver solver) {
-		this.solver = solver;
-        this.vars =(V[])new Variable[0];
-	}
-
-	public V[] getVariables() {
-		return vars;
-	}
+    public Constraint(V[] vars, Solver solver) {
+        this.vars = vars.clone();
+        this.solver = solver;
+    }
 
 
-	public Solver getSolver() {
-		return solver;
-	}
+    //BEWARE : ONLY FOR GRAPH CONSTRAINTS
+    public Constraint(Solver solver) {
+        this.solver = solver;
+        this.vars = (V[]) new Variable[0];
+    }
 
-	/**
-	 * Test if this <code>Constraint</code> object is satisfied, regarding the value of component <code>Variable</code> objects.
-	 *
-	 * @return <code>ESat.UNDEFINED</code> if at least one variable is not instantiated,
-	 *         <code>ESat.TRUE</code> if this <code>this</code> is satisfied, <code>ESat.FALSE</code> otherwise.
-	 */
-	public ESat isSatisfied(){
-		return isEntailed();
-	}
+    public V[] getVariables() {
+        return vars;
+    }
 
 
-	/**
-	 * Evaluates the current entailment of <code>this</code>.
-	 * There are 3 possible states:
-	 * <ul>
-	 * <li>regarding the current states of the variables, <code>this</code> is always satisfied,</li>
-	 * <li>regarding the current states of the variables, <code>this</code> is always violated,</li>
-	 * <li>regarding the current states of the variables, nothing can be deduced</li>
-	 * </ul>
-	 * This is mandatory for the reification.
-	 *
-	 * @return the satisfaction of the constraint
-	 */
-	public ESat isEntailed() {
-		int sat = 0;
-		for (int i = 0; i < propagators.length; i++) {
-			ESat entail = propagators[i].isEntailed();
+    public Solver getSolver() {
+        return solver;
+    }
+
+    /**
+     * Test if this <code>Constraint</code> object is satisfied, regarding the value of component <code>Variable</code> objects.
+     *
+     * @return <code>ESat.UNDEFINED</code> if at least one variable is not instantiated,
+     *         <code>ESat.TRUE</code> if this <code>this</code> is satisfied, <code>ESat.FALSE</code> otherwise.
+     */
+    public ESat isSatisfied() {
+        return isEntailed();
+    }
+
+
+    /**
+     * Evaluates the current entailment of <code>this</code>.
+     * There are 3 possible states:
+     * <ul>
+     * <li>regarding the current states of the variables, <code>this</code> is always satisfied,</li>
+     * <li>regarding the current states of the variables, <code>this</code> is always violated,</li>
+     * <li>regarding the current states of the variables, nothing can be deduced</li>
+     * </ul>
+     * This is mandatory for the reification.
+     *
+     * @return the satisfaction of the constraint
+     */
+    public ESat isEntailed() {
+        int sat = 0;
+        for (int i = 0; i < propagators.length; i++) {
+            ESat entail = propagators[i].isEntailed();
 //			System.out.println(propagators[i]+" => "+entail);
-			if (entail.equals(ESat.FALSE)) {
-				return entail;
-			} else if (entail.equals(ESat.TRUE)) {
-				sat++;
-			}
-		}
-		if (sat == propagators.length) {
-			return ESat.TRUE;
-		}
-		// No need to check if FALSE, must have been returned before
-		else {
-			return ESat.UNDEFINED;
-		}
-	}
+            if (entail.equals(ESat.FALSE)) {
+                return entail;
+            } else if (entail.equals(ESat.TRUE)) {
+                sat++;
+            }
+        }
+        if (sat == propagators.length) {
+            return ESat.TRUE;
+        }
+        // No need to check if FALSE, must have been returned before
+        else {
+            return ESat.UNDEFINED;
+        }
+    }
 
-	/**
-	 * Define the list of <code>Propagator</code> objects of this <code>Constraint</code> object.
-	 *
-	 * @param propagators list of <code>Propagator</code> objects.
-	 */
-	public final void setPropagators(P... propagators) {
-		this.propagators = propagators;
-	}
+    /**
+     * Define the list of <code>Propagator</code> objects of this <code>Constraint</code> object.
+     *
+     * @param propagators list of <code>Propagator</code> objects.
+     */
+    public final void setPropagators(P... propagators) {
+        this.propagators = propagators;
+    }
 
-	/**
-	 * Add new <code>Propagator</code> objects of this <code>Constraint</code> object.
-	 *
-	 * @param mPropagators list of <code>Propagator</code> objects to add.
-	 */
-	@SuppressWarnings({"unchecked"})
-	public final void addPropagators(P... mPropagators) {
-		if(propagators==null){
-			setPropagators(mPropagators);
-		}else{
-			// add the new propagators at the end of the current array
-			P[] tmp = this.propagators;
-			this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
-			System.arraycopy(tmp, 0, propagators, 0, tmp.length);
-			System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
-		}
-	}
+    /**
+     * Add new <code>Propagator</code> objects of this <code>Constraint</code> object.
+     *
+     * @param mPropagators list of <code>Propagator</code> objects to add.
+     */
+    @SuppressWarnings({"unchecked"})
+    public final void addPropagators(P... mPropagators) {
+        if (propagators == null) {
+            setPropagators(mPropagators);
+        } else {
+            // add the new propagators at the end of the current array
+            P[] tmp = this.propagators;
+            this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
+            System.arraycopy(tmp, 0, propagators, 0, tmp.length);
+            System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
+        }
+    }
 
-	/**
-	 * Link propagators with variables.
-	 */
-	public void declare() {
-		for (int p = 0; p < propagators.length; p++) {
-			staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
-		}
-        for(int v = 0; v < vars.length; v++){
+    /**
+     * Link propagators with variables.
+     */
+    public void declare() {
+        for (int p = 0; p < propagators.length; p++) {
+            staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
+        }
+        for (int v = 0; v < vars.length; v++) {
             vars[v].declareIn(this);
         }
-	}
+    }
 
-	/**
-	 * Returns the priority of the constraint.
-	 * Should be between 0 and 6. (0 is very slow, 6 very fast).
-	 *
-	 * @return the priority of the constraint
-	 */
-	public int getPriority() {
-		return staticPropagationPriority;
-	}
+    /**
+     * Returns the priority of the constraint.
+     * Should be between 0 and 6. (0 is very slow, 6 very fast).
+     *
+     * @return the priority of the constraint
+     */
+    public int getPriority() {
+        return staticPropagationPriority;
+    }
 
-	/**
-	 * Returns an <code>this</code>-adapted comparator.
-	 *
-	 * @param name name of comparator (if overrides the default one)
-	 * @return a comparator
-	 */
-	@SuppressWarnings({"unchecked"})
-	public AbstractSorter<V> getComparator(String name) {
-		if (name.equals(VAR_DEFAULT)) {
-			return new Incr<V>(Belong.build(this));
-		}
-		throw new SolverException("Unknown comparator name :" + name);
-	}
+    /**
+     * Returns an <code>this</code>-adapted comparator.
+     *
+     * @param name name of comparator (if overrides the default one)
+     * @return a comparator
+     */
+    @SuppressWarnings({"unchecked"})
+    public AbstractSorter<V> getComparator(String name) {
+        if (name.equals(VAR_DEFAULT)) {
+            return new Incr<V>(Belong.build(this));
+        }
+        throw new SolverException("Unknown comparator name :" + name);
+    }
 
 //	public abstract HeuristicVal getIterator(String name, V var);
 
-	@SuppressWarnings({"unchecked"})
-	public IMetric<V> getMetric(String name) {
-		if (name.equals(METRIC_DEFAULT)) {
-			return Belong.build(this);
-		}
-		throw new SolverException("Unknown metric name :" + name);
-	}
+    @SuppressWarnings({"unchecked"})
+    public IMetric<V> getMetric(String name) {
+        if (name.equals(METRIC_DEFAULT)) {
+            return Belong.build(this);
+        }
+        throw new SolverException("Unknown metric name :" + name);
+    }
+
+    /**
+     * Throws a contradiction exception based on <variable, message>
+     *
+     * @param cause    ICause object causes the exception
+     * @param variable involved variable
+     * @param message  detailed message
+     * @throws ContradictionException expected behavior
+     */
+    protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
+        solver.getEngine().fails(cause, variable, message);
+    }
+
+    public String toString() {
+        return "Cstr(" + Arrays.toString(propagators) + ")";
+    }
 }

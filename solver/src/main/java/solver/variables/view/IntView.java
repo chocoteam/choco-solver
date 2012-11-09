@@ -57,10 +57,10 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntVar>
+public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView<IV>>
         implements IView<IntDelta, IIntDeltaMonitor>, IntVar {
 
-    protected final IntVar var;
+    protected final IV var;
 
     protected IntDelta delta;
 
@@ -68,7 +68,7 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
 
     protected HeuristicVal heuristicVal;
 
-    public IntView(String name, IntVar var, Solver solver) {
+    public IntView(String name, IV var, Solver solver) {
         super(name, solver);
         this.var = var;
         this.delta = NoDelta.singleton;
@@ -180,7 +180,7 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
     }
 
     @Override
-    public void wipeOut(@NotNull ICause cause) throws  ContradictionException{
+    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
         var.wipeOut(cause);
     }
 }

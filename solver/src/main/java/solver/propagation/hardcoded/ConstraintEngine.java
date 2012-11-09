@@ -30,6 +30,7 @@ package solver.propagation.hardcoded;
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,7 +41,6 @@ import solver.propagation.IPropagationStrategy;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -145,12 +145,12 @@ public class ConstraintEngine implements IPropagationEngine {
                 for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
-                        if (IEventRecorder.DEBUG_PROPAG) {
+                        if (Configuration.PRINT_PROPAGATION) {
                             LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
-                        lastProp.propagate(null, v, mask);
+                        lastProp.propagate(v, mask);
                     }
                 }
             }
@@ -164,7 +164,7 @@ public class ConstraintEngine implements IPropagationEngine {
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
                 }
-                if (IEventRecorder.DEBUG_PROPAG) {
+                if (Configuration.PRINT_PROPAGATION) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
                 lastProp.coarseERcalls++;
@@ -202,12 +202,15 @@ public class ConstraintEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        if (Configuration.PRINT_VAR_EVENT) {
+            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+        }
         Propagator[] vProps = variable.getPropagators();
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                if (IEventRecorder.DEBUG_PROPAG)
+                if (Configuration.PRINT_PROPAGATION)
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(prop.getId());
@@ -227,7 +230,7 @@ public class ConstraintEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
         if ((schedule[aid] & C) == 0) {
-            if (IEventRecorder.DEBUG_PROPAG) {
+            if (Configuration.PRINT_PROPAGATION) {
                 LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
             }
             pro_queue_c.addLast(propagator);
@@ -250,6 +253,8 @@ public class ConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
+        //if (aid > -1) {
+        assert aid > -1 : "try to desactivate an unknown constraint";
         Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
         if ((schedule[aid] & F) != 0) { // if in the queue...
             schedule[aid] ^= F;
@@ -260,6 +265,7 @@ public class ConstraintEngine implements IPropagationEngine {
             masks_c[aid] = 0;
             pro_queue_c.remove(propagator); // removed from the queue
         }
+//        }
     }
 
     @Override

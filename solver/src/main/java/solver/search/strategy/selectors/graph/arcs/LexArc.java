@@ -28,7 +28,7 @@ package solver.search.strategy.selectors.graph.arcs;
 
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 
 public class LexArc extends ArcStrategy<GraphVar>{
 
@@ -38,11 +38,11 @@ public class LexArc extends ArcStrategy<GraphVar>{
 	
 	@Override
 	public boolean computeNextArc() {
-		INeighbors envSuc, kerSuc;
+		ISet envSuc, kerSuc;
 		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
 			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
 			kerSuc = g.getKernelGraph().getSuccessorsOf(i);
-			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
+			if(envSuc.getSize() != kerSuc.getSize()){
 				for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
 					if(!kerSuc.contain(j)){
 						this.from = i;

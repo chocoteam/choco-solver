@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.propagators.ternary;
@@ -35,7 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -73,7 +72,7 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     @Override
-    public final void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public final void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {
@@ -128,7 +127,7 @@ public class PropTimes extends Propagator<IntVar> {
             awakeOnZ();
             if (!(v2.contains(0))) {
                 int r = Math.min(getZmax(), MAX);
-                v2.updateUpperBound(r, this);
+                v2.updateUpperBound(r, aCause);
             }
         }
     }
@@ -142,7 +141,7 @@ public class PropTimes extends Propagator<IntVar> {
             awakeOnZ();
             if (!(v2.contains(0))) {
                 int r = Math.max(getZmin(), MIN);
-                v2.updateLowerBound(r, this);
+                v2.updateLowerBound(r, aCause);
             }
         }
     }
@@ -168,10 +167,10 @@ public class PropTimes extends Propagator<IntVar> {
      */
     protected void awakeOnX() throws ContradictionException {
         if (v0.instantiatedTo(0)) {
-            v2.instantiateTo(0, this);
+            v2.instantiateTo(0, aCause);
         }
         if ((v2.instantiatedTo(0)) && (!v0.contains(0))) {
-            v1.instantiateTo(0, this);
+            v1.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateYandX();
         } else if (!(v2.instantiatedTo(0))) {
@@ -179,18 +178,18 @@ public class PropTimes extends Propagator<IntVar> {
         }
         if (!(v2.instantiatedTo(0))) {
             int r = Math.max(getZmin(), MIN);
-            v2.updateLowerBound(r, this);
+            v2.updateLowerBound(r, aCause);
             r = Math.min(getZmax(), MAX);
-            v2.updateUpperBound(r, this);
+            v2.updateUpperBound(r, aCause);
         }
     }
 
     protected void awakeOnY() throws ContradictionException {
         if (v1.instantiatedTo(0)) {
-            v2.instantiateTo(0, this);
+            v2.instantiateTo(0, aCause);
         }
         if ((v2.instantiatedTo(0)) && (!v1.contains(0))) {
-            v0.instantiateTo(0, this);
+            v0.instantiateTo(0, aCause);
         } else if (!v2.contains(0)) {
             updateXandY();
         } else if (!(v2.instantiatedTo(0))) {
@@ -198,9 +197,9 @@ public class PropTimes extends Propagator<IntVar> {
         }
         if (!(v2.instantiatedTo(0))) {
             int r = Math.max(getZmin(), MIN);
-            v2.updateLowerBound(r, this);
+            v2.updateLowerBound(r, aCause);
             r = Math.min(getZmax(), MAX);
-            v2.updateUpperBound(r, this);
+            v2.updateUpperBound(r, aCause);
         }
     }
 
@@ -490,10 +489,10 @@ public class PropTimes extends Propagator<IntVar> {
      */
     protected final void propagateZero() throws ContradictionException {
         if (!(v1.contains(0))) {
-            v0.instantiateTo(0, this);
+            v0.instantiateTo(0, aCause);
         }
         if (!(v0.contains(0))) {
-            v1.instantiateTo(0, this);
+            v1.instantiateTo(0, aCause);
         }
     }
 
@@ -502,17 +501,17 @@ public class PropTimes extends Propagator<IntVar> {
      */
     protected boolean updateX() throws ContradictionException {
         int r = Math.max(getXminIfNonZero(), MIN);
-        boolean infChange = v0.updateLowerBound(r, this);
+        boolean infChange = v0.updateLowerBound(r, aCause);
         r = Math.min(getXmaxIfNonZero(), MAX);
-        boolean supChange = v0.updateUpperBound(r, this);
+        boolean supChange = v0.updateUpperBound(r, aCause);
         return (infChange || supChange);
     }
 
     protected boolean updateY() throws ContradictionException {
         int r = Math.max(getYminIfNonZero(), MIN);
-        boolean infChange = v1.updateLowerBound(r, this);
+        boolean infChange = v1.updateLowerBound(r, aCause);
         r = Math.min(getYmaxIfNonZero(), MAX);
-        boolean supChange = v1.updateUpperBound(r, this);
+        boolean supChange = v1.updateUpperBound(r, aCause);
         return (infChange || supChange);
     }
 
@@ -535,12 +534,12 @@ public class PropTimes extends Propagator<IntVar> {
         int xmin = Math.max(getXminIfNonZero(), MIN);
         int xmax = Math.min(getXmaxIfNonZero(), MAX);
         if ((xmin > v0.getUB()) || (xmax < v0.getLB())) {
-            v2.instantiateTo(0, this);
+            v2.instantiateTo(0, aCause);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
-            boolean infChange = (!(v1.contains(0)) && v0.updateLowerBound(Math.min(0, xmin), this));
-            boolean supChange = (!(v1.contains(0)) && v0.updateUpperBound(Math.max(0, xmax), this));
+            boolean infChange = (!(v1.contains(0)) && v0.updateLowerBound(Math.min(0, xmin), aCause));
+            boolean supChange = (!(v1.contains(0)) && v0.updateUpperBound(Math.max(0, xmax), aCause));
             return (infChange || supChange);
         }
     }
@@ -549,12 +548,12 @@ public class PropTimes extends Propagator<IntVar> {
         int ymin = Math.max(getYminIfNonZero(), MIN);
         int ymax = Math.min(getYmaxIfNonZero(), MAX);
         if ((ymin > v1.getUB()) || (ymax < v1.getLB())) {
-            v2.instantiateTo(0, this);
+            v2.instantiateTo(0, aCause);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
-            boolean infChange = (!(v0.contains(0)) && v1.updateLowerBound(Math.min(0, ymin), this));
-            boolean supChange = (!(v0.contains(0)) && v1.updateUpperBound(Math.max(0, ymax), this));
+            boolean infChange = (!(v0.contains(0)) && v1.updateLowerBound(Math.min(0, ymin), aCause));
+            boolean supChange = (!(v0.contains(0)) && v1.updateUpperBound(Math.max(0, ymax), aCause));
             return (infChange || supChange);
         }
     }

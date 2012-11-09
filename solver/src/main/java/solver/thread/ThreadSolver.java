@@ -29,8 +29,7 @@ package solver.thread;
 
 import choco.kernel.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.MaxObjectiveManager;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.variables.IntVar;
 
 /**
@@ -74,15 +73,11 @@ public class ThreadSolver extends Thread {
     }
 
     public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+		if(policy==ResolutionPolicy.SATISFACTION){
+			throw new UnsupportedOperationException("cannot optimize a satisfaction problem!");
+		}
         solver.getSearchLoop().stopAtFirstSolution(false);
-        switch (policy) {
-            case MAXIMIZE:
-                solver.getSearchLoop().setObjectivemanager(new MaxObjectiveManager(objective));
-                break;
-            case MINIMIZE:
-                solver.getSearchLoop().setObjectivemanager(new MinObjectiveManager(objective));
-                break;
-        }
+		solver.getSearchLoop().setObjectivemanager(new ObjectiveManager(objective,policy,solver));
         start();
     }
 

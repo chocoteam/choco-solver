@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -43,48 +43,48 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.util.BitSet;
 
 /**
  * Simple NoSubtour applied to (undirected) tree/forest
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
+ */
+@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	UndirectedGraphVar g;
+    UndirectedGraphVar g;
     GraphDeltaMonitor gdm;
-	int n;
-	private PairProcedure arcEnforced;
-	private IStateInt[] color,size;
-	// list
-	int[] fifo;
-	int[] mate;
-	BitSet in;
+    int n;
+    private PairProcedure arcEnforced;
+    private IStateInt[] color, size;
+    // list
+    int[] fifo;
+    int[] mate;
+    BitSet in;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that graph has no cycle
-	 * runs in O(n) per instantiation event
-	 * @param graph
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
+    /**
+     * Ensures that graph has no cycle
+     * runs in O(n) per instantiation event
+     *
+     * @param graph
+     * @param constraint
+     * @param solver
+     */
+    public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
+        super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
@@ -110,7 +110,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 			size[i].set(1);
 			mate[i] = -1;
 		}
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getNeighborsOf(i);
 			for(int j = nei.getFirstElement();j>=0;j=nei.getNextElement()){
@@ -123,7 +123,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		gdm.freeze();
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.unfreeze();
@@ -161,7 +161,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 		mate[i] = j;
 		while(idxFirst<idxLast){
 			x = fifo[idxFirst++];
-			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(x);
+			ISet nei = g.getEnvelopGraph().getNeighborsOf(x);
 			for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
 				if(k!=mate[x]){
 					ck = color[k].get();

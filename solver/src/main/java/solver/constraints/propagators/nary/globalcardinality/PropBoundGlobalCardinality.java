@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary.globalcardinality;
 
@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -113,7 +112,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         int n = vars.length;
         this.nbVars = n;
         this.idms = new IIntDeltaMonitor[n];
-        for (int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         treelinks = new int[2 * n + 2];
@@ -177,12 +176,12 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     protected void initialize() throws ContradictionException {
         int j = 0;
         for (; j < nbVars; j++) {
-            vars[j].updateLowerBound(offset, this);
-            vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this);
+            vars[j].updateLowerBound(offset, aCause);
+            vars[j].updateUpperBound(offset + vars.length - nbVars - 1, aCause);
         }
         for (; j < vars.length; j++) {
-            vars[j].updateLowerBound(0, this);
-            vars[j].updateUpperBound(nbVars, this);
+            vars[j].updateLowerBound(0, aCause);
+            vars[j].updateUpperBound(nbVars, aCause);
         }
         initBackDataStruct();
         initCard();
@@ -209,9 +208,9 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             initialize();
         }
         filter();
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     void filter() throws ContradictionException {
@@ -244,7 +243,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             int val = vars[varIdx].getValue();
             forcePropagate(EventType.CUSTOM_PROPAGATION);
@@ -253,7 +252,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (varIdx < nbVars) {
                 //update lower bounds of cardinalities
                 val_minOcc[val - offset].add(1);
-                card[val - offset].updateLowerBound(val_minOcc[val - offset].get(), this);
+                card[val - offset].updateLowerBound(val_minOcc[val - offset].get(), aCause);
                 filterBCOnInst(val);
             } else {
                 filterBCOnInst(varIdx - nbVars + offset);
@@ -469,7 +468,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] > x) {
                 w = pathmax(h, h[x]);
 //                updateLowerBound(maxsorted[i].var, bounds[w], maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(bounds[w], this); //CPRU not idempotent
+                maxsorted[i].var.updateLowerBound(bounds[w], aCause); //CPRU not idempotent
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[y], bounds[z] - 1)) {
@@ -505,7 +504,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] < x) {
                 w = pathmin(h, h[x]);
 //                updateUpperBound(minsorted[i].var, bounds[w] - 1, minsorted[i].idx);
-                minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
+                minsorted[i].var.updateUpperBound(bounds[w] - 1, aCause);
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[z], bounds[y] - 1)) {
@@ -615,7 +614,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             y = maxsorted[i].maxrank;
             if ((stableInterval[x] <= x) || (y > stableInterval[x])) {
 //                updateLowerBound(maxsorted[i].var, l.skipNonNullElementsRight(bounds[newMin[i]]), maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(l.skipNonNullElementsRight(bounds[newMin[i]]), this);
+                maxsorted[i].var.updateLowerBound(l.skipNonNullElementsRight(bounds[newMin[i]]), aCause);
             }
         }
     }
@@ -684,7 +683,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             int y = minsorted[i].maxrank;
             if ((stableInterval[x] <= x) || (y > stableInterval[x])) {
 //                updateUpperBound(minsorted[i].var, l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), minsorted[i].idx);
-                minsorted[i].var.updateUpperBound(l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), this);
+                minsorted[i].var.updateUpperBound(l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), aCause);
             }
         }
 
@@ -710,9 +709,9 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     void initCard() throws ContradictionException {
         for (int i = 0; i < range; i++) {
             if (val_maxOcc[i].get() == 0) {
-                card[i].instantiateTo(0, this);
+                card[i].instantiateTo(0, aCause);
             } else {
-                card[i].updateLowerBound(val_minOcc[i].get(), this);
+                card[i].updateLowerBound(val_minOcc[i].get(), aCause);
             }
         }
     }
@@ -743,7 +742,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbInf--;
         }
         if (nbInf == getMaxOcc(inf - offset)) {
-            vars[i].updateLowerBound(inf + 1, this);//CPRU not idempotent
+            vars[i].updateLowerBound(inf + 1, aCause);//CPRU not idempotent
         }
     }
 
@@ -755,7 +754,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbSup--;
         }
         if (nbSup == getMaxOcc(sup - offset)) {
-            vars[i].updateUpperBound(sup - 1, this);//CPRU not idempotent
+            vars[i].updateUpperBound(sup - 1, aCause);//CPRU not idempotent
         }
     }
 
@@ -774,7 +773,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         } else if (nbvalsure == getMaxOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (!vars[j].instantiatedTo(val)) {
-                    vars[j].removeValue(val, this);//CPRU not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].removeValue(val, aCause);//CPRU not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }
@@ -797,8 +796,8 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
             }
             for (int i = 0; i < range; i++) {
-                fixpoint |= card[i].updateUpperBound(nbVars - (lb - card[i].getLB()), this);
-                fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), this);
+                fixpoint |= card[i].updateUpperBound(nbVars - (lb - card[i].getLB()), aCause);
+                fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), aCause);
             }
         }
     }

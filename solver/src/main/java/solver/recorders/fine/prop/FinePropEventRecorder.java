@@ -27,12 +27,12 @@
 package solver.recorders.fine.prop;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.recorders.IEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -61,7 +61,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
         for (int i = 0; i < nbVar; i++) {
             _execute(i);
         }
@@ -82,7 +82,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[AbstractFineEventRecorder.PINDEX]) { // due to idempotency of propagator, it should not schedule itself
-            if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+            if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             int idx = v2i[vIdx - offset];
             if ((evt.mask & propagators[AbstractFineEventRecorder.PINDEX].getPropagationConditions(idxVinP[idx])) != 0) {
                 // 1. record the event and values removed

@@ -27,10 +27,11 @@
 
 package parser.flatzinc.parser;
 
+import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
+import org.codehaus.jparsec.Terminals;
 import org.codehaus.jparsec.misc.Mapper;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
@@ -41,6 +42,7 @@ import parser.flatzinc.ast.expression.*;
 import solver.Solver;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.List;
 
 /*
@@ -56,6 +58,9 @@ public final class FZNParser {
     public final Solver solver = new Solver();
     public final FZNLayout layout = new FZNLayout();
 
+    public final boolean all;
+    public final boolean free;
+
     /**
      * Map to find an object with its name.
      */
@@ -63,15 +68,21 @@ public final class FZNParser {
 
     public String instance;
 
-    public FZNParser() {
+    public FZNParser(boolean all, boolean free) {
         PARVAR.setParser(this);
+        this.all = all;
+        this.free = free;
+    }
+
+    public FZNParser() {
+        this(false, false);
     }
 
     /**
      * Scanners for "true" or "false" keyword.
      * Create a {@link parser.flatzinc.ast.expression.EBool} object.
      */
-    final Parser<EBool> BOOL_CONST = Parsers.or(
+    static final Parser<EBool> BOOL_CONST = Parsers.or(
             TerminalParser.term("true").retn(EBool.instanceTrue),
             TerminalParser.term("false").retn(EBool.instanceFalse));
 
@@ -79,7 +90,7 @@ public final class FZNParser {
      * Scanner for int_const.
      * Create a {@link parser.flatzinc.ast.expression.EInt} object.
      */
-    final Parser<EInt> INT_CONST =
+    static final Parser<EInt> INT_CONST =
             Mapper.curry(EInt.class).sequence(Parsers.or(TerminalParser.term("+"), TerminalParser.term("-")).optional().source(),
                     TerminalParser.NUMBER);
 
@@ -87,14 +98,14 @@ public final class FZNParser {
      * Scanner for bounded set declaration, like 1..6.
      * Create {@link parser.flatzinc.ast.expression.ESetBounds} object.
      */
-    final Parser<ESetBounds> SET_CONST_1 =
+    static final Parser<ESetBounds> SET_CONST_1 =
             Mapper.curry(ESetBounds.class).sequence(INT_CONST, TerminalParser.term(".."), INT_CONST);
 
     /**
      * Scanner for listed set declaration, like {1,6,7}.
      * Create {@link parser.flatzinc.ast.expression.ESetList} object.
      */
-    final Parser<ESetList> SET_CONST_2 =
+    static final Parser<ESetList> SET_CONST_2 =
             Mapper.curry(ESetList.class).sequence(TerminalParser.term("{"), INT_CONST.sepBy(TerminalParser.term(",")),
                     TerminalParser.term("}"));
     /**
@@ -105,29 +116,18 @@ public final class FZNParser {
 
 
     /**
-     * Scanner for common array declaration : '( {@code expr},...)'.
-     *
-     * @param expr parser to apply
-     * @param <T>  expected return object
-     * @return {@link Parser} of {@link EArray}
-     */
-    static <T> Parser<EArray> array(Parser<T> expr) {
-        return Mapper.curry(EArray.class).sequence(TerminalParser.term("["), expr.sepBy(TerminalParser.term(",")), TerminalParser.term("]"));
-    }
-
-    /**
      * Scanner for expression surrounded by parenthesis.
      *
      * @param parser Scanner for expression
      * @param <T>    expected type
      * @return {@link Parser<T>}
      */
-    static <T> Parser<T> paren(Parser<T> parser) {
+    static final <T> Parser<T> paren(Parser<T> parser) {
         return parser.between(TerminalParser.term("("), TerminalParser.term(")"));
     }
 
     /**
-     * Scanner for a list of {@link T} separeted by comma.
+     * Scanner for a list of {@link T} separated by comma.
      *
      * @param parser Scanner for expression
      * @param <T>    expected type
@@ -137,6 +137,10 @@ public final class FZNParser {
         return paren(parser.sepBy(TerminalParser.term(",")));
     }
 
+
+    final Parser<EIdentifier> IDENTIFIER = Mapper.curry(EIdentifier.class).sequence(Parsers.constant(this.map), TerminalParser.IDENTIFIER);
+
+    static final Parser<EString> STRING_LITERAL = Mapper.curry(EString.class).sequence(Terminals.StringLiteral.PARSER);
 
     /**
      * Scanner for expression.
@@ -153,19 +157,25 @@ public final class FZNParser {
                 BOOL_CONST,
                 // int_const
                 INT_CONST,
-                // identifier[int_const]
-                Mapper.curry(EIdArray.class).sequence(Parsers.constant(this.map), TerminalParser.IDENTIFIER, TerminalParser.term("["), INT_CONST, TerminalParser.term("]")),
+                // []
+                Mapper.curry(EArray.class).sequence(Parsers.constant(Collections.<Expression>emptyList()),
+                        TerminalParser.term("["), TerminalParser.term("]")),
+                // [expr,...]
+                Mapper.curry(EArray.class).sequence(TerminalParser.term("["), lazy.sepBy(TerminalParser.term(",")),
+                        TerminalParser.term("]")),
                 // annotation
                 Mapper.curry(EAnnotation.class).sequence(
-                        Mapper.curry(EIdentifier.class).sequence(Parsers.constant(this.map), TerminalParser.IDENTIFIER),
-                        list(Parsers.or(lazy))
+                        IDENTIFIER,
+                        Parsers.between(TerminalParser.term("("), lazy.sepBy(TerminalParser.term(",")),
+                                TerminalParser.term(")"))
                 ),
+                // identifier[int_const]
+                Mapper.curry(EIdArray.class).sequence(Parsers.constant(this.map), TerminalParser.IDENTIFIER,
+                        TerminalParser.term("["), INT_CONST, TerminalParser.term("]")),
                 // identifier
-                Mapper.curry(EIdentifier.class).sequence(Parsers.constant(this.map), TerminalParser.IDENTIFIER),
-                // [] | [expr,...]
-                array(lazy),
+                IDENTIFIER,
                 // "...string constant..."
-                Mapper.curry(EString.class).sequence(Scanners.DOUBLE_QUOTE_STRING)
+                STRING_LITERAL
         );
         ref.set(parser);
         return parser;
@@ -176,31 +186,29 @@ public final class FZNParser {
      * Scanner for "int" keyword.
      * Create {@link parser.flatzinc.ast.declaration.DInt} object.
      */
-    final Parser<DBool> BOOL = Mapper.curry(DBool.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("bool"));
+    static final Parser<DBool> BOOL = Mapper.curry(DBool.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("bool"));
 
 
     /**
      * Scanner for "int" keyword.
      * Create {@link parser.flatzinc.ast.declaration.DInt} object.
      */
-    final Parser<DInt> INT =
+    static final Parser<DInt> INT =
             Mapper.curry(DInt.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("int"));
 
     /**
      * Scanner for bounds of int declaration, like 1..3.
      * Create a {@link parser.flatzinc.ast.declaration.DInt2} object.
      */
-    final Parser<DInt2> INT2 =
+    static final Parser<DInt2> INT2 =
             Mapper.curry(DInt2.class).sequence(
                     TerminalParser.term("var").succeeds(), INT_CONST, TerminalParser.term(".."), INT_CONST
             );
-
-
     /**
      * Scanner for list of int declaration, like {1, 5, 8}.
      * Create a {@link parser.flatzinc.ast.declaration.DManyInt} object.
      */
-    final Parser<DManyInt> MANY_INT =
+    static final Parser<DManyInt> MANY_INT =
             Mapper.curry(DManyInt.class).sequence(
                     TerminalParser.term("var").succeeds(), TerminalParser.term("{"), INT_CONST.sepBy(TerminalParser.term(",")), TerminalParser.term("}")
             );
@@ -209,31 +217,35 @@ public final class FZNParser {
      * Scanners for every int-like expression.
      * Create a {@link parser.flatzinc.ast.declaration.Declaration} object
      */
-    private final Parser<Declaration> INTS = Parsers.or(INT, INT2, MANY_INT);
+    static final Parser<Declaration> INTS = Parsers.or(INT, INT2, MANY_INT);
 
     /**
      * Scanner for every primitive-like expression.
      * Create a {@link Declaration} object.
      */
-    private final Parser<Declaration> PRIMITIVES = Parsers.or(BOOL, INTS);
+    static final Parser<Declaration> PRIMITIVES = Parsers.or(BOOL, INTS);
 
     /**
      * Scanner for a set of int, like "set of int", "set of 1..3" or "set of {1,2,3}".
      * Create a {@link DSet} object.
      */
-    final Parser<DSet> SET_OF_INT =
+    static final Parser<DSet> SET_OF_INT =
             Mapper.curry(DSet.class).sequence(
                     TerminalParser.term("var").succeeds(), TerminalParser.phrase("set of"),
                     INTS
             );
 
+    static final Parser<Declaration> INDEX_SET = Parsers.or(INT, INT2);
+
     /**
      * Scanner for array of smth, like "array [int] of bool".
      * Creat a {@link DArray} object
      */
-    final Parser<DArray> ARRAY_OF =
+    static final Parser<DArray> ARRAY_OF =
             Mapper.curry(DArray.class).sequence(
-                    TerminalParser.phrase("array ["), Parsers.or(INT, INT2), TerminalParser.phrase("] of"),
+                    TerminalParser.phrase("array ["),
+                    INDEX_SET.sepBy(TerminalParser.term(",")),
+                    TerminalParser.phrase("] of"),
                     Parsers.or(PRIMITIVES, SET_OF_INT)
             );
 
@@ -242,7 +254,7 @@ public final class FZNParser {
      * See FZN specifications for more informations.
      * Create {@link Declaration} object
      */
-    final Parser<Declaration> TYPE =
+    static final Parser<Declaration> TYPE =
             Parsers.or(PRIMITIVES, SET_OF_INT, ARRAY_OF);
 
     /**
@@ -256,7 +268,7 @@ public final class FZNParser {
      * Scanner for predicate parameters.
      * Create a {@link PredParam} object.
      */
-    final Parser<PredParam> PRED_PARAM =
+    static final Parser<PredParam> PRED_PARAM =
             Mapper.curry(PredParam.class).sequence(TYPE, TerminalParser.term(":"), TerminalParser.IDENTIFIER);
 
 
@@ -264,7 +276,7 @@ public final class FZNParser {
      * Scanner for predicate declaration
      * Create a {@link parser.flatzinc.ast.Predicate} object
      */
-    final Parser<Predicate> PRED_DECL =
+    static final Parser<Predicate> PRED_DECL =
             Mapper.curry(Predicate.class).sequence(TerminalParser.term("predicate"), TerminalParser.IDENTIFIER, list(PRED_PARAM), TerminalParser.term(";"));
 
     /**
@@ -324,8 +336,8 @@ public final class FZNParser {
                     TerminalParser.term("solve"),
                     ANNOTATIONS,
                     Parsers.or(
-                            TerminalParser.term("maximize").retn(SolveGoal.Resolution.MAXIMIZE),
-                            TerminalParser.term("minimize").retn(SolveGoal.Resolution.MINIMIZE)
+                            TerminalParser.term("maximize").retn(ResolutionPolicy.MAXIMIZE),
+                            TerminalParser.term("minimize").retn(ResolutionPolicy.MINIMIZE)
                     ),
                     expression(),
                     TerminalParser.term(";"));
@@ -381,5 +393,9 @@ public final class FZNParser {
      */
     public void loadInstance(File file) {
         this.instance = readFileAsString(file);
+    }
+
+    public void loadInstance(String instance) {
+        this.instance = instance;
     }
 }

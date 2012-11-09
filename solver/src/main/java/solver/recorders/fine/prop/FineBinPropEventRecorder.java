@@ -27,11 +27,11 @@
 package solver.recorders.fine.prop;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.recorders.IEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.Variable;
 
@@ -50,7 +50,7 @@ public final class FineBinPropEventRecorder<V extends Variable> extends FineProp
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
 
         _execute(0);
         _execute(1);

@@ -36,8 +36,6 @@ import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphVar;
 
-import java.util.Random;
-
 /**
  * <br/>
  *
@@ -54,8 +52,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
 	public enum NodeArcPriority{
 		NODES_THEN_ARCS,
-		ARCS,
-		RANDOM;
+		ARCS;
 	}
 
 	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as, NodeArcPriority priority) {
@@ -93,8 +90,6 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 					dec.setArc(g, arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
 				}
 				break;
-//			case RANDOM:
-//				throw new UnsupportedOperationException("not implemented yet");
 			case ARCS:
 			default:
 				nextArc();

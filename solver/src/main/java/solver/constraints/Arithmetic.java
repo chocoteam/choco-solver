@@ -78,17 +78,17 @@ public class Arithmetic extends IntConstraint<IntVar> {
         this.op2 = none;
         this.cste = cste;
         this.isBinary = false;
-        if (op1.equals(eq)) {
+        if (op1.equals(eq)) {   // X = C
             setPropagators(new PropEqualXC(var, cste, solver, this));
-        } else if (op1.equals(nq)) {
+        } else if (op1.equals(nq)) {    // X =/= C
             setPropagators(new PropNotEqualXC(var, cste, solver, this));
-        } else if (op1.equals(gq)) {
+        } else if (op1.equals(gq)) {    // X >= C
             setPropagators(new PropGreaterOrEqualXC(var, cste, solver, this));
-        } else if (op1.equals(gt)) {
+        } else if (op1.equals(gt)) {    // X > C -->  X >= C + 1
             setPropagators(new PropGreaterOrEqualXC(var, cste + 1, solver, this));
-        } else if (op1.equals(lq)) {
+        } else if (op1.equals(lq)) {    // X <= C
             setPropagators(new PropLessOrEqualXC(var, cste, solver, this));
-        } else if (op1.equals(lt)) {
+        } else if (op1.equals(lt)) {    // X < C --> X <= C - 1
             setPropagators(new PropLessOrEqualXC(var, cste - 1, solver, this));
         } else {
             throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
@@ -101,18 +101,18 @@ public class Arithmetic extends IntConstraint<IntVar> {
         this.op2 = plus;
         this.cste = 0;
         this.isBinary = true;
-        if (op1.equals(eq)) {
+        if (op1.equals(eq)) {   // X = Y
             setPropagators(new PropEqualX_Y(var1, var2, solver, this));
-        } else if (op1.equals(nq)) {
+        } else if (op1.equals(nq)) {    // X =/= Y
             setPropagators(new PropNotEqualX_Y(var1, var2, solver, this));
-        } else if (op1.equals(gq)) {
+        } else if (op1.equals(gq)) {    //  X >= Y
             setPropagators(new PropGreaterOrEqualX_Y(vars, solver, this));
-        } else if (op1.equals(gt)) {
+        } else if (op1.equals(gt)) {    //  X > Y --> X >= Y + 1
             setPropagators(new PropGreaterOrEqualX_YC(vars, 1, solver, this));
-        } else if (op1.equals(lq)) {
+        } else if (op1.equals(lq)) {    //  X <= Y --> Y >= X
             setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}, solver, this));
-        } else if (op1.equals(lt)) {
-            setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -1, solver, this));
+        } else if (op1.equals(lt)) {    //  X < Y --> Y >= X + 1
+            setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1, solver, this));
         } else {
             throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
         }
@@ -128,50 +128,50 @@ public class Arithmetic extends IntConstraint<IntVar> {
         this.cste = cste;
         this.isBinary = true;
         if (op1.equals(plus)) {
-            if (op2.equals(eq)) {
+            if (op2.equals(eq)) {   // X + Y = C
                 setPropagators(new PropEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(nq)) {
+            } else if (op2.equals(nq)) {   // X + Y =/= C
                 setPropagators(new PropNotEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(gq)) {
+            } else if (op2.equals(gq)) {   // X + Y >= C
                 setPropagators(new PropGreaterOrEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(gt)) {
+            } else if (op2.equals(gt)) {   // X + Y > C --> X + Y >= C + 1
                 setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1, solver, this));
-            } else if (op2.equals(lq)) {
+            } else if (op2.equals(lq)) {   // X + Y <= C
                 setPropagators(new PropLessOrEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(lt)) {
+            } else if (op2.equals(lt)) {   // X + Y < C --> X +Y <= C - 1
                 setPropagators(new PropLessOrEqualXY_C(vars, cste - 1, solver, this));
             } else {
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
         } else if (op1.equals(minus)) {
-            if (op2.equals(eq)) {
+            if (op2.equals(eq)) {   // X - Y = C --> X = Y + C
                 setPropagators(new PropEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(nq)) {
+            } else if (op2.equals(nq)) {   // X - Y =/= C --> X =/= Y + C
                 setPropagators(new PropNotEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(gq)) {
+            } else if (op2.equals(gq)) {   // X - Y >= C --> X >= Y + C
                 setPropagators(new PropGreaterOrEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(gt)) {
+            } else if (op2.equals(gt)) {   // X - Y > C --> X >= Y + C + 1
                 setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1, solver, this));
-            } else if (op2.equals(lq)) {
+            } else if (op2.equals(lq)) {   // X - Y <= C --> Y >= X - C
                 setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste, solver, this));
-            } else if (op2.equals(lt)) {
+            } else if (op2.equals(lt)) {   // X - Y < C --> Y >= X - C + 1
                 setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1, solver, this));
             } else {
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
         } else {
             int _cste = cste * (op2.equals(plus) ? 1 : -1);
-            if (op1.equals(eq)) {
+            if (op1.equals(eq)) {   // X = Y + C
                 setPropagators(new PropEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(nq)) {
+            } else if (op1.equals(nq)) {    // X =/= Y + C
                 setPropagators(new PropNotEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(gq)) {
+            } else if (op1.equals(gq)) {    // X >= Y + C
                 setPropagators(new PropGreaterOrEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(gt)) {
+            } else if (op1.equals(gt)) {    // X > Y + C --> X >= Y + C + 1
                 setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1, solver, this));
-            } else if (op1.equals(lq)) {
+            } else if (op1.equals(lq)) {    // X <= Y + C --> Y >= X - C
                 setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste, solver, this));
-            } else if (op1.equals(lt)) {
+            } else if (op1.equals(lt)) {    // X < Y + C --> Y > X - C + 1
                 setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1, solver, this));
             } else {
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
@@ -250,10 +250,10 @@ public class Arithmetic extends IntConstraint<IntVar> {
 
     @Override
     public String toString() {
-        if(isBinary){
-            return vars[0].getName() +" "+ op1 +" "+ vars[1].getName() +" "+ op2 +" "+ cste;
-        }else{
-            return vars[0].getName() +" "+ op1 +" "+ cste;
+        if (isBinary) {
+            return vars[0].getName() + " " + op1 + " " + vars[1].getName() + " " + op2 + " " + cste;
+        } else {
+            return vars[0].getName() + " " + op1 + " " + cste;
         }
 
     }

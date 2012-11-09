@@ -32,6 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.nary.GCC_AC;
 import solver.constraints.nary.GlobalCardinality;
 import solver.variables.IntVar;
 
@@ -50,6 +51,11 @@ public class GlobalCardinalityBuilder implements IBuilder {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
-        return GlobalCardinality.make(vars, values, cards, solver);
+        boolean ac = values.length <= 2 * vars.length;
+        if (ac) {
+            return new GCC_AC(vars, values, cards, solver);
+        } else {
+            return GlobalCardinality.make(vars, values, cards, solver);
+        }
     }
 }

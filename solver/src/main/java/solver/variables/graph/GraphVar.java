@@ -41,6 +41,8 @@ import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.view.IView;
 
 
 /**
@@ -48,7 +50,7 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
         implements Variable<IGraphDelta, IGraphDeltaMonitor>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
@@ -65,6 +67,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
+
 	public GraphVar(Solver solver) {
 		super("G", solver);
 		solver.associates(this);
@@ -80,11 +83,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		if (getEnvelopOrder() != getKernelOrder()) {
 			return false;
 		}
-		INeighbors suc;
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		ISet suc;
+		ISet act = getEnvelopGraph().getActiveNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			suc = envelop.getSuccessorsOf(i);
-			if (suc.neighborhoodSize() != getKernelGraph().getSuccessorsOf(i).neighborhoodSize()) {
+			if (suc.getSize() != getKernelGraph().getSuccessorsOf(i).getSize()) {
 				return false;
 			}
 		}
@@ -93,14 +96,14 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	@Override
 	public boolean removeNode(int x, ICause cause) throws ContradictionException {
-		if (kernel.getActiveNodes().isActive(x)) {
+		if (kernel.getActiveNodes().contain(x)) {
 			this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
 			return true;
-		} else if (!envelop.getActiveNodes().isActive(x)) {
+		} else if (!envelop.getActiveNodes().contain(x)) {
 			return false;
 		}
 		if (reactOnModification) {
-			INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+			ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
 			for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
 				removeArc(x, i, cause);
 				removeArc(i, x, cause);
@@ -119,7 +122,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	@Override
 	public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-		if (envelop.getActiveNodes().isActive(x)) {
+		if (envelop.getActiveNodes().contain(x)) {
 			if (kernel.activateNode(x)) {
 				if (reactOnModification) {
 					delta.add(x,IGraphDelta.NE,cause);
@@ -134,27 +137,68 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		return true;
 	}
 
+	public enum IncidentNodes{
+		PREDECESSORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getPredecessorsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(to,from,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(to,from,cause);
+			}
+		},
+		SUCCESSORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getSuccessorsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(from,to,cause);
+			}
+		},
+		NEIGHBORS(){
+			public ISet getSet(IGraph graph, int i){
+				return graph.getNeighborsOf(i);
+			}
+			public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.removeArc(from,to,cause);
+				gv.removeArc(to,from,cause);
+			}
+			public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
+				gv.enforceArc(from,to,cause);
+				gv.enforceArc(to,from,cause);
+			}
+		};
+		public abstract ISet getSet(IGraph graph, int i);
+		public abstract void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
+		public abstract void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
+	}
+
 	//***********************************************************************************
 	// ACCESSORS
 	//***********************************************************************************
 
 	@Override
 	public int getEnvelopOrder() {
-		return envelop.getActiveNodes().neighborhoodSize();
+		return envelop.getActiveNodes().getSize();
 	}
 
 	@Override
 	public int getKernelOrder() {
-		return kernel.getActiveNodes().neighborhoodSize();
+		return kernel.getActiveNodes().getSize();
 	}
 
 	@Override
-	public IStoredGraph getKernelGraph() {
+	public E getKernelGraph() {
 		return kernel;
 	}
 
 	@Override
-	public IStoredGraph getEnvelopGraph() {
+	public E getEnvelopGraph() {
 		return envelop;
 	}
 
@@ -224,42 +268,40 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		solver.getEngine().fails(cause, this, message);
 	}
 
-	public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
-		int n = value.length;
-//		for (int i = 0; i < n; i++) {
-//			for (int j = 0; j < n; j++) {
-//				if (value[i][j]) {
-//					enforceArc(i, j, cause);
-//				} else {
-//					removeArc(i, j, cause);
-//				}
-//			}
-//		}
-		INeighbors nei;
-		for(int i=0;i<n;i++){
-			nei = getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if (value[i][j]) {
+	//***********************************************************************************
+	// SOLUTIONS : STORE AND RESTORE
+	//***********************************************************************************
+
+	public boolean[][] getValue() {
+		int n = getEnvelopGraph().getNbNodes();
+		boolean[][] vals = new boolean[n+1][n];
+		ISet kerNodes = getKernelGraph().getActiveNodes();
+		ISet kerSuccs;
+		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
+			kerSuccs = getKernelGraph().getSuccessorsOf(i);
+			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
+				vals[i][j] = true; // arc in
+			}
+			vals[n][i] = true; // node in
+		}
+		return vals;
+	}
+	
+	public void instantiateTo(boolean[][] values, ICause cause) throws ContradictionException {
+		int n = values.length-1;
+		for (int i = 0; i < n; i++) {
+			if(values[n][i]){//nodes
+				enforceNode(i,cause);
+			}else{
+				removeNode(i,cause);
+			}
+			for (int j = 0; j < n; j++) {
+				if (values[i][j]) {//arcs
 					enforceArc(i, j, cause);
 				} else {
 					removeArc(i, j, cause);
 				}
 			}
 		}
-
-	}
-
-	public boolean[][] getValue() {
-		int n = getEnvelopGraph().getNbNodes();
-		boolean[][] vals = new boolean[n][n];
-		IActiveNodes kerNodes = getKernelGraph().getActiveNodes();
-		INeighbors kerSuccs;
-		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-			kerSuccs = getKernelGraph().getSuccessorsOf(i);
-			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-				vals[i][j] = true;
-			}
-		}
-		return vals;
 	}
 }

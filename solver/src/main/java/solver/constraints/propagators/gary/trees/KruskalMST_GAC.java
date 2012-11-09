@@ -28,11 +28,10 @@
 package solver.constraints.propagators.gary.trees;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.HeldKarp;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.AbstractMSTFinder;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
@@ -71,7 +70,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalMST_GAC(int nbNodes, HeldKarp propagator) {
+	public KruskalMST_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];
@@ -81,7 +80,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 		// CCtree
 		ccN = 2*n+1;
 		// backtrable
-		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST);
+		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST,false);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
 		useful = new BitSet(n);
@@ -112,11 +111,11 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 			Tree.getSuccessorsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size+=g.getSuccessorsOf(i).neighborhoodSize();
+			size+=g.getSuccessorsOf(i).getSize();
 		}
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -166,7 +165,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 
 	protected void prepareMandArcDetection(){
 		// RECYCLING ccTp is used to model the compressed path
-		INeighbors nei;
+		ISet nei;
 		for(int i=0;i<n;i++){
 			ccTp[i] = -1;
 		}
@@ -294,7 +293,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 				}
 			}
 		}
-		INeighbors nei;
+		ISet nei;
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){

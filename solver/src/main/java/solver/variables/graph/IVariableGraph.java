@@ -35,7 +35,7 @@ import solver.exception.ContradictionException;
  * @author Jean-Guillaume Fages, Xavier Lorca
  *
  */
-public interface IVariableGraph {
+public interface IVariableGraph<E extends IGraph> {
 
     /**
      * Remove node x from the maximal partial subgraph
@@ -92,10 +92,10 @@ public interface IVariableGraph {
     /**
      * @return the graph representing the domain of the variable graph
      */
-    IStoredGraph getKernelGraph();
+    E getKernelGraph();
     
     /**
      * @return the graph representing the instantiated values (nodes and edges) of the variable graph
      */
-    IStoredGraph getEnvelopGraph();
+    E getEnvelopGraph();
 }

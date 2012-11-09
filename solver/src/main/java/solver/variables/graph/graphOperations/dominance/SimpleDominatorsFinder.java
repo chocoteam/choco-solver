@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
-import solver.variables.graph.directedGraph.IDirectedGraph;
+import solver.variables.graph.directedGraph.DirectedGraph;
 
 /**Class that finds dominators of a given flow graph g(s)
  * Uses the simple LT algorithm which runs in O(m.log(n))
@@ -40,7 +40,7 @@ public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFind
 
 	/**Object that finds dominators of the given flow graph g(s)
 	 * It uses the simple LT algorithm which runs in O(m.log(n))*/
-	public SimpleDominatorsFinder(int s, IDirectedGraph g){
+	public SimpleDominatorsFinder(int s, DirectedGraph g){
 		super(s,g);
 	}
 

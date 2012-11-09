@@ -100,6 +100,8 @@ public class VoidSearchMonitor implements ISearchMonitor{
     public void afterRestart() {
     }
 
+    public void afterInterrupt() {
+    }
 
     public void beforeClose() {
     }

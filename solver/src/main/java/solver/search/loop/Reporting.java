@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.search.strategy.decision.Decision;
+import solver.variables.Variable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -60,6 +61,18 @@ public enum Reporting {
         return sb.toString();
     }
 
+    public static String onUninstiatedVariables(Solver solver) {
+        Variable[] variables = solver.getVars();
+        StringBuilder sb = new StringBuilder();
+        for (int c = 0; c < variables.length; c++) {
+            boolean insV = variables[c].instantiated();
+            if (!insV) {
+                sb.append("FAILURE >> ").append(variables[c].toString()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
     public static String onUnsatisfiedConstraints(Solver solver) {
         Constraint[] constraints = solver.getCstrs();
         StringBuilder sb = new StringBuilder();
@@ -75,9 +88,12 @@ public enum Reporting {
     public static String fullReport(Solver solver) {
         StringBuilder sb = new StringBuilder("\n");
         sb.append(StringUtils.pad("", 50, "#")).append("\n");
+        sb.append(onUninstiatedVariables(solver)).append("\n");
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
         sb.append(onUnsatisfiedConstraints(solver)).append("\n");
         sb.append(StringUtils.pad("", 50, "=")).append("\n");
         sb.append(onDecisions(solver)).append("\n");
+        sb.append(solver.getMeasures().toOneShortLineString());
         sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }

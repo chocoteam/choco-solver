@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -40,10 +40,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -86,15 +85,15 @@ public class PropPosInTour extends Propagator {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(intVars[idxVarInProp].instantiated()){
-			enfVarPos(idxVarInProp,intVars[idxVarInProp].getValue());
-		}
+	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		if((mask & EventType.INCLOW.mask)!=0){
 			upLB(idxVarInProp,intVars[idxVarInProp].getLB());
 		}
 		if((mask & EventType.DECUPP.mask)!=0){
 			upUB(idxVarInProp,intVars[idxVarInProp].getUB());
+		}
+		if(intVars[idxVarInProp].instantiated()){
+			enfVarPos(idxVarInProp,intVars[idxVarInProp].getValue());
 		}
 	}
 
@@ -119,7 +118,7 @@ public class PropPosInTour extends Propagator {
 				enfVarPos(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(!intVars[p].contains(val-1)){
 					g.removeArc(p,var,this);
@@ -132,7 +131,7 @@ public class PropPosInTour extends Propagator {
 				enfVarPos(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(!intVars[s].contains(val+1)){
 					g.removeArc(var,s,this);
@@ -148,7 +147,7 @@ public class PropPosInTour extends Propagator {
 				upUB(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getLB()>val-1){
 					g.removeArc(p,var,this);
@@ -161,7 +160,7 @@ public class PropPosInTour extends Propagator {
 				upUB(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getLB()>val+1){
 					g.removeArc(var,s,this);
@@ -176,7 +175,7 @@ public class PropPosInTour extends Propagator {
 				upLB(p,val-1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getUB()<val-1){
 					g.removeArc(p,var,this);
@@ -189,7 +188,7 @@ public class PropPosInTour extends Propagator {
 				upLB(s,val+1);
 			}
 		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getUB()<val+1){
 					g.removeArc(var,s,this);

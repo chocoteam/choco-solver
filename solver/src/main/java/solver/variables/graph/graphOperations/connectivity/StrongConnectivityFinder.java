@@ -27,16 +27,15 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.IDirectedGraph;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
 public class StrongConnectivityFinder {
 
 	// input
-	private IDirectedGraph graph;
+	private DirectedGraph graph;
 	private BitSet restriction;
 	private int n;
 	// output
@@ -44,11 +43,11 @@ public class StrongConnectivityFinder {
 	private int nbSCC;
 
 	// util
-	INeighbors[] successors;
+	ISet[] successors;
 	int[] stack,p,inf,nodeOfDfsNum,dfsNumOfNode;
 	BitSet inStack;
 
-	public StrongConnectivityFinder(IDirectedGraph graph){
+	public StrongConnectivityFinder(DirectedGraph graph){
 		this.graph = graph;
 		this.n = graph.getNbNodes();
 		//
@@ -58,7 +57,7 @@ public class StrongConnectivityFinder {
 		nodeOfDfsNum = new int[n];
 		dfsNumOfNode = new int[n];
 		inStack = new BitSet(n);
-		successors = new INeighbors[n];
+		successors = new ISet[n];
 		restriction = new BitSet(n);
 		sccFirstNode = new int[n];
 		nextNode = new int[n];
@@ -67,9 +66,9 @@ public class StrongConnectivityFinder {
 	}
 
 	public void findAllSCC(){
-		IActiveNodes nodes = graph.getActiveNodes();
+		ISet nodes = graph.getActiveNodes();
 		for(int i=0;i<n;i++){
-			restriction.set(i,nodes.isActive(i));
+			restriction.set(i,nodes.contain(i));
 		}
 		findAllSCCOf(restriction);
 	}
@@ -94,9 +93,9 @@ public class StrongConnectivityFinder {
 	}
 
 	private void findSingletons(BitSet restriction){
-		IActiveNodes nodes = graph.getActiveNodes();
+		ISet nodes = graph.getActiveNodes();
 		for(int i=restriction.nextSetBit(0);i>=0;i=restriction.nextSetBit(i+1)){
-			if(nodes.isActive(i) && graph.getPredecessorsOf(i).neighborhoodSize()*graph.getSuccessorsOf(i).neighborhoodSize()==0){
+			if(nodes.contain(i) && graph.getPredecessorsOf(i).getSize()*graph.getSuccessorsOf(i).getSize()==0){
 				nodeSCC[i] = nbSCC;
 				sccFirstNode[nbSCC++] = i;
 				restriction.clear(i);

@@ -27,8 +27,10 @@
 package solver.variables.view;
 
 import solver.Solver;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
+import solver.variables.Variable;
 
 /**
  * Factory to build views.
@@ -79,6 +81,14 @@ public enum Views {
     }
 
     public static IntVar eq(IntVar ivar) {
+        if ((ivar.getTypeAndKind() & Variable.BOOL) != 0) {
+            return eqbool((BoolVar) ivar);
+        } else {
+            return eqint(ivar);
+        }
+    }
+
+    private static IntVar eqint(IntVar ivar) {
         IView[] views = ivar.getViews();
         for (int i = 0; i < views.length; i++) {
             if (views[i] instanceof OffsetView) {
@@ -89,6 +99,33 @@ public enum Views {
             }
         }
         return new OffsetView(ivar, 0, ivar.getSolver());
+    }
+
+
+    private static BoolVar eqbool(BoolVar boolVar) {
+        IView[] views = boolVar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof BoolEqView) {
+                BoolEqView ov = (BoolEqView) views[i];
+                if (boolVar == ov.getVariable() && ov.cste == 0) {
+                    return ov;
+                }
+            }
+        }
+        return new BoolEqView(boolVar, boolVar.getSolver());
+    }
+
+    public static BoolVar not(BoolVar boolVar) {
+        IView[] views = boolVar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof BoolEqView) {
+                BoolNotView ov = (BoolNotView) views[i];
+                if (boolVar == ov.getVariable()) {
+                    return ov;
+                }
+            }
+        }
+        return new BoolNotView(boolVar, boolVar.getSolver());
     }
 
     public static IntVar minus(IntVar ivar) {

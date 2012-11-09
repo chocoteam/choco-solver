@@ -27,8 +27,8 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.IDirectedGraph;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.setDataStructures.ISet;
 
 /**Class enabling to compute LCA queries in constant time over the DFS tree of a given graph
  * use a O(n+m) time preprocessing
@@ -43,7 +43,7 @@ public class LCAGraphManager {
 
 	//
 	private int root;
-	private IDirectedGraph graph;
+	private DirectedGraph graph;
 	private int nbNodes,nbActives;
 	//
 	private int[] father;
@@ -51,7 +51,7 @@ public class LCAGraphManager {
 	private int[] dfsNumberOfNode;
 	//
 	private int[] I,L,h,A,htmp;
-	INeighbors[] successors;
+	ISet[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -59,7 +59,7 @@ public class LCAGraphManager {
 
 	public LCAGraphManager(int nb){
 		nbNodes = nb;
-		successors = new INeighbors[nbNodes];
+		successors = new ISet[nbNodes];
 		father = new int[nbNodes];
 		nodeOfDfsNumber = new int[nbNodes];
 		dfsNumberOfNode = new int[nbNodes];
@@ -70,7 +70,7 @@ public class LCAGraphManager {
 		h = new int[nbNodes];
 	}
 
-	public void preprocess(int r, IDirectedGraph g){
+	public void preprocess(int r, DirectedGraph g){
 		root = r;
 		graph = g;
 		initParams();
@@ -91,7 +91,7 @@ public class LCAGraphManager {
 	//***********************************************************************************
 
 	private void initParams(){
-		nbActives = graph.getActiveNodes().neighborhoodSize();
+		nbActives = graph.getActiveNodes().getSize();
 		for (int i=0; i<nbNodes; i++){
 			successors[i] = graph.getSuccessorsOf(i);
 			dfsNumberOfNode[i]=-1;
@@ -161,7 +161,7 @@ public class LCAGraphManager {
 	private void performLCAPreprocessing() {
 		// step 1 : DFS already done
 		// step 2
-		INeighbors nei;
+		ISet nei;
 		for (int i=nbActives-1; i>=0; i--){
 			h[i] = BitOperations.getFirstExp(i+1);
 			if (h[i]==-1){throw new UnsupportedOperationException();}

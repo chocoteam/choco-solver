@@ -96,6 +96,8 @@ public interface ISearchMonitor extends Serializable{
 
     void afterRestart();
 
+    void afterInterrupt();
+
     void beforeClose();
 
     void afterClose();

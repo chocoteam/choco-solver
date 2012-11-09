@@ -27,6 +27,7 @@
 package solver.recorders.coarse;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -51,7 +52,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
     public void update(EventType e) {
         if ((e.mask & propagators[PINDEX].getPropagationConditions()) != 0) {
-            if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+            if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             // 1. store information concerning event
             if (!enqueued) {
                 // 2. schedule this
@@ -79,7 +80,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
         }
         assert evtmask >0;
         if (evtmask > 0) {
-            if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+            if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
             propagators[PINDEX].coarseERcalls++;
             int _evt = evtmask;
             evtmask = 0;

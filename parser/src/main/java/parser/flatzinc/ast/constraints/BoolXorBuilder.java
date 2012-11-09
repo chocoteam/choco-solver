@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
+ * (a &#8800; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme

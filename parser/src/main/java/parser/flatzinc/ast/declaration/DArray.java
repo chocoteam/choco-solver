@@ -27,6 +27,8 @@
 
 package parser.flatzinc.ast.declaration;
 
+import java.util.List;
+
 /*
 * User : CPRUDHOM
 * Mail : cprudhom(a)emn.fr
@@ -37,17 +39,21 @@ package parser.flatzinc.ast.declaration;
 */
 public final class DArray extends Declaration {
 
-    final Declaration index;
+    final List<Declaration> indices;
     final Declaration what;
 
-    public DArray(Declaration index, Declaration what) {
+    public DArray(List<Declaration> indices, Declaration what) {
         super(what.isVar, DType.ARRAY);
-        this.index = index;
+        this.indices = indices;
         this.what = what;
     }
 
-    public Declaration getIndex() {
-        return index;
+    public int getDimension() {
+        return indices.size();
+    }
+
+    public Declaration getIndex(int i) {
+        return indices.get(i);
     }
 
     public Declaration getWhat() {
@@ -56,6 +62,6 @@ public final class DArray extends Declaration {
 
     @Override
     public String toString() {
-        return "array ["+index.toString()+"] of "+what.toString();
+        return "array [" + indices.toString() + "] of " + what.toString();
     }
 }

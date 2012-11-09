@@ -29,12 +29,12 @@ package solver.recorder;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.graph.GraphGenerator;
+import samples.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
@@ -77,7 +77,7 @@ public class HamiltonianPathTest {
 		Solver solver = new Solver();
 		int n = matrix.length;
 		// build model
-		DirectedGraphVar graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+		DirectedGraphVar graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST,false);
 		try{
 			graph.getKernelGraph().activateNode(n-1);
 			for(int i=0; i<n-1; i++){
@@ -92,8 +92,16 @@ public class HamiltonianPathTest {
 			e.printStackTrace();System.exit(0);
 		}
 		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addPropagators(new PropOnePredBut(graph,0,gc,solver));
+		int[] succs = new int[n];
+		int[] preds = new int[n];
+		for(int i=0;i<n;i++){
+			succs[i] = preds[i] = 1;
+		}
+		succs[n-1] = preds[0] = 0;
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
 		gc.addPropagators(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		solver.post(gc);
 		
@@ -145,7 +153,7 @@ public class HamiltonianPathTest {
 			if(y==-1){
 				if(x!=n-1 || nb!=n){
 					for(int i=0;i<n;i++){
-						if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+						if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()>1){
 							this.from = i;
 							this.to = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
 							return true;

@@ -48,18 +48,22 @@ public class InDomainMiddle implements InValueIterator {
      */
     @Override
     public int selectValue(IntVar var) {
-        int low = var.getLB();
-        int upp = var.getUB();
-        int mean = (low + upp) / 2;
-        if (!var.contains(mean)) {
-            int lb = var.previousValue(mean);
-            int ub = var.previousValue(mean);
-            if ((mean - lb) < (ub - mean)) {
-                return lb;
-            } else {
-                return ub;
+        if (var.hasEnumeratedDomain()) {
+            int low = var.getLB();
+            int upp = var.getUB();
+            int mean = (low + upp) / 2;
+            if (!var.contains(mean)) {
+                int lb = var.previousValue(mean);
+                int ub = var.previousValue(mean);
+                if ((mean - lb) < (ub - mean)) {
+                    return lb;
+                } else {
+                    return ub;
+                }
             }
+            return mean;
+        } else {
+            return var.getLB();
         }
-        return mean;
     }
 }

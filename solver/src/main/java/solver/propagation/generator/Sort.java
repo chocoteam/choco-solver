@@ -26,9 +26,9 @@
  */
 package solver.propagation.generator;
 
+import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.recorders.IEventRecorder;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -160,7 +160,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
             toPropagate.clear(i);
             lastPopped = elements[i];
-            if (IEventRecorder.LAZY) {
+            if (Configuration.LAZY_UPDATE) {
                 lastPopped.flush();
             }
             lastPopped.deque();

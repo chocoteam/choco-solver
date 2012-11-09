@@ -26,11 +26,11 @@
  */
 package solver.propagation.generator;
 
+import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.AQueue;
 import solver.propagation.queues.CircularQueue;
-import solver.recorders.IEventRecorder;
 
 
 /**
@@ -146,7 +146,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         }
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pollFirst();//.pop();
-            if (IEventRecorder.LAZY) {
+            if (Configuration.LAZY_UPDATE) {
                 lastPopped.flush();
             }
             lastPopped.deque();

@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.propagators;
@@ -43,9 +43,10 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.view.Views;
 
 import java.io.Serializable;
 
@@ -82,7 +83,7 @@ import java.io.Serializable;
  * @see solver.constraints.Constraint
  * @since 0.01
  */
-public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity {
+public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
     private static final long serialVersionUID = 2L;
 
@@ -96,7 +97,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
-    protected int[] vindices;
+    protected int[] vindices;  // index of this within the list of propagator of the i^th variable
+
+    protected Operation[] operations;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -129,16 +132,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     private static TIntSet set = new TIntHashSet();
 
+    protected Propagator aCause; // cause of variable modifications.
+    // The default value is 'this" but it can be overridden when using in reified propagator
+
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private static <V extends Variable> void checkVariable(V[] vars) {
         set.clear();
-        for (V v : vars) {
+        for (int i = 0; i < vars.length; i++) {
+            Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
-                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                            "This is forbidden; you must consider using a View or a EQ constraint.");
+                    if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                        vars[i] = (V) Views.eq((IntVar) v);
+                    } else {
+                        throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                "This is forbidden; you must consider using a View or a EQ constraint.");
+                    }
                 }
-                set.add(v.getId());
+                set.add(vars[i].getId());
             }
         }
     }
@@ -155,6 +166,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
+        this.aCause = this;
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
             vars[v].recordMask(getPropagationConditions(v));
@@ -164,6 +176,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         fails = 0;
         ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
     }
 
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
@@ -177,6 +203,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public Solver getSolver() {
         return solver;
+    }
+
+    /**
+     * Overrides the default cause of this.
+     * This is commonly used when this is declared
+     *
+     * @param nCause the new cause.
+     */
+    public void overrideCause(Propagator nCause) {
+        this.aCause = nCause;
     }
 
     /**
@@ -215,13 +251,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param eventRecorder a fine event recorder
-     * @param idxVarInProp  index of the variable <code>var</code> in <code>this</code>
-     * @param mask          type of event
+     * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
+     * @param mask         type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
-    public abstract void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException;
+    public abstract void propagate(int idxVarInProp, int mask) throws ContradictionException;
 
     /**
      * Add the coarse event recorder into the engine
@@ -236,26 +271,22 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        environment.save(new Operation(){
-            @Override
-            public void undo() {
-                state = NEW;
-            }
-        });
-        solver.getEngine().activatePropagator(this);
+        environment.save(operations[NEW]);
+        // to handle properly reified constraint, the cause must be checked
+        if (aCause == this) {
+            solver.getEngine().activatePropagator(this);
+        }
     }
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
-        environment.save(new Operation(){
-            @Override
-            public void undo() {
-                state = ACTIVE;
-            }
-        });
-        solver.getEngine().desactivatePropagator(this);
+        environment.save(operations[ACTIVE]);
+        // to handle properly reified constraint, the cause must be checked
+        if (aCause == this) {
+            solver.getEngine().desactivatePropagator(this);
+        }
     }
 
     public boolean isStateLess() {
@@ -292,8 +323,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars;
     }
 
+    /**
+     * index of the propagator within its variables
+     *
+     * @return
+     */
     public int[] getVIndices() {
         return vindices;
+    }
+
+    public void setVIndices(int idx, int val) {
+        vindices[idx] = val;
+    }
+
+    public void unlink() {
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].unlink(this, vindices[v]);
+            vindices[v] = -1;
+        }
     }
 
     /**
@@ -329,10 +376,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param d : a <code>Deduction</code> to explain
      * @return a set of constraints and past decisions
      */
-
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
             expl.add(v.explain(VariableState.DOM));
@@ -342,7 +388,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return expl;
     }
 
-    protected boolean isCompletelyInstantiated() {
+    public boolean isCompletelyInstantiated() {
         for (int i = 0; i < vars.length; i++) {
             if (!vars[i].instantiated()) {
                 return false;
@@ -396,6 +442,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws ContradictionException expected behavior
      */
     public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(this, variable, message);
+        solver.getEngine().fails(aCause, variable, message);
+    }
+
+    @Override
+    public int compareTo(Propagator o) {
+        return this.ID - o.ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
     }
 }

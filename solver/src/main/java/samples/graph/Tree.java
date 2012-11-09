@@ -28,6 +28,8 @@
 package samples.graph;
 
 import samples.AbstractProblem;
+import samples.graph.input.DataGenerator;
+import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -37,10 +39,13 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
-import java.io.FileWriter;
 import java.util.BitSet;
 
+/**Partitions a graph into anti-arborescences
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class Tree extends AbstractProblem{
 
 	//***********************************************************************************
@@ -80,7 +85,7 @@ public class Tree extends AbstractProblem{
 
     @Override
 	public void buildModel() {
-		g = new DirectedGraphVar(solver,n,gtype,GraphType.LINKED_LIST);
+		g = new DirectedGraphVar(solver,n,gtype,GraphType.LINKED_LIST,false);
 		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);
 		try{
 		for(int i=0; i<n; i++){
@@ -109,8 +114,8 @@ public class Tree extends AbstractProblem{
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, false, false);
 		sat = solver.findSolution();
-		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
-				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+sat+";\n", file);
+		TextWriter.writeTextInto(n + ";" + d + ";" + solver.getMeasures().getNodeCount() + ";" +
+				solver.getMeasures().getBackTrackCount() + ";" + solver.getMeasures().getTimeCount() + ";" + sat + ";\n", file);
 		if(solver.getMeasures().getFailCount()>0){
 			throw new UnsupportedOperationException("error gac");
 		}
@@ -145,8 +150,8 @@ public class Tree extends AbstractProblem{
 	
 	private static void testN(){
 		file = "tree_"+(TIMELIMIT/1000)+"sec_"+gtype+".csv";
-		clearFile(file);
-		writeTextInto("n;d;nodes;bks;time;solved;\n", file);
+		TextWriter.clearFile(file);
+		TextWriter.writeTextInto("n;d;nodes;bks;time;solved;\n", file);
 		int i = 0;
 //		int[] ns = new int[]{10,50,100,150,300,450,600,800,2000,3000,4000,5000};
 //		int[] ds = new int[]{5,20,50,5000};
@@ -187,32 +192,6 @@ public class Tree extends AbstractProblem{
 			}else{
 				break;
 			}
-		}
-	}
-	
-	//***********************************************************************************
-	// RECORDING RESULTS
-	//***********************************************************************************
-
-	private static void writeTextInto(String text, String file) {
-		try{
-			FileWriter out  = new FileWriter(file,true);
-			out.write(text);
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-
-	private static void clearFile(String file) {
-		try{
-			FileWriter out  = new FileWriter(file,false);
-			out.write("");
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
 		}
 	}
 }

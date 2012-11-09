@@ -1,44 +1,43 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.explanations;
 
 import choco.kernel.common.util.iterators.DisposableValueIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.queues.CircularQueue;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,56 +51,69 @@ import java.util.Set;
  */
 public class RecorderExplanationEngine extends ExplanationEngine {
 
-    HashMap<Variable, OffsetIStateBitset> removedvalues; // maintien du domaine courant
-    HashMap<IntVar, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
-    HashMap<Deduction, Explanation> database; // base d'explications
+    TIntObjectHashMap<OffsetIStateBitset> removedvalues; // maintien du domaine courant
+    TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
+    TIntObjectHashMap<Explanation> database; // base d'explications
 
-    HashMap<Variable, HashMap<Integer, VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
-    HashMap<Variable, HashMap<Integer, VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
+    TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
+    TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
 
+    protected TIntHashSet expanded = new TIntHashSet();
+    protected TIntHashSet toexpand = new TIntHashSet();
+    protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
+
+    protected ConflictBasedBackjumping cbj;
+    protected DynamicBacktracking dbt;
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
-        removedvalues = new HashMap<Variable, OffsetIStateBitset>();
-        valueremovals = new HashMap<IntVar, HashMap<Integer, ValueRemoval>>();
-        database = new HashMap<Deduction, Explanation>();
-        variableassignments = new HashMap<Variable, HashMap<Integer, VariableAssignment>>();
-        variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
+        assert Configuration.PLUG_EXPLANATION : "Explanation is not activated (see Configuration.java)";
+        removedvalues = new TIntObjectHashMap<OffsetIStateBitset>();
+        valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
+        database = new TIntObjectHashMap<Explanation>();
+        variableassignments = new TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>>();
+        variablerefutations = new TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>>();
+
+        cbj = new ConflictBasedBackjumping(this);
+//        dbt = new DynamicBacktracking(this);
     }
 
     @Override
     public void beforeInitialPropagation() {
-        for(Variable v : solver.getVars()) {
+        for (Variable v : solver.getVars()) {
             getRemovedValues((IntVar) v);
         }
     }
 
     @Override
     public OffsetIStateBitset getRemovedValues(IntVar v) {
-        OffsetIStateBitset toreturn = removedvalues.get(v);
+        int vid = v.getId();
+        OffsetIStateBitset toreturn = removedvalues.get(vid);
         if (toreturn == null) {
             toreturn = new OffsetIStateBitset(v); // .getSolver().getEnvironment().makeBitSet(v.getUB());
-            removedvalues.put(v, toreturn);
-            valueremovals.put(v, new HashMap<Integer, ValueRemoval>());
+            removedvalues.put(vid, toreturn);
+            valueremovals.put(vid, new TIntObjectHashMap<ValueRemoval>());
         }
         return toreturn;
     }
 
     @Override
     public Explanation retrieve(IntVar var, int val) {
-        return database.get(getValueRemoval(var, val));
+        return database.get(getValueRemoval(var, val).id);
     }
 
     protected ValueRemoval getValueRemoval(IntVar var, int val) {
+        int vid = var.getId();
         ValueRemoval vr;
-        HashMap<Integer, ValueRemoval> hm = valueremovals.get(var);
+        TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
         if (hm == null) {
-            valueremovals.put(var, new HashMap<Integer, ValueRemoval>());
+            hm = new TIntObjectHashMap<ValueRemoval>();
+            valueremovals.put(vid, hm);
         }
-        vr = valueremovals.get(var).get(val);
+        vr = hm.get(val);
         if (vr == null) {
             vr = new ValueRemoval(var, val);
-            valueremovals.get(var).put(val, vr);
+            valueremovals.get(vid).put(val, vr);
         }
         return vr;
     }
@@ -110,7 +122,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public int getWorldIndex(Variable var, int val) {
         int wi = solver.getEnvironment().getWorldIndex();
         Decision dec = solver.getSearchLoop().decision;
-        while (! dec.getPositiveDeduction().getVar().equals(var)) {
+        while (!dec.getPositiveDeduction().getVar().equals(var)) {
             dec = dec.getPrevious();
             wi--;
         }
@@ -123,76 +135,86 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public VariableAssignment getVariableAssignment(IntVar var, int val) {
-        HashMap mapvar = variableassignments.get(var);
+        int vid = var.getId();
+        TIntObjectHashMap<VariableAssignment> mapvar = variableassignments.get(vid);
         if (mapvar == null) {
-            variableassignments.put(var, new HashMap<Integer, VariableAssignment>());
-            variableassignments.get(var).put(val, new VariableAssignment(var, val));
+            mapvar = new TIntObjectHashMap<VariableAssignment>();
+            variableassignments.put(vid, mapvar);
+            mapvar.put(val, new VariableAssignment(var, val));
         }
-        VariableAssignment vr = variableassignments.get(var).get(val);
+        VariableAssignment vr = mapvar.get(val);
         if (vr == null) {
             vr = new VariableAssignment(var, val);
-            variableassignments.get(var).put(val, vr);
+            variableassignments.get(vid).put(val, vr);
         }
         return vr;
     }
 
     @Override
-    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
-        HashMap mapvar = variablerefutations.get(var);
+    public VariableRefutation getVariableRefutation(IntVar var, int val) {
+        int vid = var.getId();
+        TIntObjectHashMap<VariableRefutation> mapvar = variablerefutations.get(vid);
         if (mapvar == null) {
-            variablerefutations.put(var, new HashMap<Integer, VariableRefutation>());
-            variablerefutations.get(var).put(val, new VariableRefutation(var, val, dec));
+            mapvar = new TIntObjectHashMap<VariableRefutation>();
+            variablerefutations.put(vid, mapvar);
+            mapvar.put(val, new VariableRefutation(var, val));
         }
-        VariableRefutation vr = variablerefutations.get(var).get(val);
+        VariableRefutation vr = mapvar.get(val);
         if (vr == null) {
-            vr = new VariableRefutation(var, val, dec);
-            variablerefutations.get(var).put(val, vr);
+            vr = new VariableRefutation(var, val);
+            variablerefutations.get(vid).put(val, vr);
         }
-        vr.decision = dec;
         return vr;
     }
 
 
     @Override
     public void removeValue(IntVar var, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        // 1. get the deduction
         Deduction vr = getValueRemoval(var, val);
+        // 2. explain the deduction
         Explanation expl = cause.explain(vr);
-        database.put(vr, expl);
+        // 3. store it within the database
+        database.put(vr.id, expl);
+
+        // 4. store the removed value withing the inverse domain
+        OffsetIStateBitset invdom = getRemovedValues(var);
         invdom.set(val);
-        emList.onRemoveValue(var, val, cause, expl);
+
+        // 5. explanations monitoring
+//        emList.onRemoveValue(var, val, cause, expl);
     }
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
-        Explanation explanation = new Explanation();
+//        Explanation explanation = new Explanation();
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
-            Deduction vr = getValueRemoval(var, v);
-            Explanation expl = cause.explain(vr);
-            if (! invdom.get(v)) {
-                database.put(vr, expl);
+            if (!invdom.get(v)) {
+                Deduction vr = getValueRemoval(var, v);
+                Explanation expl = cause.explain(vr);
+                database.put(vr.id, expl);
                 invdom.set(v);
-                explanation.add(expl);
+//                explanation.add(expl);
             }
         }
-        emList.onUpdateLowerBound(var, old, val, cause, explanation);
+//        emList.onUpdateLowerBound(var, old, val, cause, explanation);
     }
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
-        Explanation explanation = new Explanation();
+//        Explanation explanation = new Explanation();
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
-            Deduction vr = getValueRemoval(var, v);
-            Explanation explain = cause.explain(vr);
-            if ( ! invdom.get(v)) {
-                database.put(vr, explain);
+            if (!invdom.get(v)) {
+                Deduction vr = getValueRemoval(var, v);
+                Explanation explain = cause.explain(vr);
+                database.put(vr.id, explain);
                 invdom.set(v);
-                explanation.add(explain);
+//                explanation.add(explain);
             }
         }
-        emList.onUpdateUpperBound(var, old, val, cause, explanation);
+//        emList.onUpdateUpperBound(var, old, val, cause, explanation);
     }
 
 
@@ -200,52 +222,59 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public void instantiateTo(IntVar var, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
-        Explanation explanation = new Explanation();
+//        Explanation explanation = new Explanation();
         while (it.hasNext()) {
             int v = it.next();
-            if ( v != val ) {
-                Deduction vr = getValueRemoval(var,v);
+            if (v != val) {
+                Deduction vr = getValueRemoval(var, v);
                 Explanation explain = cause.explain(vr);
-                database.put(vr, explain);
+                database.put(vr.id, explain);
                 invdom.set(v);
-                explanation.add(explain);
+//                explanation.add(explain);
             }
         }
-        emList.onInstantiateTo(var, val, cause, explanation);
+//        emList.onInstantiateTo(var, val, cause, explanation);
     }
 
     @Override
     public Explanation flatten(Explanation expl) {
-        Explanation toreturn = new Explanation(null, null);
+        Explanation toreturn = Explanation.build();
 
-        Set<Deduction> toexpand = new HashSet<Deduction>();
-        Set<Deduction> expanded = new HashSet<Deduction>();
 
-        if (expl.deductions != null) {
-            toexpand = new HashSet<Deduction>(expl.deductions); //
+        expanded.clear();
+        toexpand.clear();
+        pending.clear();
+
+        Deduction ded;
+        int nbd = expl.nbDeductions();
+        for (int i = 0; i < nbd; i++) {
+            ded = expl.getDeduction(i);
+            pending.addLast(ded);
+            toexpand.add(ded.id);
         }
-        while (!toexpand.isEmpty()) {
-            Deduction d = toexpand.iterator().next();
-            toexpand.remove(d);
-            expanded.add(d);
-            Explanation e = database.get(d);
+
+
+        while (!pending.isEmpty()) {
+            ded = pending.pollFirst();
+            toexpand.remove(ded.id);
+            expanded.add(ded.id);
+
+            Explanation e = database.get(ded.id);
 
             if (e != null) {
-                if (e.contraintes != null) {
-                    for (Propagator prop : e.contraintes) {
-                        toreturn.add(prop);
-                    }
+                int nbp = e.nbPropagators();
+                for (int i = 0; i < nbp; i++) {
+                    toreturn.add(e.getPropagator(i));
                 }
-                if (e.deductions != null) {
-
-                    for (Deduction ded : e.deductions) {
-                        if (!expanded.contains(ded)) {
-                            toexpand.add(ded);
-                        }
+                nbd = e.nbDeductions();
+                for (int i = 0; i < nbd; i++) {
+                    ded = e.getDeduction(i);
+                    if (!expanded.contains(ded.id) && toexpand.add(ded.id)) {
+                        pending.addLast(ded);
                     }
                 }
             } else {
-                toreturn.add(d);
+                toreturn.add(ded);
             }
         }
         return toreturn;
@@ -259,7 +288,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public Explanation flatten(Deduction deduction) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         expl.add(deduction);
         return flatten(expl);
     }
@@ -272,43 +301,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     @Override
     public Deduction explain(Deduction deduction) {
         return deduction;
-    }
-
-
-    private Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
-        Decision dec = solver.getSearchLoop().decision; // the current decision to undo
-        while (dec != null && nworld > 1) {
-            dec = dec.getPrevious();
-            nworld--;
-        }
-        if (dec != null) {
-            if (! dec.hasNext())  throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if  (assign instanceof  VariableAssignment) {
-                VariableAssignment va = (VariableAssignment) assign;
-                variableassignments.get(va.var).remove(va.val);
-            }
-            database.put(vr, flatten(expl));
-        }
-        return dec;
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
-            Solver solver = (cex.v != null) ? cex.v.getSolver() : cex.c.getConstraint().getVariables()[0].getSolver();
-            Explanation complete = flatten(expl);
-            int upto = complete.getMostRecentWorldToBacktrack(this);
-            solver.getSearchLoop().overridePreviousWorld(upto);
-            Decision dec = updateVRExplainUponbacktracking(upto, complete);
-            emList.onContradiction(cex, complete, upto, dec);
-        } else {
-            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherent state");
-        }
     }
 
     @Override
@@ -344,33 +336,11 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         if (LOGGER.isInfoEnabled()) {
             if (cex.v != null) {
                 LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-            }
-            else if (cex.c != null) {
+            } else if (cex.c != null) {
                 LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
             }
-            LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
+            LOGGER.info("::EXPL:: BACKTRACK on " + decision + " (up to " + upTo + " level(s))");
         }
     }
-
-    @Override
-    public void onSolution() {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = solver.getSearchLoop().decision;
-        while ((dec != null) && (! dec.hasNext())) {
-            dec = dec.getPrevious();
-        }
-        if (dec != null) {
-            Explanation explanation = new Explanation();
-            Decision d = dec.getPrevious();
-            while ( (d != null) ) {
-                if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
-                }
-                d = d.getPrevious();
-            }
-            database.put(dec.getNegativeDeduction(), explanation);
-        }
-    }
-
 
 }

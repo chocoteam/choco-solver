@@ -1,34 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
-import gnu.trove.list.array.TIntArrayList;
+import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -86,13 +87,11 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         List<Propagator> _propagators = new ArrayList();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
-        TIntArrayList nbVars = new TIntArrayList();
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
             for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
-                nbVars.add(cprops[j].getNbVars());
                 int id = cprops[j].getId();
                 m = Math.min(m, id);
                 M = Math.max(M, id);
@@ -100,7 +99,6 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
         p2i = new AId2AbId(m, M, -1);
-//        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
@@ -113,7 +111,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         schedule_in_c = new short[nbProp];
         masks_f = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
-            masks_f[i] = new int[nbVars.get(i)];
+            masks_f[i] = new int[propagators[i].getNbVars()];
         }
         masks_c = new int[nbProp];
         notEmpty = new BitSet(15);
@@ -139,37 +137,41 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
-        int mask, pid, aid;
+        int mask, aid;
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             if (i < O) { // fine grained
                 while (!pro_queue[i].isEmpty()) {
                     lastProp = pro_queue[i].pollFirst();
                     assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     // revision of the variable
-                    pid = lastProp.getId();
-                    aid = p2i.get(pid);
+                    aid = p2i.get(lastProp.getId());
                     schedule_in_f[aid] = 0;
                     int nbVars = lastProp.getNbVars();
                     for (int v = 0; v < nbVars; v++) {
                         mask = masks_f[aid][v];
                         if (mask > 0) {
+                            if (Configuration.PRINT_PROPAGATION) {
+                                LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
+                            }
                             masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
-                            lastProp.propagate(null, v, mask);
+                            lastProp.propagate(v, mask);
                         }
                     }
                 }
                 notEmpty.clear(i);
             } else { // coarse grained
                 lastProp = pro_queue[i].pollFirst();
-                pid = lastProp.getId();
                 // revision of the propagator
-                aid = p2i.get(pid);
+                aid = p2i.get(lastProp.getId());
                 mask = masks_c[aid];
-                schedule_in_c[aid] = 0;
                 masks_c[aid] = 0;
+                schedule_in_c[aid] = 0;
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
+                }
+                if (Configuration.PRINT_PROPAGATION) {
+                    LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
                 lastProp.coarseERcalls++;
                 lastProp.propagate(mask);
@@ -188,6 +190,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
             schedule_in_f[aid] = 0;
+            masks_c[aid] = 0;
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
@@ -202,20 +205,24 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                     schedule_in_c[aid] = 0;
                 }
             }
-            notEmpty.clear();
+            notEmpty.clear(i);
         }
     }
 
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        if (Configuration.PRINT_VAR_EVENT) {
+            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+        }
         Propagator[] vProps = variable.getPropagators();
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                int pid = prop.getId();
+                if (Configuration.PRINT_PROPAGATION)
+                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
-                    int aid = p2i.get(pid);
+                    int aid = p2i.get(prop.getId());
                     masks_f[aid][pindices[p]] |= type.strengthened_mask;
                     if (schedule_in_f[aid] == 0) {
                         int prio = prop.dynPriority();
@@ -256,6 +263,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
+//        if (aid > -1) {
+        assert aid > -1 : "try to desactivate an unknown constraint";
         Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
         int prio = schedule_in_f[aid];
         if (prio > 0) { // if in the queue...
@@ -268,6 +277,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
             schedule_in_c[aid] = 0;
             pro_queue[O + prio - 1].remove(propagator); // removed from the queue
         }
+//        }
     }
 
     @Override

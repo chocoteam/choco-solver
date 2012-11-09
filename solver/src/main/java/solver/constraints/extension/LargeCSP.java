@@ -29,10 +29,7 @@ package solver.constraints.extension;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.extension.nary.IterTuplesTable;
-import solver.constraints.propagators.extension.nary.LargeRelation;
-import solver.constraints.propagators.extension.nary.PropLargeCSP;
-import solver.constraints.propagators.extension.nary.PropLargeGAC3rmPositive;
+import solver.constraints.propagators.extension.nary.*;
 import solver.variables.IntVar;
 
 /**
@@ -44,7 +41,7 @@ import solver.variables.IntVar;
 public class LargeCSP extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC32, FC
+        AC32, AC2001, FC
     }
 
     protected final LargeRelation relation;
@@ -55,6 +52,9 @@ public class LargeCSP extends IntConstraint<IntVar> {
         switch (type) {
             case FC:
                 setPropagators(new PropLargeCSP(vars, relation, solver, this));
+                break;
+            case AC2001:
+                setPropagators(new PropLargeGAC2001Positive(vars, (IterTuplesTable) relation, solver, this));
                 break;
             default:
             case AC32:

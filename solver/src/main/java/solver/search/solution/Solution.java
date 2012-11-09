@@ -89,8 +89,6 @@ public class Solution implements ICause {
                     break;
                 case Variable.GRAPH:
                     if (!vars[i].instantiated()) {
-                        System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
-                        System.out.println(((GraphVar) vars[i]).getKernelGraph());
                         throw new UnsupportedOperationException("solution graph not instantiated");
                     }
                     graphValues.add(((GraphVar) vars[i]).getValue());
