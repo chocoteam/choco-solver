@@ -230,7 +230,7 @@ public class ArcEngine implements IPropagationEngine {
             prop = vProps[p];
             if (cause != prop && prop.isActive()) {
                 paid = p2i.get(prop.getId());
-                if ((type.mask & prop.getPropagationConditions(idxVinP[vaid].get(paid))) != 0) {
+                if (prop.advise(idxVinP[vaid].get(paid), type.mask)) {
                     if (Configuration.PRINT_PROPAGATION) {
                         LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + variable.toString() + "::" + prop.toString() + " >>");
                     }

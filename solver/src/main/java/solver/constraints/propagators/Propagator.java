@@ -249,6 +249,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public abstract void propagate(int evtmask) throws ContradictionException;
 
     /**
+     * Advise a propagator of a modification occurring on one of its variables,
+     * and decide if <code>this</code> should be scheduled.
+     * At least, this method SHOULD check the propagation condition of the event received.
+     * In addition, this method can be used to update internal state of <code>this</code>.
+     * This method can returns <code>true</code> even if the propagator is already scheduled.
+     *
+     * @param idxVarInProp index of the modified variable
+     * @param mask         modification event mask
+     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
+     */
+    public boolean advise(int idxVarInProp, int mask) {
+        return (mask & getPropagationConditions(idxVarInProp)) != 0;
+    }
+
+    /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>

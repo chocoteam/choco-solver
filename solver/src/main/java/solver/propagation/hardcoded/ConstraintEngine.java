@@ -212,7 +212,7 @@ public class ConstraintEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive()) {
                 if (Configuration.PRINT_PROPAGATION)
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
-                if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
+                if (prop.advise(pindices[p], type.mask)) {
                     int aid = p2i.get(prop.getId());
                     masks_f[aid][pindices[p]] |= type.strengthened_mask;
                     if ((schedule[aid] & F) == 0) {

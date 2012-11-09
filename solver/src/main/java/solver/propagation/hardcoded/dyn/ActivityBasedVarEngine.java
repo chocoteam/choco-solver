@@ -397,7 +397,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive()) {
                 if (Configuration.PRINT_PROPAGATION)
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
-                if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
+                if (prop.advise(pindices[p], type.mask)) {
                     masks_f[aid][p] |= type.strengthened_mask;
                     _schedule = true;
                 }
