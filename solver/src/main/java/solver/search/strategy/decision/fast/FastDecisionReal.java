@@ -33,6 +33,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ExplanationEngine;
 import solver.search.strategy.decision.AbstractDecision;
+import solver.search.strategy.decision.Decision;
 import solver.variables.EventType;
 import solver.variables.RealVar;
 
@@ -65,6 +66,11 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     @Override
     public void buildNext() {
         branch++;
+    }
+
+    @Override
+    public void buildPrevious() {
+        branch--;
     }
 
     @Override
@@ -106,7 +112,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         ExplanationEngine explainer = var.getSolver().getExplainer();
         expl.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
         return expl;
@@ -122,5 +128,17 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     public Deduction getPositiveDeduction() {
 //        return var.getSolver().getExplainer().getVariableAssignment(var, value);
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Decision copy() {
+        FastDecisionReal dec = poolManager.getE();
+        if (dec == null) {
+            dec = new FastDecisionReal(poolManager);
+        }
+        dec.var = this.var;
+        dec.value = this.value;
+        dec.branch = this.branch;
+        return dec;
     }
 }
