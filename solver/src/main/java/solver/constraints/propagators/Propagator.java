@@ -113,7 +113,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected short state; // 0 : new -- 1 : active -- 2 : passive
 
-    protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
+    protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
@@ -412,18 +412,22 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    public int getNbPendingER() {
-        return nbPendingER;
+    public int getNbPendingEvt() {
+        return nbPendingEvt;
     }
 
-    public void incNbRecorderEnqued() {
-        assert (nbPendingER >= 0) : "number of enqued records is < 0";
-        nbPendingER++;
+    public void incNbPendingEvt() {
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0";
+        nbPendingEvt++;
     }
 
-    public void decNbRecrodersEnqued() {
-        assert (nbPendingER > 0) : "number of enqued records is < 0";
-        nbPendingER--;
+    public void decNbPendingEvt() {
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0";
+        nbPendingEvt--;
+    }
+
+    public void flushPendingEvt() {
+        nbPendingEvt = 0;
     }
 
     /**

@@ -150,6 +150,7 @@ public class ConstraintEngine implements IPropagationEngine {
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
+                        lastProp.decNbPendingEvt();
                         lastProp.propagate(v, mask);
                     }
                 }
@@ -183,6 +184,7 @@ public class ConstraintEngine implements IPropagationEngine {
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
             masks_c[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
@@ -190,6 +192,7 @@ public class ConstraintEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!pro_queue_c.isEmpty()) {
             lastProp = pro_queue_c.pollFirst();
@@ -218,6 +221,7 @@ public class ConstraintEngine implements IPropagationEngine {
                     if ((schedule[aid] & F) == 0) {
                         pro_queue_f.addLast(prop);
                         schedule[aid] |= F;
+                        prop.incNbPendingEvt();
                     }
                 }
             }
@@ -259,6 +263,7 @@ public class ConstraintEngine implements IPropagationEngine {
         if ((schedule[aid] & F) != 0) { // if in the queue...
             schedule[aid] ^= F;
             pro_queue_f.remove(propagator); // removed from the queue
+            propagator.flushPendingEvt();
         }
         if ((schedule[aid] & C) != 0) { // if in the queue...
             schedule[aid] ^= C;

@@ -239,6 +239,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                             }
                             masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
+                            lastProp.decNbPendingEvt();
                             lastProp.propagate(v, mask);
                         }
                     }
@@ -343,6 +344,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
             masks_c[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!prop_heap.isEmpty()) {
             lastProp = propagators[prop_heap.removemin()];
@@ -350,6 +352,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!pro_queue_c.isEmpty()) {
             lastProp = pro_queue_c.pollFirst();
@@ -384,6 +387,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                             affected.add(cid);
                             I[cid]++;
                         }
+                        lastProp.incNbPendingEvt();
                     }
                 }
             }
@@ -424,6 +428,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
             if ((schedule[aid] & F) != 0) { // if in the queue...
                 schedule[aid] ^= F;
                 prop_heap.remove(aid); // removed from the queue
+                lastProp.flushPendingEvt();
             }
             if ((schedule[aid] & C) != 0) { // if in the queue...
                 schedule[aid] ^= C;

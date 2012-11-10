@@ -87,9 +87,6 @@ public class PropLexChain extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-//        if (getNbPendingER() == 0) {
-//            filter();
-//        }
         forcePropagate(EventType.FULL_PROPAGATION);
     }
 

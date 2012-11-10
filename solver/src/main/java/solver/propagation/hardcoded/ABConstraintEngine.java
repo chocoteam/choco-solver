@@ -162,6 +162,7 @@ public class ABConstraintEngine implements IPropagationEngine {
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
+                        lastProp.decNbPendingEvt();
                         lastProp.propagate(v, mask);
                     }
                 }
@@ -197,6 +198,7 @@ public class ABConstraintEngine implements IPropagationEngine {
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
             masks_c[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!pro_queue_f.isEmpty()) {
             lastProp = propagators[pro_queue_f.removemin()];
@@ -204,6 +206,7 @@ public class ABConstraintEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         while (!pro_queue_c.isEmpty()) {
             lastProp = propagators[pro_queue_c.removemin()];
@@ -233,6 +236,7 @@ public class ABConstraintEngine implements IPropagationEngine {
                         double _w = w[aid];
                         pro_queue_f.insert(_w, aid);
                         schedule[aid] |= F;
+                        lastProp.incNbPendingEvt();
                     }
                 }
             }
@@ -274,6 +278,7 @@ public class ABConstraintEngine implements IPropagationEngine {
         if ((schedule[aid] & F) != 0) {
             schedule[aid] ^= F;
             pro_queue_f.remove(aid);
+            lastProp.flushPendingEvt();
         }
         if ((schedule[aid] & C) != 0) {
             masks_c[aid] = 0;

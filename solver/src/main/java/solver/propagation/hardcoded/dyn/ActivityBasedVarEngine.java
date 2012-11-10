@@ -249,6 +249,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                             }
                             masks_f[aid][p] = 0;
                             lastProp.fineERcalls++;
+                            lastProp.decNbPendingEvt();
                             lastProp.propagate(idxVinP[p], mask);
                         }
                     }
@@ -371,6 +372,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
             schedule[id] = false;
             masks_c[p2i.get(id)] = 0;
         }
+        throw new UnsupportedOperationException("pending evt!");
     }
 
     public void check() {
@@ -400,6 +402,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                 if (prop.advise(pindices[p], type.mask)) {
                     masks_f[aid][p] |= type.strengthened_mask;
                     _schedule = true;
+                    throw new UnsupportedOperationException("pending evt!");
                 }
             }
         }
@@ -450,6 +453,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                 int vid = v2i.get(variables[i].getId());
                 assert vindices[i] < masks_f[vid].length;
                 masks_f[vid][vindices[i]] = 0;
+                throw new UnsupportedOperationException("pending evt!");
             }
         }
         int pid = propagator.getId();

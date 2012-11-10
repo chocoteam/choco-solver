@@ -139,9 +139,6 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
             idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
             idms[varIdx].unfreeze();
         }
-//        if (getNbPendingER() == 0) {
-//            struct.removeUselessEdges(this);
-//        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 

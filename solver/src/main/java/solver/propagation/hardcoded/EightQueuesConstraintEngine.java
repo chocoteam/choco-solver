@@ -155,6 +155,7 @@ public class EightQueuesConstraintEngine implements IPropagationEngine {
                             }
                             masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
+                            lastProp.decNbPendingEvt();
                             lastProp.propagate(v, mask);
                         }
                     }
@@ -191,6 +192,7 @@ public class EightQueuesConstraintEngine implements IPropagationEngine {
             Arrays.fill(masks_f[aid], 0);
             schedule_in_f[aid] = 0;
             masks_c[aid] = 0;
+            lastProp.flushPendingEvt();
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
@@ -200,6 +202,7 @@ public class EightQueuesConstraintEngine implements IPropagationEngine {
                 if (i < O) {
                     Arrays.fill(masks_f[aid], 0);
                     schedule_in_f[aid] = 0;
+                    lastProp.flushPendingEvt();
                 } else {
                     masks_c[aid] = 0;
                     schedule_in_c[aid] = 0;
@@ -229,6 +232,7 @@ public class EightQueuesConstraintEngine implements IPropagationEngine {
                         pro_queue[prio].addLast(prop);
                         schedule_in_f[aid] = (short) (prio + 1);
                         notEmpty.set(prio);
+                        prop.incNbPendingEvt();
                     }
                 }
             }
@@ -270,6 +274,7 @@ public class EightQueuesConstraintEngine implements IPropagationEngine {
         if (prio > 0) { // if in the queue...
             schedule_in_f[aid] = 0;
             pro_queue[prio - 1].remove(propagator); // removed from the queue
+            propagator.flushPendingEvt();
         }
         prio = schedule_in_c[aid];
         if (prio > 0) {  // if in the queue...

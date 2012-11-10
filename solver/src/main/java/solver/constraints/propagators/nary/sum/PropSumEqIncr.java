@@ -249,8 +249,6 @@ public class PropSumEqIncr extends Propagator<IntVar> {
             }
             filter(swl, nbR);
         }
-//        if (getNbPendingER() == 0) filter(true, 2);
-//        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

@@ -211,7 +211,7 @@ public class FinePropEventRecorderTest {
 
     @Test
     public void testvirtExec() throws ContradictionException {
-        p1.incNbRecorderEnqued();
+        p1.incNbPendingEvt();
         s1.remove(per);
 
         replay(iv1, iv2, iv3, cer, p1);

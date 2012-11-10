@@ -175,6 +175,7 @@ public class ArcEngine implements IPropagationEngine {
                         LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
                     }
                     lastProp.fineERcalls++;
+                    lastProp.decNbPendingEvt();
                     lastProp.propagate(idxVinP[vaid].get(paid), mask);
                 }
             }
@@ -219,6 +220,7 @@ public class ArcEngine implements IPropagationEngine {
             paid = p2i.get(lastProp.getId());
             masks_c[paid] = 0;
         }
+        throw new UnsupportedOperationException("pending evt!");
     }
 
     @Override
@@ -243,7 +245,7 @@ public class ArcEngine implements IPropagationEngine {
                         cm -= (cm |= type.strengthened_mask);
                         masks_f[vaid].adjustValue(paid, cm);
                     }
-
+                    throw new UnsupportedOperationException("pending evt!");
                 }
             }
         }
@@ -291,6 +293,7 @@ public class ArcEngine implements IPropagationEngine {
             masks_c[paid] = 0;
             pro_queue_c.remove(propagator);
         }
+        throw new UnsupportedOperationException("pending evt!");
 //        }
     }
 
