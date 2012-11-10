@@ -28,6 +28,8 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
+import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -66,6 +68,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
                 Propagator[] propagators = constraints[i].propagators;
                 for (int j = 0; j < propagators.length; j++) {
                     Propagator propagator = propagators[j];
+                    if (Configuration.PRINT_PROPAGATION) {
+                        LoggerFactory.getLogger("solver").info("activate {}", "<< ::" + propagator.toString() + " >>");
+                    }
                     propagator.setActive();
                     propagator.propagate(EventType.FULL_PROPAGATION.strengthened_mask);
                     //TODO: proabbly useless...

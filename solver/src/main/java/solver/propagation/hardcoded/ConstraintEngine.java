@@ -213,11 +213,13 @@ public class ConstraintEngine implements IPropagationEngine {
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if (prop.advise(pindices[p], type.mask)) {
                     int aid = p2i.get(prop.getId());
+                    if (masks_f[aid][pindices[p]] == 0) {
+                        prop.incNbPendingEvt();
+                    }
                     masks_f[aid][pindices[p]] |= type.strengthened_mask;
                     if ((schedule[aid] & F) == 0) {
                         pro_queue_f.addLast(prop);
                         schedule[aid] |= F;
-                        prop.incNbPendingEvt();
                     }
                 }
             }

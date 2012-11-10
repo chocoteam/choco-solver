@@ -35,6 +35,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -281,6 +282,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final void forcePropagate(EventType evt) throws ContradictionException {
         //coarseER.update(evt);
         //solver.getEngine().schedulePropagator(this, evt);
+        if (Configuration.PRINT_PROPAGATION)
+            LoggerFactory.getLogger("solver").info("\tFP {}", "<< {} ::" + this.toString() + " >>");
         if (nbPendingEvt == 0) {
             propagate(evt.getStrengthenedMask());
         }
