@@ -285,6 +285,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         if (Configuration.PRINT_PROPAGATION)
             LoggerFactory.getLogger("solver").info("\tFP {}", "<< {} ::" + this.toString() + " >>");
         if (nbPendingEvt == 0) {
+            coarseERcalls++;
             propagate(evt.getStrengthenedMask());
         }
     }
