@@ -27,7 +27,6 @@
 package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
@@ -140,9 +139,6 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
 
     @Override
     public void init(Solver solver) {
-        for (int p = 0; p < propagators.length; p++) {
-            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
-        }
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -261,19 +257,6 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
             schedule_v[vid] = true;
         }
 
-    }
-
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int pid = propagator.getId();
-        int aid = p2i.get(pid);
-        if (schedule_in_c[aid] == 0) {
-            int priority = propagator.dynPriority();
-            pro_queue[priority].addLast(propagator);
-            schedule_in_c[aid] = (short) (priority + 1);
-            notEmpty.set(priority);
-        }
-        masks_c[aid] |= event.getStrengthenedMask();
     }
 
     @Override

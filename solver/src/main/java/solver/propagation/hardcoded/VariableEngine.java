@@ -27,7 +27,6 @@
 package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
@@ -117,9 +116,6 @@ public class VariableEngine implements IPropagationEngine {
 
     @Override
     public void init(Solver solver) {
-        for (int p = 0; p < propagators.length; p++) {
-            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
-        }
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -234,19 +230,6 @@ public class VariableEngine implements IPropagationEngine {
             schedule[vid] = true;
         }
 
-    }
-
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int pid = propagator.getId();
-        if (!schedule[pid]) {
-            if (Configuration.PRINT_PROPAGATION) {
-                LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
-            }
-            pro_queue.addLast(propagator);
-            schedule[pid] = true;
-        }
-        masks_c[pid] |= event.getStrengthenedMask();
     }
 
     @Override

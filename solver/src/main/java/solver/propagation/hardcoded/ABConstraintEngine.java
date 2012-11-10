@@ -27,7 +27,6 @@
 package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.slf4j.LoggerFactory;
@@ -134,9 +133,6 @@ public class ABConstraintEngine implements IPropagationEngine {
 
     @Override
     public void init(Solver solver) {
-        for (int p = 0; p < propagators.length; p++) {
-            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
-        }
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -242,20 +238,6 @@ public class ABConstraintEngine implements IPropagationEngine {
             }
         }
 
-    }
-
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int aid = p2i.get(propagator.getId());
-        if ((schedule[aid] & C) == 0) {
-            if (Configuration.PRINT_PROPAGATION) {
-                LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
-            }
-            double _w = w[aid];
-            pro_queue_c.insert(_w, aid);
-            schedule[aid] |= C;
-        }
-        masks_c[aid] |= event.getStrengthenedMask();
     }
 
     @Override

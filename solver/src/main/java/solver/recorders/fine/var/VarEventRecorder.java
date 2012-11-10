@@ -104,7 +104,8 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
             Propagator propagator = propagators[i];
             if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
                 // schedule the coarse event recorder associated to thos
-                propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                //propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                throw new UnsupportedOperationException("Unsafe");
             }
         }
     }

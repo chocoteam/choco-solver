@@ -69,7 +69,8 @@ public class PropEventRecorderWithCondition<V extends Variable> extends PropEven
             if (propagators[PINDEX].advise(idxVinP[vIdx], evt.mask)) {
                 // schedule this if condition is valid
                 if (condition.validateScheduling(this, propagators[PINDEX], evt)) {
-                    propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
+                    //propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
+                    throw new UnsupportedOperationException("Unsafe");
                 }
             }
         }

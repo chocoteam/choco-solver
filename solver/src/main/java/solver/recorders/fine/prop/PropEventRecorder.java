@@ -94,7 +94,8 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
             // schedule the coarse event recorder associated to thos
-            propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
+            //propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
+            throw new UnsupportedOperationException("Unsafe");
         }
     }
 

@@ -79,7 +79,8 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
 
                     // schedule this if condition is valid
                     if (condition.validateScheduling(this, propagator, evt)) {
-                        propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                        //propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                        throw new UnsupportedOperationException("Unsafe");
                     }
                 }
             }

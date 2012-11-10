@@ -278,9 +278,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param evt event type
      */
-    public final void forcePropagate(EventType evt) {
+    public final void forcePropagate(EventType evt) throws ContradictionException {
         //coarseER.update(evt);
-        solver.getEngine().schedulePropagator(this, evt);
+        //solver.getEngine().schedulePropagator(this, evt);
+        if (nbPendingEvt == 0) {
+            propagate(evt.getStrengthenedMask());
+        }
     }
 
     public void setActive() {

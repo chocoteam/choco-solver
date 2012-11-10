@@ -27,7 +27,6 @@
 package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
@@ -150,9 +149,6 @@ public class ArcEngine implements IPropagationEngine {
 
     @Override
     public void init(Solver solver) {
-        for (int p = 0; p < propagators.length; p++) {
-            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
-        }
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -250,18 +246,6 @@ public class ArcEngine implements IPropagationEngine {
             }
         }
 
-    }
-
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int paid = p2i.get(propagator.getId());
-        if (masks_c[paid] == 0) {
-            if (Configuration.PRINT_PROPAGATION) {
-                LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
-            }
-            pro_queue_c.addLast(propagator);
-        }
-        masks_c[paid] |= event.getStrengthenedMask();
     }
 
     @Override
