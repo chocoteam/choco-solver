@@ -30,13 +30,6 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.predicate.InCstrSet;
-import solver.propagation.generator.predicate.Predicate;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -75,27 +68,6 @@ public class Ordering extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        PArc[] arc1 = new PArc[n - 1];
-        for (int i = 0; i < n - 1; i++) {
-            arc1[i] = new PArc(propagationEngine, new IntVar[]{vars[i]}, new Predicate[]{new InCstrSet(cstrs[i])});
-        }
-        Sort s1 = new Sort(arc1);
-        PArc[] arc2 = new PArc[n - 1];
-        for (int i = n - 2; i >= 0; i--) {
-            arc2[n - 2 - i] = new PArc(propagationEngine, new IntVar[]{vars[i + 1]}, new Predicate[]{new InCstrSet(cstrs[i])});
-        }
-        Sort s2 = new Sort(arc2);
-
-        solver.set(
-                propagationEngine.set(
-                        new Sort(
-                                s1.loopOut(),
-                                s2.loopOut(),
-                                new Queue(new PCoarse(propagationEngine, cstrs)).clearOut()
-                        )
-                )
-        );
     }
 
     @Override

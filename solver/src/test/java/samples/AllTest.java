@@ -64,7 +64,7 @@ public class AllTest {
                 new AllSolverProp(
                         SearchLoops.BINARY,
                         ExplanationFactory.TRACERECORDER),
-                PropagationStrategies.ONE_QUEUE_WITH_ARCS, 6);
+                PropagationStrategies.CONSTRAINT, 6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,

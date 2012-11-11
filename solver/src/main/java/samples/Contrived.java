@@ -26,22 +26,14 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.Arrays;
 
 /**
  * It consists of two vectors v and w.
@@ -98,12 +90,6 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // <2012-03-02:cp> works fine
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        Sort first = new Sort(new PArc(propagationEngine, v[3], v[4]));
-        Queue then = new Queue(new PArc(propagationEngine, ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
-        Queue coarses = new Queue(new PCoarse(propagationEngine, solver.getCstrs()));
-        solver.set(propagationEngine.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut()));
     }
 
     @Override

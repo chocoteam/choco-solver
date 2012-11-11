@@ -32,15 +32,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.Absolute;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -93,11 +84,6 @@ public class AbsoluteEvaluation extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(pengine, vars));
-        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine,
-                solver.getCstrs()));
-        solver.set(pengine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
     }
 
     @Override

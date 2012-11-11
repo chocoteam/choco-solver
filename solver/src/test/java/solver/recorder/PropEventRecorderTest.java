@@ -92,7 +92,6 @@ public class PropEventRecorderTest {
         per = new PropEventRecorder<IntVar>(new IntVar[]{iv1, iv2, iv3, iv1}, p1, solver, engine);
         engine.addEventRecorder(per);
         cer = new CoarseEventRecorder(p1, solver, engine);
-        engine.addEventRecorder(cer);
         verify(iv1, iv2, iv3, p1);
         reset(iv1, iv2, iv3, p1);
 

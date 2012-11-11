@@ -95,7 +95,7 @@ public class CycleLtTest {
             for (int i = 0; i < nbIt; i++) {
                 Solver rand = modeler(n);
                 PropagationEngine pengine = new PropagationEngine(rand.getEnvironment());
-                PropagationStrategies.values()[j].make(rand, pengine);
+                PropagationStrategies.values()[j].make(rand);
                 rand.findAllSolutions();
                 st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
                 times[i] = rand.getMeasures().getInitialPropagationTimeCount();

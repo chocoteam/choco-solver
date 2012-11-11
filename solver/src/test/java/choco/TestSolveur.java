@@ -274,7 +274,7 @@ public class TestSolveur {
 
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
         PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        PropagationStrategies.ONE_QUEUE_WITH_PROPS.make(solver, pengine);
+        PropagationStrategies.CONSTRAINT.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

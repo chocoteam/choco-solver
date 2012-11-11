@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -99,17 +98,13 @@ public class PertTest {
     public void testAll() {
         Solver sol;
         sol = modeler();
-        PropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
-        PropagationStrategies.values()[0].make(sol, pengine);
-        sol.set(pengine);
+        PropagationStrategies.values()[0].make(sol);
         sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
         for (int t = 1; t < PropagationStrategies.values().length; t++) {
             sol = modeler();
-            pengine = new PropagationEngine(sol.getEnvironment());
-            PropagationStrategies.values()[t].make(sol, pengine);
-            sol.set(pengine);
+            PropagationStrategies.values()[t].make(sol);
             sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
             Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

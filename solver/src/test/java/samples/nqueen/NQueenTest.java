@@ -34,7 +34,6 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -157,8 +156,7 @@ public class NQueenTest {
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                PropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
-                PropagationStrategies.values()[t].make(sol, pengine);
+                PropagationStrategies.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -177,9 +175,8 @@ public class NQueenTest {
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                PropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
                 // default group
-                PropagationStrategies.values()[t].make(sol, pengine);
+                PropagationStrategies.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

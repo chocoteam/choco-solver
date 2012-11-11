@@ -30,13 +30,6 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.GCC_AC;
 import solver.constraints.nary.Sum;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.SortDyn;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -150,10 +143,6 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(propagationEngine, solver.getVars())),
-                new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs())))));
     }
 
     @Override

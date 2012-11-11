@@ -35,21 +35,9 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.Generator;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.predicate.InCstrSet;
-import solver.propagation.generator.predicate.Predicate;
-import solver.propagation.generator.sorter.Decreasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * CSPLib prob006:<br/>
@@ -128,26 +116,6 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // <cpru 04/19/12> works fine
-
-        Predicate[] plex = new Predicate[]{new InCstrSet(lex)};
-        Predicate[] pdist = new Predicate[]{new InCstrSet(distances)};
-        Predicate[] palld = new Predicate[]{new InCstrSet(alldiff)};
-        List<Generator> gen = new ArrayList();
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, plex));
-        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, pdist));
-        for (int i = 1; i < m; i++) {
-            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, plex));
-            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, pdist));
-            for (int j = 0; j < i; j++) {
-                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, pdist));
-                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, palld));
-            }
-        }
-        Sort sort = new Sort(gen.toArray(new Generator[gen.size()]));
-        Sort _coar = new Sort(new Decreasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
-        solver.set(propagationEngine.set(new Sort(sort.clearOut(), _coar.pickOne())));
     }
 
     @Override

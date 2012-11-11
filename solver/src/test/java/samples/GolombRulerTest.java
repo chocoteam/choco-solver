@@ -31,7 +31,6 @@ import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.variables.IntVar;
 
@@ -66,8 +65,7 @@ public class GolombRulerTest {
             long nodes = sol.getMeasures().getNodeCount();
             for (int k = 1; k < PropagationStrategies.values().length; k++) {
                 sol = modeler(OPTIMAL_RULER[j][0]);
-                PropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
-                PropagationStrategies.values()[k].make(sol, pengine);
+                PropagationStrategies.values()[k].make(sol);
                 sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes);
@@ -86,7 +84,7 @@ public class GolombRulerTest {
             long nodes = sol.getMeasures().getNodeCount();
             for (int k = 1; k < PropagationStrategies.values().length; k++) {
                 sol = modeler(OPTIMAL_RULER[j][0]);
-                PropagationStrategies.values()[k].make(sol, new PropagationEngine(sol.getEnvironment()));
+                PropagationStrategies.values()[k].make(sol);
                 sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes);

@@ -34,9 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngines;
-import solver.propagation.PropagationStrategies;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -68,9 +66,6 @@ public abstract class AbstractProblem {
 
     @Option(name = "-engine", usage = "Propagation engine", required = false)
     PropagationEngines engine = PropagationEngines.DEFAULT;
-
-    @Option(name = "-policy", usage = "Propagation policy", required = false)
-    PropagationStrategies policy = PropagationStrategies.DEFAULT;
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
@@ -128,23 +123,7 @@ public abstract class AbstractProblem {
 
             overrideExplanation();
 
-            switch (engine) {
-                case DEFAULT:
-                case DSLDRIVEN:
-                    switch (policy) {
-                        case DEFAULT:
-                            configureEngine();
-                            break;
-                        default:
-                            solver.set(new ConstraintEngine(solver));
-                            break;
-                    }
-                    break;
-                default:
-                    IPropagationEngine pengine = engine.make(solver);
-                    solver.set(pengine);
-                    break;
-            }
+            solver.set(new ConstraintEngine(solver));
 
             if (level.getLevel() > Level.QUIET.getLevel()) {
                 SearchMonitorFactory.log(solver,

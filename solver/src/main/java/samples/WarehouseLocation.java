@@ -34,11 +34,6 @@ import solver.Solver;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -144,21 +139,6 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        //TODO: find a propagation strat
-        PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        solver.set(pengine.set(
-                new Sort(
-                        new Queue(
-                                new Queue(new PVar(pengine, open)),
-                                new Queue(new PVar(pengine, suppliers)),
-                                new Queue(new PVar(pengine, costPerStore)),
-                                new PVar(pengine, costPerStore)
-
-                        ),
-                        new Queue(new PCoarse(pengine, solver.getCstrs()))
-                )
-        )
-        );
     }
 
     @Override

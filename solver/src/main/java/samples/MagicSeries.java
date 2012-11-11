@@ -33,9 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.propagation.PropagationEngine;
-import solver.propagation.PropagationStrategies;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -92,18 +89,6 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        final PropagationEngine engine = new PropagationEngine(solver.getEnvironment(), false, true, false);
-        PropagationStrategies.GECODE.make(solver, engine);
-        solver.set(engine);
-        final PropagationEngine engine2 = new PropagationEngine(solver.getEnvironment(), true, false, true);
-        PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, engine2);
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
-            @Override
-            public void afterInitialPropagation() {
-                engine2.init(solver);
-                solver.set(engine2);
-            }
-        });
     }
 
     @Override

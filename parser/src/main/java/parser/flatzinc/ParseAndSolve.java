@@ -36,11 +36,7 @@ import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationEngine;
-import solver.propagation.PropagationStrategies;
 import solver.propagation.hardcoded.*;
-import solver.propagation.hardcoded.dyn.ActivityBasedCstrEngine;
-import solver.propagation.hardcoded.dyn.ActivityBasedVarEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.io.File;
@@ -134,66 +130,6 @@ public class ParseAndSolve {
                 case 5:
                     solver.set(new ABConstraintEngine(solver));
                     break;
-                case 6:
-                    PropagationEngine pe = new PropagationEngine(solver.getEnvironment());
-                    PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
-                    solver.set(pe);
-                    break;
-                case 7:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, true, true));
-                    break;
-                case 8:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, true, true));
-                    break;
-                case 9:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, true, true));
-                    break;
-                case 10:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, true, true));
-                    break;
-                case 11:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, false, true));
-                    break;
-                case 12:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, false, true));
-                    break;
-                case 13:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, false, true));
-                    break;
-                case 14:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, false, true));
-                    break;
-                case 15:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, false, false));
-                    break;
-                case 16:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, false, false));
-                    break;
-                case 17:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, false, false));
-                    break;
-                case 18:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, false, false));
-                    break;
-                case 19:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, true, true));
-                    break;
-                case 20:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, true, true));
-                    break;
-                case 21:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, true));
-                    break;
-                case 22:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, true));
-                    break;
-                case 23:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, false));
-                    break;
-                case 24:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, false));
-                    break;
-                case 25:
                 case -1:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {
