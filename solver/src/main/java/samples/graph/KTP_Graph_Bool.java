@@ -43,6 +43,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
+import solver.propagation.hardcoded.ConstraintEngine;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
@@ -60,7 +61,11 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.util.ArrayList;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Knight's Tour Problem
+ * Compares performances between a graph variable and boolean variables
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class KTP_Graph_Bool {
 
@@ -91,13 +96,12 @@ public class KTP_Graph_Bool {
 		for(int size=10; size<500;size+=10){
 			String s = "king_"+size+"x"+size;
 			System.out.println(s);
+//			boolean[][] matrix = HCP_Utils.generateOpenKingTourInstance(size);
 			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
 			if(activeGraphs)
 			solveUndiGraph(matrix, s);
-//			System.exit(0);
 			if(activeBools)
 			solveBooleans(matrix, s);
-//			System.exit(0);
 		}
 	}
 
@@ -201,6 +205,7 @@ public class KTP_Graph_Bool {
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		// resolution
+		solver.set(new ConstraintEngine(solver));
 		solver.findSolution();
 		System.out.println(solver.getMeasures());
 		check(solver, decisionVars);

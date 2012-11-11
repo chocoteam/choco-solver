@@ -50,8 +50,8 @@ import solver.variables.view.IView;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
-        implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
+        implements Variable<IGraphDelta, IGraphDeltaMonitor>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************

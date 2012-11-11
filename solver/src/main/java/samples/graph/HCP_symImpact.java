@@ -52,7 +52,13 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.io.*;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Hamiltonian Cycle Problem
+ * including the Knight's Tour Problem
+ *
+ * Shows the negative impact of introducing symmetries through a successor representation
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class HCP_symImpact {
 

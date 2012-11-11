@@ -30,7 +30,10 @@ package samples.graph.input;
 import java.io.*;
 
 /**
- * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
+ * Parses and generates Hamiltonian Cycle Problem instances
+ * including the Knight's Tour Problem (open or closed)
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class HCP_Utils {
 

@@ -41,6 +41,11 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import java.util.BitSet;
 
+/**Partitions a graph into anti-arborescences
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
+ */
 public class Tree extends AbstractProblem{
 
 	//***********************************************************************************

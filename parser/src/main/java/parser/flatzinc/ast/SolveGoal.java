@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast;
 
+import choco.kernel.ResolutionPolicy;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -38,8 +39,7 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
-import solver.objective.MaxObjectiveManager;
-import solver.objective.MinObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ABSLNS;
 import solver.search.strategy.StrategyFactory;
@@ -68,12 +68,8 @@ import java.util.List;
 public class SolveGoal {
 
     final List<EAnnotation> annotations;
-    final Resolution type;
+    final ResolutionPolicy type;
     final Expression expr;
-
-    public enum Resolution {
-        SATISFY, MINIMIZE, MAXIMIZE
-    }
 
     private enum Search {
         int_search,
@@ -82,7 +78,7 @@ public class SolveGoal {
     }
 
 
-    public SolveGoal(FZNParser parser, List<EAnnotation> annotations, Resolution type, Expression expr) {
+    public SolveGoal(FZNParser parser, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         this.annotations = annotations;
         this.type = type;
         this.expr = expr;
@@ -124,12 +120,12 @@ public class SolveGoal {
             }
         } else {
             LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");
-            if (type == Resolution.SATISFY && !mSolver.getSearchLoop().stopAtFirstSolution()) {
+            if (type == ResolutionPolicy.SATISFACTION && !mSolver.getSearchLoop().stopAtFirstSolution()) {
                 mSolver.set(StrategyFactory.minDomMinVal(ivars, mSolver.getEnvironment()));
             } else {
                 ActivityBased abs = new ActivityBased(mSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
                 mSolver.set(abs);
-                if (type != Resolution.SATISFY) {
+                if (type != ResolutionPolicy.SATISFACTION) {
                     mSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(mSolver, ivars, 29091981L, abs, false, ivars.length / 2));
                 }
             }
@@ -138,25 +134,14 @@ public class SolveGoal {
 
         AbstractSearchLoop search = mSolver.getSearchLoop();
         switch (type) {
-            case SATISFY:
+            case SATISFACTION:
                 search.stopAtFirstSolution(!parser.all);
                 break;
-            case MAXIMIZE:
-                IntVar max = expr.intVarValue(mSolver);
-                MaxObjectiveManager maom = new MaxObjectiveManager(max);
-                maom.setMeasures(mSolver.getMeasures());
-                search.setObjectivemanager(maom);
+			default:
+				IntVar obj = expr.intVarValue(mSolver);
+                search.setObjectivemanager(new ObjectiveManager(obj, type,mSolver));
 //                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
-                break;
-            case MINIMIZE:
-                IntVar min = expr.intVarValue(mSolver);
-                MinObjectiveManager miom = new MinObjectiveManager(min);
-                miom.setMeasures(mSolver.getMeasures());
-                search.setObjectivemanager(miom);
-//                solver.setRestart(true);
-                search.stopAtFirstSolution(false);
-                break;
         }
     }
 

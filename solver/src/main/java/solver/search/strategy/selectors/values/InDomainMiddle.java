@@ -27,7 +27,7 @@
 
 package solver.search.strategy.selectors.values;
 
-import solver.search.strategy.selectors.ValueIterator;
+import solver.search.strategy.selectors.InValueIterator;
 import solver.variables.IntVar;
 
 /**
@@ -41,7 +41,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class InDomainMiddle implements ValueIterator<IntVar> {
+public class InDomainMiddle implements InValueIterator {
 
     /**
      * {@inheritDoc}

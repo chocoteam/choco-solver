@@ -43,19 +43,20 @@ import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIn
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BST;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
-import solver.objective.strategies.BottomUp_Minimization;
-import solver.objective.strategies.Dichotomic_Minimization;
+import solver.exception.ContradictionException;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -64,9 +65,13 @@ import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import java.io.*;
 import java.util.BitSet;
+import java.util.Random;
 
 /**
- * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
+ * Solves the Asymmetric Traveling Salesman Problem
+ *
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
 public class ATSP {
 
@@ -74,7 +79,7 @@ public class ATSP {
     // VARIABLES
     //***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
+	private static final long TIMELIMIT = 30000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
@@ -102,7 +107,7 @@ public class ATSP {
 
 	private static int arbo=0,rg=1,pos=2,allDiff=3;
 	private static boolean khun;
-	private static int NB_PARAM = 5;
+	private static int NB_PARAM = 4;
 	private static BitSet config = new BitSet(NB_PARAM);
 	private static boolean bst;
 
@@ -131,7 +136,8 @@ public class ATSP {
 		outFile = "atsp_fast.csv";
 		TextWriter.clearFile(outFile);
 		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;pos;adAC;bst;\n", outFile);
-		bench();
+//		bench();
+		benchRandomWithSCC();
 	}
 
 	private static void bench() {
@@ -176,6 +182,31 @@ public class ATSP {
 		}
 	}
 
+	private static void benchRandomWithSCC() {
+		TextWriter.clearFile(outFile);
+		TextWriter.writeTextInto("n;cMax;sccMax;sols;fails;nodes;time;obj;search;arbo;rg;pos;adAC;bst;bcTime;\n", outFile);
+		main_search = 1;
+		int[] sizes = new int[]{100};
+		int[] costs = new int[]{10};
+		Random rd = new Random(0);
+		for (int s:sizes) {
+			for (int c:costs) {
+				for (int k=0;k<10;k++) {
+					for (int scc=0;scc<30;scc++) {
+						generateInstanceWithSCC(s, c, scc, rd);
+						bst=false;
+//						configParameters(1<<allDiff);
+//						solve();
+						configParameters((1<<allDiff)+(1<<rg)+(1<<pos));
+						solve();
+						bst = true;
+						solve();
+					}
+				}
+			}
+		}
+	}
+
 	//***********************************************************************************
 	// MODEL-SEARCH-RESOLUTION-OUTPUT
 	//***********************************************************************************
@@ -190,8 +221,8 @@ public class ATSP {
 	public static void createModel() {
 		// create model
 		solver = new Solver();
-		initialUB = optimum;
-		System.out.println("initial UB : "+optimum);
+//		initialUB = optimum;
+		System.out.println("initial UB : "+initialUB);
 		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST,true);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
@@ -241,7 +272,7 @@ public class ATSP {
 				e.printStackTrace();System.exit(0);
 			}
 			gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
-			if(config.get(rg)){
+			if(config.get(rg) && bst){
 				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
 			}else{
 				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
@@ -262,16 +293,16 @@ public class ATSP {
 				relax = map;
 			}
 		}else{
-			if(config.get(rg) && bst){// BST-based HK
+			if(config.get(rg) && bst && false){// BST-based HK
 				System.out.println("BST");
 				PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
-				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+				propHK_bst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_bst);
 				relax = propHK_bst;
 			}else{
 				System.out.println("MST");
-				PropLagr_MST_BST propHK_mst = PropLagr_MST_BST.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver);
-				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+				PropLagr_MST_BSTdual propHK_mst = PropLagr_MST_BSTdual.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver);
+				propHK_mst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_mst);
 				relax = propHK_mst;
 			}
@@ -281,14 +312,21 @@ public class ATSP {
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
-		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
+//		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
+
+		GraphStrategies first = new GraphStrategies(graph,distanceMatrix,relax);
+		first.configure(9,true,true,true);
+		GraphStrategies next = new GraphStrategies(graph,distanceMatrix,relax);
+		next.configure(12,true,true,false);
+		AbstractStrategy mainStrat = new Change(graph,first,next);
+
 		switch (main_search){
 			// top-down (default)
 			case 0: solver.set(mainStrat);break;
 			// bottom-up
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),mainStrat));break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),mainStrat));break;
 			// dichotomic
-			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),mainStrat));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),mainStrat));break;
 			default: throw new UnsupportedOperationException();
 		}
         IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
@@ -301,15 +339,6 @@ public class ATSP {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 			}
-//			public void onContradiction(ContradictionException cex) {
-//				throw new UnsupportedOperationException();
-//			}
-//			public void onSolution() {
-//				System.out.println("youhou");
-//			}
-//			public void onContradiction(ContradictionException cex) {
-//				System.out.println("yaha");
-//			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
@@ -330,9 +359,9 @@ public class ATSP {
 			}
 		}
 		if(bst){
-			configst += "1;";
+			configst += "1";
 		}else{
-			configst += "0;";
+			configst += "0";
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
@@ -340,10 +369,45 @@ public class ATSP {
 		TextWriter.writeTextInto(txt, outFile);
 	}
 
+	private static class Change extends AbstractStrategy<DirectedGraphVar>{
+
+		AbstractStrategy[] strats;
+		public Change (DirectedGraphVar g, AbstractStrategy... strats){
+			super(new DirectedGraphVar[]{g});
+			this.strats = strats;
+		}
+
+		@Override
+		public void init() throws ContradictionException {
+			for(int i=0;i<strats.length;i++){
+				strats[i].init();
+			}
+		}
+
+		@Override
+		public Decision getDecision() {
+			if(solver.getMeasures().getSolutionCount()==0){
+				return strats[0].getDecision();
+			}
+			return strats[1].getDecision();
+		}
+	}
+
 	// RANDOM INSTANCES
 	private static void generateInstance(int size, int maxCost, long seed) {
 		ATSP_Utils inst = new ATSP_Utils();
 		inst.generateInstance(size,maxCost,seed);
+		n = inst.n;
+		instanceName = inst.instanceName;
+		distanceMatrix = inst.distanceMatrix;
+		noVal = inst.noVal;
+		initialUB = inst.initialUB;
+		optimum = inst.optimum;
+	}
+
+	private static void generateInstanceWithSCC(int size, int maxCost, int maxSCC, Random rd) {
+		ATSP_Utils inst = new ATSP_Utils();
+		inst.generateWithSCCStructure(size, maxCost, maxSCC, rd);
 		n = inst.n;
 		instanceName = inst.instanceName;
 		distanceMatrix = inst.distanceMatrix;

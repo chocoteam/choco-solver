@@ -31,7 +31,8 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.Sum;
-import solver.objective.strategies.Dichotomic_Maximization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -121,7 +122,7 @@ public class Knapsack extends AbstractProblem {
 		// top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
 		// dichotomic
-		solver.set(new StaticStrategiesSequencer(new Dichotomic_Maximization(power,solver),strat));
+		solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.DICHOTOMIC),strat));
 		// bottom-up
 //		solver.set(strat);
 

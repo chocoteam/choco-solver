@@ -37,5 +37,5 @@ package choco.kernel;
  */
 public enum ResolutionPolicy {
 
-    SATISFACTION, MINIMIZE, MAXIMIZE
+    SATISFACTION, MINIMIZE, MAXIMIZE;
 }

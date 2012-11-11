@@ -25,65 +25,31 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 26/10/12
+ * Time: 14:03
+ */
+
 package solver.objective;
 
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-
 /**
- * This implementation of <code>IObjectiveManager</code> interface provides empty methods for satisfaction problems,
- * where no objective variable is defined. A static reference to this object is available using <code>get()</code>.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 27 juil. 2010
+ * Class which defines a policy to adopt for the optimization process
+ * @author Jean-Guillaume Fages
+ * @since Oct. 2012
  */
-public class NoObjectiveManager extends IObjectiveManager {
-
-    public static final NoObjectiveManager internal = new NoObjectiveManager();
-
-    public static NoObjectiveManager get(){
-        return internal;
-    }
-
-    private NoObjectiveManager(){}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getBestValue() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Empty method for <code>this</code>.
-     */
-    @Override
-    public void update() {}
-
-    @Override
-    public void postDynamicCut() throws ContradictionException {}
-
-    @Override
-    public boolean isOptimization(){
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "";
-    }
-
-   
-    @Override
-    public Explanation explain(Deduction d) {
-        return null;  //TODO change body of implemented methods use File | Settings | File Templates.
-    }
+public enum OptimizationPolicy {
+	/**
+	 * Set the objective variable to its lowest value
+	 */
+	BOTTOM_UP,
+	/**
+	 * Set the objective variable to its highest value
+	 */
+	TOP_DOWN,
+	/**
+	 * Split the domain of the objective variable
+	 */
+	DICHOTOMIC;
 }
