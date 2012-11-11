@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
-import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.prop.PropEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -58,7 +57,6 @@ public class PropEventRecorderTest {
     Solver solver = null;
     IntVar iv1, iv2, iv3 = null;
 
-    CoarseEventRecorder cer = null;
     Propagator p1;
     PropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
@@ -85,13 +83,11 @@ public class PropEventRecorderTest {
         iv3 = EasyMock.createMock(IntVar.class);
         iv3.getId();
         expectLastCall().andReturn(3).times(3);
-        cer = createMock(CoarseEventRecorder.class);
 
         replay(iv1, iv2, iv3, p1);
 
         per = new PropEventRecorder<IntVar>(new IntVar[]{iv1, iv2, iv3, iv1}, p1, solver, engine);
         engine.addEventRecorder(per);
-        cer = new CoarseEventRecorder(p1, solver, engine);
         verify(iv1, iv2, iv3, p1);
         reset(iv1, iv2, iv3, p1);
 

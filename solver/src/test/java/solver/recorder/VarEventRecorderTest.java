@@ -28,7 +28,6 @@ package solver.recorder;
 
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.var.VarEventRecorder;
 import solver.variables.IntVar;
 
@@ -44,7 +43,6 @@ public class VarEventRecorderTest {
     Solver solver = null;
     IntVar iv1 = null;
 
-    CoarseEventRecorder cer = null;
     Propagator p1 = null;
     Propagator p2 = null;
     Propagator p3 = null;

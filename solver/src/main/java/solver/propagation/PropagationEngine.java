@@ -38,10 +38,12 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.generator.*;
+import solver.propagation.generator.PArc;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -67,7 +69,6 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected TIntObjectHashMap<IList<Variable, AbstractFineEventRecorder>> fines_v;
     protected TIntObjectHashMap<List<AbstractFineEventRecorder>> fines_p;
-    protected TIntObjectHashMap<AbstractCoarseEventRecorder> coarses;
 
     protected int pivot;
 
@@ -105,7 +106,6 @@ public class PropagationEngine implements IPropagationEngine {
         this.environment = environment;
         fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
         fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
-        coarses = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         this.checkProperties = checkProperties;
         this.forceInitialPropagation = forceInitialPropagation;
         this.forceActivation = forceActivation;
@@ -254,8 +254,7 @@ public class PropagationEngine implements IPropagationEngine {
     protected PropagationStrategy buildDefault(Solver solver) {
         Constraint[] constraints = solver.getCstrs();
         Queue arcs = new Queue(new PArc(this, constraints));
-        Queue coarses = new Queue(new PCoarse(this, constraints));
-        return new Sort(arcs.clearOut(), coarses.pickOne()).clearOut();
+        return new Sort(arcs.clearOut()).clearOut();
     }
 
 
@@ -303,11 +302,6 @@ public class PropagationEngine implements IPropagationEngine {
                 fines_v.get(id).add(fer, false, forceActivation);
             }
         }
-    }
-
-    public void addEventRecorder(AbstractCoarseEventRecorder er) {
-        int id = er.getPropagators()[0].getId();
-        coarses.put(id, er);
     }
 
     @Override

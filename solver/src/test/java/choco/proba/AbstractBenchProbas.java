@@ -29,13 +29,7 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.Queue;
 import solver.recorders.conditions.ICondition;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -123,7 +117,7 @@ public abstract class AbstractBenchProbas {
     }
 
     private void configPropStrategy() {
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        /*PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
         Constraint[] cstrs = solver.getCstrs();
         Queue arcs = new Queue(new PArc(propagationEngine, cstrs));
         Queue coarses;
@@ -144,7 +138,7 @@ public abstract class AbstractBenchProbas {
         }
         coarses = new Queue(coarses_.toArray(new PCoarse[coarses_.size()]));
 //        }
-        solver.set(propagationEngine.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut()));
+        solver.set(propagationEngine.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut())); */
     }//*/
 
     public String toString() {
