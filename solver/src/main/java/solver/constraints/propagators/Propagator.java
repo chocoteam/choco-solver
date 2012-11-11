@@ -170,7 +170,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.aCause = this;
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
-            vars[v].recordMask(getPropagationConditions(v));
             /*if (!vars[v].instantiated()) {
                 nbNi++;
             }*/
@@ -294,6 +293,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
         environment.save(operations[NEW]);
+        // update activity mask of variables
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].recordMask(getPropagationConditions(v));
+        }
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
             solver.getEngine().activatePropagator(this);
