@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -46,7 +46,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     protected int idxV; // index of this within the variable structure -- mutable
 
-    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver, IPropagationEngine engine) {
+    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver, PropagationEngine engine) {
         super((V[]) new Variable[]{variable}, new Propagator[]{propagator}, solver, engine);
     }
 
@@ -59,7 +59,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
+        if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not schedule itself
             // schedule the coarse event recorder associated to thos
             //propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
             throw new UnsupportedOperationException("Unsafe");

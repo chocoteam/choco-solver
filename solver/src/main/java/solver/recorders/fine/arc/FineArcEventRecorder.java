@@ -32,7 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -55,7 +55,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     protected int evtmask; // reference to events occuring -- inclusive OR over event mask
 
 
-    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver, IPropagationEngine engine) {
+    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver, PropagationEngine engine) {
         super(variable, propagator, solver, engine);
         this.idxVinP = idxVinP;
     }
@@ -75,7 +75,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
+        if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not be schedule itself
             if (propagators[PINDEX].advise(idxVinP, evt.mask)) {
                 if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
                 // record the event and values removed

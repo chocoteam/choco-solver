@@ -34,7 +34,6 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
@@ -63,7 +62,7 @@ public class FinePropEventRecorderTest {
     Propagator p1;
     FinePropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
 
 
     @BeforeMethod

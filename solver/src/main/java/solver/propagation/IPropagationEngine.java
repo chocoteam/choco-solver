@@ -30,8 +30,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -47,29 +45,11 @@ import java.io.Serializable;
 public interface IPropagationEngine extends Serializable {
 
     /**
-     * Is <code>this</code> initialized ?
-     *
-     * @return <code>true</code> if <code>this</code> is initialized
-     */
-    boolean initialized();
-
-    /**
      * Initializes <code>this</code>
      *
      * @param solver the solver
      */
     void init(Solver solver);
-
-    boolean forceActivation();
-
-    /**
-     * Attach a strategy to <code>this</code>.
-     * Override previously defined one.
-     *
-     * @param propagationStrategy a group
-     * @return this
-     */
-    IPropagationEngine set(IPropagationStrategy propagationStrategy);
 
     /**
      * Reach a fixpoint
@@ -88,12 +68,6 @@ public interface IPropagationEngine extends Serializable {
     ContradictionException getContradictionException();
 
     void clear();
-
-    void prepareWM(Solver solver);
-
-    void clearWatermark(int id1, int id2);
-
-    boolean isMarked(int id1, int id2);
 
     //********************************//
     //      SERVICES FOR UPDATING     //
@@ -122,12 +96,4 @@ public interface IPropagationEngine extends Serializable {
      * @param propagator propagator to desactivate
      */
     void desactivatePropagator(Propagator propagator);
-
-    void addEventRecorder(AbstractFineEventRecorder fer);
-
-    void addEventRecorder(AbstractCoarseEventRecorder er);
-
-    void activateFineEventRecorder(AbstractFineEventRecorder fer);
-
-    void desactivateFineEventRecorder(AbstractFineEventRecorder fer);
 }

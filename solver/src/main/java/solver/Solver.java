@@ -338,9 +338,7 @@ public class Solver implements Serializable {
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }
-        if (!engine.initialized()) {
-            engine.init(this);
-        }
+        engine.init(this);
         engine.propagate();
     }
 

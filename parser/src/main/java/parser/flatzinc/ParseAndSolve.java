@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.propagation.hardcoded.*;
@@ -136,7 +135,7 @@ public class ParseAndSolve {
                     solver.set(new ABConstraintEngine(solver));
                     break;
                 case 6:
-                    IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
+                    PropagationEngine pe = new PropagationEngine(solver.getEnvironment());
                     PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
                     solver.set(pe);
                     break;

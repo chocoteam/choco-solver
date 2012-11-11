@@ -36,12 +36,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.IPropagationStrategy;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -284,57 +281,5 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
-    }
-
-    ////////////// USELESS ///////////////
-
-    @Override
-    public boolean initialized() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean forceActivation() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void prepareWM(Solver solver) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void clearWatermark(int id1, int id2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isMarked(int id1, int id2) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addEventRecorder(AbstractFineEventRecorder fer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addEventRecorder(AbstractCoarseEventRecorder er) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -133,17 +133,27 @@ public class PropagationEngine implements IPropagationEngine {
         default_nb_vars = nbVar;
     }
 
-    @Override
+
+    /**
+     * Is <code>this</code> initialized ?
+     *
+     * @return <code>true</code> if <code>this</code> is initialized
+     */
     public boolean initialized() {
         return initialized;
     }
 
-    @Override
     public boolean forceActivation() {
         return forceActivation;
     }
 
-    @Override
+    /**
+     * Attach a strategy to <code>this</code>.
+     * Override previously defined one.
+     *
+     * @param propagationStrategy a group
+     * @return this
+     */
     public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
         this.propagationStrategy = propagationStrategy;
         return this;
@@ -270,7 +280,6 @@ public class PropagationEngine implements IPropagationEngine {
         return exception;
     }
 
-    @Override
     public void addEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         Propagator[] props = fer.getPropagators();
@@ -296,7 +305,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void addEventRecorder(AbstractCoarseEventRecorder er) {
         int id = er.getPropagators()[0].getId();
         coarses.put(id, er);
@@ -335,7 +343,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
+    /**
+     * Set the propagator as activated within the propagation engine
+     *
+     * @param propagator propagator to activate
+     */
     public void activatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -347,7 +359,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
+    /**
+     * Set the propagator as inactivated within the propagation engine
+     *
+     * @param propagator propagator to desactivate
+     */
     public void desactivatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -359,7 +375,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {
@@ -367,7 +382,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {

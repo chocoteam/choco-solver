@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
 import solver.recorders.coarse.CoarseEventRecorder;
@@ -63,7 +62,7 @@ public class PropEventRecorderTest {
     Propagator p1;
     PropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
 
 
     @BeforeMethod

@@ -29,7 +29,7 @@ package solver.recorders.fine.arc;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -55,7 +55,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
-                                         ICondition condition, Solver solver, IPropagationEngine engine) {
+                                         ICondition condition, Solver solver, PropagationEngine engine) {
         super(variable, propagator, solver, engine);
         this.idxVinP = idxInProp;
         this.condition = condition;
@@ -66,7 +66,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
+        if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not be schedule itself
             if (propagators[PINDEX].advise(idxVinP, evt.mask)) {
                 // schedule this if condition is valid
                 if (condition.validateScheduling(this, propagators[PINDEX], evt)) {

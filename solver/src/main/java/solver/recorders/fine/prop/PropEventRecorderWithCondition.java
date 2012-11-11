@@ -29,7 +29,7 @@ package solver.recorders.fine.prop;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -55,7 +55,7 @@ public class PropEventRecorderWithCondition<V extends Variable> extends PropEven
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public PropEventRecorderWithCondition(V[] variables, Propagator<V> propagator, int[] idxVinPs,
-                                          ICondition condition, Solver solver, IPropagationEngine engine) {
+                                          ICondition condition, Solver solver, PropagationEngine engine) {
         super(variables, propagator, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);
@@ -65,7 +65,7 @@ public class PropEventRecorderWithCondition<V extends Variable> extends PropEven
     @Override
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
-        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
+        if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not be schedule itself
             if (propagators[PINDEX].advise(idxVinP[vIdx], evt.mask)) {
                 // schedule this if condition is valid
                 if (condition.validateScheduling(this, propagators[PINDEX], evt)) {

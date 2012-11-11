@@ -31,7 +31,7 @@ import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -57,7 +57,7 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public VarEventRecorderWithCondition(V variable, Propagator<V>[] propagators, int[] idxVinP,
-                                         ICondition condition, Solver solver, IPropagationEngine engine) {
+                                         ICondition condition, Solver solver, PropagationEngine engine) {
         super(variable, propagators, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);

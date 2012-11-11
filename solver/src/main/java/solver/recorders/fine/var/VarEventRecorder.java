@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -60,7 +60,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     protected final int offset;
 
 
-    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver, IPropagationEngine engine) {
+    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver, PropagationEngine engine) {
         super((V[]) new Variable[]{variable}, props.clone(), solver, engine);
         int n = props.length;
         // first estimate amplitude of IDs
@@ -102,7 +102,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         for (int k = first; k < last; k++) {
             int i = propIdx[k];
             Propagator propagator = propagators[i];
-            if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+            if (cause != propagator && propagator.isActive()) { // due to idempotency of propagator, it should not schedule itself
                 // schedule the coarse event recorder associated to thos
                 //propagator.forcePropagate(EventType.FULL_PROPAGATION);
                 throw new UnsupportedOperationException("Unsafe");

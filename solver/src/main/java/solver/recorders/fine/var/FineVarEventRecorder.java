@@ -32,7 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -59,7 +59,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     protected int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
     private boolean flag_swap_during_execution = false; // a flag to capture propagator swapping during its execution
 
-    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver, IPropagationEngine engine) {
+    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver, PropagationEngine engine) {
         super(variable, props, solver, engine);
         this.idxVinPs = idxVinP.clone();
         this.evtmasks = new int[props.length];
@@ -96,7 +96,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
-// Only notify constraints that filter on the specific event received
+        // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
         boolean atleastone = false;
@@ -105,7 +105,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         for (int k = first; k < last; k++) {
             int i = propIdx[k];
             Propagator propagator = propagators[i];
-            if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+            if (cause != propagator && propagator.isActive()) { // due to idempotency of propagator, it should not schedule itself
 //                int idx = p2i[propagator.getId() - offset];
                 assert p2i[propagator.getId() - offset] == i;
                 if (propagator.advise(idxVinPs[i], evt.mask)) {

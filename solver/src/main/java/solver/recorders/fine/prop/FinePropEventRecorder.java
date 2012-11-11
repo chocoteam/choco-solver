@@ -32,7 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -53,7 +53,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     // BEWARE a variable can NOT occur more than one time in a propagator !!
     protected final int[] idxVinP; //; // index of each variable within P -- immutable
 
-    public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver, IPropagationEngine engine) {
+    public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver, PropagationEngine engine) {
         super(variables, propagator, solver, engine);
         this.evtmasks = new int[nbVar];
         this.idxVinP = idxVinPs.clone();
@@ -81,7 +81,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagators[AbstractFineEventRecorder.PINDEX]) { // due to idempotency of propagator, it should not schedule itself
+        if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not schedule itself
             if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             int idx = v2i[vIdx - offset];
             if (propagators[PINDEX].advise(idxVinP[vIdx], evt.mask)) {

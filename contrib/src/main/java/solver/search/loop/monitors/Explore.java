@@ -34,9 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.IPropagationStrategy;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -149,22 +146,7 @@ public class Explore {
     public static class NoPropagation implements IPropagationEngine {
 
         @Override
-        public boolean initialized() {
-            return false;
-        }
-
-        @Override
         public void init(Solver solver) {
-        }
-
-        @Override
-        public boolean forceActivation() {
-            return false;
-        }
-
-        @Override
-        public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
-            return null;
         }
 
         @Override
@@ -189,19 +171,6 @@ public class Explore {
         }
 
         @Override
-        public void prepareWM(Solver solver) {
-        }
-
-        @Override
-        public void clearWatermark(int id1, int id2) {
-        }
-
-        @Override
-        public boolean isMarked(int id1, int id2) {
-            return false;
-        }
-
-        @Override
         public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         }
 
@@ -215,22 +184,6 @@ public class Explore {
 
         @Override
         public void desactivatePropagator(Propagator propagator) {
-        }
-
-        @Override
-        public void addEventRecorder(AbstractFineEventRecorder fer) {
-        }
-
-        @Override
-        public void addEventRecorder(AbstractCoarseEventRecorder er) {
-        }
-
-        @Override
-        public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
-        }
-
-        @Override
-        public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
         }
     }
 }

@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
 import solver.recorders.fine.var.FineVarEventRecorder;
@@ -59,7 +58,7 @@ public class FineVarEventRecorderTest {
     Propagator p1, p2, p3, p4, p5;
     VarEventRecorder<IntVar> ver = null;
     IScheduler s1 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
 
 
     @BeforeMethod

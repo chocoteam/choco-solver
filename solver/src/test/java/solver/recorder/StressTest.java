@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Queue;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -58,7 +57,7 @@ public class StressTest {
 
     Solver solver = null;
     IntVar iv1, iv2 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
     AbstractFineEventRecorder[] fers;
     Propagator p1, p2;
 
