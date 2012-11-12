@@ -27,7 +27,9 @@
 package solver.propagation;
 
 import solver.Solver;
+import solver.propagation.hardcoded.ArcEngine;
 import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
 
 /**
  * <br/>
@@ -41,6 +43,18 @@ public enum PropagationStrategies {
         @Override
         public void make(Solver solver) {
             solver.set(new ConstraintEngine(solver));
+        }
+    },
+    VARIABLE() {
+        @Override
+        public void make(Solver solver) {
+            solver.set(new VariableEngine(solver));
+        }
+    },
+    ARC() {
+        @Override
+        public void make(Solver solver) {
+            solver.set(new ArcEngine(solver));
         }
     },
 

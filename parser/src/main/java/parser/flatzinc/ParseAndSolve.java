@@ -36,7 +36,9 @@ import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.*;
+import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.io.File;
@@ -112,25 +114,16 @@ public class ParseAndSolve {
             final Solver solver = parser.solver;
 
             switch (eng) {
-                case 0:
+                case 1:
                     solver.set(new ConstraintEngine(solver));
                     break;
-                case 1:
+                case 2:
                     solver.set(new VariableEngine(solver));
                     break;
-                case 2:
+                case 3:
                     solver.set(new SevenQueuesConstraintEngine(solver));
                     break;
-                case 3:
-                    solver.set(new EightQueuesConstraintEngine(solver));
-                    break;
-                case 4:
-                    solver.set(new EightQueuesVariableEngine(solver));
-                    break;
-                case 5:
-                    solver.set(new ABConstraintEngine(solver));
-                    break;
-                case -1:
+                case 0:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {
                         solver.set(new VariableEngine(solver));

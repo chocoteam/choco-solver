@@ -59,18 +59,16 @@ import java.util.List;
  * @since 05/07/12
  */
 public class ConstraintEngine implements IPropagationEngine {
+
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected final Variable[] variables;
     protected final Propagator[] propagators;
 
-    protected static final int F = 1, C = 2;
-
     protected final CircularQueue<Propagator> pro_queue_f;
     protected Propagator lastProp;
-    protected final CircularQueue<Propagator> pro_queue_c;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final short[] schedule;
+    protected final boolean[] schedule;
     protected final int[][] masks_f;
     protected final int[] masks_c;
 
@@ -98,10 +96,9 @@ public class ConstraintEngine implements IPropagationEngine {
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
-        pro_queue_f = new CircularQueue<Propagator>(propagators.length / 10 + 1);
-        pro_queue_c = new CircularQueue<Propagator>(propagators.length);
+        pro_queue_f = new CircularQueue<Propagator>(propagators.length);
 
-        schedule = new short[nbProp];
+        schedule = new boolean[nbProp];
         masks_f = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
             masks_f[i] = new int[propagators[i].getNbVars()];
@@ -127,46 +124,26 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
-        do {
-            while (!pro_queue_f.isEmpty()) {
-                lastProp = pro_queue_f.pollFirst();
-                assert lastProp.isActive() : "propagator is not active";
-                // revision of the variable
-                aid = p2i.get(lastProp.getId());
-                schedule[aid] ^= F;
-                int nbVars = lastProp.getNbVars();
-                for (int v = 0; v < nbVars; v++) {
-                    mask = masks_f[aid][v];
-                    if (mask > 0) {
-                        if (Configuration.PRINT_PROPAGATION) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
-                        }
-                        masks_f[aid][v] = 0;
-                        lastProp.fineERcalls++;
-                        lastProp.decNbPendingEvt();
-                        lastProp.propagate(v, mask);
+        while (!pro_queue_f.isEmpty()) {
+            lastProp = pro_queue_f.pollFirst();
+            assert lastProp.isActive() : "propagator is not active";
+            // revision of the variable
+            aid = p2i.get(lastProp.getId());
+            schedule[aid] = false;
+            int nbVars = lastProp.getNbVars();
+            for (int v = 0; v < nbVars; v++) {
+                mask = masks_f[aid][v];
+                if (mask > 0) {
+                    if (Configuration.PRINT_PROPAGATION) {
+                        LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
                     }
+                    masks_f[aid][v] = 0;
+                    lastProp.fineERcalls++;
+                    lastProp.decNbPendingEvt();
+                    lastProp.propagate(v, mask);
                 }
             }
-            if (!pro_queue_c.isEmpty()) {
-                lastProp = pro_queue_c.pollFirst();
-                // revision of the propagator
-                aid = p2i.get(lastProp.getId());
-                mask = masks_c[aid];
-                masks_c[aid] = 0;
-                schedule[aid] ^= C;
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                }
-                if (Configuration.PRINT_PROPAGATION) {
-                    LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
-                }
-                lastProp.coarseERcalls++;
-                lastProp.propagate(mask);
-                onPropagatorExecution(lastProp);
-            }
-        } while (!pro_queue_f.isEmpty() || !pro_queue_c.isEmpty());
-
+        }
     }
 
     @Override
@@ -175,7 +152,7 @@ public class ConstraintEngine implements IPropagationEngine {
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
-            schedule[aid] = 0;
+            schedule[aid] ^= true;
             masks_c[aid] = 0;
             lastProp.flushPendingEvt();
         }
@@ -184,15 +161,8 @@ public class ConstraintEngine implements IPropagationEngine {
             // revision of the variable
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
-            schedule[aid] = 0;
+            schedule[aid] = false;
             lastProp.flushPendingEvt();
-        }
-        while (!pro_queue_c.isEmpty()) {
-            lastProp = pro_queue_c.pollFirst();
-            // revision of the variable
-            aid = p2i.get(lastProp.getId());
-            schedule[aid] = 0;
-            masks_c[aid] = 0;
         }
     }
 
@@ -214,9 +184,9 @@ public class ConstraintEngine implements IPropagationEngine {
                         prop.incNbPendingEvt();
                     }
                     masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if ((schedule[aid] & F) == 0) {
+                    if (!schedule[aid]) {
                         pro_queue_f.addLast(prop);
-                        schedule[aid] |= F;
+                        schedule[aid] = true;
                     }
                 }
             }
@@ -241,17 +211,11 @@ public class ConstraintEngine implements IPropagationEngine {
         //if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
         Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-        if ((schedule[aid] & F) != 0) { // if in the queue...
-            schedule[aid] ^= F;
+        if (schedule[aid]) { // if in the queue...
+            schedule[aid] = false;
             pro_queue_f.remove(propagator); // removed from the queue
             propagator.flushPendingEvt();
         }
-        if ((schedule[aid] & C) != 0) { // if in the queue...
-            schedule[aid] ^= C;
-            masks_c[aid] = 0;
-            pro_queue_c.remove(propagator); // removed from the queue
-        }
-//        }
     }
 
     @Override

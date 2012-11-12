@@ -60,20 +60,18 @@ import java.util.List;
  * @since 05/07/12
  */
 public class SevenQueuesConstraintEngine implements IPropagationEngine {
+
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected final Variable[] variables;
-
-    protected static final int O = 8; // coarse offset
-
     protected final Propagator[] propagators;
+
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected final short[] schedule_in_f, schedule_in_c;
+    protected final short[] scheduled; // also maintains the index of the queue!
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final BitSet notEmpty;
-    protected final int[][] masks_f;
-    protected final int[] masks_c;
+    protected final BitSet notEmpty; // point out the no empty queues
+    protected final int[][] evtmasks;
 
     public SevenQueuesConstraintEngine(Solver solver) {
         this.exception = new ContradictionException();
@@ -98,19 +96,17 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
-        pro_queue = new CircularQueue[16];
-        for (int i = 0; i < 16; i++) {
+        pro_queue = new CircularQueue[9];
+        for (int i = 0; i < 9; i++) {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
-        schedule_in_f = new short[nbProp];
-        schedule_in_c = new short[nbProp];
-        masks_f = new int[nbProp][];
+        scheduled = new short[nbProp];
+        evtmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
-            masks_f[i] = new int[propagators[i].getNbVars()];
+            evtmasks[i] = new int[propagators[i].getNbVars()];
         }
-        masks_c = new int[nbProp];
-        notEmpty = new BitSet(15);
+        notEmpty = new BitSet(8);
     }
 
     @Override
@@ -132,48 +128,27 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void propagate() throws ContradictionException {
         int mask, aid;
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
-            if (i < O) { // fine grained
-                while (!pro_queue[i].isEmpty()) {
-                    lastProp = pro_queue[i].pollFirst();
-                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
-                    // revision of the variable
-                    aid = p2i.get(lastProp.getId());
-                    schedule_in_f[aid] = 0;
-                    int nbVars = lastProp.getNbVars();
-                    for (int v = 0; v < nbVars; v++) {
-                        mask = masks_f[aid][v];
-                        if (mask > 0) {
-                            if (Configuration.PRINT_PROPAGATION) {
-                                LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
-                            }
-                            masks_f[aid][v] = 0;
-                            lastProp.fineERcalls++;
-                            lastProp.decNbPendingEvt();
-                            lastProp.propagate(v, mask);
+            while (!pro_queue[i].isEmpty()) {
+                lastProp = pro_queue[i].pollFirst();
+                assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                // revision of the variable
+                aid = p2i.get(lastProp.getId());
+                scheduled[aid] = 0;
+                int nbVars = lastProp.getNbVars();
+                for (int v = 0; v < nbVars; v++) {
+                    mask = evtmasks[aid][v];
+                    if (mask > 0) {
+                        if (Configuration.PRINT_PROPAGATION) {
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
                         }
+                        evtmasks[aid][v] = 0;
+                        lastProp.fineERcalls++;
+                        lastProp.decNbPendingEvt();
+                        lastProp.propagate(v, mask);
                     }
                 }
-                notEmpty.clear(i);
-            } else { // coarse grained
-                lastProp = pro_queue[i].pollFirst();
-                // revision of the propagator
-                aid = p2i.get(lastProp.getId());
-                mask = masks_c[aid];
-                masks_c[aid] = 0;
-                schedule_in_c[aid] = 0;
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                }
-                if (Configuration.PRINT_PROPAGATION) {
-                    LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
-                }
-                lastProp.coarseERcalls++;
-                lastProp.propagate(mask);
-                onPropagatorExecution(lastProp);
-                if (pro_queue[i].isEmpty()) {
-                    notEmpty.clear(i);
-                }
             }
+            notEmpty.clear(i);
         }
     }
 
@@ -182,9 +157,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int aid;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks_f[aid], 0);
-            schedule_in_f[aid] = 0;
-            masks_c[aid] = 0;
+            Arrays.fill(evtmasks[aid], 0);
+            scheduled[aid] = 0;
             lastProp.flushPendingEvt();
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
@@ -192,14 +166,10 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
-                if (i < O) {
-                    Arrays.fill(masks_f[aid], 0);
-                    schedule_in_f[aid] = 0;
-                    lastProp.flushPendingEvt();
-                } else {
-                    masks_c[aid] = 0;
-                    schedule_in_c[aid] = 0;
-                }
+                Arrays.fill(evtmasks[aid], 0);
+                scheduled[aid] = 0;
+                lastProp.flushPendingEvt();
+
             }
             notEmpty.clear(i);
         }
@@ -219,13 +189,15 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if (prop.advise(pindices[p], type.mask)) {
                     int aid = p2i.get(prop.getId());
-                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if (schedule_in_f[aid] == 0) {
-                        int prio = prop.dynPriority();
-                        pro_queue[prio].addLast(prop);
-                        schedule_in_f[aid] = (short) (prio + 1);
-                        notEmpty.set(prio);
+                    if (evtmasks[aid][pindices[p]] == 0) {
                         prop.incNbPendingEvt();
+                    }
+                    evtmasks[aid][pindices[p]] |= type.strengthened_mask;
+                    if (scheduled[aid] == 0) {
+                        int prio = 0;
+                        pro_queue[prio].addLast(prop);
+                        scheduled[aid] = (short) (prio + 1);
+                        notEmpty.set(prio);
                     }
                 }
             }
@@ -249,18 +221,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int aid = p2i.get(pid);
 //        if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
-        Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-        int prio = schedule_in_f[aid];
+        Arrays.fill(evtmasks[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
+        int prio = scheduled[aid];
         if (prio > 0) { // if in the queue...
-            schedule_in_f[aid] = 0;
+            scheduled[aid] = 0;
             pro_queue[prio - 1].remove(propagator); // removed from the queue
             propagator.flushPendingEvt();
-        }
-        prio = schedule_in_c[aid];
-        if (prio > 0) {  // if in the queue...
-            masks_c[aid] = 0;
-            schedule_in_c[aid] = 0;
-            pro_queue[O + prio - 1].remove(propagator); // removed from the queue
         }
 //        }
     }

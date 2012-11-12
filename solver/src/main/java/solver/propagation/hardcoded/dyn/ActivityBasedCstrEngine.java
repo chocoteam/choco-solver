@@ -40,7 +40,6 @@ import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
-import solver.propagation.queues.CircularQueue;
 import solver.propagation.queues.DoubleMinHeap;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -114,15 +113,11 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     protected final Variable[] variables;
     protected final Propagator[] propagators;
 
-    protected static final int F = 1, C = 2;
-
     protected final DoubleMinHeap prop_heap;
     protected Propagator lastProp;
-    protected final CircularQueue<Propagator> pro_queue_c;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final short[] schedule;
+    protected final boolean[] schedule;
     protected final int[][] masks_f;
-    protected final int[] masks_c;
 
     protected double[] A;  // activities
     protected double[] mA;  // mean of activities
@@ -178,13 +173,11 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         }
         // 5. Build the structures
         prop_heap = new DoubleMinHeap(propagators.length / 10 + 1);
-        pro_queue_c = new CircularQueue<Propagator>(propagators.length);
-        schedule = new short[nbProp];
+        schedule = new boolean[nbProp];
         masks_f = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
             masks_f[i] = new int[propagators[i].getNbVars()];
         }
-        masks_c = new int[nbProp];
 
         // 6. Build the array of weights
         A = new double[Mp - mp + 1];
@@ -215,46 +208,27 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         int mask, aid;
         nb_probes++;
         try {
-            do {
-                while (!prop_heap.isEmpty()) {
-                    lastProp = propagators[prop_heap.removemin()];
-                    assert lastProp.isActive() : "propagator is not active";
-                    // revision of the variable
-                    aid = p2i.get(lastProp.getId());
-                    cid = aid;
-                    schedule[aid] ^= F;
-                    int nbVars = lastProp.getNbVars();
-                    for (int v = 0; v < nbVars; v++) {
-                        mask = masks_f[aid][v];
-                        if (mask > 0) {
-                            if (Configuration.PRINT_PROPAGATION) {
-                                LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
-                            }
-                            masks_f[aid][v] = 0;
-                            lastProp.fineERcalls++;
-                            lastProp.decNbPendingEvt();
-                            lastProp.propagate(v, mask);
+            while (!prop_heap.isEmpty()) {
+                lastProp = propagators[prop_heap.removemin()];
+                assert lastProp.isActive() : "propagator is not active";
+                // revision of the variable
+                aid = p2i.get(lastProp.getId());
+                cid = aid;
+                schedule[aid] = false;
+                int nbVars = lastProp.getNbVars();
+                for (int v = 0; v < nbVars; v++) {
+                    mask = masks_f[aid][v];
+                    if (mask > 0) {
+                        if (Configuration.PRINT_PROPAGATION) {
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
                         }
+                        masks_f[aid][v] = 0;
+                        lastProp.fineERcalls++;
+                        lastProp.decNbPendingEvt();
+                        lastProp.propagate(v, mask);
                     }
                 }
-                if (!pro_queue_c.isEmpty()) {
-                    lastProp = pro_queue_c.pollFirst();
-                    // revision of the propagator
-                    aid = p2i.get(lastProp.getId());
-                    mask = masks_c[aid];
-                    masks_c[aid] = 0;
-                    schedule[aid] ^= C;
-                    if (lastProp.isStateLess()) {
-                        lastProp.setActive();
-                    }
-                    if (Configuration.PRINT_PROPAGATION) {
-                        LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
-                    }
-                    lastProp.coarseERcalls++;
-                    lastProp.propagate(mask);
-                    onPropagatorExecution(lastProp);
-                }
-            } while (!prop_heap.isEmpty() || !pro_queue_c.isEmpty());
+            }
         } finally {
             cid = -1;
             updateActivities();
@@ -335,8 +309,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
-            schedule[aid] = 0;
-            masks_c[aid] = 0;
+            schedule[aid] = false;
             lastProp.flushPendingEvt();
         }
         while (!prop_heap.isEmpty()) {
@@ -344,15 +317,8 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
             // revision of the variable
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
-            schedule[aid] = 0;
+            schedule[aid] = false;
             lastProp.flushPendingEvt();
-        }
-        while (!pro_queue_c.isEmpty()) {
-            lastProp = pro_queue_c.pollFirst();
-            // revision of the variable
-            aid = p2i.get(lastProp.getId());
-            schedule[aid] = 0;
-            masks_c[aid] = 0;
         }
     }
 
@@ -370,17 +336,20 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if (prop.advise(pindices[p], type.mask)) {
                     int aid = p2i.get(prop.getId());
+                    if (masks_f[aid][pindices[p]] == 0) {
+                        prop.incNbPendingEvt();
+                    }
                     masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if ((schedule[aid] & F) == 0) {
+                    if (!schedule[aid]) {
                         double _w = minOrmax * A[aid];
                         prop_heap.insert(_w, aid);
-                        schedule[aid] |= F;
+                        schedule[aid] = true;
                         S[aid]++;
                         if (cid != -1) {
                             affected.add(cid);
                             I[cid]++;
                         }
-                        lastProp.incNbPendingEvt();
+                        prop.incNbPendingEvt();
                     }
                 }
             }
@@ -404,15 +373,10 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         int aid = p2i.get(pid);
         if (aid > -1) {
             Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-            if ((schedule[aid] & F) != 0) { // if in the queue...
-                schedule[aid] ^= F;
+            if (schedule[aid]) { // if in the queue...
+                schedule[aid] = false;
                 prop_heap.remove(aid); // removed from the queue
                 lastProp.flushPendingEvt();
-            }
-            if ((schedule[aid] & C) != 0) { // if in the queue...
-                schedule[aid] ^= C;
-                masks_c[aid] = 0;
-                pro_queue_c.remove(propagator); // removed from the queue
             }
         }
     }
