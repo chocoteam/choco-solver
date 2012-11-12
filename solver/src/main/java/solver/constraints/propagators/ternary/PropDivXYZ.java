@@ -66,11 +66,6 @@ public class PropDivXYZ extends Propagator<IntVar> {
         return EventType.INT_ALL_MASK();
     }
 
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
-    }
-
     /**
      * The main propagation method that filters according to the constraint defintion
      *

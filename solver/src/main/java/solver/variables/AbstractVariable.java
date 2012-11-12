@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables;
@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, W extends IView, V extends Variable<D, DM, W>>
+public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, V extends Variable<D, DM>>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,6 +62,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     public static final String MSG_UNKNOWN = "unknown value";
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    public static final String MSG_BOUND = "new bounds are incorrect";
     protected static final String NO_NAME = "";
 
 
@@ -77,7 +78,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected int[] pindices;    // index of the variable in the i^th propagator
     protected int pIdx;
 
-    protected W[] views; // views to inform of domain modification
+    protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
     protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
@@ -94,7 +95,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = (W[]) new IView[2];
+        views = new IView[2];
         monitors = (IVariableMonitor<V>[]) new IVariableMonitor[2];
         propagators = new Propagator[8];
         pindices = new int[8];
@@ -232,10 +233,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    public void subscribeView(W view) {
+    public void subscribeView(IView view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
-            views = (W[]) new IView[tmp.length * 3 / 2 + 1];
+            views = new IView[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
         }
         views[vIdx++] = view;
@@ -249,7 +250,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return solver;
     }
 
-    public W[] getViews() {
+    public IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 

@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Queue;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -58,7 +57,7 @@ public class StressTest {
 
     Solver solver = null;
     IntVar iv1, iv2 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
     AbstractFineEventRecorder[] fers;
     Propagator p1, p2;
 
@@ -124,10 +123,10 @@ public class StressTest {
         // for update
         expect(iv1.getId()).andReturn(1).times(M);
         expect(p2.getPropagationConditions(1)).andReturn(EventType.INSTANTIATE.mask).times(M);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(1);
         run(false);
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(1);
         replay(p2);
         engine.flush();
@@ -137,9 +136,9 @@ public class StressTest {
         // for update
         expect(iv1.getId()).andReturn(1).times(M);
         expect(p2.getPropagationConditions(1)).andReturn(EventType.INSTANTIATE.mask).times(M);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(M);
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(M);
         // for execute
 
@@ -173,11 +172,11 @@ public class StressTest {
         // for update
         expect(iv1.getId()).andReturn(1).times(M);
         expect(p2.getPropagationConditions(1)).andReturn(EventType.INSTANTIATE.mask).times(M);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(1);
         run(false);
 
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(1);
         replay(p2);
         engine.flush();
@@ -187,9 +186,9 @@ public class StressTest {
         expect(iv1.getId()).andReturn(1).times(M);
         expect(p2.getPropagationConditions(1)).andReturn(EventType.INSTANTIATE.mask).times(M);
         // for execute
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(M);
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(M);
         expect(p2.isActive()).andReturn(true).times(M);
         p2.propagate(1, EventType.INSTANTIATE.strengthened_mask);
@@ -223,17 +222,17 @@ public class StressTest {
         expect(iv1.getId()).andReturn(1).times(M);
         expect(p2.getId()).andReturn(2).times(M);
         expect(p2.getPropagationConditions(1)).andReturn(EventType.INSTANTIATE.mask).times(M);
-        p1.incNbRecorderEnqued();
+        p1.incNbPendingEvt();
         expectLastCall().times(1);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(1);
         run(false);
 
         expect(p1.getId()).andReturn(0).times(M);
         expect(p2.getId()).andReturn(2).times(M);
-        p1.decNbRecrodersEnqued();
+        p1.decNbPendingEvt();
         expectLastCall().times(1);
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(1);
         replay(p1, p2);
         engine.flush();
@@ -246,13 +245,13 @@ public class StressTest {
         // for execute
         expect(p1.getId()).andReturn(0).times(M);
         expect(p2.getId()).andReturn(2).times(M);
-        p1.incNbRecorderEnqued();
+        p1.incNbPendingEvt();
         expectLastCall().times(M);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         expectLastCall().times(M);
-        p1.decNbRecrodersEnqued();
+        p1.decNbPendingEvt();
         expectLastCall().times(M);
-        p2.decNbRecrodersEnqued();
+        p2.decNbPendingEvt();
         expectLastCall().times(M);
         expect(p2.isActive()).andReturn(true).times(M);
         p2.propagate(1, EventType.INSTANTIATE.strengthened_mask);

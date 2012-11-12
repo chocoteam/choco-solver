@@ -38,8 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -95,8 +94,8 @@ public class PropKCliques extends Propagator {
     }
 
     private void filter() throws ContradictionException {
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-        INeighbors nei;
+        ISet nodes = g.getKernelGraph().getActiveNodes();
+        ISet nei;
         int mate;
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             if (!inMIS.get(i)) {
@@ -123,13 +122,13 @@ public class PropKCliques extends Propagator {
         in.clear();
         inMIS.clear();
         int nb = 0;
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+        ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             in.set(i);
             nb++;
         }
         int idx = -1;
-        INeighbors nei;
+        ISet nei;
         int min = 0;
         while (nb > 0) {
             idx = in.nextSetBit(idx + 1);
@@ -152,14 +151,14 @@ public class PropKCliques extends Propagator {
         in.clear();
         inMIS.clear();
         int nb = 0;
-        IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+        ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             in.set(i);
-            nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+            nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).getSize();
             nb++;
         }
         int idx;
-        INeighbors nei;
+        ISet nei;
         TIntArrayList list = new TIntArrayList();
         int min = 0;
         while (nb > 0) {

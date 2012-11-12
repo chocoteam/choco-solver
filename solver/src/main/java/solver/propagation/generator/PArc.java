@@ -29,7 +29,7 @@ package solver.propagation.generator;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.arc.FineArcEventRecorder;
@@ -55,19 +55,19 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
 
     static final Predicate[] NOV = new Predicate[0];
 
-    public PArc(IPropagationEngine propagationEngine, Variable... variables) {
+    public PArc(PropagationEngine propagationEngine, Variable... variables) {
         this(propagationEngine, variables, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Constraint... constraints) {
+    public PArc(PropagationEngine propagationEngine, Constraint... constraints) {
         this(propagationEngine, constraints, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Propagator... propagators) {
+    public PArc(PropagationEngine propagationEngine, Propagator... propagators) {
         this(propagationEngine, propagators, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (variables.length > 0) {
@@ -80,7 +80,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public PArc(IPropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (constraints.length > 0) {
@@ -96,7 +96,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public PArc(IPropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (propagators.length > 0) {
@@ -110,7 +110,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
     }
 
 
-    private void make(Variable var, Predicate[] validations, IPropagationEngine propagationEngine, Solver solver) {
+    private void make(Variable var, Predicate[] validations, PropagationEngine propagationEngine, Solver solver) {
         int vidx = var.getId();
         Propagator[] propagators = var.getPropagators();
         int[] pindices = var.getPIndices();
@@ -136,7 +136,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    private void make(Propagator prop, Predicate[] validations, IPropagationEngine propagationEngine, Solver solver) {
+    private void make(Propagator prop, Predicate[] validations, PropagationEngine propagationEngine, Solver solver) {
         int pidx = prop.getId();
         Variable[] variables = prop.getVars();
         for (int j = 0; j < variables.length; j++) {
@@ -155,7 +155,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public static FineArcEventRecorder make(IPropagationEngine propagationEngine, Solver solver,
+    public static FineArcEventRecorder make(PropagationEngine propagationEngine, Solver solver,
                                             Variable var, Propagator prop, int idx) {
         FineArcEventRecorder er = null;
         int pidx = prop.getId();

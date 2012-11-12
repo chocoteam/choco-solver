@@ -40,8 +40,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K arcs/edges belong to the final graph
@@ -83,10 +82,10 @@ public class PropKArcs extends Propagator {
     public void propagate(int evtmask) throws ContradictionException {
         int nbK = 0;
         int nbE = 0;
-        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        ISet env = g.getEnvelopGraph().getActiveNodes();
         for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
-            nbE += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-            nbK += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+            nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
+            nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
         }
         if (!g.isDirected()) {
             nbK /= 2;
@@ -115,8 +114,8 @@ public class PropKArcs extends Propagator {
         k.updateLowerBound(nbK, aCause);
         k.updateUpperBound(nbE, aCause);
         if (nbK != nbE && k.instantiated()) {
-            INeighbors nei;
-            IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+            ISet nei;
+            ISet env = g.getEnvelopGraph().getActiveNodes();
             if (k.getValue() == nbE) {
                 for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
                     nei = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -128,7 +127,7 @@ public class PropKArcs extends Propagator {
                 setPassive();
             }
             if (k.getValue() == nbK) {
-                INeighbors neiKer;
+                ISet neiKer;
                 for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
                     nei = g.getEnvelopGraph().getSuccessorsOf(i);
                     neiKer = g.getKernelGraph().getSuccessorsOf(i);
@@ -158,10 +157,10 @@ public class PropKArcs extends Propagator {
     public ESat isEntailed() {
         int nbK = 0;
         int nbE = 0;
-        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        ISet env = g.getEnvelopGraph().getActiveNodes();
         for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
-            nbE += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-            nbK += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+            nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
+            nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
         }
         if (!g.isDirected()) {
             nbK /= 2;

@@ -38,7 +38,6 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.constraints.Constraint;
-import solver.objective.NoObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -154,7 +153,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
                 }
             } else {
                 if (searchLoop.getLimitsBox().isReached()
-                        && !(searchLoop.getObjectivemanager() instanceof NoObjectiveManager)) {
+                        && (searchLoop.getObjectivemanager().isOptimization())) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");

@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -271,8 +272,7 @@ public class TestSolveur {
         solver.post(ConstraintFactory.eq(vars[0], vars[n - 1], solver));
 
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
-//        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-//        PropagationStrategies.ONE_QUEUE_WITH_PROPS.make(solver, pengine);
+        PropagationStrategies.CONSTRAINT.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

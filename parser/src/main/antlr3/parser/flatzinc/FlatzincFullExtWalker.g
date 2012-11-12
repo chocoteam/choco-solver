@@ -54,7 +54,6 @@ import parser.flatzinc.ast.FVariable;
 
 import parser.flatzinc.ast.ext.*;
 
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Generator;
 import solver.propagation.generator.PropagationStrategy;
@@ -68,6 +67,7 @@ import solver.recorders.fine.arc.FineArcEventRecorder;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import choco.kernel.ResolutionPolicy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +117,7 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 	    LOGGER.warn("\% Remaining pairs after group declarations");
 	}
 
-	IPropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment(),false, false, false);
+	PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment(),false, false, false);
 	}
 	(ps = structure[propagationEngine])?
     {
@@ -142,7 +142,7 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 //    :
 //    {
 //    ArrayList<Pair> pairs= Pair.populate(mSolver);
-//    IPropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment());
+//    PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment());
 //    }
 //    (group_decl[pairs])+
 //    {
@@ -248,7 +248,7 @@ op  returns [Operator value]
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-structure   [IPropagationEngine pe] returns [PropagationStrategy ps]
+structure   [PropagationEngine pe] returns [PropagationStrategy ps]
 	:	s=struct[pe]
 	{
 	$ps = s;
@@ -259,7 +259,7 @@ structure   [IPropagationEngine pe] returns [PropagationStrategy ps]
 	}
 	;
 
-struct  [IPropagationEngine pe] returns[PropagationStrategy item]
+struct  [PropagationEngine pe] returns[PropagationStrategy item]
     :	^(STRUC
     {
     // init list
@@ -278,7 +278,7 @@ struct  [IPropagationEngine pe] returns[PropagationStrategy item]
     }
 	;
 
-struct_reg  [IPropagationEngine pe] returns[PropagationStrategy item]
+struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
 	:	^(STREG IDENTIFIER
 	{
 	String id = $IDENTIFIER.text;
@@ -313,7 +313,7 @@ struct_reg  [IPropagationEngine pe] returns[PropagationStrategy item]
     )
 	;
 
-elt	[IPropagationEngine pe] returns [ISchedulable[\] items]
+elt	[PropagationEngine pe] returns [ISchedulable[\] items]
     :	s=struct[pe]
     {
     $items = new ISchedulable[]{s};
@@ -765,7 +765,7 @@ constraint
 solve_goal
 	:
 	{
-	FGoal.Resolution type = FGoal.Resolution.SATISFY;
+	ResolutionPolicy type = ResolutionPolicy.SATISFACTION;
 	Expression expr = null;
 	}
 	^(SOLVE anns=annotations res=resolution[type,expr])
@@ -774,16 +774,16 @@ solve_goal
 	}
 	;
 
-resolution  [FGoal.Resolution type, Expression expr]
+resolution  [ResolutionPolicy type, Expression expr]
     :   SATISFY
     |   ^(MINIMIZE e=expr)
     {
-    $type=FGoal.Resolution.MINIMIZE;
+    $type=ResolutionPolicy.MINIMIZE;
     $expr=e;
     }
     |   ^(MAXIMIZE e=expr)
     {
-    $type=FGoal.Resolution.MAXIMIZE;
+    $type=ResolutionPolicy.MAXIMIZE;
     $expr=e;
     }
     ;

@@ -73,7 +73,7 @@ public class PropBoolSum extends Propagator<IntVar> {
      * @param solver
      * @param intVarPropagatorConstraint
      */
-    protected PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.append(vars, new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
         this.sum = sum;
         n = vars.length;
@@ -110,7 +110,6 @@ public class PropBoolSum extends Propagator<IntVar> {
                         vars[i].instantiateTo(0, aCause);
                     }
                 }
-                setPassive();
             }
             if (sum.getValue() == ub) {
                 for (int i = 0; i < n; i++) {
@@ -118,8 +117,10 @@ public class PropBoolSum extends Propagator<IntVar> {
                         vars[i].instantiateTo(1, aCause);
                     }
                 }
-                setPassive();
             }
+            // remarque : ne pas mettre de setPassive() car:
+            // 1) C'est inutile : tout est instancie
+            // 2) Il faudrait verifier que tous les evenements ont bien ete depiles
         }
     }
 

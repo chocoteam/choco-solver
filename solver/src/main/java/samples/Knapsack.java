@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package samples;
@@ -31,7 +31,8 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.Sum;
-import solver.objective.strategies.Dichotomic_Maximization;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -112,20 +113,20 @@ public class Knapsack extends AbstractProblem {
 
         solver.post(c_size);
         solver.post(c_energy);
-		solver.post(new solver.constraints.nary.Knapsack(objects,scalar,power,volumes,energies,solver));
+        solver.post(new solver.constraints.nary.Knapsack(objects, scalar, power, volumes, energies, solver));
     }
 
     @Override
     public void configureSearch() {
-		AbstractStrategy strat = StrategyFactory.domddegMinDom(objects);
-		// top-down
+        AbstractStrategy strat = StrategyFactory.domddegMinDom(objects);
+        // top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
-		// dichotomic
-		solver.set(new StaticStrategiesSequencer(new Dichotomic_Maximization(power,solver),strat));
-		// bottom-up
+        // dichotomic
+        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.DICHOTOMIC), strat));
+        // bottom-up
 //		solver.set(strat);
 
-		// old stuff
+        // old stuff
         /*AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
             AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
 
@@ -143,7 +144,7 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-	// not usefull
+        // not usefull
 //        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
 //        solver.set(pengine);
@@ -161,7 +162,7 @@ public class Knapsack extends AbstractProblem {
 
     public static void main(String[] args) {
         new Knapsack().execute(args);
-        }
+    }
 
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////

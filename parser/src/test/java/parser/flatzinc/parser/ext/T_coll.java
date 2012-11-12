@@ -41,7 +41,6 @@ import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
@@ -81,7 +80,7 @@ public class T_coll extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        IPropagationEngine pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+        PropagationEngine pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
 
         ArrayList<Pair> pairs = Pair.populate(mSolver);
         arcs = new ISchedulable[pairs.size()];

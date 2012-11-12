@@ -48,8 +48,8 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 public class PropIntVarChanneling extends Propagator {
 
@@ -105,7 +105,7 @@ public class PropIntVarChanneling extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        INeighbors nei;
+        ISet nei;
         IntVar v;
         for (int i = 0; i < n; i++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -176,7 +176,7 @@ public class PropIntVarChanneling extends Propagator {
             if (val < n && !g.getEnvelopGraph().arcExists(i, val)) {
                 return ESat.FALSE;
             }
-            if (g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() > 1) {
+            if (g.getEnvelopGraph().getSuccessorsOf(i).getSize() > 1) {
                 return ESat.FALSE;
             }
         }

@@ -36,8 +36,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing edge costs
@@ -112,7 +112,7 @@ public class PropCycleEvalObj extends Propagator {
     }
 
     protected void filter(int minSum) throws ContradictionException {
-        INeighbors succs;
+        ISet succs;
         int delta = sum.getUB() - minSum;
         for (int i = 0; i < n; i++) {
             succs = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -149,7 +149,7 @@ public class PropCycleEvalObj extends Propagator {
     }
 
     protected int getBestNot(int i, int not) throws ContradictionException {
-        INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+        ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
         int cost = -1;
         int idx = -1;
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
@@ -179,7 +179,7 @@ public class PropCycleEvalObj extends Propagator {
     }
 
     protected int getWorstNot(int i, int not) throws ContradictionException {
-        INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+        ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
         int cost = -1;
         int idx = -1;
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {

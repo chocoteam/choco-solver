@@ -37,9 +37,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.undirectedGraph.StoredUndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -83,7 +82,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
         n = vars.length;
         this.nValues = nValues;
-        digraph = new StoredUndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST);
+        digraph = new UndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST, false);
         in = new BitSet(n);
         inMIS = new BitSet(n);
         nodes = new BitSet(n);
@@ -196,7 +195,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
             in.set(i);
             nbNeighbors[i] = vars[i].getDomainSize();
         }
-        INeighbors nei;
+        ISet nei;
         list.clear();
         int min = 0;
         // find MIS
@@ -230,7 +229,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        INeighbors nei;
+        ISet nei;
         in.clear();
         int mate;
         for (int i = 0; i < n; i++) {
@@ -310,7 +309,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp < n) {
-            INeighbors nei = digraph.getNeighborsOf(idxVarInProp);
+            ISet nei = digraph.getNeighborsOf(idxVarInProp);
             for (int v = nei.getFirstElement(); v >= 0; v = nei.getNextElement()) {
                 if (!intersect(idxVarInProp, v)) {
                     digraph.removeEdge(idxVarInProp, v);
@@ -327,11 +326,6 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override

@@ -45,8 +45,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Simple NoSubtour of Pesant when undirected graph
@@ -104,7 +104,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
             origin[i].set(i);
             size[i].set(1);
         }
-        INeighbors nei;
+        ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getKernelGraph().getSuccessorsOf(i);
             j = nei.getFirstElement();

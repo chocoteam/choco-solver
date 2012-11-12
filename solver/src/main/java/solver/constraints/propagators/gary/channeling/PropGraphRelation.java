@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator channeling a graph and an array of variables through a Relation object
@@ -101,7 +100,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
             return ESat.UNDEFINED;
         }
         for (int i = 0; i < n; i++) {
-            INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (relation.isEntail(i, j) == ESat.FALSE) {
                     return ESat.FALSE;
@@ -116,13 +115,13 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
     //***********************************************************************************
 
     private void checkVar(int i) throws ContradictionException {
-        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+        ISet ker = g.getKernelGraph().getActiveNodes();
         for (int j = 0; j < n; j++) {
             if (g.getKernelGraph().arcExists(i, j)) {
                 relation.applyTrue(i, j, solver, aCause);
             } else {
                 if (!g.getEnvelopGraph().arcExists(i, j)) {
-                    if (ker.isActive(i) && ker.isActive(j)) {
+                    if (ker.contain(i) && ker.contain(j)) {
                         relation.applyFalse(i, j, solver, aCause);
                     }
                 }

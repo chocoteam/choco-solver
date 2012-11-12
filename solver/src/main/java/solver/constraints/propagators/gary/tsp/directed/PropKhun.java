@@ -31,20 +31,23 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
+import solver.variables.graph.IGraph;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
-public class PropKhun extends Propagator implements IRelaxation {
+/**
+ * WARNING unsafe
+ */
+public class PropKhun extends Propagator implements IGraphRelaxation {
 
     DirectedGraphVar g;
     IntVar obj;
@@ -76,7 +79,7 @@ public class PropKhun extends Propagator implements IRelaxation {
         markedCol = new BitSet(n);
         // flow
         n2 = 2 * n;
-        digraph = new StoredDirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST, false);
         free = new BitSet(n2);
         father = new int[n2];
         in = new BitSet(n2);
@@ -158,7 +161,7 @@ public class PropKhun extends Propagator implements IRelaxation {
     //***********************************************************************************
 
     private void resetMatrix() {
-        INeighbors suc;
+        ISet suc;
         M = obj.getUB() + 1;
         for (int i = 0; i < n; i++) {
             suc = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -174,7 +177,7 @@ public class PropKhun extends Propagator implements IRelaxation {
 
     private void decrease() {
         double min;
-        INeighbors nei;
+        ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(i);
             min = M;
@@ -266,7 +269,7 @@ public class PropKhun extends Propagator implements IRelaxation {
     private void mark() {
         markedRow.clear();
         markedCol.clear();
-        INeighbors suc;
+        ISet suc;
         for (int i = 0; i < n; i++) {
             suc = g.getEnvelopGraph().getSuccessorsOf(i);
             if (lineZero[i] == -1) {
@@ -304,7 +307,7 @@ public class PropKhun extends Propagator implements IRelaxation {
 
     private int getMinPositiveValue() {
         int minVal = M;
-        INeighbors suc;
+        ISet suc;
         for (int i = markedRow.nextSetBit(0); i >= 0; i = markedRow.nextSetBit(i + 1)) {
             suc = g.getEnvelopGraph().getSuccessorsOf(i);
             for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
@@ -322,7 +325,7 @@ public class PropKhun extends Propagator implements IRelaxation {
     }
 
     private void changeMatrix(int minVal) {
-        INeighbors suc;
+        ISet suc;
         boolean already;
         for (int i = 0; i < n; i++) {
             suc = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -360,7 +363,7 @@ public class PropKhun extends Propagator implements IRelaxation {
     private void buildDigraph() {
         free.set(0, n2);
         int j;
-        INeighbors nei;
+        ISet nei;
         for (int i = 0; i < n2; i++) {
             digraph.getSuccessorsOf(i).clear();
             digraph.getPredecessorsOf(i).clear();
@@ -416,7 +419,7 @@ public class PropKhun extends Propagator implements IRelaxation {
         int idxLast = 0;
         list[idxLast++] = root;
         int x, y;
-        INeighbors succs;
+        ISet succs;
         while (idxFirst != idxLast) {
             x = list[idxFirst++];
             succs = digraph.getSuccessorsOf(x);
@@ -448,7 +451,7 @@ public class PropKhun extends Propagator implements IRelaxation {
             }
         }
         obj.updateLowerBound(lb, aCause);
-        INeighbors nei;
+        ISet nei;
         int delta = obj.getUB() - lb;
         for (int i = 0; i < n; i++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -515,5 +518,10 @@ public class PropKhun extends Propagator implements IRelaxation {
             return costs[i][0];
         }
         return costs[i][j];
+    }
+
+    @Override
+    public IGraph getSupport() {
+        throw new UnsupportedOperationException("not implemented yet");
     }
 }

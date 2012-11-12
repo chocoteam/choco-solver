@@ -35,9 +35,9 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 import java.util.LinkedList;
@@ -79,7 +79,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
         this.source = source;
         list = new LinkedList<Integer>();
         visited = new BitSet(n);
-        domTrans = new DirectedGraph(n, GraphType.MATRIX);
+        domTrans = new DirectedGraph(n, GraphType.MATRIX, false);
     }
 
     //***********************************************************************************
@@ -90,7 +90,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
         list.clear();
         visited.clear();
         list.add(x);
-        INeighbors env;
+        ISet env;
         visited.set(x);
         while (!list.isEmpty()) {
             x = list.removeFirst();
@@ -105,32 +105,28 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
         return visited.nextSetBit(0) >= 0;
     }
 
-    private void filtering() throws ContradictionException {
-        structuralPruning();
-    }
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
             g.enforceNode(i, aCause);
             g.removeArc(i, i, aCause);
         }
-        filtering();
+        structuralPruning();
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        filtering();
+        structuralPruning();
     }
 
     private void structuralPruning() throws ContradictionException {
-        INeighbors succ;
+        ISet succ;
         for (int i = 0; i < n; i++) {
             domTrans.getSuccessorsOf(i).clear();
             domTrans.getPredecessorsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
-            DirectedGraph dig = new DirectedGraph(n, GraphType.LINKED_LIST);
+            DirectedGraph dig = new DirectedGraph(n, GraphType.LINKED_LIST, false);
             for (int j = 0; j < n; j++) {
                 if (j != i) {
                     succ = g.getEnvelopGraph().getSuccessorsOf(j);

@@ -37,7 +37,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K loops belong to the final graph
@@ -71,7 +71,7 @@ public class PropKLoops extends Propagator {
     public void propagate(int evtmask) throws ContradictionException {
         int min = 0;
         int max = 0;
-        IActiveNodes nodes = g.getEnvelopGraph().getActiveNodes();
+        ISet nodes = g.getEnvelopGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             if (g.getKernelGraph().arcExists(i, i)) {
                 min++;
@@ -123,7 +123,7 @@ public class PropKLoops extends Propagator {
     public ESat isEntailed() {
         int min = 0;
         int max = 0;
-        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        ISet env = g.getEnvelopGraph().getActiveNodes();
         for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
             if (g.getKernelGraph().arcExists(i, i)) {
                 min++;

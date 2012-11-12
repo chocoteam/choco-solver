@@ -37,12 +37,12 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
+import solver.variables.setDataStructures.ISet;
 
 public class PropNTree extends Propagator {
 
@@ -83,7 +83,7 @@ public class PropNTree extends Propagator {
 //			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 //			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
 //			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-//				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
+//				if (g.getEnvelopGraph().getSuccessorsOf(node).getSize()<1 || g.getKernelGraph().getSuccessorsOf(node).getSize()>1){
 //					return false;
 //				}
 //				nei = g.getEnvelopGraph().getSuccessorsOf(node);
@@ -138,8 +138,8 @@ public class PropNTree extends Propagator {
 
     private void structuralPruning() throws ContradictionException {
         int n = g.getEnvelopGraph().getNbNodes();
-        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType());
-        INeighbors nei;
+        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
+        ISet nei;
         for (int node = 0; node < n; node++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(node);
             for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
@@ -190,7 +190,7 @@ public class PropNTree extends Propagator {
         int[] sccOf = SCCfinder.getNodesSCC();
         nonSinks.clear();
         boolean looksSink;
-        INeighbors nei;
+        ISet nei;
         int node;
         int nbSinks = 0;
         for (int i = SCCfinder.getNbSCC() - 1; i >= 0; i--) {
@@ -198,7 +198,7 @@ public class PropNTree extends Propagator {
             boolean inKer = false;
             node = SCCfinder.getSCCFirstNode(i);
             while (node != -1) {
-                if (g.getKernelGraph().getActiveNodes().isActive(node)) {
+                if (g.getKernelGraph().getActiveNodes().contain(node)) {
                     inKer = true;
                 }
                 nei = g.getEnvelopGraph().getSuccessorsOf(node);

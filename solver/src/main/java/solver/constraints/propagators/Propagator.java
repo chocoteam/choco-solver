@@ -35,6 +35,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -113,7 +114,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected short state; // 0 : new -- 1 : active -- 2 : passive
 
-    protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
+    protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
@@ -169,7 +170,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.aCause = this;
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
-            vars[v].recordMask(getPropagationConditions(v));
             /*if (!vars[v].instantiated()) {
                 nbNi++;
             }*/
@@ -216,15 +216,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Return the specific mask indicating the <b>propagation events</b> on which <code>this</code> can react. <br/>
-     *
-     * @return
-     */
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    /**
      * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
      *
@@ -249,6 +240,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public abstract void propagate(int evtmask) throws ContradictionException;
 
     /**
+     * Advise a propagator of a modification occurring on one of its variables,
+     * and decide if <code>this</code> should be scheduled.
+     * At least, this method SHOULD check the propagation condition of the event received.
+     * In addition, this method can be used to update internal state of <code>this</code>.
+     * This method can returns <code>true</code> even if the propagator is already scheduled.
+     *
+     * @param idxVarInProp index of the modified variable
+     * @param mask         modification event mask
+     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
+     */
+    public boolean advise(int idxVarInProp, int mask) {
+        return (mask & getPropagationConditions(idxVarInProp)) != 0;
+    }
+
+    /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
@@ -263,15 +269,25 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param evt event type
      */
-    public final void forcePropagate(EventType evt) {
+    public final void forcePropagate(EventType evt) throws ContradictionException {
         //coarseER.update(evt);
-        solver.getEngine().schedulePropagator(this, evt);
+        //solver.getEngine().schedulePropagator(this, evt);
+        if (Configuration.PRINT_PROPAGATION)
+            LoggerFactory.getLogger("solver").info("\tFP {}", "<< {} ::" + this.toString() + " >>");
+        if (nbPendingEvt == 0) {
+            coarseERcalls++;
+            propagate(evt.getStrengthenedMask());
+        }
     }
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
         environment.save(operations[NEW]);
+        // update activity mask of variables
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].recordMask(getPropagationConditions(v));
+        }
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
             solver.getEngine().activatePropagator(this);
@@ -283,6 +299,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
         environment.save(operations[ACTIVE]);
+        //TODO: update var mask back
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
             solver.getEngine().desactivatePropagator(this);
@@ -397,18 +414,22 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    public int getNbPendingER() {
-        return nbPendingER;
+    public int getNbPendingEvt() {
+        return nbPendingEvt;
     }
 
-    public void incNbRecorderEnqued() {
-        assert (nbPendingER >= 0) : "number of enqued records is < 0";
-        nbPendingER++;
+    public void incNbPendingEvt() {
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0";
+        nbPendingEvt++;
     }
 
-    public void decNbRecrodersEnqued() {
-        assert (nbPendingER > 0) : "number of enqued records is < 0";
-        nbPendingER--;
+    public void decNbPendingEvt() {
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0";
+        nbPendingEvt--;
+    }
+
+    public void flushPendingEvt() {
+        nbPendingEvt = 0;
     }
 
     /**

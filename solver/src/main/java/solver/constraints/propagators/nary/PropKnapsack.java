@@ -99,11 +99,6 @@ public class PropKnapsack extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
     }

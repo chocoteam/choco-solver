@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
 import solver.recorders.fine.var.FineVarEventRecorder;
@@ -59,7 +58,7 @@ public class FineVarEventRecorderTest {
     Propagator p1, p2, p3, p4, p5;
     VarEventRecorder<IntVar> ver = null;
     IScheduler s1 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
 
 
     @BeforeMethod
@@ -266,16 +265,16 @@ public class FineVarEventRecorderTest {
         // p5 is not yet active
         // p1, p2 then p3 are virtually executed
         // RESULTS : ver is removed from scheduler
-        p1.incNbRecorderEnqued();
+        p1.incNbPendingEvt();
         p1.getId();
         expectLastCall().andReturn(1).times(1);
-        p2.incNbRecorderEnqued();
+        p2.incNbPendingEvt();
         p2.getId();
         expectLastCall().andReturn(2).times(1);
-        p3.incNbRecorderEnqued();
+        p3.incNbPendingEvt();
         p3.getId();
         expectLastCall().andReturn(3).times(1);
-        p5.incNbRecorderEnqued();
+        p5.incNbPendingEvt();
 
         replay(iv1, p1, p2, p3, p4, p5);
 

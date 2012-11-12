@@ -39,7 +39,6 @@ import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PropagationStrategy;
@@ -62,7 +61,7 @@ public class T_many extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    IPropagationEngine pe;
+    PropagationEngine pe;
     ArrayList<FineArcEventRecorder> arcs;
 
     @BeforeMethod

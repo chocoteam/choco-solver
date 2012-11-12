@@ -30,7 +30,6 @@ package solver.propagation;
 import choco.kernel.common.util.objects.BacktrackableArrayList;
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -42,7 +41,6 @@ import solver.exception.SolverException;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -68,7 +66,6 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected TIntObjectHashMap<IList<Variable, AbstractFineEventRecorder>> fines_v;
     protected TIntObjectHashMap<List<AbstractFineEventRecorder>> fines_p;
-    protected TIntObjectHashMap<AbstractCoarseEventRecorder> coarses;
 
     protected int pivot;
 
@@ -106,7 +103,6 @@ public class PropagationEngine implements IPropagationEngine {
         this.environment = environment;
         fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
         fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
-        coarses = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         this.checkProperties = checkProperties;
         this.forceInitialPropagation = forceInitialPropagation;
         this.forceActivation = forceActivation;
@@ -134,17 +130,27 @@ public class PropagationEngine implements IPropagationEngine {
         default_nb_vars = nbVar;
     }
 
-    @Override
+
+    /**
+     * Is <code>this</code> initialized ?
+     *
+     * @return <code>true</code> if <code>this</code> is initialized
+     */
     public boolean initialized() {
         return initialized;
     }
 
-    @Override
     public boolean forceActivation() {
         return forceActivation;
     }
 
-    @Override
+    /**
+     * Attach a strategy to <code>this</code>.
+     * Override previously defined one.
+     *
+     * @param propagationStrategy a group
+     * @return this
+     */
     public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
         this.propagationStrategy = propagationStrategy;
         return this;
@@ -168,7 +174,7 @@ public class PropagationEngine implements IPropagationEngine {
                 initialized = true;
             }
         }
-        if (forceInitialPropagation && !initialPropagationDone) {
+        /*if (forceInitialPropagation && !initialPropagationDone) {
             // 2. schedule constraints for initial propagation
             Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
@@ -186,7 +192,7 @@ public class PropagationEngine implements IPropagationEngine {
                     if (propagators[p].isActive()) activatePropagator(propagators[p]);
                 }
             }
-        }
+        }*/
     }
 
     public void prepareWM(Solver solver) {
@@ -244,10 +250,6 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
-//        Constraint[] constraints = solver.getCstrs();
-//        Queue arcs = new Queue(new PArc(this, constraints));
-//        Queue coarses = new Queue(new PCoarse(this, constraints));
-//        return new Sort(arcs.clearOut(), coarses.pickOne()).clearOut();
         throw new UnsupportedOperationException();
     }
 
@@ -273,7 +275,6 @@ public class PropagationEngine implements IPropagationEngine {
         return exception;
     }
 
-    @Override
     public void addEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         Propagator[] props = fer.getPropagators();
@@ -297,12 +298,6 @@ public class PropagationEngine implements IPropagationEngine {
                 fines_v.get(id).add(fer, false, forceActivation);
             }
         }
-    }
-
-    @Override
-    public void addEventRecorder(AbstractCoarseEventRecorder er) {
-        int id = er.getPropagators()[0].getId();
-        coarses.put(id, er);
     }
 
     @Override
@@ -338,13 +333,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int id = propagator.getId();
-        coarses.get(id).update(event);
-    }
-
-    @Override
+    /**
+     * Set the propagator as activated within the propagation engine
+     *
+     * @param propagator propagator to activate
+     */
     public void activatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -356,7 +349,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
+    /**
+     * Set the propagator as inactivated within the propagation engine
+     *
+     * @param propagator propagator to desactivate
+     */
     public void desactivatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -368,7 +365,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {
@@ -376,7 +372,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {

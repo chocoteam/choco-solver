@@ -38,10 +38,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -114,7 +113,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         n2 = idx;
         fifo = new int[n2];
         matching = new int[n2];
-        digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX, false);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];
@@ -202,7 +201,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
         int x, y;
-        INeighbors succs;
+        ISet succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
             succs = digraph.getSuccessorsOf(x);
@@ -305,12 +304,12 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         } else {
             free.clear();
             for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
                     free.set(i);
                 }
             }
             for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
                     free.set(i);
                 }
             }
@@ -330,7 +329,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         if ((mask & EventType.INSTANTIATE.mask) != 0) {
             int val = vars[varIdx].getValue();
             int j = map.get(val);
-            INeighbors nei = digraph.getPredecessorsOf(j);
+            ISet nei = digraph.getPredecessorsOf(j);
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
                 if (i != varIdx) {
                     digraph.removeEdge(i, j);
@@ -353,11 +352,6 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override

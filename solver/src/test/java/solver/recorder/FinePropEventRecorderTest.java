@@ -34,11 +34,9 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
-import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.prop.FinePropEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -59,11 +57,10 @@ public class FinePropEventRecorderTest {
     Solver solver = null;
     IntVar iv1, iv2, iv3 = null;
 
-    CoarseEventRecorder cer = null;
     Propagator p1;
     FinePropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
-    IPropagationEngine engine;
+    PropagationEngine engine;
 
 
     @BeforeMethod
@@ -85,19 +82,18 @@ public class FinePropEventRecorderTest {
         iv3 = EasyMock.createMock(IntVar.class);
         iv3.getId();
         expectLastCall().andReturn(3).times(3);
-        cer = createMock(CoarseEventRecorder.class);
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
         per = new FinePropEventRecorder<IntVar>(new IntVar[]{iv1, iv2, iv3, iv1}, p1, new int[]{0, 1, 2, 3}, solver, engine);
         engine.addEventRecorder(per);
 
-        verify(iv1, iv2, iv3, cer, p1);
-        reset(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
+        reset(iv1, iv2, iv3, p1);
 
         s1 = EasyMock.createMock(IScheduler.class);
         per.setScheduler(s1, 0);
 
-        reset(iv1, iv2, iv3, cer, p1);
+        reset(iv1, iv2, iv3, p1);
     }
 
     private <E, T> E get(String name, Class clazz, T inst) {
@@ -137,24 +133,24 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(1);
         iv3.getId();
         expectLastCall().andReturn(1);
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
         Assert.assertEquals(per.getIdx(iv1), 0);
         Assert.assertEquals(per.getIdx(iv2), 0);
         Assert.assertEquals(per.getIdx(iv3), 0);
 
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testactivate() throws ContradictionException {
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.activate(p1);
     }
 
     @Test
     public void testdesactivate() throws ContradictionException {
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.desactivate(p1);
     }
 
@@ -171,21 +167,21 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(3);
         expect(p1.getPropagationConditions(2)).andReturn(60);
         s1.schedule(EasyMock.<ISchedulable>anyObject());
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
         per.afterUpdate(iv1.getId(), EventType.INSTANTIATE, Cause.Null);
         per.afterUpdate(iv3.getId(), EventType.INSTANTIATE, Cause.Null);
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
 
-        reset(iv1, iv2, iv3, cer, p1);
+        reset(iv1, iv2, iv3, p1);
         expect(p1.isActive()).andReturn(true).times(2);
         p1.propagate(0, EventType.INSTANTIATE.getStrengthenedMask());
         p1.propagate(3, EventType.INSTANTIATE.getStrengthenedMask());
         p1.propagate(2, EventType.INSTANTIATE.getStrengthenedMask());
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         // RUN METHOD
         Assert.assertTrue(per.execute());
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
@@ -196,28 +192,28 @@ public class FinePropEventRecorderTest {
         expect(p1.getPropagationConditions(3)).andReturn(60);
         expectLastCall().times(2);
         s1.schedule(EasyMock.<ISchedulable>anyObject());
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
         per.afterUpdate(iv1.getId(), EventType.INSTANTIATE, Cause.Null);
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testflush() throws ContradictionException {
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.flush();
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testvirtExec() throws ContradictionException {
-        p1.incNbRecorderEnqued();
+        p1.incNbPendingEvt();
         s1.remove(per);
 
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.enqueue();
         per.virtuallyExecuted(p1);
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
 
     }
 

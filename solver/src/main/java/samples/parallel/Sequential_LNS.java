@@ -32,11 +32,11 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.strategy.StrategyFactory;
@@ -45,8 +45,8 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 import java.io.File;
 import java.util.Random;
@@ -132,7 +132,7 @@ public class Sequential_LNS {
         // variables
         int max = 100 * optimum;
         IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -142,16 +142,18 @@ public class Sequential_LNS {
         // constraints
         Constraint gc = GraphConstraintFactory.makeConstraint(solver);
         gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-        gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-        gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
         gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
-        PropSymmetricHeldKarp hk = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver);
+        PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver);
         hk.waitFirstSolution(true);
         gc.addPropagators(hk);
         solver.post(gc);
         // config
         solver.set(StrategyFactory.graphStrategy(undi, null, new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS));
 //		solver.set(StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse,null));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 //		SearchMonitorFactory.log(solver, true, false);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));
@@ -224,10 +226,10 @@ public class Sequential_LNS {
         @Override
         public boolean computeNextArc() {
             int cost = -1;
-            INeighbors nei, ker;
+            ISet nei, ker;
             for (int i = 0; i < n; i++) {
                 ker = g.getKernelGraph().getSuccessorsOf(i);
-                if (ker.neighborhoodSize() < 2) {
+                if (ker.getSize() < 2) {
                     nei = g.getEnvelopGraph().getSuccessorsOf(i);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!ker.contain(j)) {
@@ -286,7 +288,7 @@ public class Sequential_LNS {
             bestCost = cost.getValue();
             System.out.println("new objective : " + bestCost);
             int x = 0;
-            INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
             int y = nei.getFirstElement();
             if (y == n - 1) {
                 y = nei.getNextElement();

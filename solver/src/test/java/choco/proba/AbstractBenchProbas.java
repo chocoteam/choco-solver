@@ -117,28 +117,6 @@ public abstract class AbstractBenchProbas {
     }
 
     private void configPropStrategy() {
-        /*IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        Constraint[] cstrs = solver.getCstrs();
-        Queue arcs = new Queue(new PArc(propagationEngine, cstrs));
-        Queue coarses;
-//        if (!isProba) {
-//            coarses = Queue.build(Primitive.coarses(cstrs));
-//        } else {
-        ActivateCond sm = new ActivateCond();
-        solver.getSearchLoop().plugSearchMonitor(sm);
-        List<PCoarse> coarses_ = new ArrayList<PCoarse>();
-        for (int i = 0; i < cstrs.length; i++) {
-            if (isProba && cstrs[i] instanceof AllDifferent) {
-                IntConstraint icstr = (AllDifferent) cstrs[i];
-                IntVar[] myvars = icstr.getVariables();
-                ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars, seed, solver.getSearchLoop());
-                sm.add(condition);
-            }
-            coarses_.add(new PCoarse(propagationEngine, cstrs[i]));
-        }
-        coarses = new Queue(coarses_.toArray(new PCoarse[coarses_.size()]));
-//        }
-        solver.set(propagationEngine.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut()));*/
     }//*/
 
     public String toString() {

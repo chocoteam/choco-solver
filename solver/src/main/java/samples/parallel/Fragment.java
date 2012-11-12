@@ -25,16 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallel; import choco.kernel.ResolutionPolicy;
+package samples.parallel;
+
+import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -43,8 +45,8 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -104,7 +106,7 @@ public class Fragment {
         final Solver solver = new Solver();
         // variables
         final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n - 1; j++) {
@@ -118,14 +120,16 @@ public class Fragment {
         // constraints
         final Constraint gc = GraphConstraintFactory.makeConstraint(solver);
         gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-        gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-        gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
         gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
-        gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
+        gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
         solver.post(gc);
         // config
         solver.set(new FragSearch(undi));
 //		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         // resolution
 //		solver.findSolution();
@@ -140,7 +144,7 @@ public class Fragment {
             throw new UnsupportedOperationException(outputCost + ">" + ub);
         }
         int x = 0;
-        INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(x);
+        ISet nei = undi.getEnvelopGraph().getSuccessorsOf(x);
         int y = nei.getFirstElement();
         if (y == n - 1) {
             y = nei.getNextElement();
@@ -215,10 +219,10 @@ public class Fragment {
             if (g.instantiated()) {
                 return null;
             }
-            if (currentNode == -1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize() == 2) {
+            if (currentNode == -1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).getSize() == 2) {
                 currentNode = getNextSparseNode(g, n);
             }
-            INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
             int maxE = -1;
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!g.getKernelGraph().arcExists(currentNode, j)) {
@@ -242,17 +246,17 @@ public class Fragment {
             int s = n;
             int si;
             for (int i = 0; i < n; i++) {
-                si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+                si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
                 if (si < s && si > 2) {
                     s = si;
                 }
             }
-            INeighbors nei;
+            ISet nei;
             for (int i = 0; i < n; i++) {
                 e[i] = 0;
                 nei = g.getEnvelopGraph().getPredecessorsOf(i);
                 for (int j = 0; j < n; j++) {
-                    if (g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize() == s) {
+                    if (g.getEnvelopGraph().getSuccessorsOf(j).getSize() == s) {
                         e[i]++;
                     }
                 }
@@ -261,7 +265,7 @@ public class Fragment {
             int score;
             int node = -1;
             for (int i = 0; i < n; i++) {
-                if (g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == s) {
+                if (g.getEnvelopGraph().getSuccessorsOf(i).getSize() == s) {
                     nei = g.getEnvelopGraph().getSuccessorsOf(i);
                     score = 0;
                     for (int j = 0; j < n; j++) {

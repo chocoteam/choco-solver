@@ -25,10 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-08 14:56:37
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-12 17:29:01
 
 package parser.flatzinc;
 
+import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.antlr.runtime.*;
@@ -45,7 +46,6 @@ import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.ast.ext.*;
 import solver.Solver;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
@@ -371,8 +371,8 @@ public class FlatzincFullExtWalker extends TreeParser {
                     LOGGER.warn("% Remaining pairs after group declarations");
                 }
 
-                IPropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment());
-                propagationEngine.prepareWM(mSolver);
+                PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+
 
                 // parser/flatzinc/FlatzincFullExtWalker.g:122:2: (ps= structure[propagationEngine] )?
                 int alt6 = 2;
@@ -1074,8 +1074,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "structure"
-    // parser/flatzinc/FlatzincFullExtWalker.g:251:1: structure[IPropagationEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
-    public final PropagationStrategy structure(IPropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:251:1: structure[PropagationEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
+    public final PropagationStrategy structure(PropagationEngine pe) throws RecognitionException {
         PropagationStrategy ps = null;
 
 
@@ -1147,8 +1147,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct"
-    // parser/flatzinc/FlatzincFullExtWalker.g:262:1: struct[IPropagationEngine pe] returns [PropagationStrategy item] : ^( STRUC (element= elt[pe] )+ (ca= comb_attr )? c= coll[elements, ca] ) ;
-    public final PropagationStrategy struct(IPropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:262:1: struct[PropagationEngine pe] returns [PropagationStrategy item] : ^( STRUC (element= elt[pe] )+ (ca= comb_attr )? c= coll[elements, ca] ) ;
+    public final PropagationStrategy struct(PropagationEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
 
@@ -1264,8 +1264,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct_reg"
-    // parser/flatzinc/FlatzincFullExtWalker.g:281:1: struct_reg[IPropagationEngine pe] returns [PropagationStrategy item] : ^( STREG IDENTIFIER . (ca= comb_attr )? c= coll[pss, ca] ) ;
-    public final PropagationStrategy struct_reg(IPropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:281:1: struct_reg[PropagationEngine pe] returns [PropagationStrategy item] : ^( STREG IDENTIFIER . (ca= comb_attr )? c= coll[pss, ca] ) ;
+    public final PropagationStrategy struct_reg(PropagationEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
 
@@ -1363,8 +1363,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "elt"
-    // parser/flatzinc/FlatzincFullExtWalker.g:316:1: elt[IPropagationEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
-    public final ISchedulable[] elt(IPropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:316:1: elt[PropagationEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
+    public final ISchedulable[] elt(PropagationEngine pe) throws RecognitionException {
         ISchedulable[] items = null;
 
 
@@ -3583,7 +3583,7 @@ public class FlatzincFullExtWalker extends TreeParser {
             // parser/flatzinc/FlatzincFullExtWalker.g:767:2: ^( SOLVE anns= annotations res= resolution[type,expr] )
             {
 
-                FGoal.Resolution type = FGoal.Resolution.SATISFY;
+                ResolutionPolicy type = ResolutionPolicy.SATISFACTION;
                 Expression expr = null;
 
 
@@ -3622,8 +3622,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "resolution"
-    // parser/flatzinc/FlatzincFullExtWalker.g:777:1: resolution[FGoal.Resolution type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
-    public final void resolution(FGoal.Resolution type, Expression expr) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:777:1: resolution[ResolutionPolicy type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
+    public final void resolution(ResolutionPolicy type, Expression expr) throws RecognitionException {
         Expression e = null;
 
 
@@ -3674,7 +3674,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, Token.UP, null);
 
 
-                    type = FGoal.Resolution.MINIMIZE;
+                    type = ResolutionPolicy.MINIMIZE;
                     expr = e;
 
 
@@ -3695,7 +3695,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, Token.UP, null);
 
 
-                    type = FGoal.Resolution.MAXIMIZE;
+                    type = ResolutionPolicy.MAXIMIZE;
                     expr = e;
 
 

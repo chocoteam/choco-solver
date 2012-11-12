@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import solver.ISolverProperties;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
+import solver.propagation.PropagationStrategies;
 import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -53,7 +54,7 @@ public class AllTest {
     long nbSol;
     IEnvironment environment;
     ISolverProperties properties;
-//    PropagationStrategies strat;
+    PropagationStrategies strat;
 
 
     public AllTest() {
@@ -63,21 +64,20 @@ public class AllTest {
                 new AllSolverProp(
                         SearchLoops.BINARY,
                         ExplanationFactory.TRACERECORDER),
-                //PropagationStrategies.ONE_QUEUE_WITH_ARCS,
-                6);
+                PropagationStrategies.CONSTRAINT, 6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    ISolverProperties properties,
-//                   PropagationStrategies strat,
+                   PropagationStrategies strat,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
-        args = ArrayUtils.append(args);//, new String[]{"-policy", strat.name()});
+        args = ArrayUtils.append(args, new String[]{"-policy", strat.name()});
         this.environment = env;
         this.properties = properties;
-//        this.strat = strat;
+        this.strat = strat;
         this.nbSol = nbSol;
         //prob.solver.
     }

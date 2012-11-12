@@ -95,8 +95,8 @@ public class AllTestFactory {
                 for (SearchLoops sl : slFact) {
                     ISolverProperties pr = new AllSolverProp(sl, x);
                     for (Environments e : envFact)
-//                        for (PropagationStrategies st : pol)
-                        lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, /*st,*/ nbSol[p]));
+                        for (PropagationStrategies st : pol)
+                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, st, nbSol[p]));
                 }
         return lresult.toArray();
     }

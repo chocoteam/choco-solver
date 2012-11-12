@@ -52,6 +52,7 @@ import parser.flatzinc.ast.FVariable;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import choco.kernel.ResolutionPolicy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -306,7 +307,7 @@ constraint
 solve_goal
 	:
 	{
-	FGoal.Resolution type = FGoal.Resolution.SATISFY;
+	ResolutionPolicy type = ResolutionPolicy.SATISFACTION;
 	Expression expr = null;
 	}
 	^(SOLVE anns=annotations res=resolution[type,expr])
@@ -315,16 +316,16 @@ solve_goal
 	}
 	;
 
-resolution  [FGoal.Resolution type, Expression expr]
+resolution  [ResolutionPolicy type, Expression expr]
     :   SATISFY
     |   ^(MINIMIZE e=expr)
     {
-    $type=FGoal.Resolution.MINIMIZE;
+    $type=ResolutionPolicy.MINIMIZE;
     $expr=e;
     }
     |   ^(MAXIMIZE e=expr)
     {
-    $type=FGoal.Resolution.MAXIMIZE;
+    $type=ResolutionPolicy.MAXIMIZE;
     $expr=e;
     }
     ;

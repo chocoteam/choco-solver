@@ -35,12 +35,12 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * AntiArborescences constraint (simplification from tree constraint) based on dominators
@@ -70,7 +70,7 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
         super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
-        connectedGraph = new DirectedGraph(n + 1, GraphType.LINKED_LIST);
+        connectedGraph = new DirectedGraph(n + 1, GraphType.LINKED_LIST, false);
         if (simple) {
             domFinder = new SimpleDominatorsFinder(n, connectedGraph);
         } else {
@@ -97,7 +97,7 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
             connectedGraph.getSuccessorsOf(i).clear();
             connectedGraph.getPredecessorsOf(i).clear();
         }
-        INeighbors nei;
+        ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(i);
             if (nei.isEmpty()) {

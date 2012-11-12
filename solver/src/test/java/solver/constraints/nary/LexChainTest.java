@@ -172,7 +172,7 @@ public class LexChainTest {
         Solver lex = lex(n, m, k, seed, true);
         refor.findAllSolutions();
         lex.findAllSolutions();
-        Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", 0));
+        Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
     }
 
     @Test(groups = "10m")
