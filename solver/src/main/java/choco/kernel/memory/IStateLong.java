@@ -61,8 +61,9 @@ public interface IStateLong extends Serializable {
    * modifying a StoredInt by an increment
      *
      * @param delta
+     * @return the new value
      */
-    void add(long delta);
+    long add(long delta);
 
     /**
    * Retrieving the environment
