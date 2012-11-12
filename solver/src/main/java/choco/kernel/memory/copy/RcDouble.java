@@ -57,8 +57,10 @@ public final class RcDouble implements IStateDouble, RecomputableElement {
 
 
     @Override
-	public void add(double delta) {
-		set(currentValue + delta);
+	public double add(double delta) {
+        double r = delta + currentValue;
+		set(r);
+        return r;
 	}
 
 	@Override

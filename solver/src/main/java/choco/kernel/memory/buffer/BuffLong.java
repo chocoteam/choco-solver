@@ -58,9 +58,11 @@ public class BuffLong implements IStateLong {
     }
 
     @Override
-    public void add(long delta) {
+    public long add(long delta) {
         long v = current.get(idx);
-        current.save(idx, v + delta);
+        long res = v + delta;
+        current.save(idx, res);
+        return res;
     }
 
     @Override
