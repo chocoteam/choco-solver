@@ -54,8 +54,9 @@ public interface IStateDouble extends Serializable {
    * modifying a StoredInt by an increment
      *
      * @param delta
+     * @return the new value
      */
-    void add(double delta);
+    double add(double delta);
 
     /**
    * Retrieving the environment
