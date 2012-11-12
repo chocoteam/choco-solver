@@ -108,11 +108,6 @@ public class PropDomSize extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public ESat isEntailed() {
         return ESat.TRUE;
     }

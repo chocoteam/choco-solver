@@ -216,15 +216,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
-     * Return the specific mask indicating the <b>propagation events</b> on which <code>this</code> can react. <br/>
-     *
-     * @return
-     */
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    /**
      * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
      *

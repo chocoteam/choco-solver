@@ -38,9 +38,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -82,75 +82,75 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Global Cardinality Constraint (GCC) for integer variables
-	 * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
-	 *
-	 * AC for vars but not for cards
-	 *
-	 * @param vars
-	 * @param value
-	 * @param cards
-	 * @param constraint
-	 * @param sol
-	 */
-	public PropGCC_AC_Cards_Fast(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
-		super(ArrayUtils.append(vars,cards), sol, constraint, PropagatorPriority.QUADRATIC, false);
-		if(value.length!=cards.length){
-			throw new UnsupportedOperationException();
-		}
-		values = value;
-		n = vars.length;
-		this.cards = cards;
-		map = new TIntIntHashMap();
-		IntVar v;
-		int ubtmp;
-		int idx = n;
-		boundedVariables = new TIntArrayList();
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			if(!v.hasEnumeratedDomain()){
-				boundedVariables.add(i);
-			}
-			ubtmp = v.getUB();
-			for (int j = v.getLB(); j <= ubtmp; j = v.nextValue(j)) {
-				if (!map.containsKey(j)) {
-					map.put(j, idx);
-					idx++;
-				}
-			}
-		}
-		n2 = idx;
-		fifo = new int[n2];
-		digraph = new DirectedGraph(n2 + 1, GraphType.LINKED_LIST,false);
-		father = new int[n2];
-		in = new BitSet(n2);
-		SCCfinder = new StrongConnectivityFinder(digraph);
-		//
-		this.lb = new int[n2];
-		this.ub = new int[n2];
-		this.flow = new int[n2];
-		for(int i=0; i<n; i++){
-			ub[i] = lb[i] = 1; // 1 unit of flow per variable
-		}
-		for(int i=n; i<n2; i++){
-			ub[i] = n; // [0,n] units of flow per value (default)
-		}
-		for(int i=0; i<value.length; i++){
-			idx = map.get(value[i]);
-			int low = cards[i].getLB();
-			int up = cards[i].getUB();
-			if(lb[idx]!=0 && lb[idx]!=low
-					|| ub[idx]!=n && ub[idx]!=up){
-				throw new UnsupportedOperationException("error in the use of GCC: duplication of value "+value[i]);
-			}
-			lb[idx] = low;
-			ub[idx] = up;
-			if(low>up){
-				throw new UnsupportedOperationException("GCC error: low[i]>up[i]");
-			}
-		}
-	}
+    /**
+     * Global Cardinality Constraint (GCC) for integer variables
+     * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
+     * <p/>
+     * AC for vars but not for cards
+     *
+     * @param vars
+     * @param value
+     * @param cards
+     * @param constraint
+     * @param sol
+     */
+    public PropGCC_AC_Cards_Fast(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
+        super(ArrayUtils.append(vars, cards), sol, constraint, PropagatorPriority.QUADRATIC, false);
+        if (value.length != cards.length) {
+            throw new UnsupportedOperationException();
+        }
+        values = value;
+        n = vars.length;
+        this.cards = cards;
+        map = new TIntIntHashMap();
+        IntVar v;
+        int ubtmp;
+        int idx = n;
+        boundedVariables = new TIntArrayList();
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            if (!v.hasEnumeratedDomain()) {
+                boundedVariables.add(i);
+            }
+            ubtmp = v.getUB();
+            for (int j = v.getLB(); j <= ubtmp; j = v.nextValue(j)) {
+                if (!map.containsKey(j)) {
+                    map.put(j, idx);
+                    idx++;
+                }
+            }
+        }
+        n2 = idx;
+        fifo = new int[n2];
+        digraph = new DirectedGraph(n2 + 1, GraphType.LINKED_LIST, false);
+        father = new int[n2];
+        in = new BitSet(n2);
+        SCCfinder = new StrongConnectivityFinder(digraph);
+        //
+        this.lb = new int[n2];
+        this.ub = new int[n2];
+        this.flow = new int[n2];
+        for (int i = 0; i < n; i++) {
+            ub[i] = lb[i] = 1; // 1 unit of flow per variable
+        }
+        for (int i = n; i < n2; i++) {
+            ub[i] = n; // [0,n] units of flow per value (default)
+        }
+        for (int i = 0; i < value.length; i++) {
+            idx = map.get(value[i]);
+            int low = cards[i].getLB();
+            int up = cards[i].getUB();
+            if (lb[idx] != 0 && lb[idx] != low
+                    || ub[idx] != n && ub[idx] != up) {
+                throw new UnsupportedOperationException("error in the use of GCC: duplication of value " + value[i]);
+            }
+            lb[idx] = low;
+            ub[idx] = up;
+            if (low > up) {
+                throw new UnsupportedOperationException("GCC error: low[i]>up[i]");
+            }
+        }
+    }
 
     @Override
     public String toString() {
@@ -234,31 +234,31 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
         }
     }
 
-	private int augmentPath_BFS(int root) {
-		in.clear();
-		int indexFirst = 0, indexLast = 0;
-		fifo[indexLast++] = root;
-		int x, y;
-		ISet succs;
-		while (indexFirst != indexLast) {
-			x = fifo[indexFirst++];
-			succs = digraph.getSuccessorsOf(x);
-			for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
-				if (!in.get(y)) {
-					father[y] = x;
-					fifo[indexLast++] = y;
-					in.set(y);
-					if (flow[y]<this.ub[y]){
-						if(y<n){
-							throw new UnsupportedOperationException();
-						}
-						return y;
-					}
-				}
-			}
-		}
-		return -1;
-	}
+    private int augmentPath_BFS(int root) {
+        in.clear();
+        int indexFirst = 0, indexLast = 0;
+        fifo[indexLast++] = root;
+        int x, y;
+        ISet succs;
+        while (indexFirst != indexLast) {
+            x = fifo[indexFirst++];
+            succs = digraph.getSuccessorsOf(x);
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    fifo[indexLast++] = y;
+                    in.set(y);
+                    if (flow[y] < this.ub[y]) {
+                        if (y < n) {
+                            throw new UnsupportedOperationException();
+                        }
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
 
     private void useValue(int i) throws ContradictionException {
         int mate = swapValue_BFS(i);
@@ -293,15 +293,15 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
         }
     }
 
-	private int swapValue_BFS(int root) {
-		in.clear();
-		int indexFirst = 0, indexLast = 0;
-		fifo[indexLast++] = root;
-		int x, y;
-		ISet succs;
-		while (indexFirst != indexLast) {
-			x = fifo[indexFirst++];
-			succs = digraph.getPredecessorsOf(x);
+    private int swapValue_BFS(int root) {
+        in.clear();
+        int indexFirst = 0, indexLast = 0;
+        fifo[indexLast++] = root;
+        int x, y;
+        ISet succs;
+        while (indexFirst != indexLast) {
+            x = fifo[indexFirst++];
+            succs = digraph.getPredecessorsOf(x);
 //			succs = digraph.getSuccessorsOf(x);
             for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
                 if (!in.get(y)) {
@@ -337,66 +337,66 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
         digraph.desactivateNode(n2);
     }
 
-	private void filter() throws ContradictionException {
-		buildSCC();
-		int j, ub;
-		IntVar v;
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			if(v.getLB()!=ub) {// i.e. v is not instantiated
-				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					j = map.get(k);
-					if (nodeSCC[i] != nodeSCC[j]) {
-						if (digraph.arcExists(j,i)) {
-							v.instantiateTo(k,this);
-							ISet nei = digraph.getSuccessorsOf(i);
-							for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-								digraph.removeArc(i,s);
-							}
-						} else {
-							v.removeValue(k, this);
-							digraph.removeArc(i, j);
-						}
-					}
-				}
-			}
-		}
-		int nb = boundedVariables.size();
-		for (int i = 0; i < nb; i++) {
-			v = vars[boundedVariables.get(i)];
-			ub = v.getUB();
-			for (int k = v.getLB(); k <= ub; k++) {
-				j = map.get(k);
-				if (!(digraph.arcExists(i,j) || digraph.arcExists(j,i))) {
-					v.removeValue(k, this);
-				}
-			}
-			int lb = v.getLB();
-			for (int k = v.getUB(); k >= lb; k--) {
-				j = map.get(k);
-				if (!(digraph.arcExists(i,j) || digraph.arcExists(j,i))) {
-					v.removeValue(k, this);
-				}
-			}
-		}
-		// filter cardinality variables
-		int idx;
-		ISet nei;
-		for(int i=0; i<values.length; i++){
-			idx = map.get(values[i]);
-			nei = digraph.getSuccessorsOf(idx);
-			ub = nei.getSize()+digraph.getPredecessorsOf(idx).getSize();
-			cards[i].updateUpperBound(ub,this);
-			int min = 0;
-			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(vars[j].instantiated()){
-					min++;
-				}
-			}
-			cards[i].updateLowerBound(min,this);
-		}
-	}
+    private void filter() throws ContradictionException {
+        buildSCC();
+        int j, ub;
+        IntVar v;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            if (v.getLB() != ub) {// i.e. v is not instantiated
+                for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                    j = map.get(k);
+                    if (nodeSCC[i] != nodeSCC[j]) {
+                        if (digraph.arcExists(j, i)) {
+                            v.instantiateTo(k, this);
+                            ISet nei = digraph.getSuccessorsOf(i);
+                            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                                digraph.removeArc(i, s);
+                            }
+                        } else {
+                            v.removeValue(k, this);
+                            digraph.removeArc(i, j);
+                        }
+                    }
+                }
+            }
+        }
+        int nb = boundedVariables.size();
+        for (int i = 0; i < nb; i++) {
+            v = vars[boundedVariables.get(i)];
+            ub = v.getUB();
+            for (int k = v.getLB(); k <= ub; k++) {
+                j = map.get(k);
+                if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                    v.removeValue(k, this);
+                }
+            }
+            int lb = v.getLB();
+            for (int k = v.getUB(); k >= lb; k--) {
+                j = map.get(k);
+                if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                    v.removeValue(k, this);
+                }
+            }
+        }
+        // filter cardinality variables
+        int idx;
+        ISet nei;
+        for (int i = 0; i < values.length; i++) {
+            idx = map.get(values[i]);
+            nei = digraph.getSuccessorsOf(idx);
+            ub = nei.getSize() + digraph.getPredecessorsOf(idx).getSize();
+            cards[i].updateUpperBound(ub, this);
+            int min = 0;
+            for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (vars[j].instantiated()) {
+                    min++;
+                }
+            }
+            cards[i].updateLowerBound(min, this);
+        }
+    }
 
     //***********************************************************************************
     // PROPAGATION
@@ -427,11 +427,6 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
     }
 
     @Override

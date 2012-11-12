@@ -106,11 +106,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }

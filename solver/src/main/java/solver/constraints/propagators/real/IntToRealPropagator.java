@@ -65,11 +65,6 @@ public class IntToRealPropagator extends Propagator<IntVar> {
 
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.BOUND.mask;
     }

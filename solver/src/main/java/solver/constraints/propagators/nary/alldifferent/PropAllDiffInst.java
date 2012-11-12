@@ -72,11 +72,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append("PropAllDiffInst(");

@@ -311,11 +311,6 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public ESat isEntailed() {
         BitSet values = new BitSet(n2 - n);
         BitSet mandatoryValues = new BitSet(n2 - n);

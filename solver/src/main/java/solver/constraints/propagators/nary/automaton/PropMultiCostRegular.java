@@ -255,11 +255,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
 //TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
         return EventType.INT_ALL_MASK();
