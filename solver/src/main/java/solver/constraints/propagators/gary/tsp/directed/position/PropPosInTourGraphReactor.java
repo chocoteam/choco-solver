@@ -49,8 +49,8 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -144,11 +144,6 @@ public class PropPosInTourGraphReactor extends Propagator {
     public int getPropagationConditions(int vIdx) {
         return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
                 + EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override

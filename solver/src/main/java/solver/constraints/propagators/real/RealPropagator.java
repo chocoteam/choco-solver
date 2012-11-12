@@ -81,11 +81,6 @@ public class RealPropagator extends Propagator<RealVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.BOUND.mask;
     }

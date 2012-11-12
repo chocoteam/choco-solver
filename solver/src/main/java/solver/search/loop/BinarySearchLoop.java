@@ -31,6 +31,7 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.PropagationUtils;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -57,7 +58,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            solver.getEngine().propagate();
+            PropagationUtils.primeEngine(solver);
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);

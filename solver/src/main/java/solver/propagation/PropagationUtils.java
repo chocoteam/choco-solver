@@ -26,74 +26,48 @@
  */
 package solver.propagation;
 
-import solver.ICause;
+import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.Variable;
-
-import java.io.Serializable;
 
 /**
- * An interface for propagation engines, it defines every required services.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 05/12/11
+ * @since 12/11/12
  */
-public interface IPropagationEngine extends Serializable {
+public enum PropagationUtils {
+    ;
 
     /**
-     * Initializes <code>this</code>
+     * Define a way to initialize the propagation engine.
+     * Loops over the propagator of the solver, then activate them one by one, if stateless,
+     * and call propagate after each propagator.
      *
-     * @param solver the solver
+     * @param solver solver to initiate
+     * @throws ContradictionException can throw a contradiction
      */
-    void init(Solver solver);
-
-    /**
-     * Reach a fixpoint
-     *
-     * @throws ContradictionException if a contradiction occurrs
-     */
-    void propagate() throws ContradictionException;
-
-    /**
-     * Flush <code>this</code>, ie. remove every pending events
-     */
-    void flush();
-
-    void fails(ICause cause, Variable variable, String message) throws ContradictionException;
-
-    ContradictionException getContradictionException();
-
-    void clear();
-
-    //********************************//
-    //      SERVICES FOR UPDATING     //
-    //********************************//
-
-    /**
-     * Take into account the modification of a variable
-     *
-     * @param variable modified variable
-     * @throws ContradictionException
-     */
-    void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException;
-
-    void onPropagatorExecution(Propagator propagator);
-
-    /**
-     * Set the propagator as activated within the propagation engine
-     *
-     * @param propagator propagator to activate
-     */
-    void activatePropagator(Propagator propagator);
-
-    /**
-     * Set the propagator as inactivated within the propagation engine
-     *
-     * @param propagator propagator to desactivate
-     */
-    void desactivatePropagator(Propagator propagator);
+    public static void primeEngine(Solver solver) throws ContradictionException {
+        //TODO to improve?
+        Constraint[] constraints = solver.getCstrs();
+        for (int i = 0; i < constraints.length; i++) {
+            Propagator[] propagators = constraints[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                if (Configuration.PRINT_PROPAGATION) {
+                    LoggerFactory.getLogger("solver").info("activate {}", "<< ::" + propagator.toString() + " >>");
+                }
+                if (propagator.isStateLess()) {
+                    propagator.setActive();
+                    propagator.propagate(EventType.FULL_PROPAGATION.strengthened_mask);
+                    solver.getEngine().onPropagatorExecution(propagator);
+                }
+                solver.getEngine().propagate();
+            }
+        }
+    }
 }

@@ -39,9 +39,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -98,31 +98,31 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         n = vars.length;
-		this.nValues = nValues;
-		map = new TIntIntHashMap();
-		IntVar v;
-		int ub;
-		int idx = n;
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
-				if (!map.containsKey(j)) {
-					map.put(j, idx);
-					idx++;
-				}
-			}
-		}
-		n2 = idx;
-		fifo = new int[n2];
-		matching = new int[n2];
-		digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
-		free = new BitSet(n2);
-		remProc = new DirectedRemProc();
-		father = new int[n2];
-		in = new BitSet(n2);
-		SCCfinder = new StrongConnectivityFinder(digraph);
-	}
+        this.nValues = nValues;
+        map = new TIntIntHashMap();
+        IntVar v;
+        int ub;
+        int idx = n;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
+                if (!map.containsKey(j)) {
+                    map.put(j, idx);
+                    idx++;
+                }
+            }
+        }
+        n2 = idx;
+        fifo = new int[n2];
+        matching = new int[n2];
+        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST, false);
+        free = new BitSet(n2);
+        remProc = new DirectedRemProc();
+        father = new int[n2];
+        in = new BitSet(n2);
+        SCCfinder = new StrongConnectivityFinder(digraph);
+    }
 
     //***********************************************************************************
     // Initialization
@@ -193,28 +193,28 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
     }
 
-	private int augmentPath_BFS(int root) {
-		in.clear();
-		int indexFirst = 0, indexLast = 0;
-		fifo[indexLast++] = root;
-		int x, y;
-		ISet succs;
-		while (indexFirst != indexLast) {
-			x = fifo[indexFirst++];
-			succs = digraph.getSuccessorsOf(x);
-			for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
-				if (!in.get(y)) {
-					father[y] = x;
-					fifo[indexLast++] = y;
-					in.set(y);
-					if (free.get(y)) {
-						return y;
-					}
-				}
-			}
-		}
-		return -1;
-	}
+    private int augmentPath_BFS(int root) {
+        in.clear();
+        int indexFirst = 0, indexLast = 0;
+        fifo[indexLast++] = root;
+        int x, y;
+        ISet succs;
+        while (indexFirst != indexLast) {
+            x = fifo[indexFirst++];
+            succs = digraph.getSuccessorsOf(x);
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    fifo[indexLast++] = y;
+                    in.set(y);
+                    if (free.get(y)) {
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
 
     //***********************************************************************************
     // PRUNING
@@ -281,25 +281,25 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         idms[varIdx].freeze();
         idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
         idms[varIdx].unfreeze();
-		if (nbPendingER == 0) {
-			free.clear();
-			for (int i = 0; i < n; i++) {
-				if (digraph.getPredecessorsOf(i).getSize() == 0) {
-					free.set(i);
-				}
-			}
-			for (int i = n; i < n2; i++) {
-				if (digraph.getSuccessorsOf(i).getSize() == 0) {
-					free.set(i);
-				}
-			}
-			int card = repairMatching();
-			nValues.updateUpperBound(card,this);
-			if(nValues.getLB()==card){
-				filter();
-			}
-		}
-	}
+        if (nbPendingEvt == 0) {
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            int card = repairMatching();
+            nValues.updateUpperBound(card, this);
+            if (nValues.getLB() == card) {
+                filter();
+            }
+        }
+    }
 
     //***********************************************************************************
     // INFO
@@ -308,11 +308,6 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
     }
 
     @Override

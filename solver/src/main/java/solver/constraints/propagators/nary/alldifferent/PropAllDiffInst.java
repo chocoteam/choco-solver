@@ -24,79 +24,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 27/07/12
- * Time: 14:05
- */
-
-package solver.constraints.propagators;
+package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
 
-public class PropDomSize extends Propagator<IntVar> {
+/**
+ * Propagator for AllDifferent that only reacts on instantiation
+ *
+ * @author Charles Prud'homme
+ */
+public class PropAllDiffInst extends Propagator<IntVar> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    IStateInt[] size;
-    int n;
-    protected final IIntDeltaMonitor[] idms;
-    private DirectedRemProc remProc;
+    private final int n;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropDomSize(IntVar[] vars, Constraint c, Solver s) {
-        super(vars, s, c, PropagatorPriority.UNARY, false);
+    /**
+     * AllDifferent constraint for integer variables
+     * enables to control the cardinality of the matching
+     *
+     * @param vars
+     * @param constraint
+     * @param sol
+     */
+    public PropAllDiffInst(IntVar[] vars, Constraint constraint, Solver sol) {
+        super(vars, sol, constraint, PropagatorPriority.LINEAR, true);
         n = vars.length;
-        size = new IStateInt[n];
-        for (int i = 0; i < n; i++) {
-            size[i] = environment.makeInt(vars[i].getDomainSize());
-        }
-        this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++) {
-            idms[i] = this.vars[i].monitorDelta(this);
-        }
-        remProc = new DirectedRemProc();
     }
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        assert this.getNbPendingEvt() == 0;
-        for (int i = 0; i < n; i++) {
-            idms[i].unfreeze();
-            size[i].set(vars[i].getDomainSize());
-        }
-
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
-        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-        idms[varIdx].unfreeze();
-        if (size[varIdx].get() != vars[varIdx].getDomainSize()) {
-            throw new UnsupportedOperationException(size[varIdx].get() + " != " + vars[varIdx].getDomainSize());
-        }
-        forcePropagate(EventType.FULL_PROPAGATION);
-    }
 
     //***********************************************************************************
     // INFO
@@ -104,25 +68,70 @@ public class PropDomSize extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
+        return EventType.INSTANTIATE.mask;
     }
 
     @Override
-    public ESat isEntailed() {
-        return ESat.TRUE;
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append("PropAllDiffInst(");
+        int i = 0;
+        for (; i < Math.min(4, n); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < n - 2) {
+            st.append("...,");
+        }
+        st.append(vars[n - 1].getName()).append(")");
+        return st.toString();
     }
 
-    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
-        int idx;
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
 
-        public void execute(int i) throws ContradictionException {
-            size[idx].add(-1);
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int v = 0; v < n; v++) {
+            if (vars[v].instantiated()) {
+                int val = vars[v].getValue();
+                for (int i = 0; i < n; i++) {
+                    if (i != v) {
+                        vars[i].removeValue(val, this);
+                    }
+                }
+            }
         }
+    }
 
-        @Override
-        public UnaryIntProcedure set(Integer idx) {
-            this.idx = idx;
-            return this;
+    @Override
+    public boolean advise(int idxVarInProp, int mask) {
+        return super.advise(idxVarInProp, mask);
+    }
+
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        int val = vars[varIdx].getValue();
+        for (int i = 0; i < n; i++) {
+            if (i != varIdx) {
+                vars[i].removeValue(val, this);
+            }
         }
+    }
+
+
+    @Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
     }
 }

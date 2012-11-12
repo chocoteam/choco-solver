@@ -62,11 +62,6 @@ public class PropMaxBC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public void propagate(int evtmask) throws ContradictionException {
         filter();
     }

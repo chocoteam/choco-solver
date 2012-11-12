@@ -1,35 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation.generator;
 
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.arc.FineArcEventRecorder;
@@ -54,15 +54,15 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
 
     final List<AbstractFineEventRecorder> eventRecorders;
 
-    public PCons(IPropagationEngine propagationEngine, Constraint... constraints) {
+    public PCons(PropagationEngine propagationEngine, Constraint... constraints) {
         this(propagationEngine, constraints, PArc.NOV);
     }
 
-    public PCons(IPropagationEngine propagationEngine, Propagator... propagators) {
+    public PCons(PropagationEngine propagationEngine, Propagator... propagators) {
         this(propagationEngine, propagators, PArc.NOV);
     }
 
-    public PCons(IPropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
+    public PCons(PropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (constraints.length > 0) {
@@ -80,7 +80,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public PCons(IPropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
+    public PCons(PropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (propagators.length > 0) {
@@ -93,7 +93,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    private void make(Propagator prop, Predicate[] validations, IPropagationEngine propagationEngine, Solver solver) {
+    private void make(Propagator prop, Predicate[] validations, PropagationEngine propagationEngine, Solver solver) {
         int pidx = prop.getId();
         Variable[] variables = prop.getVars().clone();
         int nbv = prop.getNbVars();
@@ -111,7 +111,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
             }
         }
         AbstractFineEventRecorder er = null;
-        if(i==0)return;
+        if (i == 0) return;
         if (i == 1) { // in that case, there is only one variable, an Arc is a better alternative
             er = new FineArcEventRecorder(variables[0], prop, pindices[0], solver, propagationEngine);
         } else if (i < nbv) { // if some variables has been removed -- connectected previously
@@ -124,7 +124,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
         propagationEngine.addEventRecorder(er);
     }
 
-    private AbstractFineEventRecorder make(Variable[] variables, Propagator prop, int[] pindices, Solver solver, IPropagationEngine propagationEngine) {
+    private AbstractFineEventRecorder make(Variable[] variables, Propagator prop, int[] pindices, Solver solver, PropagationEngine propagationEngine) {
         if (variables.length == 2) {
             return new FineBinPropEventRecorder(variables, prop, pindices, solver, propagationEngine);
         } else if (variables.length == 3) {

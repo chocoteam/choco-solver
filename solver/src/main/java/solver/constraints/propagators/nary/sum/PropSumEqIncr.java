@@ -74,11 +74,6 @@ public class PropSumEqIncr extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
-    }
-
     public PropSumEqIncr(IntVar[] vars, int b,
                          Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
@@ -249,8 +244,6 @@ public class PropSumEqIncr extends Propagator<IntVar> {
             }
             filter(swl, nbR);
         }
-//        if (getNbPendingER() == 0) filter(true, 2);
-//        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

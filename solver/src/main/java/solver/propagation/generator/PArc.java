@@ -1,35 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation.generator;
 
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.arc.FineArcEventRecorder;
@@ -55,19 +55,19 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
 
     static final Predicate[] NOV = new Predicate[0];
 
-    public PArc(IPropagationEngine propagationEngine, Variable... variables) {
+    public PArc(PropagationEngine propagationEngine, Variable... variables) {
         this(propagationEngine, variables, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Constraint... constraints) {
+    public PArc(PropagationEngine propagationEngine, Constraint... constraints) {
         this(propagationEngine, constraints, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Propagator... propagators) {
+    public PArc(PropagationEngine propagationEngine, Propagator... propagators) {
         this(propagationEngine, propagators, NOV);
     }
 
-    public PArc(IPropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (variables.length > 0) {
@@ -80,7 +80,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public PArc(IPropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (constraints.length > 0) {
@@ -96,7 +96,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    public PArc(IPropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
+    public PArc(PropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
         super();
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
         if (propagators.length > 0) {
@@ -110,7 +110,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
     }
 
 
-    private void make(Variable var, Predicate[] validations, IPropagationEngine propagationEngine, Solver solver) {
+    private void make(Variable var, Predicate[] validations, PropagationEngine propagationEngine, Solver solver) {
         int vidx = var.getId();
         Propagator[] propagators = var.getPropagators();
         int[] pindices = var.getPIndices();
@@ -136,7 +136,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
-    private void make(Propagator prop, Predicate[] validations, IPropagationEngine propagationEngine, Solver solver) {
+    private void make(Propagator prop, Predicate[] validations, PropagationEngine propagationEngine, Solver solver) {
         int pidx = prop.getId();
         Variable[] variables = prop.getVars();
         for (int j = 0; j < variables.length; j++) {
