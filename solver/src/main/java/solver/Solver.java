@@ -39,6 +39,7 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
@@ -339,7 +340,7 @@ public class Solver implements Serializable {
             this.set(new ConstraintEngine(this));
         }
         engine.init(this);
-        engine.propagate();
+        PropagationUtils.primeEngine(this);
     }
 
     /**

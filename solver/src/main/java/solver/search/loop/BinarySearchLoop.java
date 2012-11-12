@@ -28,17 +28,13 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
-import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.PropagationUtils;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
-import solver.variables.EventType;
 import solver.variables.VariableFactory;
 
 /**
@@ -62,24 +58,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            //TODO to improve?
-            Constraint[] constraints = solver.getCstrs();
-            for (int i = 0; i < constraints.length; i++) {
-                Propagator[] propagators = constraints[i].propagators;
-                for (int j = 0; j < propagators.length; j++) {
-                    Propagator propagator = propagators[j];
-                    if (Configuration.PRINT_PROPAGATION) {
-                        LoggerFactory.getLogger("solver").info("activate {}", "<< ::" + propagator.toString() + " >>");
-                    }
-                    propagator.setActive();
-                    propagator.propagate(EventType.FULL_PROPAGATION.strengthened_mask);
-                    //TODO: proabbly useless...
-                    solver.getEngine().onPropagatorExecution(propagator);
-                    solver.getEngine().propagate();
-                }
-            }
-
-
+            PropagationUtils.primeEngine(solver);
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);
