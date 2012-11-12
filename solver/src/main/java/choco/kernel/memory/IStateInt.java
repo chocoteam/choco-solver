@@ -74,8 +74,9 @@ public interface IStateInt extends Serializable {
   /**
    * Modifying a StoredInt by an increment.
    * @param delta the value to add to the current value.
+   * @return the new value
    */
-  void add(int delta);
+  int add(int delta);
 
   /**
    * Retrieving the environment.

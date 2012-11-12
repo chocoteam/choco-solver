@@ -51,9 +51,10 @@ public class StoredInt extends AbstractStoredObject implements IStateInt {
     }
 
 	@Override
-	public final void add(final int delta) {
+	public final int add(final int delta) {
+        int res = currentValue + delta;
 		set( currentValue + delta);
-		
+        return res;
 	}
 
 	@Override

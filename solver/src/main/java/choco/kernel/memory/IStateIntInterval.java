@@ -47,8 +47,9 @@ public interface IStateIntInterval extends Serializable {
   /**
    * Modifying a StoredIntInterval inf by an increment.
    * @param delta the inf value to add to the current value.
+   * @return the new value
    */
-  void addInf(int delta);
+  int addInf(int delta);
 
     /**
      * Returns the current upper bound according to the current world
@@ -66,8 +67,9 @@ public interface IStateIntInterval extends Serializable {
     /**
    * Modifying a StoredIntInterval sup by an increment.
    * @param delta the sup value to add to the current value.
+   * @return the new value
    */
-    void addSup(int delta);
+    int addSup(int delta);
 
 
     /**
