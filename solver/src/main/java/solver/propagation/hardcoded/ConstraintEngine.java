@@ -152,7 +152,7 @@ public class ConstraintEngine implements IPropagationEngine {
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
-            schedule[aid] ^= true;
+            schedule[aid] = false;
             masks_c[aid] = 0;
             lastProp.flushPendingEvt();
         }
@@ -214,8 +214,8 @@ public class ConstraintEngine implements IPropagationEngine {
         if (schedule[aid]) { // if in the queue...
             schedule[aid] = false;
             pro_queue_f.remove(propagator); // removed from the queue
-            propagator.flushPendingEvt();
         }
+        propagator.flushPendingEvt();
     }
 
     @Override

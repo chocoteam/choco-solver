@@ -127,7 +127,7 @@ public class VariableEngine implements IPropagationEngine {
             lastVar = var_queue.pollFirst();
             // revision of the variable
             id = v2i.get(lastVar.getId());
-            schedule[id] ^= true;
+            schedule[id] = false;
             Propagator[] vProps = lastVar.getPropagators();
             int[] idxVinP = lastVar.getPIndices();
             for (int p = 0; p < vProps.length; p++) {
