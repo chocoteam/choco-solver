@@ -299,6 +299,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
         environment.save(operations[ACTIVE]);
+        //TODO: update var mask back
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
             solver.getEngine().desactivatePropagator(this);
