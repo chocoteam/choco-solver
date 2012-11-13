@@ -46,8 +46,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -62,156 +62,160 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
     private DirectedGraphVar g;
     GraphDeltaMonitor gdm;
-	private int n;
-	private PairProcedure arcRemoved;
-	private BitSet sccComputed;
-	private TIntArrayList inDoors;
-	private TIntArrayList outDoors;
-	// rg data structures
-	private IStateInt nR; IStateInt[] sccOf; ISet[] outArcs; DirectedGraph rg;
-	private IStateInt[] sccFirst, sccNext;
+    private int n;
+    private PairProcedure arcRemoved;
+    private BitSet sccComputed;
+    private TIntArrayList inDoors;
+    private TIntArrayList outDoors;
+    // rg data structures
+    private IStateInt nR;
+    IStateInt[] sccOf;
+    ISet[] outArcs;
+    DirectedGraph rg;
+    private IStateInt[] sccFirst, sccNext;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
-							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
-							 DirectedGraph rg) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
+    public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
+                             IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
+                             DirectedGraph rg) {
+        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		this.n = g.getEnvelopGraph().getNbNodes();
-		arcRemoved  = new RemArc();
-		this.nR = nR;
-		this.sccOf = sccOf;
-		this.outArcs = outArcs;
-		this.rg = rg;
-		sccComputed = new BitSet(n);
-		inDoors = new TIntArrayList();
-		outDoors = new TIntArrayList();
-	}
+        this.n = g.getEnvelopGraph().getNbNodes();
+        arcRemoved = new RemArc();
+        this.nR = nR;
+        this.sccOf = sccOf;
+        this.outArcs = outArcs;
+        this.rg = rg;
+        sccComputed = new BitSet(n);
+        inDoors = new TIntArrayList();
+        outDoors = new TIntArrayList();
+    }
 
-	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
-							 IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
-							 DirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
-		this(graph,constraint,solver,nR,sccOf,outArcs,rg);
-		this.sccFirst = sccFirst;
-		this.sccNext  = sccNext;
-	}
+    public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
+                             IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
+                             DirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
+        this(graph, constraint, solver, nR, sccOf, outArcs, rg);
+        this.sccFirst = sccFirst;
+        this.sccNext = sccNext;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=nR.get()-1;i>=0;i--){
-			checkSCCLink(i);
-		}
-		gdm.unfreeze();
-	}
-
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		sccComputed.clear();
-		gdm.freeze();
-		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = nR.get() - 1; i >= 0; i--) {
+            checkSCCLink(i);
+        }
         gdm.unfreeze();
-	}
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        sccComputed.clear();
+        gdm.freeze();
+        gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+        gdm.unfreeze();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	private void checkSCCLink(int sccFrom) throws ContradictionException {
-		inDoors.clear();
-		outDoors.clear();
-		for(int i=outArcs[sccFrom].getFirstElement();i>=0;i=outArcs[sccFrom].getNextElement()){
-			outDoors.add(i/n-1);
-			inDoors.add(i%n);
-		}
-		if(inDoors.size()==1){
-			forceInDoor(inDoors.get(0));
-		}
-		if(outDoors.size()==1){
-			forceOutDoor(outDoors.get(0));
-			// if 1 in & 1 out and scc>2 forbid in->out
-			if(sccFirst!=null){
-				int sizeSCC = 0;
-				int idx = sccFirst[sccFrom].get();
-				while(idx!=-1 && sizeSCC<4){
-					sizeSCC++;
-					idx = sccNext[idx].get();
-				}
-				if(sizeSCC>2){
-					int p = rg.getPredecessorsOf(sccFrom).getFirstElement();
-					if(p!=-1){
-						int in = -1;
-						for(int i=outArcs[p].getFirstElement();i>=0;i=outArcs[p].getNextElement()){
-							if(in == -1){
-								in = i%n;
-							}else if(in!=i%n){
-								return;
-							}
-						}
-						if(in==-1){
-							throw new UnsupportedOperationException();
-						}
-						g.removeArc(in,outDoors.get(0),this);
-					}
-				}
-			}
-		}
-	}
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private void forceInDoor(int x) throws ContradictionException {
-		ISet pred = g.getEnvelopGraph().getPredecessorsOf(x);
-		int scc = sccOf[x].get();
-		for(int i=pred.getFirstElement();i>=0;i=pred.getNextElement()){
-			if(sccOf[i].get()==scc){
-				g.removeArc(i,x,this);
-			}
-		}
-	}
-	private void forceOutDoor(int x) throws ContradictionException {
-		ISet succ = g.getEnvelopGraph().getSuccessorsOf(x);
-		int scc = sccOf[x].get();
-		for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
-			if(sccOf[i].get()==scc){
-				g.removeArc(x,i,this);
-			}
-		}
-	}
+    private void checkSCCLink(int sccFrom) throws ContradictionException {
+        inDoors.clear();
+        outDoors.clear();
+        for (int i = outArcs[sccFrom].getFirstElement(); i >= 0; i = outArcs[sccFrom].getNextElement()) {
+            outDoors.add(i / n - 1);
+            inDoors.add(i % n);
+        }
+        if (inDoors.size() == 1) {
+            forceInDoor(inDoors.get(0));
+        }
+        if (outDoors.size() == 1) {
+            forceOutDoor(outDoors.get(0));
+            // if 1 in & 1 out and scc>2 forbid in->out
+            if (sccFirst != null) {
+                int sizeSCC = 0;
+                int idx = sccFirst[sccFrom].get();
+                while (idx != -1 && sizeSCC < 4) {
+                    sizeSCC++;
+                    idx = sccNext[idx].get();
+                }
+                if (sizeSCC > 2) {
+                    int p = rg.getPredecessorsOf(sccFrom).getFirstElement();
+                    if (p != -1) {
+                        int in = -1;
+                        for (int i = outArcs[p].getFirstElement(); i >= 0; i = outArcs[p].getNextElement()) {
+                            if (in == -1) {
+                                in = i % n;
+                            } else if (in != i % n) {
+                                return;
+                            }
+                        }
+                        if (in == -1) {
+                            throw new UnsupportedOperationException();
+                        }
+                        g.removeArc(in, outDoors.get(0), aCause);
+                    }
+                }
+            }
+        }
+    }
 
-	private class RemArc implements PairProcedure{
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			int x = sccOf[from].get();
-			int y = sccOf[to].get();
-			if(x!=y){
-				if(!sccComputed.get(x)){
-					sccComputed.set(x);
-					checkSCCLink(x);
-				}
-				if(rg.getSuccessorsOf(x).getFirstElement()!=y){
-					x = rg.getPredecessorsOf(y).getFirstElement();
-					if(x>=0 && !sccComputed.get(x)){
-						sccComputed.set(x);
-						checkSCCLink(x);
-					}
-				}
-			}
-		}
-	}
+    private void forceInDoor(int x) throws ContradictionException {
+        ISet pred = g.getEnvelopGraph().getPredecessorsOf(x);
+        int scc = sccOf[x].get();
+        for (int i = pred.getFirstElement(); i >= 0; i = pred.getNextElement()) {
+            if (sccOf[i].get() == scc) {
+                g.removeArc(i, x, aCause);
+            }
+        }
+    }
+
+    private void forceOutDoor(int x) throws ContradictionException {
+        ISet succ = g.getEnvelopGraph().getSuccessorsOf(x);
+        int scc = sccOf[x].get();
+        for (int i = succ.getFirstElement(); i >= 0; i = succ.getNextElement()) {
+            if (sccOf[i].get() == scc) {
+                g.removeArc(x, i, aCause);
+            }
+        }
+    }
+
+    private class RemArc implements PairProcedure {
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            int x = sccOf[from].get();
+            int y = sccOf[to].get();
+            if (x != y) {
+                if (!sccComputed.get(x)) {
+                    sccComputed.set(x);
+                    checkSCCLink(x);
+                }
+                if (rg.getSuccessorsOf(x).getFirstElement() != y) {
+                    x = rg.getPredecessorsOf(y).getFirstElement();
+                    if (x >= 0 && !sccComputed.get(x)) {
+                        sccComputed.set(x);
+                        checkSCCLink(x);
+                    }
+                }
+            }
+        }
+    }
 }

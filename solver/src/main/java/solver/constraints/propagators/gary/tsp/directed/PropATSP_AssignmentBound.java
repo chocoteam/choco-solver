@@ -183,7 +183,7 @@ public class PropATSP_AssignmentBound extends Propagator<Variable> implements IG
                 costValue += costMatrix[i][j];
             }
         }
-        flowCost.updateLowerBound(costValue, this);
+        flowCost.updateLowerBound(costValue, aCause);
     }
 
     private boolean negativeCircuitExists() {
@@ -315,10 +315,10 @@ public class PropATSP_AssignmentBound extends Propagator<Variable> implements IG
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if ((nodeSCC[i] != nodeSCC[j + n] && digraph.arcExists(j + n, i))
                         || (nodeSCC[i + n] != nodeSCC[j] && digraph.arcExists(i + n, j))) {
-                    g.enforceArc(i, j, this);
+                    g.enforceArc(i, j, aCause);
                 } else if (nodeSCC[i] != nodeSCC[j + n] && nodeSCC[i + n] != nodeSCC[j]
                         && !(digraph.arcExists(i + n, j) || digraph.arcExists(j + n, i))) {
-                    g.removeArc(i, j, this);
+                    g.removeArc(i, j, aCause);
                     digraph.removeEdge(i, j + n);
                     digraph.removeEdge(i + n, j);
                 }

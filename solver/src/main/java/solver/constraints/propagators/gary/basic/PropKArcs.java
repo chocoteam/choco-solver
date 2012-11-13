@@ -67,129 +67,129 @@ public class PropKArcs extends Propagator {
         super(new Variable[]{graph, k}, sol, constraint, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		this.k = k;
-		nbInEnv = environment.makeInt();
-		nbInKer = environment.makeInt();
-		arcEnforced = new EnfArc();
-		arcRemoved  = new RemArc();
-	}
+        this.k = k;
+        nbInEnv = environment.makeInt();
+        nbInKer = environment.makeInt();
+        arcEnforced = new EnfArc();
+        arcRemoved = new RemArc();
+    }
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int nbK = 0;
-		int nbE = 0;
-		ISet env = g.getEnvelopGraph().getActiveNodes();
-		for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
-			nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
-		}
-		if(!g.isDirected()){
-			nbK/=2;
-			nbE/=2;
-		}
-		nbInKer.set(nbK);
-		nbInEnv.set(nbE);
-		filter(nbK, nbE);
-		gdm.unfreeze();
-	}
-
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.freeze();
-		if ((mask & EventType.ENFORCEARC.mask) != 0) {
-			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-		}
-		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-		}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int nbK = 0;
+        int nbE = 0;
+        ISet env = g.getEnvelopGraph().getActiveNodes();
+        for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+            nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
+            nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
+        }
+        if (!g.isDirected()) {
+            nbK /= 2;
+            nbE /= 2;
+        }
+        nbInKer.set(nbK);
+        nbInEnv.set(nbE);
+        filter(nbK, nbE);
         gdm.unfreeze();
-		filter(nbInKer.get(),nbInEnv.get());
-	}
+    }
 
-	private void filter(int nbK, int nbE) throws ContradictionException {
-		k.updateLowerBound(nbK, this);
-		k.updateUpperBound(nbE, this);
-		if(nbK!=nbE && k.instantiated()){
-			ISet nei;
-			ISet env = g.getEnvelopGraph().getActiveNodes();
-			if(k.getValue()==nbE){
-				for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-					nei = g.getEnvelopGraph().getSuccessorsOf(i);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						g.enforceArc(i,j,this);
-					}
-				}
-				nbInKer.set(nbE);
-				setPassive();
-			}
-			if(k.getValue()==nbK){
-				ISet neiKer;
-				for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-					nei = g.getEnvelopGraph().getSuccessorsOf(i);
-					neiKer = g.getKernelGraph().getSuccessorsOf(i);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!neiKer.contain(j)){
-							g.removeArc(i,j,this);
-						}
-					}
-				}
-				nbInEnv.set(nbK);
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.freeze();
+        if ((mask & EventType.ENFORCEARC.mask) != 0) {
+            gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+        }
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
+            gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+        }
+        gdm.unfreeze();
+        filter(nbInKer.get(), nbInEnv.get());
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    private void filter(int nbK, int nbE) throws ContradictionException {
+        k.updateLowerBound(nbK, aCause);
+        k.updateUpperBound(nbE, aCause);
+        if (nbK != nbE && k.instantiated()) {
+            ISet nei;
+            ISet env = g.getEnvelopGraph().getActiveNodes();
+            if (k.getValue() == nbE) {
+                for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+                    nei = g.getEnvelopGraph().getSuccessorsOf(i);
+                    for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                        g.enforceArc(i, j, aCause);
+                    }
+                }
+                nbInKer.set(nbE);
+                setPassive();
+            }
+            if (k.getValue() == nbK) {
+                ISet neiKer;
+                for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+                    nei = g.getEnvelopGraph().getSuccessorsOf(i);
+                    neiKer = g.getKernelGraph().getSuccessorsOf(i);
+                    for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                        if (!neiKer.contain(j)) {
+                            g.removeArc(i, j, aCause);
+                        }
+                    }
+                }
+                nbInEnv.set(nbK);
+                setPassive();
+            }
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
-				+ EventType.INCLOW.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
-	}
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public ESat isEntailed() {
-		int nbK = 0;
-		int nbE = 0;
-		ISet env = g.getEnvelopGraph().getActiveNodes();
-		for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
-			nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
-		}
-		if(!g.isDirected()){
-			nbK/=2;
-			nbE/=2;
-		}
-		if(nbK>k.getUB() || nbE<k.getLB()){
-			return ESat.FALSE;
-		}
-		if(k.instantiated() && g.instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
+                + EventType.INCLOW.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        int nbK = 0;
+        int nbE = 0;
+        ISet env = g.getEnvelopGraph().getActiveNodes();
+        for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+            nbE += g.getEnvelopGraph().getSuccessorsOf(i).getSize();
+            nbK += g.getKernelGraph().getSuccessorsOf(i).getSize();
+        }
+        if (!g.isDirected()) {
+            nbK /= 2;
+            nbE /= 2;
+        }
+        if (nbK > k.getUB() || nbE < k.getLB()) {
+            return ESat.FALSE;
+        }
+        if (k.instantiated() && g.instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	private class EnfArc implements PairProcedure {
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			nbInKer.add(1);
-		}
-	}
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class RemArc implements PairProcedure {
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			nbInEnv.add(1);
-		}
-	}
+    private class EnfArc implements PairProcedure {
+        @Override
+        public void execute(int i, int j) throws ContradictionException {
+            nbInKer.add(1);
+        }
+    }
+
+    private class RemArc implements PairProcedure {
+        @Override
+        public void execute(int i, int j) throws ContradictionException {
+            nbInEnv.add(1);
+        }
+    }
 }

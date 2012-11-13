@@ -173,7 +173,7 @@ public class PropPosGraphWithPreds extends Propagator {
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
                 if (x == to) {
-                    intVars[x].updateLowerBound(level, this);
+                    intVars[x].updateLowerBound(level, aCause);
                     return;
                 }
                 ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
@@ -213,7 +213,7 @@ public class PropPosGraphWithPreds extends Propagator {
                     nbNode++;
                     x = currentSet.get(i);
                     if (x == to) {
-                        intVars[x].updateLowerBound(intVars[from].getLB() + level, this);
+                        intVars[x].updateLowerBound(intVars[from].getLB() + level, aCause);
                         return;
                     }
                     ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
@@ -266,7 +266,7 @@ public class PropPosGraphWithPreds extends Propagator {
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
                 if (x == from) {
-                    intVars[x].updateUpperBound(level, this);
+                    intVars[x].updateUpperBound(level, aCause);
                     return;
                 }
                 ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
@@ -307,7 +307,7 @@ public class PropPosGraphWithPreds extends Propagator {
                     nbNodes++;
                     x = currentSet.get(i);
                     if (x == from) {
-                        intVars[x].updateUpperBound(intVars[to].getUB() - level, this);
+                        intVars[x].updateUpperBound(intVars[to].getUB() - level, aCause);
                         return;
                     }
                     ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);

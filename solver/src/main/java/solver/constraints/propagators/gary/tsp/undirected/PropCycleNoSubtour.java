@@ -45,8 +45,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * Simple NoSubtour of Pesant when undirected graph
@@ -80,52 +80,52 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc();
-		origin = new IStateInt[n];
-		size = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
-		}
-	}
+        this.n = g.getEnvelopGraph().getNbNodes();
+        arcEnforced = new EnfArc();
+        origin = new IStateInt[n];
+        size = new IStateInt[n];
+        end = new IStateInt[n];
+        for (int i = 0; i < n; i++) {
+            origin[i] = environment.makeInt(i);
+            size[i] = environment.makeInt(1);
+            end[i] = environment.makeInt(i);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int j;
-		for(int i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
-			size[i].set(1);
-		}
-		ISet nei;
-		for(int i=0;i<n;i++){
-			nei = g.getKernelGraph().getSuccessorsOf(i);
-			j = nei.getFirstElement();
-			if(j!=-1 && i<j){
-				enforce(i,j);
-			}
-			j = nei.getNextElement();
-			if(j!=-1 && i<j){
-				enforce(i,j);
-			}
-			if(nei.getNextElement()!=-1){
-				contradiction(g,"");
-			}
-		}
-		gdm.unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int j;
+        for (int i = 0; i < n; i++) {
+            end[i].set(i);
+            origin[i].set(i);
+            size[i].set(1);
+        }
+        ISet nei;
+        for (int i = 0; i < n; i++) {
+            nei = g.getKernelGraph().getSuccessorsOf(i);
+            j = nei.getFirstElement();
+            if (j != -1 && i < j) {
+                enforce(i, j);
+            }
+            j = nei.getNextElement();
+            if (j != -1 && i < j) {
+                enforce(i, j);
+            }
+            if (nei.getNextElement() != -1) {
+                contradiction(g, "");
+            }
+        }
+        gdm.unfreeze();
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.freeze();
-		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.freeze();
+        gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.unfreeze();
     }
 

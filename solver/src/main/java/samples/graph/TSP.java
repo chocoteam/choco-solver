@@ -36,9 +36,6 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -161,8 +158,8 @@ public class TSP {
                 System.out.println(k + "/" + e);
             }
         });
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         // resolution

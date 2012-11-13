@@ -25,7 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallel; import choco.kernel.ResolutionPolicy;
+package samples.parallel;
+
+import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -35,9 +37,6 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -129,8 +128,8 @@ public class Fragment {
         // config
         solver.set(new FragSearch(undi));
 //		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         // resolution
 //		solver.findSolution();

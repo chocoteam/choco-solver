@@ -1,37 +1,37 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation.generator;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
 
 /**
  * An abstract class for DSL to define a propagation strategy.
@@ -58,19 +58,15 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued = false; // to check wether this is enqueud or not.
     protected IPropagationEngine engine;
-
-    protected PropagationStrategy(Generator<E>... generators) {
-        this.elements = (E[]) new ISchedulable[0];
-        for (int i = 0; i < generators.length; i++) {
-            Generator gen = generators[i];
-            elements = ArrayUtils.append(elements, (E[]) gen.getElements());
-        }
-    }
+    protected IEvaluator evaluator;
 
     protected PropagationStrategy(E... schedulables) {
         this.elements = schedulables;
     }
 
+    public E[] array() {
+        return elements;
+    }
 
     //<-- DSL
 
@@ -160,7 +156,7 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
     protected abstract boolean _clearOut() throws ContradictionException;
 
     @Override
-    public final boolean execute() throws ContradictionException {
+    public boolean execute() throws ContradictionException {
         switch (iteration) {
             case pickOne:
                 return _pickOne();
@@ -177,5 +173,15 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
 
     public PropagationStrategy<E> duplicate() {
         throw new UnsupportedOperationException("unexpected call to Switcher, should be delegated");
+    }
+
+    @Override
+    public void attachEvaluator(IEvaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+
+    @Override
+    public int evaluate() {
+        return evaluator.eval(this);
     }
 }

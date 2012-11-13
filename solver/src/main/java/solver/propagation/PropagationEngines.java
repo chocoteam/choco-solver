@@ -29,6 +29,7 @@ package solver.propagation;
 import solver.Solver;
 import solver.propagation.hardcoded.ArcEngine;
 import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
 import solver.propagation.hardcoded.VariableEngine;
 
 /**
@@ -60,6 +61,12 @@ public enum PropagationEngines {
         @Override
         public IPropagationEngine make(Solver solver) {
             return new ArcEngine(solver);
+        }
+    },
+    CONSTRAINTDRIVEN_7QD() {
+        @Override
+        public IPropagationEngine make(Solver solver) {
+            return new SevenQueuesConstraintEngine(solver);
         }
     },
     DSLDRIVEN() {

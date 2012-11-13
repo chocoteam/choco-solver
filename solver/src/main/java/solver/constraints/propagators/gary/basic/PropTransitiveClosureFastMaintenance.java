@@ -38,8 +38,10 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**(incomplete) Propagator that maintains the transitive closure of a directed graph
+/**
+ * (incomplete) Propagator that maintains the transitive closure of a directed graph
  * No GAC, no complete checker neither, but fast
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropTransitiveClosureFastMaintenance extends Propagator<DirectedGraphVar> {
@@ -48,84 +50,83 @@ public class PropTransitiveClosureFastMaintenance extends Propagator<DirectedGra
     // VARIABLES
     //***********************************************************************************
 
-	private DirectedGraphVar g,tc;
-    GraphDeltaMonitor gdmG,gdmTC;
-	private PairProcedure arcEnforcedInG;
-	private PairProcedure arcRemovedFromTC;
+    private DirectedGraphVar g, tc;
+    GraphDeltaMonitor gdmG, gdmTC;
+    private PairProcedure arcEnforcedInG;
+    private PairProcedure arcRemovedFromTC;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, Solver solver, Constraint constraint) {
-		super(new DirectedGraphVar[]{graph,transitiveClosure}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
+    public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, Solver solver, Constraint constraint) {
+        super(new DirectedGraphVar[]{graph, transitiveClosure}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
         gdmG = (GraphDeltaMonitor) g.monitorDelta(this);
-		tc = transitiveClosure;
-		gdmTC = (GraphDeltaMonitor) transitiveClosure.monitorDelta(this);
-		final PropTransitiveClosureFastMaintenance cause = this;
-		arcEnforcedInG = new PairProcedure() {
-			@Override
-			public void execute(int from, int to) throws ContradictionException {
-				tc.enforceArc(from,to,cause);
-			}
-		};
-		arcRemovedFromTC = new PairProcedure() {
-			@Override
-			public void execute(int from, int to) throws ContradictionException {
-				g.removeArc(from, to, cause);
-			}
-		};
-	}
+        tc = transitiveClosure;
+        gdmTC = (GraphDeltaMonitor) transitiveClosure.monitorDelta(this);
+        arcEnforcedInG = new PairProcedure() {
+            @Override
+            public void execute(int from, int to) throws ContradictionException {
+                tc.enforceArc(from, to, aCause);
+            }
+        };
+        arcRemovedFromTC = new PairProcedure() {
+            @Override
+            public void execute(int from, int to) throws ContradictionException {
+                g.removeArc(from, to, aCause);
+            }
+        };
+    }
 
     //***********************************************************************************
     // PROPAGATIONS
     //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(g.getKernelGraph().arcExists(i,j)){
-					tc.enforceArc(i, j, this);
-				}else if(!tc.getEnvelopGraph().arcExists(i,j)){
-					g.removeArc(i, j, this);
-				}
-			}
-		}
-		gdmG.unfreeze();
-		gdmTC.unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int n = g.getEnvelopGraph().getNbNodes();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (g.getKernelGraph().arcExists(i, j)) {
+                    tc.enforceArc(i, j, aCause);
+                } else if (!tc.getEnvelopGraph().arcExists(i, j)) {
+                    g.removeArc(i, j, aCause);
+                }
+            }
+        }
+        gdmG.unfreeze();
+        gdmTC.unfreeze();
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp==0){
-			gdmG.freeze();
-			gdmG.forEachArc(arcEnforcedInG, EventType.ENFORCEARC);
-			gdmG.unfreeze();
-		}else{
-			gdmTC.freeze();
-			gdmTC.forEachArc(arcRemovedFromTC, EventType.REMOVEARC);
-			gdmTC.unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp == 0) {
+            gdmG.freeze();
+            gdmG.forEachArc(arcEnforcedInG, EventType.ENFORCEARC);
+            gdmG.unfreeze();
+        } else {
+            gdmTC.freeze();
+            gdmTC.forEachArc(arcRemovedFromTC, EventType.REMOVEARC);
+            gdmTC.unfreeze();
+        }
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0){
-			return EventType.ENFORCEARC.mask;
-		}else{
-			return EventType.REMOVEARC.mask;
-		}
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) {
+            return EventType.ENFORCEARC.mask;
+        } else {
+            return EventType.REMOVEARC.mask;
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 }

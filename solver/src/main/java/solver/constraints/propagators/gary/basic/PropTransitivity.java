@@ -39,7 +39,9 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 
-/**Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)
+/**
+ * Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
@@ -57,119 +59,119 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public PropTransitivity(V graph, Solver solver, Constraint constraint) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR,false);
-		g = graph;
+    public PropTransitivity(V graph, Solver solver, Constraint constraint) {
+        super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+        g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		arcEnforced = new PairProcedure() {
-			@Override
-			public void execute(int from, int to) throws ContradictionException {
-				enfArc(from,to);
-			}
-		};
-		arcRemoved = new PairProcedure() {
-			@Override
-			public void execute(int from, int to) throws ContradictionException {
-				remArc(from,to);
-			}
-		};
-	}
+        arcEnforced = new PairProcedure() {
+            @Override
+            public void execute(int from, int to) throws ContradictionException {
+                enfArc(from, to);
+            }
+        };
+        arcRemoved = new PairProcedure() {
+            @Override
+            public void execute(int from, int to) throws ContradictionException {
+                remArc(from, to);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(g.getKernelGraph().arcExists(i,j)){
-					enfArc(i,j);
-				}else if(!g.getEnvelopGraph().arcExists(i,j)){
-					remArc(i,j);
-				}
-			}
-		}
-		gdm.unfreeze();
-	}
-
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.freeze();
-		if ((mask & EventType.ENFORCEARC.mask) != 0) {
-			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-		}
-		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-		}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int n = g.getEnvelopGraph().getNbNodes();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (g.getKernelGraph().arcExists(i, j)) {
+                    enfArc(i, j);
+                } else if (!g.getEnvelopGraph().arcExists(i, j)) {
+                    remArc(i, j);
+                }
+            }
+        }
         gdm.unfreeze();
-	}
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.freeze();
+        if ((mask & EventType.ENFORCEARC.mask) != 0) {
+            gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+        }
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
+            gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+        }
+        gdm.unfreeze();
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask +  EventType.ENFORCEARC.mask;
-	}
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURE
-	//***********************************************************************************
-	// --- Arc enforcings
-	private void enfArc(int node, int succ) throws ContradictionException {
-		if(node != succ){
-			ISet ker = g.getKernelGraph().getPredecessorsOf(node);
-			ISet env = g.getEnvelopGraph().getPredecessorsOf(node);
-			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
-				if(ker.contain(i)){
-					if(g.enforceArc(i, succ, this)){
-						enfArc(i,succ);
-					}
-				}else if(!g.getEnvelopGraph().arcExists(i,succ)){
-					if(g.removeArc(i,node,this)){
-						remArc(i,node);
-					}
-				}
-			}
-			ker = g.getKernelGraph().getSuccessorsOf(succ);
-			env = g.getEnvelopGraph().getSuccessorsOf(succ);
-			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
-				if(ker.contain(i)){
-					if(g.enforceArc(node,i, this)){
-						enfArc(node,i);
-					}
-				}else if(!g.getEnvelopGraph().arcExists(node,i)){
-					if(g.removeArc(succ,i,this)){
-						remArc(succ,i);
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	// --- Arc removals
-	private void remArc(int from, int to) throws ContradictionException {
-		if(from != to){
-			ISet nei = g.getKernelGraph().getSuccessorsOf(from);
-			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-				if(g.removeArc(i, to,this)){
-					remArc(i,to);
-				}
-			}
-			nei = g.getKernelGraph().getPredecessorsOf(to);
-			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-				if(g.removeArc(from,i,this)){
-					remArc(from,i);
-				}
-			}
-		}
-	}
+    //***********************************************************************************
+    // PROCEDURE
+    //***********************************************************************************
+    // --- Arc enforcings
+    private void enfArc(int node, int succ) throws ContradictionException {
+        if (node != succ) {
+            ISet ker = g.getKernelGraph().getPredecessorsOf(node);
+            ISet env = g.getEnvelopGraph().getPredecessorsOf(node);
+            for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+                if (ker.contain(i)) {
+                    if (g.enforceArc(i, succ, aCause)) {
+                        enfArc(i, succ);
+                    }
+                } else if (!g.getEnvelopGraph().arcExists(i, succ)) {
+                    if (g.removeArc(i, node, aCause)) {
+                        remArc(i, node);
+                    }
+                }
+            }
+            ker = g.getKernelGraph().getSuccessorsOf(succ);
+            env = g.getEnvelopGraph().getSuccessorsOf(succ);
+            for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+                if (ker.contain(i)) {
+                    if (g.enforceArc(node, i, aCause)) {
+                        enfArc(node, i);
+                    }
+                } else if (!g.getEnvelopGraph().arcExists(node, i)) {
+                    if (g.removeArc(succ, i, aCause)) {
+                        remArc(succ, i);
+                    }
+                }
+            }
+        }
+    }
+
+    // --- Arc removals
+    private void remArc(int from, int to) throws ContradictionException {
+        if (from != to) {
+            ISet nei = g.getKernelGraph().getSuccessorsOf(from);
+            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+                if (g.removeArc(i, to, aCause)) {
+                    remArc(i, to);
+                }
+            }
+            nei = g.getKernelGraph().getPredecessorsOf(to);
+            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+                if (g.removeArc(from, i, aCause)) {
+                    remArc(from, i);
+                }
+            }
+        }
+    }
 }

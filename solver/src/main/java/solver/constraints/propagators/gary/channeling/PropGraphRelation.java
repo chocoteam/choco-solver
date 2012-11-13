@@ -94,38 +94,38 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
         return EventType.ENFORCEARC.mask + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
     }
 
-	@Override
-	public ESat isEntailed() {
-		if(!g.instantiated()){
-			return ESat.UNDEFINED;
-		}
-		for(int i=0;i<n;i++){
-			ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(relation.isEntail(i,j)==ESat.FALSE){
-					return ESat.FALSE;
-				}
-			}
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (!g.instantiated()) {
+            return ESat.UNDEFINED;
+        }
+        for (int i = 0; i < n; i++) {
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (relation.isEntail(i, j) == ESat.FALSE) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        return ESat.TRUE;
+    }
 
     //***********************************************************************************
     // PROCEDURES
     //***********************************************************************************
 
-	private void checkVar(int i) throws ContradictionException {
-		ISet ker = g.getKernelGraph().getActiveNodes();
-		for(int j=0; j<n; j++){
-			if(g.getKernelGraph().arcExists(i, j)){
-				relation.applyTrue(i,j, solver, this);
-			}else{
-				if(!g.getEnvelopGraph().arcExists(i, j)){
-					if(ker.contain(i) && ker.contain(j)){
-						relation.applyFalse(i,j, solver, this);
-					}
-				}
-			}
-		}
-	}
+    private void checkVar(int i) throws ContradictionException {
+        ISet ker = g.getKernelGraph().getActiveNodes();
+        for (int j = 0; j < n; j++) {
+            if (g.getKernelGraph().arcExists(i, j)) {
+                relation.applyTrue(i, j, solver, aCause);
+            } else {
+                if (!g.getEnvelopGraph().arcExists(i, j)) {
+                    if (ker.contain(i) && ker.contain(j)) {
+                        relation.applyFalse(i, j, solver, aCause);
+                    }
+                }
+            }
+        }
+    }
 }

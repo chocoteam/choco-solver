@@ -38,10 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.generator.PArc;
 import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -167,10 +164,11 @@ public class PropagationEngine implements IPropagationEngine {
                 if (!watermarks.isEmpty()) {
                     LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
                     PropagationStrategy _default = buildDefault(solver);
-                    propagationStrategy = new Sort(propagationStrategy, _default);
-                    if (!watermarks.isEmpty()) {
-                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
-                    }
+//                    propagationStrategy = new Sort(propagationStrategy, _default);
+                    throw new UnsupportedOperationException();
+//                    if (!watermarks.isEmpty()) {
+//                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+//                    }
                 }
                 watermarks = null;
                 initialized = true;
@@ -252,9 +250,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
-        Constraint[] constraints = solver.getCstrs();
-        Queue arcs = new Queue(new PArc(this, constraints));
-        return new Sort(arcs.clearOut()).clearOut();
+        throw new UnsupportedOperationException();
     }
 
 

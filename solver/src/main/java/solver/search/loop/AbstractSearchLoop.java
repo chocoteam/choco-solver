@@ -153,7 +153,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-		objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION,solver);//default
+        objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();

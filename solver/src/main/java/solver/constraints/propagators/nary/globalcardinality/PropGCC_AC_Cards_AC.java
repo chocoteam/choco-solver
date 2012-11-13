@@ -362,13 +362,13 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
                     j = map.get(k);
                     if (nodeSCC[i] != nodeSCC[j]) {
                         if (digraph.arcExists(j, i)) {
-                            v.instantiateTo(k, this);
+                            v.instantiateTo(k, aCause);
                             ISet nei = digraph.getSuccessorsOf(i);
                             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                                 digraph.removeArc(i, s);
                             }
                         } else {
-                            v.removeValue(k, this);
+                            v.removeValue(k, aCause);
                             digraph.removeArc(i, j);
                         }
                     }
@@ -382,14 +382,14 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k++) {
                 j = map.get(k);
                 if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                    v.removeValue(k, this);
+                    v.removeValue(k, aCause);
                 }
             }
             int lb = v.getLB();
             for (int k = v.getUB(); k >= lb; k--) {
                 j = map.get(k);
                 if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                    v.removeValue(k, this);
+                    v.removeValue(k, aCause);
                 }
             }
         }
@@ -400,7 +400,7 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
             idx = map.get(values[i]);
             nei = digraph.getSuccessorsOf(idx);
             ub = nei.getSize() + digraph.getPredecessorsOf(idx).getSize();
-            cards[i].updateUpperBound(ub, this);
+            cards[i].updateUpperBound(ub, aCause);
         }
         for (int i = 0; i < values.length; i++) {
             idx = map.get(values[i]);
@@ -409,13 +409,13 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
             while (size < ub && canUseValue(idx)) {
                 size++;
             }
-            cards[i].updateUpperBound(size, this);
+            cards[i].updateUpperBound(size, aCause);
         }
         for (int i = 0; i < values.length; i++) {
             idx = map.get(values[i]);
             while (canUnuseValue(idx)) {
             }
-            cards[i].updateLowerBound(digraph.getSuccessorsOf(idx).getSize(), this);
+            cards[i].updateLowerBound(digraph.getSuccessorsOf(idx).getSize(), aCause);
         }
     }
 

@@ -294,7 +294,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                 }
             }
             int card = repairMatching();
-            nValues.updateUpperBound(card, this);
+            nValues.updateUpperBound(card, aCause);
             if (nValues.getLB() == card) {
                 filter();
             }

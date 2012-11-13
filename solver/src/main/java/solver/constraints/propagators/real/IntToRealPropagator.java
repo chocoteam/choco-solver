@@ -82,8 +82,8 @@ public class IntToRealPropagator extends Propagator<IntVar> {
                 contradiction(null, "Ibex failed");
             case Ibex.CONTRACT:
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i].updateLowerBound((int) domains[2 * i], this);
-                    vars[i].updateUpperBound((int) domains[2 * i + 1], this);
+                    vars[i].updateLowerBound((int) domains[2 * i], aCause);
+                    vars[i].updateUpperBound((int) domains[2 * i + 1], aCause);
                 }
                 return;
             case Ibex.ENTAILED:

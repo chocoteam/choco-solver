@@ -35,7 +35,6 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
-import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -58,7 +57,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 2000;
+    private int m = 1000;
 
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
     private boolean use_views = false;
@@ -111,12 +110,6 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        /*IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PCons(propagationEngine, ALLDIFF), new PArc(propagationEngine, vars), new PArc(propagationEngine, dist));
-        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
-        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
-        */
-        solver.set(new ConstraintEngine(solver));
     }
 
     @Override

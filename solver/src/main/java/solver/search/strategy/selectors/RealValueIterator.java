@@ -44,6 +44,7 @@ public interface RealValueIterator extends Serializable {
     /**
      * Selects and returns the value to constrained chosen variable with.
      * The chosen value must belong to the domain of <code>variable</code>.
+     *
      * @return the value, based on the domain of variable
      */
     public double selectValue(RealVar var);

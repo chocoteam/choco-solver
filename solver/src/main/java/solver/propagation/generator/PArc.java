@@ -155,6 +155,19 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
         }
     }
 
+    public static FineArcEventRecorder make(PropagationEngine propagationEngine, Solver solver,
+                                            Variable var, Propagator prop, int idx) {
+        FineArcEventRecorder er = null;
+        int pidx = prop.getId();
+        int vidx = var.getId();
+        if (propagationEngine.isMarked(vidx, pidx)) {
+            propagationEngine.clearWatermark(vidx, pidx);
+            er = new FineArcEventRecorder(var, prop, idx, solver, propagationEngine);
+            propagationEngine.addEventRecorder(er);
+        }
+        return er;
+    }
+
     @Override
     public AbstractFineEventRecorder[] getElements() {
         return eventRecorders.toArray(new AbstractFineEventRecorder[eventRecorders.size()]);

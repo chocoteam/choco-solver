@@ -295,7 +295,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                     int val = vars[v].getValue();
                     for (int i = 0; i < n; i++) {
                         if (i != v) {
-                            vars[i].removeValue(val, this);
+                            vars[i].removeValue(val, aCause);
                         }
                     }
                 }
@@ -333,13 +333,13 @@ public class PropAllDiffAC extends Propagator<IntVar> {
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
                 if (i != varIdx) {
                     digraph.removeEdge(i, j);
-                    vars[i].removeValue(val, this);
+                    vars[i].removeValue(val, aCause);
                 }
             }
             int i = digraph.getSuccessorsOf(j).getFirstElement();
             if (i != -1 && i != varIdx) {
                 digraph.removeEdge(i, j);
-                vars[i].removeValue(val, this);
+                vars[i].removeValue(val, aCause);
             }
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);

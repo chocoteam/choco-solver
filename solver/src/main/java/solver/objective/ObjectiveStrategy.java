@@ -47,6 +47,7 @@ import solver.variables.IntVar;
 
 /**
  * Class that defines a branching strategy over the objective variable
+ *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
@@ -57,81 +58,89 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     private int globalLB, globalUB;
-	private int coefLB,coefUB;
+    private int coefLB, coefUB;
     private IntVar obj;
     private long nbSols;
     private Solver solver;
     private PoolManager<FastDecision> pool;
     private boolean firstCall;
-	private DecisionOperator<IntVar> decOperator;
-	private OptimizationPolicy optPolicy;
+    private DecisionOperator<IntVar> decOperator;
+    private OptimizationPolicy optPolicy;
 
-	//***********************************************************************************
+    //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Defines a branching strategy over the objective variable
-	 * @param objective variable
-	 * @param policy BOTTOM_UP, TOP_TOWN or DICHOTOMIC
-	 */
-	public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy) {
-        this(objective,getCoefs(policy),policy);
+    /**
+     * Defines a branching strategy over the objective variable
+     *
+     * @param objective variable
+     * @param policy    BOTTOM_UP, TOP_TOWN or DICHOTOMIC
+     */
+    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy) {
+        this(objective, getCoefs(policy), policy);
     }
 
-	/**
-	 * Defines a parametrized dichotomic branching over the objective variable
-	 * @param objective variable
-	 * @param coefs [a,b] defines how to split the domain of the objective variable
-	 * [1,1] will halve its domain
-	 * [1,2] will take a value closer to the upper bound than the lower bound
-	 * @param policy should be DICHOTOMIC
-	 */
-	public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
+    /**
+     * Defines a parametrized dichotomic branching over the objective variable
+     *
+     * @param objective variable
+     * @param coefs     [a,b] defines how to split the domain of the objective variable
+     *                  [1,1] will halve its domain
+     *                  [1,2] will take a value closer to the upper bound than the lower bound
+     * @param policy    should be DICHOTOMIC
+     */
+    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
         super(new IntVar[]{objective});
         this.pool = new PoolManager<FastDecision>();
         this.obj = objective;
         this.solver = obj.getSolver();
         this.firstCall = true;
-		this.coefLB = coefs[0];
-		this.coefUB = coefs[1];
-		this.optPolicy = policy;
+        this.coefLB = coefs[0];
+        this.coefUB = coefs[1];
+        this.optPolicy = policy;
         solver.getSearchLoop().restartAfterEachSolution(true);
-		if(coefLB<0 || coefUB<0 || coefLB+coefUB==0){
-			throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
-		}
-		if(coefLB+coefUB!=1 && policy!=OptimizationPolicy.DICHOTOMIC){
-			throw new UnsupportedOperationException("Invalid coefficients for BOTTOM_UP or TOP_DOWN optimization" +
-			"\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Solver solver) instead");
-		}
+        if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
+            throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
+        }
+        if (coefLB + coefUB != 1 && policy != OptimizationPolicy.DICHOTOMIC) {
+            throw new UnsupportedOperationException("Invalid coefficients for BOTTOM_UP or TOP_DOWN optimization" +
+                    "\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Solver solver) instead");
+        }
     }
 
-	private static int[] getCoefs(OptimizationPolicy policy){
-		switch (policy){
-			case BOTTOM_UP:	return new int[]{1,0};
-			case TOP_DOWN:	return new int[]{0,1};
-			case DICHOTOMIC:return new int[]{1,1};
-			default:throw new UnsupportedOperationException();
-		}
-	}
+    private static int[] getCoefs(OptimizationPolicy policy) {
+        switch (policy) {
+            case BOTTOM_UP:
+                return new int[]{1, 0};
+            case TOP_DOWN:
+                return new int[]{0, 1};
+            case DICHOTOMIC:
+                return new int[]{1, 1};
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
 
-	private DecisionOperator<IntVar> getOperator(OptimizationPolicy optPolicy, ResolutionPolicy resoPolicy){
-			switch (optPolicy){
-				case BOTTOM_UP:	return decUB;
-				case TOP_DOWN:	return incLB;
-				case DICHOTOMIC:
-					switch (resoPolicy){
-						case MINIMIZE:
-							return decUB;
-						case MAXIMIZE:
-							return incLB;
-					}
-				default:
-					System.out.println(optPolicy);
-					System.out.println(resoPolicy);
-					throw new UnsupportedOperationException();
-			}
-		}
+    private DecisionOperator<IntVar> getOperator(OptimizationPolicy optPolicy, ResolutionPolicy resoPolicy) {
+        switch (optPolicy) {
+            case BOTTOM_UP:
+                return decUB;
+            case TOP_DOWN:
+                return incLB;
+            case DICHOTOMIC:
+                switch (resoPolicy) {
+                    case MINIMIZE:
+                        return decUB;
+                    case MAXIMIZE:
+                        return incLB;
+                }
+            default:
+                System.out.println(optPolicy);
+                System.out.println(resoPolicy);
+                throw new UnsupportedOperationException();
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -139,38 +148,38 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
     @Override
     public void init() {
-		decOperator = getOperator(optPolicy,solver.getSearchLoop().getObjectivemanager().getPolicy());
-	}
+        decOperator = getOperator(optPolicy, solver.getSearchLoop().getObjectivemanager().getPolicy());
+    }
 
     @Override
     public Decision getDecision() {
-		if(obj.instantiated() || solver.getMeasures().getSolutionCount()==0
-		|| (nbSols==solver.getMeasures().getSolutionCount()&&optPolicy==OptimizationPolicy.DICHOTOMIC)){
-			return null;
-		}
-		if(firstCall){
-			firstCall = false;
-			globalLB = obj.getLB();
-			globalUB = obj.getUB();
-		}
-		nbSols = solver.getMeasures().getSolutionCount();
-		globalUB = obj.getUB();
-		globalLB = Math.max(globalLB,obj.getLB());//check
-		globalUB = Math.min(globalUB,obj.getUB());//check
-		ObjectiveManager man = solver.getSearchLoop().getObjectivemanager();
-		man.updateLB(globalLB);
-		man.updateUB(globalUB);
-		if(globalLB > globalUB){
-			return null;
-		}
-		int target;
-		target = (globalLB *coefLB+ globalUB *coefUB)/(coefLB+coefUB);
-		System.out.println(globalLB +" : "+ globalUB +" -> "+target);
-		FastDecision dec = pool.getE();
-		if(dec==null)dec = new FastDecision(pool);
-		dec.set(obj,target, decOperator);
-		return dec;
-	}
+        if (obj.instantiated() || solver.getMeasures().getSolutionCount() == 0
+                || (nbSols == solver.getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+            return null;
+        }
+        if (firstCall) {
+            firstCall = false;
+            globalLB = obj.getLB();
+            globalUB = obj.getUB();
+        }
+        nbSols = solver.getMeasures().getSolutionCount();
+        globalUB = obj.getUB();
+        globalLB = Math.max(globalLB, obj.getLB());//check
+        globalUB = Math.min(globalUB, obj.getUB());//check
+        ObjectiveManager man = solver.getSearchLoop().getObjectivemanager();
+        man.updateLB(globalLB);
+        man.updateUB(globalUB);
+        if (globalLB > globalUB) {
+            return null;
+        }
+        int target;
+        target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
+        System.out.println(globalLB + " : " + globalUB + " -> " + target);
+        FastDecision dec = pool.getE();
+        if (dec == null) dec = new FastDecision(pool);
+        dec.set(obj, target, decOperator);
+        return dec;
+    }
 
     private DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
         @Override
@@ -180,15 +189,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-			System.out.println("unapply objective decision");
-			globalLB = value + 1;
-			solver.getSearchLoop().getObjectivemanager().updateLB(globalLB);
-			var.updateLowerBound(globalLB, cause);
+            System.out.println("unapply objective decision");
+            globalLB = value + 1;
+            solver.getSearchLoop().getObjectivemanager().updateLB(globalLB);
+            var.updateLowerBound(globalLB, cause);
         }
 
         @Override
         public String toString() {
-            return " objective split("+coefLB+","+coefUB+"), decreases the upper bound first";
+            return " objective split(" + coefLB + "," + coefUB + "), decreases the upper bound first";
         }
 
         @Override
@@ -197,7 +206,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
     };
 
-	private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
+    private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
             var.updateLowerBound(value, cause);
@@ -205,15 +214,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-			System.out.println("unapply objective decision");
-			globalUB = value - 1;
-			solver.getSearchLoop().getObjectivemanager().updateUB(globalUB);
-			var.updateUpperBound(globalUB, cause);
+            System.out.println("unapply objective decision");
+            globalUB = value - 1;
+            solver.getSearchLoop().getObjectivemanager().updateUB(globalUB);
+            var.updateUpperBound(globalUB, cause);
         }
 
         @Override
         public String toString() {
-            return " objective split("+coefLB+","+coefUB+"), increases the lower bound first";
+            return " objective split(" + coefLB + "," + coefUB + "), increases the lower bound first";
         }
 
         @Override

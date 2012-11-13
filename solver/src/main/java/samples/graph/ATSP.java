@@ -50,9 +50,6 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.decision.Decision;
@@ -340,9 +337,9 @@ public class ATSP {
             default:
                 throw new UnsupportedOperationException();
         }
-        PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        PArc allArcs = new PArc(pengine, gc);
-        solver.set(pengine.set(new Sort(allArcs).clearOut()));
+//        PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        PArc allArcs = new PArc(pengine, gc);
+//        solver.set(pengine.set(new Sort(allArcs).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
             public void afterInitialPropagation() {

@@ -37,9 +37,9 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -99,7 +99,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         this.matchingCardinality = matchingCardinality;
         matching = new int[n2];
         nodeSCC = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST,false);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST, false);
         free = new BitSet(n2);
         if (g.isDirected()) {
             remProc = new DirectedRemProc();

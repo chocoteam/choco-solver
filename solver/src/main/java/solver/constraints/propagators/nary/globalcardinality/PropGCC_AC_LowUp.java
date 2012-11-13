@@ -337,13 +337,13 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
                     j = map.get(k);
                     if (nodeSCC[i] != nodeSCC[j]) {
                         if (digraph.arcExists(j, i)) {
-                            v.instantiateTo(k, this);
+                            v.instantiateTo(k, aCause);
                             ISet nei = digraph.getSuccessorsOf(i);
                             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                                 digraph.removeArc(i, s);
                             }
                         } else {
-                            v.removeValue(k, this);
+                            v.removeValue(k, aCause);
                             digraph.removeArc(i, j);
                         }
                     }
@@ -357,14 +357,14 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k++) {
                 j = map.get(k);
                 if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                    v.removeValue(k, this);
+                    v.removeValue(k, aCause);
                 }
             }
             int lb = v.getLB();
             for (int k = v.getUB(); k >= lb; k--) {
                 j = map.get(k);
                 if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
-                    v.removeValue(k, this);
+                    v.removeValue(k, aCause);
                 }
             }
         }

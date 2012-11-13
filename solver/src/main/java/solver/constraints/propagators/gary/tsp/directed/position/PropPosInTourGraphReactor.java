@@ -180,7 +180,7 @@ public class PropPosInTourGraphReactor extends Propagator {
             nextSet.clear();
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
-                intVars[x].updateLowerBound(level, this);
+                intVars[x].updateLowerBound(level, aCause);
                 ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
@@ -214,7 +214,7 @@ public class PropPosInTourGraphReactor extends Propagator {
                 for (int i = currentSet.size() - 1; i >= 0; i--) {
                     nbNode++;
                     x = currentSet.get(i);
-                    intVars[x].updateLowerBound(level, this);
+                    intVars[x].updateLowerBound(level, aCause);
                     ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {
@@ -257,7 +257,7 @@ public class PropPosInTourGraphReactor extends Propagator {
             nextSet.clear();
             for (int i = currentSet.size() - 1; i >= 0; i--) {
                 x = currentSet.get(i);
-                intVars[x].updateUpperBound(level, this);
+                intVars[x].updateUpperBound(level, aCause);
                 ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!done.get(j)) {
@@ -291,7 +291,7 @@ public class PropPosInTourGraphReactor extends Propagator {
                 for (int i = currentSet.size() - 1; i >= 0; i--) {
                     nbNodes--;
                     x = currentSet.get(i);
-                    intVars[x].updateUpperBound(level, this);
+                    intVars[x].updateUpperBound(level, aCause);
                     ISet nei = g.getEnvelopGraph().getPredecessorsOf(x);
                     for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                         if (!done.get(j)) {

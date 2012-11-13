@@ -34,9 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -141,8 +138,8 @@ public class HCP_symImpact {
         // config
         solver.set(StrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         if (useRestarts) {
             solver.getSearchLoop().plugSearchMonitor(new Restarter());
@@ -194,8 +191,8 @@ public class HCP_symImpact {
         solver.post(gc);
         // config
         solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
-        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         if (useRestarts) {
             solver.getSearchLoop().plugSearchMonitor(new Restarter());

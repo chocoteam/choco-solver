@@ -98,7 +98,7 @@ public class RealPropagator extends Propagator<RealVar> {
                 contradiction(null, "Ibex failed");
             case Ibex.CONTRACT:
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], this);
+                    vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], aCause);
                 }
                 return;
             case Ibex.ENTAILED:

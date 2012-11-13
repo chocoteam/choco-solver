@@ -1,35 +1,34 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation.generator;
 
 import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.propagation.queues.IHeap;
 import solver.propagation.queues.MinHeap;
 
@@ -44,21 +43,19 @@ import solver.propagation.queues.MinHeap;
  */
 public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    protected IEvaluator<S> evaluator;
     protected IHeap toPropagate;
     protected S lastPopped;
+    protected int coeff;
 
-    @SuppressWarnings({"unchecked"})
-    public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
-        super(generators);
-        this.evaluator = evaluator;
+
+    public SortDyn(boolean min, S[] schedulables) {
+        super(schedulables);
+        coeff = (min ? 1 : -1);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-//        this.toPropagate = new BinaryTreeHeap(elements.length);
-        this.toPropagate = new MinHeap(elements.length+1);
+        this.toPropagate = new MinHeap(elements.length + 1);
     }
-
 
     @Override
     public S[] getElements() {
@@ -71,7 +68,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
         // CONDITION: the element must not be already present (checked in element)
         assert !element.enqueued();
         int idx = element.getIndexInScheduler();
-        toPropagate.insert(evaluator.eval(element), idx);
+        toPropagate.insert(coeff * element.evaluate(), idx);
         element.enqueue();
         if (!enqueued) {
             scheduler.schedule(this);
@@ -92,7 +89,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&&!lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -113,7 +110,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&&!lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -154,12 +151,13 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     @Override
     public void update(S element) {
         int idx = element.getIndexInScheduler();
-        toPropagate.update(evaluator.eval(element), idx);
-    }
-
-    @Override
-    public SortDyn duplicate() {
-        return new SortDyn(this.evaluator);
+        toPropagate.update(coeff * element.evaluate(), idx);
     }
     //-->
+
+
+    @Override
+    public PropagationStrategy<S> duplicate() {
+        return new SortDyn<S>(coeff == 1, elements);
+    }
 }

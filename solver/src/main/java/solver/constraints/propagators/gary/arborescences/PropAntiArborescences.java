@@ -35,12 +35,12 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
-import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
+import solver.variables.setDataStructures.ISet;
 
 /**
  * AntiArborescences constraint (simplification from tree constraint) based on dominators
@@ -66,17 +66,17 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		n = g.getEnvelopGraph().getNbNodes();
-		connectedGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST,false);
-		if(simple){
-			domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-		}else{
-			domFinder = new AlphaDominatorsFinder(n, connectedGraph);
-		}
-	}
+    public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
+        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+        g = graph;
+        n = g.getEnvelopGraph().getNbNodes();
+        connectedGraph = new DirectedGraph(n + 1, GraphType.LINKED_LIST, false);
+        if (simple) {
+            domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+        } else {
+            domFinder = new AlphaDominatorsFinder(n, connectedGraph);
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -92,37 +92,37 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
         propagate(0);
     }
 
-	private void structuralPruning() throws ContradictionException {
-		for(int i=0;i<n+1;i++){
-			connectedGraph.getSuccessorsOf(i).clear();
-			connectedGraph.getPredecessorsOf(i).clear();
-		}
-		ISet nei;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(nei.isEmpty()){
-				connectedGraph.addArc(i,n);
-			}else{
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					connectedGraph.addArc(i,y);
-				}
-			}
-		}
-		if(domFinder.findPostDominators()){
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(y,x)){
-						g.removeArc(x,y,this);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        for (int i = 0; i < n + 1; i++) {
+            connectedGraph.getSuccessorsOf(i).clear();
+            connectedGraph.getPredecessorsOf(i).clear();
+        }
+        ISet nei;
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            if (nei.isEmpty()) {
+                connectedGraph.addArc(i, n);
+            } else {
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    connectedGraph.addArc(i, y);
+                }
+            }
+        }
+        if (domFinder.findPostDominators()) {
+            for (int x = 0; x < n; x++) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    //--- STANDART PRUNING
+                    if (domFinder.isDomminatedBy(y, x)) {
+                        g.removeArc(x, y, aCause);
+                    }
+                    // ENFORCE ARC-DOMINATORS (redondant)
+                }
+            }
+        } else {
+            contradiction(g, "the source cannot reach all nodes");
+        }
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

@@ -28,7 +28,6 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.iterators.ValueIterator;
 import solver.Configuration;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;

@@ -34,7 +34,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -94,7 +93,6 @@ public class CycleLtTest {
             st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
                 Solver rand = modeler(n);
-                PropagationEngine pengine = new PropagationEngine(rand.getEnvironment());
                 PropagationStrategies.values()[j].make(rand);
                 rand.findAllSolutions();
                 st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));

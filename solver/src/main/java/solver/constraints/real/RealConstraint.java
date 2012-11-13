@@ -102,6 +102,7 @@ public class RealConstraint extends Constraint {
 
     /**
      * Add a discretization constraint to Ibex, forcing variable in parameters to be considered as discrete
+     *
      * @param vars array of variables
      */
     public void discretize(IntVar... vars) {

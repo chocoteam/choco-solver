@@ -165,7 +165,6 @@ public class PropEventRecorderTest {
     public void testafterupdate() throws ContradictionException {
         set("solver", Propagator.class, p1, solver);
         expect(p1.getId()).andReturn(0);
-        p1.getPropagationConditions();
         expectLastCall().andReturn(EventType.FULL_PROPAGATION.mask);
         replay(iv1, iv2, iv3, p1, s1);
 
