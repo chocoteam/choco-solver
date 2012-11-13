@@ -89,8 +89,6 @@ public class ParseAndSolveExt {
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
 
-    long parsingtime;
-
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolveExt().doMain(args);
     }
@@ -143,7 +141,6 @@ public class ParseAndSolveExt {
             LOGGER.info("% parse instance...");
             Solver solver = new Solver();
             THashMap<String, Object> map = new THashMap<String, Object>();
-            parsingtime = -System.nanoTime();
             buildParser(new FileInputStream(new File(instance)), solver, map);
             LOGGER.info("% solve instance...");
             if (!csv.equals("")) {
@@ -153,8 +150,6 @@ public class ParseAndSolveExt {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
-            parsingtime += System.nanoTime();
-            LOGGER.info("% Parsing : {}ms", parsingtime / 1000f / 1000f);
             solver.solve();
         }
     }
