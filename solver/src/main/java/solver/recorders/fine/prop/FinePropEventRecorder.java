@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -71,7 +72,6 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     protected final void _execute(int i) throws ContradictionException {
         int evtmask_ = evtmasks[i];
         if (evtmask_ > 0) {
-//                LoggerFactory.getLogger("solver").info(">> {}", this.toString());
             evtmasks[i] = 0; // and clean up mask
             execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[i], evtmask_);
         }
@@ -82,9 +82,10 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not schedule itself
-            if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             int idx = v2i[vIdx - offset];
             if (propagators[PINDEX].advise(idxVinP[vIdx], evt.mask)) {
+                if (Configuration.PRINT_SCHEDULE)
+                    PropagationUtils.printSchedule(propagators[PINDEX]);
                 // 1. record the event and values removed
                 evtmasks[idx] |= evt.strengthened_mask;
                 schedule();

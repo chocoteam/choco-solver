@@ -44,6 +44,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.propagation.PropagationUtils;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -273,7 +274,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         //coarseER.update(evt);
         //solver.getEngine().schedulePropagator(this, evt);
         if (Configuration.PRINT_PROPAGATION)
-            LoggerFactory.getLogger("solver").info("\tFP {}", "<< {} ::" + this.toString() + " >>");
+            PropagationUtils.printPropagation(null, this);
         if (nbPendingEvt == 0) {
             coarseERcalls++;
             propagate(evt.getStrengthenedMask());

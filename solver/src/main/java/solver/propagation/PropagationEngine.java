@@ -32,6 +32,7 @@ import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -315,6 +316,9 @@ public class PropagationEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        if (Configuration.PRINT_VAR_EVENT) {
+            PropagationUtils.printModification(variable, type, cause);
+        }
         int id = variable.getId();
         IList list = fines_v.get(id);
         if (list != null) {

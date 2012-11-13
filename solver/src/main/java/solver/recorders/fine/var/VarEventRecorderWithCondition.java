@@ -26,12 +26,12 @@
  */
 package solver.recorders.fine.var;
 
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -72,11 +72,10 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
             int i = propIdx[k];
             Propagator propagator = propagators[i];
             if (cause != propagator && propagator.isActive()) { // due to idempotency of propagator, it should not schedule itself
-                if (Configuration.PRINT_PROPAGATION)
-                    LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
                 int idx = p2i[propagator.getId() - offset];
                 if (propagator.advise(idxVinPs[idx], evt.mask)) {
-
+                    if (Configuration.PRINT_SCHEDULE)
+                        PropagationUtils.printSchedule(propagators[i]);
                     // schedule this if condition is valid
                     if (condition.validateScheduling(this, propagator, evt)) {
                         //propagator.forcePropagate(EventType.FULL_PROPAGATION);

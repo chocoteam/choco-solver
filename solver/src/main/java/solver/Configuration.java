@@ -44,6 +44,9 @@ public enum Configuration {
     // Set to true to print event occurring on variables
     public static final boolean PRINT_VAR_EVENT = false;
 
+    // Set to true to print scheduling information
+    public static final boolean PRINT_SCHEDULE = false;
+
     // Set to true to print contradiction information
     public static final boolean PRINT_CONTRADICTION = false;
 

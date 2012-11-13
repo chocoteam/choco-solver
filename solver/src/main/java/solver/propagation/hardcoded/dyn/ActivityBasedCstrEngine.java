@@ -38,6 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
@@ -220,7 +221,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
                         if (Configuration.PRINT_PROPAGATION) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
+                            PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
@@ -325,16 +326,16 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+            PropagationUtils.printModification(variable, type, cause);
         }
         Propagator[] vProps = variable.getPropagators();
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                if (Configuration.PRINT_PROPAGATION)
-                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if (prop.advise(pindices[p], type.mask)) {
+                    if (Configuration.PRINT_SCHEDULE)
+                        PropagationUtils.printSchedule(prop);
                     int aid = p2i.get(prop.getId());
                     if (masks_f[aid][pindices[p]] == 0) {
                         prop.incNbPendingEvt();

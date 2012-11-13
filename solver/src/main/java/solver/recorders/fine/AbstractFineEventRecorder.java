@@ -27,12 +27,14 @@
 package solver.recorders.fine;
 
 import choco.kernel.common.Indexable;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
@@ -142,6 +144,9 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     }
 
     protected final void execute(Propagator propagator, int idx, int mask) throws ContradictionException {
+        if (Configuration.PRINT_PROPAGATION) {
+            PropagationUtils.printPropagation(propagator.getVar(idx), propagator);
+        }
         assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
         propagator.fineERcalls++;
         propagator.propagate(idx, mask);

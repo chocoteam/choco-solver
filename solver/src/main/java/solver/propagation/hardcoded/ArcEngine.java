@@ -28,7 +28,6 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -36,6 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
@@ -160,7 +160,7 @@ public class ArcEngine implements IPropagationEngine {
             masks_f[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
             if (mask > 0) {
                 if (Configuration.PRINT_PROPAGATION) {
-                    LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
+                    PropagationUtils.printPropagation(lastVar, lastProp);
                 }
                 lastProp.fineERcalls++;
                 lastProp.decNbPendingEvt();
@@ -191,6 +191,9 @@ public class ArcEngine implements IPropagationEngine {
 
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        if (Configuration.PRINT_VAR_EVENT) {
+            PropagationUtils.printModification(variable, type, cause);
+        }
         Propagator prop;
         int paid, cm, vaid = v2i.get(variable.getId());
         Propagator[] vProps = variable.getPropagators();
@@ -199,8 +202,8 @@ public class ArcEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive()) {
                 paid = p2i.get(prop.getId());
                 if (prop.advise(idxVinP[vaid].get(paid), type.mask)) {
-                    if (Configuration.PRINT_PROPAGATION) {
-                        LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + variable.toString() + "::" + prop.toString() + " >>");
+                    if (Configuration.PRINT_SCHEDULE) {
+                        PropagationUtils.printSchedule(prop);
                     }
                     cm = masks_f[vaid].get(paid);
                     if (cm == -1) {  // add the arc into the queue

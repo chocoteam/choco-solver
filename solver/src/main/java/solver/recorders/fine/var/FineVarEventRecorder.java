@@ -26,13 +26,13 @@
  */
 package solver.recorders.fine.var;
 
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -67,7 +67,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
         int first = firstAP.get();
         int last = firstPP.get();
         flag_swap_during_execution = false;
@@ -88,7 +87,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         assert p2i[propagators[i].getId() - offset] == i;
         int evtmask_ = evtmasks[i];
         if (evtmask_ > 0) {
-//          LoggerFactory.getLogger("solver").info(">> {}", this.toString());
             evtmasks[i] = 0; // and clean up mask
             execute(propagators[i], idxVinPs[i], evtmask_);
         }
@@ -98,7 +96,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
         boolean atleastone = false;
         int first = firstAP.get();
         int last = firstPP.get();
@@ -109,6 +106,8 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 //                int idx = p2i[propagator.getId() - offset];
                 assert p2i[propagator.getId() - offset] == i;
                 if (propagator.advise(idxVinPs[i], evt.mask)) {
+                    if (Configuration.PRINT_SCHEDULE)
+                        PropagationUtils.printSchedule(propagator);
                     // record the event and values removed
                     if ((evt.mask & evtmasks[i]) == 0) { // if the event has not been recorded yet (through strengthened event also).
                         evtmasks[i] |= evt.strengthened_mask;

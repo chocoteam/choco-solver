@@ -26,13 +26,13 @@
  */
 package solver.recorders.fine.arc;
 
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -63,7 +63,6 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     @Override
     public boolean execute() throws ContradictionException {
         if (evtmask > 0) {
-            if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
             int evtmask_ = evtmask;
             this.evtmask = 0; // and clean up mask
             execute(propagators[PINDEX], idxVinP, evtmask_);
@@ -77,7 +76,8 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[PINDEX] && propagators[PINDEX].isActive()) { // due to idempotency of propagator, it should not be schedule itself
             if (propagators[PINDEX].advise(idxVinP, evt.mask)) {
-                if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+                if (Configuration.PRINT_SCHEDULE)
+                    PropagationUtils.printSchedule(propagators[PINDEX]);
                 // record the event and values removed
 //                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                 evtmask |= evt.strengthened_mask;

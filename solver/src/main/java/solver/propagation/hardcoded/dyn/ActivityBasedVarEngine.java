@@ -37,6 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
@@ -45,7 +46,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -232,7 +232,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                     mask = masks_f[aid][p];
                     if (mask > 0) {
                         if (Configuration.PRINT_PROPAGATION) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar + "::" + lastProp.toString() + " >>");
+                            PropagationUtils.printPropagation(lastVar, lastProp);
                         }
                         masks_f[aid][p] = 0;
                         lastProp.fineERcalls++;
@@ -355,7 +355,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+            PropagationUtils.printModification(variable, type, cause);
         }
         int id = variable.getId();
         boolean _schedule = false;
@@ -365,9 +365,9 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                if (Configuration.PRINT_PROPAGATION)
-                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if (prop.advise(pindices[p], type.mask)) {
+                    if (Configuration.PRINT_SCHEDULE)
+                        PropagationUtils.printSchedule(prop);
                     if (masks_f[aid][p] == 0) {
                         prop.incNbPendingEvt();
                     }

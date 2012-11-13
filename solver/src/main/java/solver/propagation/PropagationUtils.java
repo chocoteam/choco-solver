@@ -28,11 +28,13 @@ package solver.propagation;
 
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -59,7 +61,7 @@ public enum PropagationUtils {
             for (int j = 0; j < propagators.length; j++) {
                 Propagator propagator = propagators[j];
                 if (Configuration.PRINT_PROPAGATION) {
-                    LoggerFactory.getLogger("solver").info("activate {}", "<< ::" + propagator.toString() + " >>");
+                    LoggerFactory.getLogger("solver").info("[A] {}", propagator);
                 }
                 if (propagator.isStateLess()) {
                     propagator.setActive();
@@ -69,5 +71,17 @@ public enum PropagationUtils {
                 solver.getEngine().propagate();
             }
         }
+    }
+
+    public static void printPropagation(Variable v, Propagator p) {
+        LoggerFactory.getLogger("solver").info("[P] {}", "(" + v + "::" + p + ")");
+    }
+
+    public static void printModification(Variable v, EventType e, ICause c) {
+        LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", new Object[]{v, e, c});
+    }
+
+    public static void printSchedule(Propagator p) {
+        LoggerFactory.getLogger("solver").info("\t\t[S] {}", p);
     }
 }
