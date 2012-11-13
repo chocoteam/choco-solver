@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// $ANTLR 3.4 parser/flatzinc/FlatzincLexer.g 2012-11-13 10:00:41
+
 package parser.flatzinc;
 
 
@@ -109,8 +111,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = BOOL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:11:5: ( 'bool' )
-            // parser/flatzinc/FlatzincLexer.g:11:6: 'bool'
+            // parser/flatzinc/FlatzincLexer.g:38:5: ( 'bool' )
+            // parser/flatzinc/FlatzincLexer.g:38:6: 'bool'
             {
                 match("bool");
 
@@ -130,8 +132,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:12:5: ( 'true' )
-            // parser/flatzinc/FlatzincLexer.g:12:6: 'true'
+            // parser/flatzinc/FlatzincLexer.g:39:5: ( 'true' )
+            // parser/flatzinc/FlatzincLexer.g:39:6: 'true'
             {
                 match("true");
 
@@ -151,8 +153,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:13:6: ( 'false' )
-            // parser/flatzinc/FlatzincLexer.g:13:7: 'false'
+            // parser/flatzinc/FlatzincLexer.g:40:6: ( 'false' )
+            // parser/flatzinc/FlatzincLexer.g:40:7: 'false'
             {
                 match("false");
 
@@ -172,8 +174,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = INT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:14:4: ( 'int' )
-            // parser/flatzinc/FlatzincLexer.g:14:5: 'int'
+            // parser/flatzinc/FlatzincLexer.g:41:4: ( 'int' )
+            // parser/flatzinc/FlatzincLexer.g:41:5: 'int'
             {
                 match("int");
 
@@ -193,8 +195,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = FLOAT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:15:6: ( 'float' )
-            // parser/flatzinc/FlatzincLexer.g:15:7: 'float'
+            // parser/flatzinc/FlatzincLexer.g:42:6: ( 'float' )
+            // parser/flatzinc/FlatzincLexer.g:42:7: 'float'
             {
                 match("float");
 
@@ -214,8 +216,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = SET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:16:5: ( 'set' )
-            // parser/flatzinc/FlatzincLexer.g:16:6: 'set'
+            // parser/flatzinc/FlatzincLexer.g:43:5: ( 'set' )
+            // parser/flatzinc/FlatzincLexer.g:43:6: 'set'
             {
                 match("set");
 
@@ -235,8 +237,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = OF;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:17:4: ( 'of' )
-            // parser/flatzinc/FlatzincLexer.g:17:5: 'of'
+            // parser/flatzinc/FlatzincLexer.g:44:4: ( 'of' )
+            // parser/flatzinc/FlatzincLexer.g:44:5: 'of'
             {
                 match("of");
 
@@ -256,8 +258,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = ARRAY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:18:7: ( 'array' )
-            // parser/flatzinc/FlatzincLexer.g:18:8: 'array'
+            // parser/flatzinc/FlatzincLexer.g:45:7: ( 'array' )
+            // parser/flatzinc/FlatzincLexer.g:45:8: 'array'
             {
                 match("array");
 
@@ -277,8 +279,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = VAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:19:5: ( 'var' )
-            // parser/flatzinc/FlatzincLexer.g:19:6: 'var'
+            // parser/flatzinc/FlatzincLexer.g:46:5: ( 'var' )
+            // parser/flatzinc/FlatzincLexer.g:46:6: 'var'
             {
                 match("var");
 
@@ -298,8 +300,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = PAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:20:5: ( 'par' )
-            // parser/flatzinc/FlatzincLexer.g:20:6: 'par'
+            // parser/flatzinc/FlatzincLexer.g:47:5: ( 'par' )
+            // parser/flatzinc/FlatzincLexer.g:47:6: 'par'
             {
                 match("par");
 
@@ -319,8 +321,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = PREDICATE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:21:11: ( 'predicate' )
-            // parser/flatzinc/FlatzincLexer.g:21:12: 'predicate'
+            // parser/flatzinc/FlatzincLexer.g:48:11: ( 'predicate' )
+            // parser/flatzinc/FlatzincLexer.g:48:12: 'predicate'
             {
                 match("predicate");
 
@@ -340,8 +342,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = CONSTRAINT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:22:12: ( 'constraint' )
-            // parser/flatzinc/FlatzincLexer.g:22:15: 'constraint'
+            // parser/flatzinc/FlatzincLexer.g:49:12: ( 'constraint' )
+            // parser/flatzinc/FlatzincLexer.g:49:15: 'constraint'
             {
                 match("constraint");
 
@@ -361,8 +363,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = SOLVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:23:7: ( 'solve' )
-            // parser/flatzinc/FlatzincLexer.g:23:8: 'solve'
+            // parser/flatzinc/FlatzincLexer.g:50:7: ( 'solve' )
+            // parser/flatzinc/FlatzincLexer.g:50:8: 'solve'
             {
                 match("solve");
 
@@ -382,8 +384,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = SATISFY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:24:9: ( 'satisfy' )
-            // parser/flatzinc/FlatzincLexer.g:24:10: 'satisfy'
+            // parser/flatzinc/FlatzincLexer.g:51:9: ( 'satisfy' )
+            // parser/flatzinc/FlatzincLexer.g:51:10: 'satisfy'
             {
                 match("satisfy");
 
@@ -403,8 +405,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = MINIMIZE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:25:10: ( 'minimize' )
-            // parser/flatzinc/FlatzincLexer.g:25:11: 'minimize'
+            // parser/flatzinc/FlatzincLexer.g:52:10: ( 'minimize' )
+            // parser/flatzinc/FlatzincLexer.g:52:11: 'minimize'
             {
                 match("minimize");
 
@@ -424,8 +426,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = MAXIMIZE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:26:10: ( 'maximize' )
-            // parser/flatzinc/FlatzincLexer.g:26:11: 'maximize'
+            // parser/flatzinc/FlatzincLexer.g:53:10: ( 'maximize' )
+            // parser/flatzinc/FlatzincLexer.g:53:11: 'maximize'
             {
                 match("maximize");
 
@@ -445,8 +447,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = DD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:28:3: ( '..' )
-            // parser/flatzinc/FlatzincLexer.g:28:4: '..'
+            // parser/flatzinc/FlatzincLexer.g:55:3: ( '..' )
+            // parser/flatzinc/FlatzincLexer.g:55:4: '..'
             {
                 match("..");
 
@@ -466,8 +468,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = DO;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:29:3: ( '.' )
-            // parser/flatzinc/FlatzincLexer.g:29:4: '.'
+            // parser/flatzinc/FlatzincLexer.g:56:3: ( '.' )
+            // parser/flatzinc/FlatzincLexer.g:56:4: '.'
             {
                 match('.');
 
@@ -486,8 +488,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = LB;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:30:3: ( '{' )
-            // parser/flatzinc/FlatzincLexer.g:30:4: '{'
+            // parser/flatzinc/FlatzincLexer.g:57:3: ( '{' )
+            // parser/flatzinc/FlatzincLexer.g:57:4: '{'
             {
                 match('{');
 
@@ -506,8 +508,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = RB;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:31:3: ( '}' )
-            // parser/flatzinc/FlatzincLexer.g:31:4: '}'
+            // parser/flatzinc/FlatzincLexer.g:58:3: ( '}' )
+            // parser/flatzinc/FlatzincLexer.g:58:4: '}'
             {
                 match('}');
 
@@ -526,8 +528,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = CM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:32:3: ( ',' )
-            // parser/flatzinc/FlatzincLexer.g:32:4: ','
+            // parser/flatzinc/FlatzincLexer.g:59:3: ( ',' )
+            // parser/flatzinc/FlatzincLexer.g:59:4: ','
             {
                 match(',');
 
@@ -546,8 +548,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = LS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:33:3: ( '[' )
-            // parser/flatzinc/FlatzincLexer.g:33:4: '['
+            // parser/flatzinc/FlatzincLexer.g:60:3: ( '[' )
+            // parser/flatzinc/FlatzincLexer.g:60:4: '['
             {
                 match('[');
 
@@ -566,8 +568,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = RS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:34:4: ( ']' )
-            // parser/flatzinc/FlatzincLexer.g:34:5: ']'
+            // parser/flatzinc/FlatzincLexer.g:61:4: ( ']' )
+            // parser/flatzinc/FlatzincLexer.g:61:5: ']'
             {
                 match(']');
 
@@ -586,8 +588,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = EQ;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:35:3: ( '=' )
-            // parser/flatzinc/FlatzincLexer.g:35:4: '='
+            // parser/flatzinc/FlatzincLexer.g:62:3: ( '=' )
+            // parser/flatzinc/FlatzincLexer.g:62:4: '='
             {
                 match('=');
 
@@ -606,8 +608,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = PL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:36:3: ( '+' )
-            // parser/flatzinc/FlatzincLexer.g:36:4: '+'
+            // parser/flatzinc/FlatzincLexer.g:63:3: ( '+' )
+            // parser/flatzinc/FlatzincLexer.g:63:4: '+'
             {
                 match('+');
 
@@ -626,8 +628,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = MN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:37:3: ( '-' )
-            // parser/flatzinc/FlatzincLexer.g:37:4: '-'
+            // parser/flatzinc/FlatzincLexer.g:64:3: ( '-' )
+            // parser/flatzinc/FlatzincLexer.g:64:4: '-'
             {
                 match('-');
 
@@ -646,8 +648,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = SC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:38:3: ( ';' )
-            // parser/flatzinc/FlatzincLexer.g:38:4: ';'
+            // parser/flatzinc/FlatzincLexer.g:65:3: ( ';' )
+            // parser/flatzinc/FlatzincLexer.g:65:4: ';'
             {
                 match(';');
 
@@ -666,8 +668,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = CL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:39:3: ( ':' )
-            // parser/flatzinc/FlatzincLexer.g:39:4: ':'
+            // parser/flatzinc/FlatzincLexer.g:66:3: ( ':' )
+            // parser/flatzinc/FlatzincLexer.g:66:4: ':'
             {
                 match(':');
 
@@ -686,8 +688,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = DC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:40:3: ( '::' )
-            // parser/flatzinc/FlatzincLexer.g:40:4: '::'
+            // parser/flatzinc/FlatzincLexer.g:67:3: ( '::' )
+            // parser/flatzinc/FlatzincLexer.g:67:4: '::'
             {
                 match("::");
 
@@ -707,8 +709,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = LP;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:41:3: ( '(' )
-            // parser/flatzinc/FlatzincLexer.g:41:4: '('
+            // parser/flatzinc/FlatzincLexer.g:68:3: ( '(' )
+            // parser/flatzinc/FlatzincLexer.g:68:4: '('
             {
                 match('(');
 
@@ -727,8 +729,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = RP;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:42:3: ( ')' )
-            // parser/flatzinc/FlatzincLexer.g:42:4: ')'
+            // parser/flatzinc/FlatzincLexer.g:69:3: ( ')' )
+            // parser/flatzinc/FlatzincLexer.g:69:4: ')'
             {
                 match(')');
 
@@ -747,8 +749,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = APAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:49:9: ( '###_P###' )
-            // parser/flatzinc/FlatzincLexer.g:49:13: '###_P###'
+            // parser/flatzinc/FlatzincLexer.g:76:9: ( '###_P###' )
+            // parser/flatzinc/FlatzincLexer.g:76:13: '###_P###'
             {
                 match("###_P###");
 
@@ -768,8 +770,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = ARRPAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:50:9: ( '###AP###' )
-            // parser/flatzinc/FlatzincLexer.g:50:13: '###AP###'
+            // parser/flatzinc/FlatzincLexer.g:77:9: ( '###AP###' )
+            // parser/flatzinc/FlatzincLexer.g:77:13: '###AP###'
             {
                 match("###AP###");
 
@@ -789,8 +791,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = AVAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:51:9: ( '###_V###' )
-            // parser/flatzinc/FlatzincLexer.g:51:13: '###_V###'
+            // parser/flatzinc/FlatzincLexer.g:78:9: ( '###_V###' )
+            // parser/flatzinc/FlatzincLexer.g:78:13: '###_V###'
             {
                 match("###_V###");
 
@@ -810,8 +812,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = ARRVAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:52:9: ( '###AV###' )
-            // parser/flatzinc/FlatzincLexer.g:52:13: '###AV###'
+            // parser/flatzinc/FlatzincLexer.g:79:9: ( '###AV###' )
+            // parser/flatzinc/FlatzincLexer.g:79:13: '###AV###'
             {
                 match("###AV###");
 
@@ -831,8 +833,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = INDEX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:53:9: ( '###ID###' )
-            // parser/flatzinc/FlatzincLexer.g:53:13: '###ID###'
+            // parser/flatzinc/FlatzincLexer.g:80:9: ( '###ID###' )
+            // parser/flatzinc/FlatzincLexer.g:80:13: '###ID###'
             {
                 match("###ID###");
 
@@ -852,8 +854,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = EXPR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:54:9: ( '###EX###' )
-            // parser/flatzinc/FlatzincLexer.g:54:13: '###EX###'
+            // parser/flatzinc/FlatzincLexer.g:81:9: ( '###EX###' )
+            // parser/flatzinc/FlatzincLexer.g:81:13: '###EX###'
             {
                 match("###EX###");
 
@@ -873,8 +875,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = ANNOTATIONS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:55:12: ( '###AS###' )
-            // parser/flatzinc/FlatzincLexer.g:55:13: '###AS###'
+            // parser/flatzinc/FlatzincLexer.g:82:12: ( '###AS###' )
+            // parser/flatzinc/FlatzincLexer.g:82:13: '###AS###'
             {
                 match("###AS###");
 
@@ -894,8 +896,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = IDENTIFIER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:64:5: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )* )
-            // parser/flatzinc/FlatzincLexer.g:64:9: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
+            // parser/flatzinc/FlatzincLexer.g:91:5: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )* )
+            // parser/flatzinc/FlatzincLexer.g:91:9: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
             {
                 if ((input.LA(1) >= 'A' && input.LA(1) <= 'Z') || input.LA(1) == '_' || (input.LA(1) >= 'a' && input.LA(1) <= 'z')) {
                     input.consume();
@@ -906,7 +908,7 @@ public class FlatzincLexer extends Lexer {
                 }
 
 
-                // parser/flatzinc/FlatzincLexer.g:64:33: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
+                // parser/flatzinc/FlatzincLexer.g:91:33: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
                 loop1:
                 do {
                     int alt1 = 2;
@@ -1017,12 +1019,12 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:69:5: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
-            // parser/flatzinc/FlatzincLexer.g:69:9: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
+            // parser/flatzinc/FlatzincLexer.g:96:5: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
+            // parser/flatzinc/FlatzincLexer.g:96:9: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
             {
                 match('%');
 
-                // parser/flatzinc/FlatzincLexer.g:69:13: (~ ( '\\n' | '\\r' ) )*
+                // parser/flatzinc/FlatzincLexer.g:96:13: (~ ( '\\n' | '\\r' ) )*
                 loop2:
                 do {
                     int alt2 = 2;
@@ -1055,7 +1057,7 @@ public class FlatzincLexer extends Lexer {
                 } while (true);
 
 
-                // parser/flatzinc/FlatzincLexer.g:69:27: ( '\\r' )?
+                // parser/flatzinc/FlatzincLexer.g:96:27: ( '\\r' )?
                 int alt3 = 2;
                 switch (input.LA(1)) {
                     case '\r': {
@@ -1066,7 +1068,7 @@ public class FlatzincLexer extends Lexer {
 
                 switch (alt3) {
                     case 1:
-                        // parser/flatzinc/FlatzincLexer.g:69:27: '\\r'
+                        // parser/flatzinc/FlatzincLexer.g:96:27: '\\r'
                     {
                         match('\r');
 
@@ -1095,8 +1097,8 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:72:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
-            // parser/flatzinc/FlatzincLexer.g:72:9: ( ' ' | '\\t' | '\\r' | '\\n' )
+            // parser/flatzinc/FlatzincLexer.g:99:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
+            // parser/flatzinc/FlatzincLexer.g:99:9: ( ' ' | '\\t' | '\\r' | '\\n' )
             {
                 if ((input.LA(1) >= '\t' && input.LA(1) <= '\n') || input.LA(1) == '\r' || input.LA(1) == ' ') {
                     input.consume();
@@ -1124,10 +1126,10 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = INT_CONST;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:84:5: ( ( '+' | '-' )? ( '0' .. '9' )+ )
-            // parser/flatzinc/FlatzincLexer.g:84:9: ( '+' | '-' )? ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincLexer.g:111:5: ( ( '+' | '-' )? ( '0' .. '9' )+ )
+            // parser/flatzinc/FlatzincLexer.g:111:9: ( '+' | '-' )? ( '0' .. '9' )+
             {
-                // parser/flatzinc/FlatzincLexer.g:84:9: ( '+' | '-' )?
+                // parser/flatzinc/FlatzincLexer.g:111:9: ( '+' | '-' )?
                 int alt4 = 2;
                 switch (input.LA(1)) {
                     case '+':
@@ -1156,7 +1158,7 @@ public class FlatzincLexer extends Lexer {
                 }
 
 
-                // parser/flatzinc/FlatzincLexer.g:84:20: ( '0' .. '9' )+
+                // parser/flatzinc/FlatzincLexer.g:111:20: ( '0' .. '9' )+
                 int cnt5 = 0;
                 loop5:
                 do {
@@ -1219,12 +1221,12 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:94:5: ( '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"' )
-            // parser/flatzinc/FlatzincLexer.g:94:8: '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"'
+            // parser/flatzinc/FlatzincLexer.g:121:5: ( '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"' )
+            // parser/flatzinc/FlatzincLexer.g:121:8: '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"'
             {
                 match('\"');
 
-                // parser/flatzinc/FlatzincLexer.g:94:12: ( ESC_SEQ |~ ( '\\\\' | '\"' ) )*
+                // parser/flatzinc/FlatzincLexer.g:121:12: ( ESC_SEQ |~ ( '\\\\' | '\"' ) )*
                 loop6:
                 do {
                     int alt6 = 3;
@@ -1239,7 +1241,7 @@ public class FlatzincLexer extends Lexer {
 
                     switch (alt6) {
                         case 1:
-                            // parser/flatzinc/FlatzincLexer.g:94:14: ESC_SEQ
+                            // parser/flatzinc/FlatzincLexer.g:121:14: ESC_SEQ
                         {
                             mESC_SEQ();
 
@@ -1247,7 +1249,7 @@ public class FlatzincLexer extends Lexer {
                         }
                         break;
                         case 2:
-                            // parser/flatzinc/FlatzincLexer.g:94:24: ~ ( '\\\\' | '\"' )
+                            // parser/flatzinc/FlatzincLexer.g:121:24: ~ ( '\\\\' | '\"' )
                         {
                             if ((input.LA(1) >= '\u0000' && input.LA(1) <= '!') || (input.LA(1) >= '#' && input.LA(1) <= '[') || (input.LA(1) >= ']' && input.LA(1) <= '\uFFFF')) {
                                 input.consume();
@@ -1284,12 +1286,12 @@ public class FlatzincLexer extends Lexer {
         try {
             int _type = CHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincLexer.g:97:5: ( '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\'' )
-            // parser/flatzinc/FlatzincLexer.g:97:8: '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\''
+            // parser/flatzinc/FlatzincLexer.g:124:5: ( '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\'' )
+            // parser/flatzinc/FlatzincLexer.g:124:8: '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\''
             {
                 match('\'');
 
-                // parser/flatzinc/FlatzincLexer.g:97:13: ( ESC_SEQ |~ ( '\\'' | '\\\\' ) )
+                // parser/flatzinc/FlatzincLexer.g:124:13: ( ESC_SEQ |~ ( '\\'' | '\\\\' ) )
                 int alt7 = 2;
                 int LA7_0 = input.LA(1);
 
@@ -1306,7 +1308,7 @@ public class FlatzincLexer extends Lexer {
                 }
                 switch (alt7) {
                     case 1:
-                        // parser/flatzinc/FlatzincLexer.g:97:15: ESC_SEQ
+                        // parser/flatzinc/FlatzincLexer.g:124:15: ESC_SEQ
                     {
                         mESC_SEQ();
 
@@ -1314,7 +1316,7 @@ public class FlatzincLexer extends Lexer {
                     }
                     break;
                     case 2:
-                        // parser/flatzinc/FlatzincLexer.g:97:25: ~ ( '\\'' | '\\\\' )
+                        // parser/flatzinc/FlatzincLexer.g:124:25: ~ ( '\\'' | '\\\\' )
                     {
                         if ((input.LA(1) >= '\u0000' && input.LA(1) <= '&') || (input.LA(1) >= '(' && input.LA(1) <= '[') || (input.LA(1) >= ']' && input.LA(1) <= '\uFFFF')) {
                             input.consume();
@@ -1346,8 +1348,8 @@ public class FlatzincLexer extends Lexer {
     // $ANTLR start "EXPONENT"
     public final void mEXPONENT() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincLexer.g:106:10: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
-            // parser/flatzinc/FlatzincLexer.g:106:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincLexer.g:133:10: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
+            // parser/flatzinc/FlatzincLexer.g:133:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
             {
                 if (input.LA(1) == 'E' || input.LA(1) == 'e') {
                     input.consume();
@@ -1358,7 +1360,7 @@ public class FlatzincLexer extends Lexer {
                 }
 
 
-                // parser/flatzinc/FlatzincLexer.g:106:22: ( '+' | '-' )?
+                // parser/flatzinc/FlatzincLexer.g:133:22: ( '+' | '-' )?
                 int alt8 = 2;
                 switch (input.LA(1)) {
                     case '+':
@@ -1387,7 +1389,7 @@ public class FlatzincLexer extends Lexer {
                 }
 
 
-                // parser/flatzinc/FlatzincLexer.g:106:33: ( '0' .. '9' )+
+                // parser/flatzinc/FlatzincLexer.g:133:33: ( '0' .. '9' )+
                 int cnt9 = 0;
                 loop9:
                 do {
@@ -1447,7 +1449,7 @@ public class FlatzincLexer extends Lexer {
     // $ANTLR start "ESC_SEQ"
     public final void mESC_SEQ() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincLexer.g:110:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+            // parser/flatzinc/FlatzincLexer.g:137:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
             int alt10 = 3;
             switch (input.LA(1)) {
                 case '\\': {
@@ -1498,7 +1500,7 @@ public class FlatzincLexer extends Lexer {
 
             switch (alt10) {
                 case 1:
-                    // parser/flatzinc/FlatzincLexer.g:110:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+                    // parser/flatzinc/FlatzincLexer.g:137:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
                 {
                     match('\\');
 
@@ -1514,7 +1516,7 @@ public class FlatzincLexer extends Lexer {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincLexer.g:111:9: UNICODE_ESC
+                    // parser/flatzinc/FlatzincLexer.g:138:9: UNICODE_ESC
                 {
                     mUNICODE_ESC();
 
@@ -1522,7 +1524,7 @@ public class FlatzincLexer extends Lexer {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincLexer.g:112:9: OCTAL_ESC
+                    // parser/flatzinc/FlatzincLexer.g:139:9: OCTAL_ESC
                 {
                     mOCTAL_ESC();
 
@@ -1541,7 +1543,7 @@ public class FlatzincLexer extends Lexer {
     // $ANTLR start "OCTAL_ESC"
     public final void mOCTAL_ESC() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincLexer.g:117:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+            // parser/flatzinc/FlatzincLexer.g:144:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
             int alt11 = 3;
             switch (input.LA(1)) {
                 case '\\': {
@@ -1625,7 +1627,7 @@ public class FlatzincLexer extends Lexer {
 
             switch (alt11) {
                 case 1:
-                    // parser/flatzinc/FlatzincLexer.g:117:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincLexer.g:144:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
                 {
                     match('\\');
 
@@ -1659,7 +1661,7 @@ public class FlatzincLexer extends Lexer {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincLexer.g:118:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincLexer.g:145:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
                 {
                     match('\\');
 
@@ -1684,7 +1686,7 @@ public class FlatzincLexer extends Lexer {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincLexer.g:119:9: '\\\\' ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincLexer.g:146:9: '\\\\' ( '0' .. '7' )
                 {
                     match('\\');
 
@@ -1711,7 +1713,7 @@ public class FlatzincLexer extends Lexer {
     // $ANTLR start "HEX_DIGIT"
     public final void mHEX_DIGIT() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincLexer.g:123:11: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
+            // parser/flatzinc/FlatzincLexer.g:150:11: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
             // parser/flatzinc/FlatzincLexer.g:
             {
                 if ((input.LA(1) >= '0' && input.LA(1) <= '9') || (input.LA(1) >= 'A' && input.LA(1) <= 'F') || (input.LA(1) >= 'a' && input.LA(1) <= 'f')) {
@@ -1735,8 +1737,8 @@ public class FlatzincLexer extends Lexer {
     // $ANTLR start "UNICODE_ESC"
     public final void mUNICODE_ESC() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincLexer.g:127:5: ( '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT )
-            // parser/flatzinc/FlatzincLexer.g:127:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+            // parser/flatzinc/FlatzincLexer.g:154:5: ( '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT )
+            // parser/flatzinc/FlatzincLexer.g:154:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
             {
                 match('\\');
 

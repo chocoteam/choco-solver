@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-12 17:29:01
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-13 10:00:41
 
 package parser.flatzinc;
 

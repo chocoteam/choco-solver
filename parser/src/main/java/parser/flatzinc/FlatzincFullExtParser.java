@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2012-11-08 14:54:42
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2012-11-13 10:00:40
 
 package parser.flatzinc;
 
@@ -829,7 +829,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: predicates, OR
+                    // elements: OR, predicates
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1593,7 +1593,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: elt, comb_attr, coll
+                // elements: coll, comb_attr, elt
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -2196,7 +2196,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: comb_attr, attribute, coll, coll, many, attribute, EACH, comb_attr
+                // elements: coll, comb_attr, attribute, attribute, many, comb_attr, coll, EACH
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -2860,7 +2860,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DO, attribute, attr_op
+                    // elements: DO, attr_op, attribute
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2958,7 +2958,7 @@ public class FlatzincFullExtParser extends Parser {
                     if (state.backtracking == 0) stream_attribute.add(attribute98.getTree());
 
                     // AST REWRITE
-                    // elements: DO, attr_op, attribute
+                    // elements: attr_op, attribute, DO
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3218,7 +3218,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: pred_param, PREDICATE, IDENTIFIER
+                // elements: PREDICATE, pred_param, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -3336,7 +3336,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, CL, pred_param_type
+                // elements: CL, pred_param_type, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4070,7 +4070,7 @@ public class FlatzincFullExtParser extends Parser {
                     if (state.backtracking == 0) stream_var_type_u.add(var_type_u136.getTree());
 
                     // AST REWRITE
-                    // elements: index_set, var_type_u
+                    // elements: var_type_u, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4502,7 +4502,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST
+                    // elements: INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4574,7 +4574,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, SET, INT_CONST
+                    // elements: INT_CONST, INT_CONST, DD, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4688,7 +4688,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, CM, INT_CONST
+                    // elements: CM, SET, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4970,7 +4970,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, INT_CONST
+                    // elements: INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5136,7 +5136,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, DD, INT_CONST, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5250,7 +5250,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, CM, INT_CONST
+                    // elements: INT_CONST, SET, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5563,7 +5563,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, index_set, ARRAY, CM
+                    // elements: CM, INT_CONST, index_set, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5718,7 +5718,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, ARRAY, DD, INT_CONST, index_set, SET
+                    // elements: ARRAY, index_set, DD, INT_CONST, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5915,7 +5915,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, ARRAY, SET, index_set, CM
+                    // elements: INT_CONST, CM, index_set, ARRAY, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6147,7 +6147,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, VAR
+                    // elements: VAR, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6271,7 +6271,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: index_set, SET, VAR, ARRAY
+                    // elements: SET, VAR, ARRAY, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6700,7 +6700,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, RB, LB
+                    // elements: RB, INT_CONST, LB
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6893,7 +6893,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: LS, RS, expr
+                    // elements: expr, RS, LS
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7285,7 +7285,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: expr, par_type, IDENTIFIER
+                // elements: par_type, expr, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -7453,7 +7453,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, var_type, expr, annotations
+                // elements: var_type, annotations, expr, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -7649,7 +7649,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: CONSTRAINT, expr, annotations, IDENTIFIER
+                // elements: IDENTIFIER, CONSTRAINT, expr, annotations
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -8202,7 +8202,7 @@ public class FlatzincFullExtParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: RP, expr, IDENTIFIER, LP
+                // elements: LP, IDENTIFIER, RP, expr
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -8221,7 +8221,7 @@ public class FlatzincFullExtParser extends Parser {
                         );
 
                         // parser/flatzinc/FlatzincFullExtParser.g:325:20: ( LP ( expr )+ RP )?
-                        if (stream_RP.hasNext() || stream_expr.hasNext() || stream_LP.hasNext()) {
+                        if (stream_LP.hasNext() || stream_RP.hasNext() || stream_expr.hasNext()) {
                             adaptor.addChild(root_0,
                                     stream_LP.nextNode()
                             );
@@ -8240,9 +8240,9 @@ public class FlatzincFullExtParser extends Parser {
                             );
 
                         }
+                        stream_LP.reset();
                         stream_RP.reset();
                         stream_expr.reset();
-                        stream_LP.reset();
 
                     }
 
