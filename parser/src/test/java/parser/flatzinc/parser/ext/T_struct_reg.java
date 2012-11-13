@@ -101,7 +101,7 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test1() throws IOException, RecognitionException {
         // Simple constraint oriented engine
-        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each cstr.name as list(wfor)}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof Queue);
