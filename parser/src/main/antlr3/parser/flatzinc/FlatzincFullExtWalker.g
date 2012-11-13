@@ -61,6 +61,7 @@ import solver.propagation.generator.Sort;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.SortDyn;
 import solver.propagation.generator.*;
+import solver.propagation.hardcoded.ConstraintEngine;
 
 import solver.propagation.ISchedulable;
 import solver.recorders.fine.arc.FineArcEventRecorder;
@@ -121,7 +122,14 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 	}
 	(ps = structure[propagationEngine])?
     {
-    mSolver.set(propagationEngine.set(ps));
+    if (ps == null) {
+        if (mSolver.getEngine() == null) {
+            LOGGER.warn("\% no engine defined -- use default one instead");
+            mSolver.set(new ConstraintEngine(mSolver));
+        }
+    } else {
+        mSolver.set(propagationEngine.set(ps));
+    }
     }
 	solve_goal
 	{
