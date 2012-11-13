@@ -158,6 +158,7 @@ public class ParseAndSolve {
                     break;
                 case 3:
                     solver.set(new SevenQueuesConstraintEngine(solver));
+                    break;
                 case -1:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {
