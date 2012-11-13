@@ -64,13 +64,14 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             solver.setFeasible(Boolean.FALSE);
             solver.getEngine().flush();
             interrupt();
+            return;
         }
-        this.env.worldPush(); // push another wolrd to recorver the state after initial propagation
+        this.env.worldPush(); // push another wolrd to recover the state after initial propagation
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
             //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver, System.currentTimeMillis()));
+            set(StrategyFactory.minDomMinVal(VariableFactory.toIntVar(solver.getVars()), solver.getEnvironment()));
         }
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
