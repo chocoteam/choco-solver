@@ -100,13 +100,13 @@ public class PropNValues_Light extends Propagator<IntVar> {
         int idx = 0;
         for (int i = concernedValues.size() - 1; i >= 0; i--) {
             boolean possible = false;
-            boolean mandatory = true;
+            boolean mandatory = false;
             mate[i] = -1;
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(concernedValues.get(i))) {
                     possible = true;
                     if (mate[i] == -1) {
-                        mate[i] = i;
+                        mate[i] = v;
                     } else {
                         mate[i] = -2;
                     }
