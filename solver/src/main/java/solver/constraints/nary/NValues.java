@@ -32,6 +32,10 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.propagators.nary.nValue.PropAtLeastNValues_AC;
+import solver.constraints.propagators.nary.nValue.PropAtMostNValues_BC;
+import solver.constraints.propagators.nary.nValue.PropAtMostNValues_Greedy;
 import solver.constraints.propagators.nary.nValue.PropNValues_Light;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -49,14 +53,14 @@ public class NValues extends IntConstraint<IntVar> {
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
-	 *
+	 * private because the case were all values are not restricted is not tested (i.e. unsafe)
 	 * @param vars
 	 * @param nValues
 	 * @param concernedValues
 	 * @param solver
 	 */
-    public NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
-        super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver);
+    private NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
 		addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
     }
 
@@ -69,7 +73,10 @@ public class NValues extends IntConstraint<IntVar> {
 	 * @param solver
 	 */
     public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
-        this(vars,nValues,getDomainUnion(vars),solver);
+        this(vars, nValues, getDomainUnion(vars), solver);
+		addPropagators(new PropAtMostNValues_BC(vars, nValues, this, solver));
+		addPropagators(new PropAtMostNValues_Greedy(vars, nValues, this, solver));
+		addPropagators(new PropAtLeastNValues_AC(vars, nValues, this, solver));
     }
 
 	private static TIntArrayList getDomainUnion(IntVar[] vars) {
