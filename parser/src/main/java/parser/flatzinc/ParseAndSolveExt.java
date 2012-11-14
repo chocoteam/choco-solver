@@ -42,12 +42,15 @@ import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
+import solver.propagation.PropagationEngine;
+import solver.propagation.generator.Arc;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +96,7 @@ public class ParseAndSolveExt {
         new ParseAndSolveExt().doMain(args);
     }
 
-    public void doMain(String[] args) throws IOException {
+    public void doMain(String[] args) throws IOException, RecognitionException {
         CmdLineParser parser = new CmdLineParser(this);
         parser.setUsageWidth(160);
         try {
@@ -136,13 +139,39 @@ public class ParseAndSolveExt {
     }
 
 
-    private void parseandsolve() throws IOException {
+    private void parseandsolve() throws IOException, RecognitionException {
         for (String instance : instances) {
             LOGGER.info("% parse instance...");
             Solver solver = new Solver();
             THashMap<String, Object> map = new THashMap<String, Object>();
             buildParser(new FileInputStream(new File(instance)), solver, map);
-            LOGGER.info("% solve instance...");
+            switch (eng) {
+                case 0:
+                    // let the default propagation strategy,
+                    break;
+                case 1:
+                    solver.set(new ConstraintEngine(solver));
+                    break;
+                case 2:
+                    solver.set(new VariableEngine(solver));
+                    break;
+                case 3:
+                    solver.set(new SevenQueuesConstraintEngine(solver));
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                    makeEngine(eng, solver);
+                    break;
+                case -1:
+                default:
+                    if (solver.getNbCstrs() > solver.getNbVars()) {
+                        solver.set(new VariableEngine(solver));
+                    } else {
+                        solver.set(new ConstraintEngine(solver));
+                    }
+
+            }
             if (!csv.equals("")) {
                 SearchMonitorFactory.toCSV(solver, instance, csv);
             }
@@ -150,8 +179,55 @@ public class ParseAndSolveExt {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
+            LOGGER.info("% solve instance...");
             solver.solve();
         }
+    }
+
+    private void makeEngine(byte eng, Solver solver) throws IOException, RecognitionException {
+        PropagationEngine pe = new PropagationEngine(solver);
+        ArrayList<Arc> pairs = Arc.populate(solver);
+        THashMap<String, ArrayList> groups = new THashMap<String, ArrayList>(1);
+        groups.put("All", pairs);
+        THashMap<String, Object> map = new THashMap<String, Object>();
+
+        String st;
+
+        switch (eng) {
+            case 4:
+                st = "All as queue(wone) of {each cstr.name as list(for)};";
+                break;
+            case 5:
+                st = "All as queue(wone) of {each var.name as list(for)};";
+                break;
+            case 6:
+                st = "All as list(wone) of {each prop.prioDyn as queue(one)};";
+                break;
+            default:
+                st = "";
+        }
+
+        // Create an input character stream from standard in
+        InputStream in = new ByteArrayInputStream(st.getBytes());
+        // Create an input character stream from standard in
+        ANTLRInputStream input = new ANTLRInputStream(in);
+        // Create an ExprLexer that feeds from that stream
+        FlatzincFullExtLexer lexer = new FlatzincFullExtLexer(input);
+        // Create a stream of tokens fed by the lexer
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        // Create a parser that feeds off the token stream
+        FlatzincFullExtParser parser = new FlatzincFullExtParser(tokens);
+        // Begin parsing at rule prog, get return value structure
+        FlatzincFullExtParser.structure_return r = parser.structure();
+        CommonTree t = (CommonTree) r.getTree();
+        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+        FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
+        walker.mSolver = solver;
+        walker.map = map;
+        walker.groups = groups;
+        PropagationStrategy ps = walker.structure(pe);
+        pe.set(ps);
+        solver.set(pe);
     }
 
 }

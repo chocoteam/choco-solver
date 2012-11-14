@@ -84,13 +84,6 @@ public interface IPropagationEngine extends Serializable {
     void onPropagatorExecution(Propagator propagator);
 
     /**
-     * Set the propagator as activated within the propagation engine
-     *
-     * @param propagator propagator to activate
-     */
-    void activatePropagator(Propagator propagator);
-
-    /**
      * Set the propagator as inactivated within the propagation engine
      *
      * @param propagator propagator to desactivate

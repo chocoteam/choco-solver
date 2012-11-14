@@ -35,12 +35,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
-import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.propagation.ISchedulable;
 import solver.propagation.PropagationEngine;
+import solver.propagation.generator.Arc;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -75,9 +75,9 @@ public class T_elt extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+        pe = new PropagationEngine(mSolver);
 
-        ArrayList<Pair> pairs = Pair.populate(mSolver);
+        ArrayList<Arc> pairs = Arc.populate(mSolver);
         groups.put("G1", pairs);
     }
 

@@ -27,11 +27,7 @@
 package solver.propagation;
 
 
-import choco.kernel.common.util.objects.BacktrackableArrayList;
-import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IEnvironment;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -39,10 +35,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.wm.IWaterMarking;
-import solver.propagation.wm.WaterMarkers;
-import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.propagation.generator.Arc;
+import solver.propagation.hardcoded.util.AId2AbId;
+import solver.propagation.hardcoded.util.IId2AbId;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -51,7 +46,7 @@ import java.util.List;
 
 /**
  * An abstract class of IPropagatioEngine.
- * It allows scheduling and propagation of ISchedulable object, like IEventRecorder or Group.
+ * It allows scheduling and propagation of ISchedulable object, like Arc or Group.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -63,86 +58,62 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected IPropagationStrategy propagationStrategy;
 
-    protected IWaterMarking watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
+    protected final Variable[] variables;
+    protected int[] vcidx;
+    protected final Propagator[] propagators;
+    protected int[] pcidx;
 
-    protected TIntObjectHashMap<IList<Variable, AbstractFineEventRecorder>> fines_v;
-    protected TIntObjectHashMap<List<AbstractFineEventRecorder>> fines_p;
-
-    protected int pivot;
-
-    protected boolean initialized = false; // is this already initialized
-
-    protected boolean forceInitialPropagation = true; // is propagator activation required
-
-    protected boolean initialPropagationDone = false; // related to forceInitialPropagation, avoid awaking up propagators 2 times
-
-    protected boolean checkProperties = true; // skip water marking phases
-
-    protected boolean forceActivation = false; // force activation of event recorder on creation
+    protected Arc[][] fines_v;
+    protected Arc[][] fines_p;
+    protected final IId2AbId v2i; // mapping between propagator ID and its absolute index
+    protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
 
     protected IEnvironment environment;
 
-    protected int default_nb_vars = 16, default_nb_props = 16;
 
-    public PropagationEngine(IEnvironment environment) {
-        this(environment, true, true, false);
-    }
-
-    /**
-     * @param checkProperties         : set to false the verification of the three following properties will be skipped:
-     *                                <br/>
-     *                                <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
-     *                                <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
-     *                                <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
-     *                                <br/>
-     *                                As a consequence, the engine can be incomplete.
-     * @param forceInitialPropagation set to true, propagators will be scheduled for initial proapation
-     * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
-     */
-    public PropagationEngine(IEnvironment environment, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
+    public PropagationEngine(Solver solver) {
         this.exception = new ContradictionException();
-        this.environment = environment;
-        fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
-        fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
-        this.checkProperties = checkProperties;
-        this.forceInitialPropagation = forceInitialPropagation;
-        this.forceActivation = forceActivation;
-    }
+        this.environment = solver.getEnvironment();
 
-    /**
-     * Override default parameters. Should be called just after the constructor.
-     *
-     * @param nbVar                   estimation of the number of variables
-     * @param nbProp                  estimation of the number of propagators
-     * @param checkProperties         set to false the verification of the three following properties will be skipped:
-     *                                <br/>
-     *                                <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
-     *                                <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
-     *                                <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
-     *                                <br/>
-     * @param forceInitialPropagation set to true, propagators will be scheduled for initial propagation
-     * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
-     */
-    public void setParameters(int nbVar, int nbProp, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
-        this.checkProperties = checkProperties;
-        this.forceInitialPropagation = forceInitialPropagation;
-        this.forceActivation = forceActivation;
-        default_nb_props = nbProp;
-        default_nb_vars = nbVar;
-    }
-
-
-    /**
-     * Is <code>this</code> initialized ?
-     *
-     * @return <code>true</code> if <code>this</code> is initialized
-     */
-    public boolean initialized() {
-        return initialized;
-    }
-
-    public boolean forceActivation() {
-        return forceActivation;
+        variables = solver.getVars();
+        int nbVar = 0;
+        int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
+        for (; nbVar < variables.length; nbVar++) {
+            int id = variables[nbVar].getId();
+            m = Math.min(m, id);
+            M = Math.max(M, id);
+        }
+        v2i = new AId2AbId(m, M, -1);
+        fines_v = new Arc[nbVar][];
+        for (int i = 0; i < nbVar; i++) {
+            int id = variables[i].getId();
+            v2i.set(id, i);
+            fines_v[i] = new Arc[variables[i].getNbProps()];
+        }
+        vcidx = new int[nbVar];
+        List<Propagator> _propagators = new ArrayList();
+        Constraint[] constraints = solver.getCstrs();
+        int nbProp = 0;
+        m = Integer.MAX_VALUE;
+        M = Integer.MIN_VALUE;
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] cprops = constraints[c].propagators;
+            for (int j = 0; j < cprops.length; j++, nbProp++) {
+                _propagators.add(cprops[j]);
+                int id = cprops[j].getId();
+                m = Math.min(m, id);
+                M = Math.max(M, id);
+            }
+        }
+        propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+        p2i = new AId2AbId(m, M, -1);
+        //        p2i = new MId2AbId(M - m + 1, -1);
+        fines_p = new Arc[nbProp][];
+        for (int j = 0; j < propagators.length; j++) {
+            p2i.set(propagators[j].getId(), j);
+            fines_p[j] = new Arc[propagators[j].getNbVars()];
+        }
+        pcidx = new int[nbProp];
     }
 
     /**
@@ -158,102 +129,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     public void init(Solver solver) {
-        if (checkProperties) {
-            if (!initialized) {
-                prepareWM(solver);
-                // 1. add the default strategy if required
-                if (!watermarks.isEmpty()) {
-                    LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
-                    PropagationStrategy _default = buildDefault(solver);
-//                    propagationStrategy = new Sort(propagationStrategy, _default);
-                    throw new UnsupportedOperationException();
-//                    if (!watermarks.isEmpty()) {
-//                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
-//                    }
-                }
-                watermarks = null;
-                initialized = true;
-            }
-        }
-        /*if (forceInitialPropagation && !initialPropagationDone) {
-            // 2. schedule constraints for initial propagation
-            Constraint[] constraints = solver.getCstrs();
-            for (int c = 0; c < constraints.length; c++) {
-                Propagator[] propagators = constraints[c].propagators;
-                for (int p = 0; p < propagators.length; p++) {
-                    propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
-                }
-            }
-            initialPropagationDone = true;
-        } else if (!forceActivation) {
-            Constraint[] constraints = solver.getCstrs();
-            for (int c = 0; c < constraints.length; c++) {
-                Propagator[] propagators = constraints[c].propagators;
-                for (int p = 0; p < propagators.length; p++) {
-                    if (propagators[p].isActive()) activatePropagator(propagators[p]);
-                }
-            }
-        }*/
     }
-
-    public void prepareWM(Solver solver) {
-        if (checkProperties && watermarks == null) {
-            pivot = solver.getNbIdElt();
-            Constraint[] constraints = solver.getCstrs();
-            // 1. water mark every couple variable-propagator of the solver
-            waterMark(constraints);
-        }
-    }
-
-    private void waterMark(Constraint[] constraints) {
-        watermarks = WaterMarkers.make(pivot);
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].propagators;
-            for (int p = 0; p < propagators.length; p++) {
-                Propagator propagator = propagators[p];
-                int idP = propagator.getId();
-                watermarks.putMark(idP);
-                int nbV = propagator.getNbVars();
-                for (int v = 0; v < nbV; v++) {
-                    Variable variable = propagator.getVar(v);
-                    if ((variable.getTypeAndKind() & Variable.CSTE) == 0) { // this is not a constant
-                        int idV = variable.getId();
-                        watermarks.putMark(idV, idP);
-                    }
-                }
-            }
-        }
-    }
-
-    public void clearWatermark(int id1, int id2) {
-        if (checkProperties) {
-            if (id1 == 0) {// coarse case
-                watermarks.clearMark(id2);
-            } else if (id2 == 0) {// coarse case
-                watermarks.clearMark(id1);
-            } else {
-                watermarks.clearMark(id1, id2);
-            }
-        }
-    }
-
-    public boolean isMarked(int id1, int id2) {
-        if (checkProperties) {
-            if (id1 == 0) {// coarse case
-                return watermarks.isMarked(id2);
-            } else if (id2 == 0) {// coarse case
-                return watermarks.isMarked(id1);
-            } else {
-                return watermarks.isMarked(id1, id2);
-            }
-        }
-        return true;
-    }
-
-    protected PropagationStrategy buildDefault(Solver solver) {
-        throw new UnsupportedOperationException();
-    }
-
 
     @Override
     public void propagate() throws ContradictionException {
@@ -276,36 +152,18 @@ public class PropagationEngine implements IPropagationEngine {
         return exception;
     }
 
-    public void addEventRecorder(AbstractFineEventRecorder fer) {
-        Variable[] vars = fer.getVariables();
-        Propagator[] props = fer.getPropagators();
-        for (int i = 0; i < props.length; i++) {
-            int id = props[i].getId();
-            if (!fines_p.containsKey(id)) {
-                ArrayList<AbstractFineEventRecorder> list = new ArrayList(default_nb_vars);
-                list.add(fer);
-                fines_p.put(id, list);
-            } else {
-                fines_p.get(id).add(fer);
-            }
-        }
-        for (int i = 0; i < vars.length; i++) {
-            int id = vars[i].getId();
-            if (!fines_v.containsKey(id)) {
-                IList<Variable, AbstractFineEventRecorder> list = new BacktrackableArrayList(vars[i], environment, default_nb_props);
-                list.add(fer, false, forceActivation);
-                fines_v.put(id, list);
-            } else {
-                fines_v.get(id).add(fer, false, forceActivation);
-            }
-        }
+    public void declareArc(Arc arc) {
+        Variable var = arc.var;
+        Propagator prop = arc.prop;
+
+        int id = p2i.get(prop.getId());
+        fines_p[id][pcidx[id]++] = arc;
+        id = v2i.get(var.getId());
+        fines_v[id][vcidx[id]++] = arc;
     }
 
     @Override
     public void clear() {
-        watermarks = null; // CPRU : to improve
-        initialized = false;
-        propagationStrategy = null;
         throw new SolverException("Clearing the engine is not enough!");//CPRU: to do
     }
 
@@ -319,38 +177,20 @@ public class PropagationEngine implements IPropagationEngine {
         if (Configuration.PRINT_VAR_EVENT) {
             PropagationUtils.printModification(variable, type, cause);
         }
-        int id = variable.getId();
-        IList list = fines_v.get(id);
-        if (list != null) {
-            list.forEach(id, type, cause);
+        int id = v2i.get(variable.getId());
+        int to = vcidx[id];
+        Arc arc;
+        for (int i = 0; i < to; i++) {
+            arc = fines_v[id][i];
+            if (arc.prop != cause && arc.prop.isActive()) {
+                arc.update(type);
+            }
         }
     }
 
     @Override
     public void onPropagatorExecution(Propagator propagator) {
-        int id = propagator.getId();
-        List<AbstractFineEventRecorder> list = fines_p.get(id);
-        if (list != null) { // to handle reified propagator, unknown from the engine
-            for (int i = 0; i < list.size(); i++) {
-                list.get(i).virtuallyExecuted(propagator);
-            }
-        }
-    }
-
-    /**
-     * Set the propagator as activated within the propagation engine
-     *
-     * @param propagator propagator to activate
-     */
-    public void activatePropagator(Propagator propagator) {
-        int id = propagator.getId();
-        List<AbstractFineEventRecorder> list = fines_p.get(id);
-        if (list != null) { // to handle reified propagator, unknown from the engine
-            for (int i = 0; i < list.size(); i++) {
-                AbstractFineEventRecorder fer = list.get(i);
-                fer.activate(propagator);
-            }
-        }
+        desactivatePropagator(propagator);
     }
 
     /**
@@ -359,27 +199,10 @@ public class PropagationEngine implements IPropagationEngine {
      * @param propagator propagator to desactivate
      */
     public void desactivatePropagator(Propagator propagator) {
-        int id = propagator.getId();
-        List<AbstractFineEventRecorder> list = fines_p.get(id);
-        if (list != null) { // to handle reified propagator, unknown from the engine
-            for (int i = 0; i < list.size(); i++) {
-                AbstractFineEventRecorder fer = list.get(i);
-                fer.desactivate(propagator);
-            }
-        }
-    }
-
-    public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
-        Variable[] vars = fer.getVariables();
-        for (int j = 0; j < vars.length; j++) {
-            fines_v.get(vars[j].getId()).setActive(fer);
-        }
-    }
-
-    public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
-        Variable[] vars = fer.getVariables();
-        for (int j = 0; j < vars.length; j++) {
-            fines_v.get(vars[j].getId()).setPassive(fer);
+        int id = p2i.get(propagator.getId());
+        int to = pcidx[id];
+        for (int i = 0; i < to; i++) {
+            fines_p[id][i].virtuallyExecuted(propagator);
         }
     }
 }

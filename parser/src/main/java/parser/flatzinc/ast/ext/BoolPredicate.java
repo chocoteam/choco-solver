@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 import java.util.List;
 
 /**
@@ -48,7 +50,7 @@ public class BoolPredicate extends Predicate {
     }
 
     @Override
-    public boolean evaluate(Pair p) {
+    public boolean evaluate(Arc p) {
         boolean ok = false;
         switch (type) {
             case AND:

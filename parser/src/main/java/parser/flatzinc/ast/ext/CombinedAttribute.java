@@ -27,8 +27,8 @@
 package parser.flatzinc.ast.ext;
 
 import solver.propagation.ISchedulable;
+import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
-import solver.recorders.fine.arc.FineArcEventRecorder;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class CombinedAttribute implements IAttribute<ISchedulable> {
     @Override
     public int eval(ISchedulable element) {
         if (operators.isEmpty()) {
-            return attribute.eval((FineArcEventRecorder) element);
+            return attribute.eval((Arc) element);
         }
         return operators.get(0).evaluate((PropagationStrategy) element, this, 1);
     }

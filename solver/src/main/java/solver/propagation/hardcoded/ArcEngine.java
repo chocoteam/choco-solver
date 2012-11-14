@@ -227,11 +227,6 @@ public class ArcEngine implements IPropagationEngine {
     }
 
     @Override
-    public void activatePropagator(Propagator propagator) {
-        // void
-    }
-
-    @Override
     public void desactivatePropagator(Propagator propagator) {
         int vaid, cm, paid = p2i.get(propagator.getId());
 //        if (paid > -1) {

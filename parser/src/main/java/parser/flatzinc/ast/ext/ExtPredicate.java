@@ -28,6 +28,7 @@ package parser.flatzinc.ast.ext;
 
 import gnu.trove.map.hash.THashMap;
 import solver.constraints.Constraint;
+import solver.propagation.generator.Arc;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class ExtPredicate extends Predicate {
     }
 
     @Override
-    public boolean evaluate(Pair p) {
+    public boolean evaluate(Arc p) {
         return vars.contains(p.var) && (cstr == null || cstr == p.prop.getConstraint());
     }
 }

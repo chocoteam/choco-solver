@@ -28,7 +28,6 @@ package solver.propagation.generator;
 
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
 
 import java.lang.reflect.Array;
 

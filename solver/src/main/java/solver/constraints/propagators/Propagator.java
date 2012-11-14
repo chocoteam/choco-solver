@@ -289,10 +289,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
         }
-        // to handle properly reified constraint, the cause must be checked
-        if (aCause == this) {
-            solver.getEngine().activatePropagator(this);
-        }
     }
 
     @SuppressWarnings({"unchecked"})

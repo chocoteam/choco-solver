@@ -64,7 +64,7 @@ import solver.propagation.generator.*;
 import solver.propagation.hardcoded.ConstraintEngine;
 
 import solver.propagation.ISchedulable;
-import solver.recorders.fine.arc.FineArcEventRecorder;
+import solver.propagation.generator.Arc;
 
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -110,15 +110,15 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
     }
 	   (pred_decl)* (param_decl)* (var_decl)* (constraint)*
 	{
-	ArrayList<Pair> pairs= Pair.populate(mSolver);
+	ArrayList<Arc> arcs= Arc.populate(mSolver);
 	}
-	(group_decl[pairs])*
+	(group_decl[arcs])*
 	{
-	if(!pairs.isEmpty()){
-	    LOGGER.warn("\% Remaining pairs after group declarations");
+	if(!arcs.isEmpty()){
+	    LOGGER.warn("\% Remaining arcs after group declarations");
 	}
 
-	PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment(),false, false, false);
+	PropagationEngine propagationEngine = new PropagationEngine(mSolver);
 	}
 	(ps = structure[propagationEngine])?
     {
@@ -149,10 +149,10 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 //engine
 //    :
 //    {
-//    ArrayList<Pair> pairs= Pair.populate(mSolver);
+//    ArrayList<Arc> arcs= Arc.populate(mSolver);
 //    PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment());
 //    }
-//    (group_decl[pairs])+
+//    (group_decl[arcs])+
 //    {
 //    ArrayList<PropagationStrategy> pss = new ArrayList();
 //    }
@@ -168,16 +168,16 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 //    }
 //    ;
 
-group_decl  [ArrayList<Pair> pairs]
+group_decl  [ArrayList<Arc> arcs]
     :
     ^(IDENTIFIER p=predicates)
     {
-    ArrayList<Pair> aGroup = Filter.execute(p,pairs);
+    ArrayList<Arc> aGroup = Filter.execute(p,arcs);
     if(aGroup.isEmpty()){
         LOGGER.error("\% Empty predicate declaration :"+ $IDENTIFIER.line+":"+$IDENTIFIER.pos);
         throw new FZNException("Empty predicate declaration");
     }
-    Pair.remove(pairs, aGroup);
+    Arc.remove(arcs, aGroup);
     groups.put($IDENTIFIER.text,aGroup);
     }
     ;
@@ -290,20 +290,13 @@ struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
 	:	^(STREG IDENTIFIER
 	{
 	String id = $IDENTIFIER.text;
-    ArrayList<Pair> scope = groups.get(id);
-    if(scope == null){
+    ArrayList<Arc> arcs = groups.get(id);
+    if(arcs == null){
         LOGGER.error("\% Unknown group_decl :"+id);
         throw new FZNException("Unknown group_decl :"+id);
     }
-    ArrayList<FineArcEventRecorder> arcs = new ArrayList<FineArcEventRecorder>(scope.size());
-    for(int i = 0 ; i < scope.size(); i++){
-        Pair p = scope.get(i);
-        FineArcEventRecorder er = PArc.make(pe,mSolver, p.var, p.prop,p.idxVinP);
-        if(er == null){
-             LOGGER.error("\% Cannot create pair :"+p);
-            throw new FZNException("Cannot create the pair "+p);
-        }
-        arcs.add(er);
+    for(int k = 0; k < arcs.size(); k++){
+        pe.declareArc(arcs.get(k));
     }
     int m_idx = input.mark();
 	}
@@ -333,25 +326,19 @@ elt	[PropagationEngine pe] returns [ISchedulable[\] items]
 	|	IDENTIFIER (KEY a=attribute)?
 	{
 	String id = $IDENTIFIER.text;
-	ArrayList<Pair> scope = groups.get(id);
+	ArrayList<Arc> scope = groups.get(id);
 	// iterate over in to create arcs
-    FineArcEventRecorder[] arcs = new FineArcEventRecorder[scope.size()];
+    Arc[] arcs = scope.toArray(new Arc[scope.size()]);
     for(int i = 0 ; i < scope.size(); i++){
-        Pair p = scope.get(i);
-        FineArcEventRecorder er = PArc.make(pe,mSolver, p.var, p.prop,p.idxVinP);
-        //todo: attach a
-        if(er == null){
-             LOGGER.error("\% Cannot create pair :"+p);
-            throw new FZNException("Cannot create the pair "+p);
-        }
-        arcs[i] = er;
-        er.attachEvaluator(a);
+        Arc arc = scope.get(i);
+        pe.declareArc(arc);
+        arc.attachEvaluator(a);
     }
     $items = arcs;
 	}
 	;
 
-many    [ArrayList<FineArcEventRecorder> in]   returns[ArrayList<PropagationStrategy> pss]
+many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
 @init{
     $pss = new ArrayList<PropagationStrategy>();
 }
@@ -368,8 +355,8 @@ many    [ArrayList<FineArcEventRecorder> in]   returns[ArrayList<PropagationStra
     if(a.isDynamic()){
          int max = 0;
          for(int i = 0; i< in.size(); i++){
-             FineArcEventRecorder pair = in.get(i);
-             int ev = a.eval(pair);
+             Arc arc = in.get(i);
+             int ev = a.eval(arc);
              if(ev > max)max = ev;
          }
 
@@ -378,19 +365,19 @@ many    [ArrayList<FineArcEventRecorder> in]   returns[ArrayList<PropagationStra
          input.release(c_idx);
 
         //TODO verifier que ca marche :)
-        Switcher sw = new Switcher(a, 0,max, _ps, in.toArray(new FineArcEventRecorder[in.size()]));
+        Switcher sw = new Switcher(a, 0,max, _ps, in.toArray(new Arc[in.size()]));
         pss.addAll(Arrays.asList(sw.getPS()));
     }else{
         // otherwise, create as many "coll" as value of attribute
-        TIntObjectHashMap<ArrayList<FineArcEventRecorder>> sublists = new TIntObjectHashMap<ArrayList<FineArcEventRecorder>>();
+        TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
         for(int i = 0; i< in.size(); i++){
-            FineArcEventRecorder pair = in.get(i);
-            int ev = a.eval(pair);
+            Arc arc = in.get(i);
+            int ev = a.eval(arc);
             if(!sublists.contains(ev)){
-                ArrayList<FineArcEventRecorder> evlist = new ArrayList<FineArcEventRecorder>();
+                ArrayList<Arc> evlist = new ArrayList<Arc>();
                 sublists.put(ev, evlist);
             }
-            sublists.get(ev).add(pair);
+            sublists.get(ev).add(arc);
         }
 
         int[] evs = sublists.keys();
@@ -418,15 +405,15 @@ many    [ArrayList<FineArcEventRecorder> in]   returns[ArrayList<PropagationStra
         throw new FZNException("SWITCHER!!");
     }
         // Build as many list as different values of "attribute" in "in"
-        TIntObjectHashMap<ArrayList<FineArcEventRecorder>> sublists = new TIntObjectHashMap<ArrayList<FineArcEventRecorder>>();
+        TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
         for(int i = 0; i< in.size(); i++){
-            FineArcEventRecorder pair = in.get(i);
-            int ev = a.eval(pair);
+            Arc arc = in.get(i);
+            int ev = a.eval(arc);
             if(!sublists.contains(ev)){
-                ArrayList<FineArcEventRecorder> evlist = new ArrayList<FineArcEventRecorder>();
+                ArrayList<Arc> evlist = new ArrayList<Arc>();
                 sublists.put(ev, evlist);
             }
-            sublists.get(ev).add(pair);
+            sublists.get(ev).add(arc);
         }
         int[] evs = sublists.keys();
         ArrayList<ArrayList<PropagationStrategy>> _pss = new ArrayList<ArrayList<PropagationStrategy>>(evs.length);

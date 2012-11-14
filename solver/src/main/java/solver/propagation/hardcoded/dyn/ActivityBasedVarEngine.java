@@ -396,11 +396,6 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     }
 
     @Override
-    public void activatePropagator(Propagator propagator) {
-        // void
-    }
-
-    @Override
     public void desactivatePropagator(Propagator propagator) {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();

@@ -120,15 +120,13 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     protected boolean _sweepUp() throws ContradictionException {
-        int idx = toPropagate.nextSetBit(0);
-        while (idx >= 0) {
+        for (int idx = toPropagate.nextSetBit(0); idx >= 0; idx = toPropagate.nextSetBit(idx + 1)) {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
-            idx = toPropagate.nextSetBit(idx + 1);
         }
         return toPropagate.isEmpty();
     }

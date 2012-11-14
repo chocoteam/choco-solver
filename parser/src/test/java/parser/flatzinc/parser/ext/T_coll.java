@@ -33,18 +33,15 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import parser.flatzinc.FZNException;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.CombinedAttribute;
-import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.propagation.ISchedulable;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
-import solver.recorders.fine.arc.FineArcEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -80,18 +77,10 @@ public class T_coll extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        PropagationEngine pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+        PropagationEngine pe = new PropagationEngine(mSolver);
 
-        ArrayList<Pair> pairs = Pair.populate(mSolver);
-        arcs = new ISchedulable[pairs.size()];
-        for (int i = 0; i < pairs.size(); i++) {
-            Pair p = pairs.get(i);
-            FineArcEventRecorder er = PArc.make(pe, mSolver, p.var, p.prop, p.idxVinP);
-            if (er == null) {
-                throw new FZNException("Cannot create the pair " + p);
-            }
-            arcs[i] = er;
-        }
+        ArrayList<Arc> pairs = Arc.populate(mSolver);
+        arcs = pairs.toArray(new ISchedulable[pairs.size()]);
     }
 
     public PropagationStrategy coll(FlatzincFullExtParser parser, ArrayList<ISchedulable> elements,

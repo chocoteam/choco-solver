@@ -35,11 +35,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
-import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.propagation.PropagationEngine;
+import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
 import solver.variables.IntVar;
@@ -76,11 +76,11 @@ public class T_struct extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+        pe = new PropagationEngine(mSolver);
 
-        ArrayList<Pair> pairs = Pair.populate(mSolver);
-        ArrayList<Pair> g1 = new ArrayList<Pair>(pairs.subList(0, 3));
-        ArrayList<Pair> g2 = new ArrayList<Pair>(pairs.subList(4, 8));
+        ArrayList<Arc> arcs = Arc.populate(mSolver);
+        ArrayList<Arc> g1 = new ArrayList<Arc>(arcs.subList(0, 3));
+        ArrayList<Arc> g2 = new ArrayList<Arc>(arcs.subList(4, 8));
         groups.put("G1", g1);
         groups.put("G2", g2);
 

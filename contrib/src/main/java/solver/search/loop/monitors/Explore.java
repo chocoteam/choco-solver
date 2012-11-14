@@ -179,10 +179,6 @@ public class Explore {
         }
 
         @Override
-        public void activatePropagator(Propagator propagator) {
-        }
-
-        @Override
         public void desactivatePropagator(Propagator propagator) {
         }
     }

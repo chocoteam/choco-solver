@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 import java.util.ArrayList;
 
 /**
@@ -46,12 +48,12 @@ public class Filter implements Instruction {
      * @param before input list of Pairs
      * @return list of pairs
      */
-    public static ArrayList<Pair> execute(Predicate p, ArrayList<Pair> before) {
-        ArrayList<Pair> after = new ArrayList<Pair>();
+    public static ArrayList<Arc> execute(Predicate p, ArrayList<Arc> before) {
+        ArrayList<Arc> after = new ArrayList<Arc>();
         for (int i = 0; i < before.size(); i++) {
-            Pair aPair = before.get(i);
-            if (p.evaluate(aPair)) {
-                after.add(aPair);
+            Arc anArc = before.get(i);
+            if (p.evaluate(anArc)) {
+                after.add(anArc);
             }
         }
         return after;

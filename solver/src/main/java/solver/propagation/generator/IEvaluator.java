@@ -24,56 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine.prop;
+package solver.propagation.generator;
 
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngine;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.Variable;
+import java.io.Serializable;
 
 /**
- * A fine event recorder prop-oriented dedicated to binary propagators
+ * An interface to evaluate an object
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/06/12
+ * @since 09/03/12
  */
-public final class FineBinPropEventRecorder<V extends Variable> extends FinePropEventRecorder<V> {
+public interface IEvaluator<E> extends Serializable {
 
-    public FineBinPropEventRecorder(V[] variables, Propagator<V> vPropagator, int[] idxVinPs, Solver solver, PropagationEngine engine) {
-        super(variables, vPropagator, idxVinPs, solver, engine);
-    }
+    /**
+     * Evaluate an element <code>E</code> and return its evaluation wrt <code>this</code>.
+     *
+     * @param element object to evaluate
+     * @return its evaluation
+     */
+    int eval(E element);
 
-    @Override
-    public boolean execute() throws ContradictionException {
-        _execute(0);
-        _execute(1);
 
-        return true;
-    }
-
-    @Override
-    public void flush() {
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-    }
-
-    @Override
-    public void virtuallyExecuted(Propagator propagator) {
-        assert this.propagators[AbstractFineEventRecorder.PINDEX] == propagator : "wrong propagator";
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        if (enqueued) {
-            scheduler.remove(this);
-        }
-    }
-
-    @Override
-    public void desactivate(Propagator<V> element) {
-        super.desactivate(element);
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-    }
 }
