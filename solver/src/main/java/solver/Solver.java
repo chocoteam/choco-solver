@@ -32,8 +32,10 @@ import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.Environments;
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.THashSet;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -327,6 +329,7 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
+        assert isValid();
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }
@@ -336,6 +339,7 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
+        assert isValid();
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }
@@ -563,5 +567,22 @@ public class Solver implements Serializable {
         this.setExplainer(explainer);
     }
 
+    public boolean isValid() {
+        // 1. check that there is no un posted constraints
+        THashSet<Constraint> cset = new THashSet<Constraint>();
+        for (int i = 0; i < vars.length; i++) {
+            cset.clear();
+            cset.addAll(Arrays.asList(vars[i].getConstraints()));
+            Propagator[] propagators = vars[i].getPropagators();
+            for (int j = 0; j < propagators.length; j++) {
+                if (!cset.contains(propagators[j].getConstraint())) {
+                    LoggerFactory.getLogger("solver")
+                            .error("The constraint \"" + propagators[j].getConstraint() + "\" exists but has not been posted within the solver.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
 }
