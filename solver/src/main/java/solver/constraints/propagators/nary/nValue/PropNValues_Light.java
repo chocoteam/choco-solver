@@ -170,7 +170,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
         int countMax = 0;
         for (int i = 0; i < concernedValues.size(); i++) {
             boolean possible = false;
-            boolean mandatory = true;
+            boolean mandatory = false;
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(concernedValues.get(i))) {
                     possible = true;
@@ -191,8 +191,11 @@ public class PropNValues_Light extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         if (countMax < nValues.getLB()) {
-            return ESat.TRUE;
+            return ESat.FALSE;
         }
+		if(count==countMax && nValues.instantiated()){
+			return ESat.TRUE;
+		}
         return ESat.UNDEFINED;
     }
 }
