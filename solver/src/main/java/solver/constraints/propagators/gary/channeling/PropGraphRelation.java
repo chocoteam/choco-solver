@@ -116,12 +116,12 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
 
     private void checkVar(int i) throws ContradictionException {
         ISet ker = g.getKernelGraph().getActiveNodes();
-        for (int j = 0; j < n; j++) {
+        for (int j = ker.getFirstElement(); j>=0; j=ker.getNextElement()) {
             if (g.getKernelGraph().arcExists(i, j)) {
                 relation.applyTrue(i, j, solver, aCause);
             } else {
                 if (!g.getEnvelopGraph().arcExists(i, j)) {
-                    if (ker.contain(i) && ker.contain(j)) {
+                    if (ker.contain(i)) {
                         relation.applyFalse(i, j, solver, aCause);
                     }
                 }
