@@ -238,6 +238,7 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
+		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
@@ -297,6 +298,7 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
+		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
