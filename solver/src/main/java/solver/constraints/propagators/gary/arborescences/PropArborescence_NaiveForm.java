@@ -140,7 +140,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
 		for(int i=0;i<n;i++){
 			succ = domTrans.getSuccessorsOf(i);
 			for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-				g.removeArc(k,i,this);
+				g.removeArc(k,i,aCause);
 			}
 		}
 	}
