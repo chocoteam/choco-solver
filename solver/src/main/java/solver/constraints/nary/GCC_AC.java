@@ -86,7 +86,7 @@ public class GCC_AC extends Constraint<IntVar,Propagator<IntVar>>{
 		if(AC_on_Card){
 			addPropagators(new PropGCC_AC_Cards_AC(vars,value,cards,this,solver));
 		}else{
-			addPropagators(new PropGCC_AC_Cards_Fast(vars, value, cards, this, solver));
+			addPropagators(new PropGCC_AC_Cards_Fast(vars,value,cards,this, solver));
 		}
 	}
 
