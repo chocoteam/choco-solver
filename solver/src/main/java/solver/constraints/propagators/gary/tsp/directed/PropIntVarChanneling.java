@@ -90,12 +90,12 @@ public class PropIntVarChanneling extends Propagator {
             idms[i] = intVars[i].monitorDelta(this);
         }
         this.n = g.getEnvelopGraph().getNbNodes();
-        valRemoved = new ValRem(this);
-        arcEnforced = new EnfArc(this);
+        valRemoved = new ValRem();
+        arcEnforced = new EnfArc();
         if (intVars[0].hasEnumeratedDomain()) {
-            arcRemoved = new RemArcAC(this);
+            arcRemoved = new RemArcAC();
         } else {
-            arcRemoved = new RemArcBC(this);
+            arcRemoved = new RemArcBC();
         }
     }
 
@@ -188,63 +188,39 @@ public class PropIntVarChanneling extends Propagator {
     //***********************************************************************************
 
     private class ValRem implements IntProcedure {
-        private Propagator p;
-
-        private ValRem(Propagator p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int i) throws ContradictionException {
-            g.removeArc(varIdx, i, p);
+            g.removeArc(varIdx, i, aCause);
         }
     }
 
     private class EnfArc implements PairProcedure {
-        private Propagator p;
-
-        private EnfArc(Propagator p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
-            intVars[from].instantiateTo(to, p);
+            intVars[from].instantiateTo(to, aCause);
         }
     }
 
     private class RemArcAC implements PairProcedure {
-        private Propagator p;
-
-        private RemArcAC(Propagator p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
-            intVars[from].removeValue(to, p);
+            intVars[from].removeValue(to, aCause);
         }
     }
 
     private class RemArcBC implements PairProcedure {
-        private Propagator p;
-
-        private RemArcBC(Propagator p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
             if (to == intVars[from].getLB()) {
                 while (to < n && !g.getEnvelopGraph().arcExists(from, to)) {
                     to++;
                 }
-                intVars[from].updateLowerBound(to, p);
+                intVars[from].updateLowerBound(to, aCause);
             } else if (to == intVars[from].getUB()) {
                 while (to >= 0 && !g.getEnvelopGraph().arcExists(from, to)) {
                     to--;
                 }
-                intVars[from].updateUpperBound(to, p);
+                intVars[from].updateUpperBound(to, aCause);
             }
         }
     }

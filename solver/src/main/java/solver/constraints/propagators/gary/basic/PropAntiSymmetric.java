@@ -65,7 +65,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
         super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        enf = new EnfProc(this);
+        enf = new EnfProc();
         n = g.getEnvelopGraph().getNbNodes();
     }
 
@@ -124,16 +124,10 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
      * Enable to remove the opposite arc
      */
     private class EnfProc implements PairProcedure {
-        private final Propagator p;
-
-        public EnfProc(Propagator p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
             if (from != to) {
-                g.removeArc(to, from, p);
+                g.removeArc(to, from, aCause);
             }
         }
     }

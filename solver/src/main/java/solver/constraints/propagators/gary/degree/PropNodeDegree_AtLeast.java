@@ -202,7 +202,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         ISet ker = target.getSet(g.getKernelGraph(), i);
         int size = nei.getSize();
         if (size < degrees[i]) {
-            g.removeNode(i, this);
+            g.removeNode(i, aCause);
         } else if (size == degrees[i] && g.getKernelGraph().getActiveNodes().contain(i) && ker.getSize() < size) {
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 target.enforce(g, i, s, aCause);

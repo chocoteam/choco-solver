@@ -110,7 +110,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 			G_R.getActiveNodes().remove(i);
 			mates[i] = new Set_Std_2LinkedList(environment);
 		}
-		arcRemoved = new RemArc(this);
+		arcRemoved = new RemArc();
 		sccComputed = new BitSet(n);
 		SCCfinder = new StrongConnectivityFinder(G.getEnvelopGraph());
 	}
@@ -301,14 +301,10 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
     //***********************************************************************************
 
     private class RemArc implements PairProcedure {
-        private Propagator p;
         private BitSet restriction;
-
-        private RemArc(Propagator p) {
-            this.p = p;
+        private RemArc() {
             this.restriction = new BitSet(n);
         }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
             int x = sccOf[from].get();
@@ -375,14 +371,14 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
                         }
                         // filter
                         if (visit(first, last) != ns + 2) {
-                            p.contradiction(G, "no Hamiltonian path");
+                            contradiction(G, "no Hamiltonian path");
                         }
                     }
                 }
             } else {
                 mates[x].remove((from + 1) * n + to);
                 if (mates[x].getSize() == 0) {
-                    p.contradiction(G, "G_R disconnected");
+                    contradiction(G, "G_R disconnected");
                 }
             }
         }
