@@ -37,9 +37,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
-
 import java.util.BitSet;
 
 /**
@@ -53,18 +53,20 @@ public class PropKCliques extends Propagator {
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
+    private UndirectedGraphVar g;
     private IntVar k;
-    int n;
-    BitSet in;
-    BitSet inMIS;
-    int[] nbNeighbors;
+    private int n;
+    private BitSet in;
+    private BitSet inMIS;
+    private int[] nbNeighbors;
+	private TIntArrayList list;
+	private ConnectivityFinder connectivityFinder;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKCliques(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
+    public PropKCliques(UndirectedGraphVar graph, Solver solver, Constraint constraint, IntVar k) {
         super(new Variable[]{graph, k}, solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
         this.k = k;
@@ -72,6 +74,8 @@ public class PropKCliques extends Propagator {
         in = new BitSet(n);
         inMIS = new BitSet(n);
         nbNeighbors = new int[n];
+		list = new TIntArrayList();
+		connectivityFinder = new ConnectivityFinder(g.getKernelGraph());
     }
 
     //***********************************************************************************
@@ -80,12 +84,27 @@ public class PropKCliques extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-//		int min = simpleSearch();
-        int min = efficientSearch();
-        k.updateLowerBound(min, aCause);
-        if (min == k.getUB()) {
-            filter();
-        }
+		connectivityFinder.findAllCC();
+		int max = connectivityFinder.getNBCC();
+		max += g.getEnvelopOrder()-g.getKernelOrder();
+		k.updateUpperBound(max,aCause);
+		if(max == k.getLB()){
+			ISet nodes = g.getKernelGraph().getActiveNodes();
+			for (int i=0;i<n;i++) {
+				if(!nodes.contain(i)){
+					ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
+					for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+						g.removeArc(i,j,aCause);
+					}
+				}
+			}
+		}else{
+			int min = findMIS();
+			k.updateLowerBound(min, aCause);
+			if (min == k.getUB()) {
+				filter();
+			}
+		}
     }
 
     @Override
@@ -93,10 +112,57 @@ public class PropKCliques extends Propagator {
         propagate(0);
     }
 
+	private int findMIS() {
+        // prepare data structures
+        in.clear();
+        inMIS.clear();
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+        int min = 0;
+        for (int i = 0; i < n; i++) {
+            nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).getSize();
+			if(!nodes.contain(i)){
+				in.set(i);
+			}
+        }
+        // find MIS
+        int idx = in.nextClearBit(0);
+        while (idx >= 0 && idx<n) {
+            for (int i = in.nextClearBit(idx + 1); i>=0 && i<n ; i = in.nextClearBit(i + 1)) {
+                if (nbNeighbors[i] < nbNeighbors[idx]) {
+                    idx = i;
+                }
+            }
+			addToMIS(idx);
+            min++;
+            idx = in.nextClearBit(0);
+        }
+        return min;
+    }
+
+	private void addToMIS(int node){
+		ISet nei = g.getEnvelopGraph().getNeighborsOf(node);
+		inMIS.set(node);
+		in.set(node);
+		list.clear();
+		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+			if (!in.get(j)) {
+				in.set(j);
+				list.add(j);
+			}
+		}
+		for (int i = list.size() - 1; i >= 0; i--) {
+			nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
+			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+				nbNeighbors[j]--;
+			}
+		}
+	}
+
     private void filter() throws ContradictionException {
-        ISet nodes = g.getKernelGraph().getActiveNodes();
         ISet nei;
+        in.clear();
         int mate;
+		ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             if (!inMIS.get(i)) {
                 mate = -1;
@@ -112,85 +178,10 @@ public class PropKCliques extends Propagator {
                     }
                 }
                 if (mate >= 0) {
-                    g.enforceArc(i, mate, aCause);
+					g.enforceArc(i,mate,aCause);
                 }
             }
         }
-    }
-
-    private int simpleSearch() {
-        in.clear();
-        inMIS.clear();
-        int nb = 0;
-        ISet nodes = g.getKernelGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            in.set(i);
-            nb++;
-        }
-        int idx = -1;
-        ISet nei;
-        int min = 0;
-        while (nb > 0) {
-            idx = in.nextSetBit(idx + 1);
-            nei = g.getEnvelopGraph().getNeighborsOf(idx);
-            in.clear(idx);
-            inMIS.set(idx);
-            nb--;
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (in.get(j)) {
-                    in.clear(j);
-                    nb--;
-                }
-            }
-            min++;
-        }
-        return min;
-    }
-
-    private int efficientSearch() {
-        in.clear();
-        inMIS.clear();
-        int nb = 0;
-        ISet nodes = g.getKernelGraph().getActiveNodes();
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            in.set(i);
-            nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).getSize();
-            nb++;
-        }
-        int idx;
-        ISet nei;
-        TIntArrayList list = new TIntArrayList();
-        int min = 0;
-        while (nb > 0) {
-            idx = in.nextSetBit(0);
-            for (int i = in.nextSetBit(idx + 1); i >= 0; i = in.nextSetBit(i + 1)) {
-                if (nbNeighbors[i] < nbNeighbors[idx]) {
-                    idx = i;
-                }
-            }
-            nei = g.getEnvelopGraph().getNeighborsOf(idx);
-            in.clear(idx);
-            inMIS.set(idx);
-            nb--;
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (in.get(j)) {
-                    in.clear(j);
-                    nb--;
-                    list.add(j);
-                }
-            }
-            for (int i = list.size() - 1; i >= 0; i--) {
-                nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
-                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-//					if(in.get(j)){
-                    nbNeighbors[j]--;
-//					}
-                }
-            }
-            list.clear();
-            min++;
-        }
-        return min;
     }
 
     //***********************************************************************************
@@ -205,7 +196,16 @@ public class PropKCliques extends Propagator {
 
     @Override
     public ESat isEntailed() {
-        //TODO
+        if(findMIS()>k.getUB()){
+			return ESat.FALSE;
+		}
+		if(g.instantiated()){
+			ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
+			cf.findAllCC();
+			if(cf.getNBCC()<=k.getLB()){
+				return ESat.TRUE;// sous reserve que le graphe soit transitif (autre propagateur)
+			}
+		}
         return ESat.UNDEFINED;
     }
 }

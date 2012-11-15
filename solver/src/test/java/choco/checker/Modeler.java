@@ -29,16 +29,14 @@ package choco.checker;
 
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.Element;
-import solver.constraints.nary.Among;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.NValues;
+import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.ternary.Times;
@@ -542,6 +540,99 @@ public interface Modeler {
 				}
             }
             Constraint ctr = new NValues(decvars,vars[n-1],s, new NValues.Type[]{});
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+		}
+	};
+
+	Modeler modelGCC_alldiff_Cards = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("modelGCC_Cards_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+			TIntArrayList vals = new TIntArrayList();
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				for(int j:domains[i]){
+					if(!vals.contains(j)){
+						vals.add(j);
+					}
+				}
+                map.put(domains[i], vars[i]);
+            }
+			int[] values = vals.toArray();
+			IntVar[] cards = VariableFactory.boolArray("cards",values.length,s);
+
+            Constraint ctr = new GCC_AC(vars,values,cards,true,s);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+		}
+	};
+
+	Modeler modelGCC_alldiff_Fast = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("modelGCC_Fast_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+			TIntArrayList vals = new TIntArrayList();
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				for(int j:domains[i]){
+					if(!vals.contains(j)){
+						vals.add(j);
+					}
+				}
+                map.put(domains[i], vars[i]);
+            }
+			int[] values = vals.toArray();
+			IntVar[] cards = VariableFactory.boolArray("cards",values.length,s);
+
+            Constraint ctr = new GCC_AC(vars,values,cards,false,s);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+		}
+	};
+
+	Modeler modelGCC_alldiff_LowUp = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("modelGCC_LowUp_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+			TIntArrayList vals = new TIntArrayList();
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				for(int j:domains[i]){
+					if(!vals.contains(j)){
+						vals.add(j);
+					}
+				}
+                map.put(domains[i], vars[i]);
+            }
+			int[] values = vals.toArray();
+			int[] low = new int[values.length];
+			int[] up = new int[values.length];
+			for(int i=0;i<values.length;i++){
+				up[i] = 1;
+			}
+            Constraint ctr = new GCC_AC(vars,values,low,up,s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

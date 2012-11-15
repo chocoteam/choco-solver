@@ -61,7 +61,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     private UndirectedGraph cliques;
     // required data structure
     private int[] nbNeighbors;
-    private BitSet in, inMIS, nodes;
+    private BitSet in, inMIS;
     private TIntArrayList list;
 
     //***********************************************************************************
@@ -85,7 +85,6 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
         cliques = new UndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST, false);
         in = new BitSet(n);
         inMIS = new BitSet(n);
-        nodes = new BitSet(n);
         nbNeighbors = new int[n];
         list = new TIntArrayList();
     }
@@ -130,12 +129,13 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             nbNeighbors[i] = cliques.getNeighborsOf(i).getSize();
         }
+        int min = 0;
 		for (int i = 0; i < n; i++) {
 			if(vars[i].instantiated() && !in.get(i)){
 				addToMIS(i);
+				min++;
 			}
 		}
-        int min = 0;
         // find MIS
         int idx = in.nextClearBit(0);
         while (idx >= 0 && idx<n) {

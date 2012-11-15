@@ -87,7 +87,7 @@ public class GraphStrategies extends GraphStrategy {
         super(graphVar, null, null, NodeArcPriority.ARCS);
         costs = costMatrix;
         relax = relaxation;
-        n = costMatrix.length;
+        n = g.getEnvelopGraph().getNbNodes();
     }
 
     /**

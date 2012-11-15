@@ -73,7 +73,7 @@ public class GraphConstraintFactory {
     public static Constraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
         Constraint gc = makeConstraint(solver);
         gc.addPropagators(new PropTransitivity(graph, solver, gc));
-        gc.addPropagators(new PropKCliques(graph, solver, gc, nCliques));// TODO beware PropKCliques might have a bug
+        gc.addPropagators(new PropKCliques(graph, solver, gc, nCliques));
         return gc;
     }
 

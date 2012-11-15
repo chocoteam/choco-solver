@@ -119,18 +119,16 @@ public class PropRelationGraph extends Propagator {
         ISet ker = g.getKernelGraph().getActiveNodes();
         ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-            if (!g.getKernelGraph().arcExists(i, j)) {
-                switch (relation.isEntail(i, j)) {
-                    case TRUE:
-                        if (ker.contain(i) && ker.contain(j)) {
-                            g.enforceArc(i, j, aCause);
-                        }
-                        break;
-                    case FALSE:
-                        g.removeArc(i, j, aCause);
-                        break;
-                }
-            }
+			switch (relation.isEntail(i, j)) {
+				case TRUE:
+					if (ker.contain(i) && ker.contain(j)) {
+						g.enforceArc(i, j, aCause);
+					}
+					break;
+				case FALSE:
+					g.removeArc(i, j, aCause);
+					break;
+			}
         }
     }
 }
