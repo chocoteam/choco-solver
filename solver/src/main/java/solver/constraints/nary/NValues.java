@@ -50,6 +50,30 @@ import java.util.BitSet;
  */
 public class NValues extends IntConstraint<IntVar> {
 
+	public enum Type{
+		AtMost_BC {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				// added twice to perform fixpoint
+				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+			}
+		},
+		AtMost_GreedyGraph {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, solver));
+			}
+		},
+		AtLeast_AC {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues, cons, solver));
+			}
+		};
+
+		public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
+	}
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
@@ -67,16 +91,28 @@ public class NValues extends IntConstraint<IntVar> {
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
-	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 * @param types additional filtering algorithms to consider
+	 */
+    public NValues(IntVar[] vars, IntVar nValues, Solver solver, Type... types) {
+        this(vars, nValues, getDomainUnion(vars), solver);
+		for(Type t:types){
+			t.addProp(vars, nValues, this, solver);
+		}
+    }
+
+	/**
+	 * NValues constraint
+	 * The number of distinct values in vars is exactly nValues
+	 * Uses all filtering algorithms in enum Type
 	 * @param vars
 	 * @param nValues
 	 * @param solver
 	 */
-    public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
-        this(vars, nValues, getDomainUnion(vars), solver);
-		addPropagators(new PropAtMostNValues_BC(vars, nValues, this, solver));
-		addPropagators(new PropAtMostNValues_Greedy(vars, nValues, this, solver));
-		addPropagators(new PropAtLeastNValues_AC(vars, nValues, this, solver));
+	public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
+        this(vars, nValues, solver, Type.values());
     }
 
 	private static TIntArrayList getDomainUnion(IntVar[] vars) {
@@ -100,11 +136,16 @@ public class NValues extends IntConstraint<IntVar> {
      */
     @Override
     public ESat isSatisfied(int[] tuple) {
+		int minval = tuple[0];
+		for (int i = 0; i < tuple.length-1; i++) {
+			if(minval>tuple[i])
+				minval = tuple[i];
+		}
 		BitSet values = new BitSet(tuple.length-1);
         for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]);
+			values.set(tuple[i]-minval);
         }
-		if(values.cardinality()<=tuple[tuple.length-1]){
+		if(values.cardinality()==tuple[tuple.length-1]){
 			return ESat.TRUE;
 		}
         return ESat.FALSE;
