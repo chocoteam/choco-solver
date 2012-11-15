@@ -38,12 +38,11 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
+import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.BitSet;
 
 /**
@@ -86,41 +85,41 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Global Cardinality Constraint (GCC) for an undirected graph variable
-     * foreach i, low[i]<=|{v = i | for any v in vars}|<=up[i]
-     *
-     * @param g
-     * @param low
-     * @param up
-     * @param constraint
-     * @param sol
-     */
-    public PropGCC_LowUp_undirected(UndirectedGraphVar g, IntVar maxFlowValue, int[] low, int[] up, Constraint constraint, Solver sol) {
-        super(new Variable[]{g, maxFlowValue}, sol, constraint, PropagatorPriority.QUADRATIC, false);
-        this.gdm = g.monitorDelta(this);
-        this.g = g;
-        n = g.getEnvelopGraph().getNbNodes();
-        n2 = n * 2;
-        if (n2 != low.length) {
-            throw new UnsupportedOperationException();
-        }
-        fifo = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST, false);
-        remProc = new DirectedRemProc();
-        father = new int[n2];
-        in = new BitSet(n2);
-        SCCfinder = new StrongConnectivityFinder(digraph);
-        //
-        this.lb = low;
-        this.ub = up;
-        this.flow = new IStateInt[n2];
-        for (int i = 0; i < n2; i++) {
-            flow[i] = environment.makeInt(0);
-        }
-        totalFlow = environment.makeInt(0);
-        this.maxFlowValue = maxFlowValue;
-    }
+	/**
+	 * Global Cardinality Constraint (GCC) for an undirected graph variable
+	 * foreach i, low[i]<=|{v = i | for any v in vars}|<=up[i]
+	 *
+	 * @param g
+	 * @param low
+	 * @param up
+	 * @param constraint
+	 * @param sol
+	 */
+	public PropGCC_LowUp_undirected(UndirectedGraphVar g, IntVar maxFlowValue, int[] low, int[] up, Constraint constraint, Solver sol) {
+		super(new Variable[]{g,maxFlowValue}, sol, constraint, PropagatorPriority.QUADRATIC, false);
+		this.gdm = g.monitorDelta(this);
+		this.g = g;
+		n = g.getEnvelopGraph().getNbNodes();
+		n2 = n*2;
+		if(n2!=low.length){
+			throw new UnsupportedOperationException();
+		}
+		fifo = new int[n2];
+		digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, SetType.LINKED_LIST,false);
+		remProc = new DirectedRemProc();
+		father = new int[n2];
+		in = new BitSet(n2);
+		SCCfinder = new StrongConnectivityFinder(digraph);
+		//
+		this.lb = low;
+		this.ub = up;
+		this.flow = new IStateInt[n2];
+		for(int i=0; i<n2; i++){
+			flow[i] = environment.makeInt(0);
+		}
+		totalFlow = environment.makeInt(0);
+		this.maxFlowValue = maxFlowValue;
+	}
 
     @Override
     public String toString() {

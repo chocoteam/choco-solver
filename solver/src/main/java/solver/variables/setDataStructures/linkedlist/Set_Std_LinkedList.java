@@ -56,14 +56,15 @@ public class Set_Std_LinkedList extends Set_LinkedList {
     }
 
     @Override
-    public void add(int element) {
+    public boolean add(int element) {
         this._add(element);
-        if (operationPoolGC.isEmpty()) {
-            new ListOP(element, REMOVE);
-        } else {
-            ListOP op = operationPoolGC.removeFirst();
-            op.set(element, REMOVE);
-        }
+        if(operationPoolGC.isEmpty()){
+			new ListOP(element, REMOVE);
+		}else{
+			ListOP op = operationPoolGC.removeFirst();
+			op.set(element,REMOVE);
+		}
+		return true;
     }
 
     protected void _add(int element) {

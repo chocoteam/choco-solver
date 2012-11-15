@@ -36,16 +36,16 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.graph.GraphType;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import static org.testng.Assert.assertEquals;
 
 public class ArborescenceTest {
 
-    private static GraphType graphTypeEnv = GraphType.MATRIX;
-    private static GraphType graphTypeKer = GraphType.MATRIX;
+	private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
+	private static SetType graphTypeKer = SetType.BOOL_ARRAY;
 
     public static Solver model(int n, int seed, boolean naive, boolean simple, long nbMaxSols) {
         Solver s = new Solver();
@@ -113,15 +113,15 @@ public class ArborescenceTest {
         }
     }
 
-    @Test(groups = "30s")
-    public static void testAllDataStructure() {
-        for (GraphType ge : GraphType.ENVELOPE_TYPES) {
-            graphTypeEnv = ge;
-            for (GraphType gk : GraphType.KERNEL_TYPES) {
-                graphTypeKer = gk;
-                System.out.println("env:" + ge + " ker :" + gk);
-                smallTrees();
-            }
-        }
-    }
+	@Test(groups = "30s")
+	public static void testAllDataStructure(){
+		for(SetType ge: SetType.values()){
+			graphTypeEnv = ge;
+			for(SetType gk: SetType.values()){
+				graphTypeKer = gk;
+				System.out.println("env:"+ge+" ker :"+gk);
+				smallTrees();
+			}
+		}
+	}
 }

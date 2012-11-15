@@ -35,64 +35,59 @@ package solver.variables.setDataStructures;
  */
 public interface ISet {
 
-    /**
-     * Add element to the neighborhood
+    /**Add element to the set
      * Does not guaranty there is no duplications
      *
      * @param element
+     * @return true iff element was not in the set and has been added
      */
-    void add(int element);
+    boolean add(int element);
 
-    /**
-     * Remove the first occurence of element from the neighborhood
-     *
+    /**Remove the first occurence of element from the set
      * @param element
-     * @return true iff element was in the neighborhood and has been removed
+     * @return true iff element was in the set and has been removed
      */
     boolean remove(int element);
 
-    /**
-     * Test the existence of element in the neighborhood
-     *
+    /**Test the existence of element in the set
      * @param element
-     * @return true iff the neighborhood contains element
+     * @return true iff the set contains element
      */
     boolean contain(int element);
 
     /**
-     * @return true iff the neighborhood is empty
+     * @return true iff the set is empty
      */
     boolean isEmpty();
 
     /**
-     * @return the number of elements in the neighborhood
+     * @return the number of elements in the set
      */
     int getSize();
 
     /**
-     * Remove all elements from the neighborhood
+     * Remove all elements from the set
      */
     void clear();
 
     /**
-     * @return the first element of the neighborhood, -1 empty set
+     * @return the first element of the set, -1 empty set
      */
     int getFirstElement();
 
-    /**
-     * enables to iterate over the neighborhood
-     * <p/>
-     * should be used as follow :
-     * <p/>
-     * for(int i=getFirstElement(); i>=0; i = getNextElement()){
-     * ...
-     * }
-     * <p/>
-     * The use of getFirstElement() is necessary to ensure a complete iteration
-     * <p/>
-     * WARNING cannot encapsulate two for loops (copy the set for that)
-     *
-     * @return the next element of the neighborhood
-     */
-    int getNextElement();
+	/**enables to iterate over the set
+	 * 
+	 * should be used as follow :
+	 * 
+	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
+	 * 		...
+	 * }
+	 * 
+	 * The use of getFirstElement() is necessary to ensure a complete iteration
+	 *
+	 * WARNING cannot encapsulate two for loops (copy the set for that)
+	 * 
+	 * @return the next element of the set
+	 */
+	int getNextElement();
 }

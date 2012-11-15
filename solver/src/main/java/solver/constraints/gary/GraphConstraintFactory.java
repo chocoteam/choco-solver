@@ -40,9 +40,9 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Some usual graph constraints

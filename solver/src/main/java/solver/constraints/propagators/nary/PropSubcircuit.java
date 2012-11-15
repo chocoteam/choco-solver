@@ -165,6 +165,9 @@ public class PropSubcircuit extends Propagator<IntVar> {
             if (length.getValue() + ct != n) {
                 return ESat.FALSE;
             }
+			if(ct==n){
+				return ESat.TRUE;
+			}
             int x = first;
             do {
                 if (visited.get(x)) {

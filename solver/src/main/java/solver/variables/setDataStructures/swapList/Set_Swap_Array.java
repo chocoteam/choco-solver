@@ -57,26 +57,24 @@ public class Set_Swap_Array extends Set_Swap {
         return false;
     }
 
-    @Override
-    public void add(int element) {
-        if (contain(element)) {
-            Exception e = new Exception("element already in list");
-            e.printStackTrace();
-            System.exit(0);
-            return;
-        }
-        int size = getSize();
-        if (getSize() == arrayLength) {
-            int[] tmp = array;
-            int ns = Math.min(sizeMax, tmp.length + 1 + (tmp.length * 2) / 3);
-            array = new int[ns];
-            arrayLength = ns;
-            System.arraycopy(tmp, 0, array, 0, size);
-        }
-        array[size] = element;
-        map[element] = size;
-        addSize(1);
-    }
+	@Override
+	public boolean add(int element) {
+		if(contain(element)){
+			return false;
+		}
+		int size = getSize();
+		if(getSize()==arrayLength){
+			int[] tmp = array;
+			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
+			array = new int[ns];
+			arrayLength = ns;
+			System.arraycopy(tmp,0,array,0,size);
+		}
+		array[size] = element;
+		map[element] = size;
+		addSize(1);
+		return true;
+	}
 
     @Override
     public boolean remove(int element) {

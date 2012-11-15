@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
-import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.DirectedGraph;
 
 /**
  * Class that finds dominators of a given flow graph g(s)

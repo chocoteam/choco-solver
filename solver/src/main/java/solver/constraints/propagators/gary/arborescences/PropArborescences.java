@@ -34,13 +34,13 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
-import solver.variables.setDataStructures.ISet;
 
 /**
  * Arborescences constraint (simplification from tree constraint) based on dominators
@@ -67,18 +67,18 @@ public class PropArborescences extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-        g = graph;
-        n = g.getEnvelopGraph().getNbNodes();
-        successors = new ISet[n];
-        connectedGraph = new DirectedGraph(n + 1, GraphType.LINKED_LIST, false);
-        if (simple) {
-            domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-        } else {
-            domFinder = new AlphaDominatorsFinder(n, connectedGraph);
-        }
-    }
+	public PropArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+		g = graph;
+		n = g.getEnvelopGraph().getNbNodes();
+		successors = new ISet[n];
+		connectedGraph = new DirectedGraph(n+1, SetType.LINKED_LIST,false);
+		if(simple){
+			domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+		}else{
+			domFinder = new AlphaDominatorsFinder(n, connectedGraph);
+		}
+	}
 
     //***********************************************************************************
     // METHODS

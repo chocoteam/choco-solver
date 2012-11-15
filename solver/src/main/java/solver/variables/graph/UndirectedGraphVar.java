@@ -25,47 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.directedGraph;
+package solver.variables.graph;
 
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
+import solver.variables.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public class DirectedGraphVar extends GraphVar<DirectedGraph> {
+public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
 
-    ////////////////////////////////// GRAPH PART ///////////////////////////////////////
+    //////////////////////////////// GRAPH PART /////////////////////////////////////////
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public DirectedGraphVar(Solver solver, int nbNodes,
-                            GraphType typeEnv, GraphType typeKer, boolean allNodes) {
-        super(solver);
-        envelop = new DirectedGraph(environment, nbNodes, typeEnv, allNodes);
-        kernel = new DirectedGraph(environment, nbNodes, typeKer, allNodes);
+	public UndirectedGraphVar(Solver solver, int nbNodes,
+							  SetType typeEnv, SetType typeKer, boolean allNodes) {
+		super(solver);
+    	envelop = new UndirectedGraph(environment, nbNodes, typeEnv,allNodes);
+    	kernel = new UndirectedGraph(environment, nbNodes, typeKer,allNodes);
+    }
+
+	public UndirectedGraphVar(Solver solver, int nbNodes,boolean allNodes) {
+		this(solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
     }
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
-    @Override
     public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
-        if (kernel.arcExists(x, y)) {
-            this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc " + x + "->" + y);
+        if (kernel.edgeExists(x, y)) {
+            this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
             return false;
         }
-        if (envelop.removeArc(x, y)) {
+        if (envelop.removeEdge(x, y)) {
             if (reactOnModification) {
                 delta.add(x, IGraphDelta.AR_tail, cause);
                 delta.add(y, IGraphDelta.AR_head, cause);
@@ -77,12 +79,11 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
         return false;
     }
 
-    @Override
     public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
         enforceNode(x, cause);
         enforceNode(y, cause);
-        if (envelop.arcExists(x, y)) {
-            if (kernel.addArc(x, y)) {
+        if (envelop.edgeExists(x, y)) {
+            if (kernel.addEdge(x, y)) {
                 if (reactOnModification) {
                     delta.add(x, IGraphDelta.AE_tail, cause);
                     delta.add(y, IGraphDelta.AE_head, cause);
@@ -103,6 +104,6 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
 
     @Override
     public boolean isDirected() {
-        return true;
+        return false;
     }
 }

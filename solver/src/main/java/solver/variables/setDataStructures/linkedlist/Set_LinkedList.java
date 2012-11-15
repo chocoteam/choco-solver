@@ -92,23 +92,24 @@ public class Set_LinkedList implements ISet {
         return res;
     }
 
-    @Override
-    /**
-     * Add an element in the first position. Beware, there is no garanty this element does not exist in the linked list
-     * BEWARE if an element is added during an iteration, as it is before the first element, then this element will not appear
-     * @param element an int
-     */
-    public void add(int element) {
-        if (poolGC == null) {
-            this.first = new IntCell(element, first);
-        } else {
-            IntCell recycled = poolGC;
-            poolGC = poolGC.next;
-            recycled.init(element, first);
-            first = recycled;
-        }
-        this.size++;
-    }
+	@Override
+	/**
+	 * Add an element in the first position. Beware, there is no garanty this element does not exist in the linked list
+	 * BEWARE if an element is added during an iteration, as it is before the first element, then this element will not appear
+	 * @param element an int
+	 */
+	public boolean add(int element) {
+		if(poolGC==null){
+			this.first = new IntCell(element, first);
+		}else{
+			IntCell recycled = poolGC;
+			poolGC = poolGC.next;
+			recycled.init(element,first);
+			first = recycled;
+		}
+		this.size++;
+		return true;
+	}
 
     @Override
     /**

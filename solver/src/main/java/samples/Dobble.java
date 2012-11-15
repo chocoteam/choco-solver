@@ -56,8 +56,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.Views;
 
 /**
@@ -136,7 +135,7 @@ public class Dobble {
 	// NValue which considers the allDifferent on each card
 	private static void addGlobalGraphNValues(Solver solver, IntVar[] flatJeu, IntVar nValTotal, int nbSymbCarte){
 		int nbNodes = flatJeu.length;
-		UndirectedGraphVar g = new UndirectedGraphVar(solver,nbNodes, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST,true);
+		UndirectedGraphVar g = new UndirectedGraphVar(solver,nbNodes,true);
 		for(int i=0;i<nbNodes;i++){
 			g.getEnvelopGraph().addEdge(i,i);
 			g.getKernelGraph().addEdge(i,i);
@@ -155,7 +154,7 @@ public class Dobble {
 	// NValue which considers the allDifferent on each card
 	private static void addCardsPairGraphNValues(Solver solver, IntVar[] flatIJ, IntVar nValues){
 		int nbNodes = flatIJ.length;
-		UndirectedGraphVar gpair = new UndirectedGraphVar(solver,nbNodes, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST,true);
+		UndirectedGraphVar gpair = new UndirectedGraphVar(solver,nbNodes,true);
 		for(int k1=0;k1<nbNodes;k1++){
 			gpair.getEnvelopGraph().addEdge(k1,k1);
 			gpair.getKernelGraph().addEdge(k1,k1);

@@ -52,17 +52,18 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
+import java.io.*;
 import java.io.File;
 import java.util.BitSet;
 import java.util.Random;
@@ -136,8 +137,8 @@ public class ATSP {
         outFile = "atsp_fast.csv";
         TextWriter.clearFile(outFile);
         TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;pos;adAC;bst;\n", outFile);
-//		bench();
-        benchRandomWithSCC();
+		bench();
+//        benchRandomWithSCC();
     }
 
     private static void bench() {
@@ -150,10 +151,10 @@ public class ATSP {
             if ((s.contains(".atsp"))) {// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
                 loadTSPLIBInstance(dir + "/" + s);
-                if (n > 0 && n < 190) {// || s.contains("p43.atsp")){
+                if (n > 0 && n < 160) {// || s.contains("p43.atsp")){
                     bst = false;
                     configParameters((1 << allDiff));
-                    solve();
+//                    solve();
                     bst = true;
                     configParameters((1 << rg) + (1 << allDiff));
                     solve();
@@ -221,9 +222,10 @@ public class ATSP {
     public static void createModel() {
         // create model
         solver = new Solver();
-//		initialUB = optimum;
+		initialUB = optimum;
+		System.out.println(initialUB);
         System.out.println("initial UB : " + initialUB);
-        graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, true);
+        graph = new DirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
         try {
             for (int i = 0; i < n - 1; i++) {
@@ -294,7 +296,7 @@ public class ATSP {
                 relax = map;
             }
         } else {
-            if (config.get(rg) && bst && false) {// BST-based HK
+            if (config.get(rg) && bst) {// BST-based HK
                 System.out.println("BST");
                 PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
                 propHK_bst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);

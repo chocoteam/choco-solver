@@ -28,8 +28,8 @@
 package solver.variables.graph.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 
 /**
@@ -55,25 +55,23 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Object that finds dominators of the given flow graph g(s)
-     */
-    public AbstractLengauerTarjanDominatorsFinder(int s, DirectedGraph g) {
-        root = s;
-        n = g.getNbNodes();
-        this.g = g;
-        parent = new int[n];
-        semi = new int[n];
-        dom = new int[n];
-        ancestor = new int[n];
-        label = new int[n];
-        vertex = new int[n];
-        bucket = new int[n];
-        succs = new ISet[n];
-        preds = new ISet[n];
-        T = new DirectedGraph(n, GraphType.LINKED_LIST, false);
-        list = new TIntArrayList();
-    }
+	/**Object that finds dominators of the given flow graph g(s)*/
+	public AbstractLengauerTarjanDominatorsFinder(int s, DirectedGraph g){
+		root = s;
+		n = g.getNbNodes();
+		this.g = g;
+		parent = new int[n];
+		semi = new int[n];
+		dom = new int[n];
+		ancestor = new int[n];
+		label = new int[n];
+		vertex = new int[n];
+		bucket= new int[n];
+		succs = new ISet[n];
+		preds = new ISet[n];
+		T = new DirectedGraph(n, SetType.LINKED_LIST,false);
+		list  = new TIntArrayList();
+	}
 
     //***********************************************************************************
     // INITIALIZATION

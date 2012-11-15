@@ -25,74 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.undirectedGraph;
+package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.delta.IGraphDelta;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
+ * @author Jean-Guillaume Fages
+ * @since Oct 2012
  */
-public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
+public class SetDelta implements IDelta {
 
-    //////////////////////////////// GRAPH PART /////////////////////////////////////////
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
+    public final static int KERNEL = 0;
+    public final static int ENVELOP = 1;
+    private IntDelta[] delta;
+    private long timestamp;
+    private final AbstractSearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public UndirectedGraphVar(Solver solver, int nbNodes,
-                              GraphType typeEnv, GraphType typeKer, boolean allNodes) {
-        super(solver);
-        envelop = new UndirectedGraph(environment, nbNodes, typeEnv, allNodes);
-        kernel = new UndirectedGraph(environment, nbNodes, typeKer, allNodes);
+    public SetDelta(AbstractSearchLoop loop) {
+        this.loop = loop;
+        delta = new IntDelta[2];
+        delta[0] = new EnumDelta(loop);
+        delta[1] = new EnumDelta(loop);
+        timestamp = loop.timeStamp;
     }
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
-    public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
-        if (kernel.edgeExists(x, y)) {
-            this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
-            return false;
-        }
-        if (envelop.removeEdge(x, y)) {
-            if (reactOnModification) {
-                delta.add(x, IGraphDelta.AR_tail, cause);
-                delta.add(y, IGraphDelta.AR_head, cause);
-            }
-            EventType e = EventType.REMOVEARC;
-            notifyPropagators(e, cause);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
-        enforceNode(x, cause);
-        enforceNode(y, cause);
-        if (envelop.edgeExists(x, y)) {
-            if (kernel.addEdge(x, y)) {
-                if (reactOnModification) {
-                    delta.add(x, IGraphDelta.AE_tail, cause);
-                    delta.add(y, IGraphDelta.AE_head, cause);
-                }
-                EventType e = EventType.ENFORCEARC;
-                notifyPropagators(e, cause);
-                return true;
-            }
-            return false;
-        }
-        this.contradiction(cause, EventType.ENFORCEARC, "enforce arc which is not in the domain");
-        return false;
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException();
     }
 
     //***********************************************************************************
@@ -100,7 +73,44 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     //***********************************************************************************
 
     @Override
-    public boolean isDirected() {
-        return false;
+    public void clear() {
+        delta[0].clear();
+        delta[1].clear();
+        timestamp = loop.timeStamp;
+    }
+
+    public int getSize(int kerOrEnv) {
+        return delta[kerOrEnv].size();
+    }
+
+    public void add(int element, int kerOrEnv, ICause cause) {
+        if (Configuration.LAZY_UPDATE) {
+            lazyClear();
+        }
+        delta[kerOrEnv].add(element, cause);
+    }
+
+    public void lazyClear() {
+        if (timestamp != loop.timeStamp) {
+            clear();
+        }
+    }
+
+    public int get(int index, int kerOrEnv) {
+        return delta[kerOrEnv].get(index);
+    }
+
+    public ICause getCause(int index, int kerOrEnv) {
+        return delta[kerOrEnv].getCause(index);
+    }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
     }
 }

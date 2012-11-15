@@ -25,7 +25,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallel.schema; import choco.kernel.ResolutionPolicy;
+package samples.parallel.schema;
+
+import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -41,9 +43,9 @@ import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
+import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
 
 /**
@@ -99,32 +101,32 @@ public class TSPslave extends AbstractParallelSlave {
     // METHODS
     //***********************************************************************************
 
-    @Override
-    public void solveSubProblem() {
-        final Solver solver = new Solver();
-        // variables
-        final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, true);
-        for (int i = 0; i < n; i++) {
-            undi.getKernelGraph().activateNode(i);
-            for (int j = i + 1; j < n - 1; j++) {
-                undi.getEnvelopGraph().addEdge(i, j);
-            }
-        }
-        undi.getEnvelopGraph().addEdge(0, n - 1);
-        undi.getEnvelopGraph().addEdge(n - 2, n - 1);
-        undi.getKernelGraph().addEdge(0, n - 1);
-        undi.getKernelGraph().addEdge(n - 2, n - 1);
-        // constraints
-        final Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-        gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
-        gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
-        gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
-        solver.post(gc);
-        // config
-        solver.set(new FragSearch(undi));
+	@Override
+	public void solveSubProblem() {
+		final Solver solver = new Solver();
+		// variables
+		final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
+		for(int i=0;i<n;i++){
+			undi.getKernelGraph().activateNode(i);
+			for(int j=i+1;j<n-1;j++){
+				undi.getEnvelopGraph().addEdge(i,j);
+			}
+		}
+		undi.getEnvelopGraph().addEdge(0,n-1);
+		undi.getEnvelopGraph().addEdge(n-2,n-1);
+		undi.getKernelGraph().addEdge(0,n-1);
+		undi.getKernelGraph().addEdge(n-2,n-1);
+		// constraints
+		final Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
+		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
+		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
+		gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
+		solver.post(gc);
+		// config
+		solver.set(new FragSearch(undi));
 //		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
 //		solver.set(new Sort(new PArc(gc)).clearOut());
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);

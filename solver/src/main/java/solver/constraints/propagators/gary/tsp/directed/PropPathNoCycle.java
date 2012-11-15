@@ -45,7 +45,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
 
 /**

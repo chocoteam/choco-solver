@@ -45,98 +45,96 @@ import java.util.LinkedList;
  */
 public class Set_Std_2LinkedList extends Set_2LinkedList {
 
-    final IEnvironment environment;
-    public final static boolean ADD = true;
-    public final static boolean REMOVE = false;
-    LinkedList<ListOP> operationPoolGC;
+	final IEnvironment environment;
+	public final static boolean ADD = true;
+	public final static boolean REMOVE = false;
+	LinkedList<ListOP> operationPoolGC;
 
-    //***********************************************************************************
-    // CONSTRUCTOR
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
 
-    public Set_Std_2LinkedList(IEnvironment environment) {
-        super();
-        this.environment = environment;
-        operationPoolGC = new LinkedList<ListOP>();
-    }
+	public Set_Std_2LinkedList(IEnvironment environment) {
+		super();
+		this.environment = environment;
+		operationPoolGC  = new LinkedList<ListOP>();
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public void add(int element) {
-        this._add(element);
-        if (operationPoolGC.isEmpty()) {
-            new ListOP(element, REMOVE);
-        } else {
-            ListOP op = operationPoolGC.removeFirst();
-            op.set(element, REMOVE);
-        }
-    }
+	@Override
+	public boolean add(int element) {
+		this._add(element);
+		if(operationPoolGC.isEmpty()){
+			new ListOP(element, REMOVE);
+		}else{
+			ListOP op = operationPoolGC.removeFirst();
+			op.set(element,REMOVE);
+		}
+		return true;
+	}
 
-    protected void _add(int element) {
-        super.add(element);
-    }
+	protected void _add(int element) {
+		super.add(element);
+	}
 
-    @Override
-    public boolean remove(int element) {
-        boolean done = this._remove(element);
-        if (done) {
-            if (operationPoolGC.isEmpty()) {
-                new ListOP(element, ADD);
-            } else {
-                ListOP op = operationPoolGC.removeFirst();
-                op.set(element, ADD);
-            }
-        }
-        return done;
-    }
+	@Override
+	public boolean remove(int element) {
+		boolean done = this._remove(element);
+		if (done) {
+			if(operationPoolGC.isEmpty()){
+				new ListOP(element, ADD);
+			}else{
+				ListOP op = operationPoolGC.removeFirst();
+				op.set(element,ADD);
+			}
+		}
+		return done;
+	}
 
-    protected boolean _remove(int element) {
-        return super.remove(element);
-    }
+	protected boolean _remove(int element) {
+		return super.remove(element);
+	}
 
-    @Override
-    public void clear() {
-        for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
-            if (operationPoolGC.isEmpty()) {
-                new ListOP(i, ADD);
-            } else {
-                ListOP op = operationPoolGC.removeFirst();
-                op.set(i, ADD);
-            }
-        }
-        super.clear();
-    }
+	@Override
+	public void clear() {
+		for(int i=getFirstElement(); i>=0; i=getNextElement()){
+			if(operationPoolGC.isEmpty()){
+				new ListOP(i, ADD);
+			}else{
+				ListOP op = operationPoolGC.removeFirst();
+				op.set(i,ADD);
+			}
+		}
+		super.clear();
+	}
 
-    //***********************************************************************************
-    // TRAILING OPERATIONS
-    //***********************************************************************************
+	//***********************************************************************************
+	// TRAILING OPERATIONS
+	//***********************************************************************************
 
-    private class ListOP extends Operation {
-        int element;
-        boolean addOrRemove;
-
-        public ListOP(int i, boolean add) {
-            super();
-            set(i, add);
-        }
-
-        @Override
-        public void undo() {
-            if (addOrRemove) {
-                _add(element);
-            } else {
-                _remove(element);
-            }
-            operationPoolGC.add(this);
-        }
-
-        public void set(int i, boolean add) {
-            element = i;
-            addOrRemove = add;
-            environment.save(this);
-        }
-    }
+	private class ListOP extends Operation{
+		int element;
+		boolean addOrRemove;
+		public ListOP(int i,boolean add) {
+			super();
+			set(i, add);
+		}
+		@Override
+		public void undo() {
+			if(addOrRemove){
+				_add(element);
+			}else{
+				_remove(element);
+			}
+			operationPoolGC.add(this);
+		}
+		public void set(int i,boolean add){
+			element = i;
+			addOrRemove = add;
+			environment.save(this);
+		}
+	}
 }

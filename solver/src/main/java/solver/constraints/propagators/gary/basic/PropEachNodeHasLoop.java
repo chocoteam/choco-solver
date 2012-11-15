@@ -65,8 +65,8 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
         super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
         this.g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        this.enfNode = new NodeEnf(this);
-        this.remArc = new ArcRem(this);
+        this.enfNode = new NodeEnf();
+        this.remArc = new ArcRem();
         this.concernedNodes = concernedNodes;
     }
 
@@ -135,31 +135,19 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     //***********************************************************************************
 
     private class NodeEnf implements IntProcedure {
-        private PropEachNodeHasLoop p;
-
-        private NodeEnf(PropEachNodeHasLoop p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int i) throws ContradictionException {
-            if (p.concernedNodes.contain(i)) {
-                g.enforceArc(i, i, p);
+            if (concernedNodes.contain(i)) {
+                g.enforceArc(i, i, aCause);
             }
         }
     }
 
     private class ArcRem implements PairProcedure {
-        private PropEachNodeHasLoop p;
-
-        private ArcRem(PropEachNodeHasLoop p) {
-            this.p = p;
-        }
-
         @Override
         public void execute(int from, int to) throws ContradictionException {
             if (from == to && concernedNodes.contain(to)) {
-                g.removeNode(from, p);
+                g.removeNode(from, aCause);
             }
         }
     }

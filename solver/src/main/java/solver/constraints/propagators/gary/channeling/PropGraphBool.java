@@ -66,8 +66,8 @@ public class PropGraphBool extends Propagator<GraphVar> {
         gdm = (GraphDeltaMonitor) graph.monitorDelta(this);
         relations = rel;
         n = rel.length;
-        enf = new EnfArc(this);
-        rem = new RemArc(this);
+        enf = new EnfArc();
+        rem = new RemArc();
     }
 
     //***********************************************************************************
@@ -139,16 +139,10 @@ public class PropGraphBool extends Propagator<GraphVar> {
      * When an edge (x,y), is enforced then the relation between x and y is true
      */
     private class EnfArc implements PairProcedure {
-        protected Propagator p;
-
-        protected EnfArc(Propagator p) {
-            this.p = p;
-        }
-
         public void execute(int i, int j) throws ContradictionException {
-            relations[i][j].setToTrue(p, false);
+            relations[i][j].setToTrue(aCause, false);
             if (!graph.isDirected()) {
-                relations[j][i].setToTrue(p, false);
+                relations[j][i].setToTrue(aCause, false);
             }
         }
     }
@@ -157,16 +151,10 @@ public class PropGraphBool extends Propagator<GraphVar> {
      * When an edge (x,y), is removed then the relation between x and y is false
      */
     private class RemArc implements PairProcedure {
-        protected Propagator p;
-
-        protected RemArc(Propagator p) {
-            this.p = p;
-        }
-
         public void execute(int i, int j) throws ContradictionException {
-            relations[i][j].setToFalse(p, false);
+            relations[i][j].setToFalse(aCause, false);
             if (!graph.isDirected()) {
-                relations[j][i].setToFalse(p, false);
+                relations[j][i].setToFalse(aCause, false);
             }
         }
     }

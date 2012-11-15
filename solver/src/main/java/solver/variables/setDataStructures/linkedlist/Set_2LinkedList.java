@@ -42,209 +42,209 @@ import solver.variables.setDataStructures.ISet;
  */
 public class Set_2LinkedList implements ISet {
 
-    /**
-     * The first cell of the linked list
-     */
-    protected int size;
-    protected DoubleIntCell first;
-    protected DoubleIntCell nextCell; // enables to iterate
-    protected DoubleIntCell poolGC;
+	/**
+	 * The first cell of the linked list
+	 */
+	protected int size;
+	protected DoubleIntCell first;
+	protected DoubleIntCell nextCell; // enables to iterate
+	protected DoubleIntCell poolGC;
 
-    //***********************************************************************************
-    // TCONSTRUCTOR
-    //***********************************************************************************
+	//***********************************************************************************
+	// TCONSTRUCTOR
+	//***********************************************************************************
 
-    public Set_2LinkedList() {
-        this.first = null;
-        this.nextCell = null;
-        this.size = 0;
-        poolGC = null;
-    }
+	public Set_2LinkedList() {
+		this.first    = null;
+		this.nextCell = null;
+		this.size	  = 0;
+		poolGC = null;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    /**
-     * Test for an empty list
-     * @return true iff the list is empty
-     */
-    public boolean isEmpty() {
-        return this.first == null;
-    }
+	@Override
+	/**
+	 * Test for an empty list
+	 * @return true iff the list is empty
+	 */
+	public boolean isEmpty() {
+		return this.first == null;
+	}
 
-    @Override
-    /**
-     * The number of elements in the linked list
-     * @return the number of cells
-     */
-    public int getSize() {
-        return this.size;
-    }
+	@Override
+	/**
+	 * The number of elements in the linked list
+	 * @return the number of cells
+	 */
+	public int getSize() {
+		return this.size;
+	}
 
-    @Override
-    /**
-     * Check if the linked list contain the value element
-     * @param element an int
-     * @return true iff the linked list contain the value element
-     */
-    public boolean contain(int element) {
-        boolean res = false;
-        DoubleIntCell current = first;
-        while (!res && current != null) {
-            if (current.element == element) {
-                res = true;
-            }
-            current = current.next;
-        }
-        return res;
-    }
+	@Override
+	/**
+	 * Check if the linked list contain the value element
+	 * @param element an int
+	 * @return true iff the linked list contain the value element
+	 */
+	public boolean contain(int element) {
+		boolean res = false;
+		DoubleIntCell current = first;
+		while (!res && current != null) {
+			if (current.element==element) {
+				res = true;
+			}
+			current = current.next;
+		}
+		return res;
+	}
 
-    @Override
-    /**
-     * Add an element in the first position. Beware, there is no garanty this element does not exist in the linked list
-     * BEWARE if an element is added during an iteration, as it is before the first element, then this element will not appear
-     * @param element an int
-     */
-    public void add(int element) {
-        if (poolGC == null) {
-            this.first = new DoubleIntCell(element, first);
-        } else {
-            DoubleIntCell recycled = poolGC;
-            poolGC = poolGC.next;
-            recycled.init(element, first);
-            first = recycled;
-        }
-        this.size++;
-    }
+	@Override
+	/**
+	 * Add an element in the first position. Beware, there is no garanty this element does not exist in the linked list
+	 * BEWARE if an element is added during an iteration, as it is before the first element, then this element will not appear
+	 * @param element an int
+	 */
+	public boolean add(int element) {
+		if(poolGC==null){
+			this.first = new DoubleIntCell(element, first);
+		}else{
+			DoubleIntCell recycled = poolGC;
+			poolGC = poolGC.next;
+			recycled.init(element,first);
+			first = recycled;
+		}
+		this.size++;
+		return true;
+	}
 
-    @Override
-    /**
-     * Remove the first occurrence of the element.
-     * @param element an int
-     * @return true iff the element has been effectively removed
-     */
-    public boolean remove(int element) {
-        if (first != null && first.element == element) {
-            DoubleIntCell old = poolGC;
-            poolGC = first;
-            first = first.next;
-            if (first != null) first.pred = null;
-            size--;
-            poolGC.next = old;
-            return true;
-        }
-        if (nextCell != null && nextCell.pred != null && nextCell.pred.element == element) {
-            DoubleIntCell pred = nextCell.pred.pred;
-            nextCell.pred.pred = null;
-            nextCell.pred.next = null;
+	@Override
+	/**
+	 * Remove the first occurrence of the element.
+	 * @param element an int
+	 * @return true iff the element has been effectively removed
+	 */
+	public boolean remove(int element) {
+		if(first!=null && first.element==element){
+			DoubleIntCell old = poolGC;
+			poolGC = first;
+			first = first.next;
+			if(first!=null)first.pred = null;
+			size--;
+			poolGC.next = old;
+			return true;
+		}
+		if(nextCell!=null && nextCell.pred!=null && nextCell.pred.element==element){
+			DoubleIntCell pred = nextCell.pred.pred;
+			nextCell.pred.pred = null;
+			nextCell.pred.next = null;
 
-            DoubleIntCell old = poolGC;
-            poolGC = nextCell.pred;
+			DoubleIntCell old = poolGC;
+			poolGC = nextCell.pred;
 
-            if (pred != null) {
-                pred.next = nextCell;
-            }
-            nextCell.pred = pred;
-            size--;
-            poolGC.next = old;
-            return true;
-        }
-        DoubleIntCell current = first;
-        DoubleIntCell nextCurrent, prevCurrent;
-        boolean removed = false;
-        while ((!removed) && current != null) {
-            if (current.element == element) {
-                if (current == nextCell) {
-                    nextCell = nextCell.next;
-                }
-                DoubleIntCell old = poolGC;
-                poolGC = current;
-                nextCurrent = current.next;
-                prevCurrent = current.pred;
-                if (nextCurrent != null) nextCurrent.pred = prevCurrent;
-                if (prevCurrent != null) prevCurrent.next = nextCurrent;
-                removed = true;
-                poolGC.next = old;
-            }
-            current = current.next;
-        }
-        if (removed) {
-            this.size--;
-        }
-        return removed;
-    }
+			if(pred!=null){
+				pred.next = nextCell;
+			}
+			nextCell.pred = pred;
+			size--;
+			poolGC.next = old;
+			return true;
+		}
+		DoubleIntCell current = first;
+		DoubleIntCell nextCurrent, prevCurrent;
+		boolean removed = false;
+		while ((!removed) && current != null) {
+			if (current.element==element) {
+				if(current == nextCell){
+					nextCell = nextCell.next;
+				}
+				DoubleIntCell old = poolGC;
+				poolGC = current;
+				nextCurrent = current.next;
+				prevCurrent = current.pred;
+				if(nextCurrent!=null)nextCurrent.pred = prevCurrent;
+				if(prevCurrent!=null)prevCurrent.next = nextCurrent;
+				removed = true;
+				poolGC.next = old;
+			}
+			current = current.next;
+		}
+		if (removed) {
+			this.size--;
+		}
+		return removed;
+	}
 
-    @Override
-    public String toString() {
-        String res = "";
-        DoubleIntCell current = first;
-        while (current != null) {
-            res += current;
-            current = current.next;
-        }
-        return res;
-    }
+	@Override
+	public String toString() {
+		String res = "";
+		DoubleIntCell current = first;
+		while (current != null) {
+			res += current;
+			current = current.next;
+		}
+		return res;
+	}
 
-    @Override
-    public void clear() {
-        if (first != null) {
-            first.next = poolGC;
-            poolGC = first;
-        }
-        first = null;
-        nextCell = null;
-        size = 0;
-    }
+	@Override
+	public void clear() {
+		if(first!=null){
+			first.next=poolGC;
+			poolGC = first;
+		}
+		first = null;
+		nextCell = null;
+		size = 0;
+	}
 
-    // --- Iterations
-    @Override
-    public int getFirstElement() {
-        if (first == null) {
-            return -1;
-        }
-        nextCell = first.next;
-        return first.element;
-    }
+	// --- Iterations	
+	@Override
+	public int getFirstElement() {
+		if(first==null){
+			return -1;
+		}
+		nextCell = first.next;
+		return first.element;
+	}
 
-    @Override
-    public int getNextElement() {
-        if (nextCell == null) {
-            return -1;
-        }
-        int el = nextCell.element;
-        nextCell = nextCell.next;
-        return el;
-    }
+	@Override
+	public int getNextElement() {
+		if(nextCell==null){
+			return -1;
+		}
+		int el = nextCell.element;
+		nextCell = nextCell.next;
+		return el;
+	}
 
-    //***********************************************************************************
-    // STRUCTURE
-    //***********************************************************************************
+	//***********************************************************************************
+	// STRUCTURE
+	//***********************************************************************************
 
-    private class DoubleIntCell {
+	private class DoubleIntCell {
 
-        DoubleIntCell pred, next;
-        int element;
+		DoubleIntCell pred,next;
+		int element;
 
-        public DoubleIntCell(int element, DoubleIntCell next) {
-            init(element, next);
-        }
+		public DoubleIntCell(int element, DoubleIntCell next) {
+			init(element,next);
+		}
 
-        public void init(int element, DoubleIntCell next) {
-            this.element = element;
-            this.next = next;
-            this.pred = null;
-            if (next != null) next.pred = this;
-        }
+		public void init(int element, DoubleIntCell next) {
+			this.element = element;
+			this.next = next;
+			this.pred = null;
+			if(next!=null)next.pred = this;
+		}
 
-        public String toString() {
-            if (next == null) {
-                return "" + element;
-            } else {
-                return "" + element + " -> ";
-            }
-        }
-    }
-
+		public String toString() {
+			if (next == null) {
+				return ""+element;
+			} else {
+				return ""+element+" -> ";
+			}
+		}
+	}
 }

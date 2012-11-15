@@ -64,11 +64,10 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
 import java.io.File;
 import java.util.BitSet;
 
@@ -148,30 +147,30 @@ public class SOP {
         printOutput();
     }
 
-    public static void createModel() {
-        // create model
-        solver = new Solver();
-        initialUB = optimum;
-        System.out.println("initial UB : " + optimum);
-        graph = new DirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST, true);
-        totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
-        try {
-            for (int i = 0; i < n - 1; i++) {
-                for (int j = 1; j < n; j++) {
-                    if (distanceMatrix[i][j] != noVal) {
-                        graph.getEnvelopGraph().addArc(i, j);
-                    }
-                }
-                graph.getEnvelopGraph().removeArc(i, i);
-            }
-            graph.getEnvelopGraph().removeArc(0, n - 1);
-            graph.getEnvelopGraph().removeArc(n - 1, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
-    }
+	public static void createModel() {
+		// create model
+		solver = new Solver();
+		initialUB = optimum;
+		System.out.println("initial UB : "+optimum);
+		graph = new DirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST,true);
+		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
+		try {
+			for (int i = 0; i < n - 1; i++) {
+				for (int j = 1; j < n; j++) {
+					if (distanceMatrix[i][j] != noVal) {
+						graph.getEnvelopGraph().addArc(i, j);
+					}
+				}
+				graph.getEnvelopGraph().removeArc(i, i);
+			}
+			graph.getEnvelopGraph().removeArc(0, n-1);
+			graph.getEnvelopGraph().removeArc(n-1,0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
+	}
 
     public static void addPropagators() {
         // BASIC MODEL
@@ -244,22 +243,22 @@ public class SOP {
         solver.post(gc);
     }
 
-    public static void addTransitionGraph() {
-        transGraph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.KERNEL_SWAP_ARRAY, true);
-        for (int j = 1; j < n; j++) {
-            transGraph.getEnvelopGraph().addArc(0, j);
-            transGraph.getKernelGraph().addArc(0, j);
-        }
-        for (int i = 1; i < n - 1; i++) {
-            for (int j = 1; j < n; j++) {
-                if (i != j && distanceMatrix[i][j] != noVal)
-                    transGraph.getEnvelopGraph().addArc(i, j);
-            }
-        }
-        gc.addPropagators(new PropAntiSymmetric(transGraph, gc, solver));
-        gc.addPropagators(new PropTransitivity(transGraph, solver, gc));
-        gc.addPropagators(new PropTransitiveClosureFastMaintenance(graph, transGraph, solver, gc));
-    }
+	public static void addTransitionGraph(){
+		transGraph = new DirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY,true);
+		for (int j = 1; j < n; j++) {
+			transGraph.getEnvelopGraph().addArc(0, j);
+			transGraph.getKernelGraph().addArc(0, j);
+		}
+		for (int i = 1; i < n - 1; i++) {
+			for (int j = 1; j < n; j++) {
+				if(i!=j && distanceMatrix[i][j]!=noVal)
+					transGraph.getEnvelopGraph().addArc(i, j);
+			}
+		}
+		gc.addPropagators(new PropAntiSymmetric(transGraph,gc,solver));
+		gc.addPropagators(new PropTransitivity(transGraph,solver,gc));
+		gc.addPropagators(new PropTransitiveClosureFastMaintenance(graph,transGraph,solver,gc));
+	}
 
     public static void configureAndSolve() {
         //SOLVER CONFIG

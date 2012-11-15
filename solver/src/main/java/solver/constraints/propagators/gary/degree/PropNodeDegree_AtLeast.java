@@ -37,10 +37,10 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.GraphVar.IncidentNodes;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
 
 /**
@@ -202,7 +202,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         ISet ker = target.getSet(g.getKernelGraph(), i);
         int size = nei.getSize();
         if (size < degrees[i]) {
-            g.removeNode(i, this);
+            g.removeNode(i, aCause);
         } else if (size == degrees[i] && g.getKernelGraph().getActiveNodes().contain(i) && ker.getSize() < size) {
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 target.enforce(g, i, s, aCause);

@@ -42,9 +42,8 @@ import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
+import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import java.io.File;
 
 /**
@@ -107,71 +106,64 @@ public class TSP {
         }
     }
 
-    private static void solve(int[][] matrix, String instanceName) {
-        final int n = matrix.length;
-        solver = new Solver();
-        // variables
-        totalCost = VariableFactory.bounded("obj", 0, upperBound, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, true);
-        for (int i = 0; i < n; i++) {
-            undi.getKernelGraph().activateNode(i);
-            for (int j = i + 1; j < n; j++) {
-                undi.getEnvelopGraph().addEdge(i, j);
-            }
-        }
-        // constraints
-        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0, solver);
-        mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-        mst.waitFirstSolution(search != 0);
-        gc.addPropagators(mst);
-        solver.post(gc);
-        // config
-        if (search != 0) {
-            throw new UnsupportedOperationException("not implemented");
-        }
-        GraphStrategies strategy = new GraphStrategies(undi, matrix, mst);
-        strategy.configure(policy, true, true, false);
-        switch (search) {
-            case 0:
-                solver.set(strategy);
-                break;
-            case 1:
-                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
-                break;
-            case 2:
-                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
-            public void afterInitialPropagation() {
-                System.out.println("cost after prop ini : " + totalCost);
-                int e = 0;
-                int k = 0;
-                for (int i = 0; i < n; i++) {
-                    e += undi.getEnvelopGraph().getNeighborsOf(i).getSize();
-                    k += undi.getKernelGraph().getNeighborsOf(i).getSize();
-                }
-                e /= 2;
-                k /= 2;
-                System.out.println(k + "/" + e);
-            }
-        });
-//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        SearchMonitorFactory.log(solver, true, false);
-        // resolution
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-        check(solver, undi, totalCost, matrix);
-        //output
-        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
-        String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-                + solver.getMeasures().getNodeCount() + ";"
-                + (int) (solver.getMeasures().getTimeCount()) + ";" + bestCost + ";" + allDiffAC + ";" + search + ";\n";
-        TextWriter.writeTextInto(txt, outFile);
-    }
+	private static void solve(int[][] matrix, String instanceName) {
+		final int n = matrix.length;
+		solver = new Solver();
+		// variables
+		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
+		for(int i=0;i<n;i++){
+			undi.getKernelGraph().activateNode(i);
+			for(int j=i+1;j<n;j++){
+				undi.getEnvelopGraph().addEdge(i,j);
+			}
+		}
+		// constraints
+		Constraint gc = GraphConstraintFactory.tsp(undi,totalCost,matrix,0,solver);
+		mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		mst.waitFirstSolution(search!=0);
+		gc.addPropagators(mst);
+		solver.post(gc);
+		// config
+		if(search!=0){
+			throw new UnsupportedOperationException("not implemented");
+		}
+		GraphStrategies strategy = new GraphStrategies(undi,matrix,mst);
+		strategy.configure(policy,true,true,false);
+		switch (search){
+			case 0:solver.set(strategy);break;
+			case 1: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP),strategy));break;
+			case 2: solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.DICHOTOMIC),strategy));break;
+			default: throw new UnsupportedOperationException();
+		}
+		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
+			public void afterInitialPropagation(){
+				System.out.println("cost after prop ini : "+totalCost);
+				int e = 0;
+				int k = 0;
+				for(int i=0;i<n;i++){
+					e+=undi.getEnvelopGraph().getNeighborsOf(i).getSize();
+					k+=undi.getKernelGraph().getNeighborsOf(i).getSize();
+				}
+				e/=2;
+				k/=2;
+				System.out.println(k+"/"+e);
+			}
+		});
+//		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+		SearchMonitorFactory.log(solver, true, false);
+		// resolution
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
+		check(solver, undi, totalCost, matrix);
+		//output
+		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
+				+ solver.getMeasures().getNodeCount() + ";"
+				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";"+allDiffAC+";"+search+";\n";
+		TextWriter.writeTextInto(txt, outFile);
+	}
 
     private static void check(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
         int n = matrix.length;

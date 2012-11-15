@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
-import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
 
 /**

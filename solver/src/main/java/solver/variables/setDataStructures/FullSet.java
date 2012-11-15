@@ -25,78 +25,77 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 21/10/12
- * Time: 18:43
- */
-
 package solver.variables.setDataStructures;
 
-public class FullSet implements ISet {
+/**
+ * Fix Set which contains all values in range [0,n-1]
+ * @author Jean-Guillaume Fages
+ * @since 21/10/12
+ */
+public class FullSet implements ISet{
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    int n;
-    int current;
+	int n;
+	int current;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public FullSet(int n) {
-        this.n = n;
-        current = 0;
-    }
+	public FullSet(int n){
+		this.n = n;
+		current = 0;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public void add(int element) {
-    }
+	@Override
+	public boolean add(int element) {
+		return false;
+	}
 
-    @Override
-    public boolean remove(int element) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean remove(int element) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean contain(int element) {
-        return true;
-    }
+	@Override
+	public boolean contain(int element) {
+		return true;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
 
-    @Override
-    public int getSize() {
-        return n;
-    }
+	@Override
+	public int getSize() {
+		return n;
+	}
 
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public int getFirstElement() {
-        current = 0;
-        return 0;
-    }
+	@Override
+	public int getFirstElement() {
+		current = 0;
+		return 0;
+	}
 
-    @Override
-    public int getNextElement() {
-        current++;
-        if (current < n)
-            return current;
-        else
-            return -1;
-    }
+	@Override
+	public int getNextElement() {
+		current++;
+		if(current<n)
+			return current;
+		else
+			return -1;
+	}
 }

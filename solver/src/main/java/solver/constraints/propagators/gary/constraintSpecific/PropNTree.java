@@ -37,12 +37,12 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
-import solver.variables.setDataStructures.ISet;
 
 public class PropNTree extends Propagator {
 

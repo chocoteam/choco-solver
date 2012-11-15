@@ -34,11 +34,11 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
-import solver.variables.setDataStructures.ISet;
 
 /**
  * AntiArborescence constraint (simplification from tree constraint)

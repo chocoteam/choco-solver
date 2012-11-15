@@ -39,8 +39,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.UndirectedGraph;
+import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.ISet;
 
 /**

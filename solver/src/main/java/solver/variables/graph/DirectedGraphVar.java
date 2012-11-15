@@ -25,60 +25,87 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.trees;
+package solver.variables.graph;
 
-import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
+import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.variables.graph.UndirectedGraph;
+import solver.variables.EventType;
+import solver.variables.delta.IGraphDelta;
 import solver.variables.setDataStructures.SetType;
 
-public abstract class AbstractTreeFinder {
+/**
+ * Created by IntelliJ IDEA.
+ * User: chameau, Jean-Guillaume Fages
+ * Date: 7 févr. 2011
+ */
+public class DirectedGraphVar extends GraphVar<DirectedGraph> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    protected final static boolean FILTER = false;
-    // INPUT
-    protected UndirectedGraph g;    // graph
-    protected int n;                // number of nodes
-    // OUTPUT
-    protected UndirectedGraph Tree;
-    protected double treeCost;
-    // PROPAGATOR
-    protected GraphLagrangianRelaxation propHK;
+    ////////////////////////////////// GRAPH PART ///////////////////////////////////////
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public AbstractTreeFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
-		n = nbNodes;
-		Tree = new UndirectedGraph(n, SetType.LINKED_LIST,false);
-		propHK = propagator;
+	public DirectedGraphVar(Solver solver, int nbNodes,
+							SetType typeEnv, SetType typeKer,boolean allNodes) {
+		super(solver);
+		envelop = new DirectedGraph(environment, nbNodes, typeEnv,allNodes);
+		kernel = new DirectedGraph(environment, nbNodes, typeKer,allNodes);
 	}
 
+	public DirectedGraphVar(Solver solver, int nbNodes,boolean allNodes) {
+		this(solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
+    }
+	
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
-    public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
+    @Override
+    public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
+        if (kernel.arcExists(x, y)) {
+            this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc " + x + "->" + y);
+            return false;
+        }
+        if (envelop.removeArc(x, y)) {
+            if (reactOnModification) {
+                delta.add(x, IGraphDelta.AR_tail, cause);
+                delta.add(y, IGraphDelta.AR_head, cause);
+            }
+            EventType e = EventType.REMOVEARC;
+            notifyPropagators(e, cause);
+            return true;
+        }
+        return false;
+    }
 
-    public abstract void performPruning(double UB) throws ContradictionException;
+    @Override
+    public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
+        enforceNode(x, cause);
+        enforceNode(y, cause);
+        if (envelop.arcExists(x, y)) {
+            if (kernel.addArc(x, y)) {
+                if (reactOnModification) {
+                    delta.add(x, IGraphDelta.AE_tail, cause);
+                    delta.add(y, IGraphDelta.AE_head, cause);
+                }
+                EventType e = EventType.ENFORCEARC;
+                notifyPropagators(e, cause);
+                return true;
+            }
+            return false;
+        }
+        this.contradiction(cause, EventType.ENFORCEARC, "enforce arc which is not in the domain");
+        return false;
+    }
 
     //***********************************************************************************
     // ACCESSORS
     //***********************************************************************************
 
-    public UndirectedGraph getMST() {
-        return Tree;
-    }
-
-    public double getBound() {
-        return treeCost;
-    }
-
-    public double getRepCost(int from, int to) {
-        throw new UnsupportedOperationException("not implemented yet");
+    @Override
+    public boolean isDirected() {
+        return true;
     }
 }

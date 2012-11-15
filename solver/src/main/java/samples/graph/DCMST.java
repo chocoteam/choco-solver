@@ -58,11 +58,11 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
-import java.io.File;
+import java.io.*;
+import solver.variables.setDataStructures.ISet;
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -80,8 +80,8 @@ public class DCMST {
 
     //	private static int upperBound;
     // input
-    private static String dir = "/Users/jfages07/Desktop/ConstrainedTrees/instances";
-    private static String testalagPath = "/Users/jfages07/Desktop/ConstrainedTrees/archive/codeAlex";// path of testalag
+    private static String dir = "/Users/jfages07/Desktop/CPAIOR13/instances";
+    private static String testalagPath = "/Users/jfages07/Desktop/CPAIOR13/archive/codeAlex";// path of testalag
     private static String instanceName;
     private static int n, nMin, nMax;
     public static int[] dMax;
@@ -163,7 +163,7 @@ public class DCMST {
     private static void solveDCMST(String instanceName) {
         solver = new Solver();
         totalCost = VariableFactory.bounded("obj", lb, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {

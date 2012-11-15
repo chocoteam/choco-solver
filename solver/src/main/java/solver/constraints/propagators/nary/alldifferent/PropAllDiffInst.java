@@ -97,7 +97,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
                 int val = vars[v].getValue();
                 for (int i = 0; i < n; i++) {
                     if (i != v) {
-                        vars[i].removeValue(val, this);
+                        vars[i].removeValue(val, aCause);
                     }
                 }
             }
@@ -114,7 +114,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         int val = vars[varIdx].getValue();
         for (int i = 0; i < n; i++) {
             if (i != varIdx) {
-                vars[i].removeValue(val, this);
+                vars[i].removeValue(val, aCause);
             }
         }
     }

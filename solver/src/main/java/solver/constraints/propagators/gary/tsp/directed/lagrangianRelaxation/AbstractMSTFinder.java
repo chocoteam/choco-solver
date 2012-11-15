@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.setDataStructures.SetType;
 
 public abstract class AbstractMSTFinder {
 
@@ -52,11 +52,11 @@ public abstract class AbstractMSTFinder {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public AbstractMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
-        n = nbNodes;
-        Tree = new DirectedGraph(n, GraphType.LINKED_LIST, false);
-        propHK = propagator;
-    }
+	public AbstractMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+		n = nbNodes;
+		Tree = new DirectedGraph(n, SetType.LINKED_LIST,false);
+		propHK = propagator;
+	}
 
     //***********************************************************************************
     // METHODS

@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
-
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.matrix.Set_BitSet;
+package solver.variables.graph.graphOperations;
 
 import java.util.BitSet;
 import java.util.HashMap;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.graph.IGraph;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.matrix.Set_BitSet;
 
 /**
  * Class containing some static methods to manipulate graphs

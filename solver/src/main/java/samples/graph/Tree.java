@@ -37,9 +37,8 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import java.util.BitSet;
 
 /**
@@ -48,37 +47,36 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class Tree extends AbstractProblem {
+public class Tree extends AbstractProblem{
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private static final long TIMELIMIT = 60000;
-    private static String file = "results_tree.csv";
-    private BitSet[] data;
-    private DirectedGraphVar g;
-    private IntVar nTree;
-    private int n;
-    private int d;
-    private Boolean sat;
-    static int seed = 0;
-    private static GraphType gtype;
+	private static final long TIMELIMIT = 60000;
+	private static String file = "results_tree.csv";
+	private BitSet[] data;
+	private DirectedGraphVar g;
+	private IntVar nTree;
+	private int n;
+	private int d;
+	private Boolean sat;
+	static int seed = 0;
+	private static SetType gtype;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public Tree(BitSet[] input, int nbSuccsPerNodes) {
-        data = input;
-        n = data.length;
-        d = nbSuccsPerNodes;
-    }
+	public Tree(BitSet[] input, int nbSuccsPerNodes) {
+		data = input;
+		n = data.length;
+		d = nbSuccsPerNodes;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
     @Override
     public void createSolver() {
@@ -86,27 +84,26 @@ public class Tree extends AbstractProblem {
     }
 
     @Override
-    public void buildModel() {
-        g = new DirectedGraphVar(solver, n, gtype, GraphType.LINKED_LIST, false);
-        nTree = VariableFactory.enumerated("NTREE ", 1, 1, solver);
-        try {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (data[i].get(j)) {
-                        g.getEnvelopGraph().addArc(i, j);
-                    }
-                }
-            }
-        } catch (Exception e) {
-        }
-        solver.post(GraphConstraintFactory.nTrees(g, nTree, solver));
-    }
+	public void buildModel() {
+		g = new DirectedGraphVar(solver,n,gtype, SetType.LINKED_LIST,false);
+		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);
+		try{
+		for(int i=0; i<n; i++){
+			for(int j=0; j<n ;j++){
+				if(data[i].get(j)){
+					g.getEnvelopGraph().addArc(i,j);
+				}
+			}
+		}
+		}catch(Exception e){}
+		solver.post(GraphConstraintFactory.nTrees(g, nTree, solver));
+	}
 
-    @Override
-    public void configureSearch() {
-        AbstractStrategy strategy = StrategyFactory.graphLexico(g);
-        solver.set(strategy);
-    }
+	@Override
+	public void configureSearch() {
+		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
+		solver.set(strategy);
+	}
 
     @Override
     public void configureEngine() {
@@ -123,39 +120,39 @@ public class Tree extends AbstractProblem {
             throw new UnsupportedOperationException("error gac");
         }
 //		System.out.println(g.getEnvelopGraph());
-    }
+	}
 
-    @Override
-    public void prettyOut() {
-        System.out.println("iniProp  : " + solver.getMeasures().getInitialPropagationTimeCount() + "ms");
-        System.out.println("duration : " + solver.getMeasures().getTimeCount() + "ms");
-        System.out.println("nbnodes  : " + solver.getMeasures().getNodeCount() + " nodes ");
-        System.out.println("nbSols  : " + solver.getMeasures().getSolutionCount() + " sols ");
-    }
+	@Override
+	public void prettyOut() {
+		System.out.println("iniProp  : "+ solver.getMeasures().getInitialPropagationTimeCount()+"ms");
+		System.out.println("duration : "+solver.getMeasures().getTimeCount()+"ms");
+		System.out.println("nbnodes  : "+solver.getMeasures().getNodeCount()+" nodes ");
+		System.out.println("nbSols  : "+solver.getMeasures().getSolutionCount()+" sols ");
+	}
 
-    public static boolean performOneTest(int n, int d) {
-        if (n < d) throw new UnsupportedOperationException("n must be greater or equal to d");
-        BitSet[] data = DataGenerator.makeTreeData(n, d);
-        Tree tsample = new Tree(data, d);
-        tsample.execute();
-        System.out.println("time : " + tsample.solver.getMeasures().getTimeCount());
-        return tsample.sat != null && tsample.solver.getMeasures().getTimeCount() <= TIMELIMIT;
-    }
+	public static boolean performOneTest(int n, int d){
+		if(n<d)throw new UnsupportedOperationException("n must be greater or equal to d");
+		BitSet[] data = DataGenerator.makeTreeData(n, d);
+		Tree tsample = new Tree(data,d);
+		tsample.execute();
+		System.out.println("time : "+tsample.solver.getMeasures().getTimeCount());
+		return tsample.sat!=null && tsample.solver.getMeasures().getTimeCount()<=TIMELIMIT;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    public static void main(String[] args) {
-        gtype = GraphType.MATRIX;
-        testN();
-    }
-
-    private static void testN() {
-        file = "tree_" + (TIMELIMIT / 1000) + "sec_" + gtype + ".csv";
-        TextWriter.clearFile(file);
-        TextWriter.writeTextInto("n;d;nodes;bks;time;solved;\n", file);
-        int i = 0;
+	public static void main(String[] args) {
+		gtype = SetType.BOOL_ARRAY;
+		testN();
+	}
+	
+	private static void testN(){
+		file = "tree_"+(TIMELIMIT/1000)+"sec_"+gtype+".csv";
+		TextWriter.clearFile(file);
+		TextWriter.writeTextInto("n;d;nodes;bks;time;solved;\n", file);
+		int i = 0;
 //		int[] ns = new int[]{10,50,100,150,300,450,600,800,2000,3000,4000,5000};
 //		int[] ds = new int[]{5,20,50,5000};
         int[] ns = new int[]{10, 50, 100, 300, 1500};

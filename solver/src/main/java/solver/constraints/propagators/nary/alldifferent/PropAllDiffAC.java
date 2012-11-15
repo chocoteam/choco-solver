@@ -37,11 +37,10 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.graph.DirectedGraph;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
+import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.BitSet;
 
 /**
@@ -113,7 +112,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         n2 = idx;
         fifo = new int[n2];
         matching = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX, false);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, SetType.BITSET, false);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];

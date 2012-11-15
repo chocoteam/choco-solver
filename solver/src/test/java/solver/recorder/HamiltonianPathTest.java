@@ -40,9 +40,9 @@ import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.variables.graph.GraphType;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
  * Find a Hamiltonian path in a sparse graph with incremental algorithm
@@ -78,7 +78,7 @@ public class HamiltonianPathTest {
         Solver solver = new Solver();
         int n = matrix.length;
         // build model
-        DirectedGraphVar graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST, false);
+        DirectedGraphVar graph = new DirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {

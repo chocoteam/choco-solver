@@ -27,6 +27,7 @@
 
 package solver.variables.graph;
 
+import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
 
 /**
@@ -131,6 +132,5 @@ public interface IGraph {
      *
      * @return the type of the graph SPARSE or DENSE
      */
-    GraphType getType();
-
+    SetType getType();
 }
