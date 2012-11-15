@@ -290,14 +290,20 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         BitSet mandatoryValues = new BitSet(nbMaxValues);
         IntVar v;
         int ub;
+		int minVal = 0;
+		for (int i = 0; i < n; i++) {
+			if(minVal>vars[i].getLB()){
+				minVal = vars[i].getLB();
+			}
+		}
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                mandatoryValues.set(ub);
+                mandatoryValues.set(ub-minVal);
             }
             for (int j = v.getLB(); j <= ub; j++) {
-                values.set(j);
+                values.set(j-minVal);
             }
         }
         if (values.cardinality() <= vars[n].getLB()) {
