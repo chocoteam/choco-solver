@@ -50,41 +50,35 @@ import solver.variables.VariableFactory;
 public class Dobble {
 
 	public static void main(String[] args) {
-		int nbSymbCarte=3;
-		int nbCarte=4;
-		int nbSymbTotal=6;
+		int nbSymbCarte=5;
+		int nbCarte=21;
+		int nbSymbTotal=21;
 
 		Solver solver = new Solver();
+		
 		IntVar[][] jeu = new IntVar[nbCarte][];
-
+		IntVar nValTotal = VariableFactory.bounded("total",0,nbSymbTotal,solver);
 		for(int i=0;i<nbCarte;i++) {
 			jeu[i] = VariableFactory.enumeratedArray("Carte_"+i, nbSymbCarte, 1, nbSymbTotal, solver);
 		}
-		for(int i=0;i<nbCarte;i++) {
-			for(int j=0;j<nbSymbCarte;j++) {//pour tout couple de carte :
-				System.out.println(jeu[i][j]);
-			}
-			System.out.println();
-		}
+		IntVar nbNValues = VariableFactory.enumerated("nbEnCommun", nbSymbCarte * 2 - 1, nbSymbCarte * 2 - 1, solver);
 		for(int i=0;i<nbCarte;i++) {
 			solver.post(new AllDifferent(jeu[i], solver,AllDifferent.Type.AC));//chaque carte a des symboles distinctes
 			for(int j=0; j<nbSymbCarte-1;j++){
 				solver.post(ConstraintFactory.lt(jeu[i][j], jeu[i][j + 1], solver));
-				//ConstraintFactory TODO Lex
 			}
 			for(int j=i+1;j<nbCarte;j++) {//pour tout couple de carte :
-				IntVar nbNValues = VariableFactory.enumerated("nbEnCommun", nbSymbCarte * 2 - 1, nbSymbCarte * 2 - 1, solver);//au total de 2 cartes, il doit y avoir 2n - 1 valeurs, car 1 est en commun, et une seule.
-				System.out.println(nbNValues);
-
-				IntVar[] regroup = ArrayUtils.append(jeu[i], jeu[j]);
-				for(int k=0;k<regroup.length;k++)
-					System.out.println(regroup[k]);
-				System.out.println(regroup.length);
-				solver.post(new NValues(regroup, nbNValues, solver));
+				//au total de 2 cartes, il doit y avoir 2n - 1 valeurs, car 1 est en commun, et une seule.
+				solver.post(new NValues(ArrayUtils.append(jeu[i], jeu[j]), nbNValues, solver));
 			}
 		}
+		for(int i=0;i<nbCarte-1;i++) {
+			solver.post(ConstraintFactory.leq(jeu[i][0], jeu[i + 1][0], solver));
+		}
+		solver.post(new NValues(ArrayUtils.flatten(jeu),nValTotal,solver));
+		// TODO conjonction differences par carte / nvalue => passer par des graphes!!!
 
-		//solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+//		solver.set(StrategyFactory.minDomMinVal(ArrayUtils.flatten(jeu), solver.getEnvironment()));
 		solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(jeu),solver.getEnvironment()));
 		SearchMonitorFactory.log(solver, true, false);
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(600*1000);
