@@ -61,6 +61,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     private int nbMaxValues;
     private int minValue;
     private TIntArrayList[] bound;
+	private TIntArrayList stamp;
     private int[] minVal, maxVal;
 
     //***********************************************************************************
@@ -97,6 +98,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         }
         minVal = new int[n];
         maxVal = new int[n];
+		stamp = new TIntArrayList();
     }
 
     //***********************************************************************************
@@ -167,24 +169,24 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                         min = minVal[node];
                         max = maxVal[node];
                         nbKer++;
+						stamp.clear();
                     }
                     if (minVal[node] <= max) {
                         min = Math.max(min, minVal[node]);
                         max = Math.min(max, maxVal[node]);
-                        updateLowerNeighbor(node, min);
+						stamp.add(node);
                     } else {
+						updateKer(min,true);
                         min = minVal[node];
                         max = maxVal[node];
                         nbKer++;
+						stamp.clear();
+						stamp.add(node);
                     }
                 }
             }
+			updateKer(min,true);
         }
-    }
-
-    private void updateLowerNeighbor(int node, int lowerNeighbor) throws ContradictionException {
-        vars[node].updateLowerBound(lowerNeighbor + minValue, aCause);
-        minVal[node] = vars[node].getLB();
     }
 
     private void pruneUB() throws ContradictionException {
@@ -222,26 +224,38 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                         min = minVal[node];
                         max = maxVal[node];
                         nbKer++;
+						stamp.clear();
                     }
                     if (maxVal[node] >= min) {
                         max = Math.min(max, maxVal[node]);
                         min = Math.max(min, minVal[node]);
-                        updateUpperNeighbor(node, max);
+						stamp.add(node);
                     } else {
+						updateKer(max,false);
                         min = minVal[node];
                         max = maxVal[node];
                         nbKer++;
+						stamp.clear();
+						stamp.add(node);
                     }
                 }
             }
+			updateKer(max,false);
         }
     }
 
-    private void updateUpperNeighbor(int node, int upperNeighbor) throws ContradictionException {
-        vars[node].updateUpperBound(upperNeighbor + minValue, aCause);
-        maxVal[node] = vars[node].getUB();
-    }
-
+	private void updateKer(int value, boolean LB) throws ContradictionException {
+		if(LB){
+			for(int i=stamp.size()-1;i>=0;i--){
+				vars[stamp.get(i)].updateLowerBound(value, aCause);
+			}
+		}else{
+			for(int i=stamp.size()-1;i>=0;i--){
+				vars[stamp.get(i)].updateUpperBound(value, aCause);
+			}
+		}
+	}
+	
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
@@ -276,14 +290,20 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         BitSet mandatoryValues = new BitSet(nbMaxValues);
         IntVar v;
         int ub;
+		int minVal = 0;
+		for (int i = 0; i < n; i++) {
+			if(minVal>vars[i].getLB()){
+				minVal = vars[i].getLB();
+			}
+		}
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                mandatoryValues.set(ub);
+                mandatoryValues.set(ub-minVal);
             }
             for (int j = v.getLB(); j <= ub; j++) {
-                values.set(j);
+                values.set(j-minVal);
             }
         }
         if (values.cardinality() <= vars[n].getLB()) {

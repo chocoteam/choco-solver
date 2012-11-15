@@ -52,6 +52,8 @@ import java.util.BitSet;
  * The worst case time complexity is O(nm) but this is very pessimistic
  * In practice it is more like O(m) where m is the number of variable-value pairs
  *
+ * BEWARE UNSAFE : BUG DETECTED THROUGH DOOBLE(3,4,6)
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropAtLeastNValues_AC extends Propagator<IntVar> {
@@ -63,7 +65,6 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     private IntVar nValues;
     private int n, n2;
     private DirectedGraph digraph;
-    private int[] matching;
     private int[] nodeSCC;
     private BitSet free;
     private UnaryIntProcedure remProc;
@@ -115,8 +116,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         n2 = idx;
         fifo = new int[n2];
-        matching = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST, false);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 2, GraphType.LINKED_LIST, false);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];
@@ -136,17 +136,14 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         free.set(0, n2);
         int j, k, ub;
         IntVar v;
-        for (int i = 0; i < n2; i++) {
+        for (int i = 0; i < n2+2; i++) {
             digraph.desactivateNode(i);
-            matching[i] = -1;
         }
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-            digraph.activateNode(i);
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
-                digraph.activateNode(j);
                 if (free.get(i) && free.get(j)) {
                     digraph.addArc(j, i);
                     free.clear(i);
@@ -166,13 +163,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
             tryToMatch(i);
         }
-        int p;
         int card = 0;
         for (int i = 0; i < n; i++) {
-            p = digraph.getPredecessorsOf(i).getFirstElement();
-            if (p != -1) {
-                matching[p] = i;
-                matching[i] = p;
+            if (digraph.getPredecessorsOf(i).getFirstElement() != -1) {
                 card++;
             }
         }
@@ -222,17 +215,28 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     private void buildSCC() {
         digraph.desactivateNode(n2);
+        digraph.desactivateNode(n2+1);
         digraph.activateNode(n2);
-        for (int i = n; i < n2; i++) {
+        digraph.activateNode(n2+1);
+		//TODO CHECK THIS PART
+		for (int i = 0; i < n; i++) {
             if (free.get(i)) {
-                digraph.addArc(i, n2);
-            } else {
                 digraph.addArc(n2, i);
-            }
+            }else{
+				digraph.addArc(i, n2);
+			}
+        }
+		for (int i = n; i < n2; i++) {
+            if (free.get(i)) {
+                digraph.addArc(i, n2+1);
+            }else{
+				digraph.addArc(n2+1, i);
+			}
         }
         SCCfinder.findAllSCC();
         nodeSCC = SCCfinder.getNodesSCC();
         digraph.desactivateNode(n2);
+        digraph.desactivateNode(n2+1);
     }
 
     private void filter() throws ContradictionException {
@@ -245,14 +249,34 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i] == j && matching[j] == i) {
+                    if (digraph.getPredecessorsOf(i).getFirstElement()==j) {
                         v.instantiateTo(k, aCause);
                     } else {
-                        v.removeValue(k, aCause);
+                        v.removeValue(k, aCause); 
                         digraph.removeArc(i, j);
                     }
                 }
             }
+			if(!v.hasEnumeratedDomain()){
+				ub = v.getUB();
+				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+					j = map.get(k);
+					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
+						break;
+					}else{
+						v.removeValue(k, aCause);
+					}
+				}
+				int lb = v.getLB();
+				for (int k = ub; k>=lb; k = v.previousValue(k)) {
+					j = map.get(k);
+					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
+						break;
+					}else{
+						v.removeValue(k, aCause);
+					}
+				}
+			}
         }
     }
 
@@ -312,18 +336,18 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        BitSet values = new BitSet(n2 - n);
-        BitSet mandatoryValues = new BitSet(n2 - n);
+        BitSet values = new BitSet(n2);
+        BitSet mandatoryValues = new BitSet(n2);
         IntVar v;
         int ub;
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                mandatoryValues.set(ub);
+                mandatoryValues.set(map.get(ub));
             }
             for (int j = v.getLB(); j <= ub; j++) {
-                values.set(j);
+                values.set(map.get(j));
             }
         }
         if (mandatoryValues.cardinality() >= vars[n].getUB()) {
