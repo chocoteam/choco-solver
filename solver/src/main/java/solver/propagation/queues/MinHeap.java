@@ -214,5 +214,6 @@ public class MinHeap implements IHeap {
             System.out.printf("%d\n", mh.removemin());
             mh.print();
         }
+        mh.rightchild(1);
     }
 }

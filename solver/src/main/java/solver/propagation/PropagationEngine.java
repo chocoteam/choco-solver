@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.propagation;
 
@@ -30,7 +30,6 @@ package solver.propagation;
 import choco.kernel.common.util.objects.BacktrackableArrayList;
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -39,10 +38,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.generator.*;
+import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -68,17 +66,16 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected TIntObjectHashMap<IList<Variable, AbstractFineEventRecorder>> fines_v;
     protected TIntObjectHashMap<List<AbstractFineEventRecorder>> fines_p;
-    protected TIntObjectHashMap<AbstractCoarseEventRecorder> coarses;
 
     protected int pivot;
 
     protected boolean initialized = false; // is this already initialized
 
-    protected boolean forceInitialPropagation= true; // is propagator activation required
+    protected boolean forceInitialPropagation = true; // is propagator activation required
 
     protected boolean initialPropagationDone = false; // related to forceInitialPropagation, avoid awaking up propagators 2 times
 
-    protected boolean checkProperties= true; // skip water marking phases
+    protected boolean checkProperties = true; // skip water marking phases
 
     protected boolean forceActivation = false; // force activation of event recorder on creation
 
@@ -106,7 +103,6 @@ public class PropagationEngine implements IPropagationEngine {
         this.environment = environment;
         fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
         fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
-        coarses = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         this.checkProperties = checkProperties;
         this.forceInitialPropagation = forceInitialPropagation;
         this.forceActivation = forceActivation;
@@ -134,17 +130,27 @@ public class PropagationEngine implements IPropagationEngine {
         default_nb_vars = nbVar;
     }
 
-    @Override
+
+    /**
+     * Is <code>this</code> initialized ?
+     *
+     * @return <code>true</code> if <code>this</code> is initialized
+     */
     public boolean initialized() {
         return initialized;
     }
 
-    @Override
     public boolean forceActivation() {
         return forceActivation;
     }
 
-    @Override
+    /**
+     * Attach a strategy to <code>this</code>.
+     * Override previously defined one.
+     *
+     * @param propagationStrategy a group
+     * @return this
+     */
     public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
         this.propagationStrategy = propagationStrategy;
         return this;
@@ -158,16 +164,17 @@ public class PropagationEngine implements IPropagationEngine {
                 if (!watermarks.isEmpty()) {
                     LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
                     PropagationStrategy _default = buildDefault(solver);
-                    propagationStrategy = new Sort(propagationStrategy, _default);
-                    if (!watermarks.isEmpty()) {
-                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
-                    }
+//                    propagationStrategy = new Sort(propagationStrategy, _default);
+                    throw new UnsupportedOperationException();
+//                    if (!watermarks.isEmpty()) {
+//                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+//                    }
                 }
                 watermarks = null;
                 initialized = true;
             }
         }
-        if (forceInitialPropagation && !initialPropagationDone) {
+        /*if (forceInitialPropagation && !initialPropagationDone) {
             // 2. schedule constraints for initial propagation
             Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
@@ -185,7 +192,7 @@ public class PropagationEngine implements IPropagationEngine {
                     if (propagators[p].isActive()) activatePropagator(propagators[p]);
                 }
             }
-        }
+        }*/
     }
 
     public void prepareWM(Solver solver) {
@@ -243,10 +250,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
-        Constraint[] constraints = solver.getCstrs();
-        Queue arcs = new Queue(new PArc(this, constraints));
-        Queue coarses = new Queue(new PCoarse(this, constraints));
-        return new Sort(arcs.clearOut(), coarses.pickOne()).clearOut();
+        throw new UnsupportedOperationException();
     }
 
 
@@ -271,7 +275,6 @@ public class PropagationEngine implements IPropagationEngine {
         return exception;
     }
 
-    @Override
     public void addEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         Propagator[] props = fer.getPropagators();
@@ -295,12 +298,6 @@ public class PropagationEngine implements IPropagationEngine {
                 fines_v.get(id).add(fer, false, forceActivation);
             }
         }
-    }
-
-    @Override
-    public void addEventRecorder(AbstractCoarseEventRecorder er) {
-        int id = er.getPropagators()[0].getId();
-        coarses.put(id, er);
     }
 
     @Override
@@ -336,13 +333,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
-    public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
-        int id = propagator.getId();
-        coarses.get(id).update(event);
-    }
-
-    @Override
+    /**
+     * Set the propagator as activated within the propagation engine
+     *
+     * @param propagator propagator to activate
+     */
     public void activatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -354,7 +349,11 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
+    /**
+     * Set the propagator as inactivated within the propagation engine
+     *
+     * @param propagator propagator to desactivate
+     */
     public void desactivatePropagator(Propagator propagator) {
         int id = propagator.getId();
         List<AbstractFineEventRecorder> list = fines_p.get(id);
@@ -366,7 +365,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {
@@ -374,7 +372,6 @@ public class PropagationEngine implements IPropagationEngine {
         }
     }
 
-    @Override
     public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
         Variable[] vars = fer.getVariables();
         for (int j = 0; j < vars.length; j++) {

@@ -116,7 +116,7 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         }
     }
 
-//	IntVar trick; // TODO en parler avec charles!
+    //	IntVar trick; // TODO en parler avec charles!
     @Override
     @SuppressWarnings({"unchecked"})
     public Decision getDecision() {

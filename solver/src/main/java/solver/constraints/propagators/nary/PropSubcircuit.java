@@ -125,7 +125,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
-		if (end[var].get() != var) {
+        if (end[var].get() != var) {
             contradiction(vars[var], "");
         }
         if (val == start) {
@@ -150,35 +150,38 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		if(isCompletelyInstantiated()&&length.instantiated()){
-			int ct = 0;
-			int first = -1;
-			BitSet visited = new BitSet(n);
-			for(int i=0;i<n;i++){
-				if(vars[i].getValue()==i+offset){
-					visited.set(i);
-					ct++;
-				}else if(first==-1){
-					first = i;
-				}
+        if (isCompletelyInstantiated() && length.instantiated()) {
+            int ct = 0;
+            int first = -1;
+            BitSet visited = new BitSet(n);
+            for (int i = 0; i < n; i++) {
+                if (vars[i].getValue() == i + offset) {
+                    visited.set(i);
+                    ct++;
+                } else if (first == -1) {
+                    first = i;
+                }
+            }
+            if (length.getValue() + ct != n) {
+                return ESat.FALSE;
+            }
+			if(ct==n){
+				return ESat.TRUE;
 			}
-			if(length.getValue()+ct!=n){
-				return ESat.FALSE;
-			}
-			int x = first;
-			do{
-				if(visited.get(x)){
-					return ESat.FALSE;
-				}
-				visited.set(x);
-				x = vars[x].getValue()-offset;
-			}while(x!=first);
-			if(visited.cardinality()!=n){
-				return ESat.FALSE;
-			}
-			return ESat.TRUE;
-		}else{
-			return ESat.UNDEFINED;
-		}
+            int x = first;
+            do {
+                if (visited.get(x)) {
+                    return ESat.FALSE;
+                }
+                visited.set(x);
+                x = vars[x].getValue() - offset;
+            } while (x != first);
+            if (visited.cardinality() != n) {
+                return ESat.FALSE;
+            }
+            return ESat.TRUE;
+        } else {
+            return ESat.UNDEFINED;
+        }
     }
 }

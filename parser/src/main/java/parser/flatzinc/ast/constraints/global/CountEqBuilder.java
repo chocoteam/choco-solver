@@ -31,7 +31,10 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.binary.Element;
+import solver.constraints.nary.Count;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -41,13 +44,30 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 26/07/12
  */
-public class CountEqBuilder implements IBuilder{
+public class CountEqBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         // array[int] of var int: x, var int: y, var int: c
-        IntVar[] x = exps.get(0).toIntVarArray(solver);
-        IntVar y = exps.get(1).intVarValue(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
-        return null;
+        if (false) {
+            IntVar[] x = exps.get(0).toIntVarArray(solver);
+            IntVar y = exps.get(1).intVarValue(solver);
+            IntVar c = exps.get(2).intVarValue(solver);
+
+            int ylb = y.getLB();
+            int yub = y.getUB();
+            int nb = yub - ylb + 1;
+
+            IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
+            for (int i = ylb; i <= yub; i++) {
+                solver.post(new Count(i, x, Count.Relop.EQ, cs[i - ylb], solver));
+            }
+            return new Element(c, cs, y, ylb, solver);
+        } else {
+            IntVar[] x = exps.get(0).toIntVarArray(solver);
+            int y = exps.get(1).intValue();
+            IntVar c = exps.get(2).intVarValue(solver);
+
+            return new Count(y, x, Count.Relop.EQ, c, solver);
+        }
     }
 }

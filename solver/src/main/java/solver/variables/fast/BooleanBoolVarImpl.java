@@ -50,7 +50,6 @@ import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
 import solver.variables.delta.monitor.OneIntDeltaMonitor;
-import solver.variables.view.IntView;
 
 /**
  * <br/>
@@ -58,7 +57,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, BoolVar> implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 

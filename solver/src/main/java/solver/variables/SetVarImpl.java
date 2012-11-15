@@ -39,7 +39,6 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.setDataStructures.SetFactory;
 import solver.variables.setDataStructures.SetType;
-import solver.variables.view.IView;
 
 /**
  * Set variable to represent a set of integers in the range [0,n-1]
@@ -47,14 +46,14 @@ import solver.variables.view.IView;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMonitor, IView, SetVar> implements SetVar {
+public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMonitor, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    protected ISet envelop, kernel;
+    protected ISet envelope, kernel;
     protected IEnvironment environment;
     protected SetDelta delta;
     ///////////// Attributes related to Variable ////////////
@@ -87,7 +86,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
         super(name, solver);
         solver.associates(this);
         this.environment = solver.getEnvironment();
-        envelop = SetFactory.makeStoredSet(envType, maximalSize, environment);
+        envelope = SetFactory.makeStoredSet(envType, maximalSize, environment);
         kernel = SetFactory.makeStoredSet(kerType, maximalSize, environment);
     }
 
@@ -97,12 +96,12 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
 
     @Override
     public boolean instantiated() {
-        return envelop.getSize() == kernel.getSize();
+        return envelope.getSize() == kernel.getSize();
     }
 
     @Override
     public boolean addToKernel(int value, ICause cause) throws ContradictionException {
-        if (!envelop.contain(value)) {
+        if (!envelope.contain(value)) {
             contradiction(cause, null, "");
         }
         if (!kernel.contain(value)) {
@@ -113,12 +112,12 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     }
 
     @Override
-    public boolean removeFromEnveloppe(int value, ICause cause) throws ContradictionException {
+    public boolean removeFromEnvelope(int value, ICause cause) throws ContradictionException {
         if (kernel.contain(value)) {
             contradiction(cause, null, "");
         }
-        if (envelop.contain(value)) {
-            envelop.remove(value);
+        if (envelope.contain(value)) {
+            envelope.remove(value);
             return true;
         }
         return false;
@@ -133,10 +132,10 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
         if (kernel.getSize() != value.length) {
             contradiction(cause, null, "");
         }
-        if (envelop.getSize() != value.length) {
-            for (int i = envelop.getFirstElement(); i >= 0; i = envelop.getNextElement()) {
+        if (envelope.getSize() != value.length) {
+            for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
                 if (!kernel.contain(i)) {
-                    envelop.remove(i);
+                    envelope.remove(i);
                 }
             }
         }
@@ -145,7 +144,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
 
     @Override
     public boolean contains(int v) {
-        return envelop.contain(v);
+        return envelope.contain(v);
     }
 
     @Override
@@ -162,12 +161,14 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     // ACCESSORS
     //***********************************************************************************
 
+	@Override
     public ISet getKernel() {
         return kernel;
     }
 
-    public ISet getEnvelop() {
-        return envelop;
+	@Override
+    public ISet getEnvelope() {
+        return envelope;
     }
 
     //***********************************************************************************
@@ -176,12 +177,12 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
 
     @Override
     public Explanation explain(VariableState what) {
-        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+        throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
     }
 
     @Override
     public Explanation explain(VariableState what, int val) {
-        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+        throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
     }
 
     @Override

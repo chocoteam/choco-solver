@@ -64,22 +64,22 @@ public class PropBoolSum extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
-	 * Works in O(1) per instantiation event
-	 *
-	 * @param vars
-	 * @param sum
-	 * @param solver
-	 * @param intVarPropagatorConstraint
-	 */
-	public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-		super(ArrayUtils.append(vars,new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
-		this.sum = sum;
-		n = vars.length;
-		min = environment.makeInt();
-		max = environment.makeInt();
-	}
+    /**
+     * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
+     * Works in O(1) per instantiation event
+     *
+     * @param vars
+     * @param sum
+     * @param solver
+     * @param intVarPropagatorConstraint
+     */
+    public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(ArrayUtils.append(vars, new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        this.sum = sum;
+        n = vars.length;
+        min = environment.makeInt();
+        max = environment.makeInt();
+    }
 
     //***********************************************************************************
     // METHODS
@@ -87,42 +87,42 @@ public class PropBoolSum extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		int lb = 0;
-		int ub = 0;
-		for (int i = 0; i < n; i++) {
-			lb += vars[i].getLB();
-			ub += vars[i].getUB();
-		}
-		min.set(lb);
-		max.set(ub);
-		filter();
+        int lb = 0;
+        int ub = 0;
+        for (int i = 0; i < n; i++) {
+            lb += vars[i].getLB();
+            ub += vars[i].getUB();
+        }
+        min.set(lb);
+        max.set(ub);
+        filter();
     }
 
-	private void filter() throws ContradictionException {
-		int lb = min.get();
-		int ub = max.get();
-		sum.updateLowerBound(lb,this);
-		sum.updateUpperBound(ub,this);
-		if(lb!=ub && sum.instantiated()){
-			if(sum.getValue()==lb){
-				for(int i=0;i<n;i++){
-					if(!vars[i].instantiated()){
-						vars[i].instantiateTo(0,this);
-					}
-				}
-			}
-			if(sum.getValue()==ub){
-				for(int i=0;i<n;i++){
-					if(!vars[i].instantiated()){
-						vars[i].instantiateTo(1,this);
-					}
-				}
-			}
-			// remarque : ne pas mettre de setPassive() car:
-			// 1) C'est inutile : tout est instancie
-			// 2) Il faudrait verifier que tous les evenements ont bien ete depiles
-		}
-	}
+    private void filter() throws ContradictionException {
+        int lb = min.get();
+        int ub = max.get();
+        sum.updateLowerBound(lb, aCause);
+        sum.updateUpperBound(ub, aCause);
+        if (lb != ub && sum.instantiated()) {
+            if (sum.getValue() == lb) {
+                for (int i = 0; i < n; i++) {
+                    if (!vars[i].instantiated()) {
+                        vars[i].instantiateTo(0, aCause);
+                    }
+                }
+            }
+            if (sum.getValue() == ub) {
+                for (int i = 0; i < n; i++) {
+                    if (!vars[i].instantiated()) {
+                        vars[i].instantiateTo(1, aCause);
+                    }
+                }
+            }
+            // remarque : ne pas mettre de setPassive() car:
+            // 1) C'est inutile : tout est instancie
+            // 2) Il faudrait verifier que tous les evenements ont bien ete depiles
+        }
+    }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {

@@ -128,9 +128,6 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
                 }
             }
         }
-//        if (getNbPendingER() == 0) {
-//            filter();
-//        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 

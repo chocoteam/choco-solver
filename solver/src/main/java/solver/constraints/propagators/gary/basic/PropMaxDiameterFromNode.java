@@ -37,6 +37,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 public class PropMaxDiameterFromNode extends Propagator<GraphVar> {
@@ -70,38 +71,38 @@ public class PropMaxDiameterFromNode extends Propagator<GraphVar> {
     // PROPAGATIONS
     //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int i = node;
-		nextSet.clear();
-		set.clear();
-		visited.clear();
-		set.add(i);
-		visited.set(i);
-		ISet nei;
-		int depth = 0;
-		while(!set.isEmpty() && depth<maxDiam){
-			for(i=set.size()-1;i>=0;i--){
-				nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(!visited.get(j)){
-						visited.set(j);
-						nextSet.add(j);
-					}
-				}
-			}
-			depth++;
-			TIntArrayList tmp = nextSet;
-			nextSet = set;
-			set = tmp;
-			nextSet.clear();
-		}
-		if(depth>=maxDiam){
-			for(i=visited.nextClearBit(0);i<n;i=visited.nextClearBit(i+1)){
-				g.removeNode(i,this);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int i = node;
+        nextSet.clear();
+        set.clear();
+        visited.clear();
+        set.add(i);
+        visited.set(i);
+        ISet nei;
+        int depth = 0;
+        while (!set.isEmpty() && depth < maxDiam) {
+            for (i = set.size() - 1; i >= 0; i--) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
+                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                    if (!visited.get(j)) {
+                        visited.set(j);
+                        nextSet.add(j);
+                    }
+                }
+            }
+            depth++;
+            TIntArrayList tmp = nextSet;
+            nextSet = set;
+            set = tmp;
+            nextSet.clear();
+        }
+        if (depth >= maxDiam) {
+            for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
+                g.removeNode(i, aCause);
+            }
+        }
+    }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {

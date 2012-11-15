@@ -206,6 +206,14 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     }
 
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName())
+                .append("+").append(cste).append(")");
+        return bf.toString();
+    }
+
     private static class RemProc implements UnaryIntProcedure<Integer> {
 
 

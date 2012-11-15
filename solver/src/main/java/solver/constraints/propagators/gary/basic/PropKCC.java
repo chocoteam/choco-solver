@@ -72,30 +72,29 @@ public class PropKCC extends Propagator {
     // PROPAGATIONS
     //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if(k.getUB()==1){
-			if(!env_CC_finder.isConnectedAndFindIsthma()){
-				contradiction(g,"");
-			}
-			int nbIsma = env_CC_finder.isthmusFrom.size();
-			for(int i=0;i<nbIsma;i++){
-				g.enforceArc(env_CC_finder.isthmusFrom.get(i),env_CC_finder.isthmusTo.get(i),this);
-			}
-		}else{
-			env_CC_finder.findAllCC();
-			int ee = env_CC_finder.getNBCC();
-			k.updateLowerBound(ee,this);
-			if(g.instantiated()){
-				k.updateUpperBound(ee,this);
-			}
-			else if(g.getEnvelopOrder()==g.getKernelOrder()){
-				ker_CC_finder.findAllCC();
-				int ke = ker_CC_finder.getNBCC();
-				k.updateUpperBound(ke,this);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if (k.getUB() == 1) {
+            if (!env_CC_finder.isConnectedAndFindIsthma()) {
+                contradiction(g, "");
+            }
+            int nbIsma = env_CC_finder.isthmusFrom.size();
+            for (int i = 0; i < nbIsma; i++) {
+                g.enforceArc(env_CC_finder.isthmusFrom.get(i), env_CC_finder.isthmusTo.get(i), aCause);
+            }
+        } else {
+            env_CC_finder.findAllCC();
+            int ee = env_CC_finder.getNBCC();
+            k.updateLowerBound(ee, aCause);
+            if (g.instantiated()) {
+                k.updateUpperBound(ee, aCause);
+            } else if (g.getEnvelopOrder() == g.getKernelOrder()) {
+                ker_CC_finder.findAllCC();
+                int ke = ker_CC_finder.getNBCC();
+                k.updateUpperBound(ke, aCause);
+            }
+        }
+    }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {

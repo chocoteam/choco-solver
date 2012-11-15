@@ -27,25 +27,30 @@
 
 package parser.flatzinc;
 
+import gnu.trove.map.hash.THashMap;
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.flatzinc.parser.FZNParser;
+import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.PropagationStrategies;
-import solver.propagation.hardcoded.*;
-import solver.propagation.hardcoded.dyn.ActivityBasedCstrEngine;
-import solver.propagation.hardcoded.dyn.ActivityBasedVarEngine;
+import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +91,7 @@ public class ParseAndSolve {
     @Option(name = "-exp", usage = "Explanation engine.", required = false)
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
     }
 
@@ -106,95 +111,53 @@ public class ParseAndSolve {
         parseandsolve();
     }
 
-    private void parseandsolve() {
+    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map) {
+        try {
+            // Create an input character stream from standard in
+            ANTLRInputStream input = new ANTLRInputStream(is);
+            // Create an ExprLexer that feeds from that stream
+            FlatzincLexer lexer = new FlatzincLexer(input);
+            // Create a stream of tokens fed by the lexer
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            // Create a parser that feeds off the token stream
+            FlatzincParser parser = new FlatzincParser(tokens);
+            // Begin parsing at rule prog, get return value structure
+            FlatzincParser.flatzinc_model_return r = parser.flatzinc_model();
+
+            // WALK RESULTING TREE
+            CommonTree t = (CommonTree) r.getTree(); // get tree from parser
+            // Create a tree node stream from resulting tree
+            CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+            FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
+            walker.flatzinc_model(mSolver, map);                 // launch at start rule prog
+        } catch (IOException io) {
+            Exit.log(io.getMessage());
+        } catch (RecognitionException re) {
+            Exit.log(re.getMessage());
+        }
+    }
+
+
+    private void parseandsolve() throws IOException {
         for (String instance : instances) {
-            final FZNParser parser = new FZNParser(all, free);
-            LOGGER.info("% load file ...");
-            parser.loadInstance(new File(instance));
             LOGGER.info("% parse instance...");
-            parser.parse();
+            Solver solver = new Solver();
+            THashMap<String, Object> map = new THashMap<String, Object>();
+            buildParser(new FileInputStream(new File(instance)), solver, map);
             LOGGER.info("% solve instance...");
-            final Solver solver = parser.solver;
 
             switch (eng) {
                 case 0:
-                    solver.set(new ConstraintEngine(solver));
+                    // let the default propagation strategy,
                     break;
                 case 1:
-                    solver.set(new VariableEngine(solver));
+                    solver.set(new ConstraintEngine(solver));
                     break;
                 case 2:
-                    solver.set(new SevenQueuesConstraintEngine(solver));
+                    solver.set(new VariableEngine(solver));
                     break;
                 case 3:
-                    solver.set(new EightQueuesConstraintEngine(solver));
-                    break;
-                case 4:
-                    solver.set(new EightQueuesVariableEngine(solver));
-                    break;
-                case 5:
-                    solver.set(new ABConstraintEngine(solver));
-                    break;
-                case 6:
-                    IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
-                    PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
-                    solver.set(pe);
-                    break;
-                case 7:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, true, true));
-                    break;
-                case 8:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, true, true));
-                    break;
-                case 9:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, true, true));
-                    break;
-                case 10:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, true, true));
-                    break;
-                case 11:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, false, true));
-                    break;
-                case 12:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, false, true));
-                    break;
-                case 13:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, false, true));
-                    break;
-                case 14:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, false, true));
-                    break;
-                case 15:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.ABS_IMP, false, false));
-                    break;
-                case 16:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.REL_IMP, false, false));
-                    break;
-                case 17:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.IMPoverDOM, false, false));
-                    break;
-                case 18:
-                    solver.set(new ActivityBasedVarEngine(solver, ActivityBasedVarEngine.Activity.SCHEDoverIMP, false, false));
-                    break;
-                case 19:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, true, true));
-                    break;
-                case 20:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, true, true));
-                    break;
-                case 21:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, true));
-                    break;
-                case 22:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, true));
-                    break;
-                case 23:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, false));
-                    break;
-                case 24:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, false));
-                    break;
-                case 25:
+                    solver.set(new SevenQueuesConstraintEngine(solver));
                 case -1:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {

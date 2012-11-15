@@ -31,8 +31,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
+import solver.propagation.PropagationEngine;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
@@ -54,7 +55,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
         IActivable<Propagator<V>>, Indexable<V> {
 
     protected final AbstractSearchLoop loop;
-    protected final IPropagationEngine engine;
+    protected final PropagationEngine engine;
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
@@ -63,8 +64,9 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
 
     protected final V[] variables;
     protected final Propagator<V>[] propagators;
+    protected IEvaluator evaluator;
 
-    protected AbstractFineEventRecorder(V[] variables, Propagator<V>[] propagators, Solver solver, IPropagationEngine engine) {
+    protected AbstractFineEventRecorder(V[] variables, Propagator<V>[] propagators, Solver solver, PropagationEngine engine) {
         this.variables = variables;
         this.propagators = propagators;
         measures = solver.getMeasures();
@@ -143,5 +145,15 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
         assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
         propagator.fineERcalls++;
         propagator.propagate(idx, mask);
+    }
+
+    @Override
+    public int evaluate() {
+        return evaluator.eval(this);
+    }
+
+    @Override
+    public void attachEvaluator(IEvaluator evaluator) {
+        this.evaluator = evaluator;
     }
 }

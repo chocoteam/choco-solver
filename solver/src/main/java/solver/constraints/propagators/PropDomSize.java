@@ -79,7 +79,7 @@ public class PropDomSize extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        assert this.getNbPendingER() == 0;
+        assert this.getNbPendingEvt() == 0;
         for (int i = 0; i < n; i++) {
             idms[i].unfreeze();
             size[i].set(vars[i].getDomainSize());
@@ -105,11 +105,6 @@ public class PropDomSize extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
     }
 
     @Override

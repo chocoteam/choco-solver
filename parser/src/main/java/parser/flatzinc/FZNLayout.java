@@ -28,7 +28,6 @@
 package parser.flatzinc;
 
 import choco.kernel.ESat;
-import choco.kernel.ResolutionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
@@ -132,7 +131,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
         switch (type) {
             case BOOL:
                 return var.getValue() == 1 ? "true" : "false";
-            case INT1:
+            case INT:
             case INT2:
             case INTN:
                 return Integer.toString(var.getValue());

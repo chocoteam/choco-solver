@@ -32,6 +32,10 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.propagators.nary.nValue.PropAtLeastNValues_AC;
+import solver.constraints.propagators.nary.nValue.PropAtMostNValues_BC;
+import solver.constraints.propagators.nary.nValue.PropAtMostNValues_Greedy;
 import solver.constraints.propagators.nary.nValue.PropNValues_Light;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -46,30 +50,69 @@ import java.util.BitSet;
  */
 public class NValues extends IntConstraint<IntVar> {
 
+	public enum Type{
+		AtMost_BC {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				// added twice to perform fixpoint
+				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+			}
+		},
+		AtMost_GreedyGraph {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, solver));
+			}
+		},
+		AtLeast_AC {
+			@Override
+			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+				cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues, cons, solver));
+			}
+		};
+
+		public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
+	}
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
-	 *
+	 * private because the case were all values are not restricted is not tested (i.e. unsafe)
 	 * @param vars
 	 * @param nValues
 	 * @param concernedValues
 	 * @param solver
 	 */
-    public NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
-        super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver);
+    private NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
 		addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
     }
 
 	/**
 	 * NValues constraint
 	 * The number of distinct values in vars is exactly nValues
-	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 * @param types additional filtering algorithms to consider
+	 */
+    public NValues(IntVar[] vars, IntVar nValues, Solver solver, Type... types) {
+        this(vars, nValues, getDomainUnion(vars), solver);
+		for(Type t:types){
+			t.addProp(vars, nValues, this, solver);
+		}
+    }
+
+	/**
+	 * NValues constraint
+	 * The number of distinct values in vars is exactly nValues
+	 * Uses all filtering algorithms in enum Type
 	 * @param vars
 	 * @param nValues
 	 * @param solver
 	 */
-    public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
-        this(vars,nValues,getDomainUnion(vars),solver);
+	public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
+        this(vars, nValues, solver, Type.values());
     }
 
 	private static TIntArrayList getDomainUnion(IntVar[] vars) {
@@ -93,11 +136,16 @@ public class NValues extends IntConstraint<IntVar> {
      */
     @Override
     public ESat isSatisfied(int[] tuple) {
+		int minval = tuple[0];
+		for (int i = 0; i < tuple.length-1; i++) {
+			if(minval>tuple[i])
+				minval = tuple[i];
+		}
 		BitSet values = new BitSet(tuple.length-1);
         for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]);
+			values.set(tuple[i]-minval);
         }
-		if(values.cardinality()<=tuple[tuple.length-1]){
+		if(values.cardinality()==tuple[tuple.length-1]){
 			return ESat.TRUE;
 		}
         return ESat.FALSE;

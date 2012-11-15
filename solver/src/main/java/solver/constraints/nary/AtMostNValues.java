@@ -108,40 +108,19 @@ public class AtMostNValues extends IntConstraint<IntVar> {
      */
     @Override
     public ESat isSatisfied(int[] tuple) {
+		int minval = tuple[0];
+		for (int i = 0; i < tuple.length-1; i++) {
+			if(minval>tuple[i])
+				minval = tuple[i];
+		}
 		BitSet values = new BitSet(tuple.length-1);
         for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]);
+			values.set(tuple[i]-minval);
         }
 		if(values.cardinality()<=tuple[tuple.length-1]){
 			return ESat.TRUE;
 		}
         return ESat.FALSE;
-    }
-
-    @Override
-    public ESat isSatisfied() {
-		int n = vars.length-1;
-		BitSet values = new BitSet();
-		BitSet mandatoryValues = new BitSet();
-		IntVar v;
-		int ub;
-		for(int i=0;i<n;i++){
-			v = vars[i];
-			ub = v.getUB();
-			if(v.instantiated()){
-				mandatoryValues.set(ub);
-			}
-			for(int j=v.getLB();j<=ub;j++){
-				values.set(j);
-			}
-		}
-		if(values.cardinality()<=vars[n].getLB()){
-			return ESat.TRUE;
-		}
-		if(mandatoryValues.cardinality()>vars[n].getUB()){
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
     }
 
     public String toString() {
