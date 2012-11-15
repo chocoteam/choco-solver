@@ -41,7 +41,6 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
 import solver.variables.setDataStructures.ISet;
-
 import java.util.BitSet;
 
 /**
@@ -49,76 +48,76 @@ import java.util.BitSet;
  */
 public class PropKhun extends Propagator implements IGraphRelaxation {
 
-	DirectedGraphVar g;
-	IntVar obj;
-	int[][] costs, originalCosts;
-	int n, M;
-	int[] lineZero;
-	BitSet markedRow,markedCol;
-	// matching structure
-	DirectedGraph digraph;
-	BitSet free;
-	int[] father;
-	BitSet in;
-	int[] list;
-	int n2;
+    DirectedGraphVar g;
+    IntVar obj;
+    int[][] costs, originalCosts;
+    int n, M;
+    int[] lineZero;
+    BitSet markedRow, markedCol;
+    // matching structure
+    DirectedGraph digraph;
+    BitSet free;
+    int[] father;
+    BitSet in;
+    int[] list;
+    int n2;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropKhun(DirectedGraphVar graph, IntVar objective, int[][] costsMatrix, Solver sol, Constraint constraint) {
-		super(new Variable[]{graph,objective}, sol, constraint, PropagatorPriority.CUBIC);
-		g = graph;
-		obj = objective;
-		originalCosts = costsMatrix;
-		n = originalCosts.length-1;
-		costs = new int[n][n];
-		lineZero = new int[n];
-		markedRow   = new BitSet(n);
-		markedCol   = new BitSet(n);
-		// flow
-		n2=2*n;
-		digraph = new DirectedGraph(solver.getEnvironment(),n2, SetType.LINKED_LIST,false);
-		free = new BitSet(n2);
-		father = new int[n2];
-		in = new BitSet(n2);
-		list = new int[n2];
-	}
+    public PropKhun(DirectedGraphVar graph, IntVar objective, int[][] costsMatrix, Solver sol, Constraint constraint) {
+        super(new Variable[]{graph, objective}, sol, constraint, PropagatorPriority.CUBIC);
+        g = graph;
+        obj = objective;
+        originalCosts = costsMatrix;
+        n = originalCosts.length - 1;
+        costs = new int[n][n];
+        lineZero = new int[n];
+        markedRow = new BitSet(n);
+        markedCol = new BitSet(n);
+        // flow
+        n2 = 2 * n;
+        digraph = new DirectedGraph(solver.getEnvironment(), n2, SetType.LINKED_LIST, false);
+        free = new BitSet(n2);
+        father = new int[n2];
+        in = new BitSet(n2);
+        list = new int[n2];
+    }
 
-	//***********************************************************************************
-	// PROPAGATION
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		khun();
-		int lb = 0;
-		for(int i=0;i<n;i++){
-			if(lineZero[i] == 0){
-				lb += originalCosts[i][n];
-			}else{
-				lb += originalCosts[i][lineZero[i]];
-			}
-		}
-		System.out.println("khun bound : "+lb);
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        khun();
+        int lb = 0;
+        for (int i = 0; i < n; i++) {
+            if (lineZero[i] == 0) {
+                lb += originalCosts[i][n];
+            } else {
+                lb += originalCosts[i][lineZero[i]];
+            }
+        }
+        System.out.println("khun bound : " + lb);
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		khun();
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        khun();
+    }
 
-	public void khun() throws ContradictionException {
-		resetMatrix();
-		decrease();
-		buildDigraph();
-		// iteration
-		int val;
-		int nbIter = -1;
-		while(true){
-			nbIter++;
-			if(nbIter>2*n+2){
+    public void khun() throws ContradictionException {
+        resetMatrix();
+        decrease();
+        buildDigraph();
+        // iteration
+        int val;
+        int nbIter = -1;
+        while (true) {
+            nbIter++;
+            if (nbIter > 2 * n + 2) {
 //				throw new UnsupportedOperationException();
                 contradiction(g, "");
             }
@@ -154,68 +153,68 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 //			s+= l+"\n";
 //		}
 //		System.out.println(s);
-	}
+    }
 
-	//***********************************************************************************
-	// INITIALIZATION
-	//***********************************************************************************
+    //***********************************************************************************
+    // INITIALIZATION
+    //***********************************************************************************
 
-	private void resetMatrix() {
-		ISet suc;
-		M = obj.getUB()+1;
-		for(int i=0;i<n;i++){
-			suc = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-				if(j<n){
-					costs[i][j] = originalCosts[i][j];
-				}else{
-					costs[i][0] = originalCosts[i][j];
-				}
-			}
-		}
-	}
+    private void resetMatrix() {
+        ISet suc;
+        M = obj.getUB() + 1;
+        for (int i = 0; i < n; i++) {
+            suc = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (j < n) {
+                    costs[i][j] = originalCosts[i][j];
+                } else {
+                    costs[i][0] = originalCosts[i][j];
+                }
+            }
+        }
+    }
 
-	private void decrease() {
-		double min;
-		ISet nei;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			min = M;
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(j==n){
-					j = 0;
-				}
-				if(costs[i][j]<min){
-					min = costs[i][j];
-				}
-			}
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(j==n){
-					j = 0;
-				}
-				costs[i][j] -= min;
-			}
-		}
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getPredecessorsOf(i);
-			min = M;
-			if(i==n){
-				i = 0;
-			}
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(costs[j][i]<min){
-					min = costs[j][i];
-				}
-			}
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				costs[j][i] -= min;
-			}
-		}
-	}
+    private void decrease() {
+        double min;
+        ISet nei;
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            min = M;
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (j == n) {
+                    j = 0;
+                }
+                if (costs[i][j] < min) {
+                    min = costs[i][j];
+                }
+            }
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (j == n) {
+                    j = 0;
+                }
+                costs[i][j] -= min;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getPredecessorsOf(i);
+            min = M;
+            if (i == n) {
+                i = 0;
+            }
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (costs[j][i] < min) {
+                    min = costs[j][i];
+                }
+            }
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                costs[j][i] -= min;
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// ALGORITHM
-	//***********************************************************************************
+    //***********************************************************************************
+    // ALGORITHM
+    //***********************************************************************************
 
 //	private void sortLines() {
 //		for(int i=0;i<n;i++){
@@ -266,204 +265,204 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 //		return min;
 //	}
 
-	private void mark() {
-		markedRow.clear();
-		markedCol.clear();
-		ISet suc;
-		for(int i=0;i<n;i++){
-			suc = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(lineZero[i] == -1){
-				markedRow.set(i);
-				for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-					if(j==n){
-						j=0;
-					}
-					if(costs[i][j]==0){
-						markedCol.set(j);
-					}
-				}
-			}
-		}
-		boolean again = true;
-		while (again){
-			again = false;
-			for(int i=markedRow.nextClearBit(0);i<n;i=markedRow.nextClearBit(i+1)){
-				if(markedCol.get(lineZero[i])){
-					markedRow.set(i);
-					suc = g.getEnvelopGraph().getSuccessorsOf(i);
-					for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-						if(j==n){
-							j = 0;
-						}
-						if(costs[i][j]==0 && !markedCol.get(j)){
-							again = true;
-							markedCol.set(j);
-						}
-					}
-				}
-			}
-		}
-	}
+    private void mark() {
+        markedRow.clear();
+        markedCol.clear();
+        ISet suc;
+        for (int i = 0; i < n; i++) {
+            suc = g.getEnvelopGraph().getSuccessorsOf(i);
+            if (lineZero[i] == -1) {
+                markedRow.set(i);
+                for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                    if (j == n) {
+                        j = 0;
+                    }
+                    if (costs[i][j] == 0) {
+                        markedCol.set(j);
+                    }
+                }
+            }
+        }
+        boolean again = true;
+        while (again) {
+            again = false;
+            for (int i = markedRow.nextClearBit(0); i < n; i = markedRow.nextClearBit(i + 1)) {
+                if (markedCol.get(lineZero[i])) {
+                    markedRow.set(i);
+                    suc = g.getEnvelopGraph().getSuccessorsOf(i);
+                    for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                        if (j == n) {
+                            j = 0;
+                        }
+                        if (costs[i][j] == 0 && !markedCol.get(j)) {
+                            again = true;
+                            markedCol.set(j);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	private int getMinPositiveValue(){
-		int minVal = M;
-		ISet suc;
-		for(int i=markedRow.nextSetBit(0);i>=0;i=markedRow.nextSetBit(i+1)){
-			suc = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-				if(j==n){
-					j = 0;
-				}
-				if(!markedCol.get(j)){
-					if(costs[i][j]<minVal){
-						minVal = costs[i][j];
-					}
-				}
-			}
-		}
-		return minVal;
-	}
+    private int getMinPositiveValue() {
+        int minVal = M;
+        ISet suc;
+        for (int i = markedRow.nextSetBit(0); i >= 0; i = markedRow.nextSetBit(i + 1)) {
+            suc = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (j == n) {
+                    j = 0;
+                }
+                if (!markedCol.get(j)) {
+                    if (costs[i][j] < minVal) {
+                        minVal = costs[i][j];
+                    }
+                }
+            }
+        }
+        return minVal;
+    }
 
-	private void changeMatrix(int minVal){
-		ISet suc;
-		boolean already;
-		for(int i=0;i<n;i++){
-			suc = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-				if(j==n){
-					j = 0;
-				}
-				already = costs[i][j]==0;
-				if(!markedCol.get(j)){
-					costs[i][j] -= minVal;
-				}
-				if(!markedRow.get(i)){
-					costs[i][j] += minVal;
-				}
-				if(costs[i][j]==0 && !already){
-					digraph.addArc(i,j+n);
-				}
-				if(costs[i][j]!=0 && already){
-					if(lineZero[i] == j){
-						digraph.removeArc(j+n,i);
-						free.set(i);
-						free.set(j+n);
-					}else{
-						digraph.removeArc(i,j+n);
-					}
-				}
-			}
-		}
-	}
+    private void changeMatrix(int minVal) {
+        ISet suc;
+        boolean already;
+        for (int i = 0; i < n; i++) {
+            suc = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (j == n) {
+                    j = 0;
+                }
+                already = costs[i][j] == 0;
+                if (!markedCol.get(j)) {
+                    costs[i][j] -= minVal;
+                }
+                if (!markedRow.get(i)) {
+                    costs[i][j] += minVal;
+                }
+                if (costs[i][j] == 0 && !already) {
+                    digraph.addArc(i, j + n);
+                }
+                if (costs[i][j] != 0 && already) {
+                    if (lineZero[i] == j) {
+                        digraph.removeArc(j + n, i);
+                        free.set(i);
+                        free.set(j + n);
+                    } else {
+                        digraph.removeArc(i, j + n);
+                    }
+                }
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// MATCHING
-	//***********************************************************************************
+    //***********************************************************************************
+    // MATCHING
+    //***********************************************************************************
 
-	private void buildDigraph() {
-		free.set(0, n2);
-		int j;
-		ISet nei;
-		for(int i=0;i<n2;i++){
-			digraph.getSuccessorsOf(i).clear();
-			digraph.getPredecessorsOf(i).clear();
-		}
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(j==n){
-					j=0;
-				}
-				if(costs[i][j]==0){
-					digraph.addArc(i,j+n);
-				}
-			}
-		}
-	}
+    private void buildDigraph() {
+        free.set(0, n2);
+        int j;
+        ISet nei;
+        for (int i = 0; i < n2; i++) {
+            digraph.getSuccessorsOf(i).clear();
+            digraph.getPredecessorsOf(i).clear();
+        }
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (j == n) {
+                    j = 0;
+                }
+                if (costs[i][j] == 0) {
+                    digraph.addArc(i, j + n);
+                }
+            }
+        }
+    }
 
-	private int repairMatching() throws ContradictionException {
-		for(int i=free.nextSetBit(0);i>=0 && i<n; i=free.nextSetBit(i+1)){
-			tryToMatch(i);
-		}
-		int p;
-		int cardinality = 0;
-		for (int i=0;i<n;i++) {
-			p = digraph.getPredecessorsOf(i).getFirstElement();
-			if(p!=-1){
-				cardinality++;
-				lineZero[i] = p-n;
-			}else{
-				lineZero[i] = -1;
-			}
-		}
-		return cardinality;
-	}
+    private int repairMatching() throws ContradictionException {
+        for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
+            tryToMatch(i);
+        }
+        int p;
+        int cardinality = 0;
+        for (int i = 0; i < n; i++) {
+            p = digraph.getPredecessorsOf(i).getFirstElement();
+            if (p != -1) {
+                cardinality++;
+                lineZero[i] = p - n;
+            } else {
+                lineZero[i] = -1;
+            }
+        }
+        return cardinality;
+    }
 
-	private void tryToMatch(int i) throws ContradictionException {
-		int mate = augmentPath_BFS(i);
-		if(mate!=-1){
-			free.clear(mate);
-			free.clear(i);
-			int tmp = mate;
-			while(tmp!=i){
-				digraph.removeArc(father[tmp],tmp);
-				digraph.addArc(tmp,father[tmp]);
-				tmp = father[tmp];
-			}
-		}
-	}
+    private void tryToMatch(int i) throws ContradictionException {
+        int mate = augmentPath_BFS(i);
+        if (mate != -1) {
+            free.clear(mate);
+            free.clear(i);
+            int tmp = mate;
+            while (tmp != i) {
+                digraph.removeArc(father[tmp], tmp);
+                digraph.addArc(tmp, father[tmp]);
+                tmp = father[tmp];
+            }
+        }
+    }
 
-	private int augmentPath_BFS(int root){
-		in.clear();
-		int idxFirst = 0;
-		int idxLast  = 0;
-		list[idxLast++] = root;
-		int x,y;
-		ISet succs;
-		while(idxFirst!=idxLast){
-			x = list[idxFirst++];
-			succs = digraph.getSuccessorsOf(x);
-			for(y=succs.getFirstElement();y>=0;y=succs.getNextElement()){
-				if(!in.get(y)){
-					father[y] = x;
-					list[idxLast++] = y;
-					in.set(y);
-					if(free.get(y)){
-						return y;
-					}
-				}
-			}
-		}
-		return -1;
-	}
+    private int augmentPath_BFS(int root) {
+        in.clear();
+        int idxFirst = 0;
+        int idxLast = 0;
+        list[idxLast++] = root;
+        int x, y;
+        ISet succs;
+        while (idxFirst != idxLast) {
+            x = list[idxFirst++];
+            succs = digraph.getSuccessorsOf(x);
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    list[idxLast++] = y;
+                    in.set(y);
+                    if (free.get(y)) {
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
 
-	//***********************************************************************************
-	// FILTERING
-	//***********************************************************************************
+    //***********************************************************************************
+    // FILTERING
+    //***********************************************************************************
 
-	private void filter() throws ContradictionException {
-		int lb = 0;
-		for(int i=0;i<n;i++){
-			if(lineZero[i] == 0){
-				lb += originalCosts[i][n];
-			}else{
-				lb += originalCosts[i][lineZero[i]];
-			}
-		}
-		obj.updateLowerBound(lb,this);
-		ISet nei;
-		int delta = obj.getUB()-lb;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				if(j<n && costs[i][j]>delta){
-					g.removeArc(i,j,this);
-				}
-			}
-			if(costs[i][0]>delta){
-				g.removeArc(i,n,this);
-			}
-		}
+    private void filter() throws ContradictionException {
+        int lb = 0;
+        for (int i = 0; i < n; i++) {
+            if (lineZero[i] == 0) {
+                lb += originalCosts[i][n];
+            } else {
+                lb += originalCosts[i][lineZero[i]];
+            }
+        }
+        obj.updateLowerBound(lb, aCause);
+        ISet nei;
+        int delta = obj.getUB() - lb;
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (j < n && costs[i][j] > delta) {
+                    g.removeArc(i, j, aCause);
+                }
+            }
+            if (costs[i][0] > delta) {
+                g.removeArc(i, n, aCause);
+            }
+        }
 //		// is optimum found?
 //		int i = 0;
 //		in.clear();
@@ -484,44 +483,44 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 //				g.enforceArc(k,lineZero[k],this);
 //			}
 //		}
-	}
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	public boolean contains(int i, int j){
-		if(j==n){
-			return lineZero[i] == 0;
-		}
-		return lineZero[i] == j;
-	}
+    public boolean contains(int i, int j) {
+        if (j == n) {
+            return lineZero[i] == 0;
+        }
+        return lineZero[i] == j;
+    }
 
-	@Override
-	public double getReplacementCost(int i, int j){
-		return 0;// do not know how to compute it
-	}
+    @Override
+    public double getReplacementCost(int i, int j) {
+        return 0;// do not know how to compute it
+    }
 
-	@Override
-	public double getMarginalCost(int i, int j) {
-		if(j==n){
-			return costs[i][0];
-		}
-		return costs[i][j];
-	}
+    @Override
+    public double getMarginalCost(int i, int j) {
+        if (j == n) {
+            return costs[i][0];
+        }
+        return costs[i][j];
+    }
 
-	@Override
-	public IGraph getSupport() {
-		throw new UnsupportedOperationException("not implemented yet");
-	}
+    @Override
+    public IGraph getSupport() {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
 }

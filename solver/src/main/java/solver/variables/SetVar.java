@@ -31,28 +31,65 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
-import solver.variables.view.IView;
+import solver.variables.setDataStructures.ISet;
 
 /**
- * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * A Set Variable is defined by a domain which is a set interval [S_low,S_up]
+ * S_low is the set of elements that must belong to every single solution. It is called the kernel.
+ * S_up is the set of elements that may belong to at least one solution. It is called the envelope.
+ *
+ * One must notice that in this context, a VALUE of the variable is a set of elements
+ * (which are integers here). 
+ * @author Charles Prud'homme, Jean-Guillaume Fages
+ * @since 15 nov. 2012
  */
-public interface SetVar extends Variable<SetDelta, SetDeltaMonitor, IView> {
+public interface SetVar extends Variable<SetDelta, SetDeltaMonitor> {
 
-    //todo : to complete
-    boolean addToKernel(int value, ICause cause) throws ContradictionException;
+	/**
+	 * Gets the set of elements that belong to every solution
+	 * @return the kernel of the set variable
+	 */
+	public ISet getKernel();
 
-    //todo : to complete
-    boolean removeFromEnveloppe(int value, ICause cause) throws ContradictionException;
+	/**
+	 * Gets the set of elements that may belong to a solution
+	 * @return the envelope of the set variable
+	 */
+    public ISet getEnvelope();
 
-    //todo : to complete
+	/**
+	 * Adds element to the kernel, i.e. enforces that the set variable
+	 * will contain element in every solution
+	 * @param element
+	 * @param cause
+	 * @return true iff value was not already in the kernel
+	 * @throws ContradictionException
+	 */
+    boolean addToKernel(int element, ICause cause) throws ContradictionException;
+
+    /**
+	 * Removes element from the envelop, i.e. the set variable cannot contain element anymore
+	 * @param element
+	 * @param cause
+	 * @return true iff value was present in the envelope
+	 * @throws ContradictionException
+	 */
+    boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException;
+
+	/**
+	 * Enforces the set variable to contain exactly the set of integers given in parameter
+	 * @param value a set of integers
+	 * @param cause
+	 * @return true iff a domain modification occurred
+	 * @throws ContradictionException
+	 */
     boolean instantiateTo(int[] value, ICause cause) throws ContradictionException;
 
     /**
-     * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
+     * Checks if an element <code>v</code> belongs to the domain of <code>this</code>
      *
-     * @param v the value to check
-     * @return <code>true</code> if the value belongs to the domain of <code>this</code>, <code>false</code> otherwise.
+     * @param v the element to check
+     * @return <code>true</code> if the element belongs to the domain of <code>this</code>, <code>false</code> otherwise.
      */
     boolean contains(int v);
 

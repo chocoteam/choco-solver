@@ -38,30 +38,29 @@ import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.setDataStructures.ISet;
-
 import java.util.BitSet;
 import java.util.LinkedList;
 
 /**
  * Arborescence constraint (simplification from tree constraint)
  * Use naive implementation in O(n.m) for testing
- * */
-public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
+ */
+public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	int source;
-	int n;
-	LinkedList<Integer> list;
-	BitSet visited;
-	DirectedGraph domTrans;
+    DirectedGraphVar g;
+    int source;
+    int n;
+    LinkedList<Integer> list;
+    BitSet visited;
+    DirectedGraph domTrans;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
 	/**Ensures that graph is an arborescence rooted in node source
 	 * naive form: O(n.m)
@@ -80,28 +79,28 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
 		domTrans= new DirectedGraph(n, SetType.BOOL_ARRAY,false);
 	}
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	private boolean allReachableFrom(int x,DirectedGraph g) {
-		list.clear();
-		visited.clear();
-		list.add(x);
-		ISet env;
-		visited.set(x);
-		while(!list.isEmpty()){
-			x = list.removeFirst();
-			env = g.getSuccessorsOf(x);
-			for(int suc=env.getFirstElement(); suc>=0; suc=env.getNextElement()){
-				if(!visited.get(suc)){
-					visited.set(suc);
-					list.addLast(suc);
-				}
-			}
-		}
-		return visited.nextSetBit(0)>=0;
-	}
+    private boolean allReachableFrom(int x, DirectedGraph g) {
+        list.clear();
+        visited.clear();
+        list.add(x);
+        ISet env;
+        visited.set(x);
+        while (!list.isEmpty()) {
+            x = list.removeFirst();
+            env = g.getSuccessorsOf(x);
+            for (int suc = env.getFirstElement(); suc >= 0; suc = env.getNextElement()) {
+                if (!visited.get(suc)) {
+                    visited.set(suc);
+                    list.addLast(suc);
+                }
+            }
+        }
+        return visited.nextSetBit(0) >= 0;
+    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -151,16 +150,16 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
         return EventType.REMOVEARC.mask;
     }
 
-	@Override
-	public ESat isEntailed() {
-		if(isCompletelyInstantiated()){
-			try{
-				structuralPruning();
-			}catch (Exception e){
-				return ESat.FALSE;
-			}
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            try {
+                structuralPruning();
+            } catch (Exception e) {
+                return ESat.FALSE;
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

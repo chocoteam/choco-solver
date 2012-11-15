@@ -105,23 +105,23 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
         structuralPruning();
     }
 
-	private void structuralPruning() throws ContradictionException {
-		if(domFinder.findPostDominators()){
-			ISet nei;
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(y,x)){
-						g.removeArc(x,y,this);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        if (domFinder.findPostDominators()) {
+            ISet nei;
+            for (int x = 0; x < n; x++) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    //--- STANDART PRUNING
+                    if (domFinder.isDomminatedBy(y, x)) {
+                        g.removeArc(x, y, aCause);
+                    }
+                    // ENFORCE ARC-DOMINATORS (redondant)
+                }
+            }
+        } else {
+            contradiction(g, "the source cannot reach all nodes");
+        }
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

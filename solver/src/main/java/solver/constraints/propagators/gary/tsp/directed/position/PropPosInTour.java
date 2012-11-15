@@ -50,150 +50,151 @@ import solver.variables.setDataStructures.ISet;
  */
 public class PropPosInTour extends Propagator {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	int n;
-	IntVar[] intVars;
+    DirectedGraphVar g;
+    int n;
+    IntVar[] intVars;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropPosInTour(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(intVars, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
-		this.intVars = intVars;
-		this.n = g.getEnvelopGraph().getNbNodes();
-	}
+    public PropPosInTour(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
+        super(intVars, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
+        this.intVars = intVars;
+        this.n = g.getEnvelopGraph().getNbNodes();
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			upUB(i,intVars[i].getUB());
-			upLB(i,intVars[i].getLB());
-			if(intVars[i].instantiated()){
-				enfVarPos(i,intVars[i].getValue());
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            upUB(i, intVars[i].getUB());
+            upLB(i, intVars[i].getLB());
+            if (intVars[i].instantiated()) {
+                enfVarPos(i, intVars[i].getValue());
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if((mask & EventType.INCLOW.mask)!=0){
-			upLB(idxVarInProp,intVars[idxVarInProp].getLB());
-		}
-		if((mask & EventType.DECUPP.mask)!=0){
-			upUB(idxVarInProp,intVars[idxVarInProp].getUB());
-		}
-		if(intVars[idxVarInProp].instantiated()){
-			enfVarPos(idxVarInProp,intVars[idxVarInProp].getValue());
-		}
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if ((mask & EventType.INCLOW.mask) != 0) {
+            upLB(idxVarInProp, intVars[idxVarInProp].getLB());
+        }
+        if ((mask & EventType.DECUPP.mask) != 0) {
+            upUB(idxVarInProp, intVars[idxVarInProp].getUB());
+        }
+        if (intVars[idxVarInProp].instantiated()) {
+            enfVarPos(idxVarInProp, intVars[idxVarInProp].getValue());
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private void enfVarPos(int var, int val) throws ContradictionException {
-		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
-		if(p!=-1){
-			if(intVars[p].instantiateTo(val-1,this)){
-				enfVarPos(p,val-1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
-			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(!intVars[p].contains(val-1)){
-					g.removeArc(p,var,this);
-				}
-			}
-		}
-		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
-		if(s!=-1){
-			if(intVars[s].instantiateTo(val+1,this)){
-				enfVarPos(s,val+1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
-			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-				if(!intVars[s].contains(val+1)){
-					g.removeArc(var,s,this);
-				}
-			}
-		}
-	}
+    private void enfVarPos(int var, int val) throws ContradictionException {
+        int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
+        if (p != -1) {
+            if (intVars[p].instantiateTo(val - 1, aCause)) {
+                enfVarPos(p, val - 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
+            for (p = nei.getFirstElement(); p >= 0; p = nei.getNextElement()) {
+                if (!intVars[p].contains(val - 1)) {
+                    g.removeArc(p, var, aCause);
+                }
+            }
+        }
+        int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
+        if (s != -1) {
+            if (intVars[s].instantiateTo(val + 1, aCause)) {
+                enfVarPos(s, val + 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
+            for (s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                if (!intVars[s].contains(val + 1)) {
+                    g.removeArc(var, s, aCause);
+                }
+            }
+        }
+    }
 
-	private void upUB(int var, int val) throws ContradictionException {
-		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
-		if(p!=-1){
-			if(intVars[p].updateUpperBound(val-1,this)){
-				upUB(p,val-1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
-			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(intVars[p].getLB()>val-1){
-					g.removeArc(p,var,this);
-				}
-			}
-		}
-		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
-		if(s!=-1){
-			if(intVars[s].updateUpperBound(val+1,this)){
-				upUB(s,val+1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
-			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-				if(intVars[s].getLB()>val+1){
-					g.removeArc(var,s,this);
-				}
-			}
-		}
-	}
-	private void upLB(int var, int val) throws ContradictionException {
-		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
-		if(p!=-1){
-			if(intVars[p].updateLowerBound(val-1,this)){
-				upLB(p,val-1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
-			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(intVars[p].getUB()<val-1){
-					g.removeArc(p,var,this);
-				}
-			}
-		}
-		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
-		if(s!=-1){
-			if(intVars[s].updateLowerBound(val+1,this)){
-				upLB(s,val+1);
-			}
-		}else{
-			ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
-			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-				if(intVars[s].getUB()<val+1){
-					g.removeArc(var,s,this);
-				}
-			}
-		}
-	}
+    private void upUB(int var, int val) throws ContradictionException {
+        int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
+        if (p != -1) {
+            if (intVars[p].updateUpperBound(val - 1, aCause)) {
+                upUB(p, val - 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
+            for (p = nei.getFirstElement(); p >= 0; p = nei.getNextElement()) {
+                if (intVars[p].getLB() > val - 1) {
+                    g.removeArc(p, var, aCause);
+                }
+            }
+        }
+        int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
+        if (s != -1) {
+            if (intVars[s].updateUpperBound(val + 1, aCause)) {
+                upUB(s, val + 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
+            for (s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                if (intVars[s].getLB() > val + 1) {
+                    g.removeArc(var, s, aCause);
+                }
+            }
+        }
+    }
+
+    private void upLB(int var, int val) throws ContradictionException {
+        int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
+        if (p != -1) {
+            if (intVars[p].updateLowerBound(val - 1, aCause)) {
+                upLB(p, val - 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getPredecessorsOf(var);
+            for (p = nei.getFirstElement(); p >= 0; p = nei.getNextElement()) {
+                if (intVars[p].getUB() < val - 1) {
+                    g.removeArc(p, var, aCause);
+                }
+            }
+        }
+        int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
+        if (s != -1) {
+            if (intVars[s].updateLowerBound(val + 1, aCause)) {
+                upLB(s, val + 1);
+            }
+        } else {
+            ISet nei = g.getEnvelopGraph().getSuccessorsOf(var);
+            for (s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                if (intVars[s].getUB() < val + 1) {
+                    g.removeArc(var, s, aCause);
+                }
+            }
+        }
+    }
 }

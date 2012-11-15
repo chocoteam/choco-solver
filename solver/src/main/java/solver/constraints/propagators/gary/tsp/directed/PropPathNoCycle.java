@@ -121,48 +121,48 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
         gdm.freeze();
         gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.unfreeze();
-	}
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask ;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ENFORCEARC.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if(!g.instantiated()){
-			return ESat.UNDEFINED;
-		}
-		int x;
-		int nb = 0;
-		ISet nei;
-		int y = source;
-		while(y!=sink){
-			nb++;
-			x = y;
-			nei = g.getEnvelopGraph().getSuccessorsOf(x);
-			y = nei.getFirstElement();
-			if(nei.getSize()!=1 || y==x){
-				return ESat.FALSE;
-			}
-		}
-		nb++;
-		if(nb!=g.getEnvelopOrder() || g.getEnvelopGraph().getSuccessorsOf(sink).getSize()>0){
-			return ESat.FALSE;
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (!g.instantiated()) {
+            return ESat.UNDEFINED;
+        }
+        int x;
+        int nb = 0;
+        ISet nei;
+        int y = source;
+        while (y != sink) {
+            nb++;
+            x = y;
+            nei = g.getEnvelopGraph().getSuccessorsOf(x);
+            y = nei.getFirstElement();
+            if (nei.getSize() != 1 || y == x) {
+                return ESat.FALSE;
+            }
+        }
+        nb++;
+        if (nb != g.getEnvelopOrder() || g.getEnvelopGraph().getSuccessorsOf(sink).getSize() > 0) {
+            return ESat.FALSE;
+        }
+        return ESat.TRUE;
+    }
 
-	private void enforce(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		if(origin[j].get()!=j){
-			contradiction(g,"");
-		}
-		g.removeArc(last,start,this);
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
+    private void enforce(int i, int j) throws ContradictionException {
+        int last = end[j].get();
+        int start = origin[i].get();
+        if (origin[j].get() != j) {
+            contradiction(g, "");
+        }
+        g.removeArc(last, start, aCause);
+        origin[last].set(start);
+        end[start].set(last);
+        size[start].add(size[j].get());
 //		if(start==source && size[start].get()<n-1){
 //			g.removeArc(last,sink,this);
 //		}

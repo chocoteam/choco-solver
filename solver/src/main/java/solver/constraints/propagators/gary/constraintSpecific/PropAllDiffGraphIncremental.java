@@ -40,7 +40,6 @@ import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**

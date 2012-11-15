@@ -47,8 +47,8 @@ import solver.variables.setDataStructures.ISet;
 /**
  * Compute the cost of the graph by summing arcs costs
  * - For minimization problem
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
+ */
+@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropPathOrCircuitEvalObj extends Propagator {
 
     //***********************************************************************************
@@ -57,187 +57,188 @@ public class PropPathOrCircuitEvalObj extends Propagator {
 
     DirectedGraphVar g;
     GraphDeltaMonitor gdm;
-	int n;
-	IntVar sum;
-	int[][] distMatrix;
-	IStateInt[] minCostSucc,maxCostSucc;
-	PairProcedure arcEnforced, arcRemoved;
-	IStateInt minSum;
-	IStateInt maxSum;
-	TIntArrayList toCompute;
+    int n;
+    IntVar sum;
+    int[][] distMatrix;
+    IStateInt[] minCostSucc, maxCostSucc;
+    PairProcedure arcEnforced, arcRemoved;
+    IStateInt minSum;
+    IStateInt maxSum;
+    TIntArrayList toCompute;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
-	 * - For minimization problem
-	 * @param graph
-	 * @param obj
-	 * @param costMatrix
-	 * @param constraint
-	 * @param solver
-	 */
-	public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
-		super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
+    /**
+     * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
+     * - For minimization problem
+     *
+     * @param graph
+     * @param obj
+     * @param costMatrix
+     * @param constraint
+     * @param solver
+     */
+    public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+        super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		sum = obj;
-		n = g.getEnvelopGraph().getNbNodes();
-		distMatrix = costMatrix;
-		arcEnforced = new EnfArc();
-		arcRemoved = new RemArc();
-		minSum = environment.makeInt(0);
-		maxSum = environment.makeInt(0);
-		toCompute = new TIntArrayList();
-		minCostSucc = new IStateInt[n];
-		maxCostSucc = new IStateInt[n];
-		for (int i = 0; i < n; i++) {
-			minCostSucc[i] = environment.makeInt(-1);
-			maxCostSucc[i] = environment.makeInt(-1);
-		}
-	}
+        sum = obj;
+        n = g.getEnvelopGraph().getNbNodes();
+        distMatrix = costMatrix;
+        arcEnforced = new EnfArc();
+        arcRemoved = new RemArc();
+        minSum = environment.makeInt(0);
+        maxSum = environment.makeInt(0);
+        toCompute = new TIntArrayList();
+        minCostSucc = new IStateInt[n];
+        maxCostSucc = new IStateInt[n];
+        for (int i = 0; i < n; i++) {
+            minCostSucc[i] = environment.makeInt(-1);
+            maxCostSucc[i] = environment.makeInt(-1);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet succ;
-		minSum.set(0);
-		maxSum.set(0);
-		for (int i = 0; i < n; i++) {
-			succ = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(succ.getSize()>0){
-				int min = succ.getFirstElement();
-				int max = min;
-				if(min==-1){
-					contradiction(g,"");
-				}
-				int minC = distMatrix[i][min];
-				int maxC = distMatrix[i][min];
-				for (int s = min; s >= 0; s = succ.getNextElement()) {
-					if (distMatrix[i][s] < minC) {
-						minC = distMatrix[i][s];
-						min = s;
-					}else if (distMatrix[i][s] > maxC) {
-						maxC = distMatrix[i][s];
-						max = s;
-					}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet succ;
+        minSum.set(0);
+        maxSum.set(0);
+        for (int i = 0; i < n; i++) {
+            succ = g.getEnvelopGraph().getSuccessorsOf(i);
+            if (succ.getSize() > 0) {
+                int min = succ.getFirstElement();
+                int max = min;
+                if (min == -1) {
+                    contradiction(g, "");
+                }
+                int minC = distMatrix[i][min];
+                int maxC = distMatrix[i][min];
+                for (int s = min; s >= 0; s = succ.getNextElement()) {
+                    if (distMatrix[i][s] < minC) {
+                        minC = distMatrix[i][s];
+                        min = s;
+                    } else if (distMatrix[i][s] > maxC) {
+                        maxC = distMatrix[i][s];
+                        max = s;
+                    }
 
-				}
-				minSum.add(minC);
-				minCostSucc[i].set(min);
-				maxSum.add(maxC);
-				maxCostSucc[i].set(max);
-			}
-		}
-		sum.updateLowerBound(minSum.get(), this);
-		sum.updateUpperBound(maxSum.get(), this);
-		// filter the graph
-		ISet succs;
-		int delta = minSum.get() - sum.getUB();
-		int curMin;
-		for (int i = 0; i < n; i++) {
-			succs = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(succs.getSize()>0){
-				curMin = distMatrix[i][minCostSucc[i].get()];
-				for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-					if (delta > curMin - distMatrix[i][j]) {
-						g.removeArc(i, j, this);
-					}
-				}
-			}
-		}
-	}
+                }
+                minSum.add(minC);
+                minCostSucc[i].set(min);
+                maxSum.add(maxC);
+                maxCostSucc[i].set(max);
+            }
+        }
+        sum.updateLowerBound(minSum.get(), aCause);
+        sum.updateUpperBound(maxSum.get(), aCause);
+        // filter the graph
+        ISet succs;
+        int delta = minSum.get() - sum.getUB();
+        int curMin;
+        for (int i = 0; i < n; i++) {
+            succs = g.getEnvelopGraph().getSuccessorsOf(i);
+            if (succs.getSize() > 0) {
+                curMin = distMatrix[i][minCostSucc[i].get()];
+                for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                    if (delta > curMin - distMatrix[i][j]) {
+                        g.removeArc(i, j, aCause);
+                    }
+                }
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		toCompute.clear();
-		int oldMin = minSum.get();
-		Variable variable = vars[idxVarInProp];
-		if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
-			gdm.freeze();
-			if ((mask & EventType.ENFORCEARC.mask) != 0) {
-				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-			}
-			if ((mask & EventType.REMOVEARC.mask) != 0) {
-				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-			}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        toCompute.clear();
+        int oldMin = minSum.get();
+        Variable variable = vars[idxVarInProp];
+        if ((variable.getTypeAndKind() & Variable.GRAPH) != 0) {
+            gdm.freeze();
+            if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+            }
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            }
             gdm.unfreeze();
-			for (int i = toCompute.size() - 1; i >= 0; i--) {
-				findMin(toCompute.get(i));
-			}
-			sum.updateLowerBound(minSum.get(), this);
-		}
-		if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
-			// filter the graph
-			ISet succs;
-			int delta = minSum.get() - sum.getUB();
-			int curMin;
-			for (int i = 0; i < n; i++) {
-				succs = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(succs.getSize()>0){
-					curMin = distMatrix[i][minCostSucc[i].get()];
-					for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-						if (delta > curMin - distMatrix[i][j]) {
-							g.removeArc(i, j, this);
-						}
-					}
-				}
-			}
-		}
-	}
+            for (int i = toCompute.size() - 1; i >= 0; i--) {
+                findMin(toCompute.get(i));
+            }
+            sum.updateLowerBound(minSum.get(), aCause);
+        }
+        if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
+            // filter the graph
+            ISet succs;
+            int delta = minSum.get() - sum.getUB();
+            int curMin;
+            for (int i = 0; i < n; i++) {
+                succs = g.getEnvelopGraph().getSuccessorsOf(i);
+                if (succs.getSize() > 0) {
+                    curMin = distMatrix[i][minCostSucc[i].get()];
+                    for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                        if (delta > curMin - distMatrix[i][j]) {
+                            g.removeArc(i, j, aCause);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	private void findMin(int i) throws ContradictionException {
-		ISet succ = g.getEnvelopGraph().getSuccessorsOf(i);
-		int min = succ.getFirstElement();
-		if (min == -1) {
-			contradiction(g,"");
-		}
-		int minC = distMatrix[i][min];
-		for (int s = min; s >= 0; s = succ.getNextElement()) {
-			if (distMatrix[i][s] < minC) {
-				minC = distMatrix[i][s];
-				min = s;
-			}
-		}
-		minSum.add(minC - distMatrix[i][minCostSucc[i].get()]);
-		minCostSucc[i].set(min);
-	}
+    private void findMin(int i) throws ContradictionException {
+        ISet succ = g.getEnvelopGraph().getSuccessorsOf(i);
+        int min = succ.getFirstElement();
+        if (min == -1) {
+            contradiction(g, "");
+        }
+        int minC = distMatrix[i][min];
+        for (int s = min; s >= 0; s = succ.getNextElement()) {
+            if (distMatrix[i][s] < minC) {
+                minC = distMatrix[i][s];
+                min = s;
+            }
+        }
+        minSum.add(minC - distMatrix[i][minCostSucc[i].get()]);
+        minCostSucc[i].set(min);
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class EnfArc implements PairProcedure {
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if (to != minCostSucc[from].get()) {
-				minSum.add(distMatrix[from][to] - distMatrix[from][minCostSucc[from].get()]);
-				minCostSucc[from].set(to);
-			}
-		}
-	}
+    private class EnfArc implements PairProcedure {
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (to != minCostSucc[from].get()) {
+                minSum.add(distMatrix[from][to] - distMatrix[from][minCostSucc[from].get()]);
+                minCostSucc[from].set(to);
+            }
+        }
+    }
 
-	private class RemArc implements PairProcedure {
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if (to == minCostSucc[from].get()) {
-				toCompute.add(from);
-			}
-		}
-	}
+    private class RemArc implements PairProcedure {
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (to == minCostSucc[from].get()) {
+                toCompute.add(from);
+            }
+        }
+    }
 }

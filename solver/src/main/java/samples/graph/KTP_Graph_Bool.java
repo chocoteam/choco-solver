@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package samples.graph;
@@ -41,10 +41,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.PropNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
@@ -59,7 +55,6 @@ import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 import solver.variables.setDataStructures.ISet;
-
 import java.util.ArrayList;
 
 /**
@@ -102,11 +97,11 @@ public class KTP_Graph_Bool {
 //			boolean[][] matrix = HCP_Utils.generateOpenKingTourInstance(size);
 			boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
 			if(activeGraphs)
-			solveUndiGraph(matrix, s);
+				solveUndiGraph(matrix, s);
 			if(activeBools)
-			solveBooleans(matrix, s);
+				solveBooleans(matrix, s);
 			if(activeInts)
-			solveIntegers(matrix,s);
+				solveIntegers(matrix,s);
 		}
 	}
 
@@ -131,8 +126,8 @@ public class KTP_Graph_Bool {
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
@@ -151,129 +146,129 @@ public class KTP_Graph_Bool {
 	}
 
 	private static void solveBooleans(boolean[][] matrix, String instanceName) {
-			int n = matrix.length;
-			solver = new Solver();
-			// variables
-			BoolVar[][] graph = new BoolVar[n][n];
-			int ct = 0;
-			for(int i=0;i<n;i++){
-				for(int j=i+1;j<n;j++){
-					if(matrix[i][j]){
-						ct++;
-						graph[i][j] = graph[j][i] = VariableFactory.bool("b"+i+"-"+j,solver);
-					}
+		int n = matrix.length;
+		solver = new Solver();
+		// variables
+		BoolVar[][] graph = new BoolVar[n][n];
+		int ct = 0;
+		for(int i=0;i<n;i++){
+			for(int j=i+1;j<n;j++){
+				if(matrix[i][j]){
+					ct++;
+					graph[i][j] = graph[j][i] = VariableFactory.bool("b"+i+"-"+j,solver);
 				}
-			}
-			BoolVar[] decisionVars = new BoolVar[ct];
-			int[] mapping = new int[ct];
-			ct = 0;
-			for(int i=0;i<n;i++){
-				for(int j=i+1;j<n;j++){
-					if(matrix[i][j]){
-						decisionVars[ct++] = graph[i][j];
-						mapping[ct-1] = i*n+j;
-					}
-				}
-			}
-			ArrayList<BoolVar>[] gl = new ArrayList[n];
-			for(int i=0;i<n;i++){
-				ArrayList<BoolVar> l = new ArrayList();
-				for(int j=0;j<n;j++){
-					if(matrix[i][j]){
-						l.add(graph[i][j]);
-					}
-				}
-				gl[i] = l;
-			}
-			// constraints
-			Constraint gc = new Constraint(solver);
-			IntVar two = VariableFactory.bounded("2",2,2,solver);
-			for(int i=0;i<n;i++){
-				int k = 0;
-				for(int j=0;j<n;j++){
-					if(matrix[i][j])
-					k++;
-				}
-				BoolVar[] bools = new BoolVar[k];
-				k = 0;
-				for(int j=0;j<n;j++){
-					if(matrix[i][j])
-					bools[k++] = graph[i][j];
-				}
-				gc.addPropagators(new PropBoolSum(bools,two,solver,gc));
-			}
-			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
-			solver.post(gc);
-			// config
-			solver.set(new MinNeighBool(decisionVars,gl));
-//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-			solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-			// resolution
-			solver.set(new ConstraintEngine(solver));
-			solver.findSolution();
-			System.out.println(solver.getMeasures());
-			check(solver, decisionVars);
-			//output
-			String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
-					+ (int)(solver.getMeasures().getFailCount()) + ";"
-					+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
-					+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
-			TextWriter.writeTextInto(txt, outFile);
-			if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
-				activeBools = false;
 			}
 		}
+		BoolVar[] decisionVars = new BoolVar[ct];
+		int[] mapping = new int[ct];
+		ct = 0;
+		for(int i=0;i<n;i++){
+			for(int j=i+1;j<n;j++){
+				if(matrix[i][j]){
+					decisionVars[ct++] = graph[i][j];
+					mapping[ct-1] = i*n+j;
+				}
+			}
+		}
+		ArrayList<BoolVar>[] gl = new ArrayList[n];
+		for(int i=0;i<n;i++){
+			ArrayList<BoolVar> l = new ArrayList();
+			for(int j=0;j<n;j++){
+				if(matrix[i][j]){
+					l.add(graph[i][j]);
+				}
+			}
+			gl[i] = l;
+		}
+		// constraints
+		Constraint gc = new Constraint(solver);
+		IntVar two = VariableFactory.bounded("2",2,2,solver);
+		for(int i=0;i<n;i++){
+			int k = 0;
+			for(int j=0;j<n;j++){
+				if(matrix[i][j])
+					k++;
+			}
+			BoolVar[] bools = new BoolVar[k];
+			k = 0;
+			for(int j=0;j<n;j++){
+				if(matrix[i][j])
+					bools[k++] = graph[i][j];
+			}
+			gc.addPropagators(new PropBoolSum(bools,two,solver,gc));
+		}
+		gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
+		solver.post(gc);
+		// config
+		solver.set(new MinNeighBool(decisionVars,gl));
+//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+		// resolution
+		solver.set(new ConstraintEngine(solver));
+		solver.findSolution();
+		System.out.println(solver.getMeasures());
+		check(solver, decisionVars);
+		//output
+		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+				+ (int)(solver.getMeasures().getFailCount()) + ";"
+				+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
+				+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
+		TextWriter.writeTextInto(txt, outFile);
+		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+			activeBools = false;
+		}
+	}
 
 	private static void solveIntegers(boolean[][] matrix, String instanceName) {
-			int n = matrix.length;
-			solver = new Solver();
-			// variables
-			IntVar[] graph = new IntVar[n];
-			for(int i=0;i<n;i++){
-				int k = 0;
-				for(int j=0;j<n;j++){
-					if(matrix[i][j]){
-						k++;
-					}
+		int n = matrix.length;
+		solver = new Solver();
+		// variables
+		IntVar[] graph = new IntVar[n];
+		for(int i=0;i<n;i++){
+			int k = 0;
+			for(int j=0;j<n;j++){
+				if(matrix[i][j]){
+					k++;
 				}
-				int[] values = new int[k];
-				k = 0;
-				for(int j=0;j<n;j++){
-					if(matrix[i][j]){
-						values[k++] = j;
-					}
-				}
-				graph[i] = VariableFactory.enumerated("v"+i,values,solver);
 			}
-			// constraints
-			Constraint gc = new Constraint(solver);
-			solver.post(new AllDifferent(graph,solver, AllDifferent.Type.AC));
-			gc.addPropagators(new PropNoSubtour(graph,solver,gc));
+			int[] values = new int[k];
+			k = 0;
+			for(int j=0;j<n;j++){
+				if(matrix[i][j]){
+					values[k++] = j;
+				}
+			}
+			graph[i] = VariableFactory.enumerated("v"+i,values,solver);
+		}
+		// constraints
+		Constraint gc = new Constraint(solver);
+		solver.post(new AllDifferent(graph,solver, AllDifferent.Type.AC));
+		gc.addPropagators(new PropNoSubtour(graph,solver,gc));
 //			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
-			solver.post(gc);
-			// config
+		solver.post(gc);
+		// config
 //			solver.set(new MinNeighBool(decisionVars,gl));
 		solver.set(StrategyFactory.minDomMinVal(graph,solver.getEnvironment()));
 
 //        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-			solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-			// resolution
-			solver.set(new ConstraintEngine(solver));
-			solver.findSolution();
-			System.out.println(solver.getMeasures());
-			check(solver, graph);
-			//output
-			String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
-					+ (int)(solver.getMeasures().getFailCount()) + ";"
-					+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
-					+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
-			TextWriter.writeTextInto(txt, outFile);
-			if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
-				activeInts = false;
-			}
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+		// resolution
+		solver.set(new ConstraintEngine(solver));
+		solver.findSolution();
+		System.out.println(solver.getMeasures());
+		check(solver, graph);
+		//output
+		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getNodeCount() + ";"
+				+ (int)(solver.getMeasures().getFailCount()) + ";"
+				+ (int)(solver.getMeasures().getEventsCount()+solver.getMeasures().getPropagationsCount()) + ";"
+				+ (int)(solver.getMeasures().getTimeCount()) + ";bool;\n";
+		TextWriter.writeTextInto(txt, outFile);
+		if(solver.getMeasures().getTimeCount()>=TIMELIMIT){
+			activeInts = false;
 		}
+	}
 
 	private static void check(Solver solver, Variable... vars) {
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
@@ -281,9 +276,9 @@ public class KTP_Graph_Bool {
 		}
 		if(solver.getMeasures().getSolutionCount() ==1){
 			for(Variable v:vars)
-			if(!v.instantiated()){
-				throw new UnsupportedOperationException();
-			}
+				if(!v.instantiated()){
+					throw new UnsupportedOperationException();
+				}
 		}
 	}
 
@@ -293,7 +288,7 @@ public class KTP_Graph_Bool {
 
 	private static class MinNeigh extends ArcStrategy {
 		int n;
-		
+
 		public MinNeigh(GraphVar graphVar) {
 			super(graphVar);
 			n = graphVar.getEnvelopGraph().getNbNodes();
@@ -325,15 +320,15 @@ public class KTP_Graph_Bool {
 //				}
 //			}
 			this.from = from;
-			to = 2*n;
+			to = 2 * n;
 			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(!g.getKernelGraph().arcExists(from,j)){
-					if(j<to){
+				if (!g.getKernelGraph().arcExists(from, j)) {
+					if (j < to) {
 						to = j;
 					}
 				}
 			}
-			if(to==2*n){
+			if (to == 2 * n) {
 				throw new UnsupportedOperationException();
 			}
 			return true;
@@ -353,7 +348,8 @@ public class KTP_Graph_Bool {
 		}
 
 		@Override
-		public void init() {}
+		public void init() {
+		}
 
 		@Override
 		public Decision getDecision() {
@@ -363,12 +359,12 @@ public class KTP_Graph_Bool {
 			for (int i = 0; i < n; i++) {
 				sizi = 0;
 				ArrayList<BoolVar> l = gl[i];
-				for(BoolVar bv:l){
-					if(bv.getUB()==1 && bv.getLB()==0){
+				for (BoolVar bv : l) {
+					if (bv.getUB() == 1 && bv.getLB() == 0) {
 						sizi++;
 					}
 				}
-				if (sizi < size && sizi>0) {
+				if (sizi < size && sizi > 0) {
 					from = i;
 					size = sizi;
 				}
@@ -378,13 +374,13 @@ public class KTP_Graph_Bool {
 				return null;
 			}
 			ArrayList<BoolVar> l = gl[from];
-			for(BoolVar bv:l){
-				if(bv.getUB()==1 && bv.getLB()==0){
+			for (BoolVar bv : l) {
+				if (bv.getUB() == 1 && bv.getLB() == 0) {
 					FastDecision dec = pool.getE();
-					if(dec == null){
+					if (dec == null) {
 						dec = new FastDecision(pool);
 					}
-					dec.set(bv,1, DecisionOperator.int_eq);
+					dec.set(bv, 1, DecisionOperator.int_eq);
 					return dec;
 				}
 			}
@@ -405,7 +401,7 @@ public class KTP_Graph_Bool {
 		protected BoolVar[][] g;
 		protected int n;
 		int[] mapping;
-		protected IStateInt[] origin,end,size;
+		protected IStateInt[] origin, end, size;
 
 		//***********************************************************************************
 		// CONSTRUCTORS
@@ -414,19 +410,21 @@ public class KTP_Graph_Bool {
 		/**
 		 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
 		 * runs in O(1) per instantiation event
+		 *
 		 * @param mapping
 		 * @param graph
 		 * @param constraint
-		 * @param solver   */
+		 * @param solver
+		 */
 		public PropBoolNoSubtour(int[] mapping, BoolVar[] decVars, BoolVar[][] graph, Constraint constraint, Solver solver) {
-			super(decVars, solver, constraint, PropagatorPriority.UNARY,true);
+			super(decVars, solver, constraint, PropagatorPriority.UNARY, true);
 			g = graph;
 			this.mapping = mapping;
 			this.n = graph.length;
 			origin = new IStateInt[n];
 			size = new IStateInt[n];
 			end = new IStateInt[n];
-			for(int i=0;i<n;i++){
+			for (int i = 0; i < n; i++) {
 				origin[i] = environment.makeInt(i);
 				size[i] = environment.makeInt(1);
 				end[i] = environment.makeInt(i);
@@ -439,33 +437,33 @@ public class KTP_Graph_Bool {
 
 		@Override
 		public void propagate(int evtmask) throws ContradictionException {
-			for(int i=0;i<n;i++){
+			for (int i = 0; i < n; i++) {
 				end[i].set(i);
 				origin[i].set(i);
 				size[i].set(1);
 			}
 			int s = vars.length;
-			for(int k=0;k<s;k++){
-				if(vars[k].getLB()==1){
-					int i = mapping[k]/n;
-					int j = mapping[k]%n;
-					enforce(i,j);
+			for (int k = 0; k < s; k++) {
+				if (vars[k].getLB() == 1) {
+					int i = mapping[k] / n;
+					int j = mapping[k] % n;
+					enforce(i, j);
 				}
 			}
 		}
 
 		@Override
 		public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-			if(vars[idxVarInProp].getLB()==1){
-				int i = mapping[idxVarInProp]/n;
-				int j = mapping[idxVarInProp]%n;
-				enforce(i,j);
+			if (vars[idxVarInProp].getLB() == 1) {
+				int i = mapping[idxVarInProp] / n;
+				int j = mapping[idxVarInProp] % n;
+				enforce(i, j);
 			}
 		}
 
 		@Override
 		public int getPropagationConditions(int vIdx) {
-			return EventType.INSTANTIATE.mask+EventType.REMOVE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask ;
+			return EventType.INSTANTIATE.mask + EventType.REMOVE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
 		}
 
 		@Override
@@ -474,21 +472,21 @@ public class KTP_Graph_Bool {
 		}
 
 		protected void enforce(int i, int j) throws ContradictionException {
-			if(end[j].get()==end[i].get() && origin[i].get()==origin[j].get()){
-				if(size[origin[i].get()].get()==n){
+			if (end[j].get() == end[i].get() && origin[i].get() == origin[j].get()) {
+				if (size[origin[i].get()].get() == n) {
 					return;
 				}
-				contradiction(g[i][j],"");
+				contradiction(g[i][j], "");
 			}
-			if(end[i].get() == i && origin[j].get()==j){
-				enforceNormal(i,j);
+			if (end[i].get() == i && origin[j].get() == j) {
+				enforceNormal(i, j);
 				return;
 			}
-			if(origin[i].get() == i && end[j].get()==j){
-				enforceNormal(j,i);
+			if (origin[i].get() == i && end[j].get() == j) {
+				enforceNormal(j, i);
 				return;
 			}
-			if(origin[i].get() == i && origin[j].get()==j){
+			if (origin[i].get() == i && origin[j].get() == j) {
 				int newOrigin = end[i].get();
 				int newEnd = origin[i].get();
 				origin[i].set(newOrigin);
@@ -496,10 +494,10 @@ public class KTP_Graph_Bool {
 				end[i].set(newEnd);
 				end[newEnd].set(newEnd);
 				size[newOrigin].set(size[newEnd].get());
-				enforceNormal(i,j);
+				enforceNormal(i, j);
 				return;
 			}
-			if(end[i].get() == i && end[j].get()==j){
+			if (end[i].get() == i && end[j].get() == j) {
 				int newOrigin = end[j].get();
 				int newEnd = origin[j].get();
 				end[j].set(newEnd);
@@ -507,34 +505,34 @@ public class KTP_Graph_Bool {
 				origin[j].set(newOrigin);
 				origin[newOrigin].set(newOrigin);
 				size[newOrigin].set(size[newEnd].get());
-				enforceNormal(i,j);
+				enforceNormal(i, j);
 				return;
 			}
-			contradiction(g[i][j],"");//this cas should not happen (except if deg=2 is not propagated yet)
+			contradiction(g[i][j], "");//this cas should not happen (except if deg=2 is not propagated yet)
 		}
 
-		protected  void enforceNormal(int i, int j) throws ContradictionException {
+		protected void enforceNormal(int i, int j) throws ContradictionException {
 			int last = end[j].get();
 			int start = origin[i].get();
 			origin[last].set(start);
 			end[start].set(last);
 			size[start].add(size[j].get());
-			if(size[start].get()>n){
-				contradiction(g[i][j],"");
+			if (size[start].get() > n) {
+				contradiction(g[i][j], "");
 			}
-			if(size[start].get()<n){
-				if(last==j && start == i){
+			if (size[start].get() < n) {
+				if (last == j && start == i) {
 					// rien faire car le chemin ne contient qu'une arrete
-				}else{
-					if(g[last][start]!=null)
-					g[last][start].setToFalse(this,false);
+				} else {
+					if (g[last][start] != null)
+						g[last][start].setToFalse(this, false);
 				}
 			}
-			if(size[start].get()==n){
-				if(g[last][start]==null){
-					contradiction(null,"");
+			if (size[start].get() == n) {
+				if (g[last][start] == null) {
+					contradiction(null, "");
 				}
-				g[last][start].setToTrue(this,false);
+				g[last][start].setToTrue(this, false);
 			}
 		}
 	}

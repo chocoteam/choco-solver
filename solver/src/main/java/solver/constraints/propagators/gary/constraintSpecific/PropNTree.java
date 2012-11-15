@@ -138,7 +138,7 @@ public class PropNTree extends Propagator {
 
     private void structuralPruning() throws ContradictionException {
         int n = g.getEnvelopGraph().getNbNodes();
-        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(),false);
+        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
         ISet nei;
         for (int node = 0; node < n; node++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(node);
@@ -196,8 +196,8 @@ public class PropNTree extends Propagator {
         for (int i = SCCfinder.getNbSCC() - 1; i >= 0; i--) {
             looksSink = true;
             boolean inKer = false;
-			node = SCCfinder.getSCCFirstNode(i);
-			while(node!=-1){
+            node = SCCfinder.getSCCFirstNode(i);
+            while (node != -1) {
                 if (g.getKernelGraph().getActiveNodes().contain(node)) {
                     inKer = true;
                 }

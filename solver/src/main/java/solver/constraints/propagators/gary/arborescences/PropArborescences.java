@@ -54,14 +54,14 @@ public class PropArborescences extends Propagator<DirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-	// flow graph
-	DirectedGraphVar g;
-	DirectedGraph connectedGraph;
-	// number of nodes
-	int n;
-	// dominators finder that contains the dominator tree
-	AbstractLengauerTarjanDominatorsFinder domFinder;
-	ISet[] successors;
+    // flow graph
+    DirectedGraphVar g;
+    DirectedGraph connectedGraph;
+    // number of nodes
+    int n;
+    // dominators finder that contains the dominator tree
+    AbstractLengauerTarjanDominatorsFinder domFinder;
+    ISet[] successors;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -94,37 +94,37 @@ public class PropArborescences extends Propagator<DirectedGraphVar> {
         propagate(0);
     }
 
-	private void structuralPruning() throws ContradictionException {
-		for(int i=0;i<n+1;i++){
-			connectedGraph.getSuccessorsOf(i).clear();
-			connectedGraph.getPredecessorsOf(i).clear();
-		}
-		ISet nei;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getPredecessorsOf(i);
-			if(nei.isEmpty()){
-				connectedGraph.addArc(n,i);
-			}else{
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					connectedGraph.addArc(y,i);
-				}
-			}
-		}
-		if(domFinder.findDominators()){
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(x,y)){
-						g.removeArc(x,y,this);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        for (int i = 0; i < n + 1; i++) {
+            connectedGraph.getSuccessorsOf(i).clear();
+            connectedGraph.getPredecessorsOf(i).clear();
+        }
+        ISet nei;
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getPredecessorsOf(i);
+            if (nei.isEmpty()) {
+                connectedGraph.addArc(n, i);
+            } else {
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    connectedGraph.addArc(y, i);
+                }
+            }
+        }
+        if (domFinder.findDominators()) {
+            for (int x = 0; x < n; x++) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    //--- STANDART PRUNING
+                    if (domFinder.isDomminatedBy(x, y)) {
+                        g.removeArc(x, y, aCause);
+                    }
+                    // ENFORCE ARC-DOMINATORS (redondant)
+                }
+            }
+        } else {
+            contradiction(g, "the source cannot reach all nodes");
+        }
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

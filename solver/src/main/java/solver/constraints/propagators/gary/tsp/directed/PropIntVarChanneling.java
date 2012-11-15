@@ -89,62 +89,62 @@ public class PropIntVarChanneling extends Propagator {
         for (int i = 0; i < intVars.length; i++) {
             idms[i] = intVars[i].monitorDelta(this);
         }
-		this.n = g.getEnvelopGraph().getNbNodes();
-		valRemoved  = new ValRem(this);
-		arcEnforced = new EnfArc(this);
-		if(intVars[0].hasEnumeratedDomain()){
-			arcRemoved  = new RemArcAC(this);
-		}else{
-			arcRemoved  = new RemArcBC(this);
-		}
-	}
+        this.n = g.getEnvelopGraph().getNbNodes();
+        valRemoved = new ValRem(this);
+        arcEnforced = new EnfArc(this);
+        if (intVars[0].hasEnumeratedDomain()) {
+            arcRemoved = new RemArcAC(this);
+        } else {
+            arcRemoved = new RemArcBC(this);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet nei;
-		IntVar v;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!intVars[i].contains(j)){
-					g.removeArc(i,j,this);
-				}
-			}
-			v = intVars[i];
-			int ub = v.getUB();
-			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
-				if(j<n && !g.getEnvelopGraph().arcExists(i,j)){
-					v.removeValue(j,this);
-				}
-			}
-			if(!v.hasEnumeratedDomain()){
-				ub = v.getUB();
-				while(ub>=0 && ub<n && !g.getEnvelopGraph().arcExists(i,ub)){
-					v.removeValue(ub,this);
-					ub--;
-				}
-			}
-		}
-		gdm.unfreeze();
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet nei;
+        IntVar v;
+        for (int i = 0; i < n; i++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (!intVars[i].contains(j)) {
+                    g.removeArc(i, j, aCause);
+                }
+            }
+            v = intVars[i];
+            int ub = v.getUB();
+            for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
+                if (j < n && !g.getEnvelopGraph().arcExists(i, j)) {
+                    v.removeValue(j, aCause);
+                }
+            }
+            if (!v.hasEnumeratedDomain()) {
+                ub = v.getUB();
+                while (ub >= 0 && ub < n && !g.getEnvelopGraph().arcExists(i, ub)) {
+                    v.removeValue(ub, aCause);
+                    ub--;
+                }
+            }
+        }
+        gdm.unfreeze();
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if((vars[idxVarInProp].getTypeAndKind() & Variable.GRAPH)!=0) {
-			gdm.freeze();
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-			}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if ((vars[idxVarInProp].getTypeAndKind() & Variable.GRAPH) != 0) {
+            gdm.freeze();
+            if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+            }
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            }
             gdm.unfreeze();
         } else {
             varIdx = idxVarInProp;
@@ -155,93 +155,97 @@ public class PropIntVarChanneling extends Propagator {
             idms[varIdx].freeze();
             idms[idxVarInProp].forEach(valRemoved, EventType.REMOVE);
             idms[varIdx].unfreeze();
-		}
-	}
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length;i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		int val;
-		for(int i=0;i<n;i++){
-			val = intVars[i].getValue();
-			if(val<n && !g.getEnvelopGraph().arcExists(i,val)){
-				return ESat.FALSE;
-			}
-			if(g.getEnvelopGraph().getSuccessorsOf(i).getSize()>1){
-				return ESat.FALSE;
-			}
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        for (int i = 0; i < vars.length; i++) {
+            if (!vars[i].instantiated()) {
+                return ESat.UNDEFINED;
+            }
+        }
+        int val;
+        for (int i = 0; i < n; i++) {
+            val = intVars[i].getValue();
+            if (val < n && !g.getEnvelopGraph().arcExists(i, val)) {
+                return ESat.FALSE;
+            }
+            if (g.getEnvelopGraph().getSuccessorsOf(i).getSize() > 1) {
+                return ESat.FALSE;
+            }
+        }
+        return ESat.TRUE;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class ValRem implements IntProcedure{
-		private Propagator p;
+    private class ValRem implements IntProcedure {
+        private Propagator p;
 
-		private ValRem(Propagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			g.removeArc(varIdx,i,p);
-		}
-	}
+        private ValRem(Propagator p) {
+            this.p = p;
+        }
 
-	private class EnfArc implements PairProcedure {
-		private Propagator p;
+        @Override
+        public void execute(int i) throws ContradictionException {
+            g.removeArc(varIdx, i, p);
+        }
+    }
 
-		private EnfArc(Propagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			intVars[from].instantiateTo(to,p);
-		}
-	}
+    private class EnfArc implements PairProcedure {
+        private Propagator p;
 
-	private class RemArcAC implements PairProcedure{
-		private Propagator p;
+        private EnfArc(Propagator p) {
+            this.p = p;
+        }
 
-		private RemArcAC(Propagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			intVars[from].removeValue(to,p);
-		}
-	}
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            intVars[from].instantiateTo(to, p);
+        }
+    }
 
-	private class RemArcBC implements PairProcedure{
-		private Propagator p;
+    private class RemArcAC implements PairProcedure {
+        private Propagator p;
 
-		private RemArcBC(Propagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(to==intVars[from].getLB()){
-				while(to<n && !g.getEnvelopGraph().arcExists(from,to)){
-					to++;
-				}
-				intVars[from].updateLowerBound(to,p);
-			}else if(to==intVars[from].getUB()){
-				while(to>=0 && !g.getEnvelopGraph().arcExists(from,to)){
-					to--;
-				}
-				intVars[from].updateUpperBound(to, p);
-			}
-		}
-	}
+        private RemArcAC(Propagator p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            intVars[from].removeValue(to, p);
+        }
+    }
+
+    private class RemArcBC implements PairProcedure {
+        private Propagator p;
+
+        private RemArcBC(Propagator p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (to == intVars[from].getLB()) {
+                while (to < n && !g.getEnvelopGraph().arcExists(from, to)) {
+                    to++;
+                }
+                intVars[from].updateLowerBound(to, p);
+            } else if (to == intVars[from].getUB()) {
+                while (to >= 0 && !g.getEnvelopGraph().arcExists(from, to)) {
+                    to--;
+                }
+                intVars[from].updateUpperBound(to, p);
+            }
+        }
+    }
 }

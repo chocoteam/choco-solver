@@ -52,40 +52,40 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-	// flow graph
-	DirectedGraphVar g;
-	// source that reaches other nodes
-	int source;
-	// number of nodes
-	int n;
-	// dominators finder that contains the dominator tree
-	AbstractLengauerTarjanDominatorsFinder domFinder;
-	ISet[] successors;
+    // flow graph
+    DirectedGraphVar g;
+    // source that reaches other nodes
+    int source;
+    // number of nodes
+    int n;
+    // dominators finder that contains the dominator tree
+    AbstractLengauerTarjanDominatorsFinder domFinder;
+    ISet[] successors;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
-	 * Ensures that graph is an arborescence rooted in node source
-	 * @param graph
-	 * @param source root of the arborescence
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropArborescence(DirectedGraphVar graph, int source, Constraint constraint, Solver solver, boolean simple) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		n = g.getEnvelopGraph().getNbNodes();
-		this.source = source;
-		successors = new ISet[n];
-		if(simple){
-			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
-		}else{
-			domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
-		}
-	}
+    /**
+     * @param graph
+     * @param source     root of the arborescence
+     * @param constraint
+     * @param solver
+     * @PropAnn(tested = {BENCHMARK,CORRECTION})
+     * Ensures that graph is an arborescence rooted in node source
+     */
+    public PropArborescence(DirectedGraphVar graph, int source, Constraint constraint, Solver solver, boolean simple) {
+        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+        g = graph;
+        n = g.getEnvelopGraph().getNbNodes();
+        this.source = source;
+        successors = new ISet[n];
+        if (simple) {
+            domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
+        } else {
+            domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -106,23 +106,23 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
         structuralPruning();
     }
 
-	private void structuralPruning() throws ContradictionException {
-		if(domFinder.findDominators()){
-			ISet nei;
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(x,y)){
-						g.removeArc(x,y,this);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        if (domFinder.findDominators()) {
+            ISet nei;
+            for (int x = 0; x < n; x++) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    //--- STANDART PRUNING
+                    if (domFinder.isDomminatedBy(x, y)) {
+                        g.removeArc(x, y, aCause);
+                    }
+                    // ENFORCE ARC-DOMINATORS (redondant)
+                }
+            }
+        } else {
+            contradiction(g, "the source cannot reach all nodes");
+        }
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

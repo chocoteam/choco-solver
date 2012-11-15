@@ -65,72 +65,76 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
         super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-		enf = new EnfProc(this);
-		n = g.getEnvelopGraph().getNbNodes();
-	}
+        enf = new EnfProc(this);
+        n = g.getEnvelopGraph().getNbNodes();
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet ker = g.getKernelGraph().getActiveNodes();
-		ISet succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				g.removeArc(j, i, this);
-			}
-		}
-		gdm.unfreeze();
-	}
-
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.freeze();
-		gdm.forEachArc(enf, EventType.ENFORCEARC);
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet ker = g.getKernelGraph().getActiveNodes();
+        ISet succ;
+        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
+            succ = g.getKernelGraph().getSuccessorsOf(i);
+            for (int j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
+                g.removeArc(j, i, aCause);
+            }
+        }
         gdm.unfreeze();
-	}
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.freeze();
+        gdm.forEachArc(enf, EventType.ENFORCEARC);
+        gdm.unfreeze();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet ker = g.getKernelGraph().getActiveNodes();
-		ISet succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				if(g.getKernelGraph().getSuccessorsOf(j).contain(i)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		if(g.instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ENFORCEARC.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        ISet ker = g.getKernelGraph().getActiveNodes();
+        ISet succ;
+        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
+            succ = g.getKernelGraph().getSuccessorsOf(i);
+            for (int j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
+                if (g.getKernelGraph().getSuccessorsOf(j).contain(i)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        if (g.instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	/** Enable to remove the opposite arc */
-	private class EnfProc implements PairProcedure {
-		private final Propagator p;
-		public EnfProc(Propagator p) {
-			this.p = p;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(from!=to){
-				g.removeArc(to, from, p);
-			}
-		}
-	}
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
+
+    /**
+     * Enable to remove the opposite arc
+     */
+    private class EnfProc implements PairProcedure {
+        private final Propagator p;
+
+        public EnfProc(Propagator p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (from != to) {
+                g.removeArc(to, from, p);
+            }
+        }
+    }
 }

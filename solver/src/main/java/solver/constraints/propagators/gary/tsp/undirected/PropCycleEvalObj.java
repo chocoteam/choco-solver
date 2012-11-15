@@ -108,87 +108,87 @@ public class PropCycleEvalObj extends Propagator {
         }
         sum.updateLowerBound(minSum, aCause);
 //		sum.updateUpperBound(maxSum, this);
-		filter(minSum);
-	}
+        filter(minSum);
+    }
 
-	protected void filter(int minSum) throws ContradictionException {
-		ISet succs;
-		int delta = sum.getUB()-minSum;
-		for (int i = 0; i < n; i++) {
-			succs = g.getEnvelopGraph().getSuccessorsOf(i);
-			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-				if(i<j && !g.getKernelGraph().edgeExists(i,j)){
-					if (replacementCost[i]==-1 || replacementCost[j]==-1) {
+    protected void filter(int minSum) throws ContradictionException {
+        ISet succs;
+        int delta = sum.getUB() - minSum;
+        for (int i = 0; i < n; i++) {
+            succs = g.getEnvelopGraph().getSuccessorsOf(i);
+            for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                if (i < j && !g.getKernelGraph().edgeExists(i, j)) {
+                    if (replacementCost[i] == -1 || replacementCost[j] == -1) {
 //						throw new UnsupportedOperationException();
-						g.removeArc(i,j,this);
-					}
-					if ((2*distMatrix[i][j]-replacementCost[i]-replacementCost[j])/2 > delta) {
-						g.removeArc(i, j, this);
-					}
-				}
-			}
-		}
-	}
+                        g.removeArc(i, j, aCause);
+                    }
+                    if ((2 * distMatrix[i][j] - replacementCost[i] - replacementCost[j]) / 2 > delta) {
+                        g.removeArc(i, j, aCause);
+                    }
+                }
+            }
+        }
+    }
 
-	protected int findTwoBest(int i) throws ContradictionException {
-		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-		if(mc1!=-1){
-			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
-			if(mc2!=-1){
-				replacementCost[i] = -1;
-				return distMatrix[i][mc1] + distMatrix[i][mc2];
-			}
-			int cost = distMatrix[i][getBestNot(i,mc1)];
-			replacementCost[i] = cost;
-			return distMatrix[i][mc1] + cost;
-		}
-		mc1 = getBestNot(i,-2);
-		int cost = distMatrix[i][getBestNot(i,mc1)];
-		replacementCost[i] = cost;
-		return distMatrix[i][mc1]+cost;
-	}
+    protected int findTwoBest(int i) throws ContradictionException {
+        int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+        if (mc1 != -1) {
+            int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
+            if (mc2 != -1) {
+                replacementCost[i] = -1;
+                return distMatrix[i][mc1] + distMatrix[i][mc2];
+            }
+            int cost = distMatrix[i][getBestNot(i, mc1)];
+            replacementCost[i] = cost;
+            return distMatrix[i][mc1] + cost;
+        }
+        mc1 = getBestNot(i, -2);
+        int cost = distMatrix[i][getBestNot(i, mc1)];
+        replacementCost[i] = cost;
+        return distMatrix[i][mc1] + cost;
+    }
 
-	protected int getBestNot(int i, int not) throws ContradictionException {
-		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int cost = -1;
-		int idx = -1;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (idx==-1 || cost>distMatrix[i][j])){
-				idx = j;
-				cost = distMatrix[i][j];
-			}
-		}
-		if(idx==-1){
+    protected int getBestNot(int i, int not) throws ContradictionException {
+        ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+        int cost = -1;
+        int idx = -1;
+        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            if (j != not && (idx == -1 || cost > distMatrix[i][j])) {
+                idx = j;
+                cost = distMatrix[i][j];
+            }
+        }
+        if (idx == -1) {
 //			throw new UnsupportedOperationException();
-			contradiction(g,"");
-		}
-		return idx;
-	}
+            contradiction(g, "");
+        }
+        return idx;
+    }
 
-	protected int findTwoWorst(int i) throws ContradictionException {
-		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-		if(mc1!=-1){
-			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
-			if(mc2!=-1){
-				return distMatrix[i][mc1] + distMatrix[i][mc2];
-			}
-			return distMatrix[i][mc1] + distMatrix[i][getWorstNot(i, mc1)];
-		}
-		mc1 = getWorstNot(i, -2);
-		return distMatrix[i][mc1]+distMatrix[i][getWorstNot(i, mc1)];
-	}
+    protected int findTwoWorst(int i) throws ContradictionException {
+        int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+        if (mc1 != -1) {
+            int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
+            if (mc2 != -1) {
+                return distMatrix[i][mc1] + distMatrix[i][mc2];
+            }
+            return distMatrix[i][mc1] + distMatrix[i][getWorstNot(i, mc1)];
+        }
+        mc1 = getWorstNot(i, -2);
+        return distMatrix[i][mc1] + distMatrix[i][getWorstNot(i, mc1)];
+    }
 
-	protected int getWorstNot(int i, int not) throws ContradictionException {
-		ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int cost = -1;
-		int idx = -1;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (idx==-1 || cost<distMatrix[i][j])){
-				idx = j;
-				cost = distMatrix[i][j];
-			}
-		}
-		if(idx==-1){
+    protected int getWorstNot(int i, int not) throws ContradictionException {
+        ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+        int cost = -1;
+        int idx = -1;
+        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            if (j != not && (idx == -1 || cost < distMatrix[i][j])) {
+                idx = j;
+                cost = distMatrix[i][j];
+            }
+        }
+        if (idx == -1) {
 //			throw new UnsupportedOperationException();
             contradiction(g, "");
         }
