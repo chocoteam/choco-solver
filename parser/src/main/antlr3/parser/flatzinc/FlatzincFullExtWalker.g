@@ -234,11 +234,13 @@ predicate   returns [Predicate pred]
 
 // ATTRIBUTE ACCESSIBLE THROUGH THE SOLVER
 attribute   returns [Attribute attr]
-    :   VNAME    {$attr = Attribute.VNAME;}
+    :   VAR     {$attr = Attribute.VAR;}
+    |   CSTR    {$attr = Attribute.CSTR;}
+    |   PROP    {$attr = Attribute.PROP;}
+    |   VNAME    {$attr = Attribute.VNAME;}
     |   VCARD   {$attr = Attribute.VCARD;}
     |   CNAME    {$attr = Attribute.CNAME;}
     |   CARITY  {$attr = Attribute.CARITY;}
-    |   PIDX     {$attr = Attribute.PIDX;}
     |   PPRIO   {$attr = Attribute.PPRIO;}
     |   PARITY  {$attr = Attribute.PARITY;}
     |   PPRIOD  {$attr = Attribute.PPRIOD;}

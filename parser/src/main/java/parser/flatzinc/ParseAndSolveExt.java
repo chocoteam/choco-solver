@@ -81,8 +81,8 @@ public class ParseAndSolveExt {
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     private long tl = -1;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n0: constraint\n1: variable\n2: 7q cstrs\n3: 8q cstrs." +
-            "\n4: 8q vars\n5: abs\n6: arcs\n-1: default", required = false)
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3: 7q cstrs" +
+            "\n4: dsl constraint\n5: dsl variable\n6: dsl 7q cstrs\n0: default", required = false)
     private byte eng = -1;
 
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
@@ -197,10 +197,10 @@ public class ParseAndSolveExt {
 
         switch (eng) {
             case 4:
-                st = "All as queue(wone) of {each prop.idx as list(for)};";
+                st = "All as queue(wone) of {each prop as list(for)};";
                 break;
             case 5:
-                st = "All as queue(wone) of {each var.name as list(for)};";
+                st = "All as queue(wone) of {each var as list(for)};";
                 break;
             case 6:
                 st = "All as list(wone) of {each prop.prioDyn as queue(one)};";

@@ -102,11 +102,12 @@ KEY:'key';
 /*********************
  *  ATTRIBUTES
  *********************/
+CSTR:'cstr';
+PROP:'prop';
 VNAME:'var.name';
 VCARD:'var.cardinality';
 CNAME:'cstr.name';
 CARITY:'cstr.arity';
-PIDX:'prop.idx';
 PPRIO:'prop.priority';
 PARITY:'prop.arity';
 PPRIOD:'prop.prioDyn';

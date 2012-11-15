@@ -36,15 +36,46 @@ import solver.propagation.generator.Arc;
  */
 public enum Attribute implements IAttribute<Arc> {
 
-    VNAME {
+    VAR {
         @Override
-        public int evaluate(Arc p) {
-            return p.var.getId();
+        public int eval(Arc p) {
+            return p.var.hashCode();
         }
 
         @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    CSTR {
+        @Override
         public int eval(Arc p) {
-            return p.var.getId();
+            return p.prop.getConstraint().hashCode();
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    PROP {
+        @Override
+        public int eval(Arc p) {
+            return p.prop.hashCode();
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    VNAME {
+        @Override
+        public int eval(Arc p) {
+            return p.var.getName().hashCode();
         }
 
         @Override
@@ -53,11 +84,6 @@ public enum Attribute implements IAttribute<Arc> {
         }
 
     }, VCARD {
-        @Override
-        public int evaluate(Arc p) {
-            return p.var.getNbProps();
-        }
-
         @Override
         public int eval(Arc p) {
             return p.var.getNbProps();
@@ -69,11 +95,6 @@ public enum Attribute implements IAttribute<Arc> {
         }
 
     }, CNAME {
-        @Override
-        public int evaluate(Arc p) {
-            return p.prop.getConstraint().hashCode();
-        }
-
         @Override
         public int eval(Arc p) {
             return p.prop.getConstraint().hashCode();
@@ -87,11 +108,6 @@ public enum Attribute implements IAttribute<Arc> {
 
     }, CARITY {
         @Override
-        public int evaluate(Arc p) {
-            return p.prop.getConstraint().getVariables().length;
-        }
-
-        @Override
         public int eval(Arc p) {
             return p.prop.getConstraint().getVariables().length;
         }
@@ -102,11 +118,6 @@ public enum Attribute implements IAttribute<Arc> {
         }
 
     }, PIDX {
-        @Override
-        public int evaluate(Arc p) {
-            return p.prop.getId();
-        }
-
         @Override
         public int eval(Arc p) {
             return p.prop.getId();
@@ -120,11 +131,6 @@ public enum Attribute implements IAttribute<Arc> {
 
     }, PPRIO {
         @Override
-        public int evaluate(Arc p) {
-            return p.prop.getPriority().priority;
-        }
-
-        @Override
         public int eval(Arc p) {
             return p.prop.getPriority().priority;
         }
@@ -135,11 +141,6 @@ public enum Attribute implements IAttribute<Arc> {
         }
 
     }, PARITY {
-        @Override
-        public int evaluate(Arc p) {
-            return p.prop.getNbVars();
-        }
-
         @Override
         public int eval(Arc p) {
             return p.prop.getNbVars();
@@ -152,11 +153,6 @@ public enum Attribute implements IAttribute<Arc> {
 
     }, PPRIOD {
         @Override
-        public int evaluate(Arc p) {
-            return p.prop.dynPriority();
-        }
-
-        @Override
         public int eval(Arc p) {
             return p.prop.dynPriority();
         }
@@ -167,8 +163,6 @@ public enum Attribute implements IAttribute<Arc> {
         }
 
     };
-
-    public abstract int evaluate(Arc p);
 
     public abstract boolean isDynamic();
 

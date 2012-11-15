@@ -82,11 +82,13 @@ predicate
 
 // ATTRIBUTE ACCESSIBLE THROUGH THE SOLVER
 attribute
-	: 	VNAME
+	: 	VAR
+	|   CSTR
+	|   PROP
+	|   VNAME
     |   VCARD
     |   CNAME
     |   CARITY
-    |   PIDX
     |   PPRIO
     |   PARITY
     |   PPRIOD
