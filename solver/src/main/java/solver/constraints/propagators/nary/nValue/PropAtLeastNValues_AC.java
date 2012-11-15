@@ -257,6 +257,26 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     }
                 }
             }
+			if(!v.hasEnumeratedDomain()){
+				ub = v.getUB();
+				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+					j = map.get(k);
+					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
+						break;
+					}else{
+						v.removeValue(k, aCause);
+					}
+				}
+				int lb = v.getLB();
+				for (int k = ub; k>=lb; k = v.previousValue(k)) {
+					j = map.get(k);
+					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
+						break;
+					}else{
+						v.removeValue(k, aCause);
+					}
+				}
+			}
         }
     }
 
@@ -316,18 +336,18 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        BitSet values = new BitSet(n2 - n);
-        BitSet mandatoryValues = new BitSet(n2 - n);
+        BitSet values = new BitSet(n2);
+        BitSet mandatoryValues = new BitSet(n2);
         IntVar v;
         int ub;
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                mandatoryValues.set(ub);
+                mandatoryValues.set(map.get(ub));
             }
             for (int j = v.getLB(); j <= ub; j++) {
-                values.set(j);
+                values.set(map.get(j));
             }
         }
         if (mandatoryValues.cardinality() >= vars[n].getUB()) {
