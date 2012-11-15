@@ -332,26 +332,25 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (prop.advise(pindices[p], type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE)
-                        PropagationUtils.printSchedule(prop);
-                    int aid = p2i.get(prop.getId());
-                    if (masks_f[aid][pindices[p]] == 0) {
-                        prop.incNbPendingEvt();
+            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+                if (Configuration.PRINT_SCHEDULE){
+                    PropagationUtils.printSchedule(prop);
+                }
+                int aid = p2i.get(prop.getId());
+                if (masks_f[aid][pindices[p]] == 0) {
+                    prop.incNbPendingEvt();
+                }
+                masks_f[aid][pindices[p]] |= type.strengthened_mask;
+                if (!schedule[aid]) {
+                    double _w = minOrmax * A[aid];
+                    prop_heap.insert(_w, aid);
+                    schedule[aid] = true;
+                    S[aid]++;
+                    if (cid != -1) {
+                        affected.add(cid);
+                        I[cid]++;
                     }
-                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if (!schedule[aid]) {
-                        double _w = minOrmax * A[aid];
-                        prop_heap.insert(_w, aid);
-                        schedule[aid] = true;
-                        S[aid]++;
-                        if (cid != -1) {
-                            affected.add(cid);
-                            I[cid]++;
-                        }
-                        prop.incNbPendingEvt();
-                    }
+                    prop.incNbPendingEvt();
                 }
             }
         }

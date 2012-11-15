@@ -27,7 +27,6 @@
 package solver.propagation.generator;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 
@@ -169,9 +168,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
             toPropagate.clear(i);
             lastPopped = elements[i];
-            if (Configuration.LAZY_UPDATE) {
-                lastPopped.flush();
-            }
+            lastPopped.flush();
             lastPopped.deque();
         }
     }

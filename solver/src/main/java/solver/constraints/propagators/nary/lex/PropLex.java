@@ -258,4 +258,25 @@ public class PropLex extends Propagator<IntVar> {
     }
 
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("LEX <");
+        int i = 0;
+        for (; i < Math.min(this.x.length - 1, 2); i++) {
+            sb.append(this.x[i]).append(", ");
+        }
+        if (i == 2 && this.x.length - 1 > 2) sb.append("..., ");
+        sb.append(this.x[x.length - 1]);
+        sb.append(">, <");
+        i = 0;
+        for (; i < Math.min(this.y.length - 1, 2); i++) {
+            sb.append(this.y[i]).append(", ");
+        }
+        if (i == 2 && this.y.length - 1 > 2) sb.append("..., ");
+        sb.append(this.y[y.length - 1]);
+        sb.append(">");
+
+        return sb.toString();
+    }
+
 }

@@ -86,6 +86,7 @@ attribute
     |   VCARD
     |   CNAME
     |   CARITY
+    |   PIDX
     |   PPRIO
     |   PARITY
     |   PPRIOD

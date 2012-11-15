@@ -238,6 +238,7 @@ attribute   returns [Attribute attr]
     |   VCARD   {$attr = Attribute.VCARD;}
     |   CNAME    {$attr = Attribute.CNAME;}
     |   CARITY  {$attr = Attribute.CARITY;}
+    |   PIDX     {$attr = Attribute.PIDX;}
     |   PPRIO   {$attr = Attribute.PPRIO;}
     |   PARITY  {$attr = Attribute.PARITY;}
     |   PPRIOD  {$attr = Attribute.PPRIOD;}

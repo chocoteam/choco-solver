@@ -430,18 +430,17 @@ public class PropElementV extends Propagator<IntVar> {
     }
 
     public String toString() {
-        /*StringBuilder sb = new StringBuilder(32);
+        StringBuilder sb = new StringBuilder(32);
         sb.append(this.vars[vars.length - 1]).append(" = ");
         sb.append(" <");
         int i = 0;
-        for (; i < Math.max(this.vars.length - 3, 5); i++) {
+        for (; i < Math.min(this.vars.length - 3, 2); i++) {
             sb.append(this.vars[i]).append(", ");
         }
-        if (i == 5 && this.vars.length - 3 > 5) sb.append("..., ");
+        if (i == 2 && this.vars.length - 3 > 2) sb.append("..., ");
         sb.append(this.vars[vars.length - 3]);
         sb.append("> [").append(this.vars[vars.length - 2]).append(']');
-        return sb.toString(); */
-        return "ElementV";
+        return sb.toString();
     }
 
 

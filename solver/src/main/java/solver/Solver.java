@@ -329,7 +329,7 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
-        assert isValid();
+//        assert isValid();
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }
@@ -339,7 +339,7 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        assert isValid();
+//        assert isValid();
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }

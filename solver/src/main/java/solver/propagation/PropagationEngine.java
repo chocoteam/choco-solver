@@ -182,7 +182,7 @@ public class PropagationEngine implements IPropagationEngine {
         Arc arc;
         for (int i = 0; i < to; i++) {
             arc = fines_v[id][i];
-            if (arc.prop != cause && arc.prop.isActive()) {
+            if (arc.prop != cause && arc.prop.isActive() && arc.prop.advise(arc.idxVinP, type.mask)) {
                 arc.update(type);
             }
         }
@@ -204,5 +204,6 @@ public class PropagationEngine implements IPropagationEngine {
         for (int i = 0; i < to; i++) {
             fines_p[id][i].virtuallyExecuted(propagator);
         }
+        propagator.flushPendingEvt();
     }
 }

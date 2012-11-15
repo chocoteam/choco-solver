@@ -184,21 +184,19 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (prop.advise(pindices[p], type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE)
-                        PropagationUtils.printSchedule(prop);
-                    int aid = p2i.get(prop.getId());
-                    if (evtmasks[aid][pindices[p]] == 0) {
-                        prop.incNbPendingEvt();
-                    }
-                    evtmasks[aid][pindices[p]] |= type.strengthened_mask;
-                    if (scheduled[aid] == 0) {
-                        int prio = 0;
-                        pro_queue[prio].addLast(prop);
-                        scheduled[aid] = (short) (prio + 1);
-                        notEmpty.set(prio);
-                    }
+            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+                if (Configuration.PRINT_SCHEDULE)
+                    PropagationUtils.printSchedule(prop);
+                int aid = p2i.get(prop.getId());
+                if (evtmasks[aid][pindices[p]] == 0) {
+                    prop.incNbPendingEvt();
+                }
+                evtmasks[aid][pindices[p]] |= type.strengthened_mask;
+                if (scheduled[aid] == 0) {
+                    int prio = 0;
+                    pro_queue[prio].addLast(prop);
+                    scheduled[aid] = (short) (prio + 1);
+                    notEmpty.set(prio);
                 }
             }
         }

@@ -81,6 +81,7 @@ public enum PropagationUtils {
         LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", new Object[]{v, e, c});
     }
 
+
     public static void printSchedule(Propagator p) {
         LoggerFactory.getLogger("solver").info("\t\t[S] {}", p);
     }

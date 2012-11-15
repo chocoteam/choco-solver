@@ -364,16 +364,15 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         int aid = v2i.get(id);
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (prop.advise(pindices[p], type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE)
-                        PropagationUtils.printSchedule(prop);
-                    if (masks_f[aid][p] == 0) {
-                        prop.incNbPendingEvt();
-                    }
-                    masks_f[aid][p] |= type.strengthened_mask;
-                    _schedule = true;
+            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+                if (Configuration.PRINT_SCHEDULE) {
+                    PropagationUtils.printSchedule(prop);
                 }
+                if (masks_f[aid][p] == 0) {
+                    prop.incNbPendingEvt();
+                }
+                masks_f[aid][p] |= type.strengthened_mask;
+                _schedule = true;
             }
         }
         if (_schedule) {

@@ -273,9 +273,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final void forcePropagate(EventType evt) throws ContradictionException {
         //coarseER.update(evt);
         //solver.getEngine().schedulePropagator(this, evt);
-        if (Configuration.PRINT_PROPAGATION)
-            PropagationUtils.printPropagation(null, this);
         if (nbPendingEvt == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                PropagationUtils.printPropagation(null, this);
+            }
             coarseERcalls++;
             propagate(evt.getStrengthenedMask());
         }
@@ -416,12 +417,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void incNbPendingEvt() {
-        assert (nbPendingEvt >= 0) : "number of enqued records is < 0";
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt++;
     }
 
     public void decNbPendingEvt() {
-        assert (nbPendingEvt > 0) : "number of enqued records is < 0";
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt--;
     }
 

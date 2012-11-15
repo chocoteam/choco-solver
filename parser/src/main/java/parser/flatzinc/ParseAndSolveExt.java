@@ -179,7 +179,9 @@ public class ParseAndSolveExt {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
+//            solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
             LOGGER.info("% solve instance...");
+            //SearchMonitorFactory.log(solver, true, true);
             solver.solve();
         }
     }
@@ -195,7 +197,7 @@ public class ParseAndSolveExt {
 
         switch (eng) {
             case 4:
-                st = "All as queue(wone) of {each cstr.name as list(for)};";
+                st = "All as queue(wone) of {each prop.idx as list(for)};";
                 break;
             case 5:
                 st = "All as queue(wone) of {each var.name as list(for)};";

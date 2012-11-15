@@ -64,6 +64,9 @@ public class Arc<V extends Variable> implements Serializable, solver.propagation
 
     public void update(EventType evt) {
         if (evtmask == 0) {
+            if (Configuration.PRINT_SCHEDULE) {
+                PropagationUtils.printSchedule(prop);
+            }
             prop.incNbPendingEvt();
             scheduler.schedule(this);
         } else if (scheduler.needUpdate()) {
@@ -141,7 +144,10 @@ public class Arc<V extends Variable> implements Serializable, solver.propagation
 
     @Override
     public void flush() {
-        this.evtmask = 0;
+        if (this.evtmask > 0) {
+            this.evtmask = 0;
+            prop.decNbPendingEvt();
+        }
     }
 
     public static ArrayList<Arc> populate(Solver solver) {

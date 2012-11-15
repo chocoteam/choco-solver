@@ -175,19 +175,18 @@ public class ConstraintEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (prop.advise(pindices[p], type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE)
+            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+                int aid = p2i.get(prop.getId());
+                if (masks_f[aid][pindices[p]] == 0) {
+                    if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
-                    int aid = p2i.get(prop.getId());
-                    if (masks_f[aid][pindices[p]] == 0) {
-                        prop.incNbPendingEvt();
                     }
-                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if (!schedule[aid]) {
-                        pro_queue_f.addLast(prop);
-                        schedule[aid] = true;
-                    }
+                    prop.incNbPendingEvt();
+                }
+                masks_f[aid][pindices[p]] |= type.strengthened_mask;
+                if (!schedule[aid]) {
+                    pro_queue_f.addLast(prop);
+                    schedule[aid] = true;
                 }
             }
         }

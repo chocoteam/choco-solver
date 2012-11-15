@@ -197,16 +197,14 @@ public class VariableEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (prop.advise(pindices[p], type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE)
-                        PropagationUtils.printSchedule(prop);
-                    if (evtmasks[vid][p] == 0) {
-                        prop.incNbPendingEvt();
-                    }
-                    evtmasks[vid][p] |= type.strengthened_mask;
-                    _schedule = true;
+            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+                if (Configuration.PRINT_SCHEDULE)
+                    PropagationUtils.printSchedule(prop);
+                if (evtmasks[vid][p] == 0) {
+                    prop.incNbPendingEvt();
                 }
+                evtmasks[vid][p] |= type.strengthened_mask;
+                _schedule = true;
             }
         }
         if (!schedule[vid] && _schedule) {
