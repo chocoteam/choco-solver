@@ -203,7 +203,7 @@ public class ParseAndSolveExt {
                 st = "All as queue(wone) of {each var as list(for)};";
                 break;
             case 6:
-                st = "All as list(wone) of {each prop.prioDyn as queue(one)};";
+                st = "All as list(wone) of {each prop.prioDyn as queue(one) of {each prop as list(for)}};";
                 break;
             default:
                 st = "";
