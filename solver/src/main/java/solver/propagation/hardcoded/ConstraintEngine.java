@@ -70,7 +70,6 @@ public class ConstraintEngine implements IPropagationEngine {
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final boolean[] schedule;
     protected final int[][] masks_f;
-    protected final int[] masks_c;
 
 
     public ConstraintEngine(Solver solver) {
@@ -78,7 +77,7 @@ public class ConstraintEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
@@ -103,7 +102,6 @@ public class ConstraintEngine implements IPropagationEngine {
         for (int i = 0; i < nbProp; i++) {
             masks_f[i] = new int[propagators[i].getNbVars()];
         }
-        masks_c = new int[nbProp];
     }
 
     @Override
@@ -153,7 +151,6 @@ public class ConstraintEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks_f[aid], 0);
             schedule[aid] = false;
-            masks_c[aid] = 0;
             lastProp.flushPendingEvt();
         }
         while (!pro_queue_f.isEmpty()) {
@@ -182,6 +179,8 @@ public class ConstraintEngine implements IPropagationEngine {
                         PropagationUtils.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
+                } else if (Configuration.PRINT_SCHEDULE) {
+                        PropagationUtils.printAlreadySchedule(prop);
                 }
                 masks_f[aid][pindices[p]] |= type.strengthened_mask;
                 if (!schedule[aid]) {

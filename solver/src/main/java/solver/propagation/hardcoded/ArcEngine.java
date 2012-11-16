@@ -202,16 +202,19 @@ public class ArcEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive()) {
                 paid = p2i.get(prop.getId());
                 if (prop.advise(idxVinP[vaid].get(paid), type.mask)) {
-                    if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printSchedule(prop);
-                    }
                     cm = masks_f[vaid].get(paid);
                     if (cm == -1) {  // add the arc into the queue
+                        if (Configuration.PRINT_SCHEDULE) {
+                            PropagationUtils.printSchedule(prop);
+                        }
                         arc_queue_v.addLast(variable);
                         arc_queue_p.addLast(prop);
                         masks_f[vaid].adjustValue(paid, type.strengthened_mask + 1);
                         prop.incNbPendingEvt();
                     } else {
+                        if (Configuration.PRINT_SCHEDULE) {
+                            PropagationUtils.printAlreadySchedule(prop);
+                        }
                         cm -= (cm |= type.strengthened_mask);
                         masks_f[vaid].adjustValue(paid, cm);
                     }

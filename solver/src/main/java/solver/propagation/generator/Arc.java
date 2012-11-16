@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IScheduler;
+import solver.propagation.ISchedulable;
 import solver.propagation.PropagationUtils;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -45,16 +45,16 @@ import java.util.ArrayList;
  * @author Charles Prud'homme
  * @since 14/11/12
  */
-public class Arc<V extends Variable> implements Serializable, solver.propagation.ISchedulable {
+public class Arc<V extends Variable> implements Serializable, ISchedulable<PropagationStrategy<Arc>> {
     public final V var;
     public final Propagator<V> prop;
     public final int idxVinP; // idx var in prop
 
     int evtmask; // reference to events occuring -- inclusive OR over event mask
-    protected IScheduler scheduler = IScheduler.Default.NONE;
+    protected PropagationStrategy<Arc> scheduler;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
 
-    protected IEvaluator evaluator;
+    protected IEvaluator<Arc> evaluator;
 
     public Arc(V var, Propagator<V> prop, int idxVinP) {
         this.var = var;
@@ -69,8 +69,18 @@ public class Arc<V extends Variable> implements Serializable, solver.propagation
             }
             prop.incNbPendingEvt();
             scheduler.schedule(this);
-        } else if (scheduler.needUpdate()) {
-            scheduler.update(this);
+        } else {
+            if (Configuration.PRINT_SCHEDULE) {
+                PropagationUtils.printAlreadySchedule(prop);
+            }
+            // to treat case where this belongs to the current group executed
+            // so the master group must be scheduled
+            if (!scheduler.enqueued()) {
+                scheduler.getScheduler().schedule(scheduler);
+            }
+            if (scheduler.needUpdate()) {
+                scheduler.update(this);
+            }
         }
         evtmask |= evt.strengthened_mask;
     }
@@ -105,7 +115,7 @@ public class Arc<V extends Variable> implements Serializable, solver.propagation
 
     @Override
     public void attachEvaluator(IEvaluator evaluator) {
-        this.evaluator = evaluator;
+        this.evaluator = (IEvaluator<Arc>) evaluator;
     }
 
     @Override
@@ -122,13 +132,13 @@ public class Arc<V extends Variable> implements Serializable, solver.propagation
     }
 
     @Override
-    public void setScheduler(IScheduler scheduler, int idxInS) {
+    public void setScheduler(PropagationStrategy<Arc> scheduler, int idxInS) {
         this.scheduler = scheduler;
         this.schedulerIdx = idxInS;
     }
 
     @Override
-    public IScheduler getScheduler() {
+    public PropagationStrategy<Arc> getScheduler() {
         return scheduler;
     }
 

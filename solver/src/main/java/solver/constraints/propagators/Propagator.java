@@ -419,15 +419,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void incNbPendingEvt() {
         assert (nbPendingEvt >= 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt++;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
     public void decNbPendingEvt() {
         assert (nbPendingEvt > 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt--;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);
     }
 
     public void flushPendingEvt() {
         nbPendingEvt = 0;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[F]{}:{}", nbPendingEvt, this);
     }
 
     /**

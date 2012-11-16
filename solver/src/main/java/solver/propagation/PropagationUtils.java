@@ -85,4 +85,8 @@ public enum PropagationUtils {
     public static void printSchedule(Propagator p) {
         LoggerFactory.getLogger("solver").info("\t\t[S] {}", p);
     }
+
+    public static void printAlreadySchedule(Propagator p) {
+            LoggerFactory.getLogger("solver").info("\t\t[s] {}", p);
+        }
 }
