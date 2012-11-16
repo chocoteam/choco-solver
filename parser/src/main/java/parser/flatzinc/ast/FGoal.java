@@ -98,7 +98,8 @@ public class FGoal {
                     strategy = readSearchAnnotation(annotation, aSolver);
                 }
 //                solver.set(strategy);
-                long t = System.currentTimeMillis();
+                LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
+                long t = 29091981L;//System.currentTimeMillis();
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,

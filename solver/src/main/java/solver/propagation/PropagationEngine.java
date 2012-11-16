@@ -91,7 +91,7 @@ public class PropagationEngine implements IPropagationEngine {
             fines_v[i] = new Arc[variables[i].getNbProps()];
         }
         vcidx = new int[nbVar];
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         m = Integer.MAX_VALUE;
