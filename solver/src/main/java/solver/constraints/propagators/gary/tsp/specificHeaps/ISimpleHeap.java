@@ -25,56 +25,36 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 12/12/11
- * Time: 16:09
- */
-
 package solver.constraints.propagators.gary.tsp.specificHeaps;
 
 /**
- * Heap that is dedicated to the computation of MST
- * It is not generic
+ * Simple heap interface with only a few services
+ * @author Jean-Guillaume Fages
  */
-public interface MST_Heap {
+public interface ISimpleHeap {
+
 
 	/**
-	 * Add element if not already present in the heap
-	 * Else, decrease key if the new key is lower than the previous one
-	 *
+	 * Get and remove the lowest element of the heap
+	 * @return the first (lowest) element of the heap
+	 */
+	public int removeFirstElement();
+
+	/**
+	 * Add element in the heap or update its value in case it is already in
 	 * @param element
-	 * @param element_key
-	 * @param i
+	 * @param value
+	 * @return true iff element was not already in the heap or if the new value is strictly lower than the previous one
 	 */
-	public void add(int element, double element_key, int i);
+	public boolean addOrUpdateElement(int element, double value);
 
 	/**
-	 * Get the min key element
-	 * @return the element with lowest key
+	 * @return true iff the heap is empty
 	 */
-	public int pop();
+	public boolean isEmpty();
 
 	/**
-	 * Flush the heap
+	 * Clear the heap (remove any remaining element)
 	 */
-	void clear();
-
-	/**
-	 * @return true iff the heap has no element
-	 */
-	boolean isEmpty();
-
-	/**
-	 * Get the mate (used when computing MST) of element to
-	 * @param to
-	 * @return mate[to]
-	 */
-	int getMate(int to);
-
-	/**
-	 * @return the number of elements in the heap
-	 */
-	int size();
+	public void clear();
 }
