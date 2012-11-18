@@ -28,8 +28,8 @@
 package solver.constraints.propagators.gary.trees;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.setDataStructures.ISet;
@@ -43,8 +43,9 @@ public class PrimMSTFinder extends AbstractTreeFinder {
     //***********************************************************************************
 
     protected double[][] costs;
-    protected MST_Heap heap;
+    protected ISimpleHeap heap;
     protected BitSet inTree;
+	protected int[] mate;
     protected int tSize;
     protected double minVal;
     protected double maxTArc;
@@ -55,8 +56,10 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 
     public PrimMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
         super(nbNodes, propagator);
-        heap = new FastArrayHeap(nbNodes);
+		heap = new FastSimpleHeap(nbNodes);
+//		heap = new FastArrayHeap(nbNodes);
         inTree = new BitSet(n);
+		mate = new int[n];
     }
 
     //***********************************************************************************
@@ -84,8 +87,8 @@ public class PrimMSTFinder extends AbstractTreeFinder {
         addNode(0);
         int from, to;
         while (tSize < n - 1 && !heap.isEmpty()) {
-            to = heap.pop();
-            from = heap.getMate(to);
+            to = heap.removeFirstElement();
+            from = mate[to];
             addArc(from, to);
         }
         if (tSize != n - 1) {
@@ -115,9 +118,12 @@ public class PrimMSTFinder extends AbstractTreeFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(i, j)) {
-                        heap.add(j, minVal, i);
+                        heap.addOrUpdateElement(j, Integer.MIN_VALUE);
+						mate[j] = i;
                     } else {
-                        heap.add(j, costs[i][j], i);
+                        if(heap.addOrUpdateElement(j, costs[i][j])){
+							mate[j] = i;
+						}
                     }
                 }
             }

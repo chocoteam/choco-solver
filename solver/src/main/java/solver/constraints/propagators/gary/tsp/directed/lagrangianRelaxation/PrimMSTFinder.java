@@ -28,8 +28,8 @@
 package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
@@ -42,11 +42,12 @@ public class PrimMSTFinder extends AbstractMSTFinder {
     //***********************************************************************************
 
     double[][] costs;
-    MST_Heap heap;
+    ISimpleHeap heap;
     BitSet inTree;
     int tSize;
     double minVal;
     double maxTArc;
+	int[] mate;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -54,8 +55,9 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 
     public PrimMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
         super(nbNodes, propagator);
-        heap = new FastArrayHeap(nbNodes);
+        heap = new FastSimpleHeap(nbNodes);
         inTree = new BitSet(n);
+		mate = new int[n*2];
     }
 
     //***********************************************************************************
@@ -84,8 +86,8 @@ public class PrimMSTFinder extends AbstractMSTFinder {
         addNode(0);
         int from, to;
         while (tSize < n - 1 && !heap.isEmpty()) {
-            to = heap.pop();
-            from = heap.getMate(to);
+            to = heap.removeFirstElement();
+            from = mate[to];
             addArc(from, to);
         }
         if (tSize != n - 1) {
@@ -129,9 +131,12 @@ public class PrimMSTFinder extends AbstractMSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(i, j)) {
-                        heap.add(j, minVal, i);
+						heap.addOrUpdateElement(j, Integer.MIN_VALUE);
+						mate[j] = i;
                     } else {
-                        heap.add(j, costs[i][j], i);
+						if(heap.addOrUpdateElement(j, costs[i][j])){
+							mate[j] = i;
+						}
                     }
                 }
             }
@@ -139,9 +144,13 @@ public class PrimMSTFinder extends AbstractMSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(j, i)) {
-                        heap.add(j, minVal, i + n);
+						if(heap.addOrUpdateElement(j, Integer.MIN_VALUE)){
+							mate[j] = i+n;
+						}
                     } else {
-                        heap.add(j, costs[j][i], i + n);
+						if(heap.addOrUpdateElement(j, costs[j][i])){
+							mate[j] = i+n;
+						}
                     }
                 }
             }

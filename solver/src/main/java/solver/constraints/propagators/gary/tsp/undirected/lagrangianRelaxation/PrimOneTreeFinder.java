@@ -102,7 +102,6 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
                 maxTArc = Math.max(maxTArc, costs[oneNode][min2]);
             }
         }
-//		boolean findCuts = nei.getSize()==2; // TAG: cut, not very helpful
         int first = -1, sizeFirst = n + 1;
         for (int i = 0; i < n; i++) {
             if (i != oneNode && g.getSuccessorsOf(i).getSize() < sizeFirst) {
@@ -116,11 +115,8 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
         addNode(first);
         int from, to;
         while (tSize < n - 2 && !heap.isEmpty()) {
-            to = heap.pop();
-            from = heap.getMate(to);
-//			if(findCuts && heap.size()==1 && (inTree.get(min1) == inTree.get(min2))){ // TAG: cut, not very helpful
-//				findCuts(from,to);
-//			}
+            to = heap.removeFirstElement();
+            from = mate[to];
             addArc(from, to);
         }
         if (tSize != n - 2) {
@@ -133,38 +129,7 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
         }
     }
 
-//	// TAG: cut, not very helpful
-//	private void findCuts(int from, int to) throws ContradictionException {
-//		INeighbors nei = g.getSuccessorsOf(to);
-//		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//			if(j!=from && inTree.get(j)){
-//				return;
-//			}
-//		}
-//		propHK.enforce(from,to);
-//		to = heap.pop();
-//		from = heap.getMate(to);
-//		nei = g.getSuccessorsOf(to);
-//		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//			if(j!=from && inTree.get(j)){
-//				heap.add(to,costs[from][to],from);
-//				return;
-//			}
-//		}
-//		propHK.enforce(from,to);
-//		heap.add(to,minVal,from);
-//	}
-
     private void chooseOneNode() {
         oneNode = 0;
-//		int size = 0;
-//		int s;
-//		for(int i=0;i<n;i++){
-//			s = g.getSuccessorsOf(i).getSize();
-//			if(s>size){
-//				size = g.getSuccessorsOf(i).getSize();
-//				oneNode = i;
-//			}
-//		}
     }
 }

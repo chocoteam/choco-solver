@@ -50,7 +50,7 @@ public class FastArrayHeap extends ArrayHeap{
 	}
 
 	@Override
-	public void add(int element, double element_key, int i) {
+	public boolean addOrUpdateElement(int element, double element_key) {
 		if(isEmpty() || element_key<bestVal){
 			bestVal = element_key;
 			bestSize = 0;
@@ -58,17 +58,22 @@ public class FastArrayHeap extends ArrayHeap{
 		}else if(element_key==bestVal && element_key<value[element]){
 			best[bestSize++]=element;
 		}
-		super.add(element,element_key,i);
+		return super.addOrUpdateElement(element,element_key);
 	}
 	@Override
-	public int pop() {
+	public int removeFirstElement() {
 		if(bestSize>0){
-			int min = best[bestSize-1];
-			bestSize--;
+			int min = best[--bestSize];
 			in.clear(min);
 			size--;
 			return min;
 		}
-		return super.pop();
+		return super.removeFirstElement();
+	}
+
+	@Override
+	public void clear() {
+		super.clear();
+		bestSize=0;
 	}
 }

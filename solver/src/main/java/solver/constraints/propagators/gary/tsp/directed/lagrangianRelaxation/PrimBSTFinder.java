@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.setDataStructures.ISet;
@@ -44,8 +44,9 @@ public class PrimBSTFinder extends AbstractBSTFinder {
     //***********************************************************************************
 
     double[][] costs;
-    MST_Heap heap;
+    ISimpleHeap heap;
     BitSet inTree;
+	int[] mate;
     private int tSize;
     private double minVal;
     double maxTArc;
@@ -59,10 +60,11 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 
     public PrimBSTFinder(int nbNodes, GraphLagrangianRelaxation propagator, int start, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
         super(nbNodes, propagator, nR, sccOf, outArcs);
-        heap = new FastArrayHeap(nbNodes);
+        heap = new FastSimpleHeap(nbNodes);
         inTree = new BitSet(n);
         this.start = start;
         minCostOutArc = new double[n];
+		mate = new int[2*n];
     }
 
     //***********************************************************************************
@@ -96,8 +98,8 @@ public class PrimBSTFinder extends AbstractBSTFinder {
         int from, to;
         while (tSize < n - 1 && !heap.isEmpty()) {
             while (tSize < n - 1 && !heap.isEmpty()) {
-                to = heap.pop();
-                from = heap.getMate(to);
+                to = heap.removeFirstElement();
+                from = mate[to];
                 addArc(from, to);
             }
             while (tSize < n - 1 && heap.isEmpty()) {
@@ -183,9 +185,12 @@ public class PrimBSTFinder extends AbstractBSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if ((!inTree.get(j)) && sccOf[j].get() == currentSCC) {
                     if (propHK.isMandatory(i, j)) {
-                        heap.add(j, minVal, i);
+                        heap.addOrUpdateElement(j, Integer.MIN_VALUE);
+						mate[j] = i;
                     } else {
-                        heap.add(j, costs[i][j], i);
+                        if(heap.addOrUpdateElement(j,costs[i][j])){
+							mate[j] = i;
+						}
                     }
                 }
             }
@@ -193,9 +198,12 @@ public class PrimBSTFinder extends AbstractBSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if ((!inTree.get(j)) && sccOf[j].get() == currentSCC) {
                     if (propHK.isMandatory(j, i)) {
-                        heap.add(j, minVal, i + n);
+						heap.addOrUpdateElement(j, Integer.MIN_VALUE);
+						mate[j] = i+n;
                     } else {
-                        heap.add(j, costs[j][i], i + n);
+                        if(heap.addOrUpdateElement(j,costs[i][j])){
+							mate[j] = i+n;
+						}
                     }
                 }
             }

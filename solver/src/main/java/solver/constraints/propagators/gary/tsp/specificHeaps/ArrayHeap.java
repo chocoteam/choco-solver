@@ -37,37 +37,37 @@ package solver.constraints.propagators.gary.tsp.specificHeaps;
 import java.util.BitSet;
 
 /**
- * Trivial Heap to use for debugging
+ * Trivial Heap (not that bad in practice)
  * worst case running time for O(m) add/decrease key and O(n) pop = O(n*n+m)
+ * @author Jean-Guillaume Fages
  */
-public class ArrayHeap implements MST_Heap {
+public class ArrayHeap implements ISimpleHeap {
 
 	BitSet in;
 	double[] value;
-	int[] mate;
 	int size;
 
 	public ArrayHeap(int n){
 		in = new BitSet(n);
 		value = new double[n];
-		mate = new int[n];
 		size = 0;
 	}
 
 	@Override
-	public void add(int element, double element_key, int i) {
+	public boolean addOrUpdateElement(int element, double element_key) {
 		if(!in.get(element)){
 			in.set(element); size++;
 			value[element] = element_key;
-			mate[element] = i;
+			return true;
 		}else if(element_key<value[element]){
 			value[element] = element_key;
-			mate[element] = i;
+			return true;
 		}
+		return false;
 	}
 
 	@Override
-	public int pop() {
+	public int removeFirstElement() {
 		if(isEmpty()){
 			throw new UnsupportedOperationException();
 		}
@@ -91,15 +91,5 @@ public class ArrayHeap implements MST_Heap {
 	@Override
 	public boolean isEmpty() {
 		return size==0;
-	}
-
-	@Override
-	public int size() {
-		return size;
-	}
-
-	@Override
-	public int getMate(int to) {
-		return mate[to];
 	}
 }
