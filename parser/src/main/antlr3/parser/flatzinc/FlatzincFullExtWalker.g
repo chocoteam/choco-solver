@@ -306,7 +306,7 @@ struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
 	.   //  many
     {
     input.seek(m_idx);
-    ArrayList<PropagationStrategy> pss = many(arcs);
+    ArrayList<PropagationStrategy> pss = many(arcs).pss;
     input.release(m_idx);
     }
     ca = comb_attr?
@@ -341,7 +341,7 @@ elt	[PropagationEngine pe] returns [ISchedulable[\] items]
 	}
 	;
 
-many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
+many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss, int depth]
 @init{
     $pss = new ArrayList<PropagationStrategy>();
 }
@@ -367,9 +367,8 @@ many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
          PropagationStrategy _ps = coll(in, ca);
          input.release(c_idx);
 
-        //TODO verifier que ca marche :)
         Switcher sw = new Switcher(a, 0,max, _ps, in.toArray(new Arc[in.size()]));
-        pss.addAll(Arrays.asList(sw.getPS()));
+        $pss.addAll(Arrays.asList(sw.getPS()));
     }else{
         // otherwise, create as many "coll" as value of attribute
         TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
@@ -387,9 +386,10 @@ many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
         for (int k = 0; k < evs.length; k++) {
             int ev = evs[k];
             input.seek(c_idx);
-            pss.add(coll(sublists.get(ev), ca));
+            $pss.add(coll(sublists.get(ev), ca));
         }
         input.release(c_idx);
+        $depth = 0;
     }
     }
     )
@@ -402,11 +402,41 @@ many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
     }
     .   //  many
     {
-    if(!a.isDynamic()){
-        //TODO: générer attribut qui va bien?
-        LOGGER.error("\% SWITCHER!!");
-        throw new FZNException("SWITCHER!!");
+    int c_idx = input.mark();
     }
+    .   // coll
+    {
+    if(a.isDynamic()){
+        // Build as many list as different values of "attribute" in "in"
+        int max = 0;
+        for(int i = 0; i< in.size(); i++){
+            Arc arc = in.get(i);
+            int ev = a.eval(arc);
+            if (max < ev) {
+                max = ev;
+            }
+        }
+        int _d = 0;
+        input.seek(m_idx);
+        FlatzincFullExtWalker.many_return manyret = many(in);
+        // 1. get depth
+        _d = manyret.depth;
+        // 2. build correct attribute (including depth
+        ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
+        aos.add(AttributeOperator.ANY);
+        for(int i = 1 ; i < _d; i++){
+            aos.add(AttributeOperator.ANY);
+        }
+        CombinedAttribute _ca = new CombinedAttribute(aos, a);
+        // 3. build on coll
+        input.seek(c_idx);
+        PropagationStrategy _ps = coll(manyret.pss, ca);
+        input.release(c_idx);
+
+        Switcher sw = new Switcher(_ca, 0,max, _ps, manyret.pss.toArray(new PropagationStrategy[manyret.pss.size()]));
+        $pss.addAll(Arrays.asList(sw.getPS()));
+        $depth = _d +1;
+    }else{
         // Build as many list as different values of "attribute" in "in"
         TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
         for(int i = 0; i< in.size(); i++){
@@ -420,23 +450,24 @@ many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss]
         }
         int[] evs = sublists.keys();
         ArrayList<ArrayList<PropagationStrategy>> _pss = new ArrayList<ArrayList<PropagationStrategy>>(evs.length);
+        int _d = 0;
         for (int k = 0; k < evs.length; k++) {
             int ev = evs[k];
             input.seek(m_idx);
-            _pss.add(many(sublists.get(ev)));
+            FlatzincFullExtWalker.many_return manyret = many(sublists.get(ev));
+            _pss.add(manyret.pss);
+            assert (k == 0 || _d == manyret.depth);
+            _d = manyret.depth;
         }
+        $depth = _d +1;
         input.release(m_idx);
-        int c_idx = input.mark();
-
+        for (int p = 0; p < _pss.size(); p++) {
+            ArrayList<PropagationStrategy> _ps = _pss.get(p);
+            input.seek(c_idx);
+            $pss.add(coll(_ps, ca));
+        }
+        input.release(c_idx);
     }
-    .   // coll
-    {
-    for (int p = 0; p < _pss.size(); p++) {
-        ArrayList<PropagationStrategy> _ps = _pss.get(p);
-        input.seek(c_idx);
-        pss.add(coll(_ps, ca));
-    }
-    input.release(c_idx);
     }
     )
 	;
