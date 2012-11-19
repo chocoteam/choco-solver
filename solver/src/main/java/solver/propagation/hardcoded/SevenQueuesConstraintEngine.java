@@ -78,7 +78,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
@@ -96,8 +96,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
-        pro_queue = new CircularQueue[9];
-        for (int i = 0; i < 9; i++) {
+        pro_queue = new CircularQueue[8];
+        for (int i = 0; i < 8; i++) {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
@@ -196,7 +196,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 }
                 evtmasks[aid][pindices[p]] |= type.strengthened_mask;
                 if (scheduled[aid] == 0) {
-                    int prio = 0;
+                    int prio = prop.dynPriority();
                     pro_queue[prio].addLast(prop);
                     scheduled[aid] = (short) (prio + 1);
                     notEmpty.set(prio);
