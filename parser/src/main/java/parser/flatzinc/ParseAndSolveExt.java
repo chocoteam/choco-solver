@@ -91,6 +91,9 @@ public class ParseAndSolveExt {
     @Option(name = "-exp", usage = "Explanation engine.", required = false)
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
+    @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
+    private long l = 0;
+
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolveExt().doMain(args);
@@ -141,48 +144,50 @@ public class ParseAndSolveExt {
 
     private void parseandsolve() throws IOException, RecognitionException {
         for (String instance : instances) {
-            LOGGER.info("% parse instance...");
-            Solver solver = new Solver();
-            THashMap<String, Object> map = new THashMap<String, Object>();
-            buildParser(new FileInputStream(new File(instance)), solver, map);
-            switch (eng) {
-                case 0:
-                    // let the default propagation strategy,
-                    break;
-                case 1:
-                    solver.set(new ConstraintEngine(solver));
-                    break;
-                case 2:
-                    solver.set(new VariableEngine(solver));
-                    break;
-                case 3:
-                    solver.set(new SevenQueuesConstraintEngine(solver));
-                    break;
-                case 4:
-                case 5:
-                case 6:
-                    makeEngine(eng, solver);
-                    break;
-                case -1:
-                default:
-                    if (solver.getNbCstrs() > solver.getNbVars()) {
-                        solver.set(new VariableEngine(solver));
-                    } else {
+            for (int i = 0; i <= l; i++) {
+                LOGGER.info("% parse instance...");
+                Solver solver = new Solver();
+                THashMap<String, Object> map = new THashMap<String, Object>();
+                buildParser(new FileInputStream(new File(instance)), solver, map);
+                switch (eng) {
+                    case 0:
+                        // let the default propagation strategy,
+                        break;
+                    case 1:
                         solver.set(new ConstraintEngine(solver));
-                    }
+                        break;
+                    case 2:
+                        solver.set(new VariableEngine(solver));
+                        break;
+                    case 3:
+                        solver.set(new SevenQueuesConstraintEngine(solver));
+                        break;
+                    case 4:
+                    case 5:
+                    case 6:
+                        makeEngine(eng, solver);
+                        break;
+                    case -1:
+                    default:
+                        if (solver.getNbCstrs() > solver.getNbVars()) {
+                            solver.set(new VariableEngine(solver));
+                        } else {
+                            solver.set(new ConstraintEngine(solver));
+                        }
 
-            }
-            if (!csv.equals("")) {
-                SearchMonitorFactory.toCSV(solver, instance, csv);
-            }
-            expeng.make(solver);
-            if (tl > -1) {
-                solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
-            }
+                }
+                if (!csv.equals("") && i == l) {
+                    SearchMonitorFactory.toCSV(solver, instance, csv);
+                }
+                expeng.make(solver);
+                if (tl > -1) {
+                    solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
+                }
 //            solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
-            LOGGER.info("% solve instance...");
-            //SearchMonitorFactory.log(solver, true, true);
-            solver.solve();
+                LOGGER.info("% solve instance...");
+                //SearchMonitorFactory.log(solver, true, true);
+                solver.solve();
+            }
         }
     }
 

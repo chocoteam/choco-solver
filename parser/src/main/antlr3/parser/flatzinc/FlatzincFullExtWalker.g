@@ -512,10 +512,9 @@ coll    [ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] retur
     $ps = it.set($ps);
     $ps.attachEvaluator(ca);
     }
-    |	m=(MIN|MAX)HEAP it=qiter
+    |	m=(MAX)? HEAP it=qiter
 	{
-	boolean min = ((m!=null?m.getText():null) == "min")?true:false;
-    ISchedulable[] elts = elements.toArray(new ISchedulable[elements.size()]);
+	ISchedulable[] elts = elements.toArray(new ISchedulable[elements.size()]);
     for (int i = 0; i < elts.length; i++) {
         try {
             elts[i].evaluate();
@@ -524,7 +523,7 @@ coll    [ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] retur
                 throw new FZNException("Cannot sort the collection, keys are missing");
         }
     }
-    $ps = new SortDyn(min, elts);
+    $ps = new SortDyn(m != null, elts);
     $ps = it.set($ps);
     $ps.attachEvaluator(ca);
     }

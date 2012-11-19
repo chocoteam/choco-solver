@@ -100,14 +100,6 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
         return true;
     }
 
-    public void virtuallyExecuted(Propagator propagator) {
-        assert propagator == prop : "wrong propagator";
-        if (evtmask == 0) {
-            scheduler.remove(this);
-        }
-        evtmask = 0;
-    }
-
     @Override
     public int evaluate() {
         return evaluator.eval(this);

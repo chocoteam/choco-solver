@@ -144,7 +144,7 @@ many
 coll
     :	QUEUE LP! qiter RP!
     |	(REV)? LIST LP! liter RP!
-    |	(MIN|MAX) HEAP  LP! qiter RP!
+    |	(MAX)? HEAP  LP! qiter RP!
 	;
 
 qiter

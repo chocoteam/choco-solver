@@ -44,7 +44,6 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -235,14 +234,13 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int aid = p2i.get(pid);
 //        if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
-        Arrays.fill(eventmasks[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-        eventsets[aid].clear();
-        int prio = scheduled[aid];
-        if (prio > 0) { // if in the queue...
-            scheduled[aid] = 0;
-            pro_queue[prio - 1].remove(propagator); // removed from the queue
-            propagator.flushPendingEvt();
+        // we don't remove the element from its master to avoid costly operations
+        IBitset evtset = eventsets[aid];
+        for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+            eventmasks[aid][p] = 0;
         }
+        evtset.clear();
+        propagator.flushPendingEvt();
 //        }
     }
 

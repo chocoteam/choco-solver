@@ -89,7 +89,7 @@ public class VariableEngine implements IPropagationEngine {
         }
 
         Constraint[] constraints = solver.getCstrs();
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         for (int c = 0; c < constraints.length; c++) {
             _propagators.addAll(Arrays.asList(constraints[c].propagators));
         }
@@ -236,12 +236,13 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            if (vindices[i] > -1) {// constants and reified propagators have a negative index
-                assert variables[i].getPropagator(vindices[i]) == propagator : propagator.toString() + " >> " + variables[i];
+            int vi = vindices[i];
+            if (vi > -1) {// constants and reified propagators have a negative index
+                assert variables[i].getPropagator(vi) == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = v2i.get(variables[i].getId());
-                assert vindices[i] < eventmasks[vid].length;
-                eventsets[vid].clear(vindices[i]);
-                eventmasks[vid][vindices[i]] = 0;
+                assert vi < eventmasks[vid].length;
+                eventsets[vid].clear(vi);
+                eventmasks[vid][vi] = 0;
             }
         }
         propagator.flushPendingEvt();

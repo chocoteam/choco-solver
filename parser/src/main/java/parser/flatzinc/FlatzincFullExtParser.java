@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2012-11-15 16:27:48
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2012-11-19 15:03:00
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -370,10 +370,10 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:43:73: ( structure )?
             int alt6=2;
             switch ( input.LA(1) ) {
+                case HEAP:
                 case IDENTIFIER:
                 case LIST:
                 case MAX:
-                case MIN:
                 case QUEUE:
                 case REV:
                     {
@@ -484,7 +484,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: predicates, IDENTIFIER
+            // elements: IDENTIFIER, predicates
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1072,7 +1072,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: IN, IDENTIFIER
+                    // elements: IDENTIFIER, IN
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1331,9 +1331,9 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:114:2: ( struct SC !| struct_reg SC !)
             int alt12=2;
             switch ( input.LA(1) ) {
+            case HEAP:
             case LIST:
             case MAX:
-            case MIN:
             case QUEUE:
             case REV:
                 {
@@ -1743,7 +1743,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: comb_attr, coll, many, IDENTIFIER
+            // elements: comb_attr, IDENTIFIER, coll, many
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1872,9 +1872,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                 }
                 break;
+            case HEAP:
             case LIST:
             case MAX:
-            case MIN:
             case QUEUE:
             case REV:
                 {
@@ -2141,7 +2141,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: many, coll, EACH, attribute, attribute, comb_attr, coll, comb_attr
+            // elements: comb_attr, attribute, comb_attr, coll, EACH, coll, many, attribute
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2238,7 +2238,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "coll"
-    // parser/flatzinc/FlatzincFullExtParser.g:144:1: coll : ( QUEUE LP ! qiter RP !| ( REV )? LIST LP ! liter RP !| ( MIN | MAX ) HEAP LP ! qiter RP !);
+    // parser/flatzinc/FlatzincFullExtParser.g:144:1: coll : ( QUEUE LP ! qiter RP !| ( REV )? LIST LP ! liter RP !| ( MAX )? HEAP LP ! qiter RP !);
     public final FlatzincFullExtParser.coll_return coll() throws RecognitionException {
         FlatzincFullExtParser.coll_return retval = new FlatzincFullExtParser.coll_return();
         retval.start = input.LT(1);
@@ -2253,7 +2253,7 @@ public TreeAdaptor getTreeAdaptor() {
         Token LIST78=null;
         Token LP79=null;
         Token RP81=null;
-        Token set82=null;
+        Token MAX82=null;
         Token HEAP83=null;
         Token LP84=null;
         Token RP86=null;
@@ -2271,42 +2271,42 @@ public TreeAdaptor getTreeAdaptor() {
         Object LIST78_tree=null;
         Object LP79_tree=null;
         Object RP81_tree=null;
-        Object set82_tree=null;
+        Object MAX82_tree=null;
         Object HEAP83_tree=null;
         Object LP84_tree=null;
         Object RP86_tree=null;
 
         try {
-            // parser/flatzinc/FlatzincFullExtParser.g:145:5: ( QUEUE LP ! qiter RP !| ( REV )? LIST LP ! liter RP !| ( MIN | MAX ) HEAP LP ! qiter RP !)
-            int alt21=3;
+            // parser/flatzinc/FlatzincFullExtParser.g:145:5: ( QUEUE LP ! qiter RP !| ( REV )? LIST LP ! liter RP !| ( MAX )? HEAP LP ! qiter RP !)
+            int alt22=3;
             switch ( input.LA(1) ) {
             case QUEUE:
                 {
-                alt21=1;
+                alt22=1;
                 }
                 break;
             case LIST:
             case REV:
                 {
-                alt21=2;
+                alt22=2;
                 }
                 break;
+            case HEAP:
             case MAX:
-            case MIN:
                 {
-                alt21=3;
+                alt22=3;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 21, 0, input);
+                    new NoViableAltException("", 22, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt21) {
+            switch (alt22) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:145:7: QUEUE LP ! qiter RP !
                     {
@@ -2390,29 +2390,40 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // parser/flatzinc/FlatzincFullExtParser.g:147:7: ( MIN | MAX ) HEAP LP ! qiter RP !
+                    // parser/flatzinc/FlatzincFullExtParser.g:147:7: ( MAX )? HEAP LP ! qiter RP !
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    set82=(Token)input.LT(1);
-
-                    if ( input.LA(1)==MAX||input.LA(1)==MIN ) {
-                        input.consume();
-                        if ( state.backtracking==0 ) adaptor.addChild(root_0, 
-                        (Object)adaptor.create(set82)
-                        );
-                        state.errorRecovery=false;
-                        state.failed=false;
-                    }
-                    else {
-                        if (state.backtracking>0) {state.failed=true; return retval;}
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        throw mse;
+                    // parser/flatzinc/FlatzincFullExtParser.g:147:7: ( MAX )?
+                    int alt21=2;
+                    switch ( input.LA(1) ) {
+                        case MAX:
+                            {
+                            alt21=1;
+                            }
+                            break;
                     }
 
+                    switch (alt21) {
+                        case 1 :
+                            // parser/flatzinc/FlatzincFullExtParser.g:147:8: MAX
+                            {
+                            MAX82=(Token)match(input,MAX,FOLLOW_MAX_in_coll754); if (state.failed) return retval;
+                            if ( state.backtracking==0 ) {
+                            MAX82_tree = 
+                            (Object)adaptor.create(MAX82)
+                            ;
+                            adaptor.addChild(root_0, MAX82_tree);
+                            }
 
-                    HEAP83=(Token)match(input,HEAP,FOLLOW_HEAP_in_coll759); if (state.failed) return retval;
+                            }
+                            break;
+
+                    }
+
+
+                    HEAP83=(Token)match(input,HEAP,FOLLOW_HEAP_in_coll758); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     HEAP83_tree = 
                     (Object)adaptor.create(HEAP83)
@@ -2420,16 +2431,16 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, HEAP83_tree);
                     }
 
-                    LP84=(Token)match(input,LP,FOLLOW_LP_in_coll762); if (state.failed) return retval;
+                    LP84=(Token)match(input,LP,FOLLOW_LP_in_coll761); if (state.failed) return retval;
 
-                    pushFollow(FOLLOW_qiter_in_coll765);
+                    pushFollow(FOLLOW_qiter_in_coll764);
                     qiter85=qiter();
 
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, qiter85.getTree());
 
-                    RP86=(Token)match(input,RP,FOLLOW_RP_in_coll767); if (state.failed) return retval;
+                    RP86=(Token)match(input,RP,FOLLOW_RP_in_coll766); if (state.failed) return retval;
 
                     }
                     break;
@@ -2553,41 +2564,41 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:156:5: ( qiter | FOR | WFOR )
-            int alt22=3;
+            int alt23=3;
             switch ( input.LA(1) ) {
             case ONE:
             case WONE:
                 {
-                alt22=1;
+                alt23=1;
                 }
                 break;
             case FOR:
                 {
-                alt22=2;
+                alt23=2;
                 }
                 break;
             case WFOR:
                 {
-                alt22=3;
+                alt23=3;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 22, 0, input);
+                    new NoViableAltException("", 23, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt22) {
+            switch (alt23) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:156:7: qiter
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_qiter_in_liter809);
+                    pushFollow(FOLLOW_qiter_in_liter808);
                     qiter88=qiter();
 
                     state._fsp--;
@@ -2602,7 +2613,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    FOR89=(Token)match(input,FOR,FOLLOW_FOR_in_liter819); if (state.failed) return retval;
+                    FOR89=(Token)match(input,FOR,FOLLOW_FOR_in_liter818); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     FOR89_tree = 
                     (Object)adaptor.create(FOR89)
@@ -2618,7 +2629,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    WFOR90=(Token)match(input,WFOR,FOLLOW_WFOR_in_liter829); if (state.failed) return retval;
+                    WFOR90=(Token)match(input,WFOR,FOLLOW_WFOR_in_liter828); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     WFOR90_tree = 
                     (Object)adaptor.create(WFOR90)
@@ -2691,13 +2702,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_attr_op=new RewriteRuleSubtreeStream(adaptor,"rule attr_op");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:163:2: ( attr_op ( DO attr_op )* ( DO attribute )? -> ^( DO ( attr_op )* ( attribute )? ) | ( attr_op DO )* attribute -> ^( DO ( attr_op )* ( attribute )? ) )
-            int alt26=2;
-            alt26 = dfa26.predict(input);
-            switch (alt26) {
+            int alt27=2;
+            alt27 = dfa27.predict(input);
+            switch (alt27) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:163:4: attr_op ( DO attr_op )* ( DO attribute )?
                     {
-                    pushFollow(FOLLOW_attr_op_in_comb_attr844);
+                    pushFollow(FOLLOW_attr_op_in_comb_attr843);
                     attr_op91=attr_op();
 
                     state._fsp--;
@@ -2705,9 +2716,9 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_attr_op.add(attr_op91.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:163:12: ( DO attr_op )*
-                    loop23:
+                    loop24:
                     do {
-                        int alt23=2;
+                        int alt24=2;
                         switch ( input.LA(1) ) {
                         case DO:
                             {
@@ -2718,7 +2729,7 @@ public TreeAdaptor getTreeAdaptor() {
                             case SIZE:
                             case SUM:
                                 {
-                                alt23=1;
+                                alt24=1;
                                 }
                                 break;
 
@@ -2729,15 +2740,15 @@ public TreeAdaptor getTreeAdaptor() {
 
                         }
 
-                        switch (alt23) {
+                        switch (alt24) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:163:13: DO attr_op
                     	    {
-                    	    DO92=(Token)match(input,DO,FOLLOW_DO_in_comb_attr847); if (state.failed) return retval; 
+                    	    DO92=(Token)match(input,DO,FOLLOW_DO_in_comb_attr846); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_DO.add(DO92);
 
 
-                    	    pushFollow(FOLLOW_attr_op_in_comb_attr849);
+                    	    pushFollow(FOLLOW_attr_op_in_comb_attr848);
                     	    attr_op93=attr_op();
 
                     	    state._fsp--;
@@ -2748,30 +2759,30 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop23;
+                    	    break loop24;
                         }
                     } while (true);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:163:27: ( DO attribute )?
-                    int alt24=2;
+                    int alt25=2;
                     switch ( input.LA(1) ) {
                         case DO:
                             {
-                            alt24=1;
+                            alt25=1;
                             }
                             break;
                     }
 
-                    switch (alt24) {
+                    switch (alt25) {
                         case 1 :
                             // parser/flatzinc/FlatzincFullExtParser.g:163:28: DO attribute
                             {
-                            DO94=(Token)match(input,DO,FOLLOW_DO_in_comb_attr855); if (state.failed) return retval; 
+                            DO94=(Token)match(input,DO,FOLLOW_DO_in_comb_attr854); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_DO.add(DO94);
 
 
-                            pushFollow(FOLLOW_attribute_in_comb_attr857);
+                            pushFollow(FOLLOW_attribute_in_comb_attr856);
                             attribute95=attribute();
 
                             state._fsp--;
@@ -2835,9 +2846,9 @@ public TreeAdaptor getTreeAdaptor() {
                     // parser/flatzinc/FlatzincFullExtParser.g:165:6: ( attr_op DO )* attribute
                     {
                     // parser/flatzinc/FlatzincFullExtParser.g:165:6: ( attr_op DO )*
-                    loop25:
+                    loop26:
                     do {
-                        int alt25=2;
+                        int alt26=2;
                         switch ( input.LA(1) ) {
                         case ANY:
                         case MAX:
@@ -2845,24 +2856,24 @@ public TreeAdaptor getTreeAdaptor() {
                         case SIZE:
                         case SUM:
                             {
-                            alt25=1;
+                            alt26=1;
                             }
                             break;
 
                         }
 
-                        switch (alt25) {
+                        switch (alt26) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:165:7: attr_op DO
                     	    {
-                    	    pushFollow(FOLLOW_attr_op_in_comb_attr881);
+                    	    pushFollow(FOLLOW_attr_op_in_comb_attr880);
                     	    attr_op96=attr_op();
 
                     	    state._fsp--;
                     	    if (state.failed) return retval;
                     	    if ( state.backtracking==0 ) stream_attr_op.add(attr_op96.getTree());
 
-                    	    DO97=(Token)match(input,DO,FOLLOW_DO_in_comb_attr883); if (state.failed) return retval; 
+                    	    DO97=(Token)match(input,DO,FOLLOW_DO_in_comb_attr882); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_DO.add(DO97);
 
 
@@ -2870,12 +2881,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop25;
+                    	    break loop26;
                         }
                     } while (true);
 
 
-                    pushFollow(FOLLOW_attribute_in_comb_attr887);
+                    pushFollow(FOLLOW_attribute_in_comb_attr886);
                     attribute98=attribute();
 
                     state._fsp--;
@@ -2883,7 +2894,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_attribute.add(attribute98.getTree());
 
                     // AST REWRITE
-                    // elements: attribute, attr_op, DO
+                    // elements: DO, attr_op, attribute
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3067,19 +3078,19 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:185:2: ( PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* RP SC -> ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
             // parser/flatzinc/FlatzincFullExtParser.g:185:6: PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* RP SC
             {
-            PREDICATE100=(Token)match(input,PREDICATE,FOLLOW_PREDICATE_in_pred_decl975); if (state.failed) return retval; 
+            PREDICATE100=(Token)match(input,PREDICATE,FOLLOW_PREDICATE_in_pred_decl974); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_PREDICATE.add(PREDICATE100);
 
 
-            IDENTIFIER101=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_decl977); if (state.failed) return retval; 
+            IDENTIFIER101=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_decl976); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER101);
 
 
-            LP102=(Token)match(input,LP,FOLLOW_LP_in_pred_decl979); if (state.failed) return retval; 
+            LP102=(Token)match(input,LP,FOLLOW_LP_in_pred_decl978); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LP.add(LP102);
 
 
-            pushFollow(FOLLOW_pred_param_in_pred_decl981);
+            pushFollow(FOLLOW_pred_param_in_pred_decl980);
             pred_param103=pred_param();
 
             state._fsp--;
@@ -3087,27 +3098,27 @@ public TreeAdaptor getTreeAdaptor() {
             if ( state.backtracking==0 ) stream_pred_param.add(pred_param103.getTree());
 
             // parser/flatzinc/FlatzincFullExtParser.g:185:41: ( CM pred_param )*
-            loop27:
+            loop28:
             do {
-                int alt27=2;
+                int alt28=2;
                 switch ( input.LA(1) ) {
                 case CM:
                     {
-                    alt27=1;
+                    alt28=1;
                     }
                     break;
 
                 }
 
-                switch (alt27) {
+                switch (alt28) {
             	case 1 :
             	    // parser/flatzinc/FlatzincFullExtParser.g:185:42: CM pred_param
             	    {
-            	    CM104=(Token)match(input,CM,FOLLOW_CM_in_pred_decl984); if (state.failed) return retval; 
+            	    CM104=(Token)match(input,CM,FOLLOW_CM_in_pred_decl983); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_CM.add(CM104);
 
 
-            	    pushFollow(FOLLOW_pred_param_in_pred_decl986);
+            	    pushFollow(FOLLOW_pred_param_in_pred_decl985);
             	    pred_param105=pred_param();
 
             	    state._fsp--;
@@ -3118,21 +3129,21 @@ public TreeAdaptor getTreeAdaptor() {
             	    break;
 
             	default :
-            	    break loop27;
+            	    break loop28;
                 }
             } while (true);
 
 
-            RP106=(Token)match(input,RP,FOLLOW_RP_in_pred_decl990); if (state.failed) return retval; 
+            RP106=(Token)match(input,RP,FOLLOW_RP_in_pred_decl989); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_RP.add(RP106);
 
 
-            SC107=(Token)match(input,SC,FOLLOW_SC_in_pred_decl992); if (state.failed) return retval; 
+            SC107=(Token)match(input,SC,FOLLOW_SC_in_pred_decl991); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SC.add(SC107);
 
 
             // AST REWRITE
-            // elements: IDENTIFIER, pred_param, PREDICATE
+            // elements: PREDICATE, IDENTIFIER, pred_param
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -3230,23 +3241,23 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:190:5: ( pred_param_type CL IDENTIFIER -> ^( CL pred_param_type IDENTIFIER ) )
             // parser/flatzinc/FlatzincFullExtParser.g:190:9: pred_param_type CL IDENTIFIER
             {
-            pushFollow(FOLLOW_pred_param_type_in_pred_param1020);
+            pushFollow(FOLLOW_pred_param_type_in_pred_param1019);
             pred_param_type108=pred_param_type();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_pred_param_type.add(pred_param_type108.getTree());
 
-            CL109=(Token)match(input,CL,FOLLOW_CL_in_pred_param1022); if (state.failed) return retval; 
+            CL109=(Token)match(input,CL,FOLLOW_CL_in_pred_param1021); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CL.add(CL109);
 
 
-            IDENTIFIER110=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_param1024); if (state.failed) return retval; 
+            IDENTIFIER110=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_param1023); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER110);
 
 
             // AST REWRITE
-            // elements: pred_param_type, CL, IDENTIFIER
+            // elements: pred_param_type, IDENTIFIER, CL
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -3331,16 +3342,16 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:195:5: ( par_pred_param_type | var_pred_param_type )
-            int alt28=2;
-            alt28 = dfa28.predict(input);
-            switch (alt28) {
+            int alt29=2;
+            alt29 = dfa29.predict(input);
+            switch (alt29) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:195:9: par_pred_param_type
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_par_pred_param_type_in_pred_param_type1058);
+                    pushFollow(FOLLOW_par_pred_param_type_in_pred_param_type1057);
                     par_pred_param_type111=par_pred_param_type();
 
                     state._fsp--;
@@ -3355,7 +3366,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_var_pred_param_type_in_pred_param_type1068);
+                    pushFollow(FOLLOW_var_pred_param_type_in_pred_param_type1067);
                     var_pred_param_type112=var_pred_param_type();
 
                     state._fsp--;
@@ -3433,11 +3444,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_par_type_u=new RewriteRuleSubtreeStream(adaptor,"rule par_type_u");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:200:5: ( ARRAY LS index_set ( CM index_set )* RS OF par_type_u -> ^( ARRPAR ( index_set )+ par_type_u ) | par_type_u -> ^( APAR par_type_u ) )
-            int alt30=2;
+            int alt31=2;
             switch ( input.LA(1) ) {
             case ARRAY:
                 {
-                alt30=1;
+                alt31=1;
                 }
                 break;
             case BOOL:
@@ -3445,31 +3456,31 @@ public TreeAdaptor getTreeAdaptor() {
             case INT:
             case SET:
                 {
-                alt30=2;
+                alt31=2;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 30, 0, input);
+                    new NoViableAltException("", 31, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt30) {
+            switch (alt31) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:200:9: ARRAY LS index_set ( CM index_set )* RS OF par_type_u
                     {
-                    ARRAY113=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_type1087); if (state.failed) return retval; 
+                    ARRAY113=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_type1086); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY113);
 
 
-                    LS114=(Token)match(input,LS,FOLLOW_LS_in_par_type1089); if (state.failed) return retval; 
+                    LS114=(Token)match(input,LS,FOLLOW_LS_in_par_type1088); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS114);
 
 
-                    pushFollow(FOLLOW_index_set_in_par_type1091);
+                    pushFollow(FOLLOW_index_set_in_par_type1090);
                     index_set115=index_set();
 
                     state._fsp--;
@@ -3477,27 +3488,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set115.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:200:28: ( CM index_set )*
-                    loop29:
+                    loop30:
                     do {
-                        int alt29=2;
+                        int alt30=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt29=1;
+                            alt30=1;
                             }
                             break;
 
                         }
 
-                        switch (alt29) {
+                        switch (alt30) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:200:29: CM index_set
                     	    {
-                    	    CM116=(Token)match(input,CM,FOLLOW_CM_in_par_type1094); if (state.failed) return retval; 
+                    	    CM116=(Token)match(input,CM,FOLLOW_CM_in_par_type1093); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM116);
 
 
-                    	    pushFollow(FOLLOW_index_set_in_par_type1096);
+                    	    pushFollow(FOLLOW_index_set_in_par_type1095);
                     	    index_set117=index_set();
 
                     	    state._fsp--;
@@ -3508,20 +3519,20 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop29;
+                    	    break loop30;
                         }
                     } while (true);
 
 
-                    RS118=(Token)match(input,RS,FOLLOW_RS_in_par_type1100); if (state.failed) return retval; 
+                    RS118=(Token)match(input,RS,FOLLOW_RS_in_par_type1099); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS118);
 
 
-                    OF119=(Token)match(input,OF,FOLLOW_OF_in_par_type1102); if (state.failed) return retval; 
+                    OF119=(Token)match(input,OF,FOLLOW_OF_in_par_type1101); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF119);
 
 
-                    pushFollow(FOLLOW_par_type_u_in_par_type1104);
+                    pushFollow(FOLLOW_par_type_u_in_par_type1103);
                     par_type_u120=par_type_u();
 
                     state._fsp--;
@@ -3529,7 +3540,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_par_type_u.add(par_type_u120.getTree());
 
                     // AST REWRITE
-                    // elements: par_type_u, index_set
+                    // elements: index_set, par_type_u
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3575,7 +3586,7 @@ public TreeAdaptor getTreeAdaptor() {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtParser.g:202:9: par_type_u
                     {
-                    pushFollow(FOLLOW_par_type_u_in_par_type1130);
+                    pushFollow(FOLLOW_par_type_u_in_par_type1129);
                     par_type_u121=par_type_u();
 
                     state._fsp--;
@@ -3674,45 +3685,45 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:207:5: ( BOOL | FLOAT | SET OF INT | INT )
-            int alt31=4;
+            int alt32=4;
             switch ( input.LA(1) ) {
             case BOOL:
                 {
-                alt31=1;
+                alt32=1;
                 }
                 break;
             case FLOAT:
                 {
-                alt31=2;
+                alt32=2;
                 }
                 break;
             case SET:
                 {
-                alt31=3;
+                alt32=3;
                 }
                 break;
             case INT:
                 {
-                alt31=4;
+                alt32=4;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 31, 0, input);
+                    new NoViableAltException("", 32, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt31) {
+            switch (alt32) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:207:9: BOOL
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    BOOL122=(Token)match(input,BOOL,FOLLOW_BOOL_in_par_type_u1162); if (state.failed) return retval;
+                    BOOL122=(Token)match(input,BOOL,FOLLOW_BOOL_in_par_type_u1161); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     BOOL122_tree = 
                     (Object)adaptor.create(BOOL122)
@@ -3728,7 +3739,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    FLOAT123=(Token)match(input,FLOAT,FOLLOW_FLOAT_in_par_type_u1172); if (state.failed) return retval;
+                    FLOAT123=(Token)match(input,FLOAT,FOLLOW_FLOAT_in_par_type_u1171); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     FLOAT123_tree = 
                     (Object)adaptor.create(FLOAT123)
@@ -3744,7 +3755,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    SET124=(Token)match(input,SET,FOLLOW_SET_in_par_type_u1182); if (state.failed) return retval;
+                    SET124=(Token)match(input,SET,FOLLOW_SET_in_par_type_u1181); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     SET124_tree = 
                     (Object)adaptor.create(SET124)
@@ -3752,7 +3763,7 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, SET124_tree);
                     }
 
-                    OF125=(Token)match(input,OF,FOLLOW_OF_in_par_type_u1184); if (state.failed) return retval;
+                    OF125=(Token)match(input,OF,FOLLOW_OF_in_par_type_u1183); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     OF125_tree = 
                     (Object)adaptor.create(OF125)
@@ -3760,7 +3771,7 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, OF125_tree);
                     }
 
-                    INT126=(Token)match(input,INT,FOLLOW_INT_in_par_type_u1186); if (state.failed) return retval;
+                    INT126=(Token)match(input,INT,FOLLOW_INT_in_par_type_u1185); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     INT126_tree = 
                     (Object)adaptor.create(INT126)
@@ -3776,7 +3787,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    INT127=(Token)match(input,INT,FOLLOW_INT_in_par_type_u1196); if (state.failed) return retval;
+                    INT127=(Token)match(input,INT,FOLLOW_INT_in_par_type_u1195); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     INT127_tree = 
                     (Object)adaptor.create(INT127)
@@ -3860,40 +3871,40 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_var_type_u=new RewriteRuleSubtreeStream(adaptor,"rule var_type_u");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:214:5: ( ARRAY LS index_set ( CM index_set )* RS OF VAR var_type_u -> ^( ARRVAR ( index_set )+ var_type_u ) | VAR var_type_u -> ^( AVAR var_type_u ) )
-            int alt33=2;
+            int alt34=2;
             switch ( input.LA(1) ) {
             case ARRAY:
                 {
-                alt33=1;
+                alt34=1;
                 }
                 break;
             case VAR:
                 {
-                alt33=2;
+                alt34=2;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 33, 0, input);
+                    new NoViableAltException("", 34, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt33) {
+            switch (alt34) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:214:9: ARRAY LS index_set ( CM index_set )* RS OF VAR var_type_u
                     {
-                    ARRAY128=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_var_type1215); if (state.failed) return retval; 
+                    ARRAY128=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_var_type1214); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY128);
 
 
-                    LS129=(Token)match(input,LS,FOLLOW_LS_in_var_type1217); if (state.failed) return retval; 
+                    LS129=(Token)match(input,LS,FOLLOW_LS_in_var_type1216); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS129);
 
 
-                    pushFollow(FOLLOW_index_set_in_var_type1219);
+                    pushFollow(FOLLOW_index_set_in_var_type1218);
                     index_set130=index_set();
 
                     state._fsp--;
@@ -3901,27 +3912,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set130.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:214:28: ( CM index_set )*
-                    loop32:
+                    loop33:
                     do {
-                        int alt32=2;
+                        int alt33=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt32=1;
+                            alt33=1;
                             }
                             break;
 
                         }
 
-                        switch (alt32) {
+                        switch (alt33) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:214:29: CM index_set
                     	    {
-                    	    CM131=(Token)match(input,CM,FOLLOW_CM_in_var_type1222); if (state.failed) return retval; 
+                    	    CM131=(Token)match(input,CM,FOLLOW_CM_in_var_type1221); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM131);
 
 
-                    	    pushFollow(FOLLOW_index_set_in_var_type1224);
+                    	    pushFollow(FOLLOW_index_set_in_var_type1223);
                     	    index_set132=index_set();
 
                     	    state._fsp--;
@@ -3932,24 +3943,24 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop32;
+                    	    break loop33;
                         }
                     } while (true);
 
 
-                    RS133=(Token)match(input,RS,FOLLOW_RS_in_var_type1228); if (state.failed) return retval; 
+                    RS133=(Token)match(input,RS,FOLLOW_RS_in_var_type1227); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS133);
 
 
-                    OF134=(Token)match(input,OF,FOLLOW_OF_in_var_type1230); if (state.failed) return retval; 
+                    OF134=(Token)match(input,OF,FOLLOW_OF_in_var_type1229); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF134);
 
 
-                    VAR135=(Token)match(input,VAR,FOLLOW_VAR_in_var_type1232); if (state.failed) return retval; 
+                    VAR135=(Token)match(input,VAR,FOLLOW_VAR_in_var_type1231); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_VAR.add(VAR135);
 
 
-                    pushFollow(FOLLOW_var_type_u_in_var_type1234);
+                    pushFollow(FOLLOW_var_type_u_in_var_type1233);
                     var_type_u136=var_type_u();
 
                     state._fsp--;
@@ -3957,7 +3968,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_var_type_u.add(var_type_u136.getTree());
 
                     // AST REWRITE
-                    // elements: var_type_u, index_set
+                    // elements: index_set, var_type_u
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4003,11 +4014,11 @@ public TreeAdaptor getTreeAdaptor() {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtParser.g:216:9: VAR var_type_u
                     {
-                    VAR137=(Token)match(input,VAR,FOLLOW_VAR_in_var_type1260); if (state.failed) return retval; 
+                    VAR137=(Token)match(input,VAR,FOLLOW_VAR_in_var_type1259); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_VAR.add(VAR137);
 
 
-                    pushFollow(FOLLOW_var_type_u_in_var_type1262);
+                    pushFollow(FOLLOW_var_type_u_in_var_type1261);
                     var_type_u138=var_type_u();
 
                     state._fsp--;
@@ -4147,31 +4158,31 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:221:5: ( BOOL | FLOAT | INT | INT_CONST DD INT_CONST -> ^( DD INT_CONST INT_CONST ) | LB INT_CONST ( CM INT_CONST )* RB -> ^( CM ( INT_CONST )+ ) | SET OF INT_CONST DD INT_CONST -> ^( SET ^( DD INT_CONST INT_CONST ) ) | SET OF LB INT_CONST ( CM INT_CONST )* RB -> ^( SET ^( CM INT_CONST INT_CONST ) ) )
-            int alt36=7;
+            int alt37=7;
             switch ( input.LA(1) ) {
             case BOOL:
                 {
-                alt36=1;
+                alt37=1;
                 }
                 break;
             case FLOAT:
                 {
-                alt36=2;
+                alt37=2;
                 }
                 break;
             case INT:
                 {
-                alt36=3;
+                alt37=3;
                 }
                 break;
             case INT_CONST:
                 {
-                alt36=4;
+                alt37=4;
                 }
                 break;
             case LB:
                 {
-                alt36=5;
+                alt37=5;
                 }
                 break;
             case SET:
@@ -4182,18 +4193,18 @@ public TreeAdaptor getTreeAdaptor() {
                     switch ( input.LA(3) ) {
                     case INT_CONST:
                         {
-                        alt36=6;
+                        alt37=6;
                         }
                         break;
                     case LB:
                         {
-                        alt36=7;
+                        alt37=7;
                         }
                         break;
                     default:
                         if (state.backtracking>0) {state.failed=true; return retval;}
                         NoViableAltException nvae =
-                            new NoViableAltException("", 36, 7, input);
+                            new NoViableAltException("", 37, 7, input);
 
                         throw nvae;
 
@@ -4204,7 +4215,7 @@ public TreeAdaptor getTreeAdaptor() {
                 default:
                     if (state.backtracking>0) {state.failed=true; return retval;}
                     NoViableAltException nvae =
-                        new NoViableAltException("", 36, 6, input);
+                        new NoViableAltException("", 37, 6, input);
 
                     throw nvae;
 
@@ -4215,20 +4226,20 @@ public TreeAdaptor getTreeAdaptor() {
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 36, 0, input);
+                    new NoViableAltException("", 37, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt36) {
+            switch (alt37) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:221:9: BOOL
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    BOOL139=(Token)match(input,BOOL,FOLLOW_BOOL_in_var_type_u1294); if (state.failed) return retval;
+                    BOOL139=(Token)match(input,BOOL,FOLLOW_BOOL_in_var_type_u1293); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     BOOL139_tree = 
                     (Object)adaptor.create(BOOL139)
@@ -4244,7 +4255,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    FLOAT140=(Token)match(input,FLOAT,FOLLOW_FLOAT_in_var_type_u1304); if (state.failed) return retval;
+                    FLOAT140=(Token)match(input,FLOAT,FOLLOW_FLOAT_in_var_type_u1303); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     FLOAT140_tree = 
                     (Object)adaptor.create(FLOAT140)
@@ -4260,7 +4271,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    INT141=(Token)match(input,INT,FOLLOW_INT_in_var_type_u1314); if (state.failed) return retval;
+                    INT141=(Token)match(input,INT,FOLLOW_INT_in_var_type_u1313); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     INT141_tree = 
                     (Object)adaptor.create(INT141)
@@ -4273,20 +4284,20 @@ public TreeAdaptor getTreeAdaptor() {
                 case 4 :
                     // parser/flatzinc/FlatzincFullExtParser.g:224:9: INT_CONST DD INT_CONST
                     {
-                    INT_CONST142=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1324); if (state.failed) return retval; 
+                    INT_CONST142=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1323); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST142);
 
 
-                    DD143=(Token)match(input,DD,FOLLOW_DD_in_var_type_u1326); if (state.failed) return retval; 
+                    DD143=(Token)match(input,DD,FOLLOW_DD_in_var_type_u1325); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD143);
 
 
-                    INT_CONST144=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1328); if (state.failed) return retval; 
+                    INT_CONST144=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1327); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST144);
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, DD, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4329,36 +4340,36 @@ public TreeAdaptor getTreeAdaptor() {
                 case 5 :
                     // parser/flatzinc/FlatzincFullExtParser.g:228:9: LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    LB145=(Token)match(input,LB,FOLLOW_LB_in_var_type_u1355); if (state.failed) return retval; 
+                    LB145=(Token)match(input,LB,FOLLOW_LB_in_var_type_u1354); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LB.add(LB145);
 
 
-                    INT_CONST146=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1357); if (state.failed) return retval; 
+                    INT_CONST146=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1356); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST146);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:228:22: ( CM INT_CONST )*
-                    loop34:
+                    loop35:
                     do {
-                        int alt34=2;
+                        int alt35=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt34=1;
+                            alt35=1;
                             }
                             break;
 
                         }
 
-                        switch (alt34) {
+                        switch (alt35) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:228:23: CM INT_CONST
                     	    {
-                    	    CM147=(Token)match(input,CM,FOLLOW_CM_in_var_type_u1360); if (state.failed) return retval; 
+                    	    CM147=(Token)match(input,CM,FOLLOW_CM_in_var_type_u1359); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM147);
 
 
-                    	    INT_CONST148=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1362); if (state.failed) return retval; 
+                    	    INT_CONST148=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1361); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST148);
 
 
@@ -4366,12 +4377,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop34;
+                    	    break loop35;
                         }
                     } while (true);
 
 
-                    RB149=(Token)match(input,RB,FOLLOW_RB_in_var_type_u1366); if (state.failed) return retval; 
+                    RB149=(Token)match(input,RB,FOLLOW_RB_in_var_type_u1365); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB149);
 
 
@@ -4422,28 +4433,28 @@ public TreeAdaptor getTreeAdaptor() {
                 case 6 :
                     // parser/flatzinc/FlatzincFullExtParser.g:230:9: SET OF INT_CONST DD INT_CONST
                     {
-                    SET150=(Token)match(input,SET,FOLLOW_SET_in_var_type_u1390); if (state.failed) return retval; 
+                    SET150=(Token)match(input,SET,FOLLOW_SET_in_var_type_u1389); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET150);
 
 
-                    OF151=(Token)match(input,OF,FOLLOW_OF_in_var_type_u1392); if (state.failed) return retval; 
+                    OF151=(Token)match(input,OF,FOLLOW_OF_in_var_type_u1391); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF151);
 
 
-                    INT_CONST152=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1394); if (state.failed) return retval; 
+                    INT_CONST152=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1393); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST152);
 
 
-                    DD153=(Token)match(input,DD,FOLLOW_DD_in_var_type_u1396); if (state.failed) return retval; 
+                    DD153=(Token)match(input,DD,FOLLOW_DD_in_var_type_u1395); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD153);
 
 
-                    INT_CONST154=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1398); if (state.failed) return retval; 
+                    INT_CONST154=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1397); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST154);
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST, SET
+                    // elements: DD, INT_CONST, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4496,44 +4507,44 @@ public TreeAdaptor getTreeAdaptor() {
                 case 7 :
                     // parser/flatzinc/FlatzincFullExtParser.g:232:9: SET OF LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    SET155=(Token)match(input,SET,FOLLOW_SET_in_var_type_u1427); if (state.failed) return retval; 
+                    SET155=(Token)match(input,SET,FOLLOW_SET_in_var_type_u1426); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET155);
 
 
-                    OF156=(Token)match(input,OF,FOLLOW_OF_in_var_type_u1429); if (state.failed) return retval; 
+                    OF156=(Token)match(input,OF,FOLLOW_OF_in_var_type_u1428); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF156);
 
 
-                    LB157=(Token)match(input,LB,FOLLOW_LB_in_var_type_u1431); if (state.failed) return retval; 
+                    LB157=(Token)match(input,LB,FOLLOW_LB_in_var_type_u1430); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LB.add(LB157);
 
 
-                    INT_CONST158=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1433); if (state.failed) return retval; 
+                    INT_CONST158=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1432); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST158);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:232:29: ( CM INT_CONST )*
-                    loop35:
+                    loop36:
                     do {
-                        int alt35=2;
+                        int alt36=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt35=1;
+                            alt36=1;
                             }
                             break;
 
                         }
 
-                        switch (alt35) {
+                        switch (alt36) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:232:30: CM INT_CONST
                     	    {
-                    	    CM159=(Token)match(input,CM,FOLLOW_CM_in_var_type_u1436); if (state.failed) return retval; 
+                    	    CM159=(Token)match(input,CM,FOLLOW_CM_in_var_type_u1435); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM159);
 
 
-                    	    INT_CONST160=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1438); if (state.failed) return retval; 
+                    	    INT_CONST160=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_var_type_u1437); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST160);
 
 
@@ -4541,17 +4552,17 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop35;
+                    	    break loop36;
                         }
                     } while (true);
 
 
-                    RB161=(Token)match(input,RB,FOLLOW_RB_in_var_type_u1442); if (state.failed) return retval; 
+                    RB161=(Token)match(input,RB,FOLLOW_RB_in_var_type_u1441); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB161);
 
 
                     // AST REWRITE
-                    // elements: SET, CM, INT_CONST, INT_CONST
+                    // elements: CM, SET, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4794,16 +4805,16 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_index_set=new RewriteRuleSubtreeStream(adaptor,"rule index_set");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:237:5: ( par_type | INT_CONST DD INT_CONST -> ^( DD INT_CONST INT_CONST ) | LB INT_CONST ( CM INT_CONST )* RB -> ^( CM ( INT_CONST )+ ) | SET OF INT_CONST DD INT_CONST -> ^( SET ^( DD INT_CONST INT_CONST ) ) | SET OF LB INT_CONST ( CM INT_CONST )* RB -> ^( SET ^( CM ( INT_CONST )+ ) ) | ARRAY LS index_set ( CM index_set )* RS OF INT_CONST DD INT_CONST -> ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ARRAY LS index_set ( CM index_set )* RS OF LB INT_CONST ( CM INT_CONST )* RB -> ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ARRAY LS index_set ( CM index_set )* RS OF SET OF INT_CONST DD INT_CONST -> ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ARRAY LS index_set ( CM index_set )* RS OF SET OF LB INT_CONST ( CM INT_CONST )* RB -> ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) )
-            int alt45=9;
-            alt45 = dfa45.predict(input);
-            switch (alt45) {
+            int alt46=9;
+            alt46 = dfa46.predict(input);
+            switch (alt46) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:237:9: par_type
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_par_type_in_par_pred_param_type1480);
+                    pushFollow(FOLLOW_par_type_in_par_pred_param_type1479);
                     par_type162=par_type();
 
                     state._fsp--;
@@ -4815,15 +4826,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtParser.g:240:9: INT_CONST DD INT_CONST
                     {
-                    INT_CONST163=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1492); if (state.failed) return retval; 
+                    INT_CONST163=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1491); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST163);
 
 
-                    DD164=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1494); if (state.failed) return retval; 
+                    DD164=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1493); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD164);
 
 
-                    INT_CONST165=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1496); if (state.failed) return retval; 
+                    INT_CONST165=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1495); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST165);
 
 
@@ -4871,36 +4882,36 @@ public TreeAdaptor getTreeAdaptor() {
                 case 3 :
                     // parser/flatzinc/FlatzincFullExtParser.g:242:9: LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    LB166=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1521); if (state.failed) return retval; 
+                    LB166=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1520); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LB.add(LB166);
 
 
-                    INT_CONST167=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1523); if (state.failed) return retval; 
+                    INT_CONST167=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1522); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST167);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:242:22: ( CM INT_CONST )*
-                    loop37:
+                    loop38:
                     do {
-                        int alt37=2;
+                        int alt38=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt37=1;
+                            alt38=1;
                             }
                             break;
 
                         }
 
-                        switch (alt37) {
+                        switch (alt38) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:242:23: CM INT_CONST
                     	    {
-                    	    CM168=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1526); if (state.failed) return retval; 
+                    	    CM168=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1525); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM168);
 
 
-                    	    INT_CONST169=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1528); if (state.failed) return retval; 
+                    	    INT_CONST169=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1527); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST169);
 
 
@@ -4908,12 +4919,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop37;
+                    	    break loop38;
                         }
                     } while (true);
 
 
-                    RB170=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1532); if (state.failed) return retval; 
+                    RB170=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1531); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB170);
 
 
@@ -4964,28 +4975,28 @@ public TreeAdaptor getTreeAdaptor() {
                 case 4 :
                     // parser/flatzinc/FlatzincFullExtParser.g:244:9: SET OF INT_CONST DD INT_CONST
                     {
-                    SET171=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1556); if (state.failed) return retval; 
+                    SET171=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1555); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET171);
 
 
-                    OF172=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1558); if (state.failed) return retval; 
+                    OF172=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1557); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF172);
 
 
-                    INT_CONST173=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1560); if (state.failed) return retval; 
+                    INT_CONST173=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1559); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST173);
 
 
-                    DD174=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1562); if (state.failed) return retval; 
+                    DD174=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1561); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD174);
 
 
-                    INT_CONST175=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1564); if (state.failed) return retval; 
+                    INT_CONST175=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1563); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST175);
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, SET, INT_CONST, DD
+                    // elements: SET, INT_CONST, DD, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5038,44 +5049,44 @@ public TreeAdaptor getTreeAdaptor() {
                 case 5 :
                     // parser/flatzinc/FlatzincFullExtParser.g:246:9: SET OF LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    SET176=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1593); if (state.failed) return retval; 
+                    SET176=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1592); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET176);
 
 
-                    OF177=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1595); if (state.failed) return retval; 
+                    OF177=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1594); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF177);
 
 
-                    LB178=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1597); if (state.failed) return retval; 
+                    LB178=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1596); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LB.add(LB178);
 
 
-                    INT_CONST179=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1599); if (state.failed) return retval; 
+                    INT_CONST179=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1598); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST179);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:246:29: ( CM INT_CONST )*
-                    loop38:
+                    loop39:
                     do {
-                        int alt38=2;
+                        int alt39=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt38=1;
+                            alt39=1;
                             }
                             break;
 
                         }
 
-                        switch (alt38) {
+                        switch (alt39) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:246:30: CM INT_CONST
                     	    {
-                    	    CM180=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1602); if (state.failed) return retval; 
+                    	    CM180=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1601); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM180);
 
 
-                    	    INT_CONST181=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1604); if (state.failed) return retval; 
+                    	    INT_CONST181=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1603); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST181);
 
 
@@ -5083,17 +5094,17 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop38;
+                    	    break loop39;
                         }
                     } while (true);
 
 
-                    RB182=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1608); if (state.failed) return retval; 
+                    RB182=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1607); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB182);
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, SET, CM
+                    // elements: CM, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5149,15 +5160,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 6 :
                     // parser/flatzinc/FlatzincFullExtParser.g:250:9: ARRAY LS index_set ( CM index_set )* RS OF INT_CONST DD INT_CONST
                     {
-                    ARRAY183=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1638); if (state.failed) return retval; 
+                    ARRAY183=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1637); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY183);
 
 
-                    LS184=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1640); if (state.failed) return retval; 
+                    LS184=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1639); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS184);
 
 
-                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1642);
+                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1641);
                     index_set185=index_set();
 
                     state._fsp--;
@@ -5165,27 +5176,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set185.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:250:28: ( CM index_set )*
-                    loop39:
+                    loop40:
                     do {
-                        int alt39=2;
+                        int alt40=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt39=1;
+                            alt40=1;
                             }
                             break;
 
                         }
 
-                        switch (alt39) {
+                        switch (alt40) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:250:29: CM index_set
                     	    {
-                    	    CM186=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1645); if (state.failed) return retval; 
+                    	    CM186=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1644); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM186);
 
 
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1647);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1646);
                     	    index_set187=index_set();
 
                     	    state._fsp--;
@@ -5196,33 +5207,33 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop39;
+                    	    break loop40;
                         }
                     } while (true);
 
 
-                    RS188=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1651); if (state.failed) return retval; 
+                    RS188=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1650); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS188);
 
 
-                    OF189=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1653); if (state.failed) return retval; 
+                    OF189=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1652); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF189);
 
 
-                    INT_CONST190=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1655); if (state.failed) return retval; 
+                    INT_CONST190=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1654); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST190);
 
 
-                    DD191=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1657); if (state.failed) return retval; 
+                    DD191=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1656); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD191);
 
 
-                    INT_CONST192=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1659); if (state.failed) return retval; 
+                    INT_CONST192=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1658); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST192);
 
 
                     // AST REWRITE
-                    // elements: DD, index_set, INT_CONST, INT_CONST, ARRAY
+                    // elements: INT_CONST, DD, INT_CONST, ARRAY, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5284,15 +5295,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 7 :
                     // parser/flatzinc/FlatzincFullExtParser.g:252:9: ARRAY LS index_set ( CM index_set )* RS OF LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    ARRAY193=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1691); if (state.failed) return retval; 
+                    ARRAY193=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1690); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY193);
 
 
-                    LS194=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1693); if (state.failed) return retval; 
+                    LS194=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1692); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS194);
 
 
-                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1695);
+                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1694);
                     index_set195=index_set();
 
                     state._fsp--;
@@ -5300,59 +5311,6 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set195.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:252:28: ( CM index_set )*
-                    loop40:
-                    do {
-                        int alt40=2;
-                        switch ( input.LA(1) ) {
-                        case CM:
-                            {
-                            alt40=1;
-                            }
-                            break;
-
-                        }
-
-                        switch (alt40) {
-                    	case 1 :
-                    	    // parser/flatzinc/FlatzincFullExtParser.g:252:29: CM index_set
-                    	    {
-                    	    CM196=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1698); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_CM.add(CM196);
-
-
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1700);
-                    	    index_set197=index_set();
-
-                    	    state._fsp--;
-                    	    if (state.failed) return retval;
-                    	    if ( state.backtracking==0 ) stream_index_set.add(index_set197.getTree());
-
-                    	    }
-                    	    break;
-
-                    	default :
-                    	    break loop40;
-                        }
-                    } while (true);
-
-
-                    RS198=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1704); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_RS.add(RS198);
-
-
-                    OF199=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1706); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_OF.add(OF199);
-
-
-                    LB200=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1708); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_LB.add(LB200);
-
-
-                    INT_CONST201=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1710); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST201);
-
-
-                    // parser/flatzinc/FlatzincFullExtParser.g:252:63: ( CM INT_CONST )*
                     loop41:
                     do {
                         int alt41=2;
@@ -5367,15 +5325,18 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt41) {
                     	case 1 :
-                    	    // parser/flatzinc/FlatzincFullExtParser.g:252:64: CM INT_CONST
+                    	    // parser/flatzinc/FlatzincFullExtParser.g:252:29: CM index_set
                     	    {
-                    	    CM202=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1713); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_CM.add(CM202);
+                    	    CM196=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1697); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_CM.add(CM196);
 
 
-                    	    INT_CONST203=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1715); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST203);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1699);
+                    	    index_set197=index_set();
 
+                    	    state._fsp--;
+                    	    if (state.failed) return retval;
+                    	    if ( state.backtracking==0 ) stream_index_set.add(index_set197.getTree());
 
                     	    }
                     	    break;
@@ -5386,12 +5347,62 @@ public TreeAdaptor getTreeAdaptor() {
                     } while (true);
 
 
-                    RB204=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1719); if (state.failed) return retval; 
+                    RS198=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1703); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_RS.add(RS198);
+
+
+                    OF199=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1705); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_OF.add(OF199);
+
+
+                    LB200=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1707); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_LB.add(LB200);
+
+
+                    INT_CONST201=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1709); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST201);
+
+
+                    // parser/flatzinc/FlatzincFullExtParser.g:252:63: ( CM INT_CONST )*
+                    loop42:
+                    do {
+                        int alt42=2;
+                        switch ( input.LA(1) ) {
+                        case CM:
+                            {
+                            alt42=1;
+                            }
+                            break;
+
+                        }
+
+                        switch (alt42) {
+                    	case 1 :
+                    	    // parser/flatzinc/FlatzincFullExtParser.g:252:64: CM INT_CONST
+                    	    {
+                    	    CM202=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1712); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_CM.add(CM202);
+
+
+                    	    INT_CONST203=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1714); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST203);
+
+
+                    	    }
+                    	    break;
+
+                    	default :
+                    	    break loop42;
+                        }
+                    } while (true);
+
+
+                    RB204=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1718); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB204);
 
 
                     // AST REWRITE
-                    // elements: ARRAY, INT_CONST, index_set, CM
+                    // elements: index_set, ARRAY, CM, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5456,15 +5467,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 8 :
                     // parser/flatzinc/FlatzincFullExtParser.g:254:9: ARRAY LS index_set ( CM index_set )* RS OF SET OF INT_CONST DD INT_CONST
                     {
-                    ARRAY205=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1750); if (state.failed) return retval; 
+                    ARRAY205=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1749); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY205);
 
 
-                    LS206=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1752); if (state.failed) return retval; 
+                    LS206=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1751); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS206);
 
 
-                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1754);
+                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1753);
                     index_set207=index_set();
 
                     state._fsp--;
@@ -5472,27 +5483,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set207.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:254:28: ( CM index_set )*
-                    loop42:
+                    loop43:
                     do {
-                        int alt42=2;
+                        int alt43=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt42=1;
+                            alt43=1;
                             }
                             break;
 
                         }
 
-                        switch (alt42) {
+                        switch (alt43) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:254:29: CM index_set
                     	    {
-                    	    CM208=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1757); if (state.failed) return retval; 
+                    	    CM208=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1756); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM208);
 
 
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1759);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1758);
                     	    index_set209=index_set();
 
                     	    state._fsp--;
@@ -5503,41 +5514,41 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop42;
+                    	    break loop43;
                         }
                     } while (true);
 
 
-                    RS210=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1763); if (state.failed) return retval; 
+                    RS210=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1762); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS210);
 
 
-                    OF211=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1765); if (state.failed) return retval; 
+                    OF211=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1764); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF211);
 
 
-                    SET212=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1767); if (state.failed) return retval; 
+                    SET212=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1766); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET212);
 
 
-                    OF213=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1769); if (state.failed) return retval; 
+                    OF213=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1768); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF213);
 
 
-                    INT_CONST214=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1771); if (state.failed) return retval; 
+                    INT_CONST214=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1770); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST214);
 
 
-                    DD215=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1773); if (state.failed) return retval; 
+                    DD215=(Token)match(input,DD,FOLLOW_DD_in_par_pred_param_type1772); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD215);
 
 
-                    INT_CONST216=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1775); if (state.failed) return retval; 
+                    INT_CONST216=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1774); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST216);
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, SET, ARRAY, DD, index_set, INT_CONST
+                    // elements: SET, INT_CONST, INT_CONST, index_set, ARRAY, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5609,15 +5620,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 9 :
                     // parser/flatzinc/FlatzincFullExtParser.g:256:9: ARRAY LS index_set ( CM index_set )* RS OF SET OF LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    ARRAY217=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1811); if (state.failed) return retval; 
+                    ARRAY217=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type1810); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY217);
 
 
-                    LS218=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1813); if (state.failed) return retval; 
+                    LS218=(Token)match(input,LS,FOLLOW_LS_in_par_pred_param_type1812); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS218);
 
 
-                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1815);
+                    pushFollow(FOLLOW_index_set_in_par_pred_param_type1814);
                     index_set219=index_set();
 
                     state._fsp--;
@@ -5625,67 +5636,6 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set219.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:256:28: ( CM index_set )*
-                    loop43:
-                    do {
-                        int alt43=2;
-                        switch ( input.LA(1) ) {
-                        case CM:
-                            {
-                            alt43=1;
-                            }
-                            break;
-
-                        }
-
-                        switch (alt43) {
-                    	case 1 :
-                    	    // parser/flatzinc/FlatzincFullExtParser.g:256:29: CM index_set
-                    	    {
-                    	    CM220=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1818); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_CM.add(CM220);
-
-
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1820);
-                    	    index_set221=index_set();
-
-                    	    state._fsp--;
-                    	    if (state.failed) return retval;
-                    	    if ( state.backtracking==0 ) stream_index_set.add(index_set221.getTree());
-
-                    	    }
-                    	    break;
-
-                    	default :
-                    	    break loop43;
-                        }
-                    } while (true);
-
-
-                    RS222=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1824); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_RS.add(RS222);
-
-
-                    OF223=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1826); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_OF.add(OF223);
-
-
-                    SET224=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1828); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_SET.add(SET224);
-
-
-                    OF225=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1830); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_OF.add(OF225);
-
-
-                    LB226=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1832); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_LB.add(LB226);
-
-
-                    INT_CONST227=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1834); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST227);
-
-
-                    // parser/flatzinc/FlatzincFullExtParser.g:256:70: ( CM INT_CONST )*
                     loop44:
                     do {
                         int alt44=2;
@@ -5700,15 +5650,18 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt44) {
                     	case 1 :
-                    	    // parser/flatzinc/FlatzincFullExtParser.g:256:71: CM INT_CONST
+                    	    // parser/flatzinc/FlatzincFullExtParser.g:256:29: CM index_set
                     	    {
-                    	    CM228=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1837); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_CM.add(CM228);
+                    	    CM220=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1817); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_CM.add(CM220);
 
 
-                    	    INT_CONST229=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1839); if (state.failed) return retval; 
-                    	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST229);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type1819);
+                    	    index_set221=index_set();
 
+                    	    state._fsp--;
+                    	    if (state.failed) return retval;
+                    	    if ( state.backtracking==0 ) stream_index_set.add(index_set221.getTree());
 
                     	    }
                     	    break;
@@ -5719,12 +5672,70 @@ public TreeAdaptor getTreeAdaptor() {
                     } while (true);
 
 
-                    RB230=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1843); if (state.failed) return retval; 
+                    RS222=(Token)match(input,RS,FOLLOW_RS_in_par_pred_param_type1823); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_RS.add(RS222);
+
+
+                    OF223=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1825); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_OF.add(OF223);
+
+
+                    SET224=(Token)match(input,SET,FOLLOW_SET_in_par_pred_param_type1827); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_SET.add(SET224);
+
+
+                    OF225=(Token)match(input,OF,FOLLOW_OF_in_par_pred_param_type1829); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_OF.add(OF225);
+
+
+                    LB226=(Token)match(input,LB,FOLLOW_LB_in_par_pred_param_type1831); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_LB.add(LB226);
+
+
+                    INT_CONST227=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1833); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST227);
+
+
+                    // parser/flatzinc/FlatzincFullExtParser.g:256:70: ( CM INT_CONST )*
+                    loop45:
+                    do {
+                        int alt45=2;
+                        switch ( input.LA(1) ) {
+                        case CM:
+                            {
+                            alt45=1;
+                            }
+                            break;
+
+                        }
+
+                        switch (alt45) {
+                    	case 1 :
+                    	    // parser/flatzinc/FlatzincFullExtParser.g:256:71: CM INT_CONST
+                    	    {
+                    	    CM228=(Token)match(input,CM,FOLLOW_CM_in_par_pred_param_type1836); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_CM.add(CM228);
+
+
+                    	    INT_CONST229=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type1838); if (state.failed) return retval; 
+                    	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST229);
+
+
+                    	    }
+                    	    break;
+
+                    	default :
+                    	    break loop45;
+                        }
+                    } while (true);
+
+
+                    RB230=(Token)match(input,RB,FOLLOW_RB_in_par_pred_param_type1842); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB230);
 
 
                     // AST REWRITE
-                    // elements: SET, index_set, INT_CONST, CM, ARRAY
+                    // elements: ARRAY, SET, INT_CONST, CM, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5882,13 +5893,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_var_type=new RewriteRuleSubtreeStream(adaptor,"rule var_type");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:262:5: ( var_type -> ^( VAR var_type ) | VAR SET OF INT -> ^( VAR SET ) | ARRAY LS index_set ( CM index_set )* RS OF VAR SET OF INT -> ^( ARRAY ( index_set )+ ^( VAR SET ) ) )
-            int alt47=3;
-            alt47 = dfa47.predict(input);
-            switch (alt47) {
+            int alt48=3;
+            alt48 = dfa48.predict(input);
+            switch (alt48) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:262:9: var_type
                     {
-                    pushFollow(FOLLOW_var_type_in_var_pred_param_type1888);
+                    pushFollow(FOLLOW_var_type_in_var_pred_param_type1887);
                     var_type231=var_type();
 
                     state._fsp--;
@@ -5933,24 +5944,24 @@ public TreeAdaptor getTreeAdaptor() {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtParser.g:264:9: VAR SET OF INT
                     {
-                    VAR232=(Token)match(input,VAR,FOLLOW_VAR_in_var_pred_param_type1911); if (state.failed) return retval; 
+                    VAR232=(Token)match(input,VAR,FOLLOW_VAR_in_var_pred_param_type1910); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_VAR.add(VAR232);
 
 
-                    SET233=(Token)match(input,SET,FOLLOW_SET_in_var_pred_param_type1913); if (state.failed) return retval; 
+                    SET233=(Token)match(input,SET,FOLLOW_SET_in_var_pred_param_type1912); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET233);
 
 
-                    OF234=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1915); if (state.failed) return retval; 
+                    OF234=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1914); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF234);
 
 
-                    INT235=(Token)match(input,INT,FOLLOW_INT_in_var_pred_param_type1917); if (state.failed) return retval; 
+                    INT235=(Token)match(input,INT,FOLLOW_INT_in_var_pred_param_type1916); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT.add(INT235);
 
 
                     // AST REWRITE
-                    // elements: VAR, SET
+                    // elements: SET, VAR
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5989,15 +6000,15 @@ public TreeAdaptor getTreeAdaptor() {
                 case 3 :
                     // parser/flatzinc/FlatzincFullExtParser.g:266:9: ARRAY LS index_set ( CM index_set )* RS OF VAR SET OF INT
                     {
-                    ARRAY236=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_var_pred_param_type1940); if (state.failed) return retval; 
+                    ARRAY236=(Token)match(input,ARRAY,FOLLOW_ARRAY_in_var_pred_param_type1939); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ARRAY.add(ARRAY236);
 
 
-                    LS237=(Token)match(input,LS,FOLLOW_LS_in_var_pred_param_type1942); if (state.failed) return retval; 
+                    LS237=(Token)match(input,LS,FOLLOW_LS_in_var_pred_param_type1941); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS237);
 
 
-                    pushFollow(FOLLOW_index_set_in_var_pred_param_type1944);
+                    pushFollow(FOLLOW_index_set_in_var_pred_param_type1943);
                     index_set238=index_set();
 
                     state._fsp--;
@@ -6005,27 +6016,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_index_set.add(index_set238.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:266:28: ( CM index_set )*
-                    loop46:
+                    loop47:
                     do {
-                        int alt46=2;
+                        int alt47=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt46=1;
+                            alt47=1;
                             }
                             break;
 
                         }
 
-                        switch (alt46) {
+                        switch (alt47) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:266:29: CM index_set
                     	    {
-                    	    CM239=(Token)match(input,CM,FOLLOW_CM_in_var_pred_param_type1947); if (state.failed) return retval; 
+                    	    CM239=(Token)match(input,CM,FOLLOW_CM_in_var_pred_param_type1946); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM239);
 
 
-                    	    pushFollow(FOLLOW_index_set_in_var_pred_param_type1949);
+                    	    pushFollow(FOLLOW_index_set_in_var_pred_param_type1948);
                     	    index_set240=index_set();
 
                     	    state._fsp--;
@@ -6036,37 +6047,37 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop46;
+                    	    break loop47;
                         }
                     } while (true);
 
 
-                    RS241=(Token)match(input,RS,FOLLOW_RS_in_var_pred_param_type1953); if (state.failed) return retval; 
+                    RS241=(Token)match(input,RS,FOLLOW_RS_in_var_pred_param_type1952); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS241);
 
 
-                    OF242=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1955); if (state.failed) return retval; 
+                    OF242=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1954); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF242);
 
 
-                    VAR243=(Token)match(input,VAR,FOLLOW_VAR_in_var_pred_param_type1957); if (state.failed) return retval; 
+                    VAR243=(Token)match(input,VAR,FOLLOW_VAR_in_var_pred_param_type1956); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_VAR.add(VAR243);
 
 
-                    SET244=(Token)match(input,SET,FOLLOW_SET_in_var_pred_param_type1959); if (state.failed) return retval; 
+                    SET244=(Token)match(input,SET,FOLLOW_SET_in_var_pred_param_type1958); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SET.add(SET244);
 
 
-                    OF245=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1961); if (state.failed) return retval; 
+                    OF245=(Token)match(input,OF,FOLLOW_OF_in_var_pred_param_type1960); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_OF.add(OF245);
 
 
-                    INT246=(Token)match(input,INT,FOLLOW_INT_in_var_pred_param_type1963); if (state.failed) return retval; 
+                    INT246=(Token)match(input,INT,FOLLOW_INT_in_var_pred_param_type1962); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT.add(INT246);
 
 
                     // AST REWRITE
-                    // elements: SET, VAR, ARRAY, index_set
+                    // elements: SET, ARRAY, index_set, VAR
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6177,40 +6188,40 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:271:5: ( INT_CONST DD INT_CONST -> ^( INDEX ^( DD INT_CONST INT_CONST ) ) | INT -> ^( INDEX INT ) )
-            int alt48=2;
+            int alt49=2;
             switch ( input.LA(1) ) {
             case INT_CONST:
                 {
-                alt48=1;
+                alt49=1;
                 }
                 break;
             case INT:
                 {
-                alt48=2;
+                alt49=2;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 48, 0, input);
+                    new NoViableAltException("", 49, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt48) {
+            switch (alt49) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:271:9: INT_CONST DD INT_CONST
                     {
-                    INT_CONST247=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_index_set2002); if (state.failed) return retval; 
+                    INT_CONST247=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_index_set2001); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST247);
 
 
-                    DD248=(Token)match(input,DD,FOLLOW_DD_in_index_set2004); if (state.failed) return retval; 
+                    DD248=(Token)match(input,DD,FOLLOW_DD_in_index_set2003); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DD.add(DD248);
 
 
-                    INT_CONST249=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_index_set2006); if (state.failed) return retval; 
+                    INT_CONST249=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_index_set2005); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST249);
 
 
@@ -6268,7 +6279,7 @@ public TreeAdaptor getTreeAdaptor() {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtParser.g:273:9: INT
                     {
-                    INT250=(Token)match(input,INT,FOLLOW_INT_in_index_set2035); if (state.failed) return retval; 
+                    INT250=(Token)match(input,INT,FOLLOW_INT_in_index_set2034); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT.add(INT250);
 
 
@@ -6392,82 +6403,82 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_expr=new RewriteRuleSubtreeStream(adaptor,"rule expr");
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:278:5: ( LB INT_CONST ( CM INT_CONST )* RB -> LB ( INT_CONST )+ RB | bool_const | INT_CONST ( DD INT_CONST )? | LS ( expr ( CM expr )* )? RS -> ^( EXPR LS ( expr )* RS ) | id_expr | STRING )
-            int alt53=6;
+            int alt54=6;
             switch ( input.LA(1) ) {
             case LB:
                 {
-                alt53=1;
+                alt54=1;
                 }
                 break;
             case FALSE:
             case TRUE:
                 {
-                alt53=2;
+                alt54=2;
                 }
                 break;
             case INT_CONST:
                 {
-                alt53=3;
+                alt54=3;
                 }
                 break;
             case LS:
                 {
-                alt53=4;
+                alt54=4;
                 }
                 break;
             case IDENTIFIER:
                 {
-                alt53=5;
+                alt54=5;
                 }
                 break;
             case STRING:
                 {
-                alt53=6;
+                alt54=6;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 53, 0, input);
+                    new NoViableAltException("", 54, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt53) {
+            switch (alt54) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:278:9: LB INT_CONST ( CM INT_CONST )* RB
                     {
-                    LB251=(Token)match(input,LB,FOLLOW_LB_in_expr2067); if (state.failed) return retval; 
+                    LB251=(Token)match(input,LB,FOLLOW_LB_in_expr2066); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LB.add(LB251);
 
 
-                    INT_CONST252=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2069); if (state.failed) return retval; 
+                    INT_CONST252=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2068); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST252);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:278:22: ( CM INT_CONST )*
-                    loop49:
+                    loop50:
                     do {
-                        int alt49=2;
+                        int alt50=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt49=1;
+                            alt50=1;
                             }
                             break;
 
                         }
 
-                        switch (alt49) {
+                        switch (alt50) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:278:23: CM INT_CONST
                     	    {
-                    	    CM253=(Token)match(input,CM,FOLLOW_CM_in_expr2072); if (state.failed) return retval; 
+                    	    CM253=(Token)match(input,CM,FOLLOW_CM_in_expr2071); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM253);
 
 
-                    	    INT_CONST254=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2074); if (state.failed) return retval; 
+                    	    INT_CONST254=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2073); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_INT_CONST.add(INT_CONST254);
 
 
@@ -6475,12 +6486,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop49;
+                    	    break loop50;
                         }
                     } while (true);
 
 
-                    RB255=(Token)match(input,RB,FOLLOW_RB_in_expr2078); if (state.failed) return retval; 
+                    RB255=(Token)match(input,RB,FOLLOW_RB_in_expr2077); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RB.add(RB255);
 
 
@@ -6532,7 +6543,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_bool_const_in_expr2102);
+                    pushFollow(FOLLOW_bool_const_in_expr2101);
                     bool_const256=bool_const();
 
                     state._fsp--;
@@ -6547,7 +6558,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    INT_CONST257=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2112); if (state.failed) return retval;
+                    INT_CONST257=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2111); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     INT_CONST257_tree = 
                     (Object)adaptor.create(INT_CONST257)
@@ -6556,20 +6567,20 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
                     // parser/flatzinc/FlatzincFullExtParser.g:281:19: ( DD INT_CONST )?
-                    int alt50=2;
+                    int alt51=2;
                     switch ( input.LA(1) ) {
                         case DD:
                             {
-                            alt50=1;
+                            alt51=1;
                             }
                             break;
                     }
 
-                    switch (alt50) {
+                    switch (alt51) {
                         case 1 :
                             // parser/flatzinc/FlatzincFullExtParser.g:281:20: DD INT_CONST
                             {
-                            DD258=(Token)match(input,DD,FOLLOW_DD_in_expr2115); if (state.failed) return retval;
+                            DD258=(Token)match(input,DD,FOLLOW_DD_in_expr2114); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
                             DD258_tree = 
                             (Object)adaptor.create(DD258)
@@ -6577,7 +6588,7 @@ public TreeAdaptor getTreeAdaptor() {
                             adaptor.addChild(root_0, DD258_tree);
                             }
 
-                            INT_CONST259=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2117); if (state.failed) return retval;
+                            INT_CONST259=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_expr2116); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
                             INT_CONST259_tree = 
                             (Object)adaptor.create(INT_CONST259)
@@ -6596,12 +6607,12 @@ public TreeAdaptor getTreeAdaptor() {
                 case 4 :
                     // parser/flatzinc/FlatzincFullExtParser.g:282:9: LS ( expr ( CM expr )* )? RS
                     {
-                    LS260=(Token)match(input,LS,FOLLOW_LS_in_expr2129); if (state.failed) return retval; 
+                    LS260=(Token)match(input,LS,FOLLOW_LS_in_expr2128); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LS.add(LS260);
 
 
                     // parser/flatzinc/FlatzincFullExtParser.g:282:12: ( expr ( CM expr )* )?
-                    int alt52=2;
+                    int alt53=2;
                     switch ( input.LA(1) ) {
                         case FALSE:
                         case IDENTIFIER:
@@ -6611,16 +6622,16 @@ public TreeAdaptor getTreeAdaptor() {
                         case STRING:
                         case TRUE:
                             {
-                            alt52=1;
+                            alt53=1;
                             }
                             break;
                     }
 
-                    switch (alt52) {
+                    switch (alt53) {
                         case 1 :
                             // parser/flatzinc/FlatzincFullExtParser.g:282:13: expr ( CM expr )*
                             {
-                            pushFollow(FOLLOW_expr_in_expr2132);
+                            pushFollow(FOLLOW_expr_in_expr2131);
                             expr261=expr();
 
                             state._fsp--;
@@ -6628,27 +6639,27 @@ public TreeAdaptor getTreeAdaptor() {
                             if ( state.backtracking==0 ) stream_expr.add(expr261.getTree());
 
                             // parser/flatzinc/FlatzincFullExtParser.g:282:18: ( CM expr )*
-                            loop51:
+                            loop52:
                             do {
-                                int alt51=2;
+                                int alt52=2;
                                 switch ( input.LA(1) ) {
                                 case CM:
                                     {
-                                    alt51=1;
+                                    alt52=1;
                                     }
                                     break;
 
                                 }
 
-                                switch (alt51) {
+                                switch (alt52) {
                             	case 1 :
                             	    // parser/flatzinc/FlatzincFullExtParser.g:282:19: CM expr
                             	    {
-                            	    CM262=(Token)match(input,CM,FOLLOW_CM_in_expr2135); if (state.failed) return retval; 
+                            	    CM262=(Token)match(input,CM,FOLLOW_CM_in_expr2134); if (state.failed) return retval; 
                             	    if ( state.backtracking==0 ) stream_CM.add(CM262);
 
 
-                            	    pushFollow(FOLLOW_expr_in_expr2137);
+                            	    pushFollow(FOLLOW_expr_in_expr2136);
                             	    expr263=expr();
 
                             	    state._fsp--;
@@ -6659,7 +6670,7 @@ public TreeAdaptor getTreeAdaptor() {
                             	    break;
 
                             	default :
-                            	    break loop51;
+                            	    break loop52;
                                 }
                             } while (true);
 
@@ -6670,12 +6681,12 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    RS264=(Token)match(input,RS,FOLLOW_RS_in_expr2143); if (state.failed) return retval; 
+                    RS264=(Token)match(input,RS,FOLLOW_RS_in_expr2142); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RS.add(RS264);
 
 
                     // AST REWRITE
-                    // elements: RS, expr, LS
+                    // elements: LS, RS, expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6728,7 +6739,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_id_expr_in_expr2171);
+                    pushFollow(FOLLOW_id_expr_in_expr2170);
                     id_expr265=id_expr();
 
                     state._fsp--;
@@ -6743,7 +6754,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    STRING266=(Token)match(input,STRING,FOLLOW_STRING_in_expr2181); if (state.failed) return retval;
+                    STRING266=(Token)match(input,STRING,FOLLOW_STRING_in_expr2180); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     STRING266_tree = 
                     (Object)adaptor.create(STRING266)
@@ -6821,7 +6832,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
 
 
-            IDENTIFIER267=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_id_expr2202); if (state.failed) return retval;
+            IDENTIFIER267=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_id_expr2201); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             IDENTIFIER267_tree = 
             (Object)adaptor.create(IDENTIFIER267)
@@ -6830,28 +6841,28 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
             // parser/flatzinc/FlatzincFullExtParser.g:291:20: ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )?
-            int alt55=3;
+            int alt56=3;
             switch ( input.LA(1) ) {
                 case LP:
                     {
-                    alt55=1;
+                    alt56=1;
                     }
                     break;
                 case LS:
                     {
-                    alt55=2;
+                    alt56=2;
                     }
                     break;
             }
 
-            switch (alt55) {
+            switch (alt56) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:291:21: ( LP expr ( CM expr )* RP )
                     {
                     // parser/flatzinc/FlatzincFullExtParser.g:291:21: ( LP expr ( CM expr )* RP )
                     // parser/flatzinc/FlatzincFullExtParser.g:291:22: LP expr ( CM expr )* RP
                     {
-                    LP268=(Token)match(input,LP,FOLLOW_LP_in_id_expr2206); if (state.failed) return retval;
+                    LP268=(Token)match(input,LP,FOLLOW_LP_in_id_expr2205); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     LP268_tree = 
                     (Object)adaptor.create(LP268)
@@ -6859,7 +6870,7 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, LP268_tree);
                     }
 
-                    pushFollow(FOLLOW_expr_in_id_expr2208);
+                    pushFollow(FOLLOW_expr_in_id_expr2207);
                     expr269=expr();
 
                     state._fsp--;
@@ -6867,23 +6878,23 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, expr269.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:291:30: ( CM expr )*
-                    loop54:
+                    loop55:
                     do {
-                        int alt54=2;
+                        int alt55=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt54=1;
+                            alt55=1;
                             }
                             break;
 
                         }
 
-                        switch (alt54) {
+                        switch (alt55) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:291:31: CM expr
                     	    {
-                    	    CM270=(Token)match(input,CM,FOLLOW_CM_in_id_expr2211); if (state.failed) return retval;
+                    	    CM270=(Token)match(input,CM,FOLLOW_CM_in_id_expr2210); if (state.failed) return retval;
                     	    if ( state.backtracking==0 ) {
                     	    CM270_tree = 
                     	    (Object)adaptor.create(CM270)
@@ -6891,7 +6902,7 @@ public TreeAdaptor getTreeAdaptor() {
                     	    adaptor.addChild(root_0, CM270_tree);
                     	    }
 
-                    	    pushFollow(FOLLOW_expr_in_id_expr2213);
+                    	    pushFollow(FOLLOW_expr_in_id_expr2212);
                     	    expr271=expr();
 
                     	    state._fsp--;
@@ -6902,12 +6913,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop54;
+                    	    break loop55;
                         }
                     } while (true);
 
 
-                    RP272=(Token)match(input,RP,FOLLOW_RP_in_id_expr2217); if (state.failed) return retval;
+                    RP272=(Token)match(input,RP,FOLLOW_RP_in_id_expr2216); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     RP272_tree = 
                     (Object)adaptor.create(RP272)
@@ -6926,7 +6937,7 @@ public TreeAdaptor getTreeAdaptor() {
                     // parser/flatzinc/FlatzincFullExtParser.g:291:45: ( LS INT_CONST RS )
                     // parser/flatzinc/FlatzincFullExtParser.g:291:46: LS INT_CONST RS
                     {
-                    LS273=(Token)match(input,LS,FOLLOW_LS_in_id_expr2221); if (state.failed) return retval;
+                    LS273=(Token)match(input,LS,FOLLOW_LS_in_id_expr2220); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     LS273_tree = 
                     (Object)adaptor.create(LS273)
@@ -6934,7 +6945,7 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, LS273_tree);
                     }
 
-                    INT_CONST274=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_id_expr2223); if (state.failed) return retval;
+                    INT_CONST274=(Token)match(input,INT_CONST,FOLLOW_INT_CONST_in_id_expr2222); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     INT_CONST274_tree = 
                     (Object)adaptor.create(INT_CONST274)
@@ -6942,7 +6953,7 @@ public TreeAdaptor getTreeAdaptor() {
                     adaptor.addChild(root_0, INT_CONST274_tree);
                     }
 
-                    RS275=(Token)match(input,RS,FOLLOW_RS_in_id_expr2225); if (state.failed) return retval;
+                    RS275=(Token)match(input,RS,FOLLOW_RS_in_id_expr2224); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     RS275_tree = 
                     (Object)adaptor.create(RS275)
@@ -7023,33 +7034,33 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:296:2: ( par_type CL IDENTIFIER EQ expr SC -> ^( PAR IDENTIFIER par_type expr ) )
             // parser/flatzinc/FlatzincFullExtParser.g:296:6: par_type CL IDENTIFIER EQ expr SC
             {
-            pushFollow(FOLLOW_par_type_in_param_decl2245);
+            pushFollow(FOLLOW_par_type_in_param_decl2244);
             par_type276=par_type();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_par_type.add(par_type276.getTree());
 
-            CL277=(Token)match(input,CL,FOLLOW_CL_in_param_decl2247); if (state.failed) return retval; 
+            CL277=(Token)match(input,CL,FOLLOW_CL_in_param_decl2246); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CL.add(CL277);
 
 
-            IDENTIFIER278=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_param_decl2249); if (state.failed) return retval; 
+            IDENTIFIER278=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_param_decl2248); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER278);
 
 
-            EQ279=(Token)match(input,EQ,FOLLOW_EQ_in_param_decl2251); if (state.failed) return retval; 
+            EQ279=(Token)match(input,EQ,FOLLOW_EQ_in_param_decl2250); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_EQ.add(EQ279);
 
 
-            pushFollow(FOLLOW_expr_in_param_decl2253);
+            pushFollow(FOLLOW_expr_in_param_decl2252);
             expr280=expr();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_expr.add(expr280.getTree());
 
-            SC281=(Token)match(input,SC,FOLLOW_SC_in_param_decl2255); if (state.failed) return retval; 
+            SC281=(Token)match(input,SC,FOLLOW_SC_in_param_decl2254); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SC.add(SC281);
 
 
@@ -7159,22 +7170,22 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:302:2: ( var_type CL IDENTIFIER annotations ( EQ expr )? SC -> ^( VAR IDENTIFIER var_type annotations ( expr )? ) )
             // parser/flatzinc/FlatzincFullExtParser.g:302:6: var_type CL IDENTIFIER annotations ( EQ expr )? SC
             {
-            pushFollow(FOLLOW_var_type_in_var_decl2283);
+            pushFollow(FOLLOW_var_type_in_var_decl2282);
             var_type282=var_type();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_var_type.add(var_type282.getTree());
 
-            CL283=(Token)match(input,CL,FOLLOW_CL_in_var_decl2285); if (state.failed) return retval; 
+            CL283=(Token)match(input,CL,FOLLOW_CL_in_var_decl2284); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CL.add(CL283);
 
 
-            IDENTIFIER284=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_var_decl2287); if (state.failed) return retval; 
+            IDENTIFIER284=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_var_decl2286); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER284);
 
 
-            pushFollow(FOLLOW_annotations_in_var_decl2289);
+            pushFollow(FOLLOW_annotations_in_var_decl2288);
             annotations285=annotations();
 
             state._fsp--;
@@ -7182,24 +7193,24 @@ public TreeAdaptor getTreeAdaptor() {
             if ( state.backtracking==0 ) stream_annotations.add(annotations285.getTree());
 
             // parser/flatzinc/FlatzincFullExtParser.g:302:41: ( EQ expr )?
-            int alt56=2;
+            int alt57=2;
             switch ( input.LA(1) ) {
                 case EQ:
                     {
-                    alt56=1;
+                    alt57=1;
                     }
                     break;
             }
 
-            switch (alt56) {
+            switch (alt57) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:302:42: EQ expr
                     {
-                    EQ286=(Token)match(input,EQ,FOLLOW_EQ_in_var_decl2292); if (state.failed) return retval; 
+                    EQ286=(Token)match(input,EQ,FOLLOW_EQ_in_var_decl2291); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_EQ.add(EQ286);
 
 
-                    pushFollow(FOLLOW_expr_in_var_decl2294);
+                    pushFollow(FOLLOW_expr_in_var_decl2293);
                     expr287=expr();
 
                     state._fsp--;
@@ -7212,12 +7223,12 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            SC288=(Token)match(input,SC,FOLLOW_SC_in_var_decl2298); if (state.failed) return retval; 
+            SC288=(Token)match(input,SC,FOLLOW_SC_in_var_decl2297); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SC.add(SC288);
 
 
             // AST REWRITE
-            // elements: expr, annotations, IDENTIFIER, var_type
+            // elements: annotations, var_type, IDENTIFIER, expr
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7334,19 +7345,19 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:307:2: ( CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations ) )
             // parser/flatzinc/FlatzincFullExtParser.g:307:6: CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC
             {
-            CONSTRAINT289=(Token)match(input,CONSTRAINT,FOLLOW_CONSTRAINT_in_constraint2328); if (state.failed) return retval; 
+            CONSTRAINT289=(Token)match(input,CONSTRAINT,FOLLOW_CONSTRAINT_in_constraint2327); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CONSTRAINT.add(CONSTRAINT289);
 
 
-            IDENTIFIER290=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_constraint2330); if (state.failed) return retval; 
+            IDENTIFIER290=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_constraint2329); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER290);
 
 
-            LP291=(Token)match(input,LP,FOLLOW_LP_in_constraint2332); if (state.failed) return retval; 
+            LP291=(Token)match(input,LP,FOLLOW_LP_in_constraint2331); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LP.add(LP291);
 
 
-            pushFollow(FOLLOW_expr_in_constraint2334);
+            pushFollow(FOLLOW_expr_in_constraint2333);
             expr292=expr();
 
             state._fsp--;
@@ -7354,27 +7365,27 @@ public TreeAdaptor getTreeAdaptor() {
             if ( state.backtracking==0 ) stream_expr.add(expr292.getTree());
 
             // parser/flatzinc/FlatzincFullExtParser.g:307:36: ( CM expr )*
-            loop57:
+            loop58:
             do {
-                int alt57=2;
+                int alt58=2;
                 switch ( input.LA(1) ) {
                 case CM:
                     {
-                    alt57=1;
+                    alt58=1;
                     }
                     break;
 
                 }
 
-                switch (alt57) {
+                switch (alt58) {
             	case 1 :
             	    // parser/flatzinc/FlatzincFullExtParser.g:307:37: CM expr
             	    {
-            	    CM293=(Token)match(input,CM,FOLLOW_CM_in_constraint2337); if (state.failed) return retval; 
+            	    CM293=(Token)match(input,CM,FOLLOW_CM_in_constraint2336); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_CM.add(CM293);
 
 
-            	    pushFollow(FOLLOW_expr_in_constraint2339);
+            	    pushFollow(FOLLOW_expr_in_constraint2338);
             	    expr294=expr();
 
             	    state._fsp--;
@@ -7385,28 +7396,28 @@ public TreeAdaptor getTreeAdaptor() {
             	    break;
 
             	default :
-            	    break loop57;
+            	    break loop58;
                 }
             } while (true);
 
 
-            RP295=(Token)match(input,RP,FOLLOW_RP_in_constraint2343); if (state.failed) return retval; 
+            RP295=(Token)match(input,RP,FOLLOW_RP_in_constraint2342); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_RP.add(RP295);
 
 
-            pushFollow(FOLLOW_annotations_in_constraint2345);
+            pushFollow(FOLLOW_annotations_in_constraint2344);
             annotations296=annotations();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_annotations.add(annotations296.getTree());
 
-            SC297=(Token)match(input,SC,FOLLOW_SC_in_constraint2347); if (state.failed) return retval; 
+            SC297=(Token)match(input,SC,FOLLOW_SC_in_constraint2346); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SC.add(SC297);
 
 
             // AST REWRITE
-            // elements: CONSTRAINT, expr, IDENTIFIER, annotations
+            // elements: IDENTIFIER, CONSTRAINT, expr, annotations
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7509,7 +7520,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
 
 
-            SOLVE298=(Token)match(input,SOLVE,FOLLOW_SOLVE_in_solve_goal2375); if (state.failed) return retval;
+            SOLVE298=(Token)match(input,SOLVE,FOLLOW_SOLVE_in_solve_goal2374); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             SOLVE298_tree = 
             (Object)adaptor.create(SOLVE298)
@@ -7517,21 +7528,21 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.becomeRoot(SOLVE298_tree, root_0);
             }
 
-            pushFollow(FOLLOW_annotations_in_solve_goal2378);
+            pushFollow(FOLLOW_annotations_in_solve_goal2377);
             annotations299=annotations();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, annotations299.getTree());
 
-            pushFollow(FOLLOW_resolution_in_solve_goal2380);
+            pushFollow(FOLLOW_resolution_in_solve_goal2379);
             resolution300=resolution();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, resolution300.getTree());
 
-            SC301=(Token)match(input,SC,FOLLOW_SC_in_solve_goal2382); if (state.failed) return retval;
+            SC301=(Token)match(input,SC,FOLLOW_SC_in_solve_goal2381); if (state.failed) return retval;
 
             }
 
@@ -7588,40 +7599,40 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:316:5: ( MINIMIZE ^ expr | MAXIMIZE ^ expr | SATISFY ^)
-            int alt58=3;
+            int alt59=3;
             switch ( input.LA(1) ) {
             case MINIMIZE:
                 {
-                alt58=1;
+                alt59=1;
                 }
                 break;
             case MAXIMIZE:
                 {
-                alt58=2;
+                alt59=2;
                 }
                 break;
             case SATISFY:
                 {
-                alt58=3;
+                alt59=3;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 58, 0, input);
+                    new NoViableAltException("", 59, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt58) {
+            switch (alt59) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:316:9: MINIMIZE ^ expr
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    MINIMIZE302=(Token)match(input,MINIMIZE,FOLLOW_MINIMIZE_in_resolution2399); if (state.failed) return retval;
+                    MINIMIZE302=(Token)match(input,MINIMIZE,FOLLOW_MINIMIZE_in_resolution2398); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     MINIMIZE302_tree = 
                     (Object)adaptor.create(MINIMIZE302)
@@ -7629,7 +7640,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.becomeRoot(MINIMIZE302_tree, root_0);
                     }
 
-                    pushFollow(FOLLOW_expr_in_resolution2402);
+                    pushFollow(FOLLOW_expr_in_resolution2401);
                     expr303=expr();
 
                     state._fsp--;
@@ -7644,7 +7655,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    MAXIMIZE304=(Token)match(input,MAXIMIZE,FOLLOW_MAXIMIZE_in_resolution2412); if (state.failed) return retval;
+                    MAXIMIZE304=(Token)match(input,MAXIMIZE,FOLLOW_MAXIMIZE_in_resolution2411); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     MAXIMIZE304_tree = 
                     (Object)adaptor.create(MAXIMIZE304)
@@ -7652,7 +7663,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.becomeRoot(MAXIMIZE304_tree, root_0);
                     }
 
-                    pushFollow(FOLLOW_expr_in_resolution2415);
+                    pushFollow(FOLLOW_expr_in_resolution2414);
                     expr305=expr();
 
                     state._fsp--;
@@ -7667,7 +7678,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    SATISFY306=(Token)match(input,SATISFY,FOLLOW_SATISFY_in_resolution2425); if (state.failed) return retval;
+                    SATISFY306=(Token)match(input,SATISFY,FOLLOW_SATISFY_in_resolution2424); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     SATISFY306_tree = 
                     (Object)adaptor.create(SATISFY306)
@@ -7730,27 +7741,27 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:322:9: ( DC annotation )*
             {
             // parser/flatzinc/FlatzincFullExtParser.g:322:9: ( DC annotation )*
-            loop59:
+            loop60:
             do {
-                int alt59=2;
+                int alt60=2;
                 switch ( input.LA(1) ) {
                 case DC:
                     {
-                    alt59=1;
+                    alt60=1;
                     }
                     break;
 
                 }
 
-                switch (alt59) {
+                switch (alt60) {
             	case 1 :
             	    // parser/flatzinc/FlatzincFullExtParser.g:322:10: DC annotation
             	    {
-            	    DC307=(Token)match(input,DC,FOLLOW_DC_in_annotations2446); if (state.failed) return retval; 
+            	    DC307=(Token)match(input,DC,FOLLOW_DC_in_annotations2445); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_DC.add(DC307);
 
 
-            	    pushFollow(FOLLOW_annotation_in_annotations2448);
+            	    pushFollow(FOLLOW_annotation_in_annotations2447);
             	    annotation308=annotation();
 
             	    state._fsp--;
@@ -7761,7 +7772,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    break;
 
             	default :
-            	    break loop59;
+            	    break loop60;
                 }
             } while (true);
 
@@ -7867,29 +7878,29 @@ public TreeAdaptor getTreeAdaptor() {
             // parser/flatzinc/FlatzincFullExtParser.g:327:5: ( IDENTIFIER ( LP expr ( CM expr )* RP )? -> IDENTIFIER ( LP ( expr )+ RP )? )
             // parser/flatzinc/FlatzincFullExtParser.g:327:9: IDENTIFIER ( LP expr ( CM expr )* RP )?
             {
-            IDENTIFIER309=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_annotation2483); if (state.failed) return retval; 
+            IDENTIFIER309=(Token)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_annotation2482); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENTIFIER.add(IDENTIFIER309);
 
 
             // parser/flatzinc/FlatzincFullExtParser.g:327:20: ( LP expr ( CM expr )* RP )?
-            int alt61=2;
+            int alt62=2;
             switch ( input.LA(1) ) {
                 case LP:
                     {
-                    alt61=1;
+                    alt62=1;
                     }
                     break;
             }
 
-            switch (alt61) {
+            switch (alt62) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:327:21: LP expr ( CM expr )* RP
                     {
-                    LP310=(Token)match(input,LP,FOLLOW_LP_in_annotation2486); if (state.failed) return retval; 
+                    LP310=(Token)match(input,LP,FOLLOW_LP_in_annotation2485); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LP.add(LP310);
 
 
-                    pushFollow(FOLLOW_expr_in_annotation2488);
+                    pushFollow(FOLLOW_expr_in_annotation2487);
                     expr311=expr();
 
                     state._fsp--;
@@ -7897,27 +7908,27 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_expr.add(expr311.getTree());
 
                     // parser/flatzinc/FlatzincFullExtParser.g:327:29: ( CM expr )*
-                    loop60:
+                    loop61:
                     do {
-                        int alt60=2;
+                        int alt61=2;
                         switch ( input.LA(1) ) {
                         case CM:
                             {
-                            alt60=1;
+                            alt61=1;
                             }
                             break;
 
                         }
 
-                        switch (alt60) {
+                        switch (alt61) {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtParser.g:327:30: CM expr
                     	    {
-                    	    CM312=(Token)match(input,CM,FOLLOW_CM_in_annotation2491); if (state.failed) return retval; 
+                    	    CM312=(Token)match(input,CM,FOLLOW_CM_in_annotation2490); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_CM.add(CM312);
 
 
-                    	    pushFollow(FOLLOW_expr_in_annotation2493);
+                    	    pushFollow(FOLLOW_expr_in_annotation2492);
                     	    expr313=expr();
 
                     	    state._fsp--;
@@ -7928,12 +7939,12 @@ public TreeAdaptor getTreeAdaptor() {
                     	    break;
 
                     	default :
-                    	    break loop60;
+                    	    break loop61;
                         }
                     } while (true);
 
 
-                    RP314=(Token)match(input,RP,FOLLOW_RP_in_annotation2497); if (state.failed) return retval; 
+                    RP314=(Token)match(input,RP,FOLLOW_RP_in_annotation2496); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RP.add(RP314);
 
 
@@ -7944,7 +7955,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: expr, RP, LP, IDENTIFIER
+            // elements: IDENTIFIER, RP, expr, LP
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7963,7 +7974,7 @@ public TreeAdaptor getTreeAdaptor() {
                 );
 
                 // parser/flatzinc/FlatzincFullExtParser.g:328:20: ( LP ( expr )+ RP )?
-                if ( stream_expr.hasNext()||stream_RP.hasNext()||stream_LP.hasNext() ) {
+                if ( stream_RP.hasNext()||stream_expr.hasNext()||stream_LP.hasNext() ) {
                     adaptor.addChild(root_0, 
                     stream_LP.nextNode()
                     );
@@ -7982,8 +7993,8 @@ public TreeAdaptor getTreeAdaptor() {
                     );
 
                 }
-                stream_expr.reset();
                 stream_RP.reset();
+                stream_expr.reset();
                 stream_LP.reset();
 
             }
@@ -8041,35 +8052,35 @@ public TreeAdaptor getTreeAdaptor() {
 
         try {
             // parser/flatzinc/FlatzincFullExtParser.g:333:5: ( TRUE ^| FALSE ^)
-            int alt62=2;
+            int alt63=2;
             switch ( input.LA(1) ) {
             case TRUE:
                 {
-                alt62=1;
+                alt63=1;
                 }
                 break;
             case FALSE:
                 {
-                alt62=2;
+                alt63=2;
                 }
                 break;
             default:
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 NoViableAltException nvae =
-                    new NoViableAltException("", 62, 0, input);
+                    new NoViableAltException("", 63, 0, input);
 
                 throw nvae;
 
             }
 
-            switch (alt62) {
+            switch (alt63) {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtParser.g:333:9: TRUE ^
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    TRUE315=(Token)match(input,TRUE,FOLLOW_TRUE_in_bool_const2538); if (state.failed) return retval;
+                    TRUE315=(Token)match(input,TRUE,FOLLOW_TRUE_in_bool_const2537); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     TRUE315_tree = 
                     (Object)adaptor.create(TRUE315)
@@ -8085,7 +8096,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
 
 
-                    FALSE316=(Token)match(input,FALSE,FOLLOW_FALSE_in_bool_const2549); if (state.failed) return retval;
+                    FALSE316=(Token)match(input,FALSE,FOLLOW_FALSE_in_bool_const2548); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     FALSE316_tree = 
                     (Object)adaptor.create(FALSE316)
@@ -8134,20 +8145,20 @@ public TreeAdaptor getTreeAdaptor() {
         if (state.failed) return ;
 
         // parser/flatzinc/FlatzincFullExtParser.g:68:18: ( AND predicates )+
-        int cnt63=0;
-        loop63:
+        int cnt64=0;
+        loop64:
         do {
-            int alt63=2;
+            int alt64=2;
             switch ( input.LA(1) ) {
             case AND:
                 {
-                alt63=1;
+                alt64=1;
                 }
                 break;
 
             }
 
-            switch (alt63) {
+            switch (alt64) {
         	case 1 :
         	    // parser/flatzinc/FlatzincFullExtParser.g:68:19: AND predicates
         	    {
@@ -8163,13 +8174,13 @@ public TreeAdaptor getTreeAdaptor() {
         	    break;
 
         	default :
-        	    if ( cnt63 >= 1 ) break loop63;
+        	    if ( cnt64 >= 1 ) break loop64;
         	    if (state.backtracking>0) {state.failed=true; return ;}
                     EarlyExitException eee =
-                        new EarlyExitException(63, input);
+                        new EarlyExitException(64, input);
                     throw eee;
             }
-            cnt63++;
+            cnt64++;
         } while (true);
 
 
@@ -8185,16 +8196,16 @@ public TreeAdaptor getTreeAdaptor() {
         // parser/flatzinc/FlatzincFullExtParser.g:163:4: ( attr_op ( DO attr_op )* ( DO attribute )? )
         // parser/flatzinc/FlatzincFullExtParser.g:163:4: attr_op ( DO attr_op )* ( DO attribute )?
         {
-        pushFollow(FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser844);
+        pushFollow(FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser843);
         attr_op();
 
         state._fsp--;
         if (state.failed) return ;
 
         // parser/flatzinc/FlatzincFullExtParser.g:163:12: ( DO attr_op )*
-        loop66:
+        loop67:
         do {
-            int alt66=2;
+            int alt67=2;
             switch ( input.LA(1) ) {
             case DO:
                 {
@@ -8205,7 +8216,7 @@ public TreeAdaptor getTreeAdaptor() {
                 case SIZE:
                 case SUM:
                     {
-                    alt66=1;
+                    alt67=1;
                     }
                     break;
 
@@ -8216,13 +8227,13 @@ public TreeAdaptor getTreeAdaptor() {
 
             }
 
-            switch (alt66) {
+            switch (alt67) {
         	case 1 :
         	    // parser/flatzinc/FlatzincFullExtParser.g:163:13: DO attr_op
         	    {
-        	    match(input,DO,FOLLOW_DO_in_synpred47_FlatzincFullExtParser847); if (state.failed) return ;
+        	    match(input,DO,FOLLOW_DO_in_synpred47_FlatzincFullExtParser846); if (state.failed) return ;
 
-        	    pushFollow(FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser849);
+        	    pushFollow(FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser848);
         	    attr_op();
 
         	    state._fsp--;
@@ -8232,28 +8243,28 @@ public TreeAdaptor getTreeAdaptor() {
         	    break;
 
         	default :
-        	    break loop66;
+        	    break loop67;
             }
         } while (true);
 
 
         // parser/flatzinc/FlatzincFullExtParser.g:163:27: ( DO attribute )?
-        int alt67=2;
+        int alt68=2;
         switch ( input.LA(1) ) {
             case DO:
                 {
-                alt67=1;
+                alt68=1;
                 }
                 break;
         }
 
-        switch (alt67) {
+        switch (alt68) {
             case 1 :
                 // parser/flatzinc/FlatzincFullExtParser.g:163:28: DO attribute
                 {
-                match(input,DO,FOLLOW_DO_in_synpred47_FlatzincFullExtParser855); if (state.failed) return ;
+                match(input,DO,FOLLOW_DO_in_synpred47_FlatzincFullExtParser854); if (state.failed) return ;
 
-                pushFollow(FOLLOW_attribute_in_synpred47_FlatzincFullExtParser857);
+                pushFollow(FOLLOW_attribute_in_synpred47_FlatzincFullExtParser856);
                 attribute();
 
                 state._fsp--;
@@ -8303,10 +8314,10 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     protected DFA2 dfa2 = new DFA2(this);
-    protected DFA26 dfa26 = new DFA26(this);
-    protected DFA28 dfa28 = new DFA28(this);
-    protected DFA45 dfa45 = new DFA45(this);
-    protected DFA47 dfa47 = new DFA47(this);
+    protected DFA27 dfa27 = new DFA27(this);
+    protected DFA29 dfa29 = new DFA29(this);
+    protected DFA46 dfa46 = new DFA46(this);
+    protected DFA48 dfa48 = new DFA48(this);
     static final String DFA2_eotS =
         "\20\uffff";
     static final String DFA2_eofS =
@@ -8322,8 +8333,8 @@ public TreeAdaptor getTreeAdaptor() {
     static final String DFA2_specialS =
         "\20\uffff}>";
     static final String[] DFA2_transitionS = {
-            "\1\1\4\uffff\1\3\6\uffff\1\2\12\uffff\1\3\3\uffff\1\2\2\uffff"+
-            "\1\3\3\uffff\1\2\2\uffff\1\2\1\uffff\1\2\25\uffff\1\2\1\uffff"+
+            "\1\1\4\uffff\1\3\6\uffff\1\2\12\uffff\1\3\1\uffff\1\2\1\uffff"+
+            "\1\2\2\uffff\1\3\3\uffff\1\2\2\uffff\1\2\27\uffff\1\2\1\uffff"+
             "\1\2\4\uffff\1\3\1\uffff\1\2\6\uffff\1\2",
             "\1\4",
             "",
@@ -8375,19 +8386,19 @@ public TreeAdaptor getTreeAdaptor() {
             return "()* loopback of 43:19: ( param_decl )*";
         }
     }
-    static final String DFA26_eotS =
+    static final String DFA27_eotS =
         "\7\uffff";
-    static final String DFA26_eofS =
+    static final String DFA27_eofS =
         "\1\uffff\1\4\3\uffff\1\4\1\uffff";
-    static final String DFA26_minS =
+    static final String DFA27_minS =
         "\1\6\1\21\1\uffff\1\6\1\uffff\1\21\1\0";
-    static final String DFA26_maxS =
+    static final String DFA27_maxS =
         "\1\127\1\113\1\uffff\1\127\1\uffff\1\113\1\0";
-    static final String DFA26_acceptS =
+    static final String DFA27_acceptS =
         "\2\uffff\1\2\1\uffff\1\1\2\uffff";
-    static final String DFA26_specialS =
+    static final String DFA27_specialS =
         "\6\uffff\1\0}>";
-    static final String[] DFA26_transitionS = {
+    static final String[] DFA27_transitionS = {
             "\1\1\7\uffff\1\2\3\uffff\1\2\2\uffff\1\2\27\uffff\1\1\1\uffff"+
             "\1\1\17\uffff\1\2\1\uffff\2\2\1\uffff\1\2\10\uffff\1\1\4\uffff"+
             "\1\1\2\uffff\3\2",
@@ -8401,34 +8412,34 @@ public TreeAdaptor getTreeAdaptor() {
             "\1\uffff"
     };
 
-    static final short[] DFA26_eot = DFA.unpackEncodedString(DFA26_eotS);
-    static final short[] DFA26_eof = DFA.unpackEncodedString(DFA26_eofS);
-    static final char[] DFA26_min = DFA.unpackEncodedStringToUnsignedChars(DFA26_minS);
-    static final char[] DFA26_max = DFA.unpackEncodedStringToUnsignedChars(DFA26_maxS);
-    static final short[] DFA26_accept = DFA.unpackEncodedString(DFA26_acceptS);
-    static final short[] DFA26_special = DFA.unpackEncodedString(DFA26_specialS);
-    static final short[][] DFA26_transition;
+    static final short[] DFA27_eot = DFA.unpackEncodedString(DFA27_eotS);
+    static final short[] DFA27_eof = DFA.unpackEncodedString(DFA27_eofS);
+    static final char[] DFA27_min = DFA.unpackEncodedStringToUnsignedChars(DFA27_minS);
+    static final char[] DFA27_max = DFA.unpackEncodedStringToUnsignedChars(DFA27_maxS);
+    static final short[] DFA27_accept = DFA.unpackEncodedString(DFA27_acceptS);
+    static final short[] DFA27_special = DFA.unpackEncodedString(DFA27_specialS);
+    static final short[][] DFA27_transition;
 
     static {
-        int numStates = DFA26_transitionS.length;
-        DFA26_transition = new short[numStates][];
+        int numStates = DFA27_transitionS.length;
+        DFA27_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA26_transition[i] = DFA.unpackEncodedString(DFA26_transitionS[i]);
+            DFA27_transition[i] = DFA.unpackEncodedString(DFA27_transitionS[i]);
         }
     }
 
-    class DFA26 extends DFA {
+    class DFA27 extends DFA {
 
-        public DFA26(BaseRecognizer recognizer) {
+        public DFA27(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 26;
-            this.eot = DFA26_eot;
-            this.eof = DFA26_eof;
-            this.min = DFA26_min;
-            this.max = DFA26_max;
-            this.accept = DFA26_accept;
-            this.special = DFA26_special;
-            this.transition = DFA26_transition;
+            this.decisionNumber = 27;
+            this.eot = DFA27_eot;
+            this.eof = DFA27_eof;
+            this.min = DFA27_min;
+            this.max = DFA27_max;
+            this.accept = DFA27_accept;
+            this.special = DFA27_special;
+            this.transition = DFA27_transition;
         }
         public String getDescription() {
             return "162:1: comb_attr : ( attr_op ( DO attr_op )* ( DO attribute )? -> ^( DO ( attr_op )* ( attribute )? ) | ( attr_op DO )* attribute -> ^( DO ( attr_op )* ( attribute )? ) );";
@@ -8438,10 +8449,10 @@ public TreeAdaptor getTreeAdaptor() {
         	int _s = s;
             switch ( s ) {
                     case 0 : 
-                        int LA26_6 = input.LA(1);
+                        int LA27_6 = input.LA(1);
 
                          
-                        int index26_6 = input.index();
+                        int index27_6 = input.index();
                         input.rewind();
 
                         s = -1;
@@ -8450,7 +8461,7 @@ public TreeAdaptor getTreeAdaptor() {
                         else if ( (true) ) {s = 2;}
 
                          
-                        input.seek(index26_6);
+                        input.seek(index27_6);
 
                         if ( s>=0 ) return s;
                         break;
@@ -8458,27 +8469,27 @@ public TreeAdaptor getTreeAdaptor() {
             if (state.backtracking>0) {state.failed=true; return -1;}
 
             NoViableAltException nvae =
-                new NoViableAltException(getDescription(), 26, _s, input);
+                new NoViableAltException(getDescription(), 27, _s, input);
             error(nvae);
             throw nvae;
         }
 
     }
-    static final String DFA28_eotS =
+    static final String DFA29_eotS =
         "\20\uffff";
-    static final String DFA28_eofS =
+    static final String DFA29_eofS =
         "\20\uffff";
-    static final String DFA28_minS =
+    static final String DFA29_minS =
         "\1\10\1\54\2\uffff\1\46\1\27\1\21\1\47\1\46\1\65\1\21\1\27\1\21"+
         "\1\15\1\47\1\21";
-    static final String DFA28_maxS =
+    static final String DFA29_maxS =
         "\1\125\1\54\2\uffff\1\47\1\27\1\111\2\47\1\65\1\111\1\27\1\111\1"+
         "\125\1\47\1\111";
-    static final String DFA28_acceptS =
+    static final String DFA29_acceptS =
         "\2\uffff\1\1\1\2\14\uffff";
-    static final String DFA28_specialS =
+    static final String DFA29_specialS =
         "\20\uffff}>";
-    static final String[] DFA28_transitionS = {
+    static final String[] DFA29_transitionS = {
             "\1\1\4\uffff\1\2\21\uffff\1\2\6\uffff\2\2\1\uffff\1\2\42\uffff"+
             "\1\2\10\uffff\1\3",
             "\1\4",
@@ -8499,55 +8510,55 @@ public TreeAdaptor getTreeAdaptor() {
             "\1\10\67\uffff\1\11"
     };
 
-    static final short[] DFA28_eot = DFA.unpackEncodedString(DFA28_eotS);
-    static final short[] DFA28_eof = DFA.unpackEncodedString(DFA28_eofS);
-    static final char[] DFA28_min = DFA.unpackEncodedStringToUnsignedChars(DFA28_minS);
-    static final char[] DFA28_max = DFA.unpackEncodedStringToUnsignedChars(DFA28_maxS);
-    static final short[] DFA28_accept = DFA.unpackEncodedString(DFA28_acceptS);
-    static final short[] DFA28_special = DFA.unpackEncodedString(DFA28_specialS);
-    static final short[][] DFA28_transition;
+    static final short[] DFA29_eot = DFA.unpackEncodedString(DFA29_eotS);
+    static final short[] DFA29_eof = DFA.unpackEncodedString(DFA29_eofS);
+    static final char[] DFA29_min = DFA.unpackEncodedStringToUnsignedChars(DFA29_minS);
+    static final char[] DFA29_max = DFA.unpackEncodedStringToUnsignedChars(DFA29_maxS);
+    static final short[] DFA29_accept = DFA.unpackEncodedString(DFA29_acceptS);
+    static final short[] DFA29_special = DFA.unpackEncodedString(DFA29_specialS);
+    static final short[][] DFA29_transition;
 
     static {
-        int numStates = DFA28_transitionS.length;
-        DFA28_transition = new short[numStates][];
+        int numStates = DFA29_transitionS.length;
+        DFA29_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA28_transition[i] = DFA.unpackEncodedString(DFA28_transitionS[i]);
+            DFA29_transition[i] = DFA.unpackEncodedString(DFA29_transitionS[i]);
         }
     }
 
-    class DFA28 extends DFA {
+    class DFA29 extends DFA {
 
-        public DFA28(BaseRecognizer recognizer) {
+        public DFA29(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 28;
-            this.eot = DFA28_eot;
-            this.eof = DFA28_eof;
-            this.min = DFA28_min;
-            this.max = DFA28_max;
-            this.accept = DFA28_accept;
-            this.special = DFA28_special;
-            this.transition = DFA28_transition;
+            this.decisionNumber = 29;
+            this.eot = DFA29_eot;
+            this.eof = DFA29_eof;
+            this.min = DFA29_min;
+            this.max = DFA29_max;
+            this.accept = DFA29_accept;
+            this.special = DFA29_special;
+            this.transition = DFA29_transition;
         }
         public String getDescription() {
             return "194:1: pred_param_type : ( par_pred_param_type | var_pred_param_type );";
         }
     }
-    static final String DFA45_eotS =
+    static final String DFA46_eotS =
         "\33\uffff";
-    static final String DFA45_eofS =
+    static final String DFA46_eofS =
         "\33\uffff";
-    static final String DFA45_minS =
+    static final String DFA46_minS =
         "\1\10\1\54\1\uffff\1\65\2\uffff\2\46\1\27\1\21\2\uffff\1\47\1\46"+
         "\1\65\1\21\1\27\1\21\1\15\1\47\2\uffff\1\65\1\21\1\46\2\uffff";
-    static final String DFA45_maxS =
+    static final String DFA46_maxS =
         "\1\114\1\54\1\uffff\1\65\2\uffff\1\47\1\51\1\27\1\111\2\uffff\2"+
         "\47\1\65\1\111\1\27\1\111\1\114\1\47\2\uffff\1\65\1\111\1\51\2\uffff";
-    static final String DFA45_acceptS =
+    static final String DFA46_acceptS =
         "\2\uffff\1\1\1\uffff\1\2\1\3\4\uffff\1\4\1\5\10\uffff\1\6\1\7\3"+
         "\uffff\1\10\1\11";
-    static final String DFA45_specialS =
+    static final String DFA46_specialS =
         "\33\uffff}>";
-    static final String[] DFA45_transitionS = {
+    static final String[] DFA46_transitionS = {
             "\1\1\4\uffff\1\2\21\uffff\1\2\6\uffff\1\2\1\4\1\uffff\1\5\42"+
             "\uffff\1\3",
             "\1\6",
@@ -8579,54 +8590,54 @@ public TreeAdaptor getTreeAdaptor() {
             ""
     };
 
-    static final short[] DFA45_eot = DFA.unpackEncodedString(DFA45_eotS);
-    static final short[] DFA45_eof = DFA.unpackEncodedString(DFA45_eofS);
-    static final char[] DFA45_min = DFA.unpackEncodedStringToUnsignedChars(DFA45_minS);
-    static final char[] DFA45_max = DFA.unpackEncodedStringToUnsignedChars(DFA45_maxS);
-    static final short[] DFA45_accept = DFA.unpackEncodedString(DFA45_acceptS);
-    static final short[] DFA45_special = DFA.unpackEncodedString(DFA45_specialS);
-    static final short[][] DFA45_transition;
+    static final short[] DFA46_eot = DFA.unpackEncodedString(DFA46_eotS);
+    static final short[] DFA46_eof = DFA.unpackEncodedString(DFA46_eofS);
+    static final char[] DFA46_min = DFA.unpackEncodedStringToUnsignedChars(DFA46_minS);
+    static final char[] DFA46_max = DFA.unpackEncodedStringToUnsignedChars(DFA46_maxS);
+    static final short[] DFA46_accept = DFA.unpackEncodedString(DFA46_acceptS);
+    static final short[] DFA46_special = DFA.unpackEncodedString(DFA46_specialS);
+    static final short[][] DFA46_transition;
 
     static {
-        int numStates = DFA45_transitionS.length;
-        DFA45_transition = new short[numStates][];
+        int numStates = DFA46_transitionS.length;
+        DFA46_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA45_transition[i] = DFA.unpackEncodedString(DFA45_transitionS[i]);
+            DFA46_transition[i] = DFA.unpackEncodedString(DFA46_transitionS[i]);
         }
     }
 
-    class DFA45 extends DFA {
+    class DFA46 extends DFA {
 
-        public DFA45(BaseRecognizer recognizer) {
+        public DFA46(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 45;
-            this.eot = DFA45_eot;
-            this.eof = DFA45_eof;
-            this.min = DFA45_min;
-            this.max = DFA45_max;
-            this.accept = DFA45_accept;
-            this.special = DFA45_special;
-            this.transition = DFA45_transition;
+            this.decisionNumber = 46;
+            this.eot = DFA46_eot;
+            this.eof = DFA46_eof;
+            this.min = DFA46_min;
+            this.max = DFA46_max;
+            this.accept = DFA46_accept;
+            this.special = DFA46_special;
+            this.transition = DFA46_transition;
         }
         public String getDescription() {
             return "236:1: par_pred_param_type : ( par_type | INT_CONST DD INT_CONST -> ^( DD INT_CONST INT_CONST ) | LB INT_CONST ( CM INT_CONST )* RB -> ^( CM ( INT_CONST )+ ) | SET OF INT_CONST DD INT_CONST -> ^( SET ^( DD INT_CONST INT_CONST ) ) | SET OF LB INT_CONST ( CM INT_CONST )* RB -> ^( SET ^( CM ( INT_CONST )+ ) ) | ARRAY LS index_set ( CM index_set )* RS OF INT_CONST DD INT_CONST -> ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ARRAY LS index_set ( CM index_set )* RS OF LB INT_CONST ( CM INT_CONST )* RB -> ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ARRAY LS index_set ( CM index_set )* RS OF SET OF INT_CONST DD INT_CONST -> ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ARRAY LS index_set ( CM index_set )* RS OF SET OF LB INT_CONST ( CM INT_CONST )* RB -> ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) );";
         }
     }
-    static final String DFA47_eotS =
+    static final String DFA48_eotS =
         "\27\uffff";
-    static final String DFA47_eofS =
+    static final String DFA48_eofS =
         "\27\uffff";
-    static final String DFA47_minS =
+    static final String DFA48_minS =
         "\1\10\1\54\1\15\1\46\1\65\1\uffff\1\27\1\21\1\46\1\47\1\46\1\65"+
         "\1\uffff\1\21\1\27\1\21\1\125\1\47\1\15\1\21\1\65\1\46\1\uffff";
-    static final String DFA47_maxS =
+    static final String DFA48_maxS =
         "\1\125\1\54\1\114\1\47\1\65\1\uffff\1\27\1\111\1\51\2\47\1\65\1"+
         "\uffff\1\111\1\27\1\111\1\125\1\47\1\114\1\111\1\65\1\51\1\uffff";
-    static final String DFA47_acceptS =
+    static final String DFA48_acceptS =
         "\5\uffff\1\1\6\uffff\1\2\11\uffff\1\3";
-    static final String DFA47_specialS =
+    static final String DFA48_specialS =
         "\27\uffff}>";
-    static final String[] DFA47_transitionS = {
+    static final String[] DFA48_transitionS = {
             "\1\1\114\uffff\1\2",
             "\1\3",
             "\1\5\21\uffff\1\5\6\uffff\2\5\1\uffff\1\5\42\uffff\1\4",
@@ -8652,34 +8663,34 @@ public TreeAdaptor getTreeAdaptor() {
             ""
     };
 
-    static final short[] DFA47_eot = DFA.unpackEncodedString(DFA47_eotS);
-    static final short[] DFA47_eof = DFA.unpackEncodedString(DFA47_eofS);
-    static final char[] DFA47_min = DFA.unpackEncodedStringToUnsignedChars(DFA47_minS);
-    static final char[] DFA47_max = DFA.unpackEncodedStringToUnsignedChars(DFA47_maxS);
-    static final short[] DFA47_accept = DFA.unpackEncodedString(DFA47_acceptS);
-    static final short[] DFA47_special = DFA.unpackEncodedString(DFA47_specialS);
-    static final short[][] DFA47_transition;
+    static final short[] DFA48_eot = DFA.unpackEncodedString(DFA48_eotS);
+    static final short[] DFA48_eof = DFA.unpackEncodedString(DFA48_eofS);
+    static final char[] DFA48_min = DFA.unpackEncodedStringToUnsignedChars(DFA48_minS);
+    static final char[] DFA48_max = DFA.unpackEncodedStringToUnsignedChars(DFA48_maxS);
+    static final short[] DFA48_accept = DFA.unpackEncodedString(DFA48_acceptS);
+    static final short[] DFA48_special = DFA.unpackEncodedString(DFA48_specialS);
+    static final short[][] DFA48_transition;
 
     static {
-        int numStates = DFA47_transitionS.length;
-        DFA47_transition = new short[numStates][];
+        int numStates = DFA48_transitionS.length;
+        DFA48_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA47_transition[i] = DFA.unpackEncodedString(DFA47_transitionS[i]);
+            DFA48_transition[i] = DFA.unpackEncodedString(DFA48_transitionS[i]);
         }
     }
 
-    class DFA47 extends DFA {
+    class DFA48 extends DFA {
 
-        public DFA47(BaseRecognizer recognizer) {
+        public DFA48(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 47;
-            this.eot = DFA47_eot;
-            this.eof = DFA47_eof;
-            this.min = DFA47_min;
-            this.max = DFA47_max;
-            this.accept = DFA47_accept;
-            this.special = DFA47_special;
-            this.transition = DFA47_transition;
+            this.decisionNumber = 48;
+            this.eot = DFA48_eot;
+            this.eof = DFA48_eof;
+            this.min = DFA48_min;
+            this.max = DFA48_max;
+            this.accept = DFA48_accept;
+            this.special = DFA48_special;
+            this.transition = DFA48_transition;
         }
         public String getDescription() {
             return "261:1: var_pred_param_type : ( var_type -> ^( VAR var_type ) | VAR SET OF INT -> ^( VAR SET ) | ARRAY LS index_set ( CM index_set )* RS OF VAR SET OF INT -> ^( ARRAY ( index_set )+ ^( VAR SET ) ) );";
@@ -8687,11 +8698,11 @@ public TreeAdaptor getTreeAdaptor() {
     }
  
 
-    public static final BitSet FOLLOW_pred_decl_in_flatzinc_ext_model67 = new BitSet(new long[]{0x0000A44880102100L,0x00000000002050A8L});
-    public static final BitSet FOLLOW_param_decl_in_flatzinc_ext_model72 = new BitSet(new long[]{0x0000A44880102100L,0x00000000002050A0L});
-    public static final BitSet FOLLOW_var_decl_in_flatzinc_ext_model77 = new BitSet(new long[]{0x0000A40800100100L,0x00000000002040A0L});
-    public static final BitSet FOLLOW_constraint_in_flatzinc_ext_model82 = new BitSet(new long[]{0x0000A40800100000L,0x00000000000040A0L});
-    public static final BitSet FOLLOW_group_decl_in_flatzinc_ext_model87 = new BitSet(new long[]{0x0000A40800000000L,0x00000000000040A0L});
+    public static final BitSet FOLLOW_pred_decl_in_flatzinc_ext_model67 = new BitSet(new long[]{0x0000244A80102100L,0x00000000002050A8L});
+    public static final BitSet FOLLOW_param_decl_in_flatzinc_ext_model72 = new BitSet(new long[]{0x0000244A80102100L,0x00000000002050A0L});
+    public static final BitSet FOLLOW_var_decl_in_flatzinc_ext_model77 = new BitSet(new long[]{0x0000240A00100100L,0x00000000002040A0L});
+    public static final BitSet FOLLOW_constraint_in_flatzinc_ext_model82 = new BitSet(new long[]{0x0000240A00100000L,0x00000000000040A0L});
+    public static final BitSet FOLLOW_group_decl_in_flatzinc_ext_model87 = new BitSet(new long[]{0x0000240A00000000L,0x00000000000040A0L});
     public static final BitSet FOLLOW_structure_in_flatzinc_ext_model92 = new BitSet(new long[]{0x0000000000000000L,0x0000000000004000L});
     public static final BitSet FOLLOW_solve_goal_in_flatzinc_ext_model96 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_IDENTIFIER_in_group_decl125 = new BitSet(new long[]{0x0000000000010000L});
@@ -8727,15 +8738,15 @@ public TreeAdaptor getTreeAdaptor() {
     public static final BitSet FOLLOW_SC_in_structure463 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_coll_in_struct478 = new BitSet(new long[]{0x0020000000000000L});
     public static final BitSet FOLLOW_OF_in_struct480 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LB_in_struct482 = new BitSet(new long[]{0x0000A40800000000L,0x00000000000000A0L});
+    public static final BitSet FOLLOW_LB_in_struct482 = new BitSet(new long[]{0x0000240A00000000L,0x00000000000000A0L});
     public static final BitSet FOLLOW_elt_in_struct484 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_struct487 = new BitSet(new long[]{0x0000A40800000000L,0x00000000000000A0L});
+    public static final BitSet FOLLOW_CM_in_struct487 = new BitSet(new long[]{0x0000240A00000000L,0x00000000000000A0L});
     public static final BitSet FOLLOW_elt_in_struct489 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
     public static final BitSet FOLLOW_RB_in_struct493 = new BitSet(new long[]{0x0000010000000002L});
     public static final BitSet FOLLOW_KEY_in_struct496 = new BitSet(new long[]{0x8000A00000244040L,0x0000000000E42016L});
     public static final BitSet FOLLOW_comb_attr_in_struct498 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_IDENTIFIER_in_struct_reg530 = new BitSet(new long[]{0x0000000000000800L});
-    public static final BitSet FOLLOW_AS_in_struct_reg532 = new BitSet(new long[]{0x0000A40000000000L,0x00000000000000A0L});
+    public static final BitSet FOLLOW_AS_in_struct_reg532 = new BitSet(new long[]{0x0000240200000000L,0x00000000000000A0L});
     public static final BitSet FOLLOW_coll_in_struct_reg534 = new BitSet(new long[]{0x0020000000000000L});
     public static final BitSet FOLLOW_OF_in_struct_reg536 = new BitSet(new long[]{0x0000020000000000L});
     public static final BitSet FOLLOW_LB_in_struct_reg538 = new BitSet(new long[]{0x0000000002000000L});
@@ -8750,7 +8761,7 @@ public TreeAdaptor getTreeAdaptor() {
     public static final BitSet FOLLOW_attribute_in_elt606 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_EACH_in_many622 = new BitSet(new long[]{0x8000000000244000L,0x0000000000E00016L});
     public static final BitSet FOLLOW_attribute_in_many624 = new BitSet(new long[]{0x0000000000000800L});
-    public static final BitSet FOLLOW_AS_in_many626 = new BitSet(new long[]{0x0000A40000000000L,0x00000000000000A0L});
+    public static final BitSet FOLLOW_AS_in_many626 = new BitSet(new long[]{0x0000240200000000L,0x00000000000000A0L});
     public static final BitSet FOLLOW_coll_in_many628 = new BitSet(new long[]{0x0020010000000002L});
     public static final BitSet FOLLOW_OF_in_many631 = new BitSet(new long[]{0x0000020000000000L});
     public static final BitSet FOLLOW_LB_in_many633 = new BitSet(new long[]{0x0000000002000000L});
@@ -8767,248 +8778,248 @@ public TreeAdaptor getTreeAdaptor() {
     public static final BitSet FOLLOW_LP_in_coll739 = new BitSet(new long[]{0x0400000100000000L,0x0000000003000000L});
     public static final BitSet FOLLOW_liter_in_coll742 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
     public static final BitSet FOLLOW_RP_in_coll744 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_coll753 = new BitSet(new long[]{0x0000000200000000L});
-    public static final BitSet FOLLOW_HEAP_in_coll759 = new BitSet(new long[]{0x0000080000000000L});
-    public static final BitSet FOLLOW_LP_in_coll762 = new BitSet(new long[]{0x0400000000000000L,0x0000000002000000L});
-    public static final BitSet FOLLOW_qiter_in_coll765 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_RP_in_coll767 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_qiter_in_liter809 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FOR_in_liter819 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_WFOR_in_liter829 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_attr_op_in_comb_attr844 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_DO_in_comb_attr847 = new BitSet(new long[]{0x0000A00000000040L,0x0000000000042000L});
-    public static final BitSet FOLLOW_attr_op_in_comb_attr849 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_DO_in_comb_attr855 = new BitSet(new long[]{0x8000000000244000L,0x0000000000E00016L});
-    public static final BitSet FOLLOW_attribute_in_comb_attr857 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_attr_op_in_comb_attr881 = new BitSet(new long[]{0x0000000001000000L});
-    public static final BitSet FOLLOW_DO_in_comb_attr883 = new BitSet(new long[]{0x8000A00000244040L,0x0000000000E42016L});
-    public static final BitSet FOLLOW_attribute_in_comb_attr887 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PREDICATE_in_pred_decl975 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl977 = new BitSet(new long[]{0x0000080000000000L});
-    public static final BitSet FOLLOW_LP_in_pred_decl979 = new BitSet(new long[]{0x000002C080002100L,0x0000000000201000L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl981 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_CM_in_pred_decl984 = new BitSet(new long[]{0x000002C080002100L,0x0000000000201000L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl986 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_RP_in_pred_decl990 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_SC_in_pred_decl992 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_pred_param_type_in_pred_param1020 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_CL_in_pred_param1022 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_pred_param1024 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_pred_param_type_in_pred_param_type1058 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_pred_param_type_in_pred_param_type1068 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_type1087 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_par_type1089 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_type1091 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_par_type1094 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_type1096 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_par_type1100 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_type1102 = new BitSet(new long[]{0x0000004080002000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_par_type_u_in_par_type1104 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_u_in_par_type1130 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_BOOL_in_par_type_u1162 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FLOAT_in_par_type_u1172 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_type_u1182 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_type_u1184 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_in_par_type_u1186 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_in_par_type_u1196 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_var_type1215 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_var_type1217 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_type1219 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_var_type1222 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_type1224 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_var_type1228 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type1230 = new BitSet(new long[]{0x0000000000000000L,0x0000000000200000L});
-    public static final BitSet FOLLOW_VAR_in_var_type1232 = new BitSet(new long[]{0x000002C080002000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_var_type_u_in_var_type1234 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_VAR_in_var_type1260 = new BitSet(new long[]{0x000002C080002000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_var_type_u_in_var_type1262 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_BOOL_in_var_type_u1294 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FLOAT_in_var_type_u1304 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_in_var_type_u1314 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1324 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_var_type_u1326 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1328 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_var_type_u1355 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1357 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_var_type_u1360 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1362 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_var_type_u1366 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_var_type_u1390 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type_u1392 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1394 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_var_type_u1396 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1398 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_var_type_u1427 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type_u1429 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LB_in_var_type_u1431 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1433 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_var_type_u1436 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1438 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_var_type_u1442 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_in_par_pred_param_type1480 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1492 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type1494 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1496 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type1521 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1523 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1526 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1528 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_par_pred_param_type1532 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type1556 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1558 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1560 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type1562 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1564 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type1593 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1595 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type1597 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1599 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1602 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1604 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_par_pred_param_type1608 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1638 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type1640 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1642 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1645 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1647 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type1651 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1653 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1655 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type1657 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1659 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1691 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type1693 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1695 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1698 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1700 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type1704 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1706 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type1708 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1710 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1713 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1715 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_par_pred_param_type1719 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1750 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type1752 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1754 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1757 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1759 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type1763 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1765 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type1767 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1769 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1771 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type1773 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1775 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1811 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type1813 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1815 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1818 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1820 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type1824 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1826 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type1828 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type1830 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type1832 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1834 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type1837 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1839 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_par_pred_param_type1843 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_type_in_var_pred_param_type1888 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1911 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type1913 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1915 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_in_var_pred_param_type1917 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type1940 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_LS_in_var_pred_param_type1942 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1944 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_var_pred_param_type1947 = new BitSet(new long[]{0x000000C000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1949 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_var_pred_param_type1953 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1955 = new BitSet(new long[]{0x0000000000000000L,0x0000000000200000L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1957 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type1959 = new BitSet(new long[]{0x0020000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1961 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_in_var_pred_param_type1963 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_index_set2002 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_DD_in_index_set2004 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_index_set2006 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_in_index_set2035 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_expr2067 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr2069 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_CM_in_expr2072 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr2074 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
-    public static final BitSet FOLLOW_RB_in_expr2078 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_bool_const_in_expr2102 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr2112 = new BitSet(new long[]{0x0000000000800002L});
-    public static final BitSet FOLLOW_DD_in_expr2115 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr2117 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_expr2129 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090200L});
-    public static final BitSet FOLLOW_expr_in_expr2132 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_CM_in_expr2135 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_expr2137 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_expr2143 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_id_expr_in_expr2171 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_STRING_in_expr2181 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr2202 = new BitSet(new long[]{0x0000180000000002L});
-    public static final BitSet FOLLOW_LP_in_id_expr2206 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_id_expr2208 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_CM_in_id_expr2211 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_id_expr2213 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_RP_in_id_expr2217 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_id_expr2221 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_id_expr2223 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000200L});
-    public static final BitSet FOLLOW_RS_in_id_expr2225 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_in_param_decl2245 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_CL_in_param_decl2247 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl2249 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_EQ_in_param_decl2251 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_param_decl2253 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_SC_in_param_decl2255 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_type_in_var_decl2283 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_CL_in_var_decl2285 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl2287 = new BitSet(new long[]{0x0000000004400000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_annotations_in_var_decl2289 = new BitSet(new long[]{0x0000000004000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_EQ_in_var_decl2292 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_var_decl2294 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_SC_in_var_decl2298 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_CONSTRAINT_in_constraint2328 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_constraint2330 = new BitSet(new long[]{0x0000080000000000L});
-    public static final BitSet FOLLOW_LP_in_constraint2332 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_constraint2334 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_CM_in_constraint2337 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_constraint2339 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_RP_in_constraint2343 = new BitSet(new long[]{0x0000000000400000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_annotations_in_constraint2345 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_SC_in_constraint2347 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SOLVE_in_solve_goal2375 = new BitSet(new long[]{0x0001400000400000L,0x0000000000000400L});
-    public static final BitSet FOLLOW_annotations_in_solve_goal2378 = new BitSet(new long[]{0x0001400000000000L,0x0000000000000400L});
-    public static final BitSet FOLLOW_resolution_in_solve_goal2380 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
-    public static final BitSet FOLLOW_SC_in_solve_goal2382 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MINIMIZE_in_resolution2399 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_resolution2402 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MAXIMIZE_in_resolution2412 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_resolution2415 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SATISFY_in_resolution2425 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DC_in_annotations2446 = new BitSet(new long[]{0x0000000800000000L});
-    public static final BitSet FOLLOW_annotation_in_annotations2448 = new BitSet(new long[]{0x0000000000400002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_annotation2483 = new BitSet(new long[]{0x0000080000000002L});
-    public static final BitSet FOLLOW_LP_in_annotation2486 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_annotation2488 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_CM_in_annotation2491 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
-    public static final BitSet FOLLOW_expr_in_annotation2493 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
-    public static final BitSet FOLLOW_RP_in_annotation2497 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TRUE_in_bool_const2538 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FALSE_in_bool_const2549 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MAX_in_coll754 = new BitSet(new long[]{0x0000000200000000L});
+    public static final BitSet FOLLOW_HEAP_in_coll758 = new BitSet(new long[]{0x0000080000000000L});
+    public static final BitSet FOLLOW_LP_in_coll761 = new BitSet(new long[]{0x0400000000000000L,0x0000000002000000L});
+    public static final BitSet FOLLOW_qiter_in_coll764 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_RP_in_coll766 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_qiter_in_liter808 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FOR_in_liter818 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_WFOR_in_liter828 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_attr_op_in_comb_attr843 = new BitSet(new long[]{0x0000000001000002L});
+    public static final BitSet FOLLOW_DO_in_comb_attr846 = new BitSet(new long[]{0x0000A00000000040L,0x0000000000042000L});
+    public static final BitSet FOLLOW_attr_op_in_comb_attr848 = new BitSet(new long[]{0x0000000001000002L});
+    public static final BitSet FOLLOW_DO_in_comb_attr854 = new BitSet(new long[]{0x8000000000244000L,0x0000000000E00016L});
+    public static final BitSet FOLLOW_attribute_in_comb_attr856 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_attr_op_in_comb_attr880 = new BitSet(new long[]{0x0000000001000000L});
+    public static final BitSet FOLLOW_DO_in_comb_attr882 = new BitSet(new long[]{0x8000A00000244040L,0x0000000000E42016L});
+    public static final BitSet FOLLOW_attribute_in_comb_attr886 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PREDICATE_in_pred_decl974 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl976 = new BitSet(new long[]{0x0000080000000000L});
+    public static final BitSet FOLLOW_LP_in_pred_decl978 = new BitSet(new long[]{0x000002C080002100L,0x0000000000201000L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl980 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_CM_in_pred_decl983 = new BitSet(new long[]{0x000002C080002100L,0x0000000000201000L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl985 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_RP_in_pred_decl989 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_SC_in_pred_decl991 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_pred_param_type_in_pred_param1019 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_CL_in_pred_param1021 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_pred_param1023 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_pred_param_type_in_pred_param_type1057 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_var_pred_param_type_in_pred_param_type1067 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_type1086 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_par_type1088 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_type1090 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_par_type1093 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_type1095 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_par_type1099 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_type1101 = new BitSet(new long[]{0x0000004080002000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_par_type_u_in_par_type1103 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_type_u_in_par_type1129 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_BOOL_in_par_type_u1161 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FLOAT_in_par_type_u1171 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_par_type_u1181 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_type_u1183 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_in_par_type_u1185 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_in_par_type_u1195 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_var_type1214 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_var_type1216 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_var_type1218 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_var_type1221 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_var_type1223 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_var_type1227 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type1229 = new BitSet(new long[]{0x0000000000000000L,0x0000000000200000L});
+    public static final BitSet FOLLOW_VAR_in_var_type1231 = new BitSet(new long[]{0x000002C080002000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_var_type_u_in_var_type1233 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_VAR_in_var_type1259 = new BitSet(new long[]{0x000002C080002000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_var_type_u_in_var_type1261 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_BOOL_in_var_type_u1293 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FLOAT_in_var_type_u1303 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_in_var_type_u1313 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1323 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_var_type_u1325 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1327 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_var_type_u1354 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1356 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_var_type_u1359 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1361 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_var_type_u1365 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_var_type_u1389 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type_u1391 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1393 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_var_type_u1395 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1397 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_var_type_u1426 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type_u1428 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_LB_in_var_type_u1430 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1432 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_var_type_u1435 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u1437 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_var_type_u1441 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_type_in_par_pred_param_type1479 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1491 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type1493 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1495 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type1520 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1522 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1525 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1527 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_par_pred_param_type1531 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type1555 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1557 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1559 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type1561 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1563 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type1592 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1594 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type1596 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1598 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1601 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1603 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_par_pred_param_type1607 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1637 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type1639 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1641 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1644 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1646 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type1650 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1652 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1654 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type1656 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1658 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1690 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type1692 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1694 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1697 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1699 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type1703 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1705 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type1707 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1709 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1712 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1714 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_par_pred_param_type1718 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1749 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type1751 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1753 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1756 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1758 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type1762 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1764 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type1766 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1768 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1770 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type1772 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1774 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type1810 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type1812 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1814 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1817 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type1819 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type1823 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1825 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type1827 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type1829 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type1831 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1833 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type1836 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type1838 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_par_pred_param_type1842 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_var_type_in_var_pred_param_type1887 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1910 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type1912 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1914 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_in_var_pred_param_type1916 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type1939 = new BitSet(new long[]{0x0000100000000000L});
+    public static final BitSet FOLLOW_LS_in_var_pred_param_type1941 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1943 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_var_pred_param_type1946 = new BitSet(new long[]{0x000000C000000000L});
+    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1948 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_var_pred_param_type1952 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1954 = new BitSet(new long[]{0x0000000000000000L,0x0000000000200000L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1956 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001000L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type1958 = new BitSet(new long[]{0x0020000000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1960 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_in_var_pred_param_type1962 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_CONST_in_index_set2001 = new BitSet(new long[]{0x0000000000800000L});
+    public static final BitSet FOLLOW_DD_in_index_set2003 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_index_set2005 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_in_index_set2034 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_expr2066 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr2068 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_CM_in_expr2071 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr2073 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000040L});
+    public static final BitSet FOLLOW_RB_in_expr2077 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_bool_const_in_expr2101 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr2111 = new BitSet(new long[]{0x0000000000800002L});
+    public static final BitSet FOLLOW_DD_in_expr2114 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr2116 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LS_in_expr2128 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090200L});
+    public static final BitSet FOLLOW_expr_in_expr2131 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_CM_in_expr2134 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_expr2136 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_expr2142 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_id_expr_in_expr2170 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_expr2180 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr2201 = new BitSet(new long[]{0x0000180000000002L});
+    public static final BitSet FOLLOW_LP_in_id_expr2205 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_id_expr2207 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_CM_in_id_expr2210 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_id_expr2212 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_RP_in_id_expr2216 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LS_in_id_expr2220 = new BitSet(new long[]{0x0000008000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_id_expr2222 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000200L});
+    public static final BitSet FOLLOW_RS_in_id_expr2224 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_type_in_param_decl2244 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_CL_in_param_decl2246 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl2248 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_EQ_in_param_decl2250 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_param_decl2252 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_SC_in_param_decl2254 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_var_type_in_var_decl2282 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_CL_in_var_decl2284 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl2286 = new BitSet(new long[]{0x0000000004400000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_annotations_in_var_decl2288 = new BitSet(new long[]{0x0000000004000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_EQ_in_var_decl2291 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_var_decl2293 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_SC_in_var_decl2297 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_CONSTRAINT_in_constraint2327 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_constraint2329 = new BitSet(new long[]{0x0000080000000000L});
+    public static final BitSet FOLLOW_LP_in_constraint2331 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_constraint2333 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_CM_in_constraint2336 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_constraint2338 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_RP_in_constraint2342 = new BitSet(new long[]{0x0000000000400000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_annotations_in_constraint2344 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_SC_in_constraint2346 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SOLVE_in_solve_goal2374 = new BitSet(new long[]{0x0001400000400000L,0x0000000000000400L});
+    public static final BitSet FOLLOW_annotations_in_solve_goal2377 = new BitSet(new long[]{0x0001400000000000L,0x0000000000000400L});
+    public static final BitSet FOLLOW_resolution_in_solve_goal2379 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000800L});
+    public static final BitSet FOLLOW_SC_in_solve_goal2381 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MINIMIZE_in_resolution2398 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_resolution2401 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MAXIMIZE_in_resolution2411 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_resolution2414 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SATISFY_in_resolution2424 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_DC_in_annotations2445 = new BitSet(new long[]{0x0000000800000000L});
+    public static final BitSet FOLLOW_annotation_in_annotations2447 = new BitSet(new long[]{0x0000000000400002L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_annotation2482 = new BitSet(new long[]{0x0000080000000002L});
+    public static final BitSet FOLLOW_LP_in_annotation2485 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_annotation2487 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_CM_in_annotation2490 = new BitSet(new long[]{0x0000128840000000L,0x0000000000090000L});
+    public static final BitSet FOLLOW_expr_in_annotation2492 = new BitSet(new long[]{0x0000000000020000L,0x0000000000000100L});
+    public static final BitSet FOLLOW_RP_in_annotation2496 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TRUE_in_bool_const2537 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FALSE_in_bool_const2548 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_LP_in_synpred9_FlatzincFullExtParser165 = new BitSet(new long[]{0x8004081000244000L,0x0000000000E80016L});
     public static final BitSet FOLLOW_predicates_in_synpred9_FlatzincFullExtParser167 = new BitSet(new long[]{0x0000000000000010L});
     public static final BitSet FOLLOW_AND_in_synpred9_FlatzincFullExtParser170 = new BitSet(new long[]{0x8004081000244000L,0x0000000000E80016L});
     public static final BitSet FOLLOW_predicates_in_synpred9_FlatzincFullExtParser172 = new BitSet(new long[]{0x0000000000000010L,0x0000000000000100L});
     public static final BitSet FOLLOW_RP_in_synpred9_FlatzincFullExtParser176 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser844 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_DO_in_synpred47_FlatzincFullExtParser847 = new BitSet(new long[]{0x0000A00000000040L,0x0000000000042000L});
-    public static final BitSet FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser849 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_DO_in_synpred47_FlatzincFullExtParser855 = new BitSet(new long[]{0x8000000000244000L,0x0000000000E00016L});
-    public static final BitSet FOLLOW_attribute_in_synpred47_FlatzincFullExtParser857 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser843 = new BitSet(new long[]{0x0000000001000002L});
+    public static final BitSet FOLLOW_DO_in_synpred47_FlatzincFullExtParser846 = new BitSet(new long[]{0x0000A00000000040L,0x0000000000042000L});
+    public static final BitSet FOLLOW_attr_op_in_synpred47_FlatzincFullExtParser848 = new BitSet(new long[]{0x0000000001000002L});
+    public static final BitSet FOLLOW_DO_in_synpred47_FlatzincFullExtParser854 = new BitSet(new long[]{0x8000000000244000L,0x0000000000E00016L});
+    public static final BitSet FOLLOW_attribute_in_synpred47_FlatzincFullExtParser856 = new BitSet(new long[]{0x0000000000000002L});
 
 }

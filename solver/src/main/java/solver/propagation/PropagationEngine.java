@@ -202,8 +202,8 @@ public class PropagationEngine implements IPropagationEngine {
         int id = p2i.get(propagator.getId());
         int to = pcidx[id];
         for (int i = 0; i < to; i++) {
-            fines_p[id][i].virtuallyExecuted(propagator);
+            // we don't remove the element from its master to avoid costly operations
+            fines_p[id][i].flush();
         }
-        propagator.flushPendingEvt();
     }
 }
