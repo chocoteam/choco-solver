@@ -27,6 +27,8 @@
 
 package solver.propagation.hardcoded;
 
+import choco.kernel.common.util.objects.BitsetFactory;
+import choco.kernel.common.util.objects.IBitset;
 import choco.kernel.memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
@@ -69,7 +71,8 @@ public class ConstraintEngine implements IPropagationEngine {
     protected Propagator lastProp;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final boolean[] schedule;
-    protected final int[][] masks_f;
+    protected final IBitset[] eventsets;
+    protected final int[][] eventmasks;
 
 
     public ConstraintEngine(Solver solver) {
@@ -98,9 +101,12 @@ public class ConstraintEngine implements IPropagationEngine {
         pro_queue_f = new CircularQueue<Propagator>(propagators.length);
 
         schedule = new boolean[nbProp];
-        masks_f = new int[nbProp][];
+        eventmasks = new int[nbProp][];
+        eventsets = new IBitset[nbProp];
         for (int i = 0; i < nbProp; i++) {
-            masks_f[i] = new int[propagators[i].getNbVars()];
+            int nbv = propagators[i].getNbVars();
+            eventmasks[i] = new int[nbv];
+            eventsets[i] = BitsetFactory.make(nbv);
         }
     }
 
@@ -122,24 +128,26 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
+        IBitset evtset;
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
             assert lastProp.isActive() : "propagator is not active";
             // revision of the variable
             aid = p2i.get(lastProp.getId());
             schedule[aid] = false;
-            int nbVars = lastProp.getNbVars();
-            for (int v = 0; v < nbVars; v++) {
-                mask = masks_f[aid][v];
-                if (mask > 0) {
-                    if (Configuration.PRINT_PROPAGATION) {
-                        PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
-                    }
-                    masks_f[aid][v] = 0;
-                    lastProp.fineERcalls++;
-                    lastProp.decNbPendingEvt();
-                    lastProp.propagate(v, mask);
+            evtset = eventsets[aid];
+            for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
+                if (Configuration.PRINT_PROPAGATION) {
+                    PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                 }
+                // clear event
+                evtset.clear(v);
+                mask = eventmasks[aid][v];
+                eventmasks[aid][v] = 0;
+                lastProp.decNbPendingEvt();
+                // run propagation on the specific event
+                lastProp.fineERcalls++;
+                lastProp.propagate(v, mask);
             }
         }
     }
@@ -147,9 +155,14 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void flush() {
         int aid;
+        IBitset evtset;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks_f[aid], 0);
+            evtset = eventsets[aid];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                eventmasks[aid][p] = 0;
+            }
+            evtset.clear();
             schedule[aid] = false;
             lastProp.flushPendingEvt();
         }
@@ -157,7 +170,11 @@ public class ConstraintEngine implements IPropagationEngine {
             lastProp = pro_queue_f.pollFirst();
             // revision of the variable
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks_f[aid], 0);
+            evtset = eventsets[aid];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                eventmasks[aid][p] = 0;
+            }
+            evtset.clear();
             schedule[aid] = false;
             lastProp.flushPendingEvt();
         }
@@ -174,15 +191,17 @@ public class ConstraintEngine implements IPropagationEngine {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (masks_f[aid][pindices[p]] == 0) {
+                if (eventmasks[aid][pindices[p]] == 0) { // not scheduled yet
+                    assert !eventsets[aid].get(pindices[p]);
                     if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
+                    eventsets[aid].set(pindices[p]);
                 } else if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printAlreadySchedule(prop);
+                    PropagationUtils.printAlreadySchedule(prop);
                 }
-                masks_f[aid][pindices[p]] |= type.strengthened_mask;
+                eventmasks[aid][pindices[p]] |= type.strengthened_mask;
                 if (!schedule[aid]) {
                     pro_queue_f.addLast(prop);
                     schedule[aid] = true;
@@ -203,7 +222,8 @@ public class ConstraintEngine implements IPropagationEngine {
         int aid = p2i.get(pid);
         //if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
-        Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
+        Arrays.fill(eventmasks[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
+        eventsets[aid].clear();
         if (schedule[aid]) { // if in the queue...
             schedule[aid] = false;
             pro_queue_f.remove(propagator); // removed from the queue

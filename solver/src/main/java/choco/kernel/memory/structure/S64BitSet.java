@@ -27,7 +27,6 @@
 
 package choco.kernel.memory.structure;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
@@ -39,7 +38,7 @@ import java.util.BitSet;
 
 public class S64BitSet implements IStateBitSet {
 
-    private final static boolean CHECK = true;
+    private final static boolean CHECK = false;
 
     /*
     * BitSets are packed into arrays of "words."  Currently a word is
@@ -157,18 +156,6 @@ public class S64BitSet implements IStateBitSet {
                 words[i] = environment.makeLong(0);
             }
         }
-    }
-
-    public DisposableIntIterator getCycleButIterator(int avoidIndex) {
-//        int n = this.cardinality();
-//        if (avoidIndex != VarEvent.NOCAUSE && this.get(avoidIndex)) n -= 1;
-//        if (n > 0) {
-//             return new CyclicIterator(this, avoidIndex);
-//        } else {
-//            return EmptyIntIterator.getEmptyIntIterator();
-//        }
-        //TODO : check wether it is still used
-        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings({"unchecked"})

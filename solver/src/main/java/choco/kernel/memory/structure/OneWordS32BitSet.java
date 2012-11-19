@@ -44,7 +44,6 @@ public class OneWordS32BitSet implements IStateBitSet {
     */
     private final static int ADDRESS_BITS_PER_WORD = 5;
     private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-    private final static int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
     /* Used to shift left or right for a partial word mask */
     private static final int WORD_MASK = 0xffffffff;

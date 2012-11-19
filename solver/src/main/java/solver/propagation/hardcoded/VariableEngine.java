@@ -26,6 +26,8 @@
  */
 package solver.propagation.hardcoded;
 
+import choco.kernel.common.util.objects.BitsetFactory;
+import choco.kernel.common.util.objects.IBitset;
 import choco.kernel.memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
@@ -69,7 +71,9 @@ public class VariableEngine implements IPropagationEngine {
     protected Propagator lastProp;
     protected final IId2AbId v2i; // mapping between propagator ID and its absolute index
     protected final boolean[] schedule;
-    protected final int[][] evtmasks;
+
+    protected final IBitset[] eventsets;
+    protected final int[][] eventmasks;
 
 
     public VariableEngine(Solver solver) {
@@ -99,9 +103,12 @@ public class VariableEngine implements IPropagationEngine {
         }
 
         schedule = new boolean[variables.length];
-        evtmasks = new int[maxID + 1][];
+        eventsets = new IBitset[maxID + 1];
+        eventmasks = new int[maxID + 1][];
         for (int i = 0; i < variables.length; i++) {
-            evtmasks[i] = new int[variables[i].getPropagators().length];
+            int nbp = variables[i].getPropagators().length;
+            eventsets[i] = BitsetFactory.make(nbp);
+            eventmasks[i] = new int[nbp];
         }
     }
 
@@ -123,6 +130,7 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int id, mask;
+        IBitset evtset;
         while (!var_queue.isEmpty()) {
             lastVar = var_queue.pollFirst();
             // revision of the variable
@@ -130,18 +138,20 @@ public class VariableEngine implements IPropagationEngine {
             schedule[id] = false;
             Propagator[] vProps = lastVar.getPropagators();
             int[] idxVinP = lastVar.getPIndices();
-            for (int p = 0; p < vProps.length; p++) {
-                lastProp = vProps[p];
-                mask = evtmasks[id][p];
-                if (mask > 0) {
-                    if (Configuration.PRINT_PROPAGATION) {
-                        PropagationUtils.printPropagation(lastVar, lastProp);
-                    }
-                    evtmasks[id][p] = 0;
-                    lastProp.fineERcalls++;
-                    lastProp.decNbPendingEvt();
-                    lastProp.propagate(idxVinP[p], mask);
+            evtset = eventsets[id];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                if (Configuration.PRINT_PROPAGATION) {
+                    PropagationUtils.printPropagation(lastVar, lastProp);
                 }
+                lastProp = vProps[p];
+                // clear event
+                evtset.clear(p);
+                mask = eventmasks[id][p];
+                eventmasks[id][p] = 0;
+                lastProp.decNbPendingEvt();
+                // run propagation on the specific evt
+                lastProp.fineERcalls++;
+                lastProp.propagate(idxVinP[p], mask);
             }
         }
     }
@@ -149,16 +159,17 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void flush() {
         int id;
+        IBitset evtset;
         if (lastVar != null) {
             id = v2i.get(lastVar.getId());
             // explicit iteration is mandatory to dec nb pending evt
             Propagator[] vProps = lastVar.getPropagators();
-            for (int p = 0; p < vProps.length; p++) {
-                if (evtmasks[id][p] > 0) {
-                    vProps[p].decNbPendingEvt();
-                    evtmasks[id][p] = 0;
-                }
+            evtset = eventsets[id];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                vProps[p].decNbPendingEvt();
+                eventmasks[id][p] = 0;
             }
+            evtset.clear();
             schedule[id] = false;
         }
         while (!var_queue.isEmpty()) {
@@ -167,21 +178,21 @@ public class VariableEngine implements IPropagationEngine {
             id = v2i.get(lastVar.getId());
             // explicit iteration is mandatory to dec nb pending evt
             Propagator[] vProps = lastVar.getPropagators();
-            for (int p = 0; p < vProps.length; p++) {
-                if (evtmasks[id][p] > 0) {
-                    vProps[p].decNbPendingEvt();
-                    evtmasks[id][p] = 0;
-                }
+            evtset = eventsets[id];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                vProps[p].decNbPendingEvt();
+                eventmasks[id][p] = 0;
             }
+            evtset.clear();
             schedule[id] = false;
         }
     }
 
     public void check() {
-        for (int i = 0; i < evtmasks.length; i++) {
-            if (evtmasks[i] != null)
-                for (int j = 0; j < evtmasks[i].length; j++) {
-                    assert evtmasks[i][j] == 0 : "MASK NOT CLEARED " + variables[0].getSolver().getMeasures().toOneShortLineString();
+        for (int i = 0; i < eventmasks.length; i++) {
+            if (eventmasks[i] != null)
+                for (int j = 0; j < eventmasks[i].length; j++) {
+                    assert eventmasks[i][j] == 0 : "MASK NOT CLEARED " + variables[0].getSolver().getMeasures().toOneShortLineString();
                 }
         }
     }
@@ -198,15 +209,17 @@ public class VariableEngine implements IPropagationEngine {
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
-                if (evtmasks[vid][p] == 0) {
-                    if (Configuration.PRINT_SCHEDULE){
+                if (eventmasks[vid][p] == 0) {
+                    assert !eventsets[vid].get(p);
+                    if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
+                    eventsets[vid].set(p);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     PropagationUtils.printAlreadySchedule(prop);
                 }
-                evtmasks[vid][p] |= type.strengthened_mask;
+                eventmasks[vid][p] |= type.strengthened_mask;
                 _schedule = true;
             }
         }
@@ -230,8 +243,9 @@ public class VariableEngine implements IPropagationEngine {
             if (vindices[i] > -1) {// constants and reified propagators have a negative index
                 assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = v2i.get(variables[i].getId());
-                assert vindices[i] < evtmasks[vid].length;
-                evtmasks[vid][vindices[i]] = 0;
+                assert vindices[i] < eventmasks[vid].length;
+                eventsets[vid].clear(vindices[i]);
+                eventmasks[vid][vindices[i]] = 0;
             }
         }
         propagator.flushPendingEvt();

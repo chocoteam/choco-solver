@@ -26,12 +26,13 @@
  */
 package solver.propagation.generator;
 
+import choco.kernel.common.util.objects.BitsetFactory;
+import choco.kernel.common.util.objects.IBitset;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Comparator;
 
 /**
@@ -52,14 +53,14 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     };
     protected S lastPopped;
 
-    protected BitSet toPropagate;
+    protected IBitset toPropagate;
 
     private Sort(S[] schedulables) {
         super(schedulables);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = BitsetFactory.make(elements.length);
     }
 
     public Sort(boolean order, boolean reverse, S[] schedulables) {
@@ -73,7 +74,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = BitsetFactory.make(elements.length);
     }
 
 
