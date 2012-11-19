@@ -84,9 +84,9 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
 
     private int weight(IntVar v) {
         int w = 0;
-        Propagator[] propagators = v.getPropagators();
-        for (int p = 0; p < propagators.length; p++) {
-            Propagator prop = propagators[p];
+        int nbp = v.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+        Propagator prop = v.getPropagator(p);
             int pid = prop.getId();
             if (pid2arity.get(pid) > 1) {
                 w += counter.getFails(prop);
@@ -133,9 +133,10 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
     @Override
     public void onUpdate(Variable var, EventType evt, ICause cause) {
         if (evt == EventType.INSTANTIATE) {
-            Propagator[] props = var.getPropagators();
-            for (int i = 0; i < props.length; i++) {
-                int pid = props[i].getId();
+            int nbp = var.getNbProps();
+            for (int p = 0; p < nbp; p++) {
+                Propagator prop = var.getPropagator(p);
+                int pid = prop.getId();
                 pid2ari.get(pid).add(-1);
             }
         }

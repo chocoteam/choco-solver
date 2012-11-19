@@ -96,21 +96,30 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
     /**
      * Return the array of propagators this
      *
-     * @return
+     * @return the array of proapgators of this
      */
     Propagator[] getPropagators();
 
     /**
+     * Return the "idx" th propagator of this
+     * @param idx position of the propagator
+     * @return a propagator
+     */
+    Propagator getPropagator(int idx);
+
+    /**
      * Return the number of propagators
      *
-     * @return
+     * @return number of propagators of this
      */
     int getNbProps();
 
     /**
-     * Return indices of the variable in its propagators
+     * Return the position of the variable in the propagator at position pidx
+     * @param pidx index of the propagator within the list of propagators of this
+     * @return position of this in the propagator pidx
      */
-    int[] getPIndices();
+    int getIndiceInPropagator(int pidx);
 
     IView[] getViews();
 

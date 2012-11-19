@@ -102,8 +102,13 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int[] getPIndices() {
-        return new int[0];
+    public Propagator getPropagator(int idx) {
+        return null;
+    }
+
+    @Override
+    public int getIndiceInPropagator(int pidx) {
+        return 0;
     }
 
     @Override

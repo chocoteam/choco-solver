@@ -90,7 +90,7 @@ public class ArcEngine implements IPropagationEngine {
             int id = variables[i].getId();
             v2i.set(id, i);
         }
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         m = Integer.MAX_VALUE;
@@ -120,11 +120,10 @@ public class ArcEngine implements IPropagationEngine {
         for (int i = 0; i < variables.length; i++) {
             masks_f[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
             idxVinP[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
-            Propagator[] varprops = variables[i].getPropagators();
-            int[] idVinP = variables[i].getPIndices();
-            for (int p = 0; p < varprops.length; p++) {
-                int paid = p2i.get(varprops[p].getId());
-                idxVinP[i].put(paid, idVinP[p]);
+            int nbp = variables[i].getNbProps();
+            for (int p = 0; p < nbp; p++) {
+                int paid = p2i.get(variables[i].getPropagator(p).getId());
+                idxVinP[i].put(paid, variables[i].getIndiceInPropagator(p));
                 masks_f[i].put(paid, -1);
             }
         }
@@ -196,9 +195,9 @@ public class ArcEngine implements IPropagationEngine {
         }
         Propagator prop;
         int paid, cm, vaid = v2i.get(variable.getId());
-        Propagator[] vProps = variable.getPropagators();
-        for (int p = 0; p < vProps.length; p++) {
-            prop = vProps[p];
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            prop = variable.getPropagator(p);
             if (cause != prop && prop.isActive()) {
                 paid = p2i.get(prop.getId());
                 if (prop.advise(idxVinP[vaid].get(paid), type.mask)) {

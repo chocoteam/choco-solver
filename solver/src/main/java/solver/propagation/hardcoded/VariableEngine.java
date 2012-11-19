@@ -106,7 +106,7 @@ public class VariableEngine implements IPropagationEngine {
         eventsets = new IBitset[maxID + 1];
         eventmasks = new int[maxID + 1][];
         for (int i = 0; i < variables.length; i++) {
-            int nbp = variables[i].getPropagators().length;
+            int nbp = variables[i].getNbProps();
             eventsets[i] = BitsetFactory.make(nbp);
             eventmasks[i] = new int[nbp];
         }
@@ -136,14 +136,12 @@ public class VariableEngine implements IPropagationEngine {
             // revision of the variable
             id = v2i.get(lastVar.getId());
             schedule[id] = false;
-            Propagator[] vProps = lastVar.getPropagators();
-            int[] idxVinP = lastVar.getPIndices();
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
                 if (Configuration.PRINT_PROPAGATION) {
                     PropagationUtils.printPropagation(lastVar, lastProp);
                 }
-                lastProp = vProps[p];
+                lastProp = lastVar.getPropagator(p);
                 // clear event
                 evtset.clear(p);
                 mask = eventmasks[id][p];
@@ -151,7 +149,7 @@ public class VariableEngine implements IPropagationEngine {
                 lastProp.decNbPendingEvt();
                 // run propagation on the specific evt
                 lastProp.fineERcalls++;
-                lastProp.propagate(idxVinP[p], mask);
+                lastProp.propagate(lastVar.getIndiceInPropagator(p), mask);
             }
         }
     }
@@ -163,10 +161,9 @@ public class VariableEngine implements IPropagationEngine {
         if (lastVar != null) {
             id = v2i.get(lastVar.getId());
             // explicit iteration is mandatory to dec nb pending evt
-            Propagator[] vProps = lastVar.getPropagators();
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-                vProps[p].decNbPendingEvt();
+                lastVar.getPropagator(p).decNbPendingEvt();
                 eventmasks[id][p] = 0;
             }
             evtset.clear();
@@ -177,10 +174,9 @@ public class VariableEngine implements IPropagationEngine {
             // revision of the variable
             id = v2i.get(lastVar.getId());
             // explicit iteration is mandatory to dec nb pending evt
-            Propagator[] vProps = lastVar.getPropagators();
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-                vProps[p].decNbPendingEvt();
+                lastVar.getPropagator(p).decNbPendingEvt();
                 eventmasks[id][p] = 0;
             }
             evtset.clear();
@@ -204,11 +200,11 @@ public class VariableEngine implements IPropagationEngine {
         }
         int vid = v2i.get(variable.getId());
         boolean _schedule = false;
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 if (eventmasks[vid][p] == 0) {
                     assert !eventsets[vid].get(p);
                     if (Configuration.PRINT_SCHEDULE) {
@@ -241,7 +237,7 @@ public class VariableEngine implements IPropagationEngine {
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
             if (vindices[i] > -1) {// constants and reified propagators have a negative index
-                assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
+                assert variables[i].getPropagator(vindices[i]) == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = v2i.get(variables[i].getId());
                 assert vindices[i] < eventmasks[vid].length;
                 eventsets[vid].clear(vindices[i]);

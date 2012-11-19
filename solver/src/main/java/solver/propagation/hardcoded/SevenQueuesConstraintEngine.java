@@ -196,23 +196,23 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         if (Configuration.PRINT_VAR_EVENT) {
             PropagationUtils.printModification(variable, type, cause);
         }
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (eventmasks[aid][pindices[p]] == 0) {
-                    assert !eventsets[aid].get(pindices[p]);
+                if (eventmasks[aid][pindice] == 0) {
+                    assert !eventsets[aid].get(pindice);
                     if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
-                    eventsets[aid].set(pindices[p]);
+                    eventsets[aid].set(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     PropagationUtils.printAlreadySchedule(prop);
                 }
-                eventmasks[aid][pindices[p]] |= type.strengthened_mask;
+                eventmasks[aid][pindice] |= type.strengthened_mask;
                 if (scheduled[aid] == 0) {
                     int prio = prop.dynPriority();
                     pro_queue[prio].addLast(prop);

@@ -71,6 +71,7 @@ public enum PropagationUtils {
                 solver.getEngine().propagate();
             }
         }
+//        throw solver.getEngine().getContradictionException();
     }
 
     public static void printPropagation(Variable v, Propagator p) {

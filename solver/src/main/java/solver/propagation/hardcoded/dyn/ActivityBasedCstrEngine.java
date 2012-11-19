@@ -328,13 +328,13 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         if (Configuration.PRINT_VAR_EVENT) {
             PropagationUtils.printModification(variable, type, cause);
         }
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (masks_f[aid][pindices[p]] == 0) {
+                if (masks_f[aid][pindice] == 0) {
                     if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
                     }
@@ -343,7 +343,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                     PropagationUtils.printAlreadySchedule(prop);
                 }
 
-                masks_f[aid][pindices[p]] |= type.strengthened_mask;
+                masks_f[aid][pindice] |= type.strengthened_mask;
                 if (!schedule[aid]) {
                     double _w = minOrmax * A[aid];
                     prop_heap.insert(_w, aid);

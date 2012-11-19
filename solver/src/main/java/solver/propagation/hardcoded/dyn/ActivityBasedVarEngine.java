@@ -176,7 +176,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         masks_f = new int[Mv - mv + 1][];
         for (int j = 0; j < variables.length; j++) {
             v2i.set(variables[j].getId(), j);
-            masks_f[j] = new int[variables[j].getPropagators().length];
+            masks_f[j] = new int[variables[j].getNbProps()];
         }
         // 4b. Mapping propagators
         p2i = new AId2AbId(mp, Mp, -1);
@@ -214,7 +214,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
-        int id, aid, mask;
+        int id, aid, mask, nbp;
         nb_probes++;
         try {
             while (!var_heap.isEmpty()) {
@@ -223,12 +223,9 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                 schedule[id] = false;
                 aid = v2i.get(id);
                 cid = aid;
-                Propagator[] vProps = lastVar.getPropagators();
-                int[] idxVinP = lastVar.getPIndices();
-
-
-                for (int p = 0; p < vProps.length; p++) {
-                    lastProp = vProps[p];
+                nbp = lastVar.getNbProps();
+                for (int p = 0; p < nbp; p++) {
+                    lastProp = lastVar.getPropagator(p);
                     mask = masks_f[aid][p];
                     if (mask > 0) {
                         if (Configuration.PRINT_PROPAGATION) {
@@ -237,7 +234,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                         masks_f[aid][p] = 0;
                         lastProp.fineERcalls++;
                         lastProp.decNbPendingEvt();
-                        lastProp.propagate(idxVinP[p], mask);
+                        lastProp.propagate(lastVar.getIndiceInPropagator(p), mask);
                     }
                 }
             }
@@ -359,12 +356,12 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         }
         int id = variable.getId();
         boolean _schedule = false;
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
         int aid = v2i.get(id);
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive() && prop.advise(pindices[p], type.mask)) {
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 if (masks_f[aid][p] == 0) {
                     if (Configuration.PRINT_SCHEDULE) {
                         PropagationUtils.printSchedule(prop);
@@ -402,7 +399,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
             if (vindices[i] > -1) {// constant has a negative index
-                assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
+                assert variables[i].getPropagator(vindices[i]) == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = v2i.get(variables[i].getId());
                 assert vindices[i] < masks_f[vid].length;
                 masks_f[vid][vindices[i]] = 0;

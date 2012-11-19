@@ -180,6 +180,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return propagators;
     }
 
+    public Propagator getPropagator(int idx){
+        return propagators[idx];
+    }
+
     public int getNbProps() {
         return pIdx;
     }
@@ -189,6 +193,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
             pindices = Arrays.copyOf(pindices, pIdx);
         }
         return pindices;
+    }
+
+    public int getIndiceInPropagator(int pidx){
+        return pindices[pidx];
     }
 
     public String getName() {
