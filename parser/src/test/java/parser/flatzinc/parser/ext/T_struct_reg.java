@@ -97,7 +97,7 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test1() throws IOException, RecognitionException {
         // Simple constraint oriented engine
-        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each cstr.name as list(wfor)}");
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each cstr as list(wfor)}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof Queue);
@@ -106,7 +106,7 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test2() throws IOException, RecognitionException {
         // Simple variable oriented engine
-        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var as list(wfor)}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof Queue);
@@ -124,10 +124,19 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test4() throws IOException, RecognitionException {
         // A heap-based variable oriented propagation engine
-        FlatzincFullExtParser fp = parser("G1 as min heap(wone) of {each var.name as queue(one) key any.var.cardinality}");
+        FlatzincFullExtParser fp = parser("G1 as heap(wone) of {each var as queue(one) key any.var.cardinality}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof SortDyn);
     }
+
+    @Test
+        public void test5() throws IOException, RecognitionException {
+            // A heap-based variable oriented propagation engine
+            FlatzincFullExtParser fp = parser("G1 as max heap(wone) of {each var as queue(one) key any.var.cardinality}");
+            PropagationStrategy scheds = struct_reg(fp);
+            Assert.assertNotNull(scheds);
+            Assert.assertTrue(scheds instanceof SortDyn);
+        }
 
 }

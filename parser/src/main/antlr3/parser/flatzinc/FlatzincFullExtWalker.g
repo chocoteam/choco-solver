@@ -290,10 +290,12 @@ struct  [PropagationEngine pe] returns[PropagationStrategy item]
 	;
 
 struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
-	:	^(STREG IDENTIFIER
-	{
-	String id = $IDENTIFIER.text;
-    ArrayList<Arc> arcs = groups.get(id);
+@init{
+    int m_idx = -1,c_idx = -1;
+}
+@after{
+//    String id = $IDENTIFIER.text;
+    ArrayList<Arc> arcs = groups.get($id.text);
     if(arcs == null){
         LOGGER.error("\% Unknown group_decl :"+id);
         throw new FZNException("Unknown group_decl :"+id);
@@ -301,20 +303,15 @@ struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
     for(int k = 0; k < arcs.size(); k++){
         pe.declareArc(arcs.get(k));
     }
-    int m_idx = input.mark();
-	}
-	.   //  many
-    {
     input.seek(m_idx);
     ArrayList<PropagationStrategy> pss = many(arcs).pss;
     input.release(m_idx);
-    }
-    ca = comb_attr?
-    c=coll[pss, ca]
-    {
-    $item = c;
-    }
-    )
+    input.seek(c_idx);
+    $item = coll(pss, ca);
+    input.release(c_idx);
+}
+	:	^(STREG id=IDENTIFIER {m_idx = input.mark();} . {c_idx = input.mark();} . )
+    |   ^(STREG id=IDENTIFIER ca=comb_attr {m_idx = input.mark();} . {c_idx = input.mark();} . )
 	;
 
 elt	[PropagationEngine pe] returns [ISchedulable[\] items]
@@ -344,132 +341,119 @@ elt	[PropagationEngine pe] returns [ISchedulable[\] items]
 many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss, int depth]
 @init{
     $pss = new ArrayList<PropagationStrategy>();
+    int c_idx = -1;
+    int m_idx = -1;
+
 }
-    :
-    ^(a=attribute
-    ca=comb_attr?
-    {
-    int c_idx = input.mark();
-    }
-    .
-    {
-    // Build as many list as different values of "attribute" in "in"
-    // if "attribute" is dynamic, the overall range of values must be created
-    if(a.isDynamic()){
-         int max = 0;
-         for(int i = 0; i< in.size(); i++){
-             Arc arc = in.get(i);
-             int ev = a.eval(arc);
-             if(ev > max)max = ev;
-         }
-
-         input.seek(c_idx);
-         PropagationStrategy _ps = coll(in, ca);
-         input.release(c_idx);
-
-        Switcher sw = new Switcher(a, 0,max, _ps, in.toArray(new Arc[in.size()]));
-        $pss.addAll(Arrays.asList(sw.getPS()));
-    }else{
-        // otherwise, create as many "coll" as value of attribute
-        TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
-        for(int i = 0; i< in.size(); i++){
-            Arc arc = in.get(i);
-            int ev = a.eval(arc);
-            if(!sublists.contains(ev)){
-                ArrayList<Arc> evlist = new ArrayList<Arc>();
-                sublists.put(ev, evlist);
-            }
-            sublists.get(ev).add(arc);
-        }
-
-        int[] evs = sublists.keys();
-        for (int k = 0; k < evs.length; k++) {
-            int ev = evs[k];
-            input.seek(c_idx);
-            $pss.add(coll(sublists.get(ev), ca));
-        }
-        input.release(c_idx);
-        $depth = 0;
-    }
-    }
-    )
-    |
-    ^(EACH
-    a=attribute
-    ca=comb_attr?
-    {
-    int m_idx = input.mark();
-    }
-    .   //  many
-    {
-    int c_idx = input.mark();
-    }
-    .   // coll
-    {
-    if(a.isDynamic()){
+@after{
+    if(m_idx == -1){ // we are in a "last many" case
         // Build as many list as different values of "attribute" in "in"
-        int max = 0;
-        for(int i = 0; i< in.size(); i++){
-            Arc arc = in.get(i);
-            int ev = a.eval(arc);
-            if (max < ev) {
-                max = ev;
-            }
-        }
-        int _d = 0;
-        input.seek(m_idx);
-        FlatzincFullExtWalker.many_return manyret = many(in);
-        // 1. get depth
-        _d = manyret.depth;
-        // 2. build correct attribute (including depth
-        ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
-        aos.add(AttributeOperator.ANY);
-        for(int i = 1 ; i < _d; i++){
-            aos.add(AttributeOperator.ANY);
-        }
-        CombinedAttribute _ca = new CombinedAttribute(aos, a);
-        // 3. build on coll
-        input.seek(c_idx);
-        PropagationStrategy _ps = coll(manyret.pss, ca);
-        input.release(c_idx);
+        // if "attribute" is dynamic, the overall range of values must be created
+        if(a.isDynamic()){
+             int max = 0;
+             for(int i = 0; i< in.size(); i++){
+                 Arc arc = in.get(i);
+                 int ev = a.eval(arc);
+                 if(ev > max)max = ev;
+             }
 
-        Switcher sw = new Switcher(_ca, 0,max, _ps, manyret.pss.toArray(new PropagationStrategy[manyret.pss.size()]));
-        $pss.addAll(Arrays.asList(sw.getPS()));
-        $depth = _d +1;
-    }else{
-        // Build as many list as different values of "attribute" in "in"
-        TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
-        for(int i = 0; i< in.size(); i++){
-            Arc arc = in.get(i);
-            int ev = a.eval(arc);
-            if(!sublists.contains(ev)){
-                ArrayList<Arc> evlist = new ArrayList<Arc>();
-                sublists.put(ev, evlist);
+             input.seek(c_idx);
+             PropagationStrategy _ps = coll(in, ca);
+             input.release(c_idx);
+
+            Switcher sw = new Switcher(a, 0,max, _ps, in.toArray(new Arc[in.size()]));
+            $pss.addAll(Arrays.asList(sw.getPS()));
+        }else{
+            // otherwise, create as many "coll" as value of attribute
+            TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
+            for(int i = 0; i< in.size(); i++){
+                Arc arc = in.get(i);
+                int ev = a.eval(arc);
+                if(!sublists.contains(ev)){
+                    ArrayList<Arc> evlist = new ArrayList<Arc>();
+                    sublists.put(ev, evlist);
+                }
+                sublists.get(ev).add(arc);
             }
-            sublists.get(ev).add(arc);
+
+            int[] evs = sublists.keys();
+            for (int k = 0; k < evs.length; k++) {
+                int ev = evs[k];
+                input.seek(c_idx);
+                $pss.add(coll(sublists.get(ev), ca));
+            }
+            input.release(c_idx);
+            $depth = 0;
         }
-        int[] evs = sublists.keys();
-        ArrayList<ArrayList<PropagationStrategy>> _pss = new ArrayList<ArrayList<PropagationStrategy>>(evs.length);
-        int _d = 0;
-        for (int k = 0; k < evs.length; k++) {
-            int ev = evs[k];
+    }else{ // we are in a recursive many
+        if(a.isDynamic()){
+            // Build as many list as different values of "attribute" in "in"
+            int max = 0;
+            for(int i = 0; i< in.size(); i++){
+                Arc arc = in.get(i);
+                int ev = a.eval(arc);
+                if (max < ev) {
+                    max = ev;
+                }
+            }
+            int _d = 0;
             input.seek(m_idx);
-            FlatzincFullExtWalker.many_return manyret = many(sublists.get(ev));
-            _pss.add(manyret.pss);
-            assert (k == 0 || _d == manyret.depth);
+            FlatzincFullExtWalker.many_return manyret = many(in);
+            // 1. get depth
             _d = manyret.depth;
-        }
-        $depth = _d +1;
-        input.release(m_idx);
-        for (int p = 0; p < _pss.size(); p++) {
-            ArrayList<PropagationStrategy> _ps = _pss.get(p);
+            // 2. build correct attribute (including depth
+            ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
+            aos.add(AttributeOperator.ANY);
+            for(int i = 1 ; i < _d; i++){
+                aos.add(AttributeOperator.ANY);
+            }
+            CombinedAttribute _ca = new CombinedAttribute(aos, a);
+            // 3. build on coll
             input.seek(c_idx);
-            $pss.add(coll(_ps, ca));
+            PropagationStrategy _ps = coll(manyret.pss, ca);
+            input.release(c_idx);
+
+            Switcher sw = new Switcher(_ca, 0,max, _ps, manyret.pss.toArray(new PropagationStrategy[manyret.pss.size()]));
+            $pss.addAll(Arrays.asList(sw.getPS()));
+            $depth = _d +1;
+        }else{
+            // Build as many list as different values of "attribute" in "in"
+            TIntObjectHashMap<ArrayList<Arc>> sublists = new TIntObjectHashMap<ArrayList<Arc>>();
+            for(int i = 0; i< in.size(); i++){
+                Arc arc = in.get(i);
+                int ev = a.eval(arc);
+                if(!sublists.contains(ev)){
+                    ArrayList<Arc> evlist = new ArrayList<Arc>();
+                    sublists.put(ev, evlist);
+                }
+                sublists.get(ev).add(arc);
+            }
+            int[] evs = sublists.keys();
+            ArrayList<ArrayList<PropagationStrategy>> _pss = new ArrayList<ArrayList<PropagationStrategy>>(evs.length);
+            int _d = 0;
+            for (int k = 0; k < evs.length; k++) {
+                int ev = evs[k];
+                input.seek(m_idx);
+                FlatzincFullExtWalker.many_return manyret = many(sublists.get(ev));
+                _pss.add(manyret.pss);
+                assert (k == 0 || _d == manyret.depth);
+                _d = manyret.depth;
+            }
+            $depth = _d +1;
+            input.release(m_idx);
+            for (int p = 0; p < _pss.size(); p++) {
+                ArrayList<PropagationStrategy> _ps = _pss.get(p);
+                input.seek(c_idx);
+                $pss.add(coll(_ps, ca));
+            }
+            input.release(c_idx);
         }
-        input.release(c_idx);
     }
-    }
-    )
+}
+    :   ^(MANY1 a=attribute {c_idx = input.mark();} . )
+    |   ^(MANY2 a=attribute ca=comb_attr {c_idx = input.mark();} . )
+    |   ^(MANY3 a=attribute {m_idx = input.mark();}.  {c_idx = input.mark();} . )
+    |   ^(MANY4 a=attribute ca=comb_attr {m_idx = input.mark();} . {c_idx = input.mark();} . )
 	;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -486,13 +470,13 @@ coll    [ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] retur
     }
 }
 
-    :	QUEUE it=qiter
+    :	^(QUEUE it=qiter)
     {
     $ps = new Queue(elements.toArray(new ISchedulable[elements.size()]));
     $ps = it.set($ps);
     $ps.attachEvaluator(ca);
     }
-    |	(r=REV)? LIST it=liter
+    |	^(LIST r=REV? it=liter)
     {
     ISchedulable[] elts = elements.toArray(new ISchedulable[elements.size()]);
     // check if an order is required
@@ -512,7 +496,7 @@ coll    [ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] retur
     $ps = it.set($ps);
     $ps.attachEvaluator(ca);
     }
-    |	m=(MAX)? HEAP it=qiter
+    |	^(HEAP m=MAX? it=qiter)
 	{
 	ISchedulable[] elts = elements.toArray(new ISchedulable[elements.size()]);
     for (int i = 0; i < elts.length; i++) {
@@ -544,23 +528,14 @@ liter   returns [Iterator it]
 
 
 comb_attr   returns[CombinedAttribute ca]
-	:
-	{
-	ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
-	}
-	^(DO (ao=attr_op
-	{
-	aos.add(ao);
-	}
-	)* ea=attribute?
-	{
-	if(ea == null && aos.isEmpty()){
-	    LOGGER.error("\% Wrong key declaration");
-        throw new FZNException("Wrong key declaration");
-	}
-	$ca = new CombinedAttribute(aos, ea);
-	}
-	)
+@init{
+    ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
+}
+@after{
+    $ca = new CombinedAttribute(aos, ea);
+}
+    :	^(CA1 (ao = attr_op{aos.add(ao);})* ea=attribute?)
+    |   ^(CA2 (ao = attr_op{aos.add(ao);})+ ea=attribute)
 	;
 
 attr_op returns[AttributeOperator ao]

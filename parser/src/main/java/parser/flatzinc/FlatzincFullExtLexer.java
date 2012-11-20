@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtLexer.g 2012-11-15 16:27:48
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtLexer.g 2012-11-20 15:26:17
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -48,83 +48,89 @@ public class FlatzincFullExtLexer extends Lexer {
     public static final int AS=11;
     public static final int AVAR=12;
     public static final int BOOL=13;
-    public static final int CARITY=14;
-    public static final int CHAR=15;
-    public static final int CL=16;
-    public static final int CM=17;
-    public static final int CNAME=18;
-    public static final int COMMENT=19;
-    public static final int CONSTRAINT=20;
-    public static final int CSTR=21;
-    public static final int DC=22;
-    public static final int DD=23;
-    public static final int DO=24;
-    public static final int EACH=25;
-    public static final int EQ=26;
-    public static final int ESC_SEQ=27;
-    public static final int EXPONENT=28;
-    public static final int EXPR=29;
-    public static final int FALSE=30;
-    public static final int FLOAT=31;
-    public static final int FOR=32;
-    public static final int HEAP=33;
-    public static final int HEX_DIGIT=34;
-    public static final int IDENTIFIER=35;
-    public static final int IN=36;
-    public static final int INDEX=37;
-    public static final int INT=38;
-    public static final int INT_CONST=39;
-    public static final int KEY=40;
-    public static final int LB=41;
-    public static final int LIST=42;
-    public static final int LP=43;
-    public static final int LS=44;
-    public static final int MAX=45;
-    public static final int MAXIMIZE=46;
-    public static final int MIN=47;
-    public static final int MINIMIZE=48;
-    public static final int MN=49;
-    public static final int NOT=50;
-    public static final int OCTAL_ESC=51;
-    public static final int OEQ=52;
-    public static final int OF=53;
-    public static final int OGQ=54;
-    public static final int OGT=55;
-    public static final int OLQ=56;
-    public static final int OLT=57;
-    public static final int ONE=58;
-    public static final int ONQ=59;
-    public static final int OR=60;
-    public static final int ORDERBY=61;
-    public static final int PAR=62;
-    public static final int PARITY=63;
-    public static final int PL=64;
-    public static final int PPRIO=65;
-    public static final int PPRIOD=66;
-    public static final int PREDICATE=67;
-    public static final int PROP=68;
-    public static final int QUEUE=69;
-    public static final int RB=70;
-    public static final int REV=71;
-    public static final int RP=72;
-    public static final int RS=73;
-    public static final int SATISFY=74;
-    public static final int SC=75;
-    public static final int SET=76;
-    public static final int SIZE=77;
-    public static final int SOLVE=78;
-    public static final int STREG=79;
-    public static final int STRING=80;
-    public static final int STRUC=81;
-    public static final int SUM=82;
-    public static final int TRUE=83;
-    public static final int UNICODE_ESC=84;
-    public static final int VAR=85;
-    public static final int VCARD=86;
-    public static final int VNAME=87;
-    public static final int WFOR=88;
-    public static final int WONE=89;
-    public static final int WS=90;
+    public static final int CA1=14;
+    public static final int CA2=15;
+    public static final int CARITY=16;
+    public static final int CHAR=17;
+    public static final int CL=18;
+    public static final int CM=19;
+    public static final int CNAME=20;
+    public static final int COMMENT=21;
+    public static final int CONSTRAINT=22;
+    public static final int CSTR=23;
+    public static final int DC=24;
+    public static final int DD=25;
+    public static final int DO=26;
+    public static final int EACH=27;
+    public static final int EQ=28;
+    public static final int ESC_SEQ=29;
+    public static final int EXPONENT=30;
+    public static final int EXPR=31;
+    public static final int FALSE=32;
+    public static final int FLOAT=33;
+    public static final int FOR=34;
+    public static final int HEAP=35;
+    public static final int HEX_DIGIT=36;
+    public static final int IDENTIFIER=37;
+    public static final int IN=38;
+    public static final int INDEX=39;
+    public static final int INT=40;
+    public static final int INT_CONST=41;
+    public static final int KEY=42;
+    public static final int LB=43;
+    public static final int LIST=44;
+    public static final int LP=45;
+    public static final int LS=46;
+    public static final int MANY1=47;
+    public static final int MANY2=48;
+    public static final int MANY3=49;
+    public static final int MANY4=50;
+    public static final int MAX=51;
+    public static final int MAXIMIZE=52;
+    public static final int MIN=53;
+    public static final int MINIMIZE=54;
+    public static final int MN=55;
+    public static final int NOT=56;
+    public static final int OCTAL_ESC=57;
+    public static final int OEQ=58;
+    public static final int OF=59;
+    public static final int OGQ=60;
+    public static final int OGT=61;
+    public static final int OLQ=62;
+    public static final int OLT=63;
+    public static final int ONE=64;
+    public static final int ONQ=65;
+    public static final int OR=66;
+    public static final int ORDERBY=67;
+    public static final int PAR=68;
+    public static final int PARITY=69;
+    public static final int PL=70;
+    public static final int PPRIO=71;
+    public static final int PPRIOD=72;
+    public static final int PREDICATE=73;
+    public static final int PROP=74;
+    public static final int QUEUE=75;
+    public static final int RB=76;
+    public static final int REV=77;
+    public static final int RP=78;
+    public static final int RS=79;
+    public static final int SATISFY=80;
+    public static final int SC=81;
+    public static final int SET=82;
+    public static final int SIZE=83;
+    public static final int SOLVE=84;
+    public static final int STREG=85;
+    public static final int STRING=86;
+    public static final int STRUC=87;
+    public static final int SUM=88;
+    public static final int TRUE=89;
+    public static final int UNICODE_ESC=90;
+    public static final int VAR=91;
+    public static final int VCARD=92;
+    public static final int VNAME=93;
+    public static final int WFOR=94;
+    public static final int WONE=95;
+    public static final int WS=96;
 
     // delegates
     // delegators
@@ -1857,13 +1863,151 @@ public class FlatzincFullExtLexer extends Lexer {
     }
     // $ANTLR end "STREG"
 
+    // $ANTLR start "MANY1"
+    public final void mMANY1() throws RecognitionException {
+        try {
+            int _type = MANY1;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:135:6: ( '###M1##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:135:7: '###M1##'
+            {
+            match("###M1##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "MANY1"
+
+    // $ANTLR start "MANY2"
+    public final void mMANY2() throws RecognitionException {
+        try {
+            int _type = MANY2;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:136:6: ( '###M2##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:136:7: '###M2##'
+            {
+            match("###M2##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "MANY2"
+
+    // $ANTLR start "MANY3"
+    public final void mMANY3() throws RecognitionException {
+        try {
+            int _type = MANY3;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:137:6: ( '###M3##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:137:7: '###M3##'
+            {
+            match("###M3##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "MANY3"
+
+    // $ANTLR start "MANY4"
+    public final void mMANY4() throws RecognitionException {
+        try {
+            int _type = MANY4;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:138:6: ( '###M4##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:138:7: '###M4##'
+            {
+            match("###M4##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "MANY4"
+
+    // $ANTLR start "CA1"
+    public final void mCA1() throws RecognitionException {
+        try {
+            int _type = CA1;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:139:4: ( '###CA1##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:139:5: '###CA1##'
+            {
+            match("###CA1##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "CA1"
+
+    // $ANTLR start "CA2"
+    public final void mCA2() throws RecognitionException {
+        try {
+            int _type = CA2;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // parser/flatzinc/FlatzincFullExtLexer.g:140:4: ( '###CA2##' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:140:5: '###CA2##'
+            {
+            match("###CA2##"); 
+
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "CA2"
+
     // $ANTLR start "IDENTIFIER"
     public final void mIDENTIFIER() throws RecognitionException {
         try {
             int _type = IDENTIFIER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:143:5: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )* )
-            // parser/flatzinc/FlatzincFullExtLexer.g:143:9: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
+            // parser/flatzinc/FlatzincFullExtLexer.g:148:5: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )* )
+            // parser/flatzinc/FlatzincFullExtLexer.g:148:9: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
@@ -1875,7 +2019,7 @@ public class FlatzincFullExtLexer extends Lexer {
             }
 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:143:33: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
+            // parser/flatzinc/FlatzincFullExtLexer.g:148:33: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' )*
             loop1:
             do {
                 int alt1=2;
@@ -1989,12 +2133,12 @@ public class FlatzincFullExtLexer extends Lexer {
         try {
             int _type = COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:148:5: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
-            // parser/flatzinc/FlatzincFullExtLexer.g:148:9: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
+            // parser/flatzinc/FlatzincFullExtLexer.g:153:5: ( '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:153:9: '%' (~ ( '\\n' | '\\r' ) )* ( '\\r' )? '\\n'
             {
             match('%'); 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:148:13: (~ ( '\\n' | '\\r' ) )*
+            // parser/flatzinc/FlatzincFullExtLexer.g:153:13: (~ ( '\\n' | '\\r' ) )*
             loop2:
             do {
                 int alt2=2;
@@ -2028,7 +2172,7 @@ public class FlatzincFullExtLexer extends Lexer {
             } while (true);
 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:148:27: ( '\\r' )?
+            // parser/flatzinc/FlatzincFullExtLexer.g:153:27: ( '\\r' )?
             int alt3=2;
             switch ( input.LA(1) ) {
                 case '\r':
@@ -2040,7 +2184,7 @@ public class FlatzincFullExtLexer extends Lexer {
 
             switch (alt3) {
                 case 1 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:148:27: '\\r'
+                    // parser/flatzinc/FlatzincFullExtLexer.g:153:27: '\\r'
                     {
                     match('\r'); 
 
@@ -2070,8 +2214,8 @@ public class FlatzincFullExtLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:151:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
-            // parser/flatzinc/FlatzincFullExtLexer.g:151:9: ( ' ' | '\\t' | '\\r' | '\\n' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:156:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
+            // parser/flatzinc/FlatzincFullExtLexer.g:156:9: ( ' ' | '\\t' | '\\r' | '\\n' )
             {
             if ( (input.LA(1) >= '\t' && input.LA(1) <= '\n')||input.LA(1)=='\r'||input.LA(1)==' ' ) {
                 input.consume();
@@ -2101,10 +2245,10 @@ public class FlatzincFullExtLexer extends Lexer {
         try {
             int _type = INT_CONST;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:163:5: ( ( '+' | '-' )? ( '0' .. '9' )+ )
-            // parser/flatzinc/FlatzincFullExtLexer.g:163:9: ( '+' | '-' )? ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincFullExtLexer.g:168:5: ( ( '+' | '-' )? ( '0' .. '9' )+ )
+            // parser/flatzinc/FlatzincFullExtLexer.g:168:9: ( '+' | '-' )? ( '0' .. '9' )+
             {
-            // parser/flatzinc/FlatzincFullExtLexer.g:163:9: ( '+' | '-' )?
+            // parser/flatzinc/FlatzincFullExtLexer.g:168:9: ( '+' | '-' )?
             int alt4=2;
             switch ( input.LA(1) ) {
                 case '+':
@@ -2135,7 +2279,7 @@ public class FlatzincFullExtLexer extends Lexer {
             }
 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:163:20: ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincFullExtLexer.g:168:20: ( '0' .. '9' )+
             int cnt5=0;
             loop5:
             do {
@@ -2201,12 +2345,12 @@ public class FlatzincFullExtLexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:173:5: ( '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"' )
-            // parser/flatzinc/FlatzincFullExtLexer.g:173:8: '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"'
+            // parser/flatzinc/FlatzincFullExtLexer.g:178:5: ( '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:178:8: '\"' ( ESC_SEQ |~ ( '\\\\' | '\"' ) )* '\"'
             {
             match('\"'); 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:173:12: ( ESC_SEQ |~ ( '\\\\' | '\"' ) )*
+            // parser/flatzinc/FlatzincFullExtLexer.g:178:12: ( ESC_SEQ |~ ( '\\\\' | '\"' ) )*
             loop6:
             do {
                 int alt6=3;
@@ -2222,7 +2366,7 @@ public class FlatzincFullExtLexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // parser/flatzinc/FlatzincFullExtLexer.g:173:14: ESC_SEQ
+            	    // parser/flatzinc/FlatzincFullExtLexer.g:178:14: ESC_SEQ
             	    {
             	    mESC_SEQ(); 
 
@@ -2230,7 +2374,7 @@ public class FlatzincFullExtLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // parser/flatzinc/FlatzincFullExtLexer.g:173:24: ~ ( '\\\\' | '\"' )
+            	    // parser/flatzinc/FlatzincFullExtLexer.g:178:24: ~ ( '\\\\' | '\"' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -2269,12 +2413,12 @@ public class FlatzincFullExtLexer extends Lexer {
         try {
             int _type = CHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // parser/flatzinc/FlatzincFullExtLexer.g:176:5: ( '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\'' )
-            // parser/flatzinc/FlatzincFullExtLexer.g:176:8: '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\''
+            // parser/flatzinc/FlatzincFullExtLexer.g:181:5: ( '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\'' )
+            // parser/flatzinc/FlatzincFullExtLexer.g:181:8: '\\'' ( ESC_SEQ |~ ( '\\'' | '\\\\' ) ) '\\''
             {
             match('\''); 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:176:13: ( ESC_SEQ |~ ( '\\'' | '\\\\' ) )
+            // parser/flatzinc/FlatzincFullExtLexer.g:181:13: ( ESC_SEQ |~ ( '\\'' | '\\\\' ) )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -2293,7 +2437,7 @@ public class FlatzincFullExtLexer extends Lexer {
             }
             switch (alt7) {
                 case 1 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:176:15: ESC_SEQ
+                    // parser/flatzinc/FlatzincFullExtLexer.g:181:15: ESC_SEQ
                     {
                     mESC_SEQ(); 
 
@@ -2301,7 +2445,7 @@ public class FlatzincFullExtLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:176:25: ~ ( '\\'' | '\\\\' )
+                    // parser/flatzinc/FlatzincFullExtLexer.g:181:25: ~ ( '\\'' | '\\\\' )
                     {
                     if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
                         input.consume();
@@ -2335,8 +2479,8 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR start "EXPONENT"
     public final void mEXPONENT() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtLexer.g:185:10: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
-            // parser/flatzinc/FlatzincFullExtLexer.g:185:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincFullExtLexer.g:190:10: ( ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+ )
+            // parser/flatzinc/FlatzincFullExtLexer.g:190:12: ( 'e' | 'E' ) ( '+' | '-' )? ( '0' .. '9' )+
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
@@ -2348,7 +2492,7 @@ public class FlatzincFullExtLexer extends Lexer {
             }
 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:185:22: ( '+' | '-' )?
+            // parser/flatzinc/FlatzincFullExtLexer.g:190:22: ( '+' | '-' )?
             int alt8=2;
             switch ( input.LA(1) ) {
                 case '+':
@@ -2379,7 +2523,7 @@ public class FlatzincFullExtLexer extends Lexer {
             }
 
 
-            // parser/flatzinc/FlatzincFullExtLexer.g:185:33: ( '0' .. '9' )+
+            // parser/flatzinc/FlatzincFullExtLexer.g:190:33: ( '0' .. '9' )+
             int cnt9=0;
             loop9:
             do {
@@ -2442,7 +2586,7 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR start "ESC_SEQ"
     public final void mESC_SEQ() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtLexer.g:189:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
+            // parser/flatzinc/FlatzincFullExtLexer.g:194:5: ( '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' ) | UNICODE_ESC | OCTAL_ESC )
             int alt10=3;
             switch ( input.LA(1) ) {
             case '\\':
@@ -2497,7 +2641,7 @@ public class FlatzincFullExtLexer extends Lexer {
 
             switch (alt10) {
                 case 1 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:189:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
+                    // parser/flatzinc/FlatzincFullExtLexer.g:194:9: '\\\\' ( 'b' | 't' | 'n' | 'f' | 'r' | '\\\"' | '\\'' | '\\\\' )
                     {
                     match('\\'); 
 
@@ -2514,7 +2658,7 @@ public class FlatzincFullExtLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:190:9: UNICODE_ESC
+                    // parser/flatzinc/FlatzincFullExtLexer.g:195:9: UNICODE_ESC
                     {
                     mUNICODE_ESC(); 
 
@@ -2522,7 +2666,7 @@ public class FlatzincFullExtLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:191:9: OCTAL_ESC
+                    // parser/flatzinc/FlatzincFullExtLexer.g:196:9: OCTAL_ESC
                     {
                     mOCTAL_ESC(); 
 
@@ -2542,7 +2686,7 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR start "OCTAL_ESC"
     public final void mOCTAL_ESC() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtLexer.g:196:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+            // parser/flatzinc/FlatzincFullExtLexer.g:201:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
             int alt11=3;
             switch ( input.LA(1) ) {
             case '\\':
@@ -2632,7 +2776,7 @@ public class FlatzincFullExtLexer extends Lexer {
 
             switch (alt11) {
                 case 1 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:196:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincFullExtLexer.g:201:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); 
 
@@ -2669,7 +2813,7 @@ public class FlatzincFullExtLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:197:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincFullExtLexer.g:202:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); 
 
@@ -2696,7 +2840,7 @@ public class FlatzincFullExtLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // parser/flatzinc/FlatzincFullExtLexer.g:198:9: '\\\\' ( '0' .. '7' )
+                    // parser/flatzinc/FlatzincFullExtLexer.g:203:9: '\\\\' ( '0' .. '7' )
                     {
                     match('\\'); 
 
@@ -2725,7 +2869,7 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR start "HEX_DIGIT"
     public final void mHEX_DIGIT() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtLexer.g:202:11: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
+            // parser/flatzinc/FlatzincFullExtLexer.g:207:11: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
             // parser/flatzinc/FlatzincFullExtLexer.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'F')||(input.LA(1) >= 'a' && input.LA(1) <= 'f') ) {
@@ -2751,8 +2895,8 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR start "UNICODE_ESC"
     public final void mUNICODE_ESC() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtLexer.g:206:5: ( '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT )
-            // parser/flatzinc/FlatzincFullExtLexer.g:206:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+            // parser/flatzinc/FlatzincFullExtLexer.g:211:5: ( '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT )
+            // parser/flatzinc/FlatzincFullExtLexer.g:211:9: '\\\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
             {
             match('\\'); 
 
@@ -2781,8 +2925,8 @@ public class FlatzincFullExtLexer extends Lexer {
     // $ANTLR end "UNICODE_ESC"
 
     public void mTokens() throws RecognitionException {
-        // parser/flatzinc/FlatzincFullExtLexer.g:1:8: ( BOOL | TRUE | FALSE | INT | FLOAT | SET | OF | ARRAY | VAR | PAR | PREDICATE | CONSTRAINT | SOLVE | SATISFY | MINIMIZE | MAXIMIZE | DD | DO | LB | RB | CM | LS | RS | EQ | PL | MN | SC | CL | DC | LP | RP | AS | EACH | QUEUE | LIST | HEAP | ONE | WONE | FOR | WFOR | ORDERBY | AND | OR | NOT | IN | REV | OEQ | ONQ | OLT | OGT | OLQ | OGQ | KEY | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD | ANY | MIN | MAX | SUM | SIZE | APAR | ARRPAR | AVAR | ARRVAR | INDEX | EXPR | ANNOTATIONS | STRUC | STREG | IDENTIFIER | COMMENT | WS | INT_CONST | STRING | CHAR )
-        int alt12=82;
+        // parser/flatzinc/FlatzincFullExtLexer.g:1:8: ( BOOL | TRUE | FALSE | INT | FLOAT | SET | OF | ARRAY | VAR | PAR | PREDICATE | CONSTRAINT | SOLVE | SATISFY | MINIMIZE | MAXIMIZE | DD | DO | LB | RB | CM | LS | RS | EQ | PL | MN | SC | CL | DC | LP | RP | AS | EACH | QUEUE | LIST | HEAP | ONE | WONE | FOR | WFOR | ORDERBY | AND | OR | NOT | IN | REV | OEQ | ONQ | OLT | OGT | OLQ | OGQ | KEY | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD | ANY | MIN | MAX | SUM | SIZE | APAR | ARRPAR | AVAR | ARRVAR | INDEX | EXPR | ANNOTATIONS | STRUC | STREG | MANY1 | MANY2 | MANY3 | MANY4 | CA1 | CA2 | IDENTIFIER | COMMENT | WS | INT_CONST | STRING | CHAR )
+        int alt12=88;
         alt12 = dfa12.predict(input);
         switch (alt12) {
             case 1 :
@@ -3394,47 +3538,95 @@ public class FlatzincFullExtLexer extends Lexer {
                 }
                 break;
             case 77 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:386: IDENTIFIER
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:386: MANY1
+                {
+                mMANY1(); 
+
+
+                }
+                break;
+            case 78 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:392: MANY2
+                {
+                mMANY2(); 
+
+
+                }
+                break;
+            case 79 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:398: MANY3
+                {
+                mMANY3(); 
+
+
+                }
+                break;
+            case 80 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:404: MANY4
+                {
+                mMANY4(); 
+
+
+                }
+                break;
+            case 81 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:410: CA1
+                {
+                mCA1(); 
+
+
+                }
+                break;
+            case 82 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:414: CA2
+                {
+                mCA2(); 
+
+
+                }
+                break;
+            case 83 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:418: IDENTIFIER
                 {
                 mIDENTIFIER(); 
 
 
                 }
                 break;
-            case 78 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:397: COMMENT
+            case 84 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:429: COMMENT
                 {
                 mCOMMENT(); 
 
 
                 }
                 break;
-            case 79 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:405: WS
+            case 85 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:437: WS
                 {
                 mWS(); 
 
 
                 }
                 break;
-            case 80 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:408: INT_CONST
+            case 86 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:440: INT_CONST
                 {
                 mINT_CONST(); 
 
 
                 }
                 break;
-            case 81 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:418: STRING
+            case 87 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:450: STRING
                 {
                 mSTRING(); 
 
 
                 }
                 break;
-            case 82 :
-                // parser/flatzinc/FlatzincFullExtLexer.g:1:425: CHAR
+            case 88 :
+                // parser/flatzinc/FlatzincFullExtLexer.g:1:457: CHAR
                 {
                 mCHAR(); 
 
@@ -3454,16 +3646,16 @@ public class FlatzincFullExtLexer extends Lexer {
         "\1\147\3\46\1\153\10\46\10\uffff\6\46\2\uffff\1\46\4\uffff\1\46"+
         "\1\uffff\4\46\1\u0082\1\u0083\1\uffff\1\u0084\2\46\1\u0087\1\46"+
         "\1\uffff\1\u0089\2\46\1\uffff\1\u008c\1\u008e\1\u008f\4\46\1\u0095"+
-        "\1\u0097\6\46\1\u009e\1\u009f\1\uffff\1\u00a5\1\u00a6\2\46\3\uffff"+
-        "\2\46\1\uffff\1\u00ab\1\uffff\2\46\4\uffff\1\46\1\u00b2\1\46\1\u00b5"+
-        "\1\46\1\uffff\1\46\1\uffff\1\u00b8\1\46\1\u00ba\1\u00bb\1\u00bc"+
-        "\1\u00bd\11\uffff\1\u00c5\1\u00c6\1\u00c7\1\46\1\uffff\1\46\1\u00ca"+
-        "\2\uffff\1\46\2\uffff\1\46\2\uffff\2\46\1\uffff\1\u00d3\16\uffff"+
-        "\1\46\2\uffff\1\46\2\uffff\1\46\2\uffff\2\46\1\uffff\1\u00da\1\46"+
-        "\1\uffff\3\46\1\uffff\1\46\1\uffff\1\46\1\u00e3\1\u00e4\1\u00e5"+
-        "\1\uffff\1\46\5\uffff\1\u00e9\1\uffff";
+        "\1\u0097\6\46\1\u009e\1\u009f\1\uffff\1\u00a7\1\u00a8\2\46\3\uffff"+
+        "\2\46\1\uffff\1\u00ad\1\uffff\2\46\4\uffff\1\46\1\u00b4\1\46\1\u00b7"+
+        "\1\46\1\uffff\1\46\1\uffff\1\u00ba\1\46\1\u00bc\1\u00bd\1\u00be"+
+        "\1\u00bf\13\uffff\1\u00cc\1\u00cd\1\u00ce\1\46\1\uffff\1\46\1\u00d1"+
+        "\2\uffff\1\46\2\uffff\1\46\2\uffff\2\46\1\uffff\1\u00da\23\uffff"+
+        "\1\46\2\uffff\1\46\2\uffff\1\46\2\uffff\2\46\3\uffff\1\u00e3\1\46"+
+        "\1\uffff\3\46\1\uffff\1\46\1\uffff\1\46\1\u00ec\1\u00ed\1\u00ee"+
+        "\1\uffff\1\46\5\uffff\1\u00f2\1\uffff";
     static final String DFA12_eofS =
-        "\u00ea\uffff";
+        "\u00f3\uffff";
     static final String DFA12_minS =
         "\1\11\1\157\1\162\1\141\1\156\1\141\1\146\1\156\2\141\1\157\1\141"+
         "\1\56\5\uffff\1\75\2\60\1\uffff\1\72\2\uffff\1\141\1\165\1\151\1"+
@@ -3476,11 +3668,12 @@ public class FlatzincFullExtLexer extends Lexer {
         "\1\163\1\162\2\60\1\150\1\165\1\164\1\160\1\145\1\162\2\60\1\101"+
         "\2\60\1\145\1\164\3\uffff\1\145\1\163\1\uffff\1\60\1\uffff\1\162"+
         "\1\171\1\uffff\1\143\2\uffff\1\151\1\56\1\164\1\56\1\155\1\uffff"+
-        "\1\155\1\uffff\1\60\1\145\4\60\2\uffff\2\120\2\uffff\1\122\2\uffff"+
-        "\3\60\1\146\1\uffff\1\40\1\60\2\uffff\1\143\1\141\1\uffff\1\162"+
-        "\1\141\1\uffff\2\151\1\uffff\1\60\16\uffff\1\171\2\uffff\1\141\1"+
-        "\162\1\uffff\1\141\2\uffff\2\172\1\uffff\1\60\1\164\2\151\2\145"+
-        "\1\uffff\1\145\1\157\1\156\3\60\1\104\1\164\5\uffff\1\60\1\uffff";
+        "\1\155\1\uffff\1\60\1\145\4\60\2\uffff\2\120\2\uffff\1\122\1\61"+
+        "\1\101\2\uffff\3\60\1\146\1\uffff\1\40\1\60\2\uffff\1\143\1\141"+
+        "\1\uffff\1\162\1\141\1\uffff\2\151\1\uffff\1\60\17\uffff\1\61\3"+
+        "\uffff\1\171\2\uffff\1\141\1\162\1\uffff\1\141\2\uffff\2\172\3\uffff"+
+        "\1\60\1\164\2\151\2\145\1\uffff\1\145\1\157\1\156\3\60\1\104\1\164"+
+        "\5\uffff\1\60\1\uffff";
     static final String DFA12_maxS =
         "\1\175\1\157\1\162\1\157\1\156\1\165\1\162\1\163\1\141\1\162\1\163"+
         "\1\151\1\56\5\uffff\1\75\2\71\1\uffff\1\72\2\uffff\1\141\1\165\1"+
@@ -3494,25 +3687,26 @@ public class FlatzincFullExtLexer extends Lexer {
         "\1\137\2\172\1\145\1\164\3\uffff\1\145\1\163\1\uffff\1\172\1\uffff"+
         "\1\162\1\171\1\uffff\1\156\2\uffff\1\151\1\172\1\164\1\172\1\155"+
         "\1\uffff\1\155\1\uffff\1\172\1\145\4\172\2\uffff\2\126\2\uffff\1"+
-        "\124\2\uffff\3\172\1\146\1\uffff\1\40\1\172\2\uffff\1\143\1\160"+
-        "\1\uffff\1\162\1\156\1\uffff\2\151\1\uffff\1\172\16\uffff\1\171"+
-        "\2\uffff\1\141\1\162\1\uffff\1\141\2\uffff\2\172\1\uffff\1\172\1"+
-        "\164\2\151\2\145\1\uffff\1\145\1\157\1\156\3\172\1\162\1\164\5\uffff"+
-        "\1\172\1\uffff";
+        "\124\1\64\1\101\2\uffff\3\172\1\146\1\uffff\1\40\1\172\2\uffff\1"+
+        "\143\1\160\1\uffff\1\162\1\156\1\uffff\2\151\1\uffff\1\172\17\uffff"+
+        "\1\62\3\uffff\1\171\2\uffff\1\141\1\162\1\uffff\1\141\2\uffff\2"+
+        "\172\3\uffff\1\172\1\164\2\151\2\145\1\uffff\1\145\1\157\1\156\3"+
+        "\172\1\162\1\164\5\uffff\1\172\1\uffff";
     static final String DFA12_acceptS =
         "\15\uffff\1\23\1\24\1\25\1\26\1\27\3\uffff\1\33\1\uffff\1\36\1\37"+
-        "\5\uffff\1\52\1\53\6\uffff\1\115\1\116\1\117\1\120\1\121\1\122\30"+
+        "\5\uffff\1\52\1\53\6\uffff\1\123\1\124\1\125\1\126\1\127\1\130\30"+
         "\uffff\1\21\1\22\1\57\1\30\1\31\1\32\1\35\1\34\6\uffff\1\60\1\54"+
         "\1\uffff\1\63\1\61\1\64\1\62\10\uffff\1\55\5\uffff\1\7\3\uffff\1"+
         "\40\26\uffff\1\47\1\4\1\6\2\uffff\1\102\1\uffff\1\45\2\uffff\1\77"+
         "\1\uffff\1\11\1\12\5\uffff\1\100\1\uffff\1\101\6\uffff\1\56\1\65"+
-        "\2\uffff\1\110\1\111\1\uffff\1\1\1\2\4\uffff\1\103\2\uffff\1\70"+
+        "\2\uffff\1\110\1\111\3\uffff\1\1\1\2\4\uffff\1\103\2\uffff\1\70"+
         "\1\71\2\uffff\1\67\2\uffff\1\66\2\uffff\1\41\1\uffff\1\43\1\44\1"+
-        "\46\1\50\1\104\1\106\1\105\1\107\1\112\1\113\1\114\1\3\1\5\1\15"+
-        "\1\uffff\1\51\1\10\2\uffff\1\75\1\uffff\1\72\1\73\2\uffff\1\42\6"+
-        "\uffff\1\16\10\uffff\1\17\1\20\1\13\1\74\1\76\1\uffff\1\14";
+        "\46\1\50\1\104\1\106\1\105\1\107\1\112\1\113\1\114\1\115\1\116\1"+
+        "\117\1\120\1\uffff\1\3\1\5\1\15\1\uffff\1\51\1\10\2\uffff\1\75\1"+
+        "\uffff\1\72\1\73\2\uffff\1\42\1\121\1\122\6\uffff\1\16\10\uffff"+
+        "\1\17\1\20\1\13\1\74\1\76\1\uffff\1\14";
     static final String DFA12_specialS =
-        "\u00ea\uffff}>";
+        "\u00f3\uffff}>";
     static final String[] DFA12_transitionS = {
             "\2\50\2\uffff\1\50\22\uffff\1\50\1\40\1\52\1\45\1\uffff\1\47"+
             "\1\36\1\53\1\27\1\30\1\uffff\1\23\1\17\1\24\1\14\1\uffff\12"+
@@ -3647,111 +3841,120 @@ public class FlatzincFullExtLexer extends Lexer {
             "\1\u009d",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\1\u00a1\3\uffff\1\u00a3\3\uffff\1\u00a2\11\uffff\1\u00a4\13"+
-            "\uffff\1\u00a0",
+            "\1\u00a1\1\uffff\1\u00a6\1\uffff\1\u00a3\3\uffff\1\u00a2\3"+
+            "\uffff\1\u00a5\5\uffff\1\u00a4\13\uffff\1\u00a0",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\1\u00a7",
-            "\1\u00a8",
-            "",
-            "",
-            "",
             "\1\u00a9",
             "\1\u00aa",
             "",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "",
+            "",
+            "\1\u00ab",
             "\1\u00ac",
-            "\1\u00ad",
-            "",
-            "\1\u00af\12\uffff\1\u00ae",
-            "",
-            "",
-            "\1\u00b0",
-            "\1\u00b1\1\uffff\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32"+
-            "\46",
-            "\1\u00b3",
-            "\1\u00b4\1\uffff\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32"+
-            "\46",
-            "\1\u00b6",
-            "",
-            "\1\u00b7",
             "",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "",
+            "\1\u00ae",
+            "\1\u00af",
+            "",
+            "\1\u00b1\12\uffff\1\u00b0",
+            "",
+            "",
+            "\1\u00b2",
+            "\1\u00b3\1\uffff\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32"+
+            "\46",
+            "\1\u00b5",
+            "\1\u00b6\1\uffff\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32"+
+            "\46",
+            "\1\u00b8",
+            "",
             "\1\u00b9",
+            "",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\1\u00bb",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "",
             "",
-            "\1\u00be\5\uffff\1\u00bf",
-            "\1\u00c0\2\uffff\1\u00c2\2\uffff\1\u00c1",
+            "\1\u00c0\5\uffff\1\u00c1",
+            "\1\u00c2\2\uffff\1\u00c4\2\uffff\1\u00c3",
             "",
             "",
-            "\1\u00c4\1\uffff\1\u00c3",
-            "",
-            "",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\1\u00c8",
-            "",
-            "\1\u00c9",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "",
-            "",
+            "\1\u00c6\1\uffff\1\u00c5",
+            "\1\u00c7\1\u00c8\1\u00c9\1\u00ca",
             "\1\u00cb",
-            "\1\u00cd\16\uffff\1\u00cc",
             "",
-            "\1\u00ce",
-            "\1\u00d0\14\uffff\1\u00cf",
             "",
-            "\1\u00d1",
-            "\1\u00d2",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\1\u00cf",
             "",
+            "\1\u00d0",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
             "",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "\1\u00d4",
-            "",
+            "\1\u00d2",
+            "\1\u00d4\16\uffff\1\u00d3",
             "",
             "\1\u00d5",
-            "\1\u00d6",
-            "",
-            "\1\u00d7",
-            "",
+            "\1\u00d7\14\uffff\1\u00d6",
             "",
             "\1\u00d8",
             "\1\u00d9",
             "",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\1\u00db",
-            "\1\u00dc",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\u00db\1\u00dc",
+            "",
+            "",
+            "",
             "\1\u00dd",
+            "",
+            "",
             "\1\u00de",
             "\1\u00df",
             "",
             "\1\u00e0",
+            "",
+            "",
             "\1\u00e1",
             "\1\u00e2",
+            "",
+            "",
+            "",
             "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
-            "\1\u00e7\55\uffff\1\u00e6",
+            "\1\u00e4",
+            "\1\u00e5",
+            "\1\u00e6",
+            "\1\u00e7",
             "\1\u00e8",
+            "",
+            "\1\u00e9",
+            "\1\u00ea",
+            "\1\u00eb",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\12\46\7\uffff\32\46\4\uffff\1\46\1\uffff\32\46",
+            "\1\u00f0\55\uffff\1\u00ef",
+            "\1\u00f1",
             "",
             "",
             "",
@@ -3791,7 +3994,7 @@ public class FlatzincFullExtLexer extends Lexer {
             this.transition = DFA12_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( BOOL | TRUE | FALSE | INT | FLOAT | SET | OF | ARRAY | VAR | PAR | PREDICATE | CONSTRAINT | SOLVE | SATISFY | MINIMIZE | MAXIMIZE | DD | DO | LB | RB | CM | LS | RS | EQ | PL | MN | SC | CL | DC | LP | RP | AS | EACH | QUEUE | LIST | HEAP | ONE | WONE | FOR | WFOR | ORDERBY | AND | OR | NOT | IN | REV | OEQ | ONQ | OLT | OGT | OLQ | OGQ | KEY | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD | ANY | MIN | MAX | SUM | SIZE | APAR | ARRPAR | AVAR | ARRVAR | INDEX | EXPR | ANNOTATIONS | STRUC | STREG | IDENTIFIER | COMMENT | WS | INT_CONST | STRING | CHAR );";
+            return "1:1: Tokens : ( BOOL | TRUE | FALSE | INT | FLOAT | SET | OF | ARRAY | VAR | PAR | PREDICATE | CONSTRAINT | SOLVE | SATISFY | MINIMIZE | MAXIMIZE | DD | DO | LB | RB | CM | LS | RS | EQ | PL | MN | SC | CL | DC | LP | RP | AS | EACH | QUEUE | LIST | HEAP | ONE | WONE | FOR | WFOR | ORDERBY | AND | OR | NOT | IN | REV | OEQ | ONQ | OLT | OGT | OLQ | OGQ | KEY | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD | ANY | MIN | MAX | SUM | SIZE | APAR | ARRPAR | AVAR | ARRVAR | INDEX | EXPR | ANNOTATIONS | STRUC | STREG | MANY1 | MANY2 | MANY3 | MANY4 | CA1 | CA2 | IDENTIFIER | COMMENT | WS | INT_CONST | STRING | CHAR );";
         }
     }
  

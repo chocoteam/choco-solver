@@ -53,6 +53,6 @@ public class CombinedAttribute implements IAttribute<ISchedulable> {
         if (operators.isEmpty()) {
             return attribute.eval((Arc) element);
         }
-        return operators.get(0).evaluate((PropagationStrategy) element, this, 1);
+        return operators.get(0).evaluate((PropagationStrategy) element, this, 0);
     }
 }

@@ -71,4 +71,13 @@ public class T_comb_attr extends GrammarExtTest {
         Assert.assertEquals(1, o.operators.size());
         Assert.assertTrue(o.operators.get(0) == AttributeOperator.SIZE);
     }
+
+    @Test
+    public void test3() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("any.prop.priority");
+        CombinedAttribute o = comb_attr(fp);
+        Assert.assertEquals(1, o.operators.size());
+        Assert.assertTrue(o.operators.get(0) == AttributeOperator.ANY);
+        Assert.assertTrue(o.attribute == Attribute.PPRIO);
+    }
 }

@@ -42,6 +42,7 @@ import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -124,7 +125,7 @@ public class T_many extends GrammarExtTest {
         ArrayList<PropagationStrategy> scheds = _many.pss;
         Assert.assertNotNull(scheds);
         Assert.assertEquals(4, scheds.size());
-        Assert.assertTrue(scheds.get(0) instanceof Queue);
+        Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 
     @Test
@@ -137,5 +138,47 @@ public class T_many extends GrammarExtTest {
         Assert.assertNotNull(scheds);
         Assert.assertEquals(3, scheds.size());
         Assert.assertTrue(scheds.get(0) instanceof Queue);
+    }
+
+    @Test
+    public void test5() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser("each prop as queue(wone) key any.prop.priority");
+
+        FlatzincFullExtWalker.many_return _many = many(fp, arcs);
+        Assert.assertEquals(0, _many.depth);
+        ArrayList<PropagationStrategy> scheds = _many.pss;
+        Assert.assertNotNull(scheds);
+        Assert.assertEquals(4, scheds.size());
+        Assert.assertTrue(scheds.get(0) instanceof Queue);
+    }
+
+    //each var as list(wone) of {" +
+//                                    "       each prop as queue(wone) key any.prop.priority" +
+//                                    "   } key any.any.var.cardinality
+
+    @Test
+    public void test6() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp =
+                parser("each var as list(wone) key any.var.cardinality");
+
+        FlatzincFullExtWalker.many_return _many = many(fp, arcs);
+        Assert.assertEquals(0, _many.depth);
+        ArrayList<PropagationStrategy> scheds = _many.pss;
+        Assert.assertNotNull(scheds);
+        Assert.assertEquals(5, scheds.size());
+        Assert.assertTrue(scheds.get(0) instanceof Sort);
+    }
+
+    @Test
+    public void test7() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp =
+                parser("each var as list(wone) of {each prop as queue(one) key any.prop.priority} key any.any.var.cardinality");
+
+        FlatzincFullExtWalker.many_return _many = many(fp, arcs);
+        Assert.assertEquals(1, _many.depth);
+        ArrayList<PropagationStrategy> scheds = _many.pss;
+        Assert.assertNotNull(scheds);
+        Assert.assertEquals(5, scheds.size());
+        Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 }
