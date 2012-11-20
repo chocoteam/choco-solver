@@ -48,13 +48,15 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
 
     int nb_probes;
     double[] mA;
+    long nbExecutions;
 //    double[] sA;
 
 
-    public AverageCSV(String prefix, String fileName) {
+    public AverageCSV(String prefix, String fileName, long nbExecutions) {
         this.prefix = prefix;
         this.fileName = fileName;
         this.mA = new double[13];
+        nb_probes = nbExecutions>1?-1:0;
 //        this.sA = new double[13];
     }
 
@@ -66,14 +68,16 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
     @Override
     public void afterClose() {
         nb_probes++;
-        double[] A = currentSolver.getMeasures().toArray();
-        for (int i = 0; i < A.length; i++) {
-            double activity = A[i];
-            double oldmA = mA[i];
+        if (nb_probes > 0) {
+            double[] A = currentSolver.getMeasures().toArray();
+            for (int i = 0; i < A.length; i++) {
+                double activity = A[i];
+                double oldmA = mA[i];
 
-            double U = activity - oldmA;
-            mA[i] += (U / nb_probes);
+                double U = activity - oldmA;
+                mA[i] += (U / nb_probes);
 //            sA[i] += (U * (activity - mA[i]));
+            }
         }
     }
 

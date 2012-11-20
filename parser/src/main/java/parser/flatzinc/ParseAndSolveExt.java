@@ -146,7 +146,7 @@ public class ParseAndSolveExt {
         for (String instance : instances) {
             AverageCSV acsv = null;
             if (!csv.equals("")) {
-                acsv = new AverageCSV(instance, csv);
+                acsv = new AverageCSV(instance, csv, l);
             }
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
