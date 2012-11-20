@@ -48,7 +48,7 @@ import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
 import solver.propagation.hardcoded.VariableEngine;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.loop.monitors.AverageCSV;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -92,7 +92,7 @@ public class ParseAndSolveExt {
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
     @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
-    private long l = 0;
+    private long l = 1;
 
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
@@ -144,7 +144,11 @@ public class ParseAndSolveExt {
 
     private void parseandsolve() throws IOException, RecognitionException {
         for (String instance : instances) {
-            for (int i = 0; i <= l; i++) {
+            AverageCSV acsv = null;
+            if (!csv.equals("")) {
+                acsv = new AverageCSV(instance, csv);
+            }
+            for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
                 THashMap<String, Object> map = new THashMap<String, Object>();
@@ -176,8 +180,9 @@ public class ParseAndSolveExt {
                         }
 
                 }
-                if (!csv.equals("") && i == l) {
-                    SearchMonitorFactory.toCSV(solver, instance, csv);
+                if (!csv.equals("")) {
+                    assert acsv != null;
+                    acsv.setSolver(solver);
                 }
                 expeng.make(solver);
                 if (tl > -1) {
@@ -187,6 +192,10 @@ public class ParseAndSolveExt {
                 LOGGER.info("% solve instance...");
                 //SearchMonitorFactory.log(solver, true, true);
                 solver.solve();
+            }
+            if (!csv.equals("")) {
+                assert acsv != null;
+                acsv.record();
             }
         }
     }

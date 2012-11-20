@@ -44,6 +44,8 @@ public interface IMeasures extends ISearchMonitor, Serializable {
 
     String toCSV();
 
+    double[] toArray();
+
     /**
      * Get current world unique id
      *

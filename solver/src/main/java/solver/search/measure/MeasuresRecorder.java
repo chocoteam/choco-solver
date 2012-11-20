@@ -336,6 +336,23 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
+    public double[] toArray() {
+        return new double[]{
+                solutionCount,
+                readingTimeCount / IN_MS,
+                initialisationTimeCount / IN_MS,
+                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
+                (timeCount - initialPropagationTimeCount) / IN_MS,
+                timeCount / IN_SEC,
+                hasObjective() ? objectiveIntValue : 0,
+                nodeCount,
+                backtrackCount,
+                failCount,
+                restartCount,
+                eventCount,
+                propagationCount
+        };
+    }
 
     @Override
     public String toOneLineString() {
