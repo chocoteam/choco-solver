@@ -40,7 +40,7 @@ package parser.flatzinc;
 }
 
 flatzinc_ext_model
-	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (group_decl)* (structure)? solve_goal
+	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (engine)? solve_goal
 	;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,10 +50,9 @@ flatzinc_ext_model
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//engine
-//    :   (group_decl)* //structure
-//    ->  group_decl+ //structure
-//    ;
+engine
+    :   group_decl+ structure
+    ;
 
 // DECLARATION OF A GROUP
 group_decl
@@ -116,14 +115,15 @@ structure
 	;
 
 struct
-    :	coll OF LB elt (CM elt)* RB (KEY comb_attr)?
-    ->  ^(STRUC elt+ comb_attr? coll)
+    :	coll OF LB elt (CM elt)* RB (KEY ca=comb_attr)?
+    ->  {ca==null}? ^(STRUC1 elt+ coll)
+    ->              ^(STRUC2 elt+ comb_attr coll)
 	;
 
 struct_reg
 	:	IDENTIFIER AS coll OF LB many RB (KEY ca=comb_attr)?
-	->  {ca==null}?     ^(STREG IDENTIFIER many coll)
-	->                  ^(STREG IDENTIFIER comb_attr many coll)
+	->  {ca==null}? ^(STREG IDENTIFIER many coll)
+	->              ^(STREG IDENTIFIER comb_attr many coll)
 	;
 
 //TODO: remove backtrack options

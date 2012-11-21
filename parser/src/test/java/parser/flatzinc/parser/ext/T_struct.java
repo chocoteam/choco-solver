@@ -105,4 +105,18 @@ public class T_struct extends GrammarExtTest {
         Assert.assertTrue(scheds instanceof Queue);
     }
 
+    //queue(wone) of {queue(wone) of{G1}, list of {list(for) of {G2} key var.name,rev list of {G3} key var.name}};
+    @Test
+    public void test2() throws IOException, RecognitionException {
+        FlatzincFullExtParser fp = parser(
+                "queue(wone) of {" +
+                        "list(for) of {" +
+                        "   list(for) of {G1} key any.var.name, " +
+                        "   rev list(for) of {G2} key any.var.name}" +
+                        "}" +
+                        "};");
+        PropagationStrategy scheds = struct(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof Queue);
+    }
 }

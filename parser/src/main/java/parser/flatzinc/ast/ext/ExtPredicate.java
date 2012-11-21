@@ -53,6 +53,11 @@ public class ExtPredicate extends Predicate {
                 vars.add((Variable) o);
             } else if (o instanceof Constraint) {
                 cstr = (Constraint) o;
+            }else if(o instanceof Variable[]){
+                Variable[] allvars = (Variable[])o;
+                for(int j = 0; j < allvars.length; j++){
+                    vars.add(allvars[j]);
+                }
             }
         }
     }

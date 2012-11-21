@@ -49,15 +49,15 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
     int nb_probes;
     double[] mA;
     long nbExecutions;
-//    double[] sA;
+    double[] sA;
 
 
     public AverageCSV(String prefix, String fileName, long nbExecutions) {
         this.prefix = prefix;
         this.fileName = fileName;
         this.mA = new double[13];
-        nb_probes = nbExecutions>1?-1:0;
-//        this.sA = new double[13];
+        nb_probes = nbExecutions > 1 ? -1 : 0;
+        this.sA = new double[13];
     }
 
     public void setSolver(Solver aSolver) {
@@ -76,7 +76,7 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
 
                 double U = activity - oldmA;
                 mA[i] += (U / nb_probes);
-//            sA[i] += (U * (activity - mA[i]));
+                sA[i] += (U * (activity - mA[i]));
             }
         }
     }
@@ -89,6 +89,9 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
         st.append(";");
         for (int i = 0; i < mA.length; i++) {
             st.append(String.format("%.4f;", mA[i]));
+        }
+        for (int i = 0; i < mA.length; i++) {
+            st.append(String.format("%.4f;", Math.sqrt(sA[i] / (nb_probes - 1))));
         }
         st.append("\n");
         writeTextInto(st.toString(), fileName);
@@ -106,7 +109,9 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
             boolean exist = aFile.exists();
             FileWriter out = new FileWriter(aFile, true);
             if (!exist) {
-                out.write("instance;solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;\n");
+                out.write(";AVERAGE;;;;;;;;;;;;;STD DEV;;;;;;;;;;;;;\n");
+                out.write("instance;solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
+                out.write("solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;\n");
             }
             out.write(text);
             out.flush();

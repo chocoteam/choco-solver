@@ -108,30 +108,7 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 	this.map = map;
 	this.groups = new THashMap();
     }
-	   (pred_decl)* (param_decl)* (var_decl)* (constraint)*
-	{
-	ArrayList<Arc> arcs= Arc.populate(mSolver);
-	}
-	(group_decl[arcs])*
-	{
-	if(!arcs.isEmpty()){
-	    LOGGER.warn("\% Remaining arcs after group declarations");
-	}
-
-	PropagationEngine propagationEngine = new PropagationEngine(mSolver);
-	}
-	(ps = structure[propagationEngine])?
-    {
-    if (ps == null) {
-        if (mSolver.getEngine() == null) {
-            LOGGER.warn("\% no engine defined -- use default one instead");
-            mSolver.set(new ConstraintEngine(mSolver));
-        }
-    } else {
-        mSolver.set(propagationEngine.set(ps));
-    }
-    }
-	solve_goal
+	   (pred_decl)* (param_decl)* (var_decl)* (constraint)* engine? solve_goal
 	{
 	if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
         mLayout.setSearchLoop(mSolver.getSearchLoop());
@@ -144,29 +121,24 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 /////////////////////////////////////////  OUR DSL /////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//engine
-//    :
-//    {
-//    ArrayList<Arc> arcs= Arc.populate(mSolver);
-//    PropagationEngine propagationEngine = new PropagationEngine(mSolver.getEnvironment());
-//    }
-//    (group_decl[arcs])+
-//    {
-//    ArrayList<PropagationStrategy> pss = new ArrayList();
-//    }
-////    structure
-//    {
-//    PropagationStrategy ps = null;
-////    if(pss.size() > 1){ // a master generator is required
-////        ps = new Sort(null,pss.toArray(new Generator[ps.size()]));
-////    }else{ // pss.size() == 1
-////        ps = pss.get(0);
-////    }
-//    mSolver.set(propagationEngine.set(ps));
-//    }
-//    ;
+engine
+@init{
+	ArrayList<Arc> arcs= Arc.populate(mSolver);
+	PropagationEngine propagationEngine = new PropagationEngine(mSolver);
+	}
+@after{
+    if(!arcs.isEmpty()){
+        LOGGER.warn("\% Remaining arcs after group declarations");
+        throw new FZNException("Remaining arcs after group declarations");
+    }
+    if (arcs.isEmpty() && ps == null) {
+        LOGGER.warn("\% no engine defined");
+        throw new FZNException("no engine defined");
+    }
+    mSolver.set(propagationEngine.set(ps));
+}
+    :   (group_decl[arcs])+ ps = structure[propagationEngine]
+;
 
 group_decl  [ArrayList<Arc> arcs]
     :
@@ -271,22 +243,14 @@ structure   [PropagationEngine pe] returns [PropagationStrategy ps]
 	;
 
 struct  [PropagationEngine pe] returns[PropagationStrategy item]
-    :	^(STRUC
-    {
-    // init list
-    ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
-    }
-    (element = elt[pe]
-    {
-    // feed list
-    elements.addAll(Arrays.asList(element));
-    }
-    )+
-    ca=comb_attr?
-    c=coll[elements, ca])
-    {
-    $item = c;
-    }
+@init{
+     ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
+}
+@after{
+     $item = c;
+}
+    :	^(STRUC1 (element = elt[pe]{elements.addAll(Arrays.asList(element));})+ c=coll[elements, ca])
+	|   ^(STRUC2 (element = elt[pe]{elements.addAll(Arrays.asList(element));})+ ca=comb_attr c=coll[elements, ca])
 	;
 
 struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
@@ -309,6 +273,8 @@ struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
     input.seek(c_idx);
     $item = coll(pss, ca);
     input.release(c_idx);
+    //BEWARE: kind of ugly patch...
+    match(input, Token.UP, null);
 }
 	:	^(STREG id=IDENTIFIER {m_idx = input.mark();} . {c_idx = input.mark();} . )
     |   ^(STREG id=IDENTIFIER ca=comb_attr {m_idx = input.mark();} . {c_idx = input.mark();} . )
@@ -341,8 +307,7 @@ elt	[PropagationEngine pe] returns [ISchedulable[\] items]
 many    [ArrayList<Arc> in]   returns[ArrayList<PropagationStrategy> pss, int depth]
 @init{
     $pss = new ArrayList<PropagationStrategy>();
-    int c_idx = -1;
-    int m_idx = -1;
+    int c_idx = -1, m_idx = -1;
 
 }
 @after{

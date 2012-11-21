@@ -41,16 +41,10 @@ import java.io.ByteArrayInputStream;
  */
 public class T_models {
 
-    private void execute(String model) {
-        ParseAndSolveExt ps = new ParseAndSolveExt();
-        Solver solver = new Solver();
-        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>());
-        solver.solve();
-    }
+    StringBuilder st;
 
-    @Test
-    public void testAIS() {
-        StringBuilder st = new StringBuilder();
+    public void before() {
+        st = new StringBuilder();
         st.append("" +
                 "var 0..8: INT____00001;\n" +
                 "var 0..9: INT____00002;\n" +
@@ -64,10 +58,34 @@ public class T_models {
                 "constraint int_lin_eq([-1, -1, 1], [INT____00003, mark[2], mark[3]], 0);\n" +
                 "constraint int_lt(INT____00001, INT____00003);\n" +
                 "constraint int_lt(mark[1], mark[2]);\n" +
-                "constraint int_lt(mark[2], mark[3]);\n" +
-                "All: true;" +
-                "All as queue(wone) of {each var.name as list(wfor)};" +
-                "solve  :: int_search(mark, input_order, indomain, complete) minimize mark[3];\n");
+                "constraint int_lt(mark[2], mark[3]);\n");
+    }
+
+    public void after() {
+        st.append("solve  :: int_search(mark, input_order, indomain, complete) minimize mark[3];\n");
+    }
+
+
+    private void execute(String model) {
+        ParseAndSolveExt ps = new ParseAndSolveExt();
+        Solver solver = new Solver();
+        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>());
+        solver.solve();
+    }
+
+    @Test
+    public void test1() {
+        before();
+        st.append("All: true;All as queue(wone) of {each var.name as list(wfor)};");
+        after();
+        execute(st.toString());
+    }
+
+    @Test
+    public void test2() {
+        before();
+        st.append("All: true;queue(wone) of {All};");
+        after();
         execute(st.toString());
     }
 }
