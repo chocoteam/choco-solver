@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures;
 
 public enum SetType {
 	SWAP_ARRAY,

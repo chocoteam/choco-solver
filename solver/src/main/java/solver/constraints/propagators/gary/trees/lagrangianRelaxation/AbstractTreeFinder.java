@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.UndirectedGraph;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 
 public abstract class AbstractTreeFinder {
 

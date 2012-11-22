@@ -25,69 +25,78 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures.matrix;
+
+import choco.kernel.memory.setDataStructures.ISet;
+
+import java.util.BitSet;
 
 /**
- * Class representing a set (of nodes)
  * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
+ * User: chameau
  * Date: 9 fŽvr. 2011
  */
-public interface ISet {
+public class Set_BitSet extends BitSet implements ISet {
 
-    /**Add element to the set
-     * Does not guaranty there is no duplications
-     *
-     * @param element
-     * @return true iff element was not in the set and has been added
-     */
-    boolean add(int element);
+    private int current;//enables to iterate
+    private int card;    // enable to get the cardinality in O(1)
 
-    /**Remove the first occurence of element from the set
-     * @param element
-     * @return true iff element was in the set and has been removed
-     */
-    boolean remove(int element);
+    public Set_BitSet(int nbits) {
+        super(nbits);
+        card = 0;
+        current = 0;
+    }
 
-    /**Test the existence of element in the set
-     * @param element
-     * @return true iff the set contains element
-     */
-    boolean contain(int element);
+    @Override
+    public boolean add(int element) {
+    	if(!get(element)){
+    		card++;
+            this.set(element, true);
+			return true;
+    	}
+		return false;
+    }
 
-    /**
-     * @return true iff the set is empty
-     */
-    boolean isEmpty();
+    @Override
+    public boolean remove(int element) {
+        boolean isIn = this.get(element);
+        if (isIn) {
+            this.set(element, false);
+            card--;
+        }
+        return isIn;
+    }
 
-    /**
-     * @return the number of elements in the set
-     */
-    int getSize();
+    @Override
+    public boolean contain(int element) {
+        return this.get(element);
+    }
 
-    /**
-     * Remove all elements from the set
-     */
-    void clear();
+    @Override
+    public boolean isEmpty() {
+        return this.cardinality() == 0;
+    }
 
-    /**
-     * @return the first element of the set, -1 empty set
-     */
-    int getFirstElement();
+    @Override
+    public int getSize() {
+        return this.card;
+    }
 
-	/**enables to iterate over the set
-	 * 
-	 * should be used as follow :
-	 * 
-	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
-	 * 		...
-	 * }
-	 * 
-	 * The use of getFirstElement() is necessary to ensure a complete iteration
-	 *
-	 * WARNING cannot encapsulate two for loops (copy the set for that)
-	 * 
-	 * @return the next element of the set
-	 */
-	int getNextElement();
+    @Override
+    public int getFirstElement() {
+        current = nextSetBit(0);
+        return current;
+    }
+
+    @Override
+    public int getNextElement() {
+        current = nextSetBit(current + 1);
+        return current;
+    }
+
+    @Override
+    public void clear() {
+        card = 0;
+        super.clear();
+    }
 }

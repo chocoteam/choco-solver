@@ -25,32 +25,78 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.linkedlist;
+package choco.kernel.memory.setDataStructures;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 f�vr. 2011
+ * Fixed Set which ALWAYS contains all integers in range [0,n-1]
+ * cannot add or remove elements
+ * @author Jean-Guillaume Fages
+ * @since 21/10/12
  */
-public class IntCell {
+public class Set_Full implements ISet{
 
-    int element;
-    IntCell next;
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    public IntCell(int element, IntCell next) {
-        init(element, next);
-    }
+	int n;
+	int current;
 
-    public String toString() {
-        if (next == null) {
-            return "" + element;
-        } else {
-            return "" + element + " -> ";
-        }
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public void init(int element, IntCell next) {
-        this.element = element;
-        this.next = next;
-    }
+	public Set_Full(int n){
+		this.n = n;
+		current = 0;
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	@Override
+	public boolean add(int element) {
+		return false;
+	}
+
+	@Override
+	public boolean remove(int element) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return true;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public int getSize() {
+		return n;
+	}
+
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getFirstElement() {
+		current = 0;
+		return 0;
+	}
+
+	@Override
+	public int getNextElement() {
+		current++;
+		if(current<n)
+			return current;
+		else
+			return -1;
+	}
 }

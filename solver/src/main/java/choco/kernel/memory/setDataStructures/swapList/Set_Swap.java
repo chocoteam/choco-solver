@@ -25,14 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
+package choco.kernel.memory.setDataStructures.swapList;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
- * Backtrable List of m elements based on Array int_swaping
- * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
+ * List of m elements based on Array int_swaping
  * add : O(1)
  * testPresence: O(1)
  * remove: O(1)
@@ -41,25 +39,71 @@ import choco.kernel.memory.IStateInt;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class Set_Std_Swap_Hash extends Set_Swap_Hash {
+public abstract class Set_Swap implements ISet {
 
-    protected IStateInt size;
-    protected IEnvironment env;
+    protected int arrayLength, sizeMax, currentIdx, size;
+    protected int[] array;
 
-	public Set_Std_Swap_Hash(IEnvironment e, int n) {
-		super(n);
-		env = e;
-		size = e.makeInt(0);
-	}
+    public Set_Swap(int n) {
+        size = 0;
+        sizeMax = n;
+        arrayLength = 16;
+        array = new int[arrayLength];
+    }
 
-	@Override
-	public int getSize(){
-		return size.get();
-	}
-	protected void setSize(int s){
-		size.set(s);
-	}
-	protected void addSize(int delta){
-		size.add(delta);
-	}
+    @Override
+    public boolean isEmpty() {
+        return getSize() == 0;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    protected void setSize(int s) {
+        size = s;
+    }
+
+    protected void addSize(int delta) {
+        size += delta;
+    }
+
+    @Override
+    public String toString() {
+        int size = getSize();
+        if (size == 0) {
+            return "empty";
+        }
+        String res = "";
+        for (int i = 0; i < size - 1; i++) {
+            res += array[i] + " -> ";
+        }
+        res += array[size - 1];
+        return res;
+    }
+
+    @Override
+    public void clear() {
+        setSize(0);
+    }
+
+    // --- Iterations
+    @Override
+    public int getFirstElement() {
+        if (getSize() == 0) {
+            return -1;
+        }
+        currentIdx = 0;
+        return array[currentIdx];
+    }
+
+    @Override
+    public int getNextElement() {
+        currentIdx++;
+        if (currentIdx >= getSize()) {
+            return -1;
+        }
+        return array[currentIdx];
+    }
 }

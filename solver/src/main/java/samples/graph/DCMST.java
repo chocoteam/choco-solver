@@ -59,10 +59,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.io.*;
-import solver.variables.setDataStructures.ISet;
 import java.util.BitSet;
 import java.util.LinkedList;
 

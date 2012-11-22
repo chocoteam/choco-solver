@@ -29,7 +29,7 @@ package solver.search.strategy.selectors.graph.arcs;
 import gnu.trove.list.array.TIntArrayList;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.Random;
 

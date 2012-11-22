@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.linkedlist;
+package choco.kernel.memory.setDataStructures.linkedlist;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.Operation;

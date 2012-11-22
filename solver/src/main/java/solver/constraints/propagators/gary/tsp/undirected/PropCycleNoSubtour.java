@@ -47,7 +47,7 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case

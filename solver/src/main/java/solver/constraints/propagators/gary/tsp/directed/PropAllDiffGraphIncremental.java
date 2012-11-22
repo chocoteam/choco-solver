@@ -36,9 +36,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.BitSet;
 

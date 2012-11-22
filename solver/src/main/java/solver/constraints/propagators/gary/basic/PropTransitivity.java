@@ -38,7 +38,7 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IGraph;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)

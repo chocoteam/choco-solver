@@ -25,77 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures.linkedlist;
 
 /**
- * Fix Set which contains all values in range [0,n-1]
- * @author Jean-Guillaume Fages
- * @since 21/10/12
+ * Created by IntelliJ IDEA.
+ * User: chameau
+ * Date: 9 f�vr. 2011
  */
-public class FullSet implements ISet{
+public class IntCell {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    int element;
+    IntCell next;
 
-	int n;
-	int current;
+    public IntCell(int element, IntCell next) {
+        init(element, next);
+    }
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    public String toString() {
+        if (next == null) {
+            return "" + element;
+        } else {
+            return "" + element + " -> ";
+        }
+    }
 
-	public FullSet(int n){
-		this.n = n;
-		current = 0;
-	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-	public boolean add(int element) {
-		return false;
-	}
-
-	@Override
-	public boolean remove(int element) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean contain(int element) {
-		return true;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return false;
-	}
-
-	@Override
-	public int getSize() {
-		return n;
-	}
-
-	@Override
-	public void clear() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getFirstElement() {
-		current = 0;
-		return 0;
-	}
-
-	@Override
-	public int getNextElement() {
-		current++;
-		if(current<n)
-			return current;
-		else
-			return -1;
-	}
+    public void init(int element, IntCell next) {
+        this.element = element;
+        this.next = next;
+    }
 }

@@ -32,15 +32,15 @@
  * Time: 01:56
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.buffer.EnvironmentBuffering;
 import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
-import solver.variables.setDataStructures.linkedlist.*;
-import solver.variables.setDataStructures.matrix.*;
-import solver.variables.setDataStructures.swapList.*;
+import choco.kernel.memory.setDataStructures.linkedlist.*;
+import choco.kernel.memory.setDataStructures.matrix.*;
+import choco.kernel.memory.setDataStructures.swapList.*;
 
 /**
  * Factory for creating sets
@@ -141,6 +141,16 @@ public class SetFactory {
 	*/
 	public static ISet makeArray(int n){
 		return new Set_Array(n);
+	}
+
+	/**
+	* Creates a set that will ALWAYS contain all values from 0 to n-1
+	*
+	* @param n size of the set
+	* @return a new set that must always be full
+	*/
+	public static ISet makeFullSet(int n){
+		return new Set_Full(n);
 	}
 
 	/**

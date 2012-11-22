@@ -32,7 +32,7 @@ import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.util.BitSet;
 
 public class PrimMSTFinder extends AbstractMSTFinder {

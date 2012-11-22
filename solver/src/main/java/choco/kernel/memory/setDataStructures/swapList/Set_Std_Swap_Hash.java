@@ -25,74 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.matrix;
+package choco.kernel.memory.setDataStructures.swapList;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.structure.S64BitSet;
-import solver.variables.setDataStructures.ISet;
 
 /**
+ * Backtrable List of m elements based on Array int_swaping
+ * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
+ * add : O(1)
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public class Set_Std_BitSet extends S64BitSet implements ISet {
+public class Set_Std_Swap_Hash extends Set_Swap_Hash {
 
-    protected int current;    //enables to iterate
-    protected IStateInt card;    // enables to get the cardinality in O(1)
+    protected IStateInt size;
+    protected IEnvironment env;
 
-    public Set_Std_BitSet(IEnvironment environment, int nbits) {
-        super(environment, nbits);
-        current = 0;
-        card = environment.makeInt(0);
-    }
+	public Set_Std_Swap_Hash(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
+	}
 
-    @Override
-    public boolean add(int element) {
-    	if(!get(element)){
-    		card.add(1);
-    		this.set(element,true);
-			return true;
-    	}
-		return false;
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card.add(-1);
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public int getSize() {
-        return this.card.get();
-    }
-
-    @Override
-    public int getFirstElement() {
-        current = nextSetBit(0);
-        return current;
-    }
-
-    @Override
-    public int getNextElement() {
-        current = nextSetBit(current + 1);
-        return current;
-    }
-
-    @Override
-    public void clear() {
-        super.clear();
-        card.set(0);
-    }
+	@Override
+	public int getSize(){
+		return size.get();
+	}
+	protected void setSize(int s){
+		size.set(s);
+	}
+	protected void addSize(int delta){
+		size.add(delta);
+	}
 }

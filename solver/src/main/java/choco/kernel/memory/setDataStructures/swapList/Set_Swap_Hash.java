@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
+package choco.kernel.memory.setDataStructures.swapList;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 

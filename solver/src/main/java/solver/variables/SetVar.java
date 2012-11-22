@@ -31,7 +31,7 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * A Set Variable is defined by a domain which is a set interval [S_low,S_up]

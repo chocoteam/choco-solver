@@ -47,8 +47,8 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.util.ArrayList;
 
 /**

@@ -31,8 +31,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.IGraph;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.matrix.Set_BitSet;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.matrix.Set_BitSet;
 
 /**
  * Class containing some static methods to manipulate graphs

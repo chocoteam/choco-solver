@@ -66,8 +66,8 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.io.File;
 import java.util.BitSet;
 

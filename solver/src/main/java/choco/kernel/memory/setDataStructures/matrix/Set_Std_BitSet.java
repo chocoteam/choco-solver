@@ -25,85 +25,74 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
+package choco.kernel.memory.setDataStructures.matrix;
 
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.structure.S64BitSet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
- * List of m elements based on Array int_swaping
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * User: chameau
+ * Date: 9 févr. 2011
  */
-public abstract class Set_Swap implements ISet {
+public class Set_Std_BitSet extends S64BitSet implements ISet {
 
-    protected int arrayLength, sizeMax, currentIdx, size;
-    protected int[] array;
+    protected int current;    //enables to iterate
+    protected IStateInt card;    // enables to get the cardinality in O(1)
 
-    public Set_Swap(int n) {
-        size = 0;
-        sizeMax = n;
-        arrayLength = 16;
-        array = new int[arrayLength];
+    public Set_Std_BitSet(IEnvironment environment, int nbits) {
+        super(environment, nbits);
+        current = 0;
+        card = environment.makeInt(0);
     }
 
     @Override
-    public boolean isEmpty() {
-        return getSize() == 0;
+    public boolean add(int element) {
+    	if(!get(element)){
+    		card.add(1);
+    		this.set(element,true);
+			return true;
+    	}
+		return false;
+    }
+
+    @Override
+    public boolean remove(int element) {
+        boolean isIn = this.get(element);
+        if (isIn) {
+            this.set(element, false);
+            card.add(-1);
+        }
+        return isIn;
+    }
+
+    @Override
+    public boolean contain(int element) {
+        return this.get(element);
     }
 
     @Override
     public int getSize() {
-        return size;
+        return this.card.get();
     }
 
-    protected void setSize(int s) {
-        size = s;
-    }
-
-    protected void addSize(int delta) {
-        size += delta;
-    }
-
-    @Override
-    public String toString() {
-        int size = getSize();
-        if (size == 0) {
-            return "empty";
-        }
-        String res = "";
-        for (int i = 0; i < size - 1; i++) {
-            res += array[i] + " -> ";
-        }
-        res += array[size - 1];
-        return res;
-    }
-
-    @Override
-    public void clear() {
-        setSize(0);
-    }
-
-    // --- Iterations
     @Override
     public int getFirstElement() {
-        if (getSize() == 0) {
-            return -1;
-        }
-        currentIdx = 0;
-        return array[currentIdx];
+        current = nextSetBit(0);
+        return current;
     }
 
     @Override
     public int getNextElement() {
-        currentIdx++;
-        if (currentIdx >= getSize()) {
-            return -1;
-        }
-        return array[currentIdx];
+        current = nextSetBit(current + 1);
+        return current;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        card.set(0);
     }
 }

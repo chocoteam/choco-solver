@@ -25,41 +25,69 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
-
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+package choco.kernel.memory.setDataStructures;
 
 /**
- * Backtrable List of m elements based on Array int_swaping
- * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
+ * Class representing a set (of nodes)
  * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
+ * User: chameau, Jean-Guillaume Fages
+ * Date: 9 fŽvr. 2011
  */
-public class Set_Std_Swap_Array extends Set_Swap_Array {
+public interface ISet {
 
-    protected IStateInt size;
-    protected IEnvironment env;
+    /**Add element to the set
+     * Does not guaranty there is no duplications
+     *
+     * @param element
+     * @return true iff element was not in the set and has been added
+     */
+    boolean add(int element);
 
-	public Set_Std_Swap_Array(IEnvironment e, int n) {
-		super(n);
-		env = e;
-		size = e.makeInt(0);
-	}
+    /**Remove the first occurence of element from the set
+     * @param element
+     * @return true iff element was in the set and has been removed
+     */
+    boolean remove(int element);
 
-	@Override
-	public int getSize(){
-		return size.get();
-	}
-	protected void setSize(int s){
-		size.set(s);
-	}
-	protected void addSize(int delta){
-		size.add(delta);
-	}
+    /**Test the existence of element in the set
+     * @param element
+     * @return true iff the set contains element
+     */
+    boolean contain(int element);
+
+    /**
+     * @return true iff the set is empty
+     */
+    boolean isEmpty();
+
+    /**
+     * @return the number of elements in the set
+     */
+    int getSize();
+
+    /**
+     * Remove all elements from the set
+     */
+    void clear();
+
+    /**
+     * @return the first element of the set, -1 empty set
+     */
+    int getFirstElement();
+
+	/**enables to iterate over the set
+	 * 
+	 * should be used as follow :
+	 * 
+	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
+	 * 		...
+	 * }
+	 * 
+	 * The use of getFirstElement() is necessary to ensure a complete iteration
+	 *
+	 * WARNING cannot encapsulate two for loops (copy the set for that)
+	 * 
+	 * @return the next element of the set
+	 */
+	int getNextElement();
 }

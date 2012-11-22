@@ -31,9 +31,9 @@ import choco.kernel.memory.*;
 import choco.kernel.memory.structure.Operation;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 import static choco.kernel.memory.copy.RecomputableElement.*;
 

@@ -38,7 +38,7 @@ import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 import static org.testng.Assert.assertEquals;

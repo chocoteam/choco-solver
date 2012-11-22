@@ -29,8 +29,8 @@ package choco.kernel.memory;
 
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import choco.kernel.memory.structure.Operation;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 
 import java.io.Serializable;
 

@@ -25,78 +25,79 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.matrix;
-
-import solver.variables.setDataStructures.ISet;
-
-import java.util.BitSet;
+package choco.kernel.memory.setDataStructures.swapList;
 
 /**
+ * List of m elements based on Array int_swaping with an additionnal array
+ * add : O(1)
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public class Set_BitSet extends BitSet implements ISet {
+public class Set_Swap_Array extends Set_Swap {
 
-    private int current;//enables to iterate
-    private int card;    // enable to get the cardinality in O(1)
+    protected int[] map;
 
-    public Set_BitSet(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
-
-    @Override
-    public boolean add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-			return true;
-    	}
-		return false;
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
+    public Set_Swap_Array(int n) {
+        super(n);
+        map = new int[n];
+        for (int i = 0; i < n; i++) {
+            map[i] = -1;
         }
-        return isIn;
     }
 
     @Override
     public boolean contain(int element) {
-        return this.get(element);
+        if (map[element] >= 0) {
+            return map[element] < getSize() && array[map[element]] == element;
+        }
+        return false;
     }
 
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
+	@Override
+	public boolean add(int element) {
+		if(contain(element)){
+			return false;
+		}
+		int size = getSize();
+		if(getSize()==arrayLength){
+			int[] tmp = array;
+			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
+			array = new int[ns];
+			arrayLength = ns;
+			System.arraycopy(tmp,0,array,0,size);
+		}
+		array[size] = element;
+		map[element] = size;
+		addSize(1);
+		return true;
+	}
 
     @Override
-    public int getSize() {
-        return this.card;
-    }
-
-    @Override
-    public int getFirstElement() {
-        current = nextSetBit(0);
-        return current;
-    }
-
-    @Override
-    public int getNextElement() {
-        current = nextSetBit(current + 1);
-        return current;
-    }
-
-    @Override
-    public void clear() {
-        card = 0;
-        super.clear();
+    public boolean remove(int element) {
+        int size = getSize();
+        if (map[element] >= 0) {
+            if (size == 1) {
+                setSize(0);
+                return true;
+            }
+            int idx = map[element];
+            if (idx < size) {
+                int replacer = array[size - 1];
+                map[replacer] = idx;
+                array[idx] = replacer;
+                map[element] = size - 1;
+                array[size - 1] = element;
+                addSize(-1);
+                if (idx == currentIdx) {
+                    currentIdx--;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

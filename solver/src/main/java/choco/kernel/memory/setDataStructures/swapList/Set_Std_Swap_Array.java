@@ -25,10 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.swapList;
+package choco.kernel.memory.setDataStructures.swapList;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 
 /**
- * List of m elements based on Array int_swaping with an additionnal array
+ * Backtrable List of m elements based on Array int_swaping
+ * BEWARE : CANNOT ADD AND REMOVE ELEMENTS DURING SEARCH
  * add : O(1)
  * testPresence: O(1)
  * remove: O(1)
@@ -37,67 +41,25 @@ package solver.variables.setDataStructures.swapList;
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class Set_Swap_Array extends Set_Swap {
+public class Set_Std_Swap_Array extends Set_Swap_Array {
 
-    protected int[] map;
+    protected IStateInt size;
+    protected IEnvironment env;
 
-    public Set_Swap_Array(int n) {
-        super(n);
-        map = new int[n];
-        for (int i = 0; i < n; i++) {
-            map[i] = -1;
-        }
-    }
-
-    @Override
-    public boolean contain(int element) {
-        if (map[element] >= 0) {
-            return map[element] < getSize() && array[map[element]] == element;
-        }
-        return false;
-    }
-
-	@Override
-	public boolean add(int element) {
-		if(contain(element)){
-			return false;
-		}
-		int size = getSize();
-		if(getSize()==arrayLength){
-			int[] tmp = array;
-			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
-			array = new int[ns];
-			arrayLength = ns;
-			System.arraycopy(tmp,0,array,0,size);
-		}
-		array[size] = element;
-		map[element] = size;
-		addSize(1);
-		return true;
+	public Set_Std_Swap_Array(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
 	}
 
-    @Override
-    public boolean remove(int element) {
-        int size = getSize();
-        if (map[element] >= 0) {
-            if (size == 1) {
-                setSize(0);
-                return true;
-            }
-            int idx = map[element];
-            if (idx < size) {
-                int replacer = array[size - 1];
-                map[replacer] = idx;
-                array[idx] = replacer;
-                map[element] = size - 1;
-                array[size - 1] = element;
-                addSize(-1);
-                if (idx == currentIdx) {
-                    currentIdx--;
-                }
-                return true;
-            }
-        }
-        return false;
-    }
+	@Override
+	public int getSize(){
+		return size.get();
+	}
+	protected void setSize(int s){
+		size.set(s);
+	}
+	protected void addSize(int delta){
+		size.add(delta);
+	}
 }

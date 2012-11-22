@@ -36,9 +36,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * Set variable to represent a set of integers in the range [0,n-1]

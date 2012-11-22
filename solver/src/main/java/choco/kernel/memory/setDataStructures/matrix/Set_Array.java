@@ -32,27 +32,24 @@
  * Time: 01:43
  */
 
-package solver.variables.setDataStructures.matrix;
+package choco.kernel.memory.setDataStructures.matrix;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBool;
-import choco.kernel.memory.IStateInt;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
- * Set represented by an array of backtrable booleans
+ * Set represented by an array of booleans
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public class Set_Std_Array implements ISet{
+public class Set_Array implements ISet{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected IStateBool[] elements;
-	private IStateInt size;
+	protected boolean[] elements;
 	private int n;
+	private int size;
 	protected int current;
 
 	//***********************************************************************************
@@ -60,16 +57,13 @@ public class Set_Std_Array implements ISet{
 	//***********************************************************************************
 
 	/**
-	 * Creates a set represented by an array of backtrable booleans
+	 * Creates a set represented by an array of booleans
 	 * @param n maximal size of the set
 	 */
-	public Set_Std_Array(IEnvironment environment,int n){
+	public Set_Array(int n){
 		this.n = n;
-		this.elements = new IStateBool[n];
-		this.size = environment.makeInt(0);
-		for(int i=0;i<n;i++){
-			elements[i] = environment.makeBool(false);
-		}
+		this.elements = new boolean[n];
+		this.size = 0;
 	}
 
 	//***********************************************************************************
@@ -78,9 +72,9 @@ public class Set_Std_Array implements ISet{
 
 	@Override
 	public boolean add(int element) {
-		if(!elements[element].get()){
-			size.add(1);
-			elements[element].set(true);
+		if(!elements[element]){
+			size++;
+			elements[element] = true;
 			return true;
 		}
 		return false;
@@ -88,9 +82,9 @@ public class Set_Std_Array implements ISet{
 
 	@Override
 	public boolean remove(int element) {
-		if(elements[element].get()){
-			size.add(-1);
-			elements[element].set(false);
+		if(elements[element]){
+			size--;
+			elements[element] = false;
 			return true;
 		}
 		return false;
@@ -98,26 +92,24 @@ public class Set_Std_Array implements ISet{
 
 	@Override
 	public boolean contain(int element) {
-		return elements[element].get();
+		return elements[element];
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return size.get()==0;
+		return size==0;
 	}
 
 	@Override
 	public int getSize() {
-		return size.get();
+		return size;
 	}
 
 	@Override
 	public void clear() {
-		int s = size.get();
-		size.set(0);
-		for(int i=0;i<n && s>0;i++){
-			if(elements[i].get())s--;
-			elements[i].set(false);
+		for(int i=0;i<n && size>0;i++){
+			if(elements[i])size--;
+			elements[i] = false;
 		}
 	}
 
@@ -130,7 +122,7 @@ public class Set_Std_Array implements ISet{
 	@Override
 	public int getNextElement() {
 		int i = current;
-		while(i<n && !elements[i].get()){
+		while(i<n && !elements[i]){
 			i++;
 		}
 		if(i<n){

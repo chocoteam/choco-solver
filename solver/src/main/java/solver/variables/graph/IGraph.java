@@ -27,8 +27,8 @@
 
 package solver.variables.graph;
 
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca

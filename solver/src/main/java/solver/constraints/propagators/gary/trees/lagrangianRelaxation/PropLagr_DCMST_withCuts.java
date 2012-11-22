@@ -43,7 +43,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;

@@ -33,7 +33,7 @@ import solver.exception.ContradictionException;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 public abstract class GraphRelation<V extends Variable> {

@@ -25,16 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateObject;
 import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.copy.RcObject;
 import choco.kernel.memory.copy.RecomputableElement;
-import choco.kernel.memory.structure.Operation;
-
-import java.util.LinkedList;
 
 /**
  * Backtrable set
@@ -43,18 +38,12 @@ import java.util.LinkedList;
  */
 public class Set_Copy extends RcObject implements ISet {
 
-	// trailing
-    private final EnvironmentCopying environment;
-	private int timestamp;
-	// set (decorator design pattern)
-	private ISet set;
+	private ISet set;// set to be maintained during search (decorator design pattern)
 
     public Set_Copy(EnvironmentCopying environment, ISet set) {
         super(environment,null);
-        this.environment = environment;
 		this.set = set;
 		environment.add(this);
-		timestamp = environment.getWorldIndex();
     }
 
 	public Object deepCopy() {
@@ -72,13 +61,13 @@ public class Set_Copy extends RcObject implements ISet {
 		for(int i:vals){
 			set.add(i);
 		}
-		timestamp = wstamp;
+		timeStamp = wstamp;
 	}
 
     @Override
     public boolean add(int element) {
 		if(set.add(element)){
-			timestamp = environment.getWorldIndex();
+			timeStamp = environment.getWorldIndex();
 			return true;
 		}return false;
     }
@@ -86,7 +75,7 @@ public class Set_Copy extends RcObject implements ISet {
     @Override
     public boolean remove(int element) {
 		if(set.remove(element)){
-			timestamp = environment.getWorldIndex();
+			timeStamp = environment.getWorldIndex();
 			return true;
 		}return false;
     }
@@ -109,7 +98,7 @@ public class Set_Copy extends RcObject implements ISet {
 	@Override
     public void clear() {
 		if(!set.isEmpty()){
-			timestamp = environment.getWorldIndex();
+			timeStamp = environment.getWorldIndex();
 		}
 		set.clear();
     }
@@ -131,6 +120,15 @@ public class Set_Copy extends RcObject implements ISet {
 
 	@Override
 	public int getTimeStamp() {
-		return timestamp;
+		return timeStamp;
+	}
+
+	public void set(Object y) {
+		throw new UnsupportedOperationException("this method should not be called");
+	}
+
+	@Override
+	public String toString() {
+		return "set stored by copy "+set.toString();
 	}
 }

@@ -40,7 +40,7 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.GraphVar.IncidentNodes;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that a node has at most N successors/predecessors/neighbors

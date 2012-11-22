@@ -25,81 +25,71 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures;
+package choco.kernel.memory.setDataStructures.linkedlist;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.Operation;
-import choco.kernel.memory.trailing.EnvironmentTrailing;
-import solver.variables.setDataStructures.linkedlist.Set_LinkedList;
 
 import java.util.LinkedList;
 
 /**
- * Backtrable set
- * @author Jean-Guillaume Fages
- * @since Nov 2012
+ * Backtrable LinkedList of m elements
+ * add : O(1)
+ * testPresence: O(m)
+ * remove: O(m)
+ * iteration : O(m)
+ * Created by IntelliJ IDEA.
+ * User: chameau
+ * Date: 10 f�vr. 2011
  */
-public class Set_Trail implements ISet{
+public class Set_Std_LinkedList extends Set_LinkedList {
 
-	// trailing
-    private final EnvironmentTrailing environment;
+    final IEnvironment environment;
     private LinkedList<ListOP> operationPoolGC;
     private final static boolean ADD = true;
     private final static boolean REMOVE = false;
-	// set (decorator design pattern)
-	private ISet set;
 
-    public Set_Trail(EnvironmentTrailing environment, ISet set) {
+    public Set_Std_LinkedList(IEnvironment environment) {
         super();
         this.environment = environment;
-        this.operationPoolGC = new LinkedList<ListOP>();
-		this.set = set;
+        operationPoolGC = new LinkedList<ListOP>();
     }
 
     @Override
     public boolean add(int element) {
-		if(set.add(element)){
-			if(operationPoolGC.isEmpty()){
-				new ListOP(element, REMOVE);
-			}else{
-				ListOP op = operationPoolGC.removeFirst();
-				op.set(element,REMOVE);
-			}
-			return true;
+        this._add(element);
+        if(operationPoolGC.isEmpty()){
+			new ListOP(element, REMOVE);
+		}else{
+			ListOP op = operationPoolGC.removeFirst();
+			op.set(element,REMOVE);
 		}
-		return false;
+		return true;
+    }
+
+    protected void _add(int element) {
+        super.add(element);
     }
 
     @Override
     public boolean remove(int element) {
-		if(set.remove(element)){
-			if (operationPoolGC.isEmpty()) {
+        boolean done = this._remove(element);
+        if (done) {
+            if (operationPoolGC.isEmpty()) {
                 new ListOP(element, ADD);
             } else {
                 ListOP op = operationPoolGC.removeFirst();
                 op.set(element, ADD);
             }
-			return true;
-		}
-        return false;
+        }
+        return done;
     }
 
-	@Override
-	public boolean contain(int element) {
-		return set.contain(element);
-	}
+    protected boolean _remove(int element) {
+        return super.remove(element);
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return set.isEmpty();
-	}
-
-	@Override
-	public int getSize() {
-		return set.getSize();
-	}
-
-	@Override
+    @Override
     public void clear() {
         for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
             if (operationPoolGC.isEmpty()) {
@@ -109,26 +99,16 @@ public class Set_Trail implements ISet{
                 op.set(i, ADD);
             }
         }
-		set.clear();
+        super.clear();
     }
 
-	@Override
-	public int getFirstElement() {
-		return set.getFirstElement();
-	}
-
-	@Override
-	public int getNextElement() {
-		return set.getNextElement();
-	}
-
-	//***********************************************************************************
+    //***********************************************************************************
     // TRAILING OPERATIONS
     //***********************************************************************************
 
     private class ListOP extends Operation {
-        private int element;
-        private boolean addOrRemove;
+        int element;
+        boolean addOrRemove;
 
         public ListOP(int i, boolean add) {
             super();
@@ -138,9 +118,9 @@ public class Set_Trail implements ISet{
         @Override
         public void undo() {
             if (addOrRemove) {
-                set.add(element);
+                _add(element);
             } else {
-                set.remove(element);
+                _remove(element);
             }
             operationPoolGC.add(this);
         }

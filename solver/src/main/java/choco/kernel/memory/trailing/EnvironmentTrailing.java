@@ -31,9 +31,9 @@ package choco.kernel.memory.trailing;
 import choco.kernel.memory.*;
 import choco.kernel.memory.structure.Operation;
 import choco.kernel.memory.trailing.trail.*;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * The root class for managing memory and sessions.

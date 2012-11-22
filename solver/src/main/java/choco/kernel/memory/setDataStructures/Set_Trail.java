@@ -25,71 +25,79 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.setDataStructures.linkedlist;
+package choco.kernel.memory.setDataStructures;
 
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.Operation;
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 
 import java.util.LinkedList;
 
 /**
- * Backtrable LinkedList of m elements
- * add : O(1)
- * testPresence: O(m)
- * remove: O(m)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 f�vr. 2011
+ * Backtrable set
+ * @author Jean-Guillaume Fages
+ * @since Nov 2012
  */
-public class Set_Std_LinkedList extends Set_LinkedList {
+public class Set_Trail implements ISet{
 
-    final IEnvironment environment;
+	// trailing
+    private final EnvironmentTrailing environment;
     private LinkedList<ListOP> operationPoolGC;
     private final static boolean ADD = true;
     private final static boolean REMOVE = false;
+	// set (decorator design pattern)
+	private ISet set;
 
-    public Set_Std_LinkedList(IEnvironment environment) {
+    public Set_Trail(EnvironmentTrailing environment, ISet set) {
         super();
         this.environment = environment;
-        operationPoolGC = new LinkedList<ListOP>();
+        this.operationPoolGC = new LinkedList<ListOP>();
+		this.set = set;
     }
 
     @Override
     public boolean add(int element) {
-        this._add(element);
-        if(operationPoolGC.isEmpty()){
-			new ListOP(element, REMOVE);
-		}else{
-			ListOP op = operationPoolGC.removeFirst();
-			op.set(element,REMOVE);
+		if(set.add(element)){
+			if(operationPoolGC.isEmpty()){
+				new ListOP(element, REMOVE);
+			}else{
+				ListOP op = operationPoolGC.removeFirst();
+				op.set(element,REMOVE);
+			}
+			return true;
 		}
-		return true;
-    }
-
-    protected void _add(int element) {
-        super.add(element);
+		return false;
     }
 
     @Override
     public boolean remove(int element) {
-        boolean done = this._remove(element);
-        if (done) {
-            if (operationPoolGC.isEmpty()) {
+		if(set.remove(element)){
+			if (operationPoolGC.isEmpty()) {
                 new ListOP(element, ADD);
             } else {
                 ListOP op = operationPoolGC.removeFirst();
                 op.set(element, ADD);
             }
-        }
-        return done;
+			return true;
+		}
+        return false;
     }
 
-    protected boolean _remove(int element) {
-        return super.remove(element);
-    }
+	@Override
+	public boolean contain(int element) {
+		return set.contain(element);
+	}
 
-    @Override
+	@Override
+	public boolean isEmpty() {
+		return set.isEmpty();
+	}
+
+	@Override
+	public int getSize() {
+		return set.getSize();
+	}
+
+	@Override
     public void clear() {
         for (int i = getFirstElement(); i >= 0; i = getNextElement()) {
             if (operationPoolGC.isEmpty()) {
@@ -99,16 +107,31 @@ public class Set_Std_LinkedList extends Set_LinkedList {
                 op.set(i, ADD);
             }
         }
-        super.clear();
+		set.clear();
     }
 
-    //***********************************************************************************
+	@Override
+	public int getFirstElement() {
+		return set.getFirstElement();
+	}
+
+	@Override
+	public int getNextElement() {
+		return set.getNextElement();
+	}
+
+	@Override
+	public String toString() {
+		return "set stored by trailing "+set.toString();
+	}
+
+	//***********************************************************************************
     // TRAILING OPERATIONS
     //***********************************************************************************
 
     private class ListOP extends Operation {
-        int element;
-        boolean addOrRemove;
+        private int element;
+        private boolean addOrRemove;
 
         public ListOP(int i, boolean add) {
             super();
@@ -118,9 +141,9 @@ public class Set_Std_LinkedList extends Set_LinkedList {
         @Override
         public void undo() {
             if (addOrRemove) {
-                _add(element);
+                set.add(element);
             } else {
-                _remove(element);
+                set.remove(element);
             }
             operationPoolGC.add(this);
         }

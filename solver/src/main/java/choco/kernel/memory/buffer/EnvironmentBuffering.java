@@ -38,9 +38,9 @@ import choco.kernel.memory.buffer.type.unsafe.BoolBufferingUnsafe;
 import choco.kernel.memory.buffer.type.unsafe.IntBufferingUnsafe;
 import choco.kernel.memory.buffer.type.unsafe.LongBufferingUnsafe;
 import choco.kernel.memory.structure.Operation;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * <br/>

@@ -30,7 +30,7 @@ package solver.variables.graph.graphOperations.connectivity;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.IGraph;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
