@@ -29,6 +29,7 @@ package solver.constraints.propagators;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
 import gnu.trove.set.TIntSet;
@@ -100,8 +101,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int[] vindices;  // index of this within the list of propagator of the i^th variable
 
-    protected Operation[] operations;
-
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
@@ -112,7 +111,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected short state; // 0 : new -- 1 : active -- 2 : passive
+    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
 
     protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
@@ -163,7 +162,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.vindices = new int[vars.length];
         this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.state = NEW;
+        this.state = environment.makeInt(NEW);
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
@@ -176,20 +175,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         fails = 0;
         ID = solver.nextId();
-        operations = new Operation[]{
-                new Operation() {
-                    @Override
-                    public void undo() {
-                        state = NEW;
-                    }
-                },
-                new Operation() {
-                    @Override
-                    public void undo() {
-                        state = ACTIVE;
-                    }
-                }
-        };
     }
 
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
@@ -282,8 +267,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
-        state = ACTIVE;
-        environment.save(operations[NEW]);
+        state.set(ACTIVE);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
@@ -297,8 +281,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
-        state = PASSIVE;
-        environment.save(operations[ACTIVE]);
+        state.set(PASSIVE);
         //TODO: update var mask back
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
@@ -307,15 +290,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public boolean isStateLess() {
-        return state == NEW;
+        return state.get() == NEW;
     }
 
     public boolean isActive() {
-        return state == ACTIVE;
+        return state.get() == ACTIVE;
     }
 
     public boolean isPassive() {
-        return state == PASSIVE;
+        return state.get() == PASSIVE;
     }
 
     /**
