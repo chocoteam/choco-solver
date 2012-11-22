@@ -38,6 +38,9 @@ import choco.kernel.memory.buffer.type.unsafe.BoolBufferingUnsafe;
 import choco.kernel.memory.buffer.type.unsafe.IntBufferingUnsafe;
 import choco.kernel.memory.buffer.type.unsafe.LongBufferingUnsafe;
 import choco.kernel.memory.structure.Operation;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.SetFactory;
+import solver.variables.setDataStructures.SetType;
 
 /**
  * <br/>
@@ -177,6 +180,11 @@ public class EnvironmentBuffering extends AbstractEnvironment {
     @Override
     public IStateObject makeObject(Object obj) {
         throw new UnsupportedOperationException();
+    }
+
+	@Override
+    public ISet makeSet(SetType type, int sizeMax) {
+        return SetFactory.makeBufferedSet(type, sizeMax, this);
     }
 
     @Override

@@ -35,6 +35,9 @@
 package solver.variables.setDataStructures;
 
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.buffer.EnvironmentBuffering;
+import choco.kernel.memory.copy.EnvironmentCopying;
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 import solver.variables.setDataStructures.linkedlist.*;
 import solver.variables.setDataStructures.matrix.*;
 import solver.variables.setDataStructures.swapList.*;
@@ -47,9 +50,53 @@ import solver.variables.setDataStructures.swapList.*;
 public class SetFactory {
 
 	//***********************************************************************************
-	// FACTORY
+	// FACTORY - STORED SET
 	//***********************************************************************************
 
+	public final static boolean HARD_CODED = false;
+	/**
+	 * Make a stored set of integers in the range [0,maximumSize-1]
+	 * Such a set is restored after a backtrack
+	 * @param type of set data structure
+	 * @param maximumSize of the set (maximum value -1)
+	 * @param environment solver environment
+	 * @return a new set which can be restored during search, after some backtracks
+	 */
+	public static ISet makeStoredSet(SetType type, int maximumSize, IEnvironment environment){
+		if(HARD_CODED && environment instanceof EnvironmentTrailing)
+		switch (type){
+			case SWAP_ARRAY:return new Set_Std_Swap_Array(environment,maximumSize);
+			case SWAP_HASH:return new Set_Std_Swap_Hash(environment,maximumSize);
+			case LINKED_LIST: return new Set_Std_LinkedList(environment);
+			case DOUBLE_LINKED_LIST: return new Set_Std_2LinkedList(environment);
+			case BITSET: new Set_Std_BitSet(environment,maximumSize);
+			case BOOL_ARRAY: return new Set_Std_Array(environment,maximumSize);
+		}
+		return environment.makeSet(type,maximumSize);
+	}
+
+	public static ISet makeTrailedSet(SetType type, int sizeMax, EnvironmentTrailing environmentCopying) {
+		return new Set_Trail(environmentCopying,makeSet(type,sizeMax));
+	}
+
+	public static ISet makeCopiedSet(SetType type, int sizeMax, EnvironmentCopying environmentCopying) {
+		return new Set_Copy(environmentCopying,makeSet(type,sizeMax));
+	}
+
+	public static ISet makeBufferedSet(SetType type, int sizeMax, EnvironmentBuffering environmentCopying) {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+
+	//***********************************************************************************
+	// FACTORY - SET
+	//***********************************************************************************
+
+	/**
+	 * Make a set of integers in the range [0,maximumSize-1]
+	 * @param type of set data structure
+	 * @param maximumSize of the set (maximum value -1)
+	 * @return a new set
+	 */
 	public static ISet makeSet(SetType type, int maximumSize){
 		switch (type){
 			case SWAP_ARRAY:return makeSwap(maximumSize, false);
@@ -59,37 +106,6 @@ public class SetFactory {
 			case BITSET: return makeBitSet(maximumSize);
 			case BOOL_ARRAY: return makeArray(maximumSize);
 		}throw new UnsupportedOperationException("unknown SetType");
-	}
-
-	public static ISet makeStoredSet(SetType type, int maximumSize, IEnvironment environment){
-		switch (type){
-			case SWAP_ARRAY:return makeStoredSwap(environment,maximumSize, false);
-			case SWAP_HASH:return makeStoredSwap(environment,maximumSize, true);
-			case LINKED_LIST: return makeStoredLinkedList(environment,false);
-			case DOUBLE_LINKED_LIST: return makeStoredLinkedList(environment,true);
-			case BITSET: return makeStoredBitSet(environment,maximumSize);
-			case BOOL_ARRAY: return makeStoredArray(environment,maximumSize);
-		}throw new UnsupportedOperationException("unknown SetType");
-	}
-
-	//***********************************************************************************
-	// LISTS
-	//***********************************************************************************
-
-	/**
-	* Creates a stored set based on a backtrable linked list
-	* appropriate when the set has only a few elements
-	*
-	* @param environment
-	* @param doubleLink
-	* @return a new set
-	*/
-	public static ISet makeStoredLinkedList(IEnvironment environment, boolean doubleLink){
-		if(doubleLink){
-			return new Set_Std_2LinkedList(environment);
-		}else{
-			return new Set_Std_LinkedList(environment);
-		}
 	}
 
 	/**
@@ -107,21 +123,6 @@ public class SetFactory {
 		}
 	}
 
-	//***********************************************************************************
-	// MATRIX
-	//***********************************************************************************
-
-	/**
-	* Creates a stored set based on a backtrable BitSet
-	*
-	* @param environment
-	* @param n maximal size of the set
-	* @return a new set
-	*/
-	public static ISet makeStoredBitSet(IEnvironment environment, int n){
-		return new Set_Std_BitSet(environment,n);
-	}
-
 	/**
 	* Creates a stored set based on a BitSet
 	*
@@ -133,17 +134,6 @@ public class SetFactory {
 	}
 
 	/**
-	* Creates a stored set based on a backtrable boolean array
-	*
-	* @param environment
-	* @param n maximal size of the set
-	* @return a new set
-	*/
-	public static ISet makeStoredArray(IEnvironment environment, int n){
-		return new Set_Std_Array(environment,n);
-	}
-
-	/**
 	* Creates a set based on a boolean array
 	*
 	* @param n maximal size of the set
@@ -151,28 +141,6 @@ public class SetFactory {
 	*/
 	public static ISet makeArray(int n){
 		return new Set_Array(n);
-	}
-
-	//***********************************************************************************
-	// SWAP LIST
-	//***********************************************************************************
-
-	/**
-	 * Creates a stored set based on swaps
-	 * Optimal complexity BUT cannot be used for
-	 * both adding and removing elements during search
-	 *
-	 * @param environment
-	 * @param n maximal size of the set
-	 * @param hash lighter in memory by slower (false is recommended)
-	 * @return a new set
-	 */
-	public static ISet makeStoredSwap(IEnvironment environment, int n, boolean hash){
-		if(hash){
-			return new Set_Std_Swap_Hash(environment,n);
-		}else{
-			return new Set_Std_Swap_Array(environment,n);
-		}
 	}
 
 	/**
@@ -189,4 +157,5 @@ public class SetFactory {
 			return new Set_Swap_Array(n);
 		}
 	}
+
 }

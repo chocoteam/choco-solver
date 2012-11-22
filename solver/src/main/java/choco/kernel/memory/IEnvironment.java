@@ -29,6 +29,8 @@ package choco.kernel.memory;
 
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import choco.kernel.memory.structure.Operation;
+import solver.variables.setDataStructures.ISet;
+import solver.variables.setDataStructures.SetType;
 
 import java.io.Serializable;
 
@@ -170,6 +172,15 @@ public interface IEnvironment extends Serializable{
      * @return IStateBitSet
      */
     IStateBitSet makeBitSet(int size);
+
+    /**
+     * Factory pattern: a new backtrable set of integers in range [0,n-1] is created by the environment
+     *
+	 * @param type of data structure
+     * @param sizeMax maximal size of the set (maximal value-1)
+     * @return ISet
+     */
+    ISet makeSet(SetType type, int sizeMax);
 
     /**
      * Factory pattern: new StoredFloat objects are created by the environment
