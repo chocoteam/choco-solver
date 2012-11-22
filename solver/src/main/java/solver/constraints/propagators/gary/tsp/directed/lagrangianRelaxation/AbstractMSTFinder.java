@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 
 public abstract class AbstractMSTFinder {
 

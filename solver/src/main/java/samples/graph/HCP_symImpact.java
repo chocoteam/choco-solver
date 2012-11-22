@@ -32,7 +32,7 @@ import samples.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -42,9 +42,9 @@ import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.io.File;
 
 /**

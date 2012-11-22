@@ -31,6 +31,9 @@ import choco.kernel.memory.*;
 import choco.kernel.memory.structure.Operation;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 import static choco.kernel.memory.copy.RecomputableElement.*;
 
@@ -385,6 +388,11 @@ public class EnvironmentCopying extends AbstractEnvironment {
     @Override
     public IStateObject makeObject(Object obj) {
         return new RcObject(this, obj);
+    }
+
+	@Override
+    public ISet makeSet(SetType type, int sizeMax) {
+        return SetFactory.makeCopiedSet(type,sizeMax,this);
     }
 
     @Override

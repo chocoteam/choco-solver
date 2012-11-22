@@ -52,12 +52,12 @@ public class BoolEqView extends OffsetView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public boolean setToTrue(@NotNull ICause cause, boolean informCause) throws ContradictionException {
+    public boolean setToTrue(@NotNull ICause cause) throws ContradictionException {
         return instantiateTo(1, cause);
     }
 
     @Override
-    public boolean setToFalse(@NotNull ICause cause, boolean informCause) throws ContradictionException {
+    public boolean setToFalse(@NotNull ICause cause) throws ContradictionException {
         return instantiateTo(0, cause);
     }
 }

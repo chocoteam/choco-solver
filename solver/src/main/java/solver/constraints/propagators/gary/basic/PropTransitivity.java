@@ -37,7 +37,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import solver.variables.graph.IGraph;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)
@@ -119,6 +120,22 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 
     @Override
     public ESat isEntailed() {
+		IGraph env = g.getEnvelopGraph();
+		IGraph ker = g.getKernelGraph();
+		int n = env.getNbNodes();
+		for(int i=0;i<n;i++){
+			ISet succ = ker.getSuccessorsOf(i);
+			for(int j=succ.getFirstElement();j>=0;j=succ.getNextElement()){
+				for(int k=i+1;k<n;k++){
+					if(ker.arcExists(j,k) && !ker.arcExists(i,k)){
+						return ESat.FALSE;
+					}
+				}
+			}
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}
         return ESat.UNDEFINED;
     }
 

@@ -37,10 +37,11 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing edge costs
+ * Supposes that each node must have two neighbors (cycle)
  * - For minimization problem
  */
 public class PropCycleEvalObj extends Propagator {
@@ -84,6 +85,29 @@ public class PropCycleEvalObj extends Propagator {
 
     @Override
     public ESat isEntailed() {
+		int minSum = 0;
+        int maxSum = 0;
+        for (int i = 0; i < n; i++) {
+			ISet env = g.getEnvelopGraph().getNeighborsOf(i);
+			ISet ker = g.getKernelGraph().getNeighborsOf(i);
+            for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
+				if(i<=j){
+					maxSum += distMatrix[i][j];
+					if(ker.contain(j)){
+						minSum += distMatrix[i][j];
+					}
+				}
+			}
+        }
+        if (maxSum < 0) {
+            maxSum = Integer.MAX_VALUE;
+        }
+		if(minSum>sum.getUB() || maxSum<sum.getLB()){
+			return ESat.FALSE;
+		}
+		if(maxSum == minSum && sum.instantiated()){
+			return ESat.TRUE;
+		}
         return ESat.UNDEFINED;
     }
 
@@ -107,7 +131,7 @@ public class PropCycleEvalObj extends Propagator {
             maxSum = Integer.MAX_VALUE;
         }
         sum.updateLowerBound(minSum, aCause);
-//		sum.updateUpperBound(maxSum, this);
+		sum.updateUpperBound(maxSum, aCause);
         filter(minSum);
     }
 
@@ -119,7 +143,6 @@ public class PropCycleEvalObj extends Propagator {
             for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                 if (i < j && !g.getKernelGraph().edgeExists(i, j)) {
                     if (replacementCost[i] == -1 || replacementCost[j] == -1) {
-//						throw new UnsupportedOperationException();
                         g.removeArc(i, j, aCause);
                     }
                     if ((2 * distMatrix[i][j] - replacementCost[i] - replacementCost[j]) / 2 > delta) {
@@ -159,7 +182,6 @@ public class PropCycleEvalObj extends Propagator {
             }
         }
         if (idx == -1) {
-//			throw new UnsupportedOperationException();
             contradiction(g, "");
         }
         return idx;
@@ -189,7 +211,6 @@ public class PropCycleEvalObj extends Propagator {
             }
         }
         if (idx == -1) {
-//			throw new UnsupportedOperationException();
             contradiction(g, "");
         }
         return idx;

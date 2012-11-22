@@ -28,7 +28,7 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 import solver.variables.graph.DirectedGraph;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 

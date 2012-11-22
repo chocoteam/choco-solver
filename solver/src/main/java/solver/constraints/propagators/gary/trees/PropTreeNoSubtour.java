@@ -46,7 +46,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -136,7 +136,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED; //TODO
+        return ESat.TRUE; //not implemented
     }
 
     private void enforce(int i, int j) throws ContradictionException {

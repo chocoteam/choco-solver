@@ -28,7 +28,7 @@ package solver.constraints.gary;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.gary.PropKCliques;
+import solver.constraints.propagators.gary.basic.PropKCliques;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;

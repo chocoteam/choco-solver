@@ -28,7 +28,7 @@ package solver.search.strategy.selectors.graph.arcs;
 
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 public class LexArc extends ArcStrategy<GraphVar> {
 

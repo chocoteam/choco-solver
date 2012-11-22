@@ -39,9 +39,9 @@ import choco.kernel.memory.IStateObject;
 */
 public class RcObject implements IStateObject, RecomputableElement {
 
-    private final EnvironmentCopying environment;
+    protected final EnvironmentCopying environment;
+    protected int timeStamp;
     private Object currentObject;
-    private int timeStamp;
 
 
     public RcObject(EnvironmentCopying env, Object obj ) {
@@ -79,8 +79,6 @@ public class RcObject implements IStateObject, RecomputableElement {
     public Object deepCopy() {
         return currentObject;
     }
-
-
 
     public int getType() {
         return OBJECT;

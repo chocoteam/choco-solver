@@ -34,14 +34,14 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.AbstractTreeFinder;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * TSP Lagrangian relaxation
@@ -316,7 +316,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE;// it is just implied filtering
     }
 
     public double getMinArcVal() {

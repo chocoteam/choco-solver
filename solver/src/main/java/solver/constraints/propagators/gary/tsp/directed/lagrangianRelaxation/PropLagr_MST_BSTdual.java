@@ -41,7 +41,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianRelaxation {
 
@@ -362,7 +362,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+    	return ESat.TRUE; //not implemented
     }
 
     public double getMinArcVal() {

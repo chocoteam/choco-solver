@@ -35,7 +35,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
@@ -131,14 +131,6 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            try {
-                structuralPruning();
-            } catch (Exception e) {
-                return ESat.FALSE;
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 }

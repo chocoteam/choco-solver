@@ -28,9 +28,9 @@
 package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.trees.PrimMSTFinder;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PrimMSTFinder;
 import solver.exception.ContradictionException;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 public class PrimOneTreeFinder extends PrimMSTFinder {
 

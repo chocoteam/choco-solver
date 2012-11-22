@@ -37,7 +37,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing edge costs
@@ -74,30 +74,6 @@ public class PropTreeEvalObj extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-//		int minSum =0;
-//		INeighbors nei;
-//		for (int i = 0; i < n; i++) {
-//			lowestUnused[i] = 0;
-//			nei = g.getEnvelopGraph().getNeighborsOf(i);
-//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//				if(!g.getKernelGraph().arcExists(i,j)){
-//					if( lowestUnused[i] > distMatrix[i][j]){
-//						lowestUnused[i] = distMatrix[i][j];
-//					}
-//				}
-//			}
-//			nei = g.getKernelGraph().getNeighborsOf(i);
-//			if(nei.getSize()>0){
-//				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//					if(i<j)
-//					minSum += distMatrix[i][j];
-//				}
-//			}else{
-//				minSum += lowestUnused[i];
-//			}
-//		}
-//		sum.updateLowerBound(minSum, this);
-//		filter(minSum);
         int min = 0;
         int max = 0;
         int ce = 0;
@@ -143,7 +119,7 @@ public class PropTreeEvalObj extends Propagator {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; // not implemented
     }
 
     protected void filter(int minSum) throws ContradictionException {

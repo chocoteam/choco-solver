@@ -40,7 +40,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K arcs/edges belong to the final graph
@@ -124,7 +124,6 @@ public class PropKArcs extends Propagator {
                     }
                 }
                 nbInKer.set(nbE);
-                setPassive();
             }
             if (k.getValue() == nbK) {
                 ISet neiKer;
@@ -138,7 +137,6 @@ public class PropKArcs extends Propagator {
                     }
                 }
                 nbInEnv.set(nbK);
-                setPassive();
             }
         }
     }

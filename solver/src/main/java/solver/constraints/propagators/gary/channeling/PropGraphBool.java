@@ -80,10 +80,10 @@ public class PropGraphBool extends Propagator<GraphVar> {
             graph.enforceNode(i, aCause);
             for (int j = 0; j < n; j++) {
                 if (!graph.getEnvelopGraph().arcExists(i, j)) {
-                    relations[i][j].setToFalse(aCause, false);
+                    relations[i][j].setToFalse(aCause);
                 }
                 if (graph.getKernelGraph().arcExists(i, j)) {
-                    relations[i][j].setToTrue(aCause, false);
+                    relations[i][j].setToTrue(aCause);
                 }
             }
         }
@@ -140,9 +140,9 @@ public class PropGraphBool extends Propagator<GraphVar> {
      */
     private class EnfArc implements PairProcedure {
         public void execute(int i, int j) throws ContradictionException {
-            relations[i][j].setToTrue(aCause, false);
+            relations[i][j].setToTrue(aCause);
             if (!graph.isDirected()) {
-                relations[j][i].setToTrue(aCause, false);
+                relations[j][i].setToTrue(aCause);
             }
         }
     }
@@ -152,9 +152,9 @@ public class PropGraphBool extends Propagator<GraphVar> {
      */
     private class RemArc implements PairProcedure {
         public void execute(int i, int j) throws ContradictionException {
-            relations[i][j].setToFalse(aCause, false);
+            relations[i][j].setToFalse(aCause);
             if (!graph.isDirected()) {
-                relations[j][i].setToFalse(aCause, false);
+                relations[j][i].setToFalse(aCause);
             }
         }
     }

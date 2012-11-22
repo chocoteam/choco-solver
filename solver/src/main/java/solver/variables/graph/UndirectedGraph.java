@@ -28,17 +28,9 @@
 package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.FullSet;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.linkedlist.Set_2LinkedList;
-import solver.variables.setDataStructures.linkedlist.Set_LinkedList;
-import solver.variables.setDataStructures.linkedlist.Set_Std_2LinkedList;
-import solver.variables.setDataStructures.linkedlist.Set_Std_LinkedList;
-import solver.variables.setDataStructures.matrix.Set_BitSet;
-import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
-import solver.variables.setDataStructures.swapList.*;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -78,9 +70,9 @@ public class UndirectedGraph implements IGraph {
 			neighbors[i] = SetFactory.makeStoredSet(type, nbits, env);
 		}
 		if(allNodes){
-			this.nodes = new FullSet(nbits);
+			this.nodes = SetFactory.makeFullSet(nbits);
 		}else{
-			this.nodes = new Set_Std_BitSet(env, nbits);
+			this.nodes = SetFactory.makeStoredSet(SetType.BITSET,nbits,env);
 		}
 	}
 
@@ -98,9 +90,9 @@ public class UndirectedGraph implements IGraph {
 			neighbors[i] = SetFactory.makeSet(type,nbits);
 		}
 		if(allNodes){
-			this.nodes = new FullSet(nbits);
+			this.nodes = SetFactory.makeFullSet(nbits);
 		}else{
-			this.nodes = new Set_BitSet(nbits);
+			this.nodes = SetFactory.makeBitSet(nbits);
 		}
 	}
 

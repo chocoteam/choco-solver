@@ -50,7 +50,7 @@ import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -148,7 +148,7 @@ public class PropPosInTourGraphReactor extends Propagator {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     //***********************************************************************************

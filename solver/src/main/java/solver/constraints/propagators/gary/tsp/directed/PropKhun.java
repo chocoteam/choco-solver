@@ -38,9 +38,9 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.util.BitSet;
 
 /**
@@ -496,7 +496,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     public boolean contains(int i, int j) {

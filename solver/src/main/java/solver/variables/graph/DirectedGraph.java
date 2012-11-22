@@ -29,12 +29,9 @@ package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.graphOperations.GraphTools;
-import solver.variables.setDataStructures.SetFactory;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.FullSet;
-import solver.variables.setDataStructures.ISet;
-import solver.variables.setDataStructures.matrix.Set_BitSet;
-import solver.variables.setDataStructures.matrix.Set_Std_BitSet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -71,9 +68,9 @@ public class DirectedGraph implements IGraph {
 			successors[i] = SetFactory.makeSet(type, nbits);
 		}
 		if(allNodes){
-			this.nodes = new FullSet(nbits);
+			this.nodes = SetFactory.makeFullSet(nbits);
 		}else{
-			this.nodes = new Set_BitSet(nbits);
+			this.nodes = SetFactory.makeBitSet(nbits);
 		}
 	}
 
@@ -99,9 +96,9 @@ public class DirectedGraph implements IGraph {
 			successors[i] = SetFactory.makeStoredSet(type, nb, env);
 		}
 		if(allNodes){
-			this.nodes = new FullSet(nb);
+			this.nodes = SetFactory.makeFullSet(nb);
 		}else{
-			this.nodes = new Set_Std_BitSet(env,nb);
+			this.nodes = SetFactory.makeStoredSet(SetType.BITSET,nb,env);
 		}
 	}
 

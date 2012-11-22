@@ -36,8 +36,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.setDataStructures.SetType;
-import solver.variables.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -152,14 +152,6 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            try {
-                structuralPruning();
-            } catch (Exception e) {
-                return ESat.FALSE;
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 }

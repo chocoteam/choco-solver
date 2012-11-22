@@ -253,12 +253,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public boolean setToTrue(ICause cause, boolean informCause) throws ContradictionException {
+    public boolean setToTrue(ICause cause) throws ContradictionException {
         return instantiateTo(1, cause);
     }
 
     @Override
-    public boolean setToFalse(ICause cause, boolean informCause) throws ContradictionException {
+    public boolean setToFalse(ICause cause) throws ContradictionException {
         return instantiateTo(0, cause);
     }
 

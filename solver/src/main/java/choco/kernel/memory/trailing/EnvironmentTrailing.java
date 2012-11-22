@@ -31,6 +31,9 @@ package choco.kernel.memory.trailing;
 import choco.kernel.memory.*;
 import choco.kernel.memory.structure.Operation;
 import choco.kernel.memory.trailing.trail.*;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * The root class for managing memory and sessions.
@@ -259,6 +262,11 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
     @Override
     public IStateObject makeObject(final Object obj) {
         throw (new UnsupportedOperationException());
+    }
+
+	@Override
+    public ISet makeSet(SetType type, int sizeMax) {
+        return SetFactory.makeTrailedSet(type, sizeMax, this);
     }
 
     private void increaseTrail() {// TODO check resizing
