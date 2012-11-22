@@ -28,9 +28,11 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.Environments;
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Solver;
+import solver.SolverProperties;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
@@ -108,7 +110,8 @@ public class TSP {
 
 	private static void solve(int[][] matrix, String instanceName) {
 		final int n = matrix.length;
-		solver = new Solver();
+		solver = new Solver(Environments.COPY.make(),"solver",SolverProperties.DEFAULT);
+//		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
 		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
