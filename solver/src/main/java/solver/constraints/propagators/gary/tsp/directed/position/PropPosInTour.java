@@ -104,7 +104,7 @@ public class PropPosInTour extends Propagator {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     //***********************************************************************************

@@ -46,10 +46,11 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.setDataStructures.ISet;
 
 /**
- * Simple NoSubtour of Pesant when undirected graph
+ * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case
  */
 @PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
@@ -58,11 +59,11 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    protected UndirectedGraphVar g;
-    GraphDeltaMonitor gdm;
-    protected int n;
-    protected PairProcedure arcEnforced;
-    protected IStateInt[] origin, end, size;
+    private UndirectedGraphVar g;
+    private GraphDeltaMonitor gdm;
+    private int n;
+    private PairProcedure arcEnforced;
+	private IStateInt[] e1, e2, size;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -82,13 +83,13 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();
         arcEnforced = new EnfArc();
-        origin = new IStateInt[n];
+        e1 = new IStateInt[n];
+		e2 = new IStateInt[n];
         size = new IStateInt[n];
-        end = new IStateInt[n];
         for (int i = 0; i < n; i++) {
-            origin[i] = environment.makeInt(i);
+            e1[i] = environment.makeInt(i);
+            e2[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
-            end[i] = environment.makeInt(i);
         }
     }
 
@@ -98,26 +99,19 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int j;
         for (int i = 0; i < n; i++) {
-            end[i].set(i);
-            origin[i].set(i);
+            e1[i].set(i);
+            e2[i].set(i);
             size[i].set(1);
         }
         ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getKernelGraph().getSuccessorsOf(i);
-            j = nei.getFirstElement();
-            if (j != -1 && i < j) {
-                enforce(i, j);
-            }
-            j = nei.getNextElement();
-            if (j != -1 && i < j) {
-                enforce(i, j);
-            }
-            if (nei.getNextElement() != -1) {
-                contradiction(g, "");
-            }
+			for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
+				if(i<j){
+					enforce(i,j);
+				}
+			}
         }
         gdm.unfreeze();
     }
@@ -136,69 +130,49 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;//TODO
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			if(g.getKernelGraph().getNeighborsOf(i).getSize()>2 || g.getEnvelopGraph().getNeighborsOf(i).getSize()<2){
+				return ESat.FALSE;
+			}
+		}
+		ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
+		if(!cf.isBiconnected()){
+			return ESat.FALSE;
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}
+        return ESat.UNDEFINED;
     }
 
-    protected void enforce(int i, int j) throws ContradictionException {
-        if (end[j].get() == end[i].get() && origin[i].get() == origin[j].get()) {
-            if (size[origin[i].get()].get() == n) {
-                return;
-            }
-            contradiction(g, "");
-        }
-        if (end[i].get() == i && origin[j].get() == j) {
-            enforceNormal(i, j);
-            return;
-        }
-        if (origin[i].get() == i && end[j].get() == j) {
-            enforceNormal(j, i);
-            return;
-        }
-        if (origin[i].get() == i && origin[j].get() == j) {
-            int newOrigin = end[i].get();
-            int newEnd = origin[i].get();
-            origin[i].set(newOrigin);
-            origin[newOrigin].set(newOrigin);
-            end[i].set(newEnd);
-            end[newEnd].set(newEnd);
-            size[newOrigin].set(size[newEnd].get());
-            enforceNormal(i, j);
-            return;
-        }
-        if (end[i].get() == i && end[j].get() == j) {
-            int newOrigin = end[j].get();
-            int newEnd = origin[j].get();
-            end[j].set(newEnd);
-            end[newEnd].set(newEnd);
-            origin[j].set(newOrigin);
-            origin[newOrigin].set(newOrigin);
-            size[newOrigin].set(size[newEnd].get());
-            enforceNormal(i, j);
-            return;
-        }
-        contradiction(g, "");//this cas should not happen (except if deg=2 is not propagated yet)
+    private void enforce(int i, int j) throws ContradictionException {
+        int ext1 = getExt(i);
+		int ext2 = getExt(j);
+		int t = size[ext1].get()+size[ext2].get();
+		setExt(ext1,ext2);
+		setExt(ext2,ext1);
+		size[ext1].set(t);
+		size[ext2].set(t);
+		if(t>2 && t<=n)
+		if(t<n){
+			g.removeArc(ext1,ext2,aCause);
+		}else if(t==n){
+			g.enforceArc(ext1,ext2,aCause);
+		}
     }
 
-    protected void enforceNormal(int i, int j) throws ContradictionException {
-        int last = end[j].get();
-        int start = origin[i].get();
-        origin[last].set(start);
-        end[start].set(last);
-        size[start].add(size[j].get());
-        if (size[start].get() > n) {
-            contradiction(g, "");
-        }
-        if (size[start].get() < n) {
-            if (last == j && start == i) {
-                // rien faire car le chemin ne contient qu'une arrete
-            } else {
-                g.removeArc(last, start, aCause);
-            }
-        }
-        if (size[start].get() == n) {
-            g.enforceArc(last, start, aCause);
-        }
-    }
+	private int getExt(int i) {
+		return (e1[i].get()==i) ? e2[i].get() : e1[i].get();
+	}
+
+	private void setExt(int i, int ext) {
+		if(e1[i].get()==i) {
+			e2[i].set(ext);
+		}else{
+			e1[i].set(ext);
+		}
+	}
 
     //***********************************************************************************
     // PROCEDURES

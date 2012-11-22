@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.trees;
+package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
@@ -38,8 +38,9 @@ import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
+import java.util.LinkedList;
 
-public class KruskalMSTFinder extends AbstractTreeFinder {
+public class KruskalMST_GAC extends AbstractTreeFinder {
 
     //***********************************************************************************
     // VARIABLES
@@ -48,7 +49,6 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     protected TIntArrayList ma;     //mandatory arcs (i,j) <-> i*n+j
     // indexes are sorted
     protected int[] sortedArcs;   // from sorted to lex
-    protected int[][] indexOfArc; // from lex (i,j) to sorted (i+1)*n+j
     protected BitSet activeArcs; // if sorted is active
     // UNSORTED
     protected double[] costs;             // cost of the lex arc
@@ -59,22 +59,22 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     protected int[] ccTp;
     protected double[] ccTEdgeCost;
     protected LCAGraphManager lca;
-    protected int fromInterest, cctRoot;
+    protected int cctRoot;
     protected BitSet useful;
     protected double minTArc, maxTArc;
-    protected double[][] distMatrix;
+    protected int[][] map;
+    protected double[][] repCosts;
 
     //***********************************************************************************
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     //***********************************************************************************
 
-	public KruskalMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+	public KruskalMST_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];
 		costs = new double[n*n];
 		sortedArcs = new int[n*n];
-		indexOfArc = new int[n][n];
 		p = new int[n];
 		// CCtree
 		ccN = 2*n+1;
@@ -84,24 +84,11 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
 		ccTp = new int[n];
 		useful = new BitSet(n);
 		lca = new LCAGraphManager(ccN);
+		map = new int[n][n];
+		repCosts = new double[n][n];
 	}
 
-    //***********************************************************************************
-    // FIND MST
-    //***********************************************************************************
-
-    public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
-        g = graph;
-        distMatrix = costs;
-        ma = propHK.getMandatoryArcsList();
-        sortArcs();
-        treeCost = 0;
-        cctRoot = n - 1;
-        int tSize = addMandatoryArcs();
-        connectMST(tSize);
-    }
-
-    protected void sortArcs() {
+    protected void sortArcs(double[][] costMatrix) {
         Comparator<Integer> comp = new Comparator<Integer>() {
             @Override
             public int compare(Integer i1, Integer i2) {
@@ -119,26 +106,21 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
             p[i] = i;
             rank[i] = 0;
             ccTp[i] = i;
-            Tree.getNeighborsOf(i).clear();
+            Tree.getPredecessorsOf(i).clear();
+            Tree.getSuccessorsOf(i).clear();
             ccTree.desactivateNode(i);
             ccTree.activateNode(i);
             size += g.getSuccessorsOf(i).getSize();
         }
-        if (size % 2 != 0) {
-            throw new UnsupportedOperationException();
-        }
-        size /= 2;
-        ISet nei;
         Integer[] integers = new Integer[size];
         int idx = 0;
+        ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getSuccessorsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (i < j) {
-                    integers[idx] = i * n + j;
-                    costs[i * n + j] = distMatrix[i][j];
-                    idx++;
-                }
+                integers[idx] = i * n + j;
+                costs[i * n + j] = costMatrix[i][j];
+                idx++;
             }
         }
         for (int i = n; i < ccN; i++) {
@@ -151,36 +133,124 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         for (idx = 0; idx < size; idx++) {
             v = integers[idx];
             sortedArcs[idx] = v;
-            indexOfArc[v / n][v % n] = idx;
         }
     }
 
     //***********************************************************************************
-    // PRUNING
+    // METHODS
     //***********************************************************************************
+
+    public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
+        g = graph;
+        ma = propHK.getMandatoryArcsList();
+        sortArcs(costs);
+        treeCost = 0;
+        cctRoot = n - 1;
+        int tSize = addMandatoryArcs();
+        connectMST(tSize);
+    }
 
     public void performPruning(double UB) throws ContradictionException {
         double delta = UB - treeCost;
         if (delta < 0) {
             throw new UnsupportedOperationException("mst>ub");
         }
-        fromInterest = 0;
-        if (selectAndCompress(delta)) {
+        prepareMandArcDetection();
+        if (selectRelevantArcs(delta)) {
             lca.preprocess(cctRoot, ccTree);
-            pruning(fromInterest, delta);
+            pruning(delta);
+        }
+    }
+
+    protected void prepareMandArcDetection() {
+        // RECYCLING ccTp is used to model the compressed path
+        ISet nei;
+        for (int i = 0; i < n; i++) {
+            ccTp[i] = -1;
+        }
+        int k = 0;
+        useful.clear();
+        useful.set(0);
+        ccTp[0] = 0;
+        LinkedList<Integer> list = new LinkedList<Integer>();
+        list.add(k);
+        while (!list.isEmpty()) {
+            k = list.removeFirst();
+            nei = Tree.getSuccessorsOf(k);
+            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                if (ccTp[s] == -1) {
+                    ccTp[s] = k;
+                    map[s][k] = -1;
+                    map[k][s] = -1;
+                    if (!useful.get(s)) {
+                        list.addLast(s);
+                        useful.set(s);
+                    }
+                }
+            }
+            nei = Tree.getPredecessorsOf(k);
+            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
+                if (ccTp[s] == -1) {
+                    ccTp[s] = k;
+                    map[s][k] = -1;
+                    map[k][s] = -1;
+                    if (!useful.get(s)) {
+                        list.addLast(s);
+                        useful.set(s);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void markTreeEdges(int[] next, int i, int j) {
+        int rep = i * n + j;
+        if (Tree.arcExists(j, i)) {
+            if (map[j][i] == -1) {
+                map[j][i] = map[i][j] = rep;
+            }
+            return;
+        }
+        if (next[i] == next[j]) {
+            if (map[i][next[i]] == -1) {
+                map[i][next[i]] = map[next[i]][i] = rep;
+            }
+            if (map[j][next[j]] == -1) {
+                map[j][next[j]] = map[next[j]][j] = rep;
+            }
+            return;
+        }
+        useful.clear();
+        int meeting = j;
+        int tmp;
+        int a;
+        for (a = i; a != next[a]; a = next[a]) {
+            useful.set(a);
+        }
+        useful.set(a);
+        for (; !useful.get(meeting); meeting = next[meeting]) {
+        }
+        for (int b = j; b != meeting; ) {
+            tmp = next[b];
+            next[b] = meeting;
+            if (map[b][tmp] == -1) {
+                map[b][tmp] = map[tmp][b] = rep;
+            }
+            b = tmp;
+        }
+        for (a = i; a != meeting; ) {
+            tmp = next[a];
+            next[a] = meeting;
+            if (map[a][tmp] == -1) {
+                map[a][tmp] = map[tmp][a] = rep;
+            }
+            a = tmp;
         }
     }
 
     protected boolean selectRelevantArcs(double delta) throws ContradictionException {
         // Trivially no inference
         int idx = activeArcs.nextSetBit(0);
-        while (idx >= 0 && costs[sortedArcs[idx]] - minTArc <= delta) {
-            idx = activeArcs.nextSetBit(idx + 1);
-        }
-        if (idx == -1) {
-            return false;
-        }
-        fromInterest = idx;
         // Maybe interesting
         while (idx >= 0 && costs[sortedArcs[idx]] - maxTArc <= delta) {
             idx = activeArcs.nextSetBit(idx + 1);
@@ -192,58 +262,8 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
                 activeArcs.clear(idx);
             }
             idx = activeArcs.nextSetBit(idx + 1);
-        }
-        ccTree.addArc(cctRoot, 0);
-        return true;
-    }
-
-    protected boolean selectAndCompress(double delta) throws ContradictionException {
-        // Trivially no inference
-        int idx = activeArcs.nextSetBit(0);
-        while (idx >= 0 && costs[sortedArcs[idx]] - minTArc <= delta) {
-            idx = activeArcs.nextSetBit(idx + 1);
-        }
-        if (idx == -1) {
-            return false;
-        }
-        fromInterest = idx;
-        // Maybe interesting
-        useful.clear();
-        while (idx >= 0 && costs[sortedArcs[idx]] - maxTArc <= delta) {
-            useful.set(sortedArcs[idx] / n);
-            useful.set(sortedArcs[idx] % n);
-            idx = activeArcs.nextSetBit(idx + 1);
-        }
-        // Trivially infeasible arcs
-        while (idx >= 0) {
-            if (!Tree.arcExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
-                propHK.remove(sortedArcs[idx] / n, sortedArcs[idx] % n);
-                activeArcs.clear(idx);
-            }
-            idx = activeArcs.nextSetBit(idx + 1);
-        }
-        if (useful.cardinality() == 0) {
-            return false;
         }
         //contract ccTree
-        int p, s;
-        for (int i = useful.nextClearBit(0); i < n; i = useful.nextClearBit(i + 1)) {
-            ccTree.desactivateNode(i);
-        }
-        for (int i = ccTree.getActiveNodes().getFirstElement(); i >= 0; i = ccTree.getActiveNodes().getNextElement()) {
-            s = ccTree.getSuccessorsOf(i).getFirstElement();
-            if (s == -1) {
-                if (i >= n) {
-                    ccTree.desactivateNode(i);
-                }
-            } else if (ccTree.getSuccessorsOf(i).getNextElement() == -1) {
-                p = ccTree.getPredecessorsOf(i).getFirstElement();
-                ccTree.desactivateNode(i);
-                if (p != -1) {
-                    ccTree.addArc(p, s);
-                }
-            }
-        }
         cctRoot++;
         int newNode = cctRoot;
         ccTree.activateNode(newNode);
@@ -258,23 +278,39 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         return true;
     }
 
-    protected void pruning(int fi, double delta) throws ContradictionException {
+    protected void pruning(double delta) throws ContradictionException {
         int i, j;
-        double repCost;
-        for (int arc = activeArcs.nextSetBit(fi); arc >= 0; arc = activeArcs.nextSetBit(arc + 1)) {
+        for (int arc = activeArcs.nextSetBit(0); arc >= 0; arc = activeArcs.nextSetBit(arc + 1)) {
             i = sortedArcs[arc] / n;
             j = sortedArcs[arc] % n;
             if (!Tree.arcExists(i, j)) {
-                if (propHK.isMandatory(i, j)) {
-                    throw new UnsupportedOperationException();
-                }
-//				repCost = ccTEdgeCost[getLCA(i,j)];
-                repCost = ccTEdgeCost[lca.getLCA(i, j)];
-//				PropSymmetricHeldKarp.reducedCosts[i][j] = repCost;
-                if (costs[i * n + j] - repCost > delta) {
+                repCosts[i][j] = costs[i * n + j] - ccTEdgeCost[lca.getLCA(i, j)];
+                if (repCosts[i][j] > delta) {
                     activeArcs.clear(arc);
                     propHK.remove(i, j);
+                } else {
+                    markTreeEdges(ccTp, i, j);
                 }
+            }
+        }
+        ISet nei;
+        for (i = 0; i < n; i++) {
+            nei = Tree.getSuccessorsOf(i);
+            for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (map[i][j] != -1) {
+                    repCosts[i][j] = costs[map[i][j]] - costs[i * n + j];
+                    if (repCosts[i][j] > delta) {
+                        propHK.enforce(i, j);
+                    }
+                } else {
+                    propHK.enforce(i, j);
+                }
+
+//					repCost = costs[map[i][j]];
+//					if(repCost-costs[i*n+j]>delta){
+//						propHK.enforce(i,j);
+//					}
+//				}
             }
         }
     }
@@ -367,9 +403,12 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         return p[i];
     }
 
-//	BitSet marked = new BitSet(n*2);
+    public double getRepCost(int from, int to) {
+        return repCosts[from][to];
+    }
+
 //	private int getLCA(int i, int j) {
-//		marked.clear();
+//		BitSet marked = new BitSet(ccN);
 //		marked.set(i);
 //		marked.set(j);
 //		int p = ccTree.getPredecessorsOf(i).getFirstElement();

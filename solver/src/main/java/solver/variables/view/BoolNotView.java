@@ -60,13 +60,13 @@ public class BoolNotView extends IntView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public boolean setToTrue(@NotNull ICause cause, boolean informCause) throws ContradictionException {
-        return var.setToFalse(cause, informCause);
+    public boolean setToTrue(@NotNull ICause cause) throws ContradictionException {
+        return var.setToFalse(cause);
     }
 
     @Override
-    public boolean setToFalse(@NotNull ICause cause, boolean informCause) throws ContradictionException {
-        return var.setToTrue(cause, informCause);
+    public boolean setToFalse(@NotNull ICause cause) throws ContradictionException {
+        return var.setToTrue(cause);
     }
 
     @Override

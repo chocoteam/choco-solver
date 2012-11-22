@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;

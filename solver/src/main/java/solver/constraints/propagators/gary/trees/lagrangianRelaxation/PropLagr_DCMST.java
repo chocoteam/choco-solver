@@ -34,9 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
-import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
-import solver.constraints.propagators.gary.trees.KruskalMST_GAC;
-import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -394,7 +391,7 @@ public class PropLagr_DCMST extends Propagator implements GraphLagrangianRelaxat
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; // not implemented
     }
 
     public double getMinArcVal() {

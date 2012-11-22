@@ -186,14 +186,14 @@ public class PropReified extends Propagator<Variable> {
         ESat sat = entailed(left, lastActiveL);
         switch (sat) {
             case TRUE:
-                bVar.setToTrue(aCause, false);
+                bVar.setToTrue(aCause);
                 this.setPassive();
                 break;
             case FALSE:
                 sat = entailed(right, lastActiveR);
                 switch (sat) {
                     case TRUE:
-                        bVar.setToFalse(aCause, false);
+                        bVar.setToFalse(aCause);
                         this.setPassive();
                         break;
                     case FALSE:

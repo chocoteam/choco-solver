@@ -130,7 +130,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     //***********************************************************************************

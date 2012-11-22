@@ -74,13 +74,16 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
     public void propagate(int evtmask) throws ContradictionException {
         ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            BFS(i);
+			if (BFS(i) >= maxDiam) {
+				for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
+					g.removeNode(i, aCause);
+				}
+			}
         }
     }
 
-    private void BFS(int i) throws ContradictionException {
+    private int BFS(int i) {
         nextSet.clear();
-        int idx = i;
         set.clear();
         visited.clear();
         set.add(i);
@@ -103,11 +106,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
             set = tmp;
             nextSet.clear();
         }
-        if (depth >= maxDiam) {
-            for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
-                g.removeNode(i, aCause);
-            }
-        }
+        return depth;
     }
 
     @Override
@@ -126,14 +125,20 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (!g.instantiated()) {
-            return ESat.UNDEFINED;
+		ISet nodes = g.getKernelGraph().getActiveNodes();
+		for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
+			int k = BFS(i);
+			if (k >= maxDiam) {
+				for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
+					if(nodes.contain(i)){
+						return ESat.FALSE;
+					}
+				}
+			}
         }
-        try {
-            propagate(0);
+		if (g.instantiated()) {
             return ESat.TRUE;
-        } catch (Exception e) {
-            return ESat.FALSE;
         }
+		return ESat.UNDEFINED;
     }
 }

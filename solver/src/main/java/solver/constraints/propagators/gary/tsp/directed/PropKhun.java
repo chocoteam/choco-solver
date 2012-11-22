@@ -496,7 +496,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     public boolean contains(int i, int j) {

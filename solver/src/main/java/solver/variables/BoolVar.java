@@ -43,7 +43,7 @@ public interface BoolVar extends IntVar {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(@NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean setToTrue(@NotNull ICause cause) throws ContradictionException;
 
-    boolean setToFalse(@NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean setToFalse(@NotNull ICause cause) throws ContradictionException;
 }

@@ -130,14 +130,6 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            try {
-                structuralPruning();
-            } catch (Exception e) {
-                return ESat.FALSE;
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 }

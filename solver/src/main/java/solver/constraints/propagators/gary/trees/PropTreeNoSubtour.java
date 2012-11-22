@@ -136,7 +136,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED; //TODO
+        return ESat.TRUE; //not implemented
     }
 
     private void enforce(int i, int j) throws ContradictionException {

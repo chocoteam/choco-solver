@@ -124,7 +124,6 @@ public class PropKArcs extends Propagator {
                     }
                 }
                 nbInKer.set(nbE);
-                setPassive();
             }
             if (k.getValue() == nbK) {
                 ISet neiKer;
@@ -138,7 +137,6 @@ public class PropKArcs extends Propagator {
                     }
                 }
                 nbInEnv.set(nbK);
-                setPassive();
             }
         }
     }

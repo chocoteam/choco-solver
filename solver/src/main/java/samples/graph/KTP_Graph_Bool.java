@@ -401,7 +401,7 @@ public class KTP_Graph_Bool {
 		protected BoolVar[][] g;
 		protected int n;
 		int[] mapping;
-		protected IStateInt[] origin, end, size;
+		protected IStateInt[] e1, e2, size;
 
 		//***********************************************************************************
 		// CONSTRUCTORS
@@ -421,13 +421,13 @@ public class KTP_Graph_Bool {
 			g = graph;
 			this.mapping = mapping;
 			this.n = graph.length;
-			origin = new IStateInt[n];
+			e1 = new IStateInt[n];
 			size = new IStateInt[n];
-			end = new IStateInt[n];
+			e2 = new IStateInt[n];
 			for (int i = 0; i < n; i++) {
-				origin[i] = environment.makeInt(i);
+				e1[i] = environment.makeInt(i);
 				size[i] = environment.makeInt(1);
-				end[i] = environment.makeInt(i);
+				e2[i] = environment.makeInt(i);
 			}
 		}
 
@@ -438,8 +438,8 @@ public class KTP_Graph_Bool {
 		@Override
 		public void propagate(int evtmask) throws ContradictionException {
 			for (int i = 0; i < n; i++) {
-				end[i].set(i);
-				origin[i].set(i);
+				e1[i].set(i);
+				e2[i].set(i);
 				size[i].set(1);
 			}
 			int s = vars.length;
@@ -468,71 +468,35 @@ public class KTP_Graph_Bool {
 
 		@Override
 		public ESat isEntailed() {
-			return ESat.UNDEFINED;
+			return ESat.TRUE; //not implemented
 		}
 
-		protected void enforce(int i, int j) throws ContradictionException {
-			if (end[j].get() == end[i].get() && origin[i].get() == origin[j].get()) {
-				if (size[origin[i].get()].get() == n) {
-					return;
+		private void enforce(int i, int j) throws ContradictionException {
+			int ext1 = getExt(i);
+			int ext2 = getExt(j);
+			int t = size[ext1].get()+size[ext2].get();
+			setExt(ext1,ext2);
+			setExt(ext2,ext1);
+			size[ext1].set(t);
+			size[ext2].set(t);
+			if(t>2 && t<=n)
+				if(t<n){
+					if(g[ext1][ext2]!=null)
+					g[ext1][ext2].setToFalse(aCause);
+				}else if(t==n){
+					g[ext1][ext2].setToTrue(aCause);
 				}
-				contradiction(g[i][j], "");
-			}
-			if (end[i].get() == i && origin[j].get() == j) {
-				enforceNormal(i, j);
-				return;
-			}
-			if (origin[i].get() == i && end[j].get() == j) {
-				enforceNormal(j, i);
-				return;
-			}
-			if (origin[i].get() == i && origin[j].get() == j) {
-				int newOrigin = end[i].get();
-				int newEnd = origin[i].get();
-				origin[i].set(newOrigin);
-				origin[newOrigin].set(newOrigin);
-				end[i].set(newEnd);
-				end[newEnd].set(newEnd);
-				size[newOrigin].set(size[newEnd].get());
-				enforceNormal(i, j);
-				return;
-			}
-			if (end[i].get() == i && end[j].get() == j) {
-				int newOrigin = end[j].get();
-				int newEnd = origin[j].get();
-				end[j].set(newEnd);
-				end[newEnd].set(newEnd);
-				origin[j].set(newOrigin);
-				origin[newOrigin].set(newOrigin);
-				size[newOrigin].set(size[newEnd].get());
-				enforceNormal(i, j);
-				return;
-			}
-			contradiction(g[i][j], "");//this cas should not happen (except if deg=2 is not propagated yet)
 		}
 
-		protected void enforceNormal(int i, int j) throws ContradictionException {
-			int last = end[j].get();
-			int start = origin[i].get();
-			origin[last].set(start);
-			end[start].set(last);
-			size[start].add(size[j].get());
-			if (size[start].get() > n) {
-				contradiction(g[i][j], "");
-			}
-			if (size[start].get() < n) {
-				if (last == j && start == i) {
-					// rien faire car le chemin ne contient qu'une arrete
-				} else {
-					if (g[last][start] != null)
-						g[last][start].setToFalse(this, false);
-				}
-			}
-			if (size[start].get() == n) {
-				if (g[last][start] == null) {
-					contradiction(null, "");
-				}
-				g[last][start].setToTrue(this, false);
+		private int getExt(int i) {
+			return (e1[i].get()==i) ? e2[i].get() : e1[i].get();
+		}
+
+		private void setExt(int i, int ext) {
+			if(e1[i].get()==i) {
+				e2[i].set(ext);
+			}else{
+				e1[i].set(ext);
 			}
 		}
 	}

@@ -566,7 +566,7 @@ public class DCMST {
 
         @Override
         public ESat isEntailed() {
-            return ESat.UNDEFINED;
+            return ESat.TRUE; // not implemented
         }
 
         private void preprocessOneNodes() {

@@ -126,7 +126,7 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+        return ESat.TRUE; //not implemented
     }
 
     private void enforce(int i, int j) throws ContradictionException {

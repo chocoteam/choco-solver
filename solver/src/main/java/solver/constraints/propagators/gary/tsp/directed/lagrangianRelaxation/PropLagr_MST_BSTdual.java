@@ -362,7 +362,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 
     @Override
     public ESat isEntailed() {
-        return ESat.UNDEFINED;
+    	return ESat.TRUE; //not implemented
     }
 
     public double getMinArcVal() {

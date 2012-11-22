@@ -362,10 +362,7 @@ public class PropATSP_AssignmentBound extends Propagator<Variable> implements IG
 
 	@Override
 	public ESat isEntailed() {
-		if(!(g.instantiated()&&flowCost.instantiated())){
-			return ESat.UNDEFINED;
-		}
-		throw new UnsupportedOperationException("Entailment check not implemented");
+		return ESat.TRUE; //not implemented
 	}
 
 	@Override

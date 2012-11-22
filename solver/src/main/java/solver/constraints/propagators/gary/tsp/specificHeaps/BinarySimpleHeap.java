@@ -110,7 +110,7 @@ public class BinarySimpleHeap implements ISimpleHeap{
 	}
 
 	public boolean addElement(int element, double value) {
-		assert positions[element]!=-1: element+" is already in the heap";
+		assert positions[element]==-1: element+" is already in the heap";
 		// add new data at the first available position in the binary heap
 		elements[firstEmpty] = element;
 		values[element] = value;
@@ -133,7 +133,7 @@ public class BinarySimpleHeap implements ISimpleHeap{
 	}
 
 	public boolean updateElement(int element, double value) {
-		assert positions[element]==-1:element+" is not in the heap";
+		assert positions[element]!=-1:element+" is not in the heap";
 		if(value>=values[element]){
 			return false;
 		}

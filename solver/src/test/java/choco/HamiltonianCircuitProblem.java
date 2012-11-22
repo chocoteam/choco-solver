@@ -39,7 +39,7 @@ import solver.constraints.nary.NoSubTours;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
