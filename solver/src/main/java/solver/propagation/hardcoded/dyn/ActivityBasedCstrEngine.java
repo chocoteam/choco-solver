@@ -211,7 +211,6 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         try {
             while (!prop_heap.isEmpty()) {
                 lastProp = propagators[prop_heap.removemin()];
-                assert lastProp.isActive() : "propagator is not active";
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 cid = aid;
@@ -220,6 +219,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                 for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
+                        assert lastProp.isActive() : "propagator is not active";
                         if (Configuration.PRINT_PROPAGATION) {
                             PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                         }

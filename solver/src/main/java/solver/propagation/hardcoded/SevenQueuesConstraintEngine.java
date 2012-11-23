@@ -135,12 +135,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
-                assert lastProp.isActive() : "propagator is not active:" + lastProp;
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 scheduled[aid] = 0;
                 evtset = eventsets[aid];
                 for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
+                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     if (Configuration.PRINT_PROPAGATION) {
                         PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                     }

@@ -138,6 +138,7 @@ public class VariableEngine implements IPropagationEngine {
             schedule[id] = false;
             evtset = eventsets[id];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                assert lastProp.isActive() : "propagator is not active:" + lastProp;
                 if (Configuration.PRINT_PROPAGATION) {
                     PropagationUtils.printPropagation(lastVar, lastProp);
                 }

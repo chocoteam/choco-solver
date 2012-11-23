@@ -228,6 +228,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                     lastProp = lastVar.getPropagator(p);
                     mask = masks_f[aid][p];
                     if (mask > 0) {
+                        assert lastProp.isActive() : "propagator is not active:" + lastProp;
                         if (Configuration.PRINT_PROPAGATION) {
                             PropagationUtils.printPropagation(lastVar, lastProp);
                         }

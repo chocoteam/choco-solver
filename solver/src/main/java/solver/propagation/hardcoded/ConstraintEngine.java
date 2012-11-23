@@ -130,12 +130,12 @@ public class ConstraintEngine implements IPropagationEngine {
         IBitset evtset;
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
-            assert lastProp.isActive() : "propagator is not active";
             // revision of the variable
             aid = p2i.get(lastProp.getId());
             schedule[aid] = false;
             evtset = eventsets[aid];
             for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
+                assert lastProp.isActive() : "propagator is not active";
                 if (Configuration.PRINT_PROPAGATION) {
                     PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                 }

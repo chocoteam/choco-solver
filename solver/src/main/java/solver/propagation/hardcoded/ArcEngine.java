@@ -150,7 +150,6 @@ public class ArcEngine implements IPropagationEngine {
         while (!arc_queue_v.isEmpty()) {
             lastVar = arc_queue_v.pollFirst();
             lastProp = arc_queue_p.pollFirst();
-//                assert lastProp.isActive() : "propagator is not active"; <= CPRU: a propagator can be inactive, what matters is the mask
 
             // revision of the variable
             vaid = v2i.get(lastVar.getId());
@@ -158,6 +157,7 @@ public class ArcEngine implements IPropagationEngine {
             mask = masks_f[vaid].get(paid);
             masks_f[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
             if (mask > 0) {
+                assert lastProp.isActive() : "propagator is not active";
                 if (Configuration.PRINT_PROPAGATION) {
                     PropagationUtils.printPropagation(lastVar, lastProp);
                 }
