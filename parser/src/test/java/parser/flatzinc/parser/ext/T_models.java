@@ -29,6 +29,7 @@ package parser.flatzinc.parser.ext;
 import gnu.trove.map.hash.THashMap;
 import org.testng.annotations.Test;
 import parser.flatzinc.ParseAndSolveExt;
+import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 
 import java.io.ByteArrayInputStream;
@@ -69,7 +70,7 @@ public class T_models {
     private void execute(String model) {
         ParseAndSolveExt ps = new ParseAndSolveExt();
         Solver solver = new Solver();
-        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>());
+        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>(), new GoalConf(false, 0,false,false, 0));
         solver.solve();
     }
 

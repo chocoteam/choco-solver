@@ -36,6 +36,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class T_flatzinc_model extends GrammarTest {
         walker.mSolver = mSolver;
         walker.map = map;
         try {
-            walker.flatzinc_model(mSolver, map);
+            walker.flatzinc_model(mSolver, map,new GoalConf(false, 0,false,false, 0));
         } catch (RecognitionException e) {
             Assert.fail();
         }
