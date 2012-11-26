@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-26 14:06:12
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-26 15:40:26
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -29,28 +29,56 @@
 
 package parser.flatzinc;
 
-import choco.kernel.ResolutionPolicy;
-import gnu.trove.map.hash.THashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.TreeNodeStream;
-import org.antlr.runtime.tree.TreeParser;
-import org.antlr.runtime.tree.TreeRuleReturnScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.flatzinc.ast.*;
+
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.ast.ext.*;
-import solver.Solver;
-import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.*;
+import parser.flatzinc.FZNException;
+import parser.flatzinc.FZNLayout;
+import parser.flatzinc.ast.FConstraint;
+import parser.flatzinc.ast.FGoal;
+import parser.flatzinc.ast.FParameter;
+import parser.flatzinc.ast.FVariable;
+import parser.flatzinc.ast.GoalConf;
 
-import java.util.ArrayList;
+
+import parser.flatzinc.ast.ext.*;
+
+import solver.propagation.PropagationEngine;
+import solver.propagation.generator.Generator;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.SortDyn;
+import solver.propagation.generator.*;
+import solver.propagation.hardcoded.ConstraintEngine;
+
+import solver.propagation.ISchedulable;
+import solver.propagation.generator.Arc;
+
+import solver.Solver;
+import solver.constraints.Constraint;
+import choco.kernel.ResolutionPolicy;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Arrays;
+import choco.kernel.common.util.tools.ArrayUtils;
+
+
+import org.antlr.runtime.*;
+import org.antlr.runtime.tree.*;
+import java.util.Stack;
 import java.util.List;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class FlatzincFullExtWalker extends TreeParser {
@@ -4113,31 +4141,28 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "solve_goal"
-    // parser/flatzinc/FlatzincFullExtWalker.g:732:1: solve_goal : ^( SOLVE anns= annotations res= resolution[type,expr] ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:732:1: solve_goal : ^( SOLVE anns= annotations res= resolution ) ;
     public final void solve_goal() throws RecognitionException {
         List<EAnnotation> anns =null;
 
+        FlatzincFullExtWalker.resolution_return res =null;
+
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:733:2: ( ^( SOLVE anns= annotations res= resolution[type,expr] ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:734:2: ^( SOLVE anns= annotations res= resolution[type,expr] )
+            // parser/flatzinc/FlatzincFullExtWalker.g:733:2: ( ^( SOLVE anns= annotations res= resolution ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:734:2: ^( SOLVE anns= annotations res= resolution )
             {
-
-            	ResolutionPolicy type = ResolutionPolicy.SATISFACTION;
-            	Expression expr = null;
-            	
-
-            match(input,SOLVE,FOLLOW_SOLVE_in_solve_goal2160); 
+            match(input,SOLVE,FOLLOW_SOLVE_in_solve_goal2157); 
 
             match(input, Token.DOWN, null); 
-            pushFollow(FOLLOW_annotations_in_solve_goal2164);
+            pushFollow(FOLLOW_annotations_in_solve_goal2161);
             anns=annotations();
 
             state._fsp--;
 
 
-            pushFollow(FOLLOW_resolution_in_solve_goal2168);
-            resolution(type, expr);
+            pushFollow(FOLLOW_resolution_in_solve_goal2165);
+            res=resolution();
 
             state._fsp--;
 
@@ -4146,7 +4171,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
 
-                FGoal.define_goal(gc, mSolver,anns,type,expr);
+                FGoal.define_goal(gc, mSolver,anns,res.type,res.expr);
             	
 
             }
@@ -4165,15 +4190,24 @@ public class FlatzincFullExtWalker extends TreeParser {
     // $ANTLR end "solve_goal"
 
 
+    public static class resolution_return extends TreeRuleReturnScope {
+        public ResolutionPolicy type;
+        public Expression expr;
+    };
+
 
     // $ANTLR start "resolution"
-    // parser/flatzinc/FlatzincFullExtWalker.g:744:1: resolution[ResolutionPolicy type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
-    public final void resolution(ResolutionPolicy type, Expression expr) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:740:1: resolution returns [ResolutionPolicy type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
+    public final FlatzincFullExtWalker.resolution_return resolution() throws RecognitionException {
+        FlatzincFullExtWalker.resolution_return retval = new FlatzincFullExtWalker.resolution_return();
+        retval.start = input.LT(1);
+
+
         Expression e =null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:745:5: ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:741:5: ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) )
             int alt49=3;
             switch ( input.LA(1) ) {
             case SATISFY:
@@ -4201,19 +4235,24 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt49) {
                 case 1 :
-                    // parser/flatzinc/FlatzincFullExtWalker.g:745:9: SATISFY
+                    // parser/flatzinc/FlatzincFullExtWalker.g:741:9: SATISFY
                     {
-                    match(input,SATISFY,FOLLOW_SATISFY_in_resolution2192); 
+                    match(input,SATISFY,FOLLOW_SATISFY_in_resolution2189); 
+
+
+                        retval.type =ResolutionPolicy.SATISFACTION;
+                        retval.expr =null;
+                        
 
                     }
                     break;
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:746:9: ^( MINIMIZE e= expr )
                     {
-                    match(input,MINIMIZE,FOLLOW_MINIMIZE_in_resolution2203); 
+                    match(input,MINIMIZE,FOLLOW_MINIMIZE_in_resolution2206); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expr_in_resolution2207);
+                    pushFollow(FOLLOW_expr_in_resolution2210);
                     e=expr();
 
                     state._fsp--;
@@ -4223,8 +4262,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
 
-                        type =ResolutionPolicy.MINIMIZE;
-                        expr =e;
+                        retval.type =ResolutionPolicy.MINIMIZE;
+                        retval.expr =e;
                         
 
                     }
@@ -4232,10 +4271,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 3 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:751:9: ^( MAXIMIZE e= expr )
                     {
-                    match(input,MAXIMIZE,FOLLOW_MAXIMIZE_in_resolution2225); 
+                    match(input,MAXIMIZE,FOLLOW_MAXIMIZE_in_resolution2228); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_expr_in_resolution2229);
+                    pushFollow(FOLLOW_expr_in_resolution2232);
                     e=expr();
 
                     state._fsp--;
@@ -4245,8 +4284,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
 
-                        type =ResolutionPolicy.MAXIMIZE;
-                        expr =e;
+                        retval.type =ResolutionPolicy.MAXIMIZE;
+                        retval.expr =e;
                         
 
                     }
@@ -4262,7 +4301,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         finally {
         	// do for sure before leaving
         }
-        return ;
+        return retval;
     }
     // $ANTLR end "resolution"
 
@@ -4285,7 +4324,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 anns = new ArrayList();
                 
 
-            match(input,ANNOTATIONS,FOLLOW_ANNOTATIONS_in_annotations2272); 
+            match(input,ANNOTATIONS,FOLLOW_ANNOTATIONS_in_annotations2275); 
 
             if ( input.LA(1)==Token.DOWN ) {
                 match(input, Token.DOWN, null); 
@@ -4306,7 +4345,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 	case 1 :
                 	    // parser/flatzinc/FlatzincFullExtWalker.g:763:24: e= annotation
                 	    {
-                	    pushFollow(FOLLOW_annotation_in_annotations2277);
+                	    pushFollow(FOLLOW_annotation_in_annotations2280);
                 	    e=annotation();
 
                 	    state._fsp--;
@@ -4362,7 +4401,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 ArrayList<Expression> exps = new ArrayList();
                 
 
-            IDENTIFIER8=(CommonTree)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_annotation2314); 
+            IDENTIFIER8=(CommonTree)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_annotation2317); 
 
             // parser/flatzinc/FlatzincFullExtWalker.g:771:16: ( LP (e= expr )+ RP )?
             int alt52=2;
@@ -4378,7 +4417,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:771:17: LP (e= expr )+ RP
                     {
-                    match(input,LP,FOLLOW_LP_in_annotation2317); 
+                    match(input,LP,FOLLOW_LP_in_annotation2320); 
 
                     // parser/flatzinc/FlatzincFullExtWalker.g:771:20: (e= expr )+
                     int cnt51=0;
@@ -4404,7 +4443,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:771:21: e= expr
                     	    {
-                    	    pushFollow(FOLLOW_expr_in_annotation2322);
+                    	    pushFollow(FOLLOW_expr_in_annotation2325);
                     	    e=expr();
 
                     	    state._fsp--;
@@ -4425,7 +4464,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,RP,FOLLOW_RP_in_annotation2327); 
+                    match(input,RP,FOLLOW_RP_in_annotation2330); 
 
                     }
                     break;
@@ -4486,7 +4525,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:778:9: TRUE
                     {
-                    match(input,TRUE,FOLLOW_TRUE_in_bool_const2359); 
+                    match(input,TRUE,FOLLOW_TRUE_in_bool_const2362); 
 
                     value = true;
 
@@ -4495,7 +4534,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:779:9: FALSE
                     {
-                    match(input,FALSE,FOLLOW_FALSE_in_bool_const2371); 
+                    match(input,FALSE,FOLLOW_FALSE_in_bool_const2374); 
 
                     value = false;
 
@@ -4527,10 +4566,10 @@ public class FlatzincFullExtWalker extends TreeParser {
             // parser/flatzinc/FlatzincFullExtWalker.g:784:2: ( ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
             // parser/flatzinc/FlatzincFullExtWalker.g:784:6: ^( PREDICATE IDENTIFIER ( pred_param )+ )
             {
-            match(input,PREDICATE,FOLLOW_PREDICATE_in_pred_decl2390); 
+            match(input,PREDICATE,FOLLOW_PREDICATE_in_pred_decl2393); 
 
             match(input, Token.DOWN, null); 
-            IDENTIFIER9=(CommonTree)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_decl2392); 
+            IDENTIFIER9=(CommonTree)match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_decl2395); 
 
             // parser/flatzinc/FlatzincFullExtWalker.g:784:29: ( pred_param )+
             int cnt54=0;
@@ -4550,7 +4589,7 @@ public class FlatzincFullExtWalker extends TreeParser {
             	case 1 :
             	    // parser/flatzinc/FlatzincFullExtWalker.g:784:29: pred_param
             	    {
-            	    pushFollow(FOLLOW_pred_param_in_pred_decl2394);
+            	    pushFollow(FOLLOW_pred_param_in_pred_decl2397);
             	    pred_param();
 
             	    state._fsp--;
@@ -4600,16 +4639,16 @@ public class FlatzincFullExtWalker extends TreeParser {
             // parser/flatzinc/FlatzincFullExtWalker.g:792:5: ( ^( CL pred_param_type IDENTIFIER ) )
             // parser/flatzinc/FlatzincFullExtWalker.g:792:9: ^( CL pred_param_type IDENTIFIER )
             {
-            match(input,CL,FOLLOW_CL_in_pred_param2417); 
+            match(input,CL,FOLLOW_CL_in_pred_param2420); 
 
             match(input, Token.DOWN, null); 
-            pushFollow(FOLLOW_pred_param_type_in_pred_param2419);
+            pushFollow(FOLLOW_pred_param_type_in_pred_param2422);
             pred_param_type();
 
             state._fsp--;
 
 
-            match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_param2421); 
+            match(input,IDENTIFIER,FOLLOW_IDENTIFIER_in_pred_param2424); 
 
             match(input, Token.UP, null); 
 
@@ -4642,7 +4681,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:797:9: par_pred_param_type
                     {
-                    pushFollow(FOLLOW_par_pred_param_type_in_pred_param_type2442);
+                    pushFollow(FOLLOW_par_pred_param_type_in_pred_param_type2445);
                     par_pred_param_type();
 
                     state._fsp--;
@@ -4653,7 +4692,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:798:9: var_pred_param_type
                     {
-                    pushFollow(FOLLOW_var_pred_param_type_in_pred_param_type2452);
+                    pushFollow(FOLLOW_var_pred_param_type_in_pred_param_type2455);
                     var_pred_param_type();
 
                     state._fsp--;
@@ -4689,7 +4728,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:803:9: par_type
                     {
-                    pushFollow(FOLLOW_par_type_in_par_pred_param_type2472);
+                    pushFollow(FOLLOW_par_type_in_par_pred_param_type2475);
                     par_type();
 
                     state._fsp--;
@@ -4700,12 +4739,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:805:9: ^( DD INT_CONST INT_CONST )
                     {
-                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2484); 
+                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2487); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2486); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2489); 
 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2488); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2491); 
 
                     match(input, Token.UP, null); 
 
@@ -4715,7 +4754,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 3 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:806:9: ^( CM ( INT_CONST )+ )
                     {
-                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2500); 
+                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2503); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:806:14: ( INT_CONST )+
@@ -4736,7 +4775,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:806:14: INT_CONST
                     	    {
-                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2502); 
+                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2505); 
 
                     	    }
                     	    break;
@@ -4759,15 +4798,15 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 4 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:807:9: ^( SET ^( DD INT_CONST INT_CONST ) )
                     {
-                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2515); 
+                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2518); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2518); 
+                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2521); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2520); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2523); 
 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2522); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2525); 
 
                     match(input, Token.UP, null); 
 
@@ -4780,10 +4819,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 5 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:808:9: ^( SET ^( CM ( INT_CONST )+ ) )
                     {
-                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2535); 
+                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2538); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2538); 
+                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2541); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:808:20: ( INT_CONST )+
@@ -4804,7 +4843,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:808:20: INT_CONST
                     	    {
-                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2540); 
+                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2543); 
 
                     	    }
                     	    break;
@@ -4830,7 +4869,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 6 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:810:9: ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) )
                     {
-                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2555); 
+                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2558); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:810:17: ( index_set )+
@@ -4851,7 +4890,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:810:17: index_set
                     	    {
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2557);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2560);
                     	    index_set();
 
                     	    state._fsp--;
@@ -4870,12 +4909,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2561); 
+                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2564); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2563); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2566); 
 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2565); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2568); 
 
                     match(input, Token.UP, null); 
 
@@ -4888,7 +4927,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 7 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:811:9: ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) )
                     {
-                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2578); 
+                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2581); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:811:17: ( index_set )+
@@ -4909,7 +4948,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:811:17: index_set
                     	    {
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2580);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2583);
                     	    index_set();
 
                     	    state._fsp--;
@@ -4928,7 +4967,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2584); 
+                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2587); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:811:33: ( INT_CONST )+
@@ -4949,7 +4988,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:811:33: INT_CONST
                     	    {
-                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2586); 
+                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2589); 
 
                     	    }
                     	    break;
@@ -4975,7 +5014,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 8 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:812:9: ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) )
                     {
-                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2600); 
+                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2603); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:812:17: ( index_set )+
@@ -4996,7 +5035,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:812:17: index_set
                     	    {
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2602);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2605);
                     	    index_set();
 
                     	    state._fsp--;
@@ -5015,15 +5054,15 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2606); 
+                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2609); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2609); 
+                    match(input,DD,FOLLOW_DD_in_par_pred_param_type2612); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2611); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2614); 
 
-                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2613); 
+                    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2616); 
 
                     match(input, Token.UP, null); 
 
@@ -5039,7 +5078,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 9 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:813:9: ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) )
                     {
-                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2627); 
+                    match(input,ARRAY,FOLLOW_ARRAY_in_par_pred_param_type2630); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:813:17: ( index_set )+
@@ -5060,7 +5099,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:813:17: index_set
                     	    {
-                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2629);
+                    	    pushFollow(FOLLOW_index_set_in_par_pred_param_type2632);
                     	    index_set();
 
                     	    state._fsp--;
@@ -5079,10 +5118,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2633); 
+                    match(input,SET,FOLLOW_SET_in_par_pred_param_type2636); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2636); 
+                    match(input,CM,FOLLOW_CM_in_par_pred_param_type2639); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:813:39: ( INT_CONST )+
@@ -5103,7 +5142,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:813:39: INT_CONST
                     	    {
-                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2638); 
+                    	    match(input,INT_CONST,FOLLOW_INT_CONST_in_par_pred_param_type2641); 
 
                     	    }
                     	    break;
@@ -5207,10 +5246,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 1 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:818:9: ^( VAR var_type )
                     {
-                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2663); 
+                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2666); 
 
                     match(input, Token.DOWN, null); 
-                    pushFollow(FOLLOW_var_type_in_var_pred_param_type2665);
+                    pushFollow(FOLLOW_var_type_in_var_pred_param_type2668);
                     var_type();
 
                     state._fsp--;
@@ -5224,10 +5263,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 2 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:819:9: ^( VAR SET )
                     {
-                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2677); 
+                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2680); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,SET,FOLLOW_SET_in_var_pred_param_type2679); 
+                    match(input,SET,FOLLOW_SET_in_var_pred_param_type2682); 
 
                     match(input, Token.UP, null); 
 
@@ -5237,7 +5276,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 case 3 :
                     // parser/flatzinc/FlatzincFullExtWalker.g:820:9: ^( ARRAY ( index_set )+ ^( VAR SET ) )
                     {
-                    match(input,ARRAY,FOLLOW_ARRAY_in_var_pred_param_type2691); 
+                    match(input,ARRAY,FOLLOW_ARRAY_in_var_pred_param_type2694); 
 
                     match(input, Token.DOWN, null); 
                     // parser/flatzinc/FlatzincFullExtWalker.g:820:17: ( index_set )+
@@ -5258,7 +5297,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     	case 1 :
                     	    // parser/flatzinc/FlatzincFullExtWalker.g:820:17: index_set
                     	    {
-                    	    pushFollow(FOLLOW_index_set_in_var_pred_param_type2693);
+                    	    pushFollow(FOLLOW_index_set_in_var_pred_param_type2696);
                     	    index_set();
 
                     	    state._fsp--;
@@ -5277,10 +5316,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                     } while (true);
 
 
-                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2697); 
+                    match(input,VAR,FOLLOW_VAR_in_var_pred_param_type2700); 
 
                     match(input, Token.DOWN, null); 
-                    match(input,SET,FOLLOW_SET_in_var_pred_param_type2699); 
+                    match(input,SET,FOLLOW_SET_in_var_pred_param_type2702); 
 
                     match(input, Token.UP, null); 
 
@@ -5737,70 +5776,70 @@ public class FlatzincFullExtWalker extends TreeParser {
     public static final BitSet FOLLOW_IDENTIFIER_in_constraint2128 = new BitSet(new long[]{0x0000144300000000L,0x0000000008800000L});
     public static final BitSet FOLLOW_expr_in_constraint2133 = new BitSet(new long[]{0x0000144300000020L,0x0000000008800000L});
     public static final BitSet FOLLOW_annotations_in_constraint2140 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_SOLVE_in_solve_goal2160 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_annotations_in_solve_goal2164 = new BitSet(new long[]{0x00A0000000000000L,0x0000000000020000L});
-    public static final BitSet FOLLOW_resolution_in_solve_goal2168 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_SATISFY_in_resolution2192 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MINIMIZE_in_resolution2203 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expr_in_resolution2207 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_MAXIMIZE_in_resolution2225 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_expr_in_resolution2229 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_ANNOTATIONS_in_annotations2272 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_annotation_in_annotations2277 = new BitSet(new long[]{0x0000004000000008L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_annotation2314 = new BitSet(new long[]{0x0000400000000002L});
-    public static final BitSet FOLLOW_LP_in_annotation2317 = new BitSet(new long[]{0x0000144300000000L,0x0000000008800000L});
-    public static final BitSet FOLLOW_expr_in_annotation2322 = new BitSet(new long[]{0x0000144300000000L,0x0000000008808000L});
-    public static final BitSet FOLLOW_RP_in_annotation2327 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TRUE_in_bool_const2359 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FALSE_in_bool_const2371 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PREDICATE_in_pred_decl2390 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl2392 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl2394 = new BitSet(new long[]{0x0000000000040008L});
-    public static final BitSet FOLLOW_CL_in_pred_param2417 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_pred_param_type_in_pred_param2419 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_pred_param2421 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_par_pred_param_type_in_pred_param_type2442 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_pred_param_type_in_pred_param_type2452 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_in_par_pred_param_type2472 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type2484 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2486 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2488 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type2500 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2502 = new BitSet(new long[]{0x0000040000000008L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type2515 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type2518 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2520 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2522 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type2535 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type2538 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2540 = new BitSet(new long[]{0x0000040000000008L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2555 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2557 = new BitSet(new long[]{0x0000010002000000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type2561 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2563 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2565 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2578 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2580 = new BitSet(new long[]{0x0000010000080000L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type2584 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2586 = new BitSet(new long[]{0x0000040000000008L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2600 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2602 = new BitSet(new long[]{0x0000010000000000L,0x0000000000080000L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type2606 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type2609 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2611 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2613 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2627 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2629 = new BitSet(new long[]{0x0000010000000000L,0x0000000000080000L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type2633 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type2636 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2638 = new BitSet(new long[]{0x0000040000000008L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2663 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_var_type_in_var_pred_param_type2665 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2677 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type2679 = new BitSet(new long[]{0x0000000000000008L});
-    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type2691 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_index_set_in_var_pred_param_type2693 = new BitSet(new long[]{0x0000010000000000L,0x0000000020000000L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2697 = new BitSet(new long[]{0x0000000000000004L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type2699 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_SOLVE_in_solve_goal2157 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_annotations_in_solve_goal2161 = new BitSet(new long[]{0x00A0000000000000L,0x0000000000020000L});
+    public static final BitSet FOLLOW_resolution_in_solve_goal2165 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_SATISFY_in_resolution2189 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MINIMIZE_in_resolution2206 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expr_in_resolution2210 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_MAXIMIZE_in_resolution2228 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_expr_in_resolution2232 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_ANNOTATIONS_in_annotations2275 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_annotation_in_annotations2280 = new BitSet(new long[]{0x0000004000000008L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_annotation2317 = new BitSet(new long[]{0x0000400000000002L});
+    public static final BitSet FOLLOW_LP_in_annotation2320 = new BitSet(new long[]{0x0000144300000000L,0x0000000008800000L});
+    public static final BitSet FOLLOW_expr_in_annotation2325 = new BitSet(new long[]{0x0000144300000000L,0x0000000008808000L});
+    public static final BitSet FOLLOW_RP_in_annotation2330 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TRUE_in_bool_const2362 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FALSE_in_bool_const2374 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PREDICATE_in_pred_decl2393 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl2395 = new BitSet(new long[]{0x0000000000040000L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl2397 = new BitSet(new long[]{0x0000000000040008L});
+    public static final BitSet FOLLOW_CL_in_pred_param2420 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_pred_param_type_in_pred_param2422 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_pred_param2424 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_par_pred_param_type_in_pred_param_type2445 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_var_pred_param_type_in_pred_param_type2455 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_type_in_par_pred_param_type2475 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type2487 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2489 = new BitSet(new long[]{0x0000040000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2491 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type2503 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2505 = new BitSet(new long[]{0x0000040000000008L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type2518 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type2521 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2523 = new BitSet(new long[]{0x0000040000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2525 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type2538 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type2541 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2543 = new BitSet(new long[]{0x0000040000000008L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2558 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2560 = new BitSet(new long[]{0x0000010002000000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type2564 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2566 = new BitSet(new long[]{0x0000040000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2568 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2581 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2583 = new BitSet(new long[]{0x0000010000080000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type2587 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2589 = new BitSet(new long[]{0x0000040000000008L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2603 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2605 = new BitSet(new long[]{0x0000010000000000L,0x0000000000080000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type2609 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type2612 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2614 = new BitSet(new long[]{0x0000040000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2616 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type2630 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type2632 = new BitSet(new long[]{0x0000010000000000L,0x0000000000080000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type2636 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type2639 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type2641 = new BitSet(new long[]{0x0000040000000008L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2666 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_var_type_in_var_pred_param_type2668 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2680 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type2682 = new BitSet(new long[]{0x0000000000000008L});
+    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type2694 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_index_set_in_var_pred_param_type2696 = new BitSet(new long[]{0x0000010000000000L,0x0000000020000000L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type2700 = new BitSet(new long[]{0x0000000000000004L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type2702 = new BitSet(new long[]{0x0000000000000008L});
 
 }

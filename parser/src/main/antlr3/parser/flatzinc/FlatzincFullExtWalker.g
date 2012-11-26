@@ -731,18 +731,18 @@ constraint
 
 solve_goal
 	:
+	^(SOLVE anns=annotations res=resolution)
 	{
-	ResolutionPolicy type = ResolutionPolicy.SATISFACTION;
-	Expression expr = null;
-	}
-	^(SOLVE anns=annotations res=resolution[type,expr])
-	{
-    FGoal.define_goal(gc, mSolver,anns,type,expr);
+    FGoal.define_goal(gc, mSolver,anns,res.type,res.expr);
 	}
 	;
 
-resolution  [ResolutionPolicy type, Expression expr]
+resolution  returns[ResolutionPolicy type, Expression expr]
     :   SATISFY
+    {
+    $type=ResolutionPolicy.SATISFACTION;
+    $expr=null;
+    }
     |   ^(MINIMIZE e=expr)
     {
     $type=ResolutionPolicy.MINIMIZE;
