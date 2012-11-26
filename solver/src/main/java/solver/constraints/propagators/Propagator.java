@@ -29,7 +29,6 @@ package solver.constraints.propagators;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
 import gnu.trove.set.TIntSet;
@@ -102,6 +101,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int[] vindices;  // index of this within the list of propagator of the i^th variable
 
+    protected Operation[] operations;
+
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
@@ -112,7 +113,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
+    protected short state; // 0 : new -- 1 : active -- 2 : passive
 
     protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
@@ -163,7 +164,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.vindices = new int[vars.length];
         this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.state = environment.makeInt(NEW);
+        this.state = NEW;
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
@@ -176,6 +177,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         fails = 0;
         ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
     }
 
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
@@ -256,8 +271,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param evt event type
      */
     public final void forcePropagate(EventType evt) throws ContradictionException {
-        //coarseER.update(evt);
-        //solver.getEngine().schedulePropagator(this, evt);
         if (nbPendingEvt == 0) {
             if (Configuration.PRINT_PROPAGATION) {
                 PropagationUtils.printPropagation(null, this);
@@ -269,7 +282,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
-        state.set(ACTIVE);
+        state = ACTIVE;
+        environment.save(operations[NEW]);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
@@ -279,7 +293,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
-        state.set(PASSIVE);
+        state = PASSIVE;
+        environment.save(operations[ACTIVE]);
         //TODO: update var mask back
         // to handle properly reified constraint, the cause must be checked
         if (aCause == this) {
@@ -288,15 +303,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public boolean isStateLess() {
-        return state.get() == NEW;
+        return state == NEW;
     }
 
     public boolean isActive() {
-        return state.get() == ACTIVE;
+        return state == ACTIVE;
     }
 
     public boolean isPassive() {
-        return state.get() == PASSIVE;
+        return state == PASSIVE;
     }
 
     /**
