@@ -40,6 +40,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
+import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.ConstraintEngine;
@@ -74,6 +75,15 @@ public class ParseAndSolve {
 
     @Option(name = "-i", aliases = {"--ignore-search"}, usage = "Ignore search strategy.", required = false)
     private boolean free = false;
+
+    @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
+    private int bbss = 1;
+
+    @Option(name="-dv",usage = "Use same decision variables as declared in file (default false)",required = false)
+    private boolean decision_vars = false;
+
+    @Option(name="-seed", usage = "Seed for randomness", required = false)
+    private long seed = 29091981L;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
     private int nb_cores = 1;
@@ -111,7 +121,7 @@ public class ParseAndSolve {
         parseandsolve();
     }
 
-    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map) {
+    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map, GoalConf gc) {
         try {
             // Create an input character stream from standard in
             ANTLRInputStream input = new ANTLRInputStream(is);
@@ -129,7 +139,7 @@ public class ParseAndSolve {
             // Create a tree node stream from resulting tree
             CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
             FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
-            walker.flatzinc_model(mSolver, map);                 // launch at start rule prog
+            walker.flatzinc_model(mSolver, map, gc);                 // launch at start rule prog
         } catch (IOException io) {
             Exit.log(io.getMessage());
         } catch (RecognitionException re) {
@@ -141,9 +151,10 @@ public class ParseAndSolve {
     private void parseandsolve() throws IOException {
         for (String instance : instances) {
             LOGGER.info("% parse instance...");
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed);
             Solver solver = new Solver();
             THashMap<String, Object> map = new THashMap<String, Object>();
-            buildParser(new FileInputStream(new File(instance)), solver, map);
+            buildParser(new FileInputStream(new File(instance)), solver, map, gc);
             switch (eng) {
                 case 0:
                     // let the default propagation strategy,

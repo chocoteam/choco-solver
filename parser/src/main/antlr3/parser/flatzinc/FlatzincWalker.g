@@ -49,6 +49,7 @@ import parser.flatzinc.ast.FConstraint;
 import parser.flatzinc.ast.FGoal;
 import parser.flatzinc.ast.FParameter;
 import parser.flatzinc.ast.FVariable;
+import parser.flatzinc.ast.GoalConf;
 
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -66,23 +67,21 @@ protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 // maintains map between name and objects
 public THashMap<String, Object> map;
 
-// search for all solutions
-public boolean all = false;
-// free search strategy
-public boolean free = false;
-
 // the solver
 public Solver mSolver;
+// goal configuration
+public GoalConf gc;
 
 // the layout dedicated to pretty print message wrt to fzn recommendations
 public final FZNLayout mLayout = new FZNLayout();
 }
 
-flatzinc_model [Solver aSolver, THashMap<String, Object> map]
+flatzinc_model [Solver aSolver, THashMap<String, Object> map, GoalConf gc]
 	:
 	{
 	this.mSolver = aSolver;
 	this.map = map;
+	this.gc = gc;
     }
 	   (pred_decl)* (param_decl)* (var_decl)* (constraint)* solve_goal
 	{
@@ -312,7 +311,7 @@ solve_goal
 	}
 	^(SOLVE anns=annotations res=resolution[type,expr])
 	{
-    FGoal.define_goal(free, all, mSolver,anns,type,expr);
+    FGoal.define_goal(gc, mSolver,anns,type,expr);
 	}
 	;
 

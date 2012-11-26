@@ -96,11 +96,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
      * Philippe Refalo, CP2004.</b>
      *
      * @param ivariables variables of the problem (should be integers)
-     * @param alpha      aging paramter
-     * @param split      split paramater for dubdomains computation
+     * @param alpha      aging parameter
+     * @param split      split parameter for subdomains computation
      * @param nodeImpact force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
      * @param seed       a seed for random
-     * @param initOnly   only apply the initialisation phase, do not update impacte therafter
+     * @param initOnly   only apply the initialisation phase, do not update impact thereafter
      */
     public ImpactBased(IntVar[] ivariables, int alpha, int split, int nodeImpact, long seed, boolean initOnly) { //TODO: node impacts
         super(ivariables);
