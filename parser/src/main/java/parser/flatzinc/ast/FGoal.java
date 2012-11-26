@@ -139,7 +139,7 @@ public class FGoal {
                             ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
                         }
                     } else {
-                        ArrayUtils.append(dvars, extractScope(annotation, aSolver));
+                        dvars = ArrayUtils.append(dvars, extractScope(annotation, aSolver));
                     }
                 }
                 ivars = new IntVar[dvars.length];
@@ -160,6 +160,9 @@ public class FGoal {
                     case 3:
                         DomOverWDegVS dwd = new DomOverWDegVS(ivars, aSolver, gc.seed);
                         aSolver.set(new Assignment(ivars, dwd, new InDomainMin()));
+                        break;
+                    case 4:
+                        aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
                         break;
                     case 1:
                     default:

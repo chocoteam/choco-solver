@@ -112,6 +112,7 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
                 fixSomeVariables();
+                solver.getEngine().propagate();
             } catch (Exception e) {
                 //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
                 solver.getEngine().flush();
