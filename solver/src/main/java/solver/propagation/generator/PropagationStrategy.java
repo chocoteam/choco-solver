@@ -31,7 +31,6 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
 
 /**
  * An abstract class for DSL to define a propagation strategy.

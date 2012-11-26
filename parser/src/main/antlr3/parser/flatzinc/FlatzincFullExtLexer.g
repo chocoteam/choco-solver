@@ -102,6 +102,8 @@ KEY:'key';
 /*********************
  *  ATTRIBUTES
  *********************/
+CSTR:'cstr';
+PROP:'prop';
 VNAME:'var.name';
 VCARD:'var.cardinality';
 CNAME:'cstr.name';
@@ -128,9 +130,16 @@ INDEX   :   '###ID###';
 EXPR    :   '###EX###';
 ANNOTATIONS:'###AS###';
 
-STRUC:'###ST###';
+STRUC1:'###ST1##';
+STRUC2:'###ST2##';
 STREG:'###SR###';
-
+MANY1:'###M1###';
+MANY2:'###M2###';
+MANY3:'###M3###';
+MANY4:'###M4###';
+CA1:'###CA1###';
+CA2:'###CA2###';
+ENGINE:'###EN###';
 
 /*********************************************
  * GENERAL

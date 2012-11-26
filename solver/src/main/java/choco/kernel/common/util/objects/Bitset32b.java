@@ -24,48 +24,42 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.kernel.common.util.objects;
 
-package choco.kernel.memory.structure;
-
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateLong;
 
-import java.lang.reflect.Array;
 import java.util.BitSet;
 
-
-public class OneWordS64BitSet implements IStateBitSet {
+/**
+ * A bitset based on one int.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 19/11/12
+ */
+public class Bitset32b implements IBitset {
 
     /*
-    * BitSets are packed into arrays of "word."  Currently a word is
-    * a long, which consists of 64 bits, requiring 6 address bits.
-    * The choice of word size is determined purely by performance concerns.
+    * BitSets are packed into arrays of "theWord."  Currently a theWord is
+    * an int, which consists of 32 bits, requiring 6 address bits.
+    * The choice of theWord size is determined purely by performance concerns.
     */
-    private final static int ADDRESS_BITS_PER_WORD = 6;
+    private final static int ADDRESS_BITS_PER_WORD = 5;
     private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
 
-    /* Used to shift left or right for a partial word mask */
-    private static final long WORD_MASK = 0xffffffffffffffffL;
-
-    /**
-     * The current environment.
-     */
-    private final IEnvironment environment;
+    /* Used to shift left or right for a partial theWord mask */
+    private static final int WORD_MASK = 0xffffffff;
 
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    private IStateLong word;
+    private int theWord;
 
     /**
      * Creates a new bit set. All bits are initially <code>false</code>.
-     *
-     * @param environment bactrackable environment
      */
-    public OneWordS64BitSet(IEnvironment environment) {
-        this.environment = environment;
-        word = this.environment.makeLong(0);
+    public Bitset32b() {
+        theWord = 0;
     }
 
     /**
@@ -73,35 +67,18 @@ public class OneWordS64BitSet implements IStateBitSet {
      * represent bits with indices in the range <code>0</code> through
      * <code>nbits-1</code>. All bits are initially <code>false</code>.
      *
-     * @param environment backtrackable environment
-     * @param nbits       the initial size of the bit set.
+     * @param nbits the initial size of the bit set.
      * @throws NegativeArraySizeException if the specified initial size
      *                                    is negative.
      */
-    public OneWordS64BitSet(IEnvironment environment, int nbits) {
-        this.environment = environment;
+    public Bitset32b(int nbits) {
         // nbits can't be negative; size 0 is OK
         if (nbits < 0)
             throw new NegativeArraySizeException("nbits < 0: " + nbits);
-        if (nbits > 64)
-            throw new ArrayIndexOutOfBoundsException("nbits > 64: " + nbits);
+        if (nbits > 32)
+            throw new ArrayIndexOutOfBoundsException("nbits > 32: " + nbits);
 
-        word = this.environment.makeLong(0);
-    }
-
-    @SuppressWarnings({"unchecked"})
-    public static <T> T[] copyOf(T[] original, int newLength) {
-        return (T[]) copyOf(original, newLength, original.getClass());
-    }
-
-    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy"})
-    public static <T, U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        T[] copy = ((Object) newType == (Object) Object[].class)
-                ? (T[]) new Object[newLength]
-                : (T[]) Array.newInstance(newType.getComponentType(), newLength);
-        System.arraycopy(original, 0, copy, 0,
-                Math.min(original.length, newLength));
-        return copy;
+        theWord = 0;
     }
 
     public BitSet copyToBitSet() {
@@ -137,9 +114,9 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
-        long tmp = word.get();
-        tmp ^= (1L << bitIndex);
-        word.set(tmp);
+        int tmp = theWord;
+        tmp ^= (1 << bitIndex);
+        theWord = tmp;
     }
 
     /**
@@ -159,11 +136,11 @@ public class OneWordS64BitSet implements IStateBitSet {
 
         if (fromIndex == toIndex)
             return;
-        long firstWordMask = WORD_MASK << fromIndex;
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        long tmp = word.get();
+        int firstWordMask = WORD_MASK << fromIndex;
+        int lastWordMask = WORD_MASK >>> -toIndex;
+        int tmp = theWord;
         tmp ^= (firstWordMask & lastWordMask);
-        word.set(tmp);
+        theWord = tmp;
     }
 
     /**
@@ -177,7 +154,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
-        word.set(word.get() | (1L << bitIndex)); // Restores invariants
+        theWord = theWord | (1 << bitIndex); // Restores invariants
         //checkInvariants();
     }
 
@@ -213,9 +190,9 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (fromIndex == toIndex)
             return;
 
-        long firstWordMask = WORD_MASK << fromIndex;
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        word.set(word.get() | (firstWordMask & lastWordMask));
+        int firstWordMask = WORD_MASK << fromIndex;
+        int lastWordMask = WORD_MASK >>> -toIndex;
+        theWord = theWord | (firstWordMask & lastWordMask);
         //checkInvariants();
     }
 
@@ -249,7 +226,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
-        word.set(word.get() & ~(1L << bitIndex));
+        theWord = theWord & ~(1 << bitIndex);
         //checkInvariants();
     }
 
@@ -270,9 +247,9 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (fromIndex == toIndex)
             return;
 
-        long firstWordMask = WORD_MASK << fromIndex;
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        word.set(word.get() & ~(firstWordMask & lastWordMask));
+        int firstWordMask = WORD_MASK << fromIndex;
+        int lastWordMask = WORD_MASK >>> -toIndex;
+        theWord = theWord & ~(firstWordMask & lastWordMask);
         //checkInvariants();
     }
 
@@ -282,7 +259,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @since 1.4
      */
     public void clear() {
-        word.set(0);
+        theWord = 0;
     }
 
     /**
@@ -300,7 +277,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         //checkInvariants();
-        return bitIndex < 64 && ((word.get() & (1L << bitIndex)) != 0);
+        return bitIndex < 32 && ((theWord & (1 << bitIndex)) != 0);
     }
 
     /**
@@ -315,7 +292,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
-    public OneWordS64BitSet get(int fromIndex, int toIndex) {
+    public IBitset get(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException();
     }
 
@@ -343,13 +320,13 @@ public class OneWordS64BitSet implements IStateBitSet {
             fromIndex = 0;
         }
 
-        if (fromIndex >= 64)
+        if (fromIndex >= 32)
             return -1;
 
-        long word = this.word.get() & (WORD_MASK << fromIndex);
+        int word = theWord & (WORD_MASK << fromIndex);
 
         if (word != 0)
-            return Long.numberOfTrailingZeros(word);
+            return Integer.numberOfTrailingZeros(word);
         else
             return -1;
     }
@@ -373,10 +350,10 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (fromIndex >= 64)
             return fromIndex;
 
-        long word = ~this.word.get() & (WORD_MASK << fromIndex);
+        int word = ~theWord & (WORD_MASK << fromIndex);
 
         if (word != 0)
-            return Long.numberOfTrailingZeros(word);
+            return Integer.numberOfTrailingZeros(word);
         else
             return 0;
     }
@@ -407,13 +384,13 @@ public class OneWordS64BitSet implements IStateBitSet {
             return -1;
         }
 
-        if (fromIndex >= 64)
+        if (fromIndex >= 32)
             return length() - 1;
 
-        long word = this.word.get() & (WORD_MASK >>> -(fromIndex + 1));
+        int word = theWord & (WORD_MASK >>> -(fromIndex + 1));
 
         if (word != 0)
-            return BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+            return BITS_PER_WORD - 1 - Integer.numberOfLeadingZeros(word);
         else
             return -1;
     }
@@ -439,10 +416,10 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (fromIndex >= 64)
             return fromIndex;
 
-        long word = ~this.word.get() & (WORD_MASK >>> -(fromIndex + 1));
+        int word = ~theWord & (WORD_MASK >>> -(fromIndex + 1));
 
         if (word != 0)
-            return BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+            return BITS_PER_WORD - 1 - Integer.numberOfLeadingZeros(word);
         else
             return -1;
     }
@@ -460,7 +437,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @since 1.2
      */
     public int length() {
-        return (BITS_PER_WORD - Long.numberOfLeadingZeros(word.get()));
+        return (BITS_PER_WORD - Integer.numberOfLeadingZeros(theWord));
     }
 
     /**
@@ -471,7 +448,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @since 1.4
      */
     public boolean isEmpty() {
-        return word.get() == 0;
+        return theWord == 0;
     }
 
     /**
@@ -483,7 +460,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @since 1.4
      */
     public int cardinality() {
-        return Long.bitCount(word.get());
+        return Integer.bitCount(theWord);
     }
 
     /**
@@ -542,6 +519,11 @@ public class OneWordS64BitSet implements IStateBitSet {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean intersects(IBitset setI) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Returns true if the specified <code>BitSet</code> has any bits set to
      * <code>true</code> that are also set to <code>true</code> in this
@@ -557,9 +539,9 @@ public class OneWordS64BitSet implements IStateBitSet {
     }
 
     public int hashCode() {
-        long h = 1234;
-        h ^= word.get();
-        return (int) ((h >> 32) ^ h);
+        int h = 1234;
+        h ^= theWord;
+        return (h >> 16) ^ h;
     }
 
     /**
@@ -574,25 +556,25 @@ public class OneWordS64BitSet implements IStateBitSet {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof OneWordS64BitSet))
+        if (!(obj instanceof Bitset32b))
             return false;
         if (this == obj)
             return true;
 
-        OneWordS64BitSet set = (OneWordS64BitSet) obj;
+        Bitset32b set = (Bitset32b) obj;
 
         //checkInvariants();
         //set.checkInvariants();
 
         // Check word in use by both BitSets
-        return word == set.word;
+        return theWord == set.theWord;
     }
 
-    public IStateBitSet copy() {
+    public IBitset copy() {
         //if (!sizeIsSticky.get()) trimToSize();
-        OneWordS64BitSet result = new OneWordS64BitSet(environment, this.size());
+        Bitset32b result = new Bitset32b(this.size());
         //result.sizeIsSticky.set(sizeIsSticky.get());
-        result.word.set(word.get());
+        result.theWord = theWord;
         //result.checkInvariants();
         return result;
     }

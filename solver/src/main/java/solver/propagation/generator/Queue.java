@@ -26,7 +26,6 @@
  */
 package solver.propagation.generator;
 
-import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.AQueue;
@@ -131,9 +130,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         }
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pollFirst();//.pop();
-            if (Configuration.LAZY_UPDATE) {
-                lastPopped.flush();
-            }
+            lastPopped.flush();
             lastPopped.deque();
         }
     }

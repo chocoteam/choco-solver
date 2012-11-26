@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package solver.constraints.propagators.nary.alldifferent.proba;
 
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -8,7 +35,6 @@ import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Cause;
 import solver.ICause;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.recorders.IEventRecorder;
@@ -43,12 +69,12 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     protected final RemProc rem_proc;
     protected final TIntObjectHashMap<IIntDeltaMonitor> deltamon; // delta monitoring -- can be NONE
     protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
-	protected final AbstractSearchLoop loop;
+    protected final AbstractSearchLoop loop;
 
 
     public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars, int seed, AbstractSearchLoop loop) {
         this.seed = seed;
-		this.loop = loop;
+        this.loop = loop;
         this.rand = new Random();
         this.rem_proc = new RemProc(this);
         this.environment = environment;
@@ -158,22 +184,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         dm.unfreeze();
         assert test();
     } //*/
-
-    @Override
-    public boolean validateScheduling(IEventRecorder recorder, Propagator propagator, EventType event) {
-        double cut = rand.nextDouble();
-        return (1 - proba > cut); //*/
-        //return true;
-    }
-
-    @Override
-    public ICondition next() {
-        return null;
-    }
-
-    @Override
-    public void linkRecorder(IEventRecorder recorder) {
-    }
 
     public boolean test() {
         Set<Integer> union = computeUnion();

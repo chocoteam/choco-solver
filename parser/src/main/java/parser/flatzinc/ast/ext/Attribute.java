@@ -26,7 +26,7 @@
  */
 package parser.flatzinc.ast.ext;
 
-import solver.recorders.fine.arc.FineArcEventRecorder;
+import solver.propagation.generator.Arc;
 
 /**
  * <br/>
@@ -34,17 +34,48 @@ import solver.recorders.fine.arc.FineArcEventRecorder;
  * @author Charles Prud'homme
  * @since 22/10/12
  */
-public enum Attribute implements IAttribute<FineArcEventRecorder> {
+public enum Attribute implements IAttribute<Arc> {
 
-    VNAME {
+    VAR {
         @Override
-        public int evaluate(Pair p) {
-            return p.var.getId();
+        public int eval(Arc p) {
+            return p.var.hashCode();
         }
 
         @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getVariables()[0].getId();
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    CSTR {
+        @Override
+        public int eval(Arc p) {
+            return p.prop.getConstraint().hashCode();
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    PROP {
+        @Override
+        public int eval(Arc p) {
+            return p.prop.hashCode();
+        }
+
+        @Override
+        public boolean isDynamic() {
+            return false;
+        }
+
+    },
+    VNAME {
+        @Override
+        public int eval(Arc p) {
+            return p.var.getName().hashCode();
         }
 
         @Override
@@ -54,13 +85,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, VCARD {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.var.getNbProps();
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getVariables()[0].getNbProps();
         }
 
         @Override
@@ -70,13 +96,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, CNAME {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.getConstraint().hashCode();
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].getConstraint().hashCode();
         }
 
         @Override
@@ -87,13 +108,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, CARITY {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.getConstraint().getVariables().length;
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].getConstraint().getVariables().length;
         }
 
         @Override
@@ -103,13 +119,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, PIDX {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.getId();
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].getId();
         }
 
         @Override
@@ -120,13 +131,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, PPRIO {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.getPriority().priority;
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].getPriority().priority;
         }
 
         @Override
@@ -136,13 +142,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, PARITY {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.getNbVars();
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].getNbVars();
         }
 
         @Override
@@ -152,13 +153,8 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
 
     }, PPRIOD {
         @Override
-        public int evaluate(Pair p) {
+        public int eval(Arc p) {
             return p.prop.dynPriority();
-        }
-
-        @Override
-        public int eval(FineArcEventRecorder p) {
-            return p.getPropagators()[0].dynPriority();
         }
 
         @Override
@@ -167,8 +163,6 @@ public enum Attribute implements IAttribute<FineArcEventRecorder> {
         }
 
     };
-
-    public abstract int evaluate(Pair p);
 
     public abstract boolean isDynamic();
 

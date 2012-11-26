@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 /**
  * <br/>
  *
@@ -47,7 +49,7 @@ public class IntPredicate extends Predicate {
     }
 
     @Override
-    public boolean evaluate(Pair p) {
-        return (op.apply(attribute.evaluate(p), value));
+    public boolean evaluate(Arc p) {
+        return op.apply(attribute.eval(p), value);
     }
 }

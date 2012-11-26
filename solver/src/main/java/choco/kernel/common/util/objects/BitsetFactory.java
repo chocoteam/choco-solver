@@ -24,35 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.generator.predicate;
-
-import gnu.trove.set.hash.TIntHashSet;
-import solver.variables.Variable;
+package choco.kernel.common.util.objects;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 08/03/12
+ * @since 19/11/12
  */
-public class InVarSet extends Predicate<Variable> {
+public enum BitsetFactory {
+    ;
 
-    final TIntHashSet allowIndices;
-
-    public InVarSet(Variable... variables) {
-        super(true, false);
-        allowIndices = new TIntHashSet();
-        add(variables);
-    }
-
-    public void add(Variable... variables) {
-        for (int i = 0; i < variables.length; i++) {
-            allowIndices.add(variables[i].getId());
+    public static IBitset make(int nbits) {
+        if (nbits < 0) {
+            throw new NegativeArraySizeException("nbits < 0: " + nbits);
+        } else if (nbits <= 32) {
+            return new Bitset32b(nbits);
+        } else if (nbits <= 64) {
+            return new Bitset64b(nbits);
+        } else {
+            return new Bitset64n(nbits);
         }
-    }
-
-    @Override
-    public boolean isValid(Variable element) {
-        return allowIndices.contains(element.getId());
     }
 }

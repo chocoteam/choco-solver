@@ -27,8 +27,8 @@
 package parser.flatzinc.ast.ext;
 
 import solver.propagation.ISchedulable;
+import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
-import solver.recorders.fine.arc.FineArcEventRecorder;
 
 /**
  * <br/>
@@ -41,8 +41,8 @@ public enum AttributeOperator {
     ANY {
         @Override
         public int evaluate(PropagationStrategy input, CombinedAttribute ca, int current) {
-            if (current == ca.operators.size()) {
-                return ca.attribute.eval((FineArcEventRecorder) input.array()[0]);
+            if (current +1 == ca.operators.size()) {
+                return ca.attribute.eval((Arc) input.array()[0]);
             } else {
                 return ca.operators.get(current + 1).evaluate((PropagationStrategy) input.array()[0], ca, current + 1);
             }
@@ -55,8 +55,8 @@ public enum AttributeOperator {
             for (int i = 0; i < scheds.length; i++) {
                 ISchedulable sched = scheds[i];
                 int val;
-                if (current == ca.operators.size()) {
-                    val = ca.attribute.eval((FineArcEventRecorder) sched);
+                if (current +1 == ca.operators.size()) {
+                    val = ca.attribute.eval((Arc) sched);
                 } else {
                     val = ca.operators.get(current + 1).evaluate((PropagationStrategy) sched, ca, current + 1);
                 }
@@ -74,8 +74,8 @@ public enum AttributeOperator {
             for (int i = 0; i < scheds.length; i++) {
                 ISchedulable sched = scheds[i];
                 int val;
-                if (current == ca.operators.size()) {
-                    val = ca.attribute.eval((FineArcEventRecorder) sched);
+                if (current +1 == ca.operators.size()) {
+                    val = ca.attribute.eval((Arc) sched);
                 } else {
                     val = ca.operators.get(current + 1).evaluate((PropagationStrategy) sched, ca, current + 1);
                 }
@@ -93,8 +93,8 @@ public enum AttributeOperator {
             for (int i = 0; i < scheds.length; i++) {
                 ISchedulable sched = scheds[i];
                 int val;
-                if (current == ca.operators.size()) {
-                    val = ca.attribute.eval((FineArcEventRecorder) sched);
+                if (current +1 == ca.operators.size()) {
+                    val = ca.attribute.eval((Arc) sched);
                 } else {
                     val = ca.operators.get(current + 1).evaluate((PropagationStrategy) sched, ca, current + 1);
                 }

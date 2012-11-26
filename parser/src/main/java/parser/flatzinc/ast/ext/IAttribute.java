@@ -26,7 +26,7 @@
  */
 package parser.flatzinc.ast.ext;
 
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
+import solver.propagation.generator.IEvaluator;
 
 /**
  * <br/>

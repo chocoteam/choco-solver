@@ -40,7 +40,7 @@ package parser.flatzinc;
 }
 
 flatzinc_ext_model
-	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (group_decl)* (structure)? solve_goal
+	:   (pred_decl)* (param_decl)* (var_decl)* (constraint)* (engine)? solve_goal
 	;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,10 +50,9 @@ flatzinc_ext_model
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//engine
-//    :   (group_decl)* //structure
-//    ->  group_decl+ //structure
-//    ;
+engine
+    :   group_decl+ structure
+    ;
 
 // DECLARATION OF A GROUP
 group_decl
@@ -82,7 +81,10 @@ predicate
 
 // ATTRIBUTE ACCESSIBLE THROUGH THE SOLVER
 attribute
-	: 	VNAME
+	: 	VAR
+	|   CSTR
+	|   PROP
+	|   VNAME
     |   VCARD
     |   CNAME
     |   CARITY
@@ -113,13 +115,15 @@ structure
 	;
 
 struct
-    :	coll OF LB elt (CM elt)* RB (KEY comb_attr)?
-    ->  ^(STRUC elt+ comb_attr? coll)
+    :	coll OF LB elt (CM elt)* RB (KEY ca=comb_attr)?
+    ->  {ca==null}? ^(STRUC1 elt+ coll)
+    ->              ^(STRUC2 elt+ comb_attr coll)
 	;
 
 struct_reg
-	:	IDENTIFIER AS coll OF LB many RB (KEY comb_attr)?
-	->  ^(STREG IDENTIFIER many comb_attr? coll)
+	:	IDENTIFIER AS coll OF LB many RB (KEY ca=comb_attr)?
+	->  {ca==null}? ^(STREG IDENTIFIER many coll)
+	->              ^(STREG IDENTIFIER comb_attr many coll)
 	;
 
 //TODO: remove backtrack options
@@ -130,18 +134,23 @@ elt
 	;
 
 many
-    :	EACH attribute AS coll (OF LB m=many RB)? (KEY comb_attr)?
-    ->  {m==null}?  ^(attribute comb_attr? coll)
-    ->              ^(EACH attribute comb_attr? many coll)
+    :	EACH attribute AS coll (OF LB m=many RB)? (KEY ca=comb_attr)?
+    ->  {m==null && ca == null}?   ^(MANY1 attribute coll)
+    ->  {m==null && ca != null}?   ^(MANY2 attribute comb_attr coll)
+    ->  {m!=null && ca == null}?   ^(MANY3 attribute many coll)
+    ->                             ^(MANY4 attribute comb_attr many coll)
 	;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 coll
-    :	QUEUE LP! qiter RP!
-    |	(REV)? LIST LP! liter RP!
-    |	(MIN|MAX) HEAP  LP! qiter RP!
+    :	QUEUE LP qiter RP
+    ->  ^(QUEUE qiter)
+    |	(REV)? LIST LP liter RP
+    ->  ^(LIST REV? liter)
+    |	(MAX)? HEAP  LP qiter RP
+    ->  ^(HEAP MAX? qiter)
 	;
 
 qiter
@@ -158,9 +167,9 @@ liter
 
 comb_attr
 	:	attr_op (DO attr_op)*  (DO attribute)?
-	->  ^(DO attr_op* attribute?)
-	|   (attr_op DO)* attribute
-	->  ^(DO attr_op* attribute?)
+	->  ^(CA1 attr_op* attribute?)
+	|   (attr_op DO)+ attribute
+	->  ^(CA2 attr_op+ attribute)
 	;
 
 attr_op

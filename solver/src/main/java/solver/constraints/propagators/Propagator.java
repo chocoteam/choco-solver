@@ -45,6 +45,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.propagation.PropagationUtils;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -257,9 +258,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final void forcePropagate(EventType evt) throws ContradictionException {
         //coarseER.update(evt);
         //solver.getEngine().schedulePropagator(this, evt);
-        if (Configuration.PRINT_PROPAGATION)
-            LoggerFactory.getLogger("solver").info("\tFP {}", "<< {} ::" + this.toString() + " >>");
         if (nbPendingEvt == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                PropagationUtils.printPropagation(null, this);
+            }
             coarseERcalls++;
             propagate(evt.getStrengthenedMask());
         }
@@ -271,10 +273,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
             vars[v].recordMask(getPropagationConditions(v));
-        }
-        // to handle properly reified constraint, the cause must be checked
-        if (aCause == this) {
-            solver.getEngine().activatePropagator(this);
         }
     }
 
@@ -402,17 +400,23 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void incNbPendingEvt() {
-        assert (nbPendingEvt >= 0) : "number of enqued records is < 0";
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt++;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
     public void decNbPendingEvt() {
-        assert (nbPendingEvt > 0) : "number of enqued records is < 0";
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0 "+this;
         nbPendingEvt--;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);
     }
 
     public void flushPendingEvt() {
         nbPendingEvt = 0;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[F]{}:{}", nbPendingEvt, this);
     }
 
     /**

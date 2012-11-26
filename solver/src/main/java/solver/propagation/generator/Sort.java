@@ -26,13 +26,13 @@
  */
 package solver.propagation.generator;
 
+import choco.kernel.common.util.objects.BitsetFactory;
+import choco.kernel.common.util.objects.IBitset;
 import choco.kernel.common.util.tools.ArrayUtils;
-import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Comparator;
 
 /**
@@ -53,14 +53,14 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     };
     protected S lastPopped;
 
-    protected BitSet toPropagate;
+    protected IBitset toPropagate;
 
     private Sort(S[] schedulables) {
         super(schedulables);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = BitsetFactory.make(elements.length);
     }
 
     public Sort(boolean order, boolean reverse, S[] schedulables) {
@@ -74,7 +74,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = BitsetFactory.make(elements.length);
     }
 
 
@@ -120,15 +120,13 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     protected boolean _sweepUp() throws ContradictionException {
-        int idx = toPropagate.nextSetBit(0);
-        while (idx >= 0) {
+        for (int idx = toPropagate.nextSetBit(0); idx >= 0; idx = toPropagate.nextSetBit(idx + 1)) {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
-            idx = toPropagate.nextSetBit(idx + 1);
         }
         return toPropagate.isEmpty();
     }
@@ -171,9 +169,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
             toPropagate.clear(i);
             lastPopped = elements[i];
-            if (Configuration.LAZY_UPDATE) {
-                lastPopped.flush();
-            }
+            lastPopped.flush();
             lastPopped.deque();
         }
     }

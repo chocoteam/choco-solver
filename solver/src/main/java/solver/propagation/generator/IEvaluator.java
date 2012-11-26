@@ -24,62 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine.prop;
+package solver.propagation.generator;
 
-import org.slf4j.LoggerFactory;
-import solver.Configuration;
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.propagation.PropagationEngine;
-import solver.variables.Variable;
+import java.io.Serializable;
 
 /**
- * A fine event recorder prop-oriented dedicated to ternary propagators
+ * An interface to evaluate an object
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/06/12
+ * @since 09/03/12
  */
-public final class FineTernPropEventRecorder<V extends Variable> extends FinePropEventRecorder<V> {
+public interface IEvaluator<E> extends Serializable {
 
-    public FineTernPropEventRecorder(V[] variables, Propagator<V> vPropagator, int[] idxVinPs, Solver solver, PropagationEngine engine) {
-        super(variables, vPropagator, idxVinPs, solver, engine);
-    }
-
-    @Override
-    public boolean execute() throws ContradictionException {
-        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        _execute(0);
-        _execute(1);
-        _execute(2);
-        return true;
-    }
+    /**
+     * Evaluate an element <code>E</code> and return its evaluation wrt <code>this</code>.
+     *
+     * @param element object to evaluate
+     * @return its evaluation
+     */
+    int eval(E element);
 
 
-    @Override
-    public void flush() {
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
-    }
-
-    @Override
-    public void virtuallyExecuted(Propagator propagator) {
-        assert this.propagators[PINDEX] == propagator : "wrong propagator";
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
-        if (enqueued) {
-            scheduler.remove(this);
-        }
-    }
-
-    @Override
-    public void desactivate(Propagator<V> element) {
-        super.desactivate(element);
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
-    }
 }

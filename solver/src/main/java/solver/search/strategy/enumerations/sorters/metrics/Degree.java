@@ -54,9 +54,10 @@ public class Degree<V extends Variable> implements IMetric<V> {
     @Override
     public int eval(V var) {
         int d = 0;
-        Propagator[] props = var.getPropagators();
-        for (int i = 0; i < props.length; i++) {
-            d += (props[i].isActive() ? 1 : 0);
+        int nbp = var.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = var.getPropagator(p);
+            d += (prop.isActive() ? 1 : 0);
         }
         return d;
     }

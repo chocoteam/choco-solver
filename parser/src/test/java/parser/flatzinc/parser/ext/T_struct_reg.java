@@ -35,15 +35,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
-import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.SortDyn;
+import solver.propagation.generator.*;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -79,10 +75,10 @@ public class T_struct_reg extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver.getEnvironment(), false, false, false);
+        pe = new PropagationEngine(mSolver);
 
-        ArrayList<Pair> pairs = Pair.populate(mSolver);
-        groups.put("G1", pairs);
+        ArrayList<Arc> arcs = Arc.populate(mSolver);
+        groups.put("G1", arcs);
 
     }
 
@@ -101,7 +97,7 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test1() throws IOException, RecognitionException {
         // Simple constraint oriented engine
-        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each cstr as list(wfor)}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof Queue);
@@ -110,7 +106,7 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test2() throws IOException, RecognitionException {
         // Simple variable oriented engine
-        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var.name as list(wfor)}");
+        FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var as list(wfor)}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof Queue);
@@ -128,10 +124,19 @@ public class T_struct_reg extends GrammarExtTest {
     @Test
     public void test4() throws IOException, RecognitionException {
         // A heap-based variable oriented propagation engine
-        FlatzincFullExtParser fp = parser("G1 as min heap(wone) of {each var.name as queue(one) key any.var.cardinality}");
+        FlatzincFullExtParser fp = parser("G1 as heap(wone) of {each var as queue(one) key any.var.cardinality}");
         PropagationStrategy scheds = struct_reg(fp);
         Assert.assertNotNull(scheds);
         Assert.assertTrue(scheds instanceof SortDyn);
     }
+
+    @Test
+        public void test5() throws IOException, RecognitionException {
+            // A heap-based variable oriented propagation engine
+            FlatzincFullExtParser fp = parser("G1 as max heap(wone) of {each var as queue(one) key any.var.cardinality}");
+            PropagationStrategy scheds = struct_reg(fp);
+            Assert.assertNotNull(scheds);
+            Assert.assertTrue(scheds instanceof SortDyn);
+        }
 
 }

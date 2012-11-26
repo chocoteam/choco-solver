@@ -144,8 +144,6 @@ public class ParseAndSolve {
             Solver solver = new Solver();
             THashMap<String, Object> map = new THashMap<String, Object>();
             buildParser(new FileInputStream(new File(instance)), solver, map);
-            LOGGER.info("% solve instance...");
-
             switch (eng) {
                 case 0:
                     // let the default propagation strategy,
@@ -158,6 +156,7 @@ public class ParseAndSolve {
                     break;
                 case 3:
                     solver.set(new SevenQueuesConstraintEngine(solver));
+                    break;
                 case -1:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {
@@ -174,6 +173,8 @@ public class ParseAndSolve {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
+
+            LOGGER.info("% solve instance...");
             solver.solve();
         }
     }

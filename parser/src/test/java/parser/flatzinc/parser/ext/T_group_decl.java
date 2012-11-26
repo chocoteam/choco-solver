@@ -35,10 +35,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
-import parser.flatzinc.ast.ext.Pair;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.propagation.generator.Arc;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -87,7 +87,7 @@ public class T_group_decl extends GrammarExtTest {
 
     @Test
     public void test1() throws IOException, RecognitionException {
-        ArrayList<Pair> before = Pair.populate(mSolver);
+        ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: true;");
         group_decl(fp, before);
         ArrayList elmts = groups.get("G1");
@@ -96,7 +96,7 @@ public class T_group_decl extends GrammarExtTest {
 
     @Test
     public void test2() throws IOException, RecognitionException {
-        ArrayList<Pair> before = Pair.populate(mSolver);
+        ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: prop.priority <= 2;");
         group_decl(fp, before);
         ArrayList elmts = groups.get("G1");
@@ -105,7 +105,7 @@ public class T_group_decl extends GrammarExtTest {
 
     @Test
     public void test3() throws IOException, RecognitionException {
-        ArrayList<Pair> before = Pair.populate(mSolver);
+        ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: (in(v_0,c_0) || in(v_1,c_1) || in(v_2,c_2) || in(v_3,c_3));");
         group_decl(fp, before);
         ArrayList elmts = groups.get("G1");

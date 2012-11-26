@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 import java.util.ArrayList;
 
 /**
@@ -36,13 +38,13 @@ import java.util.ArrayList;
  */
 public abstract class Predicate {
 
-    public abstract boolean evaluate(Pair p);
+    public abstract boolean evaluate(Arc p);
 
     public ArrayList evaluate(ArrayList before) {
         ArrayList after = new ArrayList();
         Object o = before.get(0);
-        if (o instanceof Pair) {
-            if (this.evaluate((Pair) o)) {
+        if (o instanceof Arc) {
+            if (this.evaluate((Arc) o)) {
                 after.add(o);
             }
         } else {

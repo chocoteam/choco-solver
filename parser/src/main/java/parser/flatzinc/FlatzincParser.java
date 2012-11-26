@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// $ANTLR 3.4 parser/flatzinc/FlatzincParser.g 2012-10-19 17:44:46
+// $ANTLR 3.4 parser/flatzinc/FlatzincParser.g 2012-11-13 10:00:41
 
 package parser.flatzinc;
 
@@ -37,88 +37,59 @@ import org.antlr.runtime.tree.*;
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class FlatzincParser extends Parser {
     public static final String[] tokenNames = new String[]{
-            "<invalid>", "<EOR>", "<DOWN>", "<UP>", "AND", "ANNOTATIONS", "APAR", "ARRAY", "ARRPAR", "ARRVAR", "AVAR", "BOOL", "CARITY", "CHAR", "CIDX", "CL", "CM", "COMMENT", "CONSTRAINT", "DC", "DD", "DO", "ENGINE", "EQ", "ESC_SEQ", "EXPONENT", "EXPR", "FALSE", "FILTER", "FLOAT", "FOR", "GROUPBY", "HEAP", "HEX_DIGIT", "IDENTIFIER", "IN", "INDEX", "INT", "INT_CONST", "LB", "LIST", "LP", "LS", "MANY", "MAXIMIZE", "MINIMIZE", "MN", "NOT", "OCTAL_ESC", "OEQ", "OF", "OGT", "OLT", "ONE", "ONQ", "OR", "ORDERBY", "PAR", "PARITY", "PIDX", "PL", "PPRIO", "PPRIOD", "PREDICATE", "QUEUE", "RB", "RP", "RS", "SATISFY", "SC", "SET", "SOLVE", "STRING", "TRUE", "Tokens", "UNICODE_ESC", "VAR", "VCARD", "VIDX", "WFOR", "WONE", "WS"
+            "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ANNOTATIONS", "APAR", "ARRAY", "ARRPAR", "ARRVAR", "AVAR", "BOOL", "CHAR", "CL", "CM", "COMMENT", "CONSTRAINT", "DC", "DD", "DO", "EQ", "ESC_SEQ", "EXPONENT", "EXPR", "FALSE", "FLOAT", "HEX_DIGIT", "IDENTIFIER", "INDEX", "INT", "INT_CONST", "LB", "LP", "LS", "MAXIMIZE", "MINIMIZE", "MN", "OCTAL_ESC", "OF", "PAR", "PL", "PREDICATE", "RB", "RP", "RS", "SATISFY", "SC", "SET", "SOLVE", "STRING", "TRUE", "UNICODE_ESC", "VAR", "WS"
     };
 
     public static final int EOF = -1;
-    public static final int AND = 4;
-    public static final int ANNOTATIONS = 5;
-    public static final int APAR = 6;
-    public static final int ARRAY = 7;
-    public static final int ARRPAR = 8;
-    public static final int ARRVAR = 9;
-    public static final int AVAR = 10;
-    public static final int BOOL = 11;
-    public static final int CARITY = 12;
-    public static final int CHAR = 13;
-    public static final int CIDX = 14;
-    public static final int CL = 15;
-    public static final int CM = 16;
-    public static final int COMMENT = 17;
-    public static final int CONSTRAINT = 18;
-    public static final int DC = 19;
-    public static final int DD = 20;
-    public static final int DO = 21;
-    public static final int ENGINE = 22;
-    public static final int EQ = 23;
-    public static final int ESC_SEQ = 24;
-    public static final int EXPONENT = 25;
-    public static final int EXPR = 26;
-    public static final int FALSE = 27;
-    public static final int FILTER = 28;
-    public static final int FLOAT = 29;
-    public static final int FOR = 30;
-    public static final int GROUPBY = 31;
-    public static final int HEAP = 32;
-    public static final int HEX_DIGIT = 33;
-    public static final int IDENTIFIER = 34;
-    public static final int IN = 35;
-    public static final int INDEX = 36;
-    public static final int INT = 37;
-    public static final int INT_CONST = 38;
-    public static final int LB = 39;
-    public static final int LIST = 40;
-    public static final int LP = 41;
-    public static final int LS = 42;
-    public static final int MANY = 43;
-    public static final int MAXIMIZE = 44;
-    public static final int MINIMIZE = 45;
-    public static final int MN = 46;
-    public static final int NOT = 47;
-    public static final int OCTAL_ESC = 48;
-    public static final int OEQ = 49;
-    public static final int OF = 50;
-    public static final int OGT = 51;
-    public static final int OLT = 52;
-    public static final int ONE = 53;
-    public static final int ONQ = 54;
-    public static final int OR = 55;
-    public static final int ORDERBY = 56;
-    public static final int PAR = 57;
-    public static final int PARITY = 58;
-    public static final int PIDX = 59;
-    public static final int PL = 60;
-    public static final int PPRIO = 61;
-    public static final int PPRIOD = 62;
-    public static final int PREDICATE = 63;
-    public static final int QUEUE = 64;
-    public static final int RB = 65;
-    public static final int RP = 66;
-    public static final int RS = 67;
-    public static final int SATISFY = 68;
-    public static final int SC = 69;
-    public static final int SET = 70;
-    public static final int SOLVE = 71;
-    public static final int STRING = 72;
-    public static final int TRUE = 73;
-    public static final int Tokens = 74;
-    public static final int UNICODE_ESC = 75;
-    public static final int VAR = 76;
-    public static final int VCARD = 77;
-    public static final int VIDX = 78;
-    public static final int WFOR = 79;
-    public static final int WONE = 80;
-    public static final int WS = 81;
+    public static final int ANNOTATIONS = 4;
+    public static final int APAR = 5;
+    public static final int ARRAY = 6;
+    public static final int ARRPAR = 7;
+    public static final int ARRVAR = 8;
+    public static final int AVAR = 9;
+    public static final int BOOL = 10;
+    public static final int CHAR = 11;
+    public static final int CL = 12;
+    public static final int CM = 13;
+    public static final int COMMENT = 14;
+    public static final int CONSTRAINT = 15;
+    public static final int DC = 16;
+    public static final int DD = 17;
+    public static final int DO = 18;
+    public static final int EQ = 19;
+    public static final int ESC_SEQ = 20;
+    public static final int EXPONENT = 21;
+    public static final int EXPR = 22;
+    public static final int FALSE = 23;
+    public static final int FLOAT = 24;
+    public static final int HEX_DIGIT = 25;
+    public static final int IDENTIFIER = 26;
+    public static final int INDEX = 27;
+    public static final int INT = 28;
+    public static final int INT_CONST = 29;
+    public static final int LB = 30;
+    public static final int LP = 31;
+    public static final int LS = 32;
+    public static final int MAXIMIZE = 33;
+    public static final int MINIMIZE = 34;
+    public static final int MN = 35;
+    public static final int OCTAL_ESC = 36;
+    public static final int OF = 37;
+    public static final int PAR = 38;
+    public static final int PL = 39;
+    public static final int PREDICATE = 40;
+    public static final int RB = 41;
+    public static final int RP = 42;
+    public static final int RS = 43;
+    public static final int SATISFY = 44;
+    public static final int SC = 45;
+    public static final int SET = 46;
+    public static final int SOLVE = 47;
+    public static final int STRING = 48;
+    public static final int TRUE = 49;
+    public static final int UNICODE_ESC = 50;
+    public static final int VAR = 51;
+    public static final int WS = 52;
 
     // delegates
     public Parser[] getDelegates() {
@@ -455,7 +426,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: PREDICATE, pred_param, IDENTIFIER
+                // elements: IDENTIFIER, pred_param, PREDICATE
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -566,7 +537,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: CL, IDENTIFIER, pred_param_type
+                // elements: IDENTIFIER, CL, pred_param_type
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -1248,7 +1219,7 @@ public class FlatzincParser extends Parser {
                     stream_var_type_u.add(var_type_u42.getTree());
 
                     // AST REWRITE
-                    // elements: index_set, var_type_u
+                    // elements: var_type_u, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1556,7 +1527,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, INT_CONST
+                    // elements: DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1642,7 +1613,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, CM
+                    // elements: CM, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1706,7 +1677,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, DD, INT_CONST
+                    // elements: SET, INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1810,7 +1781,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, SET, CM
+                    // elements: CM, INT_CONST, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2084,7 +2055,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, DD
+                    // elements: DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2170,7 +2141,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST
+                    // elements: INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2234,7 +2205,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, DD, INT_CONST, INT_CONST
+                    // elements: DD, INT_CONST, INT_CONST, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2338,7 +2309,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, SET, CM
+                    // elements: SET, INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2463,7 +2434,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: ARRAY, DD, INT_CONST, INT_CONST, index_set
+                    // elements: ARRAY, index_set, DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2627,7 +2598,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, ARRAY, CM, index_set
+                    // elements: ARRAY, index_set, INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2769,7 +2740,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, index_set, ARRAY, INT_CONST, INT_CONST, SET
+                    // elements: DD, ARRAY, INT_CONST, INT_CONST, index_set, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2951,7 +2922,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, ARRAY, index_set, CM, SET
+                    // elements: SET, INT_CONST, index_set, CM, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3283,7 +3254,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: ARRAY, VAR, index_set, SET
+                    // elements: SET, ARRAY, VAR, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3426,7 +3397,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, INT_CONST
+                    // elements: DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3682,7 +3653,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, LB, RB
+                    // elements: RB, INT_CONST, LB
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3863,7 +3834,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: RS, expr, LS
+                    // elements: expr, LS, RS
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4387,7 +4358,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: annotations, expr, IDENTIFIER, var_type
+                // elements: IDENTIFIER, var_type, expr, annotations
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4572,7 +4543,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: expr, CONSTRAINT, IDENTIFIER, annotations
+                // elements: IDENTIFIER, annotations, CONSTRAINT, expr
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -5093,7 +5064,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, RP, expr, LP
+                // elements: RP, expr, LP, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -5268,33 +5239,33 @@ public class FlatzincParser extends Parser {
     static final String DFA2_eofS =
             "\20\uffff";
     static final String DFA2_minS =
-            "\1\7\1\52\2\uffff\1\45\1\24\1\20\1\46\1\45\1\62\1\20\1\24\1\20\1" +
-                    "\13\1\46\1\20";
+            "\1\6\1\40\2\uffff\1\34\1\21\1\15\1\35\1\34\1\45\1\15\1\21\1\15\1" +
+                    "\12\1\35\1\15";
     static final String DFA2_maxS =
-            "\1\114\1\52\2\uffff\1\46\1\24\1\103\2\46\1\62\1\103\1\24\1\103\1" +
-                    "\114\1\46\1\103";
+            "\1\63\1\40\2\uffff\1\35\1\21\1\53\2\35\1\45\1\53\1\21\1\53\1\63" +
+                    "\1\35\1\53";
     static final String DFA2_acceptS =
             "\2\uffff\1\2\1\1\14\uffff";
     static final String DFA2_specialS =
             "\20\uffff}>";
     static final String[] DFA2_transitionS = {
-            "\1\1\3\uffff\1\3\6\uffff\1\2\12\uffff\1\3\7\uffff\1\3\40\uffff" +
-                    "\1\3\1\2\4\uffff\1\2",
+            "\1\1\3\uffff\1\3\4\uffff\1\2\10\uffff\1\3\3\uffff\1\3\21\uffff" +
+                    "\1\3\1\2\3\uffff\1\2",
             "\1\4",
             "",
             "",
             "\1\6\1\5",
             "\1\7",
-            "\1\10\62\uffff\1\11",
+            "\1\10\35\uffff\1\11",
             "\1\12",
             "\1\14\1\13",
             "\1\15",
-            "\1\10\62\uffff\1\11",
+            "\1\10\35\uffff\1\11",
             "\1\16",
-            "\1\10\62\uffff\1\11",
-            "\1\3\21\uffff\1\3\7\uffff\1\3\40\uffff\1\3\5\uffff\1\2",
+            "\1\10\35\uffff\1\11",
+            "\1\3\15\uffff\1\3\3\uffff\1\3\21\uffff\1\3\4\uffff\1\2",
             "\1\17",
-            "\1\10\62\uffff\1\11"
+            "\1\10\35\uffff\1\11"
     };
 
     static final short[] DFA2_eot = DFA.unpackEncodedString(DFA2_eotS);
@@ -5337,33 +5308,33 @@ public class FlatzincParser extends Parser {
     static final String DFA6_eofS =
             "\20\uffff";
     static final String DFA6_minS =
-            "\1\7\1\52\2\uffff\1\45\1\24\1\20\1\46\1\45\1\62\1\20\1\24\1\20\1" +
-                    "\13\1\46\1\20";
+            "\1\6\1\40\2\uffff\1\34\1\21\1\15\1\35\1\34\1\45\1\15\1\21\1\15\1" +
+                    "\12\1\35\1\15";
     static final String DFA6_maxS =
-            "\1\114\1\52\2\uffff\1\46\1\24\1\103\2\46\1\62\1\103\1\24\1\103\1" +
-                    "\114\1\46\1\103";
+            "\1\63\1\40\2\uffff\1\35\1\21\1\53\2\35\1\45\1\53\1\21\1\53\1\63" +
+                    "\1\35\1\53";
     static final String DFA6_acceptS =
             "\2\uffff\1\1\1\2\14\uffff";
     static final String DFA6_specialS =
             "\20\uffff}>";
     static final String[] DFA6_transitionS = {
-            "\1\1\3\uffff\1\2\21\uffff\1\2\7\uffff\3\2\36\uffff\1\2\5\uffff" +
+            "\1\1\3\uffff\1\2\15\uffff\1\2\3\uffff\3\2\17\uffff\1\2\4\uffff" +
                     "\1\3",
             "\1\4",
             "",
             "",
             "\1\6\1\5",
             "\1\7",
-            "\1\10\62\uffff\1\11",
+            "\1\10\35\uffff\1\11",
             "\1\12",
             "\1\14\1\13",
             "\1\15",
-            "\1\10\62\uffff\1\11",
+            "\1\10\35\uffff\1\11",
             "\1\16",
-            "\1\10\62\uffff\1\11",
-            "\1\2\21\uffff\1\2\7\uffff\3\2\36\uffff\1\2\5\uffff\1\3",
+            "\1\10\35\uffff\1\11",
+            "\1\2\15\uffff\1\2\3\uffff\3\2\17\uffff\1\2\4\uffff\1\3",
             "\1\17",
-            "\1\10\62\uffff\1\11"
+            "\1\10\35\uffff\1\11"
     };
 
     static final short[] DFA6_eot = DFA.unpackEncodedString(DFA6_eotS);
@@ -5406,18 +5377,18 @@ public class FlatzincParser extends Parser {
     static final String DFA23_eofS =
             "\33\uffff";
     static final String DFA23_minS =
-            "\1\7\1\52\1\uffff\1\62\2\uffff\2\45\1\24\1\20\2\uffff\1\46\1\45" +
-                    "\1\62\1\20\1\24\1\20\1\13\1\46\2\uffff\1\62\1\20\1\45\2\uffff";
+            "\1\6\1\40\1\uffff\1\45\2\uffff\2\34\1\21\1\15\2\uffff\1\35\1\34" +
+                    "\1\45\1\15\1\21\1\15\1\12\1\35\2\uffff\1\45\1\15\1\34\2\uffff";
     static final String DFA23_maxS =
-            "\1\106\1\52\1\uffff\1\62\2\uffff\1\46\1\47\1\24\1\103\2\uffff\2" +
-                    "\46\1\62\1\103\1\24\1\103\1\106\1\46\2\uffff\1\62\1\103\1\47\2\uffff";
+            "\1\56\1\40\1\uffff\1\45\2\uffff\1\35\1\36\1\21\1\53\2\uffff\2\35" +
+                    "\1\45\1\53\1\21\1\53\1\56\1\35\2\uffff\1\45\1\53\1\36\2\uffff";
     static final String DFA23_acceptS =
             "\2\uffff\1\1\1\uffff\1\2\1\3\4\uffff\1\4\1\5\10\uffff\1\6\1\7\3" +
                     "\uffff\1\10\1\11";
     static final String DFA23_specialS =
             "\33\uffff}>";
     static final String[] DFA23_transitionS = {
-            "\1\1\3\uffff\1\2\21\uffff\1\2\7\uffff\1\2\1\4\1\5\36\uffff\1" +
+            "\1\1\3\uffff\1\2\15\uffff\1\2\3\uffff\1\2\1\4\1\5\17\uffff\1" +
                     "\3",
             "\1\6",
             "",
@@ -5427,21 +5398,21 @@ public class FlatzincParser extends Parser {
             "\1\11\1\10",
             "\1\2\1\12\1\13",
             "\1\14",
-            "\1\15\62\uffff\1\16",
+            "\1\15\35\uffff\1\16",
             "",
             "",
             "\1\17",
             "\1\21\1\20",
             "\1\22",
-            "\1\15\62\uffff\1\16",
+            "\1\15\35\uffff\1\16",
             "\1\23",
-            "\1\15\62\uffff\1\16",
-            "\1\2\21\uffff\1\2\7\uffff\1\2\1\24\1\25\36\uffff\1\26",
+            "\1\15\35\uffff\1\16",
+            "\1\2\15\uffff\1\2\3\uffff\1\2\1\24\1\25\17\uffff\1\26",
             "\1\27",
             "",
             "",
             "\1\30",
-            "\1\15\62\uffff\1\16",
+            "\1\15\35\uffff\1\16",
             "\1\2\1\31\1\32",
             "",
             ""
@@ -5487,36 +5458,36 @@ public class FlatzincParser extends Parser {
     static final String DFA25_eofS =
             "\27\uffff";
     static final String DFA25_minS =
-            "\1\7\1\52\1\13\1\45\1\62\1\uffff\1\24\1\20\1\45\1\46\1\45\1\62\1" +
-                    "\uffff\1\20\1\24\1\20\1\114\1\46\1\13\1\20\1\62\1\45\1\uffff";
+            "\1\6\1\40\1\12\1\34\1\45\1\uffff\1\21\1\15\1\34\1\35\1\34\1\45\1" +
+                    "\uffff\1\15\1\21\1\15\1\63\1\35\1\12\1\15\1\45\1\34\1\uffff";
     static final String DFA25_maxS =
-            "\1\114\1\52\1\106\1\46\1\62\1\uffff\1\24\1\103\1\47\2\46\1\62\1" +
-                    "\uffff\1\103\1\24\1\103\1\114\1\46\1\106\1\103\1\62\1\47\1\uffff";
+            "\1\63\1\40\1\56\1\35\1\45\1\uffff\1\21\1\53\1\36\2\35\1\45\1\uffff" +
+                    "\1\53\1\21\1\53\1\63\1\35\1\56\1\53\1\45\1\36\1\uffff";
     static final String DFA25_acceptS =
             "\5\uffff\1\1\6\uffff\1\2\11\uffff\1\3";
     static final String DFA25_specialS =
             "\27\uffff}>";
     static final String[] DFA25_transitionS = {
-            "\1\1\104\uffff\1\2",
+            "\1\1\54\uffff\1\2",
             "\1\3",
-            "\1\5\21\uffff\1\5\7\uffff\3\5\36\uffff\1\4",
+            "\1\5\15\uffff\1\5\3\uffff\3\5\17\uffff\1\4",
             "\1\7\1\6",
             "\1\10",
             "",
             "\1\11",
-            "\1\12\62\uffff\1\13",
+            "\1\12\35\uffff\1\13",
             "\1\14\2\5",
             "\1\15",
             "\1\17\1\16",
             "\1\20",
             "",
-            "\1\12\62\uffff\1\13",
+            "\1\12\35\uffff\1\13",
             "\1\21",
-            "\1\12\62\uffff\1\13",
+            "\1\12\35\uffff\1\13",
             "\1\22",
             "\1\23",
-            "\1\5\21\uffff\1\5\7\uffff\3\5\36\uffff\1\24",
-            "\1\12\62\uffff\1\13",
+            "\1\5\15\uffff\1\5\3\uffff\3\5\17\uffff\1\24",
+            "\1\12\35\uffff\1\13",
             "\1\25",
             "\1\26\2\5",
             ""
@@ -5558,225 +5529,225 @@ public class FlatzincParser extends Parser {
     }
 
 
-    public static final BitSet FOLLOW_pred_decl_in_flatzinc_model59 = new BitSet(new long[]{0x8000002020040880L, 0x00000000000010C0L});
-    public static final BitSet FOLLOW_param_decl_in_flatzinc_model64 = new BitSet(new long[]{0x0000002020040880L, 0x00000000000010C0L});
-    public static final BitSet FOLLOW_var_decl_in_flatzinc_model69 = new BitSet(new long[]{0x0000000000040080L, 0x0000000000001080L});
-    public static final BitSet FOLLOW_constraint_in_flatzinc_model74 = new BitSet(new long[]{0x0000000000040000L, 0x0000000000000080L});
+    public static final BitSet FOLLOW_pred_decl_in_flatzinc_model59 = new BitSet(new long[]{0x0008C10011008440L});
+    public static final BitSet FOLLOW_param_decl_in_flatzinc_model64 = new BitSet(new long[]{0x0008C00011008440L});
+    public static final BitSet FOLLOW_var_decl_in_flatzinc_model69 = new BitSet(new long[]{0x0008800000008040L});
+    public static final BitSet FOLLOW_constraint_in_flatzinc_model74 = new BitSet(new long[]{0x0000800000008000L});
     public static final BitSet FOLLOW_solve_goal_in_flatzinc_model78 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PREDICATE_in_pred_decl92 = new BitSet(new long[]{0x0000000400000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl94 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LP_in_pred_decl96 = new BitSet(new long[]{0x000000E020000880L, 0x0000000000001040L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl98 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_pred_decl101 = new BitSet(new long[]{0x000000E020000880L, 0x0000000000001040L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl103 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_RP_in_pred_decl107 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000020L});
+    public static final BitSet FOLLOW_PREDICATE_in_pred_decl92 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl94 = new BitSet(new long[]{0x0000000080000000L});
+    public static final BitSet FOLLOW_LP_in_pred_decl96 = new BitSet(new long[]{0x0008400071000440L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl98 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_pred_decl101 = new BitSet(new long[]{0x0008400071000440L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl103 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_pred_decl107 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_pred_decl109 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_pred_param_type_in_pred_param137 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_CL_in_pred_param139 = new BitSet(new long[]{0x0000000400000000L});
+    public static final BitSet FOLLOW_pred_param_type_in_pred_param137 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CL_in_pred_param139 = new BitSet(new long[]{0x0000000004000000L});
     public static final BitSet FOLLOW_IDENTIFIER_in_pred_param141 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_par_pred_param_type_in_pred_param_type175 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_var_pred_param_type_in_pred_param_type185 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_type204 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_par_type206 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_type208 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_type211 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_type213 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_par_type217 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_type219 = new BitSet(new long[]{0x0000002020000800L, 0x0000000000000040L});
+    public static final BitSet FOLLOW_ARRAY_in_par_type204 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_par_type206 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_type208 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_par_type211 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_type213 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_par_type217 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_type219 = new BitSet(new long[]{0x0000400011000400L});
     public static final BitSet FOLLOW_par_type_u_in_par_type221 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_par_type_u_in_par_type247 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_BOOL_in_par_type_u279 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_FLOAT_in_par_type_u289 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_type_u299 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_type_u301 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_SET_in_par_type_u299 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_type_u301 = new BitSet(new long[]{0x0000000010000000L});
     public static final BitSet FOLLOW_INT_in_par_type_u303 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_INT_in_par_type_u313 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_var_type332 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_var_type334 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_type336 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_var_type339 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_type341 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_var_type345 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type347 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000001000L});
-    public static final BitSet FOLLOW_VAR_in_var_type349 = new BitSet(new long[]{0x000000E020000800L, 0x0000000000000040L});
+    public static final BitSet FOLLOW_ARRAY_in_var_type332 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_var_type334 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_var_type336 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_var_type339 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_var_type341 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_var_type345 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type347 = new BitSet(new long[]{0x0008000000000000L});
+    public static final BitSet FOLLOW_VAR_in_var_type349 = new BitSet(new long[]{0x0000400071000400L});
     public static final BitSet FOLLOW_var_type_u_in_var_type351 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_VAR_in_var_type377 = new BitSet(new long[]{0x000000E020000800L, 0x0000000000000040L});
+    public static final BitSet FOLLOW_VAR_in_var_type377 = new BitSet(new long[]{0x0000400071000400L});
     public static final BitSet FOLLOW_var_type_u_in_var_type379 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_BOOL_in_var_type_u411 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_FLOAT_in_var_type_u421 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_INT_in_var_type_u431 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u441 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_var_type_u443 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u441 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_var_type_u443 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_var_type_u445 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_var_type_u472 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u474 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_var_type_u477 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u479 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_var_type_u472 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u474 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_var_type_u477 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u479 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_var_type_u483 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_var_type_u507 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type_u509 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u511 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_var_type_u513 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_SET_in_var_type_u507 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type_u509 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u511 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_var_type_u513 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_var_type_u515 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_var_type_u544 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_type_u546 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_LB_in_var_type_u548 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u550 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_var_type_u553 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_var_type_u555 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_var_type_u544 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_type_u546 = new BitSet(new long[]{0x0000000040000000L});
+    public static final BitSet FOLLOW_LB_in_var_type_u548 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u550 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_var_type_u553 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_var_type_u555 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_var_type_u559 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_par_type_in_par_pred_param_type597 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type609 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type611 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type609 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type611 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type613 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type638 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type640 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type643 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type645 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type638 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type640 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type643 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type645 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_par_pred_param_type649 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type673 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type675 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type677 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type679 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type673 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type675 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type677 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type679 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type681 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type710 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type712 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type714 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type716 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type719 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type721 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type710 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type712 = new BitSet(new long[]{0x0000000040000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type714 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type716 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type719 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type721 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_par_pred_param_type725 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type755 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type757 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type759 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type762 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type764 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type768 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type770 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type772 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type774 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type755 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type757 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type759 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type762 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type764 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type768 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type770 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type772 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type774 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type776 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type808 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type810 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type812 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type815 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type817 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type821 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type823 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type825 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type827 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type830 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type832 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type808 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type810 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type812 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type815 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type817 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type821 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type823 = new BitSet(new long[]{0x0000000040000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type825 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type827 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type830 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type832 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_par_pred_param_type836 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type867 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type869 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type871 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type874 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type876 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type880 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type882 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000040L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type884 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type886 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type888 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_par_pred_param_type890 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type867 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type869 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type871 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type874 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type876 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type880 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type882 = new BitSet(new long[]{0x0000400000000000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type884 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type886 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type888 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_par_pred_param_type890 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type892 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type928 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_par_pred_param_type930 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type932 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type935 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_par_pred_param_type937 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_par_pred_param_type941 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type943 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000040L});
-    public static final BitSet FOLLOW_SET_in_par_pred_param_type945 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_par_pred_param_type947 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_LB_in_par_pred_param_type949 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type951 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_par_pred_param_type954 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type956 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_ARRAY_in_par_pred_param_type928 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_par_pred_param_type930 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type932 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type935 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_par_pred_param_type937 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_par_pred_param_type941 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type943 = new BitSet(new long[]{0x0000400000000000L});
+    public static final BitSet FOLLOW_SET_in_par_pred_param_type945 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_par_pred_param_type947 = new BitSet(new long[]{0x0000000040000000L});
+    public static final BitSet FOLLOW_LB_in_par_pred_param_type949 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type951 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_par_pred_param_type954 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_par_pred_param_type956 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_par_pred_param_type960 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_var_type_in_var_pred_param_type1005 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1028 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000040L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type1030 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1032 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1028 = new BitSet(new long[]{0x0000400000000000L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type1030 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1032 = new BitSet(new long[]{0x0000000010000000L});
     public static final BitSet FOLLOW_INT_in_var_pred_param_type1034 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type1057 = new BitSet(new long[]{0x0000040000000000L});
-    public static final BitSet FOLLOW_LS_in_var_pred_param_type1059 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1061 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_var_pred_param_type1064 = new BitSet(new long[]{0x0000006000000000L});
-    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1066 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_RS_in_var_pred_param_type1070 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1072 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000001000L});
-    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1074 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000040L});
-    public static final BitSet FOLLOW_SET_in_var_pred_param_type1076 = new BitSet(new long[]{0x0004000000000000L});
-    public static final BitSet FOLLOW_OF_in_var_pred_param_type1078 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_ARRAY_in_var_pred_param_type1057 = new BitSet(new long[]{0x0000000100000000L});
+    public static final BitSet FOLLOW_LS_in_var_pred_param_type1059 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1061 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_var_pred_param_type1064 = new BitSet(new long[]{0x0000000030000000L});
+    public static final BitSet FOLLOW_index_set_in_var_pred_param_type1066 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_var_pred_param_type1070 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1072 = new BitSet(new long[]{0x0008000000000000L});
+    public static final BitSet FOLLOW_VAR_in_var_pred_param_type1074 = new BitSet(new long[]{0x0000400000000000L});
+    public static final BitSet FOLLOW_SET_in_var_pred_param_type1076 = new BitSet(new long[]{0x0000002000000000L});
+    public static final BitSet FOLLOW_OF_in_var_pred_param_type1078 = new BitSet(new long[]{0x0000000010000000L});
     public static final BitSet FOLLOW_INT_in_var_pred_param_type1080 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_index_set1119 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_DD_in_index_set1121 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_index_set1119 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_DD_in_index_set1121 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_index_set1123 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_INT_in_index_set1152 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_expr1184 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1186 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
-    public static final BitSet FOLLOW_CM_in_expr1189 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1191 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_expr1184 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1186 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_expr1189 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1191 = new BitSet(new long[]{0x0000020000002000L});
     public static final BitSet FOLLOW_RB_in_expr1195 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_bool_const_in_expr1219 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1229 = new BitSet(new long[]{0x0000000000100002L});
-    public static final BitSet FOLLOW_DD_in_expr1232 = new BitSet(new long[]{0x0000004000000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1229 = new BitSet(new long[]{0x0000000000020002L});
+    public static final BitSet FOLLOW_DD_in_expr1232 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_expr1234 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_expr1246 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000308L});
-    public static final BitSet FOLLOW_expr_in_expr1249 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
-    public static final BitSet FOLLOW_CM_in_expr1252 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_expr1254 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000008L});
+    public static final BitSet FOLLOW_LS_in_expr1246 = new BitSet(new long[]{0x0003080164800000L});
+    public static final BitSet FOLLOW_expr_in_expr1249 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_expr1252 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_expr1254 = new BitSet(new long[]{0x0000080000002000L});
     public static final BitSet FOLLOW_RS_in_expr1260 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_id_expr_in_expr1288 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_STRING_in_expr1298 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr1319 = new BitSet(new long[]{0x0000060000000002L});
-    public static final BitSet FOLLOW_LP_in_id_expr1323 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_id_expr1325 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_id_expr1328 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_id_expr1330 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr1319 = new BitSet(new long[]{0x0000000180000002L});
+    public static final BitSet FOLLOW_LP_in_id_expr1323 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_id_expr1325 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_id_expr1328 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_id_expr1330 = new BitSet(new long[]{0x0000040000002000L});
     public static final BitSet FOLLOW_RP_in_id_expr1334 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_id_expr1338 = new BitSet(new long[]{0x0000004000000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_id_expr1340 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000008L});
+    public static final BitSet FOLLOW_LS_in_id_expr1338 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_id_expr1340 = new BitSet(new long[]{0x0000080000000000L});
     public static final BitSet FOLLOW_RS_in_id_expr1342 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_in_param_decl1362 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_CL_in_param_decl1364 = new BitSet(new long[]{0x0000000400000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl1366 = new BitSet(new long[]{0x0000000000800000L});
-    public static final BitSet FOLLOW_EQ_in_param_decl1368 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_param_decl1370 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000020L});
+    public static final BitSet FOLLOW_par_type_in_param_decl1362 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CL_in_param_decl1364 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl1366 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_EQ_in_param_decl1368 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_param_decl1370 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_param_decl1372 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_type_in_var_decl1400 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_CL_in_var_decl1402 = new BitSet(new long[]{0x0000000400000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl1404 = new BitSet(new long[]{0x0000000000880000L, 0x0000000000000020L});
-    public static final BitSet FOLLOW_annotations_in_var_decl1406 = new BitSet(new long[]{0x0000000000800000L, 0x0000000000000020L});
-    public static final BitSet FOLLOW_EQ_in_var_decl1409 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_var_decl1411 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000020L});
+    public static final BitSet FOLLOW_var_type_in_var_decl1400 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CL_in_var_decl1402 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl1404 = new BitSet(new long[]{0x0000200000090000L});
+    public static final BitSet FOLLOW_annotations_in_var_decl1406 = new BitSet(new long[]{0x0000200000080000L});
+    public static final BitSet FOLLOW_EQ_in_var_decl1409 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_var_decl1411 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_var_decl1415 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_CONSTRAINT_in_constraint1445 = new BitSet(new long[]{0x0000000400000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_constraint1447 = new BitSet(new long[]{0x0000020000000000L});
-    public static final BitSet FOLLOW_LP_in_constraint1449 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_constraint1451 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_constraint1454 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_constraint1456 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_RP_in_constraint1460 = new BitSet(new long[]{0x0000000000080000L, 0x0000000000000020L});
-    public static final BitSet FOLLOW_annotations_in_constraint1462 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000020L});
+    public static final BitSet FOLLOW_CONSTRAINT_in_constraint1445 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_constraint1447 = new BitSet(new long[]{0x0000000080000000L});
+    public static final BitSet FOLLOW_LP_in_constraint1449 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_constraint1451 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_constraint1454 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_constraint1456 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_constraint1460 = new BitSet(new long[]{0x0000200000010000L});
+    public static final BitSet FOLLOW_annotations_in_constraint1462 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_constraint1464 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SOLVE_in_solve_goal1492 = new BitSet(new long[]{0x0000300000080000L, 0x0000000000000010L});
-    public static final BitSet FOLLOW_annotations_in_solve_goal1495 = new BitSet(new long[]{0x0000300000000000L, 0x0000000000000010L});
-    public static final BitSet FOLLOW_resolution_in_solve_goal1497 = new BitSet(new long[]{0x0000000000000000L, 0x0000000000000020L});
+    public static final BitSet FOLLOW_SOLVE_in_solve_goal1492 = new BitSet(new long[]{0x0000100600010000L});
+    public static final BitSet FOLLOW_annotations_in_solve_goal1495 = new BitSet(new long[]{0x0000100600000000L});
+    public static final BitSet FOLLOW_resolution_in_solve_goal1497 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_solve_goal1499 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MINIMIZE_in_resolution1516 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
+    public static final BitSet FOLLOW_MINIMIZE_in_resolution1516 = new BitSet(new long[]{0x0003000164800000L});
     public static final BitSet FOLLOW_expr_in_resolution1519 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MAXIMIZE_in_resolution1529 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
+    public static final BitSet FOLLOW_MAXIMIZE_in_resolution1529 = new BitSet(new long[]{0x0003000164800000L});
     public static final BitSet FOLLOW_expr_in_resolution1532 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_SATISFY_in_resolution1542 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DC_in_annotations1563 = new BitSet(new long[]{0x0000000400000000L});
-    public static final BitSet FOLLOW_annotation_in_annotations1565 = new BitSet(new long[]{0x0000000000080002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_annotation1600 = new BitSet(new long[]{0x0000020000000002L});
-    public static final BitSet FOLLOW_LP_in_annotation1603 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_annotation1605 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
-    public static final BitSet FOLLOW_CM_in_annotation1608 = new BitSet(new long[]{0x000004C408000000L, 0x0000000000000300L});
-    public static final BitSet FOLLOW_expr_in_annotation1610 = new BitSet(new long[]{0x0000000000010000L, 0x0000000000000004L});
+    public static final BitSet FOLLOW_DC_in_annotations1563 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_annotation_in_annotations1565 = new BitSet(new long[]{0x0000000000010002L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_annotation1600 = new BitSet(new long[]{0x0000000080000002L});
+    public static final BitSet FOLLOW_LP_in_annotation1603 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_annotation1605 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_annotation1608 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_annotation1610 = new BitSet(new long[]{0x0000040000002000L});
     public static final BitSet FOLLOW_RP_in_annotation1614 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_TRUE_in_bool_const1655 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_FALSE_in_bool_const1666 = new BitSet(new long[]{0x0000000000000002L});

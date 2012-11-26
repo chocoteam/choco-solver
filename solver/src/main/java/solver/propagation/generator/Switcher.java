@@ -28,7 +28,6 @@ package solver.propagation.generator;
 
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
 
 import java.lang.reflect.Array;
 
@@ -57,13 +56,8 @@ public class Switcher<S extends ISchedulable> extends PropagationStrategy<S> {
 
     public Switcher(IEvaluator<S> evaluator, int min, int max, PropagationStrategy<S> pstrat,
                     S[] generators) {
-
-        this(evaluator, min, max, maker(min, max, pstrat), generators);
-    }
-
-    private Switcher(IEvaluator<S> evaluator, int min, int max, PropagationStrategy<S>[] pstrats,
-                     S[] generators) {
         super(generators);
+        PropagationStrategy<S>[] pstrats = maker(min, max, pstrat);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }

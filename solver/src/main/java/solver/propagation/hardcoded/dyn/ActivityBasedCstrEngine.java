@@ -38,6 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
@@ -210,7 +211,6 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         try {
             while (!prop_heap.isEmpty()) {
                 lastProp = propagators[prop_heap.removemin()];
-                assert lastProp.isActive() : "propagator is not active";
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 cid = aid;
@@ -219,8 +219,9 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                 for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
+                        assert lastProp.isActive() : "propagator is not active";
                         if (Configuration.PRINT_PROPAGATION) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
+                            PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
@@ -325,32 +326,34 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+            PropagationUtils.printModification(variable, type, cause);
         }
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (Configuration.PRINT_PROPAGATION)
-                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
-                if (prop.advise(pindices[p], type.mask)) {
-                    int aid = p2i.get(prop.getId());
-                    if (masks_f[aid][pindices[p]] == 0) {
-                        prop.incNbPendingEvt();
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
+                int aid = p2i.get(prop.getId());
+                if (masks_f[aid][pindice] == 0) {
+                    if (Configuration.PRINT_SCHEDULE) {
+                        PropagationUtils.printSchedule(prop);
                     }
-                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
-                    if (!schedule[aid]) {
-                        double _w = minOrmax * A[aid];
-                        prop_heap.insert(_w, aid);
-                        schedule[aid] = true;
-                        S[aid]++;
-                        if (cid != -1) {
-                            affected.add(cid);
-                            I[cid]++;
-                        }
-                        prop.incNbPendingEvt();
+                    prop.incNbPendingEvt();
+                } else if (Configuration.PRINT_SCHEDULE) {
+                    PropagationUtils.printAlreadySchedule(prop);
+                }
+
+                masks_f[aid][pindice] |= type.strengthened_mask;
+                if (!schedule[aid]) {
+                    double _w = minOrmax * A[aid];
+                    prop_heap.insert(_w, aid);
+                    schedule[aid] = true;
+                    S[aid]++;
+                    if (cid != -1) {
+                        affected.add(cid);
+                        I[cid]++;
                     }
+                    prop.incNbPendingEvt();
                 }
             }
         }
@@ -360,11 +363,6 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     @Override
     public void onPropagatorExecution(Propagator propagator) {
         desactivatePropagator(propagator);
-    }
-
-    @Override
-    public void activatePropagator(Propagator propagator) {
-        // void
     }
 
     @Override

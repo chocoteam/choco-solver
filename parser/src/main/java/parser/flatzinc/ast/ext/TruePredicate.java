@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 /**
  * <br/>
  *
@@ -37,7 +39,7 @@ public class TruePredicate extends Predicate {
     public static TruePredicate singleton = new TruePredicate();
 
     @Override
-    public boolean evaluate(Pair p) {
+    public boolean evaluate(Arc p) {
         return true;
     }
 }

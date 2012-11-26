@@ -72,7 +72,7 @@ public enum PropagationEngines {
     DSLDRIVEN() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return new PropagationEngine(solver.getEnvironment());
+            return new PropagationEngine(solver);
         }
     },
     DEFAULT() {

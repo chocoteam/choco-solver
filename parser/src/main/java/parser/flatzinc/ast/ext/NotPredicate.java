@@ -26,6 +26,8 @@
  */
 package parser.flatzinc.ast.ext;
 
+import solver.propagation.generator.Arc;
+
 /**
  * <br/>
  *
@@ -41,7 +43,7 @@ public class NotPredicate extends Predicate {
     }
 
     @Override
-    public boolean evaluate(Pair p) {
+    public boolean evaluate(Arc p) {
         return !predicate.evaluate(p);
     }
 }

@@ -26,7 +26,7 @@
  */
 package solver.propagation;
 
-import solver.propagation.generator.sorter.evaluator.IEvaluator;
+import solver.propagation.generator.IEvaluator;
 
 /**
  * An interface for objects schedulable, ie queuable and executable

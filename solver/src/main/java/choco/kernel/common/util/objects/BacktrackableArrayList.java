@@ -1,38 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package choco.kernel.common.util.objects;
 
+import choco.kernel.common.Indexable;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -41,7 +38,8 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class BacktrackableArrayList<V extends Variable, E extends AbstractFineEventRecorder<V>>
+@Deprecated
+public final class BacktrackableArrayList<V extends Variable, E extends Indexable<V>>
         implements IList<V, E> {
 
     protected E[] elements;
@@ -58,7 +56,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends Abstract
 
     public BacktrackableArrayList(V variable, IEnvironment environment, int size) {
         this.parent = variable;
-        elements = (E[]) new AbstractFineEventRecorder[size];
+        elements = (E[]) new Indexable[size];
         size = 0;
         firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
@@ -102,12 +100,12 @@ public final class BacktrackableArrayList<V extends Variable, E extends Abstract
         }
         if (size == elements.length - 1) {
             E[] tmp = elements;
-            elements = (E[]) new AbstractFineEventRecorder[size * 3 / 2 + 1];
+            elements = (E[]) new Indexable[size * 3 / 2 + 1];
             System.arraycopy(tmp, 0, elements, 0, size);
         }
         elements[size] = element;
         element.setIdx(parent, size++);
-        if(!activeSilently)this.firstActive.add(1);
+        if (!activeSilently) this.firstActive.add(1);
         this.firstPassive.add(1);
     }
 
@@ -142,13 +140,5 @@ public final class BacktrackableArrayList<V extends Variable, E extends Abstract
     @Override
     public E get(int i) {
         return elements[i];
-    }
-
-    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException {
-        int first = firstActive.get();
-        int last = firstPassive.get();
-        for (int a = last-1; a >= first; a--) {
-            elements[a].afterUpdate(vIdx, t, c);
-        }
     }
 }

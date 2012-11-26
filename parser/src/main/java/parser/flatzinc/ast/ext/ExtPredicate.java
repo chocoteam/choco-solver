@@ -28,6 +28,7 @@ package parser.flatzinc.ast.ext;
 
 import gnu.trove.map.hash.THashMap;
 import solver.constraints.Constraint;
+import solver.propagation.generator.Arc;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -42,22 +43,39 @@ import java.util.List;
 public class ExtPredicate extends Predicate {
 
     List<Variable> vars;
-    Constraint cstr;
+    List<Constraint> cstrs;
 
     public ExtPredicate(List<String> ids, THashMap<String, Object> map) {
         vars = new ArrayList<Variable>(ids.size());
+        cstrs = new ArrayList<Constraint>(ids.size());
         for (int i = 0; i < ids.size(); i++) {
             Object o = map.get(ids.get(i));
             if (o instanceof Variable) {
                 vars.add((Variable) o);
             } else if (o instanceof Constraint) {
-                cstr = (Constraint) o;
+                cstrs.add((Constraint) o);
+            } else if (o instanceof Variable[]) {
+                Variable[] allvars = (Variable[]) o;
+                for (int j = 0; j < allvars.length; j++) {
+                    vars.add(allvars[j]);
+                }
+            }
+            if (o instanceof Constraint[]) {
+                Constraint[] allcstrs = (Constraint[]) o;
+                for (int j = 0; j < allcstrs.length; j++) {
+                    cstrs.add(allcstrs[j]);
+                }
             }
         }
     }
 
     @Override
-    public boolean evaluate(Pair p) {
-        return vars.contains(p.var) && (cstr == null || cstr == p.prop.getConstraint());
+    public boolean evaluate(Arc p) {
+        if (cstrs.isEmpty()) {
+            return vars.contains(p.var);
+        } else if (vars.isEmpty()) {
+            return cstrs.contains(p.prop.getConstraint());
+        }
+        return vars.contains(p.var) && cstrs.contains(p.prop.getConstraint());
     }
 }

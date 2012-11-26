@@ -43,7 +43,10 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ABSLNS;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.variables.FirstFail;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -98,7 +101,8 @@ public class FGoal {
                     strategy = readSearchAnnotation(annotation, aSolver);
                 }
 //                solver.set(strategy);
-                long t = System.currentTimeMillis();
+                LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
+                long t = 29091981L;//System.currentTimeMillis();
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,
@@ -110,7 +114,7 @@ public class FGoal {
         } else {
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && !aSolver.getSearchLoop().stopAtFirstSolution()) {
-                aSolver.set(StrategyFactory.minDomMinVal(ivars, aSolver.getEnvironment()));
+                aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
             } else {
                 ActivityBased abs = new ActivityBased(aSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
                 aSolver.set(abs);

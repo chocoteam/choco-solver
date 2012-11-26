@@ -26,8 +26,9 @@
  */
 package solver.propagation.hardcoded;
 
+import choco.kernel.common.util.objects.BitsetFactory;
+import choco.kernel.common.util.objects.IBitset;
 import choco.kernel.memory.IEnvironment;
-import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -35,6 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
@@ -42,8 +44,6 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -68,17 +68,18 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected final short[] scheduled; // also maintains the index of the queue!
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final BitSet notEmpty; // point out the no empty queues
-    protected final int[][] evtmasks;
+    protected final IBitset notEmpty; // point out the no empty queues
+    protected final short[] scheduled; // also maintains the index of the queue!
+    protected final IBitset[] eventsets;
+    protected final int[][] eventmasks;
 
     public SevenQueuesConstraintEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        List<Propagator> _propagators = new ArrayList();
+        List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
@@ -96,17 +97,20 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
-        pro_queue = new CircularQueue[9];
-        for (int i = 0; i < 9; i++) {
+        pro_queue = new CircularQueue[8];
+        for (int i = 0; i < 8; i++) {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
         scheduled = new short[nbProp];
-        evtmasks = new int[nbProp][];
+        eventsets = new IBitset[nbProp];
+        eventmasks = new int[nbProp][];
         for (int i = 0; i < nbProp; i++) {
-            evtmasks[i] = new int[propagators[i].getNbVars()];
+            int nbv = propagators[i].getNbVars();
+            eventmasks[i] = new int[nbv];
+            eventsets[i] = BitsetFactory.make(nbv);
         }
-        notEmpty = new BitSet(8);
+        notEmpty = BitsetFactory.make(8);
     }
 
     @Override
@@ -127,25 +131,27 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
+        IBitset evtset;
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
-                assert lastProp.isActive() : "propagator is not active:" + lastProp;
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 scheduled[aid] = 0;
-                int nbVars = lastProp.getNbVars();
-                for (int v = 0; v < nbVars; v++) {
-                    mask = evtmasks[aid][v];
-                    if (mask > 0) {
-                        if (Configuration.PRINT_PROPAGATION) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
-                        }
-                        evtmasks[aid][v] = 0;
-                        lastProp.fineERcalls++;
-                        lastProp.decNbPendingEvt();
-                        lastProp.propagate(v, mask);
+                evtset = eventsets[aid];
+                for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
+                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
+                    if (Configuration.PRINT_PROPAGATION) {
+                        PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
                     }
+                    // clear event
+                    evtset.clear(v);
+                    mask = eventmasks[aid][v];
+                    eventmasks[aid][v] = 0;
+                    lastProp.decNbPendingEvt();
+                    // run propagation on the specific event
+                    lastProp.fineERcalls++;
+                    lastProp.propagate(v, mask);
                 }
             }
             notEmpty.clear(i);
@@ -155,9 +161,14 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void flush() {
         int aid;
+        IBitset evtset;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(evtmasks[aid], 0);
+            evtset = eventsets[aid];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                eventmasks[aid][p] = 0;
+            }
+            evtset.clear();
             scheduled[aid] = 0;
             lastProp.flushPendingEvt();
         }
@@ -166,7 +177,11 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
-                Arrays.fill(evtmasks[aid], 0);
+                evtset = eventsets[aid];
+                for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                    eventmasks[aid][p] = 0;
+                }
+                evtset.clear();
                 scheduled[aid] = 0;
                 lastProp.flushPendingEvt();
 
@@ -178,27 +193,30 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+            PropagationUtils.printModification(variable, type, cause);
         }
-        Propagator[] vProps = variable.getPropagators();
-        int[] pindices = variable.getPIndices();
-        for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
-            if (cause != prop && prop.isActive()) {
-                if (Configuration.PRINT_PROPAGATION)
-                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
-                if (prop.advise(pindices[p], type.mask)) {
-                    int aid = p2i.get(prop.getId());
-                    if (evtmasks[aid][pindices[p]] == 0) {
-                        prop.incNbPendingEvt();
+        int nbp = variable.getNbProps();
+        for (int p = 0; p < nbp; p++) {
+            Propagator prop = variable.getPropagator(p);
+            int pindice = variable.getIndiceInPropagator(p);
+            if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
+                int aid = p2i.get(prop.getId());
+                if (eventmasks[aid][pindice] == 0) {
+                    assert !eventsets[aid].get(pindice);
+                    if (Configuration.PRINT_SCHEDULE) {
+                        PropagationUtils.printSchedule(prop);
                     }
-                    evtmasks[aid][pindices[p]] |= type.strengthened_mask;
-                    if (scheduled[aid] == 0) {
-                        int prio = 0;
-                        pro_queue[prio].addLast(prop);
-                        scheduled[aid] = (short) (prio + 1);
-                        notEmpty.set(prio);
-                    }
+                    prop.incNbPendingEvt();
+                    eventsets[aid].set(pindice);
+                } else if (Configuration.PRINT_SCHEDULE) {
+                    PropagationUtils.printAlreadySchedule(prop);
+                }
+                eventmasks[aid][pindice] |= type.strengthened_mask;
+                if (scheduled[aid] == 0) {
+                    int prio = prop.dynPriority();
+                    pro_queue[prio].addLast(prop);
+                    scheduled[aid] = (short) (prio + 1);
+                    notEmpty.set(prio);
                 }
             }
         }
@@ -211,23 +229,18 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     }
 
     @Override
-    public void activatePropagator(Propagator propagator) {
-        // void
-    }
-
-    @Override
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
 //        if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
-        Arrays.fill(evtmasks[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-        int prio = scheduled[aid];
-        if (prio > 0) { // if in the queue...
-            scheduled[aid] = 0;
-            pro_queue[prio - 1].remove(propagator); // removed from the queue
-            propagator.flushPendingEvt();
+        // we don't remove the element from its master to avoid costly operations
+        IBitset evtset = eventsets[aid];
+        for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+            eventmasks[aid][p] = 0;
         }
+        evtset.clear();
+        propagator.flushPendingEvt();
 //        }
     }
 

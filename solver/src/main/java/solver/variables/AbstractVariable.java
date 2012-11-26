@@ -27,14 +27,12 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.procedure.TernaryProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
@@ -182,6 +180,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return propagators;
     }
 
+    public Propagator getPropagator(int idx){
+        return propagators[idx];
+    }
+
     public int getNbProps() {
         return pIdx;
     }
@@ -191,6 +193,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
             pindices = Arrays.copyOf(pindices, pIdx);
         }
         return pindices;
+    }
+
+    public int getIndiceInPropagator(int pidx){
+        return pindices[pidx];
     }
 
     public String getName() {
@@ -254,41 +260,5 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    protected static abstract class Monitoring implements TernaryProcedure<AbstractFineEventRecorder, Variable, EventType, ICause> {
-        int vIdx;
-        EventType evt;
-        ICause cause;
-
-        @Override
-        public TernaryProcedure set(Variable variable, EventType eventType, ICause cause) {
-            this.vIdx = variable.getId();
-            this.evt = eventType;
-            this.cause = cause;
-            return this;
-        }
-    }
-
-    /*protected static class OnBeforeProc extends Monitoring {
-        @Override
-        public void execute(IVariableMonitor monitor) throws ContradictionException {
-            monitor.beforeUpdate(var, evt, cause);
-        }
-    }*/
-
-    protected static class OnAfterProc extends Monitoring {
-        @Override
-        public void execute(AbstractFineEventRecorder monitor) throws ContradictionException {
-            monitor.afterUpdate(vIdx, evt, cause);
-        }
-    }
-
-    /*protected static class OnContradiction extends Monitoring {
-        @Override
-        public void execute(IVariableMonitor monitor) throws ContradictionException {
-            monitor.contradict(var, evt, cause);
-        }
-    }*/
 
 }
