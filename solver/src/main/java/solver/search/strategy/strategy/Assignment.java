@@ -73,7 +73,6 @@ public class Assignment extends AbstractStrategy<IntVar> {
     }
 
     IntVar failVar; // TODO en parler avec charles!
-    int failVal;
 
     @SuppressWarnings({"unchecked"})
     @Override
@@ -88,12 +87,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
             } else {
                 variable = failVar;
             }
-            if (!Configuration.STORE_LAST_DECISION_VAL || assgnt.isValid(variable, failVal)) {
-                value = valueIterator.selectValue(variable);
-                failVal = value;
-            } else {
-                value = failVal;
-            }
+            value = valueIterator.selectValue(variable);
             FastDecision d = decisionPool.getE();
             if (d == null) {
                 d = new FastDecision(decisionPool);

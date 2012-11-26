@@ -55,7 +55,4 @@ public enum Configuration {
 
     // Set to true to retain the variable last of a decision involved into a fail
     public static final boolean STORE_LAST_DECISION_VAR = false;
-
-    // Set to true to retain the value of the last decision involved into a fail
-    public static final boolean STORE_LAST_DECISION_VAL = false;
 }
