@@ -172,6 +172,7 @@ public class ParseAndSolveExt {
                         makeEngine(eng, solver);
                         break;
                     case -1:
+                        break;
                     default:
                         if (solver.getNbCstrs() > solver.getNbVars()) {
                             solver.set(new VariableEngine(solver));
@@ -188,7 +189,7 @@ public class ParseAndSolveExt {
                 if (tl > -1) {
                     solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
                 }
-//            solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
+            //solver.getSearchLoop().getLimitsBox().setTimeLimit(5000);
                 LOGGER.info("% solve instance...");
                 //SearchMonitorFactory.log(solver, true, true);
                 solver.solve();

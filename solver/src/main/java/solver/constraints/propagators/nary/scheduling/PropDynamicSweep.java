@@ -80,6 +80,11 @@ public class PropDynamicSweep extends Propagator<IntVar> {
     }
 
     @Override
+    public boolean advise(int idxVarInProp, int mask) {
+        return nbPendingEvt == 0 && super.advise(idxVarInProp, mask);
+    }
+
+    @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         this.forcePropagate(EventType.FULL_PROPAGATION);
     }

@@ -38,14 +38,14 @@ import solver.variables.IntVar;
 public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
 
     private final int nbTasks;
-	private final int limit;
+    private final int limit;
 
     public static enum Type {
         SWEEP, DYNAMIC_SWEEP, EDGE_FINDING, GREEDY
     }
 
-	public Cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, int limit, Solver solver) {
-		super(ArrayUtils.append(starts,durations,ends,heights), solver);
+    public Cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, int limit, Solver solver) {
+        super(ArrayUtils.append(starts, durations, ends, heights), solver);
         assert (starts.length == durations.length && starts.length == ends.length && starts.length == heights.length);
         this.nbTasks = starts.length;
         this.limit = limit;
@@ -53,7 +53,7 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
     }
 
     public Cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, int limit, Solver solver, Type type) {
-		super(ArrayUtils.append(starts,durations,ends,heights), solver);
+        super(ArrayUtils.append(starts, durations, ends, heights), solver);
         assert (starts.length == durations.length && starts.length == ends.length && starts.length == heights.length);
         this.nbTasks = starts.length;
         this.limit = limit;
@@ -71,9 +71,6 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
                 setPropagators(new PropDynamicSweep(vars, solver, this, 0, 1));
         }
     }
-
-
-
 
 
     @Override
@@ -94,7 +91,7 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
             for (int is = 0, ie = 2 * nbTasks, ih = 3 * nbTasks; is < this.nbTasks; is++, ie++, ih++) {
                 if (i >= vars[is].getValue() && i < vars[ie].getValue()) sumHeight += vars[ih].getValue();
             }
-			if (sumHeight > limit) return ESat.FALSE;
+            if (sumHeight > limit) return ESat.FALSE;
         }
         return ESat.TRUE;
     }
@@ -104,7 +101,7 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
     }
 
     public int limit() {
-		return limit;
+        return limit;
     }
 
 }
