@@ -57,6 +57,20 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
         this.poolManager = poolManager;
     }
 
+    @Override
+    public GraphVar getDecisionVariable() {
+        return g;
+    }
+
+    @Override
+    public Object getDecisionValue() {
+        if (to == -1) {
+            return from;
+        } else {
+            return new int[]{from, to};
+        }
+    }
+
     public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
         g = variable;
         this.from = node;

@@ -59,6 +59,16 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     }
 
     @Override
+    public RealVar getDecisionVariable() {
+        return var;
+    }
+
+    @Override
+    public Object getDecisionValue() {
+        return value;
+    }
+
+    @Override
     public boolean hasNext() {
         return branch < 2;
     }

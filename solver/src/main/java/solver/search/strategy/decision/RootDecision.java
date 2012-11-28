@@ -31,6 +31,7 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -40,6 +41,17 @@ import solver.explanations.Explanation;
  */
 public enum RootDecision implements Decision {
     ROOT;
+
+
+    @Override
+    public Variable getDecisionVariable() {
+        return null;
+    }
+
+    @Override
+    public Object getDecisionValue() {
+        return null;
+    }
 
     @Override
     public boolean hasNext() {

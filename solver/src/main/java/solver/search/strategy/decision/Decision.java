@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -39,9 +40,13 @@ import solver.explanations.Deduction;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public interface Decision extends ICause {
+public interface Decision<V extends Variable> extends ICause {
 
     Logger LOGGER = LoggerFactory.getLogger(Decision.class);
+
+    V getDecisionVariable();
+
+    Object getDecisionValue();
 
     boolean hasNext();
 

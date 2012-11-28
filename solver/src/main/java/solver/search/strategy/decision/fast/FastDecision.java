@@ -62,6 +62,16 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
+    public IntVar getDecisionVariable() {
+        return var;
+    }
+
+    @Override
+    public Object getDecisionValue() {
+        return value;
+    }
+
+    @Override
     public boolean hasNext() {
         return branch < 2;
     }

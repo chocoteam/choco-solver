@@ -5,7 +5,7 @@
             <pattern><!--%d{HH:mm:ss.SSS} -->%msg%n</pattern>
         </encoder>
     </appender>
-    
+
     <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
 
     <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
@@ -27,7 +27,13 @@
 
     <logger name="explainer" level="error"/>
 
-     <logger name="fzn" level="error"/>
+    <logger name="fzn" level="error"/>
+
+    <logger name="configuration" level="error"/>
+
+    <logger name="tree" level="error"/>
+
+    <logger name="visualization" level="error"/>
 
     <root level="warn">
         <appender-ref ref="STDOUT"/>

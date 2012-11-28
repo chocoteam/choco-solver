@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+/**
+ * Copyright (c) 1999-2010, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,18 +24,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.loop.monitors.cpviz.visualizers;
 
-package solver.search.strategy.decision.fast;
-
-import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
 
 /**
+ * A specialized visualizer for the cardinality sum of domain variables.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 13/12/10
  */
-public interface IFastDecision<V extends Variable> extends Decision<V> {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public final class VectorSize extends Vector {
+
+    private static final String type = "vector_size";
+
+    /**
+     * Build a visualizer for the cardinality sum of domain variables.
+     *
+     * @param vars    domain variables
+     * @param display "expanded" or "compact"
+     * @param width   width of the visualizer
+     * @param height  height of the visualizer
+     */
+    public VectorSize(Variable[] vars, String display, int width, int height) {
+        super(vars, type, display, width, height);
+    }
+
+    /**
+     * Build a visualizer for the cardinality sum of domain variables.
+     *
+     * @param vars    domain variables
+     * @param display "expanded" or "compact"
+     * @param x       coordinate of the visualizer in the x-axis (horizontal)
+     * @param y       coordinate of the visualizer in the y-axis (vertical)
+     * @param width   width of the visualizer
+     * @param height  height of the visualizer
+     * @param group   group name (to group multiple constraints)
+     * @param min     expected minimal value of any of the domains
+     * @param max     expected maximal value of any of the domains
+     */
+    public VectorSize(Variable[] vars, String display, int x, int y, int width, int height, String group, int min, int max) {
+        super(vars, type, display, x, y, width, height, group, min, max);
+    }
 }
