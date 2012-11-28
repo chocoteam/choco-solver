@@ -69,10 +69,10 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
 			if (varselector.hasNext()) {
 				varselector.advance();
 				variable = varselector.getVariable();
-				lastFail.setVar(variable);
 			}
 		}
 		if(variable!=null){
+			lastFail.setVar(variable);
 			double value = valueIterator.selectValue(variable);
 			FastDecisionReal d = decisionPool.getE();
 			if (d == null) {

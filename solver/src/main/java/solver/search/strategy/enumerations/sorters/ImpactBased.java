@@ -137,10 +137,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
 				// 2. select the variable
 				currentVar = bests.get(random.nextInt(bests.size()));
 				best = vars[currentVar];
-				lastFail.setVar(best);
 			}
 		}
 		if(best!=null){
+			lastFail.setVar(best);
             // 3. then iterate over values
             bests.clear();
             double bestImpact = 1.0;

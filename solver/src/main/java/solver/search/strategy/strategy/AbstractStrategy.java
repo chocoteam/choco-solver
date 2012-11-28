@@ -29,11 +29,9 @@ package solver.search.strategy.strategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.exception.ContradictionException;
+import solver.search.pattern.*;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.pattern.LastFail;
-import solver.variables.IntVar;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -60,6 +58,8 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
 
     protected AbstractStrategy(V[] variables) {
         this.vars = variables.clone();
+//		lastFail = new LastFail_Delayed<V>(vars[0].getSolver());
+//		lastFail = new LastFail_LimitedDepth<V>(vars[0].getSolver());
 		lastFail = new LastFail<V>(vars[0].getSolver());
     }
 

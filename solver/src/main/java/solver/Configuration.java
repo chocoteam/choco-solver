@@ -54,5 +54,5 @@ public enum Configuration {
     public static final boolean LAZY_UPDATE = true;
 
     // Set to true to retain the variable last of a decision involved into a fail
-    public static final boolean STORE_LAST_DECISION_VAR = false;
+    public static final boolean STORE_LAST_DECISION_VAR = true;
 }

@@ -216,10 +216,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
 			if (bests.size() > 0) {
 				currentVar = bests.get(random.nextInt(bests.size()));
 				best = vars[currentVar];
-				lastFail.setVar(best);
 			}
 		}
 		if(best!=null){
+			lastFail.setVar(best);
 			currentVal = best.getLB();
 			if (sampling) {
 				int ds = best.getDomainSize();

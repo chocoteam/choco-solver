@@ -32,27 +32,30 @@
  * Time: 16:25
  */
 
-package solver.search.strategy.pattern;
+package solver.search.pattern;
 
-import solver.Configuration;
+import choco.kernel.memory.IEnvironment;
 import solver.Solver;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.variables.Variable;
 
-public class LastFail<V extends Variable> extends VoidSearchMonitor{
+public class LastFail_LimitedDepth<V extends Variable> extends LastFail<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected V lastVar;
+	private int maxDepth;
+	private long worldIndex;
+	private IEnvironment environment;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public LastFail(Solver solver){
-		solver.getSearchLoop().plugSearchMonitor(this);
+	public LastFail_LimitedDepth(Solver solver){
+		super(solver);
+		maxDepth = 0;
+		environment = solver.getEnvironment();
 	}
 
 	//***********************************************************************************
@@ -60,22 +63,11 @@ public class LastFail<V extends Variable> extends VoidSearchMonitor{
 	//***********************************************************************************
 
 	public boolean canApply() {
-		return Configuration.STORE_LAST_DECISION_VAR && lastVar!=null && !lastVar.instantiated();
+		return super.canApply() && worldIndex - maxDepth < environment.getWorldIndex();
 	}
 
 	public void setVar(V v) {
-		lastVar = v;
-	}
-
-	public V getVar() {
-		return lastVar;
-	}
-
-	public void afterRestart() {
-		lastVar = null;
-	}
-
-	public void onSolution() {
-		lastVar = null;
+		super.setVar(v);
+		worldIndex = environment.getWorldIndex();
 	}
 }

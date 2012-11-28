@@ -28,11 +28,9 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
-import solver.Configuration;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.pattern.LastFail;
 import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
@@ -84,8 +82,8 @@ public class Assignment extends AbstractStrategy<IntVar> {
 			}else{
 				varselector.advance();
                 variable = varselector.getVariable();
-				lastFail.setVar(variable);
 			}
+			lastFail.setVar(variable);
             value = valueIterator.selectValue(variable);
             FastDecision d = decisionPool.getE();
             if (d == null) {
