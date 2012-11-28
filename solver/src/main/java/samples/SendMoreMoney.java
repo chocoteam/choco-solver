@@ -96,7 +96,7 @@ public class SendMoreMoney extends AbstractProblem {
     public void solve() {
         //-------> Visualization declaration starts here <-------//
         // create a new instance of Visualization
-        Visualization visu = new Visualization("SendMoreMoney", solver, "/Users/cprudhom/");
+        Visualization visu = new Visualization("SendMoreMoney", solver, System.getProperty("user.dir"));
         visu.createTree(); // declare tree search visualization
         visu.createViz(); // declare visualizers container
         // create a new Vector visualizer
@@ -104,8 +104,6 @@ public class SendMoreMoney extends AbstractProblem {
                 "expanded", 0, 0, 8, 10, "SENDMORY", 0, 9);
         // add the vector to the visualizers container
         visu.addVisualizer(visualizer);
-        //-------> Visualization declaration ends here <-------//
-        solver.getSearchLoop().plugSearchMonitor(visu);
         solver.solve();
     }
 
