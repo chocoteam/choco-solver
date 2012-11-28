@@ -62,17 +62,25 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (varselector.hasNext()) {
-            varselector.advance();
-            RealVar variable = varselector.getVariable();
-            double value = valueIterator.selectValue(variable);
-            FastDecisionReal d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecisionReal(decisionPool);
-            }
-            d.set(variable, value);
-            return d;
-        }
+		RealVar variable = null;
+		if(lastFail.canApply()){
+			variable = lastFail.getVar();
+		}else{
+			if (varselector.hasNext()) {
+				varselector.advance();
+				variable = varselector.getVariable();
+				lastFail.setVar(variable);
+			}
+		}
+		if(variable!=null){
+			double value = valueIterator.selectValue(variable);
+			FastDecisionReal d = decisionPool.getE();
+			if (d == null) {
+				d = new FastDecisionReal(decisionPool);
+			}
+			d.set(variable, value);
+			return d;
+		}
         return null;
     }
 }

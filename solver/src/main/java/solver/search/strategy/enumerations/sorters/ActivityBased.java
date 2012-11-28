@@ -144,8 +144,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
 
     TIntList bests = new TIntArrayList();
 
-    IntVar trick;
-
     public ActivityBased(Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
         super(vars);
         this.solver = solver;
@@ -196,76 +194,80 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
 
     @Override
     public Decision getDecision() {
-        bests.clear();
-        double bestVal = -1.0d;
-        for (int i = 0; i < vars.length; i++) {
-            int ds = vars[i].getDomainSize();
-            if (ds > 1) {
-                double a = A[v2i.get(vars[i].getId())] / ds;
-                if (a > bestVal) {
-                    bests.clear();
-                    bests.add(i);
-                    bestVal = a;
-                } else if (a == bestVal) {
-                    bests.add(i);
-                }
-            }
-        }
-        if (bests.size() > 0) {
-            IntVar best = trick;
-            if (!Configuration.STORE_LAST_DECISION_VAR || (trick == null || trick.instantiated())) {
-                currentVar = bests.get(random.nextInt(bests.size()));
-                best = vars[currentVar];
-                trick = best;
-            }
-            currentVal = best.getLB();
-            if (sampling) {
-                int ds = best.getDomainSize();
-                int n = random.nextInt(ds);
-                if (best.hasEnumeratedDomain()) {
-                    while (n-- > 0) {
-                        currentVal = best.nextValue(currentVal);
-                    }
-                } else {
-                    currentVal += n;
-                }
-            } else {
-                if (best.hasEnumeratedDomain()) {
-                    bests.clear();
-                    bestVal = Double.MAX_VALUE;
-                    DisposableValueIterator it = best.getValueIterator(true);
-                    while (it.hasNext()) {
-                        int value = it.next();
-                        double current = vAct[currentVar].activity(value);
-                        if (current < bestVal) {
-                            bests.clear();
-                            bests.add(value);
-                            bestVal = current;
-                        } else {
-                            bests.add(value);
-                        }
-                    }
-                    currentVal = bests.get(random.nextInt(bests.size()));
-                } else {
-                    int lb = best.getLB();
-                    int ub = best.getUB();
-                    currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
-                            lb : ub;
-                }
-            }
-            FastDecision currrent = decisionPool.getE();
-            if (currrent == null) {
-                currrent = new FastDecision(decisionPool);
-            }
-            currrent.set(best, currentVal, DecisionOperator.int_eq);
+		IntVar best = null;
+		if(lastFail.canApply() && !sampling){
+			best = lastFail.getVar();
+		}else{
+			bests.clear();
+			double bestVal = -1.0d;
+			for (int i = 0; i < vars.length; i++) {
+				int ds = vars[i].getDomainSize();
+				if (ds > 1) {
+					double a = A[v2i.get(vars[i].getId())] / ds;
+					if (a > bestVal) {
+						bests.clear();
+						bests.add(i);
+						bestVal = a;
+					} else if (a == bestVal) {
+						bests.add(i);
+					}
+				}
+			}
+			if (bests.size() > 0) {
+				currentVar = bests.get(random.nextInt(bests.size()));
+				best = vars[currentVar];
+				lastFail.setVar(best);
+			}
+		}
+		if(best!=null){
+			currentVal = best.getLB();
+			if (sampling) {
+				int ds = best.getDomainSize();
+				int n = random.nextInt(ds);
+				if (best.hasEnumeratedDomain()) {
+					while (n-- > 0) {
+						currentVal = best.nextValue(currentVal);
+					}
+				} else {
+					currentVal += n;
+				}
+			} else {
+				if (best.hasEnumeratedDomain()) {
+					bests.clear();
+					double bestVal = Double.MAX_VALUE;
+					DisposableValueIterator it = best.getValueIterator(true);
+					while (it.hasNext()) {
+						int value = it.next();
+						double current = vAct[currentVar].activity(value);
+						if (current < bestVal) {
+							bests.clear();
+							bests.add(value);
+							bestVal = current;
+						} else {
+							bests.add(value);
+						}
+					}
+					currentVal = bests.get(random.nextInt(bests.size()));
+				} else {
+					int lb = best.getLB();
+					int ub = best.getUB();
+					currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
+							lb : ub;
+				}
+			}
+			FastDecision currrent = decisionPool.getE();
+			if (currrent == null) {
+				currrent = new FastDecision(decisionPool);
+			}
+			currrent.set(best, currentVal, DecisionOperator.int_eq);
 //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-            return currrent;
-        } else {
-            return null;
-        }
-    }
+			return currrent;
+		} else {
+			return null;
+		}
+	}
 
-    @Override
+	@Override
     public int compare(IntVar o1, IntVar o2) {
         if (sampling) {
             return random.nextBoolean() ? 1 : -1;

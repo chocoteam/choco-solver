@@ -32,6 +32,7 @@ import solver.Configuration;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.pattern.LastFail;
 import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
@@ -72,21 +73,19 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    IntVar failVar; // TODO en parler avec charles!
-
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
         if (varselector.hasNext()) {
             IntVar variable;
             int value;
-            if (!Configuration.STORE_LAST_DECISION_VAR || (failVar == null || failVar.instantiated())) {
-                varselector.advance();
+			if(lastFail.canApply()){
+				variable = lastFail.getVar();
+			}else{
+				varselector.advance();
                 variable = varselector.getVariable();
-                failVar = variable;
-            } else {
-                variable = failVar;
-            }
+				lastFail.setVar(variable);
+			}
             value = valueIterator.selectValue(variable);
             FastDecision d = decisionPool.getE();
             if (d == null) {

@@ -87,8 +87,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     protected boolean learnsAndFails; // does the learning pahse leads to a failure
     protected IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
-    IntVar trick;
-
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
      * <p/>
@@ -116,33 +114,36 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
 
     @Override
     public Decision getDecision() {
-        // 1. first select the variable with the largest impact
-        bests.clear();
-        double bestImpact = -Double.MAX_VALUE;
-        for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
-                double imp = computeImpact(i);
-                if (imp > bestImpact) {
-                    bests.clear();
-                    bests.add(i);
-                    bestImpact = imp;
-                } else if (imp == bestImpact) {
-                    bests.add(i);
-                }
-            }
-        }
-        if (bests.size() > 0) {
-            // 2. select the variable
-            IntVar best = trick;
-            if (!Configuration.STORE_LAST_DECISION_VAR || (trick == null || trick.instantiated())) {
-                currentVar = bests.get(random.nextInt(bests.size()));
-                best = vars[currentVar];
-                trick = best;
-            }
-
+		IntVar best = null;
+		if(lastFail.canApply()){
+			best = lastFail.getVar();
+		}else{
+			// 1. first select the variable with the largest impact
+			bests.clear();
+			double bestImpact = -Double.MAX_VALUE;
+			for (int i = 0; i < vars.length; i++) {
+				if (!vars[i].instantiated()) {
+					double imp = computeImpact(i);
+					if (imp > bestImpact) {
+						bests.clear();
+						bests.add(i);
+						bestImpact = imp;
+					} else if (imp == bestImpact) {
+						bests.add(i);
+					}
+				}
+			}
+			if (bests.size() > 0) {
+				// 2. select the variable
+				currentVar = bests.get(random.nextInt(bests.size()));
+				best = vars[currentVar];
+				lastFail.setVar(best);
+			}
+		}
+		if(best!=null){
             // 3. then iterate over values
             bests.clear();
-            bestImpact = 1.0;
+            double bestImpact = 1.0;
             if (best.hasEnumeratedDomain()) {
                 DisposableValueIterator it = best.getValueIterator(true);
                 int o = offsets[currentVar];
