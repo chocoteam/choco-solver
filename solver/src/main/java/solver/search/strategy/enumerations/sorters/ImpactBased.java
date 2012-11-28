@@ -32,7 +32,6 @@ import choco.kernel.memory.IStateDouble;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Cause;
-import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -47,7 +46,6 @@ import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-
 import java.util.Random;
 
 /**
@@ -87,8 +85,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     protected boolean learnsAndFails; // does the learning pahse leads to a failure
     protected IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
-    IntVar trick;
-
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
      * <p/>
@@ -114,68 +110,69 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
         if (!initOnly) solver.getSearchLoop().plugSearchMonitor(this);
     }
 
+	@Override
+	public Decision<IntVar> computeDecision(IntVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		bests.clear();
+		double bestImpact = 1.0;
+		if (variable.hasEnumeratedDomain()) {
+			DisposableValueIterator it = variable.getValueIterator(true);
+			int o = offsets[currentVar];
+			while (it.hasNext()) {
+				int val = it.next();
+				double impact = Ilabel[currentVar][val - o];
+				if (impact < bestImpact) {
+					bests.clear();
+					bests.add(val);
+					bestImpact = impact;
+				} else if (impact == bestImpact) {
+					bests.add(val);
+				}
+			}
+			it.dispose();
+
+			currentVal = bests.get(random.nextInt(bests.size()));
+		} else {
+			int lb = variable.getLB();
+			int ub = variable.getUB();
+			currentVal = random.nextBoolean() ? lb : ub;
+		}
+
+		FastDecision currrent = decisionPool.getE();
+		if (currrent == null) {
+			currrent = new FastDecision(decisionPool);
+		}
+		currrent.set(variable, currentVal, DecisionOperator.int_eq);
+		//System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
+		return currrent;
+	}
+
     @Override
     public Decision getDecision() {
-        // 1. first select the variable with the largest impact
-        bests.clear();
-        double bestImpact = -Double.MAX_VALUE;
-        for (int i = 0; i < vars.length; i++) {
-            if (!vars[i].instantiated()) {
-                double imp = computeImpact(i);
-                if (imp > bestImpact) {
-                    bests.clear();
-                    bests.add(i);
-                    bestImpact = imp;
-                } else if (imp == bestImpact) {
-                    bests.add(i);
-                }
-            }
-        }
-        if (bests.size() > 0) {
-            // 2. select the variable
-            IntVar best = trick;
-            if (!Configuration.STORE_LAST_DECISION_VAR || (trick == null || trick.instantiated())) {
-                currentVar = bests.get(random.nextInt(bests.size()));
-                best = vars[currentVar];
-                trick = best;
-            }
-
-            // 3. then iterate over values
-            bests.clear();
-            bestImpact = 1.0;
-            if (best.hasEnumeratedDomain()) {
-                DisposableValueIterator it = best.getValueIterator(true);
-                int o = offsets[currentVar];
-                while (it.hasNext()) {
-                    int val = it.next();
-                    double impact = Ilabel[currentVar][val - o];
-                    if (impact < bestImpact) {
-                        bests.clear();
-                        bests.add(val);
-                        bestImpact = impact;
-                    } else if (impact == bestImpact) {
-                        bests.add(val);
-                    }
-                }
-                it.dispose();
-
-                currentVal = bests.get(random.nextInt(bests.size()));
-            } else {
-                int lb = best.getLB();
-                int ub = best.getUB();
-                currentVal = random.nextBoolean() ? lb : ub;
-            }
-
-            FastDecision currrent = decisionPool.getE();
-            if (currrent == null) {
-                currrent = new FastDecision(decisionPool);
-            }
-            currrent.set(best, currentVal, DecisionOperator.int_eq);
-            //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-            return currrent;
-        } else {
-            return null;
-        }
+		IntVar best = null;
+		// 1. first select the variable with the largest impact
+		bests.clear();
+		double bestImpact = -Double.MAX_VALUE;
+		for (int i = 0; i < vars.length; i++) {
+			if (!vars[i].instantiated()) {
+				double imp = computeImpact(i);
+				if (imp > bestImpact) {
+					bests.clear();
+					bests.add(i);
+					bestImpact = imp;
+				} else if (imp == bestImpact) {
+					bests.add(i);
+				}
+			}
+		}
+		if (bests.size() > 0) {
+			// 2. select the variable
+			currentVar = bests.get(random.nextInt(bests.size()));
+			best = vars[currentVar];
+		}
+		return computeDecision(best);
     }
 
     @Override

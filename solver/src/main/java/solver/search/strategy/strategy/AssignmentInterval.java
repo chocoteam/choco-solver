@@ -59,20 +59,28 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
     public void init() {
     }
 
+	@Override
+	public Decision<RealVar> computeDecision(RealVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		double value = valueIterator.selectValue(variable);
+		FastDecisionReal d = decisionPool.getE();
+		if (d == null) {
+			d = new FastDecisionReal(decisionPool);
+		}
+		d.set(variable, value);
+		return d;
+	}
+
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (varselector.hasNext()) {
-            varselector.advance();
-            RealVar variable = varselector.getVariable();
-            double value = valueIterator.selectValue(variable);
-            FastDecisionReal d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecisionReal(decisionPool);
-            }
-            d.set(variable, value);
-            return d;
-        }
-        return null;
+		RealVar variable = null;
+		if (varselector.hasNext()) {
+			varselector.advance();
+			variable = varselector.getVariable();
+		}
+		return computeDecision(variable);
     }
 }

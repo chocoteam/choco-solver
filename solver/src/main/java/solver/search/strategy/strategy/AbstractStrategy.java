@@ -47,7 +47,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
-public abstract class AbstractStrategy<V extends Variable> implements Serializable {
+public abstract class AbstractStrategy<V extends Variable> implements Serializable, IDecisionComputer<V> {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
@@ -82,4 +82,14 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
         }
         return s.toString();
     }
+
+	/**
+	 * Computes a decision to be applied to variable var
+	 * This method should be implemented in order to use search patterns
+	 * @param var
+	 * @return a decision to be applied to variable var
+	 */
+	public Decision<V> computeDecision(V var){
+		return null;
+	}
 }

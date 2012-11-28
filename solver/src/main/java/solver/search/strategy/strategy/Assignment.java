@@ -28,7 +28,6 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
-import solver.Configuration;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -72,29 +71,28 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    IntVar failVar; // TODO en parler avec charles!
+	@Override
+	public Decision<IntVar> computeDecision(IntVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		int value = valueIterator.selectValue(variable);
+		FastDecision d = decisionPool.getE();
+		if (d == null) {
+			d = new FastDecision(decisionPool);
+		}
+		d.set(variable, value, assgnt);
+		return d;
+	}
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
+		IntVar variable = null;
         if (varselector.hasNext()) {
-            IntVar variable;
-            int value;
-            if (!Configuration.STORE_LAST_DECISION_VAR || (failVar == null || failVar.instantiated())) {
-                varselector.advance();
-                variable = varselector.getVariable();
-                failVar = variable;
-            } else {
-                variable = failVar;
-            }
-            value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
-            }
-            d.set(variable, value, assgnt);
-            return d;
+			varselector.advance();
+			variable = varselector.getVariable();
         }
-        return null;
+        return computeDecision(variable);
     }
 }
