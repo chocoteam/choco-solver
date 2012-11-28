@@ -30,7 +30,6 @@ package solver.search.strategy.strategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.exception.ContradictionException;
-import solver.search.pattern.*;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
 
@@ -48,19 +47,14 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 1 juil. 2010
  */
-public abstract class AbstractStrategy<V extends Variable> implements Serializable {
+public abstract class AbstractStrategy<V extends Variable> implements Serializable, IDecisionComputer<V> {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     public final V[] vars;
 
-	protected LastFail<V> lastFail;
-
     protected AbstractStrategy(V[] variables) {
         this.vars = variables.clone();
-//		lastFail = new LastFail_Delayed<V>(vars[0].getSolver());
-//		lastFail = new LastFail_LimitedDepth<V>(vars[0].getSolver());
-		lastFail = new LastFail<V>(vars[0].getSolver());
     }
 
     /**
@@ -88,4 +82,14 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
         }
         return s.toString();
     }
+
+	/**
+	 * Computes a decision to be applied to variable var
+	 * This method should be implemented in order to use search patterns
+	 * @param var
+	 * @return a decision to be applied to variable var
+	 */
+	public Decision<V> computeDecision(V var){
+		return null;
+	}
 }

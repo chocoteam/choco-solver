@@ -116,35 +116,37 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         }
     }
 
-    //	IntVar trick; // TODO en parler avec charles!
+	@Override
+	public Decision<IntVar> computeDecision(IntVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		// test on first selection of the variable
+		if (!firstSelection.get(variable.getId()).get()) {
+			variable.getHeuristicVal().update(Action.first_selection);
+			firstSelection.get(variable.getId()).set(true);
+		}
+		variable.getHeuristicVal().update(Action.open_node);
+		if (variable.getHeuristicVal().hasNext()) {
+			int value = variable.getHeuristicVal().next();
+			FastDecision d = decisionPool.getE();
+			if (d == null) {
+				d = new FastDecision(decisionPool);
+			}
+			d.set(variable, value, assignment);
+			return d;
+		} else {
+			LoggerFactory.getLogger("solver").warn("StrategyVarValAssign : no value for var {}", variable.toString());
+			return null;
+		}
+	}
+
     @Override
     @SuppressWarnings({"unchecked"})
     public Decision getDecision() {
-        if (varColl.hasNext()) {
-            //			IntVar var = trick;
-            //			if(trick==null || trick.instantiated()){
-            //				var = varColl.next();
-            //			}
-            //			trick = var;
+		if (varColl.hasNext()) {
             IntVar var = varColl.next();
-            // test on first selection of the variable
-            if (!firstSelection.get(var.getId()).get()) {
-                var.getHeuristicVal().update(Action.first_selection);
-                firstSelection.get(var.getId()).set(true);
-            }
-            var.getHeuristicVal().update(Action.open_node);
-            if (var.getHeuristicVal().hasNext()) {
-                int value = var.getHeuristicVal().next();
-                FastDecision d = decisionPool.getE();
-                if (d == null) {
-                    d = new FastDecision(decisionPool);
-                }
-                d.set(var, value, assignment);
-                return d;
-            } else {
-                LoggerFactory.getLogger("solver").warn("StrategyVarValAssign : no value for var {}", var.toString());
-                return null;
-            }
+            return computeDecision(var);
         }
         return null;
     }

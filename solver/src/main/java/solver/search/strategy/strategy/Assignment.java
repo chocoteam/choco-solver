@@ -71,27 +71,28 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
+	@Override
+	public Decision<IntVar> computeDecision(IntVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		int value = valueIterator.selectValue(variable);
+		FastDecision d = decisionPool.getE();
+		if (d == null) {
+			d = new FastDecision(decisionPool);
+		}
+		d.set(variable, value, assgnt);
+		return d;
+	}
+
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
+		IntVar variable = null;
         if (varselector.hasNext()) {
-            IntVar variable;
-            int value;
-			if(lastFail.canApply()){
-				variable = lastFail.getVar();
-			}else{
-				varselector.advance();
-                variable = varselector.getVariable();
-			}
-			lastFail.setVar(variable);
-            value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
-            }
-            d.set(variable, value, assgnt);
-            return d;
+			varselector.advance();
+			variable = varselector.getVariable();
         }
-        return null;
+        return computeDecision(variable);
     }
 }

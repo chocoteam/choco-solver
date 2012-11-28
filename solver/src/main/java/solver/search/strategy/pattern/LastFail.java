@@ -25,54 +25,64 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 28/11/12
- * Time: 16:25
- */
+package solver.search.strategy.pattern;
 
-package solver.search.pattern;
-
-import solver.Configuration;
 import solver.Solver;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
-public class LastFail<V extends Variable> extends VoidSearchMonitor{
+/**
+ * Last Fail pattern :
+ * After a backtrack, the next decision to be computed should involve
+ * the variable of the la decision (left branch, refutations are not considered)
+ * @author Jean-Guillaume Fages
+ */
+public class LastFail extends AbstractStrategy<Variable> implements ISearchMonitor{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected V lastVar;
+	protected Variable lastVar;
+	protected AbstractStrategy<Variable> mainStrategy;
+	protected Solver solver;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public LastFail(Solver solver){
-		if(Configuration.STORE_LAST_DECISION_VAR){
-			solver.getSearchLoop().plugSearchMonitor(this);
-		}
+	public LastFail(Solver solver, AbstractStrategy<Variable> mainStrategy){
+		super(solver.getVars());
+		this.solver = solver;
+		this.mainStrategy = mainStrategy;
+		solver.getSearchLoop().plugSearchMonitor(this);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public boolean canApply() {
-		return Configuration.STORE_LAST_DECISION_VAR && lastVar!=null && !lastVar.instantiated();
+	@Override
+	public void init() throws ContradictionException {}
+
+	@Override
+	public Decision getDecision() {
+		if(lastVar!=null && !lastVar.instantiated()){
+			return mainStrategy.computeDecision(lastVar);
+		}
+		return null;
 	}
 
-	public void setVar(V v) {
-		lastVar = v;
-	}
+	//***********************************************************************************
+	// Monitor
+	//***********************************************************************************
 
-	public V getVar() {
-		return lastVar;
+	public void afterOpenNode() {
+		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
 	}
-
 	public void afterRestart() {
 		lastVar = null;
 	}
@@ -80,4 +90,21 @@ public class LastFail<V extends Variable> extends VoidSearchMonitor{
 	public void onSolution() {
 		lastVar = null;
 	}
+	// useless
+	public void beforeInitialize() {}
+	public void afterInitialize() {}
+	public void beforeInitialPropagation() {}
+	public void afterInitialPropagation() {}
+	public void beforeOpenNode() {}
+	public void beforeDownLeftBranch() {}
+	public void afterDownLeftBranch() {}
+	public void beforeDownRightBranch() {}
+	public void afterDownRightBranch() {}
+	public void beforeUpBranch() {}
+	public void afterUpBranch() {}
+	public void onContradiction(ContradictionException cex) {}
+	public void beforeRestart() {}
+	public void afterInterrupt() {}
+	public void beforeClose() {}
+	public void afterClose() {}
 }

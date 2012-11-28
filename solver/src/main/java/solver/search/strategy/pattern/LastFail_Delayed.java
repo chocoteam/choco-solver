@@ -25,38 +25,36 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 28/11/12
- * Time: 16:25
- */
-
-package solver.search.pattern;
+package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.measure.IMeasures;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
-public class LastFail_Delayed<V extends Variable> extends LastFail<V>{
+/**
+ * restricted Last Fail :
+ * the last fail is not applied directly after a backtrack
+ * It is delayed to the second decision after the backtrack
+ * @author Jean-Guillaume Fages
+ */
+public class LastFail_Delayed extends LastFail{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	// Delays the Last Fail pattern to the second decision
-	private V tmp;
+	private Variable tmp;
 	private long failStamp;
-	private IMeasures measures;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public LastFail_Delayed(Solver solver){
-		super(solver);
-		measures = solver.getMeasures();
+	public LastFail_Delayed(Solver solver, AbstractStrategy<Variable> mainStrategy){
+		super(solver,mainStrategy);
 	}
 
 	//***********************************************************************************
@@ -64,13 +62,16 @@ public class LastFail_Delayed<V extends Variable> extends LastFail<V>{
 	//***********************************************************************************
 
 	@Override
-	public boolean canApply() {
-		return super.canApply()&&tmp!=null;
+	public Decision getDecision() {
+		if(lastVar!=null && !lastVar.instantiated()
+		&& tmp!=null){
+			return mainStrategy.computeDecision(lastVar);
+		}
+		return null;
 	}
 
-	@Override
-	public void setVar(V v) {
-		tmp = v;
+	public void afterOpenNode() {
+		tmp = solver.getSearchLoop().decision.getDecisionVariable();
 	}
 
 	@Override
@@ -86,8 +87,8 @@ public class LastFail_Delayed<V extends Variable> extends LastFail<V>{
 	}
 
 	public void onContradiction(ContradictionException cex) {
-		if(failStamp!=measures.getFailCount()){
-			failStamp = measures.getFailCount();
+		if(failStamp!=solver.getMeasures().getFailCount()){
+			failStamp = solver.getMeasures().getFailCount();
 			lastVar = tmp;
 			tmp = null;
 		}

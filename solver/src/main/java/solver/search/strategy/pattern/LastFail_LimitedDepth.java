@@ -25,20 +25,20 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 28/11/12
- * Time: 16:25
- */
+package solver.search.strategy.pattern;
 
-package solver.search.pattern;
-
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
-public class LastFail_LimitedDepth<V extends Variable> extends LastFail<V>{
+/**
+ * restricted Last Fail : if the lastDecision has been stored too far away
+ * from the current search node, then the Last Fail is not applied
+ * => Should reduce pathological behaviors
+ * @author Jean-Guillaume Fages
+ */
+public class LastFail_LimitedDepth extends LastFail{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -46,28 +46,35 @@ public class LastFail_LimitedDepth<V extends Variable> extends LastFail<V>{
 
 	private int maxDepth;
 	private long worldIndex;
-	private IEnvironment environment;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public LastFail_LimitedDepth(Solver solver){
-		super(solver);
-		maxDepth = 0;
-		environment = solver.getEnvironment();
+	public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy){
+		this(solver,mainStrategy,1);
+	}
+
+	public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy, int maxDistance){
+		super(solver,mainStrategy);
+		maxDepth = maxDistance;
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public boolean canApply() {
-		return super.canApply() && worldIndex - maxDepth < environment.getWorldIndex();
+	@Override
+	public Decision getDecision() {
+		if(lastVar!=null && !lastVar.instantiated()
+		&& worldIndex - maxDepth < solver.getEnvironment().getWorldIndex()){
+			return mainStrategy.computeDecision(lastVar);
+		}
+		return null;
 	}
 
-	public void setVar(V v) {
-		super.setVar(v);
-		worldIndex = environment.getWorldIndex();
+	public void afterOpenNode() {
+		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+		worldIndex = solver.getEnvironment().getWorldIndex();
 	}
 }

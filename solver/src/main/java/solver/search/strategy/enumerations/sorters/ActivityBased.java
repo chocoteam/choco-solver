@@ -35,7 +35,6 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -50,7 +49,6 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
-
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -192,79 +190,78 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
     }
 
+	@Override
+	public Decision<IntVar> computeDecision(IntVar variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		currentVal = variable.getLB();
+		if (sampling) {
+			int ds = variable.getDomainSize();
+			int n = random.nextInt(ds);
+			if (variable.hasEnumeratedDomain()) {
+				while (n-- > 0) {
+					currentVal = variable.nextValue(currentVal);
+				}
+			} else {
+				currentVal += n;
+			}
+		} else {
+			if (variable.hasEnumeratedDomain()) {
+				bests.clear();
+				double bestVal = Double.MAX_VALUE;
+				DisposableValueIterator it = variable.getValueIterator(true);
+				while (it.hasNext()) {
+					int value = it.next();
+					double current = vAct[currentVar].activity(value);
+					if (current < bestVal) {
+						bests.clear();
+						bests.add(value);
+						bestVal = current;
+					} else {
+						bests.add(value);
+					}
+				}
+				currentVal = bests.get(random.nextInt(bests.size()));
+			} else {
+				int lb = variable.getLB();
+				int ub = variable.getUB();
+				currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
+						lb : ub;
+			}
+		}
+		FastDecision currrent = decisionPool.getE();
+		if (currrent == null) {
+			currrent = new FastDecision(decisionPool);
+		}
+		currrent.set(variable, currentVal, DecisionOperator.int_eq);
+//            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
+		return currrent;
+	}
+
     @Override
     public Decision getDecision() {
 		IntVar best = null;
-		if(lastFail.canApply() && !sampling){
-			best = lastFail.getVar();
-		}else{
-			bests.clear();
-			double bestVal = -1.0d;
-			for (int i = 0; i < vars.length; i++) {
-				int ds = vars[i].getDomainSize();
-				if (ds > 1) {
-					double a = A[v2i.get(vars[i].getId())] / ds;
-					if (a > bestVal) {
-						bests.clear();
-						bests.add(i);
-						bestVal = a;
-					} else if (a == bestVal) {
-						bests.add(i);
-					}
-				}
-			}
-			if (bests.size() > 0) {
-				currentVar = bests.get(random.nextInt(bests.size()));
-				best = vars[currentVar];
-			}
-		}
-		if(best!=null){
-			lastFail.setVar(best);
-			currentVal = best.getLB();
-			if (sampling) {
-				int ds = best.getDomainSize();
-				int n = random.nextInt(ds);
-				if (best.hasEnumeratedDomain()) {
-					while (n-- > 0) {
-						currentVal = best.nextValue(currentVal);
-					}
-				} else {
-					currentVal += n;
-				}
-			} else {
-				if (best.hasEnumeratedDomain()) {
+		bests.clear();
+		double bestVal = -1.0d;
+		for (int i = 0; i < vars.length; i++) {
+			int ds = vars[i].getDomainSize();
+			if (ds > 1) {
+				double a = A[v2i.get(vars[i].getId())] / ds;
+				if (a > bestVal) {
 					bests.clear();
-					double bestVal = Double.MAX_VALUE;
-					DisposableValueIterator it = best.getValueIterator(true);
-					while (it.hasNext()) {
-						int value = it.next();
-						double current = vAct[currentVar].activity(value);
-						if (current < bestVal) {
-							bests.clear();
-							bests.add(value);
-							bestVal = current;
-						} else {
-							bests.add(value);
-						}
-					}
-					currentVal = bests.get(random.nextInt(bests.size()));
-				} else {
-					int lb = best.getLB();
-					int ub = best.getUB();
-					currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
-							lb : ub;
+					bests.add(i);
+					bestVal = a;
+				} else if (a == bestVal) {
+					bests.add(i);
 				}
 			}
-			FastDecision currrent = decisionPool.getE();
-			if (currrent == null) {
-				currrent = new FastDecision(decisionPool);
-			}
-			currrent.set(best, currentVal, DecisionOperator.int_eq);
-//            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-			return currrent;
-		} else {
-			return null;
 		}
+		if (bests.size() > 0) {
+			currentVar = bests.get(random.nextInt(bests.size()));
+			best = vars[currentVar];
+		}
+		return computeDecision(best);
 	}
 
 	@Override

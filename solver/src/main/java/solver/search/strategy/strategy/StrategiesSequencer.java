@@ -113,6 +113,19 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
         }
     }
 
+	@Override
+	public Decision<Variable> computeDecision(Variable variable){
+		if(variable==null || variable.instantiated()){
+			return null;
+		}
+		int idx = index.get();
+        Decision decision = strategies[idx].computeDecision(variable);
+        while (decision == null && idx < strategies.length - 1) {
+            decision = strategies[++idx].computeDecision(variable);
+        }
+        return decision;
+	}
+
     /**
      * {@inheritDoc}
      * Iterates over the declared sub-strategies and gets the overall current decision.
