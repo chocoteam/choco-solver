@@ -106,8 +106,7 @@ public enum RootDecision implements Decision {
     }
 
     @Override
-    public Explanation explain(@Nullable Deduction d) {
-        return null;
+    public void explain(@Nullable Deduction d, Explanation e) {
     }
 
     @Override

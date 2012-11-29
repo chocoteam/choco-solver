@@ -173,7 +173,8 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         // 1. get the deduction
         Deduction vr = getValueRemoval(var, val);
         // 2. explain the deduction
-        Explanation expl = cause.explain(vr);
+        Explanation expl = Explanation.build();
+        cause.explain(vr, expl);
         // 3. store it within the database
         database.put(vr.id, expl);
 
@@ -192,7 +193,8 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation expl = cause.explain(vr);
+                Explanation expl = Explanation.build();
+                cause.explain(vr, expl);
                 database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(expl);
@@ -208,8 +210,9 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation explain = cause.explain(vr);
-                database.put(vr.id, explain);
+                Explanation expl = Explanation.build();
+                cause.explain(vr, expl);
+                database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(explain);
             }
@@ -227,8 +230,9 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             int v = it.next();
             if (v != val) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation explain = cause.explain(vr);
-                database.put(vr.id, explain);
+                Explanation expl = Explanation.build();
+                cause.explain(vr, expl);
+                database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(explain);
             }

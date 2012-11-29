@@ -53,8 +53,12 @@ public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISear
     @Override
     public void onContradiction(ContradictionException cex) {
         if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
+            Explanation expl = Explanation.build();
+            if (cex.v != null) {
+                expl.add(cex.v.explain(VariableState.DOM));
+            } else {
+                cex.c.explain(null, expl);
+            }
             Explanation complete = mExplanationEngine.flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(mExplanationEngine);
             mSolver.getSearchLoop().overridePreviousWorld(upto);

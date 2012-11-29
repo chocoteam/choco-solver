@@ -121,11 +121,9 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
 
 
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         ExplanationEngine explainer = var.getSolver().getExplainer();
-        expl.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
-        return expl;
+        e.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
     }
 
     @Override

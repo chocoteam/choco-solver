@@ -182,7 +182,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     @Override
                     public void undo() {
                         state = NEW;
-    }
+                    }
                 },
                 new Operation() {
                     @Override
@@ -387,18 +387,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * returns a explanation for the decision mentionned in parameters
      *
      * @param d : a <code>Deduction</code> to explain
+     * @param e
      * @return a set of constraints and past decisions
      */
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(VariableState.DOM));
+            e.add(v.explain(VariableState.DOM));
         }
         // and the application of the current propagator
-        expl.add(this);
-        return expl;
+        e.add(this);
     }
 
     public boolean isCompletelyInstantiated() {
@@ -415,14 +414,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void incNbPendingEvt() {
-        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 "+this;
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt++;
         //if(LoggerFactory.getLogger("solver").isDebugEnabled())
         //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
     public void decNbPendingEvt() {
-        assert (nbPendingEvt > 0) : "number of enqued records is < 0 "+this;
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt--;
         //if(LoggerFactory.getLogger("solver").isDebugEnabled())
         //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);

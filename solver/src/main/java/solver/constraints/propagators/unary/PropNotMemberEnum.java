@@ -52,8 +52,6 @@ import java.util.Arrays;
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropNotMemberEnum extends Propagator<IntVar> {
 
-    Explanation mExp; // a unique explanation, created on demand
-
     final TIntHashSet values;
 
 
@@ -119,11 +117,8 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        if (mExp == null) {
-            mExp = Explanation.build(aCause);
-        }
-        return mExp;
+    public void explain(Deduction d, Explanation e) {
+        e.add(aCause);
     }
 
 }

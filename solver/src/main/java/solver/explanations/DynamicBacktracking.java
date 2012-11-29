@@ -108,8 +108,12 @@ public class DynamicBacktracking extends AbstractStrategy<Variable> implements I
 
     public void onContradiction(ContradictionException cex) {
         if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
+            Explanation expl = Explanation.build();
+            if (cex.v != null) {
+                expl.add(cex.v.explain(VariableState.DOM));
+            } else {
+                cex.c.explain(null, expl);
+            }
             Explanation complete = mExplanationEngine.flatten(expl);
 
             decision_path.clear();

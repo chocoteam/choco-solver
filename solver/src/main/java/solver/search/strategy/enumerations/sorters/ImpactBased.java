@@ -46,6 +46,7 @@ import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+
 import java.util.Random;
 
 /**
@@ -110,69 +111,69 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
         if (!initOnly) solver.getSearchLoop().plugSearchMonitor(this);
     }
 
-	@Override
-	public Decision<IntVar> computeDecision(IntVar variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		bests.clear();
-		double bestImpact = 1.0;
-		if (variable.hasEnumeratedDomain()) {
-			DisposableValueIterator it = variable.getValueIterator(true);
-			int o = offsets[currentVar];
-			while (it.hasNext()) {
-				int val = it.next();
-				double impact = Ilabel[currentVar][val - o];
-				if (impact < bestImpact) {
-					bests.clear();
-					bests.add(val);
-					bestImpact = impact;
-				} else if (impact == bestImpact) {
-					bests.add(val);
-				}
-			}
-			it.dispose();
+    @Override
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        bests.clear();
+        double bestImpact = 1.0;
+        if (variable.hasEnumeratedDomain()) {
+            DisposableValueIterator it = variable.getValueIterator(true);
+            int o = offsets[currentVar];
+            while (it.hasNext()) {
+                int val = it.next();
+                double impact = Ilabel[currentVar][val - o];
+                if (impact < bestImpact) {
+                    bests.clear();
+                    bests.add(val);
+                    bestImpact = impact;
+                } else if (impact == bestImpact) {
+                    bests.add(val);
+                }
+            }
+            it.dispose();
 
-			currentVal = bests.get(random.nextInt(bests.size()));
-		} else {
-			int lb = variable.getLB();
-			int ub = variable.getUB();
-			currentVal = random.nextBoolean() ? lb : ub;
-		}
+            currentVal = bests.get(random.nextInt(bests.size()));
+        } else {
+            int lb = variable.getLB();
+            int ub = variable.getUB();
+            currentVal = random.nextBoolean() ? lb : ub;
+        }
 
-		FastDecision currrent = decisionPool.getE();
-		if (currrent == null) {
-			currrent = new FastDecision(decisionPool);
-		}
-		currrent.set(variable, currentVal, DecisionOperator.int_eq);
-		//System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-		return currrent;
-	}
+        FastDecision currrent = decisionPool.getE();
+        if (currrent == null) {
+            currrent = new FastDecision(decisionPool);
+        }
+        currrent.set(variable, currentVal, DecisionOperator.int_eq);
+        //System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
+        return currrent;
+    }
 
     @Override
     public Decision getDecision() {
-		IntVar best = null;
-		// 1. first select the variable with the largest impact
-		bests.clear();
-		double bestImpact = -Double.MAX_VALUE;
-		for (int i = 0; i < vars.length; i++) {
-			if (!vars[i].instantiated()) {
-				double imp = computeImpact(i);
-				if (imp > bestImpact) {
-					bests.clear();
-					bests.add(i);
-					bestImpact = imp;
-				} else if (imp == bestImpact) {
-					bests.add(i);
-				}
-			}
-		}
-		if (bests.size() > 0) {
-			// 2. select the variable
-			currentVar = bests.get(random.nextInt(bests.size()));
-			best = vars[currentVar];
-		}
-		return computeDecision(best);
+        IntVar best = null;
+        // 1. first select the variable with the largest impact
+        bests.clear();
+        double bestImpact = -Double.MAX_VALUE;
+        for (int i = 0; i < vars.length; i++) {
+            if (!vars[i].instantiated()) {
+                double imp = computeImpact(i);
+                if (imp > bestImpact) {
+                    bests.clear();
+                    bests.add(i);
+                    bestImpact = imp;
+                } else if (imp == bestImpact) {
+                    bests.add(i);
+                }
+            }
+        }
+        if (bests.size() > 0) {
+            // 2. select the variable
+            currentVar = bests.get(random.nextInt(bests.size()));
+            best = vars[currentVar];
+        }
+        return computeDecision(best);
     }
 
     @Override
@@ -474,13 +475,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(VariableState.DOM));
+            e.add(v.explain(VariableState.DOM));
         }
-        return expl;
     }
 
     @Override

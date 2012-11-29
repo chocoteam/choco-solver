@@ -60,16 +60,18 @@ public class Explanation extends Deduction {
 
     public static Explanation build() {
         if (stock.isEmpty()) {
-            return new Explanation();
+            Explanation e = new Explanation();
+            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
+                ExplanationEngine.LOGGER.info("::EXP*:: " + e.toString());
+            }
+            return e;
         } else {
-            return stock.pollFirst();
+            Explanation e = stock.pollFirst();
+            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
+                ExplanationEngine.LOGGER.info("::EXP!:: " + e.toString());
+            }
+            return e;
         }
-    }
-
-    public static Explanation build(Propagator propagator) {
-        Explanation exp = build();
-        exp.add(propagator);
-        return exp;
     }
 
     private static void free(Explanation explanation) {
@@ -77,6 +79,9 @@ public class Explanation extends Deduction {
             stock.addLast(explanation);
         }
         explanation.reset();
+        if (ExplanationEngine.LOGGER.isInfoEnabled()) {
+            ExplanationEngine.LOGGER.info("::EXP?:: " + explanation.toString());
+        }
     }
 
     private Explanation() {
@@ -125,6 +130,9 @@ public class Explanation extends Deduction {
         }
         if (this.pid.add(p.getId())) {
             this.propagators.add(p);
+            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
+                ExplanationEngine.LOGGER.info("::UPD:: " + this.toString());
+            }
         }
     }
 
@@ -139,11 +147,14 @@ public class Explanation extends Deduction {
             //throw new UnsupportedOperationException("ARG");
         } else {
             if (this.deductions == null) {
-                this.deductions = new ArrayList<Deduction>();
+                this.deductions = new ArrayList<Deduction>(4);
                 this.did = new TIntHashSet();
             }
             if (this.did.add(d.id)) {
                 this.deductions.add(d);
+                if (ExplanationEngine.LOGGER.isInfoEnabled()) {
+                    ExplanationEngine.LOGGER.info("::UPD:: " + this.toString());
+                }
             }
         }
     }
