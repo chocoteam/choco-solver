@@ -25,15 +25,12 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package choco.kernel.parallelism;
+
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 22/05/12
- * Time: 17:54
+ * Master a set of slaves which will work in parallel
+ * @param <S>
  */
-
-package samples.parallel.schema;
-
 public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 
 	//***********************************************************************************
@@ -59,7 +56,7 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 	public void distributedSlavery() {
 		nbWorkingSlaves = slaves.length;
 		for(int i=0;i<slaves.length;i++){
-			slaves[i].solveSubProblemInParallel();
+			slaves[i].workInParallel();
 		}
 		wait = true;
 		try {
@@ -68,6 +65,16 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
+		}
+	}
+
+	/**
+	 * Make the slaves work in sequence
+	 */
+	public void sequentialSlavery() {
+		nbWorkingSlaves = slaves.length;
+		for(int i=0;i<slaves.length;i++){
+			slaves[i].work();
 		}
 	}
 

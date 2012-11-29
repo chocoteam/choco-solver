@@ -25,16 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 22/05/12
- * Time: 17:54
- */
+package choco.kernel.parallelism;
 
-package samples.parallel.schema;
-
-/**Slave born to be mastered and solve sub-problems in parallel
+/**Slave born to be mastered and work in parallel
  * @author Jean-Guillaume Fages
  */
 public abstract class AbstractParallelSlave {
@@ -51,7 +44,7 @@ public abstract class AbstractParallelSlave {
 	//***********************************************************************************
 
 	/**
-	 * Create a slave born to be mastered and solve sub-problems in parallel
+	 * Create a slave born to be mastered and work in parallel
 	 * @param master
 	 * @param id slave unique name
 	 */
@@ -65,12 +58,12 @@ public abstract class AbstractParallelSlave {
 	//***********************************************************************************
 
 	/**
-	 * Creates a new thread to solve the sub-problem
+	 * Creates a new thread to work in parallel
 	 */
-	public void solveSubProblemInParallel() {
+	public void workInParallel() {
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				solveSubProblem();
+				work();
 				master.wishGranted();
 			}
 		});
@@ -78,7 +71,7 @@ public abstract class AbstractParallelSlave {
 	}
 
 	/**
-	 * Model and solve the subproblem
+	 * do something
 	 */
-	public abstract void solveSubProblem();
+	public abstract void work();
 }
