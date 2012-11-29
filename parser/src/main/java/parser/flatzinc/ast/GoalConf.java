@@ -42,6 +42,10 @@ public class GoalConf {
     long seed; // seed for random search
     SearchPattern searchPattern;  // Search pattern
 
+    public GoalConf() {
+        this(false, 0, true, false, 29091981L, SearchPattern.NONE);
+    }
+
     public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, SearchPattern sp) {
         this.free = free;
         this.bbss = bbss;
@@ -50,5 +54,6 @@ public class GoalConf {
         this.all = all;
         this.searchPattern = sp;
     }
+
 
 }

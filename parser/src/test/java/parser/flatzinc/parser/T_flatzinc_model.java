@@ -80,7 +80,7 @@ public class T_flatzinc_model extends GrammarTest {
         walker.mSolver = mSolver;
         walker.map = map;
         try {
-            walker.flatzinc_model(mSolver, map,new GoalConf(false, 0,false,false, 0));
+            walker.flatzinc_model(mSolver, map, new GoalConf());
         } catch (RecognitionException e) {
             Assert.fail();
         }

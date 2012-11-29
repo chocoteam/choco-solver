@@ -70,7 +70,7 @@ public class T_models {
     private void execute(String model) {
         ParseAndSolveExt ps = new ParseAndSolveExt();
         Solver solver = new Solver();
-        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>(), new GoalConf(false, 0,false,false, 0));
+        ps.buildParser(new ByteArrayInputStream(model.getBytes()), solver, new THashMap<String, Object>(), new GoalConf());
         solver.solve();
     }
 
