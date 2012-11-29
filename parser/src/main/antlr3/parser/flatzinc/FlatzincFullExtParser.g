@@ -281,7 +281,8 @@ index_set
     ;
 
 expr
-    :   LB INT_CONST (CM INT_CONST)* RB
+    :   LB RB
+    |   LB INT_CONST (CM INT_CONST)* RB
     ->  LB INT_CONST+ RB
     |   bool_const
     |   INT_CONST (DD INT_CONST)?

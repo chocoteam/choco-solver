@@ -1,3 +1,5 @@
+// $ANTLR 3.4 parser/flatzinc/FlatzincParser.g 2012-11-29 14:29:48
+
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
@@ -24,8 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-// $ANTLR 3.4 parser/flatzinc/FlatzincParser.g 2012-11-13 10:00:41
 
 package parser.flatzinc;
 
@@ -426,7 +426,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, pred_param, PREDICATE
+                // elements: IDENTIFIER, PREDICATE, pred_param
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -537,7 +537,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, CL, pred_param_type
+                // elements: CL, pred_param_type, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -1219,7 +1219,7 @@ public class FlatzincParser extends Parser {
                     stream_var_type_u.add(var_type_u42.getTree());
 
                     // AST REWRITE
-                    // elements: var_type_u, index_set
+                    // elements: index_set, var_type_u
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1527,7 +1527,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1613,7 +1613,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST
+                    // elements: INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1677,7 +1677,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, INT_CONST, DD
+                    // elements: INT_CONST, INT_CONST, SET, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1781,7 +1781,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST, SET, INT_CONST
+                    // elements: INT_CONST, INT_CONST, SET, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2205,7 +2205,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST, SET
+                    // elements: INT_CONST, INT_CONST, DD, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2309,7 +2309,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, CM
+                    // elements: INT_CONST, CM, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2434,7 +2434,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: ARRAY, index_set, DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, ARRAY, DD, index_set, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2598,7 +2598,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: ARRAY, index_set, INT_CONST, CM
+                    // elements: CM, INT_CONST, index_set, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2740,7 +2740,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, ARRAY, INT_CONST, INT_CONST, index_set, SET
+                    // elements: DD, INT_CONST, ARRAY, SET, INT_CONST, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2922,7 +2922,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, index_set, CM, ARRAY
+                    // elements: ARRAY, INT_CONST, CM, SET, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3254,7 +3254,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, ARRAY, VAR, index_set
+                    // elements: VAR, ARRAY, SET, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3518,7 +3518,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "expr"
-    // parser/flatzinc/FlatzincParser.g:141:1: expr : ( LB INT_CONST ( CM INT_CONST )* RB -> LB ( INT_CONST )+ RB | bool_const | INT_CONST ( DD INT_CONST )? | LS ( expr ( CM expr )* )? RS -> ^( EXPR LS ( expr )* RS ) | id_expr | STRING );
+    // parser/flatzinc/FlatzincParser.g:141:1: expr : ( LB RB | LB INT_CONST ( CM INT_CONST )* RB -> LB ( INT_CONST )+ RB | bool_const | INT_CONST ( DD INT_CONST )? | LS ( expr ( CM expr )* )? RS -> ^( EXPR LS ( expr )* RS ) | id_expr | STRING );
     public final FlatzincParser.expr_return expr() throws RecognitionException {
         FlatzincParser.expr_return retval = new FlatzincParser.expr_return();
         retval.start = input.LT(1);
@@ -3527,38 +3527,42 @@ public class FlatzincParser extends Parser {
         Object root_0 = null;
 
         Token LB157 = null;
-        Token INT_CONST158 = null;
-        Token CM159 = null;
+        Token RB158 = null;
+        Token LB159 = null;
         Token INT_CONST160 = null;
-        Token RB161 = null;
-        Token INT_CONST163 = null;
-        Token DD164 = null;
+        Token CM161 = null;
+        Token INT_CONST162 = null;
+        Token RB163 = null;
         Token INT_CONST165 = null;
-        Token LS166 = null;
-        Token CM168 = null;
-        Token RS170 = null;
-        Token STRING172 = null;
-        FlatzincParser.bool_const_return bool_const162 = null;
-
-        FlatzincParser.expr_return expr167 = null;
+        Token DD166 = null;
+        Token INT_CONST167 = null;
+        Token LS168 = null;
+        Token CM170 = null;
+        Token RS172 = null;
+        Token STRING174 = null;
+        FlatzincParser.bool_const_return bool_const164 = null;
 
         FlatzincParser.expr_return expr169 = null;
 
-        FlatzincParser.id_expr_return id_expr171 = null;
+        FlatzincParser.expr_return expr171 = null;
+
+        FlatzincParser.id_expr_return id_expr173 = null;
 
 
         Object LB157_tree = null;
-        Object INT_CONST158_tree = null;
-        Object CM159_tree = null;
+        Object RB158_tree = null;
+        Object LB159_tree = null;
         Object INT_CONST160_tree = null;
-        Object RB161_tree = null;
-        Object INT_CONST163_tree = null;
-        Object DD164_tree = null;
+        Object CM161_tree = null;
+        Object INT_CONST162_tree = null;
+        Object RB163_tree = null;
         Object INT_CONST165_tree = null;
-        Object LS166_tree = null;
-        Object CM168_tree = null;
-        Object RS170_tree = null;
-        Object STRING172_tree = null;
+        Object DD166_tree = null;
+        Object INT_CONST167_tree = null;
+        Object LS168_tree = null;
+        Object CM170_tree = null;
+        Object RS172_tree = null;
+        Object STRING174_tree = null;
         RewriteRuleTokenStream stream_RS = new RewriteRuleTokenStream(adaptor, "token RS");
         RewriteRuleTokenStream stream_INT_CONST = new RewriteRuleTokenStream(adaptor, "token INT_CONST");
         RewriteRuleTokenStream stream_LB = new RewriteRuleTokenStream(adaptor, "token LB");
@@ -3567,32 +3571,48 @@ public class FlatzincParser extends Parser {
         RewriteRuleTokenStream stream_CM = new RewriteRuleTokenStream(adaptor, "token CM");
         RewriteRuleSubtreeStream stream_expr = new RewriteRuleSubtreeStream(adaptor, "rule expr");
         try {
-            // parser/flatzinc/FlatzincParser.g:142:5: ( LB INT_CONST ( CM INT_CONST )* RB -> LB ( INT_CONST )+ RB | bool_const | INT_CONST ( DD INT_CONST )? | LS ( expr ( CM expr )* )? RS -> ^( EXPR LS ( expr )* RS ) | id_expr | STRING )
-            int alt31 = 6;
+            // parser/flatzinc/FlatzincParser.g:142:5: ( LB RB | LB INT_CONST ( CM INT_CONST )* RB -> LB ( INT_CONST )+ RB | bool_const | INT_CONST ( DD INT_CONST )? | LS ( expr ( CM expr )* )? RS -> ^( EXPR LS ( expr )* RS ) | id_expr | STRING )
+            int alt31 = 7;
             switch (input.LA(1)) {
                 case LB: {
-                    alt31 = 1;
+                    switch (input.LA(2)) {
+                        case RB: {
+                            alt31 = 1;
+                        }
+                        break;
+                        case INT_CONST: {
+                            alt31 = 2;
+                        }
+                        break;
+                        default:
+                            NoViableAltException nvae =
+                                    new NoViableAltException("", 31, 1, input);
+
+                            throw nvae;
+
+                    }
+
                 }
                 break;
                 case FALSE:
                 case TRUE: {
-                    alt31 = 2;
-                }
-                break;
-                case INT_CONST: {
                     alt31 = 3;
                 }
                 break;
-                case LS: {
+                case INT_CONST: {
                     alt31 = 4;
                 }
                 break;
-                case IDENTIFIER: {
+                case LS: {
                     alt31 = 5;
                 }
                 break;
-                case STRING: {
+                case IDENTIFIER: {
                     alt31 = 6;
+                }
+                break;
+                case STRING: {
+                    alt31 = 7;
                 }
                 break;
                 default:
@@ -3605,17 +3625,39 @@ public class FlatzincParser extends Parser {
 
             switch (alt31) {
                 case 1:
-                    // parser/flatzinc/FlatzincParser.g:142:9: LB INT_CONST ( CM INT_CONST )* RB
+                    // parser/flatzinc/FlatzincParser.g:142:9: LB RB
                 {
+                    root_0 = (Object) adaptor.nil();
+
+
                     LB157 = (Token) match(input, LB, FOLLOW_LB_in_expr1184);
-                    stream_LB.add(LB157);
+                    LB157_tree =
+                            (Object) adaptor.create(LB157)
+                    ;
+                    adaptor.addChild(root_0, LB157_tree);
 
 
-                    INT_CONST158 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1186);
-                    stream_INT_CONST.add(INT_CONST158);
+                    RB158 = (Token) match(input, RB, FOLLOW_RB_in_expr1186);
+                    RB158_tree =
+                            (Object) adaptor.create(RB158)
+                    ;
+                    adaptor.addChild(root_0, RB158_tree);
 
 
-                    // parser/flatzinc/FlatzincParser.g:142:22: ( CM INT_CONST )*
+                }
+                break;
+                case 2:
+                    // parser/flatzinc/FlatzincParser.g:143:9: LB INT_CONST ( CM INT_CONST )* RB
+                {
+                    LB159 = (Token) match(input, LB, FOLLOW_LB_in_expr1196);
+                    stream_LB.add(LB159);
+
+
+                    INT_CONST160 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1198);
+                    stream_INT_CONST.add(INT_CONST160);
+
+
+                    // parser/flatzinc/FlatzincParser.g:143:22: ( CM INT_CONST )*
                     loop27:
                     do {
                         int alt27 = 2;
@@ -3629,14 +3671,14 @@ public class FlatzincParser extends Parser {
 
                         switch (alt27) {
                             case 1:
-                                // parser/flatzinc/FlatzincParser.g:142:23: CM INT_CONST
+                                // parser/flatzinc/FlatzincParser.g:143:23: CM INT_CONST
                             {
-                                CM159 = (Token) match(input, CM, FOLLOW_CM_in_expr1189);
-                                stream_CM.add(CM159);
+                                CM161 = (Token) match(input, CM, FOLLOW_CM_in_expr1201);
+                                stream_CM.add(CM161);
 
 
-                                INT_CONST160 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1191);
-                                stream_INT_CONST.add(INT_CONST160);
+                                INT_CONST162 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1203);
+                                stream_INT_CONST.add(INT_CONST162);
 
 
                             }
@@ -3648,12 +3690,12 @@ public class FlatzincParser extends Parser {
                     } while (true);
 
 
-                    RB161 = (Token) match(input, RB, FOLLOW_RB_in_expr1195);
-                    stream_RB.add(RB161);
+                    RB163 = (Token) match(input, RB, FOLLOW_RB_in_expr1207);
+                    stream_RB.add(RB163);
 
 
                     // AST REWRITE
-                    // elements: RB, INT_CONST, LB
+                    // elements: INT_CONST, RB, LB
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3663,7 +3705,7 @@ public class FlatzincParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                     root_0 = (Object) adaptor.nil();
-                    // 143:5: -> LB ( INT_CONST )+ RB
+                    // 144:5: -> LB ( INT_CONST )+ RB
                     {
                         adaptor.addChild(root_0,
                                 stream_LB.nextNode()
@@ -3691,35 +3733,35 @@ public class FlatzincParser extends Parser {
 
                 }
                 break;
-                case 2:
-                    // parser/flatzinc/FlatzincParser.g:144:9: bool_const
+                case 3:
+                    // parser/flatzinc/FlatzincParser.g:145:9: bool_const
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    pushFollow(FOLLOW_bool_const_in_expr1219);
-                    bool_const162 = bool_const();
+                    pushFollow(FOLLOW_bool_const_in_expr1231);
+                    bool_const164 = bool_const();
 
                     state._fsp--;
 
-                    adaptor.addChild(root_0, bool_const162.getTree());
+                    adaptor.addChild(root_0, bool_const164.getTree());
 
                 }
                 break;
-                case 3:
-                    // parser/flatzinc/FlatzincParser.g:145:9: INT_CONST ( DD INT_CONST )?
+                case 4:
+                    // parser/flatzinc/FlatzincParser.g:146:9: INT_CONST ( DD INT_CONST )?
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    INT_CONST163 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1229);
-                    INT_CONST163_tree =
-                            (Object) adaptor.create(INT_CONST163)
+                    INT_CONST165 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1241);
+                    INT_CONST165_tree =
+                            (Object) adaptor.create(INT_CONST165)
                     ;
-                    adaptor.addChild(root_0, INT_CONST163_tree);
+                    adaptor.addChild(root_0, INT_CONST165_tree);
 
 
-                    // parser/flatzinc/FlatzincParser.g:145:19: ( DD INT_CONST )?
+                    // parser/flatzinc/FlatzincParser.g:146:19: ( DD INT_CONST )?
                     int alt28 = 2;
                     switch (input.LA(1)) {
                         case DD: {
@@ -3730,20 +3772,20 @@ public class FlatzincParser extends Parser {
 
                     switch (alt28) {
                         case 1:
-                            // parser/flatzinc/FlatzincParser.g:145:20: DD INT_CONST
+                            // parser/flatzinc/FlatzincParser.g:146:20: DD INT_CONST
                         {
-                            DD164 = (Token) match(input, DD, FOLLOW_DD_in_expr1232);
-                            DD164_tree =
-                                    (Object) adaptor.create(DD164)
+                            DD166 = (Token) match(input, DD, FOLLOW_DD_in_expr1244);
+                            DD166_tree =
+                                    (Object) adaptor.create(DD166)
                             ;
-                            adaptor.addChild(root_0, DD164_tree);
+                            adaptor.addChild(root_0, DD166_tree);
 
 
-                            INT_CONST165 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1234);
-                            INT_CONST165_tree =
-                                    (Object) adaptor.create(INT_CONST165)
+                            INT_CONST167 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1246);
+                            INT_CONST167_tree =
+                                    (Object) adaptor.create(INT_CONST167)
                             ;
-                            adaptor.addChild(root_0, INT_CONST165_tree);
+                            adaptor.addChild(root_0, INT_CONST167_tree);
 
 
                         }
@@ -3754,14 +3796,14 @@ public class FlatzincParser extends Parser {
 
                 }
                 break;
-                case 4:
-                    // parser/flatzinc/FlatzincParser.g:146:9: LS ( expr ( CM expr )* )? RS
+                case 5:
+                    // parser/flatzinc/FlatzincParser.g:147:9: LS ( expr ( CM expr )* )? RS
                 {
-                    LS166 = (Token) match(input, LS, FOLLOW_LS_in_expr1246);
-                    stream_LS.add(LS166);
+                    LS168 = (Token) match(input, LS, FOLLOW_LS_in_expr1258);
+                    stream_LS.add(LS168);
 
 
-                    // parser/flatzinc/FlatzincParser.g:146:12: ( expr ( CM expr )* )?
+                    // parser/flatzinc/FlatzincParser.g:147:12: ( expr ( CM expr )* )?
                     int alt30 = 2;
                     switch (input.LA(1)) {
                         case FALSE:
@@ -3778,16 +3820,16 @@ public class FlatzincParser extends Parser {
 
                     switch (alt30) {
                         case 1:
-                            // parser/flatzinc/FlatzincParser.g:146:13: expr ( CM expr )*
+                            // parser/flatzinc/FlatzincParser.g:147:13: expr ( CM expr )*
                         {
-                            pushFollow(FOLLOW_expr_in_expr1249);
-                            expr167 = expr();
+                            pushFollow(FOLLOW_expr_in_expr1261);
+                            expr169 = expr();
 
                             state._fsp--;
 
-                            stream_expr.add(expr167.getTree());
+                            stream_expr.add(expr169.getTree());
 
-                            // parser/flatzinc/FlatzincParser.g:146:18: ( CM expr )*
+                            // parser/flatzinc/FlatzincParser.g:147:18: ( CM expr )*
                             loop29:
                             do {
                                 int alt29 = 2;
@@ -3801,18 +3843,18 @@ public class FlatzincParser extends Parser {
 
                                 switch (alt29) {
                                     case 1:
-                                        // parser/flatzinc/FlatzincParser.g:146:19: CM expr
+                                        // parser/flatzinc/FlatzincParser.g:147:19: CM expr
                                     {
-                                        CM168 = (Token) match(input, CM, FOLLOW_CM_in_expr1252);
-                                        stream_CM.add(CM168);
+                                        CM170 = (Token) match(input, CM, FOLLOW_CM_in_expr1264);
+                                        stream_CM.add(CM170);
 
 
-                                        pushFollow(FOLLOW_expr_in_expr1254);
-                                        expr169 = expr();
+                                        pushFollow(FOLLOW_expr_in_expr1266);
+                                        expr171 = expr();
 
                                         state._fsp--;
 
-                                        stream_expr.add(expr169.getTree());
+                                        stream_expr.add(expr171.getTree());
 
                                     }
                                     break;
@@ -3829,12 +3871,12 @@ public class FlatzincParser extends Parser {
                     }
 
 
-                    RS170 = (Token) match(input, RS, FOLLOW_RS_in_expr1260);
-                    stream_RS.add(RS170);
+                    RS172 = (Token) match(input, RS, FOLLOW_RS_in_expr1272);
+                    stream_RS.add(RS172);
 
 
                     // AST REWRITE
-                    // elements: expr, LS, RS
+                    // elements: RS, LS, expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3844,9 +3886,9 @@ public class FlatzincParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                     root_0 = (Object) adaptor.nil();
-                    // 147:5: -> ^( EXPR LS ( expr )* RS )
+                    // 148:5: -> ^( EXPR LS ( expr )* RS )
                     {
-                        // parser/flatzinc/FlatzincParser.g:147:9: ^( EXPR LS ( expr )* RS )
+                        // parser/flatzinc/FlatzincParser.g:148:9: ^( EXPR LS ( expr )* RS )
                         {
                             Object root_1 = (Object) adaptor.nil();
                             root_1 = (Object) adaptor.becomeRoot(
@@ -3857,7 +3899,7 @@ public class FlatzincParser extends Parser {
                                     stream_LS.nextNode()
                             );
 
-                            // parser/flatzinc/FlatzincParser.g:147:19: ( expr )*
+                            // parser/flatzinc/FlatzincParser.g:148:19: ( expr )*
                             while (stream_expr.hasNext()) {
                                 adaptor.addChild(root_1, stream_expr.nextTree());
 
@@ -3878,32 +3920,32 @@ public class FlatzincParser extends Parser {
 
                 }
                 break;
-                case 5:
-                    // parser/flatzinc/FlatzincParser.g:148:9: id_expr
+                case 6:
+                    // parser/flatzinc/FlatzincParser.g:149:9: id_expr
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    pushFollow(FOLLOW_id_expr_in_expr1288);
-                    id_expr171 = id_expr();
+                    pushFollow(FOLLOW_id_expr_in_expr1300);
+                    id_expr173 = id_expr();
 
                     state._fsp--;
 
-                    adaptor.addChild(root_0, id_expr171.getTree());
+                    adaptor.addChild(root_0, id_expr173.getTree());
 
                 }
                 break;
-                case 6:
-                    // parser/flatzinc/FlatzincParser.g:149:9: STRING
+                case 7:
+                    // parser/flatzinc/FlatzincParser.g:150:9: STRING
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    STRING172 = (Token) match(input, STRING, FOLLOW_STRING_in_expr1298);
-                    STRING172_tree =
-                            (Object) adaptor.create(STRING172)
+                    STRING174 = (Token) match(input, STRING, FOLLOW_STRING_in_expr1310);
+                    STRING174_tree =
+                            (Object) adaptor.create(STRING174)
                     ;
-                    adaptor.addChild(root_0, STRING172_tree);
+                    adaptor.addChild(root_0, STRING174_tree);
 
 
                 }
@@ -3941,7 +3983,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "id_expr"
-    // parser/flatzinc/FlatzincParser.g:153:1: id_expr : IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )? ;
+    // parser/flatzinc/FlatzincParser.g:154:1: id_expr : IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )? ;
     public final FlatzincParser.id_expr_return id_expr() throws RecognitionException {
         FlatzincParser.id_expr_return retval = new FlatzincParser.id_expr_return();
         retval.start = input.LT(1);
@@ -3949,41 +3991,41 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token IDENTIFIER173 = null;
-        Token LP174 = null;
-        Token CM176 = null;
-        Token RP178 = null;
-        Token LS179 = null;
-        Token INT_CONST180 = null;
-        Token RS181 = null;
-        FlatzincParser.expr_return expr175 = null;
-
+        Token IDENTIFIER175 = null;
+        Token LP176 = null;
+        Token CM178 = null;
+        Token RP180 = null;
+        Token LS181 = null;
+        Token INT_CONST182 = null;
+        Token RS183 = null;
         FlatzincParser.expr_return expr177 = null;
 
+        FlatzincParser.expr_return expr179 = null;
 
-        Object IDENTIFIER173_tree = null;
-        Object LP174_tree = null;
-        Object CM176_tree = null;
-        Object RP178_tree = null;
-        Object LS179_tree = null;
-        Object INT_CONST180_tree = null;
-        Object RS181_tree = null;
+
+        Object IDENTIFIER175_tree = null;
+        Object LP176_tree = null;
+        Object CM178_tree = null;
+        Object RP180_tree = null;
+        Object LS181_tree = null;
+        Object INT_CONST182_tree = null;
+        Object RS183_tree = null;
 
         try {
-            // parser/flatzinc/FlatzincParser.g:155:5: ( IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )? )
-            // parser/flatzinc/FlatzincParser.g:155:9: IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )?
+            // parser/flatzinc/FlatzincParser.g:156:5: ( IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )? )
+            // parser/flatzinc/FlatzincParser.g:156:9: IDENTIFIER ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )?
             {
                 root_0 = (Object) adaptor.nil();
 
 
-                IDENTIFIER173 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_id_expr1319);
-                IDENTIFIER173_tree =
-                        (Object) adaptor.create(IDENTIFIER173)
+                IDENTIFIER175 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_id_expr1331);
+                IDENTIFIER175_tree =
+                        (Object) adaptor.create(IDENTIFIER175)
                 ;
-                adaptor.addChild(root_0, IDENTIFIER173_tree);
+                adaptor.addChild(root_0, IDENTIFIER175_tree);
 
 
-                // parser/flatzinc/FlatzincParser.g:155:20: ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )?
+                // parser/flatzinc/FlatzincParser.g:156:20: ( ( LP expr ( CM expr )* RP ) | ( LS INT_CONST RS ) )?
                 int alt33 = 3;
                 switch (input.LA(1)) {
                     case LP: {
@@ -3998,26 +4040,26 @@ public class FlatzincParser extends Parser {
 
                 switch (alt33) {
                     case 1:
-                        // parser/flatzinc/FlatzincParser.g:155:21: ( LP expr ( CM expr )* RP )
+                        // parser/flatzinc/FlatzincParser.g:156:21: ( LP expr ( CM expr )* RP )
                     {
-                        // parser/flatzinc/FlatzincParser.g:155:21: ( LP expr ( CM expr )* RP )
-                        // parser/flatzinc/FlatzincParser.g:155:22: LP expr ( CM expr )* RP
+                        // parser/flatzinc/FlatzincParser.g:156:21: ( LP expr ( CM expr )* RP )
+                        // parser/flatzinc/FlatzincParser.g:156:22: LP expr ( CM expr )* RP
                         {
-                            LP174 = (Token) match(input, LP, FOLLOW_LP_in_id_expr1323);
-                            LP174_tree =
-                                    (Object) adaptor.create(LP174)
+                            LP176 = (Token) match(input, LP, FOLLOW_LP_in_id_expr1335);
+                            LP176_tree =
+                                    (Object) adaptor.create(LP176)
                             ;
-                            adaptor.addChild(root_0, LP174_tree);
+                            adaptor.addChild(root_0, LP176_tree);
 
 
-                            pushFollow(FOLLOW_expr_in_id_expr1325);
-                            expr175 = expr();
+                            pushFollow(FOLLOW_expr_in_id_expr1337);
+                            expr177 = expr();
 
                             state._fsp--;
 
-                            adaptor.addChild(root_0, expr175.getTree());
+                            adaptor.addChild(root_0, expr177.getTree());
 
-                            // parser/flatzinc/FlatzincParser.g:155:30: ( CM expr )*
+                            // parser/flatzinc/FlatzincParser.g:156:30: ( CM expr )*
                             loop32:
                             do {
                                 int alt32 = 2;
@@ -4031,21 +4073,21 @@ public class FlatzincParser extends Parser {
 
                                 switch (alt32) {
                                     case 1:
-                                        // parser/flatzinc/FlatzincParser.g:155:31: CM expr
+                                        // parser/flatzinc/FlatzincParser.g:156:31: CM expr
                                     {
-                                        CM176 = (Token) match(input, CM, FOLLOW_CM_in_id_expr1328);
-                                        CM176_tree =
-                                                (Object) adaptor.create(CM176)
+                                        CM178 = (Token) match(input, CM, FOLLOW_CM_in_id_expr1340);
+                                        CM178_tree =
+                                                (Object) adaptor.create(CM178)
                                         ;
-                                        adaptor.addChild(root_0, CM176_tree);
+                                        adaptor.addChild(root_0, CM178_tree);
 
 
-                                        pushFollow(FOLLOW_expr_in_id_expr1330);
-                                        expr177 = expr();
+                                        pushFollow(FOLLOW_expr_in_id_expr1342);
+                                        expr179 = expr();
 
                                         state._fsp--;
 
-                                        adaptor.addChild(root_0, expr177.getTree());
+                                        adaptor.addChild(root_0, expr179.getTree());
 
                                     }
                                     break;
@@ -4056,11 +4098,11 @@ public class FlatzincParser extends Parser {
                             } while (true);
 
 
-                            RP178 = (Token) match(input, RP, FOLLOW_RP_in_id_expr1334);
-                            RP178_tree =
-                                    (Object) adaptor.create(RP178)
+                            RP180 = (Token) match(input, RP, FOLLOW_RP_in_id_expr1346);
+                            RP180_tree =
+                                    (Object) adaptor.create(RP180)
                             ;
-                            adaptor.addChild(root_0, RP178_tree);
+                            adaptor.addChild(root_0, RP180_tree);
 
 
                         }
@@ -4069,30 +4111,30 @@ public class FlatzincParser extends Parser {
                     }
                     break;
                     case 2:
-                        // parser/flatzinc/FlatzincParser.g:155:45: ( LS INT_CONST RS )
+                        // parser/flatzinc/FlatzincParser.g:156:45: ( LS INT_CONST RS )
                     {
-                        // parser/flatzinc/FlatzincParser.g:155:45: ( LS INT_CONST RS )
-                        // parser/flatzinc/FlatzincParser.g:155:46: LS INT_CONST RS
+                        // parser/flatzinc/FlatzincParser.g:156:45: ( LS INT_CONST RS )
+                        // parser/flatzinc/FlatzincParser.g:156:46: LS INT_CONST RS
                         {
-                            LS179 = (Token) match(input, LS, FOLLOW_LS_in_id_expr1338);
-                            LS179_tree =
-                                    (Object) adaptor.create(LS179)
+                            LS181 = (Token) match(input, LS, FOLLOW_LS_in_id_expr1350);
+                            LS181_tree =
+                                    (Object) adaptor.create(LS181)
                             ;
-                            adaptor.addChild(root_0, LS179_tree);
+                            adaptor.addChild(root_0, LS181_tree);
 
 
-                            INT_CONST180 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_id_expr1340);
-                            INT_CONST180_tree =
-                                    (Object) adaptor.create(INT_CONST180)
+                            INT_CONST182 = (Token) match(input, INT_CONST, FOLLOW_INT_CONST_in_id_expr1352);
+                            INT_CONST182_tree =
+                                    (Object) adaptor.create(INT_CONST182)
                             ;
-                            adaptor.addChild(root_0, INT_CONST180_tree);
+                            adaptor.addChild(root_0, INT_CONST182_tree);
 
 
-                            RS181 = (Token) match(input, RS, FOLLOW_RS_in_id_expr1342);
-                            RS181_tree =
-                                    (Object) adaptor.create(RS181)
+                            RS183 = (Token) match(input, RS, FOLLOW_RS_in_id_expr1354);
+                            RS183_tree =
+                                    (Object) adaptor.create(RS183)
                             ;
-                            adaptor.addChild(root_0, RS181_tree);
+                            adaptor.addChild(root_0, RS183_tree);
 
 
                         }
@@ -4137,7 +4179,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "param_decl"
-    // parser/flatzinc/FlatzincParser.g:159:1: param_decl : par_type CL IDENTIFIER EQ expr SC -> ^( PAR IDENTIFIER par_type expr ) ;
+    // parser/flatzinc/FlatzincParser.g:160:1: param_decl : par_type CL IDENTIFIER EQ expr SC -> ^( PAR IDENTIFIER par_type expr ) ;
     public final FlatzincParser.param_decl_return param_decl() throws RecognitionException {
         FlatzincParser.param_decl_return retval = new FlatzincParser.param_decl_return();
         retval.start = input.LT(1);
@@ -4145,19 +4187,19 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token CL183 = null;
-        Token IDENTIFIER184 = null;
-        Token EQ185 = null;
-        Token SC187 = null;
-        FlatzincParser.par_type_return par_type182 = null;
+        Token CL185 = null;
+        Token IDENTIFIER186 = null;
+        Token EQ187 = null;
+        Token SC189 = null;
+        FlatzincParser.par_type_return par_type184 = null;
 
-        FlatzincParser.expr_return expr186 = null;
+        FlatzincParser.expr_return expr188 = null;
 
 
-        Object CL183_tree = null;
-        Object IDENTIFIER184_tree = null;
-        Object EQ185_tree = null;
-        Object SC187_tree = null;
+        Object CL185_tree = null;
+        Object IDENTIFIER186_tree = null;
+        Object EQ187_tree = null;
+        Object SC189_tree = null;
         RewriteRuleTokenStream stream_SC = new RewriteRuleTokenStream(adaptor, "token SC");
         RewriteRuleTokenStream stream_EQ = new RewriteRuleTokenStream(adaptor, "token EQ");
         RewriteRuleTokenStream stream_IDENTIFIER = new RewriteRuleTokenStream(adaptor, "token IDENTIFIER");
@@ -4165,41 +4207,41 @@ public class FlatzincParser extends Parser {
         RewriteRuleSubtreeStream stream_par_type = new RewriteRuleSubtreeStream(adaptor, "rule par_type");
         RewriteRuleSubtreeStream stream_expr = new RewriteRuleSubtreeStream(adaptor, "rule expr");
         try {
-            // parser/flatzinc/FlatzincParser.g:160:2: ( par_type CL IDENTIFIER EQ expr SC -> ^( PAR IDENTIFIER par_type expr ) )
-            // parser/flatzinc/FlatzincParser.g:160:6: par_type CL IDENTIFIER EQ expr SC
+            // parser/flatzinc/FlatzincParser.g:161:2: ( par_type CL IDENTIFIER EQ expr SC -> ^( PAR IDENTIFIER par_type expr ) )
+            // parser/flatzinc/FlatzincParser.g:161:6: par_type CL IDENTIFIER EQ expr SC
             {
-                pushFollow(FOLLOW_par_type_in_param_decl1362);
-                par_type182 = par_type();
+                pushFollow(FOLLOW_par_type_in_param_decl1374);
+                par_type184 = par_type();
 
                 state._fsp--;
 
-                stream_par_type.add(par_type182.getTree());
+                stream_par_type.add(par_type184.getTree());
 
-                CL183 = (Token) match(input, CL, FOLLOW_CL_in_param_decl1364);
-                stream_CL.add(CL183);
-
-
-                IDENTIFIER184 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_param_decl1366);
-                stream_IDENTIFIER.add(IDENTIFIER184);
+                CL185 = (Token) match(input, CL, FOLLOW_CL_in_param_decl1376);
+                stream_CL.add(CL185);
 
 
-                EQ185 = (Token) match(input, EQ, FOLLOW_EQ_in_param_decl1368);
-                stream_EQ.add(EQ185);
+                IDENTIFIER186 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_param_decl1378);
+                stream_IDENTIFIER.add(IDENTIFIER186);
 
 
-                pushFollow(FOLLOW_expr_in_param_decl1370);
-                expr186 = expr();
+                EQ187 = (Token) match(input, EQ, FOLLOW_EQ_in_param_decl1380);
+                stream_EQ.add(EQ187);
+
+
+                pushFollow(FOLLOW_expr_in_param_decl1382);
+                expr188 = expr();
 
                 state._fsp--;
 
-                stream_expr.add(expr186.getTree());
+                stream_expr.add(expr188.getTree());
 
-                SC187 = (Token) match(input, SC, FOLLOW_SC_in_param_decl1372);
-                stream_SC.add(SC187);
+                SC189 = (Token) match(input, SC, FOLLOW_SC_in_param_decl1384);
+                stream_SC.add(SC189);
 
 
                 // AST REWRITE
-                // elements: par_type, expr, IDENTIFIER
+                // elements: IDENTIFIER, expr, par_type
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4209,9 +4251,9 @@ public class FlatzincParser extends Parser {
                 RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                 root_0 = (Object) adaptor.nil();
-                // 161:2: -> ^( PAR IDENTIFIER par_type expr )
+                // 162:2: -> ^( PAR IDENTIFIER par_type expr )
                 {
-                    // parser/flatzinc/FlatzincParser.g:161:6: ^( PAR IDENTIFIER par_type expr )
+                    // parser/flatzinc/FlatzincParser.g:162:6: ^( PAR IDENTIFIER par_type expr )
                     {
                         Object root_1 = (Object) adaptor.nil();
                         root_1 = (Object) adaptor.becomeRoot(
@@ -4267,7 +4309,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "var_decl"
-    // parser/flatzinc/FlatzincParser.g:165:1: var_decl : var_type CL IDENTIFIER annotations ( EQ expr )? SC -> ^( VAR IDENTIFIER var_type annotations ( expr )? ) ;
+    // parser/flatzinc/FlatzincParser.g:166:1: var_decl : var_type CL IDENTIFIER annotations ( EQ expr )? SC -> ^( VAR IDENTIFIER var_type annotations ( expr )? ) ;
     public final FlatzincParser.var_decl_return var_decl() throws RecognitionException {
         FlatzincParser.var_decl_return retval = new FlatzincParser.var_decl_return();
         retval.start = input.LT(1);
@@ -4275,21 +4317,21 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token CL189 = null;
-        Token IDENTIFIER190 = null;
-        Token EQ192 = null;
-        Token SC194 = null;
-        FlatzincParser.var_type_return var_type188 = null;
+        Token CL191 = null;
+        Token IDENTIFIER192 = null;
+        Token EQ194 = null;
+        Token SC196 = null;
+        FlatzincParser.var_type_return var_type190 = null;
 
-        FlatzincParser.annotations_return annotations191 = null;
+        FlatzincParser.annotations_return annotations193 = null;
 
-        FlatzincParser.expr_return expr193 = null;
+        FlatzincParser.expr_return expr195 = null;
 
 
-        Object CL189_tree = null;
-        Object IDENTIFIER190_tree = null;
-        Object EQ192_tree = null;
-        Object SC194_tree = null;
+        Object CL191_tree = null;
+        Object IDENTIFIER192_tree = null;
+        Object EQ194_tree = null;
+        Object SC196_tree = null;
         RewriteRuleTokenStream stream_SC = new RewriteRuleTokenStream(adaptor, "token SC");
         RewriteRuleTokenStream stream_EQ = new RewriteRuleTokenStream(adaptor, "token EQ");
         RewriteRuleTokenStream stream_IDENTIFIER = new RewriteRuleTokenStream(adaptor, "token IDENTIFIER");
@@ -4298,32 +4340,32 @@ public class FlatzincParser extends Parser {
         RewriteRuleSubtreeStream stream_expr = new RewriteRuleSubtreeStream(adaptor, "rule expr");
         RewriteRuleSubtreeStream stream_annotations = new RewriteRuleSubtreeStream(adaptor, "rule annotations");
         try {
-            // parser/flatzinc/FlatzincParser.g:166:2: ( var_type CL IDENTIFIER annotations ( EQ expr )? SC -> ^( VAR IDENTIFIER var_type annotations ( expr )? ) )
-            // parser/flatzinc/FlatzincParser.g:166:6: var_type CL IDENTIFIER annotations ( EQ expr )? SC
+            // parser/flatzinc/FlatzincParser.g:167:2: ( var_type CL IDENTIFIER annotations ( EQ expr )? SC -> ^( VAR IDENTIFIER var_type annotations ( expr )? ) )
+            // parser/flatzinc/FlatzincParser.g:167:6: var_type CL IDENTIFIER annotations ( EQ expr )? SC
             {
-                pushFollow(FOLLOW_var_type_in_var_decl1400);
-                var_type188 = var_type();
+                pushFollow(FOLLOW_var_type_in_var_decl1412);
+                var_type190 = var_type();
 
                 state._fsp--;
 
-                stream_var_type.add(var_type188.getTree());
+                stream_var_type.add(var_type190.getTree());
 
-                CL189 = (Token) match(input, CL, FOLLOW_CL_in_var_decl1402);
-                stream_CL.add(CL189);
-
-
-                IDENTIFIER190 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_var_decl1404);
-                stream_IDENTIFIER.add(IDENTIFIER190);
+                CL191 = (Token) match(input, CL, FOLLOW_CL_in_var_decl1414);
+                stream_CL.add(CL191);
 
 
-                pushFollow(FOLLOW_annotations_in_var_decl1406);
-                annotations191 = annotations();
+                IDENTIFIER192 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_var_decl1416);
+                stream_IDENTIFIER.add(IDENTIFIER192);
+
+
+                pushFollow(FOLLOW_annotations_in_var_decl1418);
+                annotations193 = annotations();
 
                 state._fsp--;
 
-                stream_annotations.add(annotations191.getTree());
+                stream_annotations.add(annotations193.getTree());
 
-                // parser/flatzinc/FlatzincParser.g:166:41: ( EQ expr )?
+                // parser/flatzinc/FlatzincParser.g:167:41: ( EQ expr )?
                 int alt34 = 2;
                 switch (input.LA(1)) {
                     case EQ: {
@@ -4334,18 +4376,18 @@ public class FlatzincParser extends Parser {
 
                 switch (alt34) {
                     case 1:
-                        // parser/flatzinc/FlatzincParser.g:166:42: EQ expr
+                        // parser/flatzinc/FlatzincParser.g:167:42: EQ expr
                     {
-                        EQ192 = (Token) match(input, EQ, FOLLOW_EQ_in_var_decl1409);
-                        stream_EQ.add(EQ192);
+                        EQ194 = (Token) match(input, EQ, FOLLOW_EQ_in_var_decl1421);
+                        stream_EQ.add(EQ194);
 
 
-                        pushFollow(FOLLOW_expr_in_var_decl1411);
-                        expr193 = expr();
+                        pushFollow(FOLLOW_expr_in_var_decl1423);
+                        expr195 = expr();
 
                         state._fsp--;
 
-                        stream_expr.add(expr193.getTree());
+                        stream_expr.add(expr195.getTree());
 
                     }
                     break;
@@ -4353,12 +4395,12 @@ public class FlatzincParser extends Parser {
                 }
 
 
-                SC194 = (Token) match(input, SC, FOLLOW_SC_in_var_decl1415);
-                stream_SC.add(SC194);
+                SC196 = (Token) match(input, SC, FOLLOW_SC_in_var_decl1427);
+                stream_SC.add(SC196);
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, var_type, expr, annotations
+                // elements: annotations, var_type, expr, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4368,9 +4410,9 @@ public class FlatzincParser extends Parser {
                 RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                 root_0 = (Object) adaptor.nil();
-                // 167:2: -> ^( VAR IDENTIFIER var_type annotations ( expr )? )
+                // 168:2: -> ^( VAR IDENTIFIER var_type annotations ( expr )? )
                 {
-                    // parser/flatzinc/FlatzincParser.g:167:6: ^( VAR IDENTIFIER var_type annotations ( expr )? )
+                    // parser/flatzinc/FlatzincParser.g:168:6: ^( VAR IDENTIFIER var_type annotations ( expr )? )
                     {
                         Object root_1 = (Object) adaptor.nil();
                         root_1 = (Object) adaptor.becomeRoot(
@@ -4385,7 +4427,7 @@ public class FlatzincParser extends Parser {
 
                         adaptor.addChild(root_1, stream_annotations.nextTree());
 
-                        // parser/flatzinc/FlatzincParser.g:167:44: ( expr )?
+                        // parser/flatzinc/FlatzincParser.g:168:44: ( expr )?
                         if (stream_expr.hasNext()) {
                             adaptor.addChild(root_1, stream_expr.nextTree());
 
@@ -4433,7 +4475,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "constraint"
-    // parser/flatzinc/FlatzincParser.g:170:1: constraint : CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations ) ;
+    // parser/flatzinc/FlatzincParser.g:171:1: constraint : CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations ) ;
     public final FlatzincParser.constraint_return constraint() throws RecognitionException {
         FlatzincParser.constraint_return retval = new FlatzincParser.constraint_return();
         retval.start = input.LT(1);
@@ -4441,25 +4483,25 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token CONSTRAINT195 = null;
-        Token IDENTIFIER196 = null;
-        Token LP197 = null;
-        Token CM199 = null;
-        Token RP201 = null;
-        Token SC203 = null;
-        FlatzincParser.expr_return expr198 = null;
-
+        Token CONSTRAINT197 = null;
+        Token IDENTIFIER198 = null;
+        Token LP199 = null;
+        Token CM201 = null;
+        Token RP203 = null;
+        Token SC205 = null;
         FlatzincParser.expr_return expr200 = null;
 
-        FlatzincParser.annotations_return annotations202 = null;
+        FlatzincParser.expr_return expr202 = null;
+
+        FlatzincParser.annotations_return annotations204 = null;
 
 
-        Object CONSTRAINT195_tree = null;
-        Object IDENTIFIER196_tree = null;
-        Object LP197_tree = null;
-        Object CM199_tree = null;
-        Object RP201_tree = null;
-        Object SC203_tree = null;
+        Object CONSTRAINT197_tree = null;
+        Object IDENTIFIER198_tree = null;
+        Object LP199_tree = null;
+        Object CM201_tree = null;
+        Object RP203_tree = null;
+        Object SC205_tree = null;
         RewriteRuleTokenStream stream_SC = new RewriteRuleTokenStream(adaptor, "token SC");
         RewriteRuleTokenStream stream_RP = new RewriteRuleTokenStream(adaptor, "token RP");
         RewriteRuleTokenStream stream_CONSTRAINT = new RewriteRuleTokenStream(adaptor, "token CONSTRAINT");
@@ -4469,29 +4511,29 @@ public class FlatzincParser extends Parser {
         RewriteRuleSubtreeStream stream_expr = new RewriteRuleSubtreeStream(adaptor, "rule expr");
         RewriteRuleSubtreeStream stream_annotations = new RewriteRuleSubtreeStream(adaptor, "rule annotations");
         try {
-            // parser/flatzinc/FlatzincParser.g:171:2: ( CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations ) )
-            // parser/flatzinc/FlatzincParser.g:171:6: CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC
+            // parser/flatzinc/FlatzincParser.g:172:2: ( CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations ) )
+            // parser/flatzinc/FlatzincParser.g:172:6: CONSTRAINT IDENTIFIER LP expr ( CM expr )* RP annotations SC
             {
-                CONSTRAINT195 = (Token) match(input, CONSTRAINT, FOLLOW_CONSTRAINT_in_constraint1445);
-                stream_CONSTRAINT.add(CONSTRAINT195);
+                CONSTRAINT197 = (Token) match(input, CONSTRAINT, FOLLOW_CONSTRAINT_in_constraint1457);
+                stream_CONSTRAINT.add(CONSTRAINT197);
 
 
-                IDENTIFIER196 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_constraint1447);
-                stream_IDENTIFIER.add(IDENTIFIER196);
+                IDENTIFIER198 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_constraint1459);
+                stream_IDENTIFIER.add(IDENTIFIER198);
 
 
-                LP197 = (Token) match(input, LP, FOLLOW_LP_in_constraint1449);
-                stream_LP.add(LP197);
+                LP199 = (Token) match(input, LP, FOLLOW_LP_in_constraint1461);
+                stream_LP.add(LP199);
 
 
-                pushFollow(FOLLOW_expr_in_constraint1451);
-                expr198 = expr();
+                pushFollow(FOLLOW_expr_in_constraint1463);
+                expr200 = expr();
 
                 state._fsp--;
 
-                stream_expr.add(expr198.getTree());
+                stream_expr.add(expr200.getTree());
 
-                // parser/flatzinc/FlatzincParser.g:171:36: ( CM expr )*
+                // parser/flatzinc/FlatzincParser.g:172:36: ( CM expr )*
                 loop35:
                 do {
                     int alt35 = 2;
@@ -4505,18 +4547,18 @@ public class FlatzincParser extends Parser {
 
                     switch (alt35) {
                         case 1:
-                            // parser/flatzinc/FlatzincParser.g:171:37: CM expr
+                            // parser/flatzinc/FlatzincParser.g:172:37: CM expr
                         {
-                            CM199 = (Token) match(input, CM, FOLLOW_CM_in_constraint1454);
-                            stream_CM.add(CM199);
+                            CM201 = (Token) match(input, CM, FOLLOW_CM_in_constraint1466);
+                            stream_CM.add(CM201);
 
 
-                            pushFollow(FOLLOW_expr_in_constraint1456);
-                            expr200 = expr();
+                            pushFollow(FOLLOW_expr_in_constraint1468);
+                            expr202 = expr();
 
                             state._fsp--;
 
-                            stream_expr.add(expr200.getTree());
+                            stream_expr.add(expr202.getTree());
 
                         }
                         break;
@@ -4527,23 +4569,23 @@ public class FlatzincParser extends Parser {
                 } while (true);
 
 
-                RP201 = (Token) match(input, RP, FOLLOW_RP_in_constraint1460);
-                stream_RP.add(RP201);
+                RP203 = (Token) match(input, RP, FOLLOW_RP_in_constraint1472);
+                stream_RP.add(RP203);
 
 
-                pushFollow(FOLLOW_annotations_in_constraint1462);
-                annotations202 = annotations();
+                pushFollow(FOLLOW_annotations_in_constraint1474);
+                annotations204 = annotations();
 
                 state._fsp--;
 
-                stream_annotations.add(annotations202.getTree());
+                stream_annotations.add(annotations204.getTree());
 
-                SC203 = (Token) match(input, SC, FOLLOW_SC_in_constraint1464);
-                stream_SC.add(SC203);
+                SC205 = (Token) match(input, SC, FOLLOW_SC_in_constraint1476);
+                stream_SC.add(SC205);
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, annotations, CONSTRAINT, expr
+                // elements: annotations, expr, IDENTIFIER, CONSTRAINT
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4553,9 +4595,9 @@ public class FlatzincParser extends Parser {
                 RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                 root_0 = (Object) adaptor.nil();
-                // 172:2: -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations )
+                // 173:2: -> ^( CONSTRAINT IDENTIFIER ( expr )+ annotations )
                 {
-                    // parser/flatzinc/FlatzincParser.g:172:6: ^( CONSTRAINT IDENTIFIER ( expr )+ annotations )
+                    // parser/flatzinc/FlatzincParser.g:173:6: ^( CONSTRAINT IDENTIFIER ( expr )+ annotations )
                     {
                         Object root_1 = (Object) adaptor.nil();
                         root_1 = (Object) adaptor.becomeRoot(
@@ -4618,7 +4660,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "solve_goal"
-    // parser/flatzinc/FlatzincParser.g:175:1: solve_goal : SOLVE ^ annotations resolution SC !;
+    // parser/flatzinc/FlatzincParser.g:176:1: solve_goal : SOLVE ^ annotations resolution SC !;
     public final FlatzincParser.solve_goal_return solve_goal() throws RecognitionException {
         FlatzincParser.solve_goal_return retval = new FlatzincParser.solve_goal_return();
         retval.start = input.LT(1);
@@ -4626,45 +4668,45 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token SOLVE204 = null;
-        Token SC207 = null;
-        FlatzincParser.annotations_return annotations205 = null;
+        Token SOLVE206 = null;
+        Token SC209 = null;
+        FlatzincParser.annotations_return annotations207 = null;
 
-        FlatzincParser.resolution_return resolution206 = null;
+        FlatzincParser.resolution_return resolution208 = null;
 
 
-        Object SOLVE204_tree = null;
-        Object SC207_tree = null;
+        Object SOLVE206_tree = null;
+        Object SC209_tree = null;
 
         try {
-            // parser/flatzinc/FlatzincParser.g:176:2: ( SOLVE ^ annotations resolution SC !)
-            // parser/flatzinc/FlatzincParser.g:176:6: SOLVE ^ annotations resolution SC !
+            // parser/flatzinc/FlatzincParser.g:177:2: ( SOLVE ^ annotations resolution SC !)
+            // parser/flatzinc/FlatzincParser.g:177:6: SOLVE ^ annotations resolution SC !
             {
                 root_0 = (Object) adaptor.nil();
 
 
-                SOLVE204 = (Token) match(input, SOLVE, FOLLOW_SOLVE_in_solve_goal1492);
-                SOLVE204_tree =
-                        (Object) adaptor.create(SOLVE204)
+                SOLVE206 = (Token) match(input, SOLVE, FOLLOW_SOLVE_in_solve_goal1504);
+                SOLVE206_tree =
+                        (Object) adaptor.create(SOLVE206)
                 ;
-                root_0 = (Object) adaptor.becomeRoot(SOLVE204_tree, root_0);
+                root_0 = (Object) adaptor.becomeRoot(SOLVE206_tree, root_0);
 
 
-                pushFollow(FOLLOW_annotations_in_solve_goal1495);
-                annotations205 = annotations();
-
-                state._fsp--;
-
-                adaptor.addChild(root_0, annotations205.getTree());
-
-                pushFollow(FOLLOW_resolution_in_solve_goal1497);
-                resolution206 = resolution();
+                pushFollow(FOLLOW_annotations_in_solve_goal1507);
+                annotations207 = annotations();
 
                 state._fsp--;
 
-                adaptor.addChild(root_0, resolution206.getTree());
+                adaptor.addChild(root_0, annotations207.getTree());
 
-                SC207 = (Token) match(input, SC, FOLLOW_SC_in_solve_goal1499);
+                pushFollow(FOLLOW_resolution_in_solve_goal1509);
+                resolution208 = resolution();
+
+                state._fsp--;
+
+                adaptor.addChild(root_0, resolution208.getTree());
+
+                SC209 = (Token) match(input, SC, FOLLOW_SC_in_solve_goal1511);
 
             }
 
@@ -4699,7 +4741,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "resolution"
-    // parser/flatzinc/FlatzincParser.g:179:1: resolution : ( MINIMIZE ^ expr | MAXIMIZE ^ expr | SATISFY ^);
+    // parser/flatzinc/FlatzincParser.g:180:1: resolution : ( MINIMIZE ^ expr | MAXIMIZE ^ expr | SATISFY ^);
     public final FlatzincParser.resolution_return resolution() throws RecognitionException {
         FlatzincParser.resolution_return retval = new FlatzincParser.resolution_return();
         retval.start = input.LT(1);
@@ -4707,20 +4749,20 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token MINIMIZE208 = null;
-        Token MAXIMIZE210 = null;
-        Token SATISFY212 = null;
-        FlatzincParser.expr_return expr209 = null;
-
+        Token MINIMIZE210 = null;
+        Token MAXIMIZE212 = null;
+        Token SATISFY214 = null;
         FlatzincParser.expr_return expr211 = null;
 
+        FlatzincParser.expr_return expr213 = null;
 
-        Object MINIMIZE208_tree = null;
-        Object MAXIMIZE210_tree = null;
-        Object SATISFY212_tree = null;
+
+        Object MINIMIZE210_tree = null;
+        Object MAXIMIZE212_tree = null;
+        Object SATISFY214_tree = null;
 
         try {
-            // parser/flatzinc/FlatzincParser.g:180:5: ( MINIMIZE ^ expr | MAXIMIZE ^ expr | SATISFY ^)
+            // parser/flatzinc/FlatzincParser.g:181:5: ( MINIMIZE ^ expr | MAXIMIZE ^ expr | SATISFY ^)
             int alt36 = 3;
             switch (input.LA(1)) {
                 case MINIMIZE: {
@@ -4745,41 +4787,19 @@ public class FlatzincParser extends Parser {
 
             switch (alt36) {
                 case 1:
-                    // parser/flatzinc/FlatzincParser.g:180:9: MINIMIZE ^ expr
+                    // parser/flatzinc/FlatzincParser.g:181:9: MINIMIZE ^ expr
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    MINIMIZE208 = (Token) match(input, MINIMIZE, FOLLOW_MINIMIZE_in_resolution1516);
-                    MINIMIZE208_tree =
-                            (Object) adaptor.create(MINIMIZE208)
+                    MINIMIZE210 = (Token) match(input, MINIMIZE, FOLLOW_MINIMIZE_in_resolution1528);
+                    MINIMIZE210_tree =
+                            (Object) adaptor.create(MINIMIZE210)
                     ;
-                    root_0 = (Object) adaptor.becomeRoot(MINIMIZE208_tree, root_0);
+                    root_0 = (Object) adaptor.becomeRoot(MINIMIZE210_tree, root_0);
 
 
-                    pushFollow(FOLLOW_expr_in_resolution1519);
-                    expr209 = expr();
-
-                    state._fsp--;
-
-                    adaptor.addChild(root_0, expr209.getTree());
-
-                }
-                break;
-                case 2:
-                    // parser/flatzinc/FlatzincParser.g:181:9: MAXIMIZE ^ expr
-                {
-                    root_0 = (Object) adaptor.nil();
-
-
-                    MAXIMIZE210 = (Token) match(input, MAXIMIZE, FOLLOW_MAXIMIZE_in_resolution1529);
-                    MAXIMIZE210_tree =
-                            (Object) adaptor.create(MAXIMIZE210)
-                    ;
-                    root_0 = (Object) adaptor.becomeRoot(MAXIMIZE210_tree, root_0);
-
-
-                    pushFollow(FOLLOW_expr_in_resolution1532);
+                    pushFollow(FOLLOW_expr_in_resolution1531);
                     expr211 = expr();
 
                     state._fsp--;
@@ -4788,17 +4808,39 @@ public class FlatzincParser extends Parser {
 
                 }
                 break;
-                case 3:
-                    // parser/flatzinc/FlatzincParser.g:182:9: SATISFY ^
+                case 2:
+                    // parser/flatzinc/FlatzincParser.g:182:9: MAXIMIZE ^ expr
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    SATISFY212 = (Token) match(input, SATISFY, FOLLOW_SATISFY_in_resolution1542);
-                    SATISFY212_tree =
-                            (Object) adaptor.create(SATISFY212)
+                    MAXIMIZE212 = (Token) match(input, MAXIMIZE, FOLLOW_MAXIMIZE_in_resolution1541);
+                    MAXIMIZE212_tree =
+                            (Object) adaptor.create(MAXIMIZE212)
                     ;
-                    root_0 = (Object) adaptor.becomeRoot(SATISFY212_tree, root_0);
+                    root_0 = (Object) adaptor.becomeRoot(MAXIMIZE212_tree, root_0);
+
+
+                    pushFollow(FOLLOW_expr_in_resolution1544);
+                    expr213 = expr();
+
+                    state._fsp--;
+
+                    adaptor.addChild(root_0, expr213.getTree());
+
+                }
+                break;
+                case 3:
+                    // parser/flatzinc/FlatzincParser.g:183:9: SATISFY ^
+                {
+                    root_0 = (Object) adaptor.nil();
+
+
+                    SATISFY214 = (Token) match(input, SATISFY, FOLLOW_SATISFY_in_resolution1554);
+                    SATISFY214_tree =
+                            (Object) adaptor.create(SATISFY214)
+                    ;
+                    root_0 = (Object) adaptor.becomeRoot(SATISFY214_tree, root_0);
 
 
                 }
@@ -4836,7 +4878,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "annotations"
-    // parser/flatzinc/FlatzincParser.g:185:1: annotations : ( DC annotation )* -> ^( ANNOTATIONS ( annotation )* ) ;
+    // parser/flatzinc/FlatzincParser.g:186:1: annotations : ( DC annotation )* -> ^( ANNOTATIONS ( annotation )* ) ;
     public final FlatzincParser.annotations_return annotations() throws RecognitionException {
         FlatzincParser.annotations_return retval = new FlatzincParser.annotations_return();
         retval.start = input.LT(1);
@@ -4844,18 +4886,18 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token DC213 = null;
-        FlatzincParser.annotation_return annotation214 = null;
+        Token DC215 = null;
+        FlatzincParser.annotation_return annotation216 = null;
 
 
-        Object DC213_tree = null;
+        Object DC215_tree = null;
         RewriteRuleTokenStream stream_DC = new RewriteRuleTokenStream(adaptor, "token DC");
         RewriteRuleSubtreeStream stream_annotation = new RewriteRuleSubtreeStream(adaptor, "rule annotation");
         try {
-            // parser/flatzinc/FlatzincParser.g:186:5: ( ( DC annotation )* -> ^( ANNOTATIONS ( annotation )* ) )
-            // parser/flatzinc/FlatzincParser.g:186:9: ( DC annotation )*
+            // parser/flatzinc/FlatzincParser.g:187:5: ( ( DC annotation )* -> ^( ANNOTATIONS ( annotation )* ) )
+            // parser/flatzinc/FlatzincParser.g:187:9: ( DC annotation )*
             {
-                // parser/flatzinc/FlatzincParser.g:186:9: ( DC annotation )*
+                // parser/flatzinc/FlatzincParser.g:187:9: ( DC annotation )*
                 loop37:
                 do {
                     int alt37 = 2;
@@ -4869,18 +4911,18 @@ public class FlatzincParser extends Parser {
 
                     switch (alt37) {
                         case 1:
-                            // parser/flatzinc/FlatzincParser.g:186:10: DC annotation
+                            // parser/flatzinc/FlatzincParser.g:187:10: DC annotation
                         {
-                            DC213 = (Token) match(input, DC, FOLLOW_DC_in_annotations1563);
-                            stream_DC.add(DC213);
+                            DC215 = (Token) match(input, DC, FOLLOW_DC_in_annotations1575);
+                            stream_DC.add(DC215);
 
 
-                            pushFollow(FOLLOW_annotation_in_annotations1565);
-                            annotation214 = annotation();
+                            pushFollow(FOLLOW_annotation_in_annotations1577);
+                            annotation216 = annotation();
 
                             state._fsp--;
 
-                            stream_annotation.add(annotation214.getTree());
+                            stream_annotation.add(annotation216.getTree());
 
                         }
                         break;
@@ -4902,16 +4944,16 @@ public class FlatzincParser extends Parser {
                 RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                 root_0 = (Object) adaptor.nil();
-                // 187:5: -> ^( ANNOTATIONS ( annotation )* )
+                // 188:5: -> ^( ANNOTATIONS ( annotation )* )
                 {
-                    // parser/flatzinc/FlatzincParser.g:187:9: ^( ANNOTATIONS ( annotation )* )
+                    // parser/flatzinc/FlatzincParser.g:188:9: ^( ANNOTATIONS ( annotation )* )
                     {
                         Object root_1 = (Object) adaptor.nil();
                         root_1 = (Object) adaptor.becomeRoot(
                                 (Object) adaptor.create(ANNOTATIONS, "ANNOTATIONS")
                                 , root_1);
 
-                        // parser/flatzinc/FlatzincParser.g:187:23: ( annotation )*
+                        // parser/flatzinc/FlatzincParser.g:188:23: ( annotation )*
                         while (stream_annotation.hasNext()) {
                             adaptor.addChild(root_1, stream_annotation.nextTree());
 
@@ -4959,7 +5001,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "annotation"
-    // parser/flatzinc/FlatzincParser.g:190:1: annotation : IDENTIFIER ( LP expr ( CM expr )* RP )? -> IDENTIFIER ( LP ( expr )+ RP )? ;
+    // parser/flatzinc/FlatzincParser.g:191:1: annotation : IDENTIFIER ( LP expr ( CM expr )* RP )? -> IDENTIFIER ( LP ( expr )+ RP )? ;
     public final FlatzincParser.annotation_return annotation() throws RecognitionException {
         FlatzincParser.annotation_return retval = new FlatzincParser.annotation_return();
         retval.start = input.LT(1);
@@ -4967,33 +5009,33 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token IDENTIFIER215 = null;
-        Token LP216 = null;
-        Token CM218 = null;
-        Token RP220 = null;
-        FlatzincParser.expr_return expr217 = null;
-
+        Token IDENTIFIER217 = null;
+        Token LP218 = null;
+        Token CM220 = null;
+        Token RP222 = null;
         FlatzincParser.expr_return expr219 = null;
 
+        FlatzincParser.expr_return expr221 = null;
 
-        Object IDENTIFIER215_tree = null;
-        Object LP216_tree = null;
-        Object CM218_tree = null;
-        Object RP220_tree = null;
+
+        Object IDENTIFIER217_tree = null;
+        Object LP218_tree = null;
+        Object CM220_tree = null;
+        Object RP222_tree = null;
         RewriteRuleTokenStream stream_RP = new RewriteRuleTokenStream(adaptor, "token RP");
         RewriteRuleTokenStream stream_IDENTIFIER = new RewriteRuleTokenStream(adaptor, "token IDENTIFIER");
         RewriteRuleTokenStream stream_CM = new RewriteRuleTokenStream(adaptor, "token CM");
         RewriteRuleTokenStream stream_LP = new RewriteRuleTokenStream(adaptor, "token LP");
         RewriteRuleSubtreeStream stream_expr = new RewriteRuleSubtreeStream(adaptor, "rule expr");
         try {
-            // parser/flatzinc/FlatzincParser.g:191:5: ( IDENTIFIER ( LP expr ( CM expr )* RP )? -> IDENTIFIER ( LP ( expr )+ RP )? )
-            // parser/flatzinc/FlatzincParser.g:191:9: IDENTIFIER ( LP expr ( CM expr )* RP )?
+            // parser/flatzinc/FlatzincParser.g:192:5: ( IDENTIFIER ( LP expr ( CM expr )* RP )? -> IDENTIFIER ( LP ( expr )+ RP )? )
+            // parser/flatzinc/FlatzincParser.g:192:9: IDENTIFIER ( LP expr ( CM expr )* RP )?
             {
-                IDENTIFIER215 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_annotation1600);
-                stream_IDENTIFIER.add(IDENTIFIER215);
+                IDENTIFIER217 = (Token) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_annotation1612);
+                stream_IDENTIFIER.add(IDENTIFIER217);
 
 
-                // parser/flatzinc/FlatzincParser.g:191:20: ( LP expr ( CM expr )* RP )?
+                // parser/flatzinc/FlatzincParser.g:192:20: ( LP expr ( CM expr )* RP )?
                 int alt39 = 2;
                 switch (input.LA(1)) {
                     case LP: {
@@ -5004,20 +5046,20 @@ public class FlatzincParser extends Parser {
 
                 switch (alt39) {
                     case 1:
-                        // parser/flatzinc/FlatzincParser.g:191:21: LP expr ( CM expr )* RP
+                        // parser/flatzinc/FlatzincParser.g:192:21: LP expr ( CM expr )* RP
                     {
-                        LP216 = (Token) match(input, LP, FOLLOW_LP_in_annotation1603);
-                        stream_LP.add(LP216);
+                        LP218 = (Token) match(input, LP, FOLLOW_LP_in_annotation1615);
+                        stream_LP.add(LP218);
 
 
-                        pushFollow(FOLLOW_expr_in_annotation1605);
-                        expr217 = expr();
+                        pushFollow(FOLLOW_expr_in_annotation1617);
+                        expr219 = expr();
 
                         state._fsp--;
 
-                        stream_expr.add(expr217.getTree());
+                        stream_expr.add(expr219.getTree());
 
-                        // parser/flatzinc/FlatzincParser.g:191:29: ( CM expr )*
+                        // parser/flatzinc/FlatzincParser.g:192:29: ( CM expr )*
                         loop38:
                         do {
                             int alt38 = 2;
@@ -5031,18 +5073,18 @@ public class FlatzincParser extends Parser {
 
                             switch (alt38) {
                                 case 1:
-                                    // parser/flatzinc/FlatzincParser.g:191:30: CM expr
+                                    // parser/flatzinc/FlatzincParser.g:192:30: CM expr
                                 {
-                                    CM218 = (Token) match(input, CM, FOLLOW_CM_in_annotation1608);
-                                    stream_CM.add(CM218);
+                                    CM220 = (Token) match(input, CM, FOLLOW_CM_in_annotation1620);
+                                    stream_CM.add(CM220);
 
 
-                                    pushFollow(FOLLOW_expr_in_annotation1610);
-                                    expr219 = expr();
+                                    pushFollow(FOLLOW_expr_in_annotation1622);
+                                    expr221 = expr();
 
                                     state._fsp--;
 
-                                    stream_expr.add(expr219.getTree());
+                                    stream_expr.add(expr221.getTree());
 
                                 }
                                 break;
@@ -5053,8 +5095,8 @@ public class FlatzincParser extends Parser {
                         } while (true);
 
 
-                        RP220 = (Token) match(input, RP, FOLLOW_RP_in_annotation1614);
-                        stream_RP.add(RP220);
+                        RP222 = (Token) match(input, RP, FOLLOW_RP_in_annotation1626);
+                        stream_RP.add(RP222);
 
 
                     }
@@ -5064,7 +5106,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: RP, expr, LP, IDENTIFIER
+                // elements: expr, IDENTIFIER, RP, LP
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -5074,14 +5116,14 @@ public class FlatzincParser extends Parser {
                 RewriteRuleSubtreeStream stream_retval = new RewriteRuleSubtreeStream(adaptor, "rule retval", retval != null ? retval.tree : null);
 
                 root_0 = (Object) adaptor.nil();
-                // 192:5: -> IDENTIFIER ( LP ( expr )+ RP )?
+                // 193:5: -> IDENTIFIER ( LP ( expr )+ RP )?
                 {
                     adaptor.addChild(root_0,
                             stream_IDENTIFIER.nextNode()
                     );
 
-                    // parser/flatzinc/FlatzincParser.g:192:20: ( LP ( expr )+ RP )?
-                    if (stream_RP.hasNext() || stream_expr.hasNext() || stream_LP.hasNext()) {
+                    // parser/flatzinc/FlatzincParser.g:193:20: ( LP ( expr )+ RP )?
+                    if (stream_expr.hasNext() || stream_RP.hasNext() || stream_LP.hasNext()) {
                         adaptor.addChild(root_0,
                                 stream_LP.nextNode()
                         );
@@ -5100,8 +5142,8 @@ public class FlatzincParser extends Parser {
                         );
 
                     }
-                    stream_RP.reset();
                     stream_expr.reset();
+                    stream_RP.reset();
                     stream_LP.reset();
 
                 }
@@ -5142,7 +5184,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "bool_const"
-    // parser/flatzinc/FlatzincParser.g:196:1: bool_const : ( TRUE ^| FALSE ^);
+    // parser/flatzinc/FlatzincParser.g:197:1: bool_const : ( TRUE ^| FALSE ^);
     public final FlatzincParser.bool_const_return bool_const() throws RecognitionException {
         FlatzincParser.bool_const_return retval = new FlatzincParser.bool_const_return();
         retval.start = input.LT(1);
@@ -5150,14 +5192,14 @@ public class FlatzincParser extends Parser {
 
         Object root_0 = null;
 
-        Token TRUE221 = null;
-        Token FALSE222 = null;
+        Token TRUE223 = null;
+        Token FALSE224 = null;
 
-        Object TRUE221_tree = null;
-        Object FALSE222_tree = null;
+        Object TRUE223_tree = null;
+        Object FALSE224_tree = null;
 
         try {
-            // parser/flatzinc/FlatzincParser.g:197:5: ( TRUE ^| FALSE ^)
+            // parser/flatzinc/FlatzincParser.g:198:5: ( TRUE ^| FALSE ^)
             int alt40 = 2;
             switch (input.LA(1)) {
                 case TRUE: {
@@ -5178,31 +5220,31 @@ public class FlatzincParser extends Parser {
 
             switch (alt40) {
                 case 1:
-                    // parser/flatzinc/FlatzincParser.g:197:9: TRUE ^
+                    // parser/flatzinc/FlatzincParser.g:198:9: TRUE ^
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    TRUE221 = (Token) match(input, TRUE, FOLLOW_TRUE_in_bool_const1655);
-                    TRUE221_tree =
-                            (Object) adaptor.create(TRUE221)
+                    TRUE223 = (Token) match(input, TRUE, FOLLOW_TRUE_in_bool_const1667);
+                    TRUE223_tree =
+                            (Object) adaptor.create(TRUE223)
                     ;
-                    root_0 = (Object) adaptor.becomeRoot(TRUE221_tree, root_0);
+                    root_0 = (Object) adaptor.becomeRoot(TRUE223_tree, root_0);
 
 
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincParser.g:198:9: FALSE ^
+                    // parser/flatzinc/FlatzincParser.g:199:9: FALSE ^
                 {
                     root_0 = (Object) adaptor.nil();
 
 
-                    FALSE222 = (Token) match(input, FALSE, FOLLOW_FALSE_in_bool_const1666);
-                    FALSE222_tree =
-                            (Object) adaptor.create(FALSE222)
+                    FALSE224 = (Token) match(input, FALSE, FOLLOW_FALSE_in_bool_const1678);
+                    FALSE224_tree =
+                            (Object) adaptor.create(FALSE224)
                     ;
-                    root_0 = (Object) adaptor.becomeRoot(FALSE222_tree, root_0);
+                    root_0 = (Object) adaptor.becomeRoot(FALSE224_tree, root_0);
 
 
                 }
@@ -5685,71 +5727,73 @@ public class FlatzincParser extends Parser {
     public static final BitSet FOLLOW_DD_in_index_set1121 = new BitSet(new long[]{0x0000000020000000L});
     public static final BitSet FOLLOW_INT_CONST_in_index_set1123 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_INT_in_index_set1152 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LB_in_expr1184 = new BitSet(new long[]{0x0000000020000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1186 = new BitSet(new long[]{0x0000020000002000L});
-    public static final BitSet FOLLOW_CM_in_expr1189 = new BitSet(new long[]{0x0000000020000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1191 = new BitSet(new long[]{0x0000020000002000L});
-    public static final BitSet FOLLOW_RB_in_expr1195 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_bool_const_in_expr1219 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1229 = new BitSet(new long[]{0x0000000000020002L});
-    public static final BitSet FOLLOW_DD_in_expr1232 = new BitSet(new long[]{0x0000000020000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_expr1234 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_expr1246 = new BitSet(new long[]{0x0003080164800000L});
-    public static final BitSet FOLLOW_expr_in_expr1249 = new BitSet(new long[]{0x0000080000002000L});
-    public static final BitSet FOLLOW_CM_in_expr1252 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_expr1254 = new BitSet(new long[]{0x0000080000002000L});
-    public static final BitSet FOLLOW_RS_in_expr1260 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_id_expr_in_expr1288 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_STRING_in_expr1298 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr1319 = new BitSet(new long[]{0x0000000180000002L});
-    public static final BitSet FOLLOW_LP_in_id_expr1323 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_id_expr1325 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_CM_in_id_expr1328 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_id_expr1330 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_RP_in_id_expr1334 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LS_in_id_expr1338 = new BitSet(new long[]{0x0000000020000000L});
-    public static final BitSet FOLLOW_INT_CONST_in_id_expr1340 = new BitSet(new long[]{0x0000080000000000L});
-    public static final BitSet FOLLOW_RS_in_id_expr1342 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_par_type_in_param_decl1362 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_CL_in_param_decl1364 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl1366 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_EQ_in_param_decl1368 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_param_decl1370 = new BitSet(new long[]{0x0000200000000000L});
-    public static final BitSet FOLLOW_SC_in_param_decl1372 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_type_in_var_decl1400 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_CL_in_var_decl1402 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl1404 = new BitSet(new long[]{0x0000200000090000L});
-    public static final BitSet FOLLOW_annotations_in_var_decl1406 = new BitSet(new long[]{0x0000200000080000L});
-    public static final BitSet FOLLOW_EQ_in_var_decl1409 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_var_decl1411 = new BitSet(new long[]{0x0000200000000000L});
-    public static final BitSet FOLLOW_SC_in_var_decl1415 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_CONSTRAINT_in_constraint1445 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_constraint1447 = new BitSet(new long[]{0x0000000080000000L});
-    public static final BitSet FOLLOW_LP_in_constraint1449 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_constraint1451 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_CM_in_constraint1454 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_constraint1456 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_RP_in_constraint1460 = new BitSet(new long[]{0x0000200000010000L});
-    public static final BitSet FOLLOW_annotations_in_constraint1462 = new BitSet(new long[]{0x0000200000000000L});
-    public static final BitSet FOLLOW_SC_in_constraint1464 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SOLVE_in_solve_goal1492 = new BitSet(new long[]{0x0000100600010000L});
-    public static final BitSet FOLLOW_annotations_in_solve_goal1495 = new BitSet(new long[]{0x0000100600000000L});
-    public static final BitSet FOLLOW_resolution_in_solve_goal1497 = new BitSet(new long[]{0x0000200000000000L});
-    public static final BitSet FOLLOW_SC_in_solve_goal1499 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MINIMIZE_in_resolution1516 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_resolution1519 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_MAXIMIZE_in_resolution1529 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_resolution1532 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SATISFY_in_resolution1542 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_DC_in_annotations1563 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_annotation_in_annotations1565 = new BitSet(new long[]{0x0000000000010002L});
-    public static final BitSet FOLLOW_IDENTIFIER_in_annotation1600 = new BitSet(new long[]{0x0000000080000002L});
-    public static final BitSet FOLLOW_LP_in_annotation1603 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_annotation1605 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_CM_in_annotation1608 = new BitSet(new long[]{0x0003000164800000L});
-    public static final BitSet FOLLOW_expr_in_annotation1610 = new BitSet(new long[]{0x0000040000002000L});
-    public static final BitSet FOLLOW_RP_in_annotation1614 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TRUE_in_bool_const1655 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FALSE_in_bool_const1666 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_expr1184 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_RB_in_expr1186 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LB_in_expr1196 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1198 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_CM_in_expr1201 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1203 = new BitSet(new long[]{0x0000020000002000L});
+    public static final BitSet FOLLOW_RB_in_expr1207 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_bool_const_in_expr1231 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1241 = new BitSet(new long[]{0x0000000000020002L});
+    public static final BitSet FOLLOW_DD_in_expr1244 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_expr1246 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LS_in_expr1258 = new BitSet(new long[]{0x0003080164800000L});
+    public static final BitSet FOLLOW_expr_in_expr1261 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_CM_in_expr1264 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_expr1266 = new BitSet(new long[]{0x0000080000002000L});
+    public static final BitSet FOLLOW_RS_in_expr1272 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_id_expr_in_expr1300 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_expr1310 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_id_expr1331 = new BitSet(new long[]{0x0000000180000002L});
+    public static final BitSet FOLLOW_LP_in_id_expr1335 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_id_expr1337 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_id_expr1340 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_id_expr1342 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_id_expr1346 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LS_in_id_expr1350 = new BitSet(new long[]{0x0000000020000000L});
+    public static final BitSet FOLLOW_INT_CONST_in_id_expr1352 = new BitSet(new long[]{0x0000080000000000L});
+    public static final BitSet FOLLOW_RS_in_id_expr1354 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_par_type_in_param_decl1374 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CL_in_param_decl1376 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_param_decl1378 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_EQ_in_param_decl1380 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_param_decl1382 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_SC_in_param_decl1384 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_var_type_in_var_decl1412 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_CL_in_var_decl1414 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_var_decl1416 = new BitSet(new long[]{0x0000200000090000L});
+    public static final BitSet FOLLOW_annotations_in_var_decl1418 = new BitSet(new long[]{0x0000200000080000L});
+    public static final BitSet FOLLOW_EQ_in_var_decl1421 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_var_decl1423 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_SC_in_var_decl1427 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_CONSTRAINT_in_constraint1457 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_constraint1459 = new BitSet(new long[]{0x0000000080000000L});
+    public static final BitSet FOLLOW_LP_in_constraint1461 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_constraint1463 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_constraint1466 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_constraint1468 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_constraint1472 = new BitSet(new long[]{0x0000200000010000L});
+    public static final BitSet FOLLOW_annotations_in_constraint1474 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_SC_in_constraint1476 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SOLVE_in_solve_goal1504 = new BitSet(new long[]{0x0000100600010000L});
+    public static final BitSet FOLLOW_annotations_in_solve_goal1507 = new BitSet(new long[]{0x0000100600000000L});
+    public static final BitSet FOLLOW_resolution_in_solve_goal1509 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_SC_in_solve_goal1511 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MINIMIZE_in_resolution1528 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_resolution1531 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_MAXIMIZE_in_resolution1541 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_resolution1544 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SATISFY_in_resolution1554 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_DC_in_annotations1575 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_annotation_in_annotations1577 = new BitSet(new long[]{0x0000000000010002L});
+    public static final BitSet FOLLOW_IDENTIFIER_in_annotation1612 = new BitSet(new long[]{0x0000000080000002L});
+    public static final BitSet FOLLOW_LP_in_annotation1615 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_annotation1617 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_CM_in_annotation1620 = new BitSet(new long[]{0x0003000164800000L});
+    public static final BitSet FOLLOW_expr_in_annotation1622 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_annotation1626 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TRUE_in_bool_const1667 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FALSE_in_bool_const1678 = new BitSet(new long[]{0x0000000000000002L});
 
 }
