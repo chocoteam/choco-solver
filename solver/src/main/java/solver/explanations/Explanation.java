@@ -99,32 +99,14 @@ public class Explanation extends Deduction {
         int nbd = expl.nbDeductions();
         int nbp = expl.nbPropagators();
         if (nbd > 0 || nbp > 0) {
-            // 1. create deductions list if necessary
-            if (this.deductions == null && nbd > 0) {
-                this.deductions = new ArrayList<Deduction>(nbd);
-                this.did = new TIntHashSet(nbd);
-            }
-            // 2. add all deductions of expl
-            Deduction ded;
+            // 1. add all deductions of expl
             for (int i = 0; i < nbd; i++) {
-                ded = expl.getDeduction(i);
-                if (this.did.add(ded.id)) {
-                    this.deductions.add(ded);
-                }
+                add(expl.getDeduction(i));
             }
 
-            // 3. create propagators list if necessary
-            if (this.propagators == null && nbp > 0) {
-                this.propagators = new ArrayList<Propagator>(nbp);
-                this.pid = new TIntHashSet(nbp);
-            }
-            // 4. add all propagators of expl
-            Propagator prop;
+            // 2. add all propagators of expl
             for (int i = 0; i < nbp; i++) {
-                prop = expl.getPropagator(i);
-                if (this.pid.add(prop.getId())) {
-                    this.propagators.add(prop);
-                }
+                add(expl.getPropagator(i));
             }
         } else {
             free(expl);
