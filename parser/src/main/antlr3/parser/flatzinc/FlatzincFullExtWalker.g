@@ -622,7 +622,11 @@ index_set returns [Declaration decl]
     ;
 
 expr    returns[Expression exp]
-    :
+    :   LB RB
+    {
+    $exp = new ESetList(new ArrayList());
+    }
+    |
     {
     ArrayList<EInt> values = new ArrayList();
     }

@@ -101,4 +101,14 @@ public class T_param_decl extends GrammarTest {
         Assert.assertTrue(o instanceof int[]);
         Assert.assertEquals(new int[]{1, 1, 2, 3, 5, 8, 13}, o);
     }
+
+    @Test
+    public void test4() throws IOException {
+        FlatzincParser fp = parser("array [1..3] of set of int: suc = [{5, 10, 14}, {}, {}];");
+        try {
+            param_decl(fp);
+        } catch (RecognitionException e) {
+            Assert.fail();
+        }
+    }
 }
