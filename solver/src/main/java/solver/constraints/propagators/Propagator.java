@@ -132,13 +132,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final Solver solver;
 
-    private static TIntSet set = new TIntHashSet();
+    private TIntSet set = new TIntHashSet();
 
     protected Propagator aCause; // cause of variable modifications.
     // The default value is 'this" but it can be overridden when using in reified propagator
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
-    private static <V extends Variable> void checkVariable(V[] vars) {
+    private <V extends Variable> void checkVariable(V[] vars) {
         set.clear();
         for (int i = 0; i < vars.length; i++) {
             Variable v = vars[i];
