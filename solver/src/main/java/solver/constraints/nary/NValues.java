@@ -159,8 +159,8 @@ public class NValues extends IntConstraint<IntVar> {
             Variable var = vars[i];
             sb.append(var);
         }
-		sb.append(" = "+vars[vars.length-1]);
-        sb.append("})");
+        sb.append("}, "+vars[vars.length-1]);
+        sb.append(")");
         return sb.toString();
     }
 }
