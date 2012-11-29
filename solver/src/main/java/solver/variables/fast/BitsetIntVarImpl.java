@@ -543,7 +543,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 expl.add(solver.getExplainer().explain(this, val));
             }
         }
-
+        it.dispose();
 //        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
         return expl;
     }

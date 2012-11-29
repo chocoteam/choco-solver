@@ -466,6 +466,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 expl.add(solver.getExplainer().explain(this, val));
             }
         }
+        it.dispose();
         return expl;
     }
 

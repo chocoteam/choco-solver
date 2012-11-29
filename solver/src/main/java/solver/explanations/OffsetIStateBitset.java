@@ -68,7 +68,7 @@ public class OffsetIStateBitset {
         return domain.get(inside);
     }
 
-     public DisposableValueIterator getValueIterator() {
+    public DisposableValueIterator getValueIterator() {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
@@ -77,7 +77,7 @@ public class OffsetIStateBitset {
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.value = (LB.get() < Integer.MAX_VALUE) ? LB.get() : -1 ;
+                    this.value = (LB.get() < Integer.MAX_VALUE) ? LB.get() : -1;
                 }
 
                 @Override
@@ -110,7 +110,7 @@ public class OffsetIStateBitset {
                 }
             };
         }
-            _viterator.bottomUpInit();
+        _viterator.bottomUpInit();
         return _viterator;
     }
 
@@ -123,6 +123,7 @@ public class OffsetIStateBitset {
         while (it.hasNext()) {
             bf.append(" " + it.next());
         }
+        it.dispose();
         bf.append("]");
         return bf.toString();
     }
