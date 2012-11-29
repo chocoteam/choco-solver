@@ -46,7 +46,8 @@ import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
 import solver.propagation.hardcoded.VariableEngine;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.loop.monitors.AverageCSV;
+import solver.search.strategy.pattern.SearchPattern;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,44 +69,51 @@ public class ParseAndSolve {
 
     // receives other command line parameters than options
     @Argument
-    private List<String> instances = new ArrayList<String>();
+    protected List<String> instances = new ArrayList<String>();
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions.", required = false)
-    private boolean all = false;
+    protected boolean all = false;
 
     @Option(name = "-i", aliases = {"--ignore-search"}, usage = "Ignore search strategy.", required = false)
-    private boolean free = false;
+    protected boolean free = false;
 
     @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
-    private int bbss = 1;
+    protected int bbss = 1;
 
-    @Option(name="-dv",usage = "Use same decision variables as declared in file (default false)",required = false)
-    private boolean decision_vars = false;
+    @Option(name = "-dv", usage = "Use same decision variables as declared in file (default false)", required = false)
+    protected boolean decision_vars = false;
 
-    @Option(name="-seed", usage = "Seed for randomness", required = false)
-    private long seed = 29091981L;
+    @Option(name = "-seed", usage = "Seed for randomness", required = false)
+    protected long seed = 29091981L;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
-    private int nb_cores = 1;
+    protected int nb_cores = 1;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
-    private long tl = -1;
+    protected long tl = -1;
 
     @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n0: constraint\n1: variable\n2: 7q cstrs\n3: 8q cstrs." +
             "\n4: 8q vars\n5: abs\n6: arcs\n-1: default", required = false)
-    private byte eng = -1;
+    protected byte eng = -1;
 
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
-    private String csv = "";
+    protected String csv = "";
+
+    @Option(name = "-sp", usage = "Search pattern.", required = false)
+    protected SearchPattern searchp = SearchPattern.NONE;
 
     @Option(name = "-exp", usage = "Explanation engine.", required = false)
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
+
+
+    @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
+    protected long l = 1;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
     }
 
-    public void doMain(String[] args) throws IOException {
+    public void doMain(String[] args) throws IOException, RecognitionException {
         CmdLineParser parser = new CmdLineParser(this);
         parser.setUsageWidth(160);
         try {
@@ -148,45 +156,60 @@ public class ParseAndSolve {
     }
 
 
-    private void parseandsolve() throws IOException {
+    protected void parseandsolve() throws IOException {
         for (String instance : instances) {
-            LOGGER.info("% parse instance...");
-            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed);
-            Solver solver = new Solver();
-            THashMap<String, Object> map = new THashMap<String, Object>();
-            buildParser(new FileInputStream(new File(instance)), solver, map, gc);
-            switch (eng) {
-                case 0:
-                    // let the default propagation strategy,
-                    break;
-                case 1:
-                    solver.set(new ConstraintEngine(solver));
-                    break;
-                case 2:
-                    solver.set(new VariableEngine(solver));
-                    break;
-                case 3:
-                    solver.set(new SevenQueuesConstraintEngine(solver));
-                    break;
-                case -1:
-                default:
-                    if (solver.getNbCstrs() > solver.getNbVars()) {
-                        solver.set(new VariableEngine(solver));
-                    } else {
-                        solver.set(new ConstraintEngine(solver));
-                    }
+            AverageCSV acsv = null;
+            if (!csv.equals("")) {
+                acsv = new AverageCSV(instance, csv, l);
+            }
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp);
+            for (int i = 0; i < l; i++) {
+                LOGGER.info("% parse instance...");
+                Solver solver = new Solver();
+                THashMap<String, Object> map = new THashMap<String, Object>();
+                buildParser(new FileInputStream(new File(instance)), solver, map, gc);
+                makeEngine(solver);
+                if (!csv.equals("")) {
+                    assert acsv != null;
+                    acsv.setSolver(solver);
+                }
+                expeng.make(solver);
+                if (tl > -1) {
+                    solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
+                }
 
+                LOGGER.info("% solve instance...");
+                solver.solve();
             }
             if (!csv.equals("")) {
-                SearchMonitorFactory.toCSV(solver, instance, csv);
+                assert acsv != null;
+                acsv.record();
             }
-            expeng.make(solver);
-            if (tl > -1) {
-                solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
-            }
+        }
+    }
 
-            LOGGER.info("% solve instance...");
-            solver.solve();
+    protected void makeEngine(Solver solver) {
+        switch (eng) {
+            case 0:
+                // let the default propagation strategy,
+                break;
+            case 1:
+                solver.set(new ConstraintEngine(solver));
+                break;
+            case 2:
+                solver.set(new VariableEngine(solver));
+                break;
+            case 3:
+                solver.set(new SevenQueuesConstraintEngine(solver));
+                break;
+            case -1:
+            default:
+                if (solver.getNbCstrs() > solver.getNbVars()) {
+                    solver.set(new VariableEngine(solver));
+                } else {
+                    solver.set(new ConstraintEngine(solver));
+                }
+
         }
     }
 

@@ -92,7 +92,7 @@ public class FGoal {
                 search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
         }
-
+        aSolver.set(gc.searchPattern);
         // Then define search goal
         Variable[] vars = aSolver.getVars();
         IntVar[] ivars = new IntVar[vars.length];

@@ -30,6 +30,7 @@ import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
@@ -119,9 +120,7 @@ public class SendMoreMoney extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        SendMoreMoney smm = new SendMoreMoney();
-        smm.buildModel();
-        smm.solve();
+        new SendMoreMoney().execute(args);
     }
 
 }
