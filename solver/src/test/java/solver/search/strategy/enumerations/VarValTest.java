@@ -490,6 +490,7 @@ public class VarValTest {
         IMetric<IntVar> nth = new GetI<IntVar>(maplin, metrics);
 
         AbstractSorter<IntVar> seq = new Seq<IntVar>(new Incr<IntVar>(remap), new Incr<IntVar>(nth));
+		HeuristicValFactory.indomainMin(ArrayUtils.flatten(vars));
         AbstractStrategy strategy = StrategyVarValAssign.dyn(ArrayUtils.flatten(vars), seq, ValidatorFactory.instanciated, solver.getEnvironment());
         solver.set(strategy);
 

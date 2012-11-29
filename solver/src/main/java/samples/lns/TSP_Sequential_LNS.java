@@ -25,23 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallel;
+package samples.lns;
 
 import choco.kernel.ResolutionPolicy;
+import samples.graph.input.TSP_Utils;
+import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
@@ -53,7 +47,7 @@ import java.util.Random;
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class Sequential_LNS {
+public class TSP_Sequential_LNS {
 
     //***********************************************************************************
     // VARIABLES
@@ -65,15 +59,18 @@ public class Sequential_LNS {
     private static int optimum;
     private static int[][] distMatrix;
     private static int n;
-    // LNS
-//	private static int[] bestSolution;
-//	private static int bestCost;
 
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
+		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+		String sol = dir+"/bestSols.csv";
+		benchmark(new String[]{"-dir",dir,"-optFile",sol});
+	}
+
+    public static void benchmark(String[] args) {
         // set input
         if (args.length < 4 || !(args[0].equals("-dir") && args[2].equals("-optFile"))) {
             throw new UnsupportedOperationException("please insert first the input directory " +
@@ -86,21 +83,24 @@ public class Sequential_LNS {
         String[] list = folder.list();
         // set output
         outFile = "tsp_lns_parallel.csv";
-        Parser.clearFile(outFile);
-        Parser.writeTextInto("instance;time;obj;opt;parallel\n", outFile);
+        TextWriter.clearFile(outFile);
+        TextWriter.writeTextInto("instance;time;obj;opt;parallel\n", outFile);
+
         // start program
         long time = System.currentTimeMillis();
         for (String s : list) {
             if (s.contains(".tsp") && (!s.contains("a280")) && (!s.contains("gz")) && (!s.contains("lin"))) {
-                distMatrix = Parser.parseInstance(dir + "/" + s);
+                distMatrix = TSP_Utils.parseInstance(dir + "/" + s, 1000);
                 if (distMatrix != null) {
                     n = distMatrix.length;
                     if (n >= 100 && n < 500) {
-                        optimum = Parser.getOpt(s.split("\\.")[0], optFile);
+                        optimum = TSP_Utils.getOptimum(s.split("\\.")[0], optFile);
                         System.out.println("optimum : " + optimum);
-                        checkMatrix();
-                        run();
-                        System.exit(0);
+                        int bestValue = run();
+						double gap = (double)(bestValue-optimum)*100/optimum;
+						gap = (int)(gap*100);
+						gap /= 100;
+						System.out.println("GAP "+gap+"%");
                     }
                 } else {
                     System.out.println("CANNOT LOAD");
@@ -114,24 +114,12 @@ public class Sequential_LNS {
     // INITIALIZATION
     //***********************************************************************************
 
-    private static void checkMatrix() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (distMatrix[i][j] != distMatrix[j][i]) {
-                    System.out.println(i + " : " + j);
-                    System.out.println(distMatrix[i][j] + " != " + distMatrix[j][i]);
-                    throw new UnsupportedOperationException();
-                }
-            }
-        }
-    }
-
-	private static void run() {
+	private static int run() {
 		Solver solver = new Solver();
 		// variables
 		int max = 100*optimum;
 		IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -139,111 +127,24 @@ public class Sequential_LNS {
 			}
 		}
 		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
-		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
-		PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver);
-		hk.waitFirstSolution(true);
-		gc.addPropagators(hk);
-		solver.post(gc);
+		solver.post(GraphConstraintFactory.tsp(undi,totalCost,distMatrix,2,solver));
 		// config
-		solver.set(StrategyFactory.graphStrategy(undi, null, new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS));
-//		solver.set(StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse,null));
-//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-//        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-//		SearchMonitorFactory.log(solver, true, false);
+		GraphStrategies strategy = new GraphStrategies(undi,distMatrix,null);
+		strategy.configure(9,true,true,false);
+		solver.set(strategy);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));
-//		solver.getSearchLoop().restartAfterEachSolution(true);
         // resolution
         long timeInst = System.currentTimeMillis();
         System.out.println("start LNS...");
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         System.out.println("end LNS... duration = " + (System.currentTimeMillis() - timeInst) + " ms");
-//		checkUndirected(solver, undi, totalCost, distMatrix);
-//		//output
-//		if(!undi.instantiated()){
-//			throw new UnsupportedOperationException();
-//		}
-//		System.out.println("first solution");
-//		bestCost = totalCost.getValue();
-//		System.out.println("cost : "+bestCost);
-//		bestSolution = new int[n];
-//		int x = 0;
-//		INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(x);
-//		int y = nei.getFirstElement();
-//		int tmp;
-//		String s = "";
-//		for(int i=0;i<n;i++){
-//			bestSolution[i] = x;
-//			tmp = x;
-//			x = y;
-//			nei = undi.getEnvelopGraph().getSuccessorsOf(x);
-//			y = nei.getFirstElement();
-//			if(y==tmp){
-//				y = nei.getNextElement();
-//			}
-//			s += bestSolution[i]+", ";
-//		}
-//		System.out.println(s);
-    }
-
-    private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
-        if (solver.getMeasures().getSolutionCount() == 0) {
-            throw new UnsupportedOperationException();
-        }
-        if (solver.getMeasures().getSolutionCount() > 0) {
-            int sum = 0;
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (undi.getEnvelopGraph().edgeExists(i, j)) {
-                        sum += matrix[i][j];
-                    }
-                }
-            }
-            if (sum != solver.getSearchLoop().getObjectivemanager().getBestValue() && sum != totalCost.getValue()) {
-                throw new UnsupportedOperationException();
-            }
-        }
-    }
+    	return solver.getMeasures().getObjectiveValue();
+	}
 
     //***********************************************************************************
     // RESOLUTION
     //***********************************************************************************
-
-    //***********************************************************************************
-    // BRANCHING
-    //***********************************************************************************
-
-    private static class MinCost extends ArcStrategy<UndirectedGraphVar> {
-        public MinCost(UndirectedGraphVar undirectedGraphVar) {
-            super(undirectedGraphVar);
-        }
-
-        @Override
-        public boolean computeNextArc() {
-            int cost = -1;
-            ISet nei, ker;
-            for (int i = 0; i < n; i++) {
-                ker = g.getKernelGraph().getSuccessorsOf(i);
-                if (ker.getSize() < 2) {
-                    nei = g.getEnvelopGraph().getSuccessorsOf(i);
-                    for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                        if (!ker.contain(j)) {
-                            if (cost == -1 || distMatrix[i][j] < cost) {
-                                cost = distMatrix[i][j];
-                                this.from = i;
-                                this.to = j;
-                            }
-                        }
-                    }
-                }
-            }
-            return cost != -1;
-        }
-    }
 
     private static class TSP_LNS_Monitor extends Abstract_LNS_SearchMonitor {
 
