@@ -153,9 +153,9 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            e.add(y.explain(VariableState.DOM));
+            y.explain(VariableState.DOM, e);
         } else if (var != null) {
-            e.add(x.explain(VariableState.DOM));
+            x.explain(VariableState.DOM, e);
         }
         // and the application of the current propagator
         e.add(aCause);

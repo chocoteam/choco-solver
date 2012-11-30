@@ -453,8 +453,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain(VariableState what) {
-        Explanation expl = Explanation.build();
+    public void explain(VariableState what, Explanation to) {
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
@@ -463,11 +462,10 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                expl.add(solver.getExplainer().explain(this, val));
+                to.add(solver.getExplainer().explain(this, val));
             }
         }
         it.dispose();
-        return expl;
     }
 
     @Override

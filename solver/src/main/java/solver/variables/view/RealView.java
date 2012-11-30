@@ -190,8 +190,7 @@ public class RealView extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, 
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        return null;
+    public void explain(VariableState what, Explanation to) {
     }
 
     @Override

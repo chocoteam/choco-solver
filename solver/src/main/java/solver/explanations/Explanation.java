@@ -29,7 +29,6 @@ package solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.queues.CircularQueue;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -56,24 +55,7 @@ public class Explanation extends Deduction {
     private List<Propagator> propagators;
     private TIntHashSet pid;
 
-    private static CircularQueue<Explanation> stock = new CircularQueue<Explanation>(8);
-
-    public static Explanation build() {
-        if (stock.isEmpty()) {
-            return new Explanation();
-        } else {
-            return stock.pollFirst();
-        }
-    }
-
-    private static void free(Explanation explanation) {
-        if (stock.size() < 16) {
-            stock.addLast(explanation);
-        }
-        explanation.reset();
-    }
-
-    private Explanation() {
+    public Explanation() {
         super(Type.Exp);
     }
 
@@ -97,8 +79,6 @@ public class Explanation extends Deduction {
             for (int i = 0; i < nbp; i++) {
                 add(expl.getPropagator(i));
             }
-        } else {
-            free(expl);
         }
     }
 

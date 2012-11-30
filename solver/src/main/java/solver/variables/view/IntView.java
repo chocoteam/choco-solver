@@ -148,13 +148,13 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDel
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        return var.explain(what);
+    public void explain(VariableState what, Explanation to) {
+        var.explain(what, to);
     }
 
     @Override
     public void explain(@Nullable Deduction d, Explanation e) {
-        e.add(var.explain(VariableState.DOM));
+        var.explain(VariableState.DOM, e);
     }
 
     @Override

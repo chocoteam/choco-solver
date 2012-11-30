@@ -190,7 +190,7 @@ public class ObjectiveManager implements ICause {
 
     public void explain(Deduction val, Explanation e) {
         if (policy != ResolutionPolicy.SATISFACTION) {
-            objective.explain(VariableState.DOM);
+            objective.explain(VariableState.DOM, e);
         }
     }
 

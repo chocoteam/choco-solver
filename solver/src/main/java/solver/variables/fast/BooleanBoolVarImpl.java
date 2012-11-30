@@ -397,10 +397,10 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
      * {@inheritDoc}
      *
      * @param what
+     * @param to
      */
     @Override
-    public Explanation explain(VariableState what) {
-        Explanation expl = Explanation.build();
+    public void explain(VariableState what, Explanation to) {
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
@@ -408,11 +408,10 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
-                expl.add(solver.getExplainer().explain(this, val));
+                to.add(solver.getExplainer().explain(this, val));
             }
         }
         it.dispose();
-        return expl;
     }
 
     @Override

@@ -270,7 +270,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     //***********************************************************************************
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
     }
 

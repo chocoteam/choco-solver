@@ -132,9 +132,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
         Variable var = d.getVar();
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            e.add(y.explain(VariableState.LB));
+            y.explain(VariableState.LB, e);
         } else if (var.equals(y)) {
-            e.add(x.explain(VariableState.UB));
+            x.explain(VariableState.UB, e);
         } else {
             super.explain(d, e);
         }

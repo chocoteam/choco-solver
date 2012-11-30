@@ -85,7 +85,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
     }
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         throw new UnsupportedOperationException("MetaVariable does not (yet) implement method explain(...)");
     }
 

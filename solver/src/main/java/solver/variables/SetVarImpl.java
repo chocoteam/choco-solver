@@ -176,7 +176,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     //***********************************************************************************
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
     }
 
