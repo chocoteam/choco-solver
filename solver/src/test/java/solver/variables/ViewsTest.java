@@ -286,8 +286,8 @@ public class ViewsTest {
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
-                IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.sqr(x);
+				IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
+				IntVar x = Views.sqr(z);
                 solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
             }
             check(ref, solver, seed, false, true);

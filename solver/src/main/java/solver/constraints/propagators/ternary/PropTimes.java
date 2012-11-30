@@ -66,23 +66,14 @@ public class PropTimes extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        filter(0);
-        filter(1);
-        filter(2);
+        filter(0,true,true);
+        filter(1,true,true);
+        filter(2,true,true);
     }
 
     @Override
     public final void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else {
-            if (EventType.isInclow(mask)) {
-                this.awakeOnLow(varIdx);
-            }
-            if (EventType.isDecupp(mask)) {
-                this.awakeOnUpp(varIdx);
-            }
-        }
+		filter(varIdx,EventType.isInclow(mask),EventType.isDecupp(mask));
     }
 
     @Override
@@ -118,47 +109,25 @@ public class PropTimes extends Propagator<IntVar> {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
 
-    protected final void awakeOnUpp(int idx) throws ContradictionException {
+    protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
         if (idx == 0) {
             awakeOnX();
         } else if (idx == 1) {
             awakeOnY();
         } else if (idx == 2) {
             awakeOnZ();
-            if (!(v2.contains(0))) {
-                int r = Math.min(getZmax(), MAX);
-                v2.updateUpperBound(r, aCause);
-            }
-        }
-    }
-
-    protected final void awakeOnLow(int idx) throws ContradictionException {
-        if (idx == 0) {
-            awakeOnX();
-        } else if (idx == 1) {
-            awakeOnY();
-        } else if (idx == 2) {
-            awakeOnZ();
-            if (!(v2.contains(0))) {
-                int r = Math.max(getZmin(), MIN);
-                v2.updateLowerBound(r, aCause);
-            }
-        }
-    }
-
-    protected final void awakeOnInst(int vIdx) throws ContradictionException {
-        filter(vIdx);
-    }
-
-    protected final void filter(int idx) throws ContradictionException {
-        if (idx == 0) {
-            awakeOnX();
-        } else if (idx == 1) {
-            awakeOnY();
-        } else if (idx == 2) {
-            awakeOnZ();
-        }
-    }
+			if (!(v2.contains(0))) {
+				if(lb){
+					int r = Math.min(getZmax(), MAX);
+					v2.updateUpperBound(r, aCause);
+				}
+				if(ub){
+					int r = Math.max(getZmin(), MIN);
+					v2.updateLowerBound(r, aCause);
+				}
+			}
+		}
+	}
 
     /**
      * reaction when X (v0) is updated

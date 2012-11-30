@@ -46,223 +46,166 @@ import solver.variables.delta.IIntDeltaMonitor;
 /**
  * Enforces X = |Y|
  * <br/>
- *
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @since 18/05/11
  */
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropAbsolute extends Propagator<IntVar> {
 
-    protected final RemProc rem_proc;
-    protected final IIntDeltaMonitor[] idms;
+	protected RemProc rem_proc;
+	protected IIntDeltaMonitor[] idms;
+	protected IntVar X,Y;
+	protected boolean bothEnumerated;
 
-    public PropAbsolute(IntVar X, IntVar Y, Solver solver,
-                        Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
-        rem_proc = new RemProc(this);
-        this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++) {
-            idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        }
-    }
+	public PropAbsolute(IntVar X, IntVar Y, Solver solver,
+						Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+		super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
+		this.X = vars[0];
+		this.Y = vars[1];
+		bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
+		if(bothEnumerated){
+			rem_proc = new RemProc();
+			this.idms = new IIntDeltaMonitor[this.vars.length];
+			for (int i = 0; i < this.vars.length; i++) {
+				idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
+			}
+		}
+	}
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INT_ALL_MASK();
-        } else {
-            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-        }
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		if (bothEnumerated) {
+			return EventType.INT_ALL_MASK();
+		} else {
+			return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+		}
+	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        // Filter on X from Y
-        updateLowerBoundofX();
-        updateUpperBoundofX();
-        updateHolesinX();
+	@Override
+	public ESat isEntailed() {
+		if (vars[0].getUB() < 0) {
+			return ESat.FALSE;
+		} else if (vars[0].instantiated()) {
+			if (vars[1].instantiated()) {
+				return ESat.eval(vars[0].getValue() == Math.abs(vars[1].getValue()));
+			} else if (vars[1].getDomainSize() == 2 &&
+					vars[1].contains(vars[0].getValue()) &&
+					vars[1].contains(-vars[0].getValue())) {
+				return ESat.TRUE;
+			} else if (!vars[1].contains(vars[0].getValue()) &&
+					!vars[1].contains(-vars[0].getValue())) {
+				return ESat.FALSE;
+			} else {
+				return ESat.UNDEFINED;
+			}
+		} else {
+			return ESat.UNDEFINED;
+		}
+	}
 
-        // Filter on Y from X
-        updateLowerBoundofY();
-        updateUpperBoundofY();
-        updateHolesinY();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
-    }
+	@Override
+	public String toString() {
+		return String.format("%s = |%s|", vars[0].toString(), vars[1].toString());
+	}
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (varIdx == 0) { // filter from X to Y
-            if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
-                updateLowerBoundofY();
-                updateUpperBoundofY();
-                updateHolesinY();
-            } else {
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-//                updateHolesinY();
-            }
-        } else { // filter from Y to X
-            // <nj> originally we had the following condition
-//            if (EventType.isRemove(mask) && EventType.isRemove(getPropagationConditions(idxVarInProp))) {
-            // this led to a nasty bug due to event promotion
+	//***********************************************************************************
+    // FILTERING
+    //***********************************************************************************
 
-            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-                updateLowerBoundofX();
-                updateUpperBoundofX();
-                updateHolesinX();
-            } else {
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-//                updateHolesinX();
-            }
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		X.updateLowerBound(0,aCause);
+		setBounds();
+		if(bothEnumerated){
+			enumeratedFiltering();
+			idms[0].unfreeze();
+			idms[1].unfreeze();
+		}
+	}
 
-    @Override
-    public ESat isEntailed() {
-        if (vars[0].getUB() < 0) {
-            return ESat.FALSE;
-        } else if (vars[0].instantiated()) {
-            if (vars[1].instantiated()) {
-                return ESat.eval(vars[0].getValue() == Math.abs(vars[1].getValue()));
-            } else if (vars[1].getDomainSize() == 2 &&
-                    vars[1].contains(vars[0].getValue()) &&
-                    vars[1].contains(-vars[0].getValue())) {
-                return ESat.TRUE;
-            } else if (!vars[1].contains(vars[0].getValue()) &&
-                    !vars[1].contains(-vars[0].getValue())) {
-                return ESat.FALSE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else {
-            return ESat.UNDEFINED;
-        }
-    }
+	@Override
+	public void propagate(int varIdx, int mask) throws ContradictionException {
+		if(bothEnumerated){
+			idms[varIdx].freeze();
+			idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+			idms[varIdx].unfreeze();
+		}else{
+			setBounds();
+		}
+	}
 
-    @Override
-    public String toString() {
-        return String.format("%s = |%s|", vars[0].toString(), vars[1].toString());
-    }
+	private void setBounds() throws ContradictionException {
+		// X = |Y|
+		int max = X.getUB();
+		int min = X.getLB();
+		Y.updateUpperBound(max,aCause);
+		Y.updateLowerBound(-max,aCause);
+		Y.removeInterval(1-min,min-1,aCause);
+		/////////////////////////////////////////////////
+		int prevLB = X.getLB();
+		int prevUB = X.getUB();
+		min = Y.getLB();
+		max = Y.getUB();
+		if(max<=0){
+			X.updateLowerBound(-max,aCause);
+			X.updateUpperBound(-min,aCause);
+		}else if (min>=0){
+			X.updateLowerBound(min,aCause);
+			X.updateUpperBound(max,aCause);
+		}else {
+			if(Y.hasEnumeratedDomain()){
+				int mP = Y.nextValue(-1);
+				int mN = -Y.previousValue(1);
+				X.updateLowerBound(Math.min(mP,mN),aCause);
+			}
+			X.updateUpperBound(Math.max(-min,max),aCause);
+		}
+		if(prevLB!=X.getLB() || prevUB!=X.getUB())setBounds();
+	}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private void enumeratedFiltering() throws ContradictionException {
+		int min = X.getLB();
+		int	max = X.getUB();
+		for(int v=min;v<=max;v=X.nextValue(v)){
+			if(!(Y.contains(v)||Y.contains(-v))){
+				X.removeValue(v,aCause);
+			}
+		}
+		min = Y.getLB();
+		max = Y.getUB();
+		for(int v=min;v<=max;v=Y.nextValue(v)){
+			if(!(X.contains(Math.abs(v)))){
+				Y.removeValue(v,aCause);
+			}
+		}
+	}
 
-    protected void updateLowerBoundofX() throws ContradictionException {
-        int a0 = vars[1].nextValue(-1);
-        int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(a0, -b0), aCause);
-    }
+	private class RemProc implements UnaryIntProcedure<Integer> {
+		private int var;
+		@Override
+		public UnaryIntProcedure set(Integer idxVar) {
+			this.var = idxVar;
+			return this;
+		}
+		@Override
+		public void execute(int val) throws ContradictionException {
+			if(var==0){
+				vars[1].removeValue(val,aCause);
+				vars[1].removeValue(-val,aCause);
+			}else if(var==1){
+				if(!vars[1].contains(-val))
+					vars[0].removeValue(Math.abs(val),aCause);
+			}
+		}
+	}
 
-    protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), aCause);
-
-    }
-
-    protected void updateHolesinX() throws ContradictionException {
-        // remove intervals to deal with consecutive value removal and upper bound modification
-        if (vars[1].hasEnumeratedDomain()) {
-            int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
-            int ub = vars[0].getUB();
-            for (int value = vars[0].getLB(); value <= ub; value = vars[0].nextValue(value)) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        vars[0].removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
-                }
-            }
-            vars[0].removeInterval(left, right, aCause);
-        } else {
-            int value = vars[0].getLB();
-            int nlb = value - 1;
-            while (nlb == value - 1) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
-                    nlb = value;
-                }
-                value = vars[0].nextValue(value);
-            }
-            vars[0].updateLowerBound(nlb, aCause);
-
-            value = vars[0].getUB();
-            int nub = value + 1;
-            while (nub == value + 1) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
-                    nub = value;
-                }
-                value = vars[0].previousValue(value);
-            }
-            vars[0].updateUpperBound(nub, aCause);
-        }
-    }
-
-    protected void updateHoleinX(int remVal) throws ContradictionException {
-        if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(Math.abs(remVal), aCause);
-        }
-    }
-
-    protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-vars[0].getUB(), aCause);
-    }
-
-    protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(vars[0].getUB(), aCause);
-    }
-
-    protected void updateHolesinY() throws ContradictionException {
-        // remove intervals to deal with consecutive value removal and upper bound modification
-        if (vars[0].hasEnumeratedDomain()) {
-            int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
-            int ub = vars[1].getUB();
-            for (int value = vars[1].getLB(); value <= ub; value = vars[1].nextValue(value)) {
-                if (!vars[0].contains(Math.abs(value))) {
-                    if (value == right + 1) {
-                        right = value;
-                    } else {
-                        vars[1].removeInterval(left, right, aCause);
-                        left = right = value;
-                    }
-                }
-            }
-            vars[1].removeInterval(left, right, aCause);
-        } else {
-            int value = vars[1].getLB();
-            int nlb = value - 1;
-            while (nlb == value - 1) {
-                if (!vars[0].contains(Math.abs(value))) {
-                    nlb = value;
-                }
-                value = vars[1].nextValue(value);
-            }
-            vars[1].updateLowerBound(nlb, aCause);
-
-            value = vars[1].getUB();
-            int nub = value + 1;
-            while (nub == value + 1) {
-                if (!vars[0].contains(Math.abs(value))) {
-                    nub = value;
-                }
-                value = vars[1].previousValue(value);
-            }
-            vars[1].updateUpperBound(nub, aCause);
-        }
-    }
-
-    protected void updateHoleinY(int remVal) throws ContradictionException {
-        vars[1].removeValue(remVal, aCause);
-        vars[1].removeValue(-remVal, aCause);
-    }
-
+	//***********************************************************************************
+    // EXPLANATIONS
+    //***********************************************************************************
 
     @Override
     public Explanation explain(Deduction d) {
-//        return super.explain(d);
         if (d.getVar() == vars[0]) {
             Explanation explanation = Explanation.build(aCause);
             if (d instanceof ValueRemoval) {
@@ -284,30 +227,4 @@ public class PropAbsolute extends Propagator<IntVar> {
             return super.explain(d);
         }
     }
-
-    private static class RemProc implements UnaryIntProcedure<Integer> {
-
-        private final PropAbsolute p;
-        private int idxVar;
-
-        public RemProc(PropAbsolute p) {
-            this.p = p;
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
-        }
-
-        @Override
-        public void execute(int i) throws ContradictionException {
-            if (idxVar == 0) {
-                p.updateHoleinY(i);
-            } else {
-                p.updateHoleinX(i);
-            }
-        }
-    }
-
 }
