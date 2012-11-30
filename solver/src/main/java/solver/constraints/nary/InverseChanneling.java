@@ -70,14 +70,14 @@ public class InverseChanneling extends IntConstraint<IntVar> {
 		// propagators
 		setPropagators(new PropInverseChanneling(this.X, this.Y, offSetX, offSetY, solver, this));
 		switch (type) {
-			case AC:
-				addPropagators(new PropAllDiffAC(this.X, this, solver));
-				addPropagators(new PropAllDiffAC(this.Y, this, solver));
-				break;
 			case BC:
-			default:
 				addPropagators(new PropAllDiffBC(this.X, solver, this));
 				addPropagators(new PropAllDiffBC(this.Y, solver, this));
+				break;
+			case AC:
+			default:
+				addPropagators(new PropAllDiffAC(this.X, this, solver));
+				addPropagators(new PropAllDiffAC(this.Y, this, solver));
 				break;
 		}
 	}
