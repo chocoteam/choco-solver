@@ -266,15 +266,15 @@ public class PropAbsolute extends Propagator<IntVar> {
         if (d.getVar() == vars[0]) {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
-                e.add(vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal()));
-                e.add(vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal()));
+                vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+                vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == vars[1]) {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
-                e.add(vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
+                vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }

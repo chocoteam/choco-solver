@@ -102,6 +102,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
 
     /**
      * Return the "idx" th propagator of this
+     *
      * @param idx position of the propagator
      * @return a propagator
      */
@@ -116,6 +117,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
 
     /**
      * Return the position of the variable in the propagator at position pidx
+     *
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
@@ -154,7 +156,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
 
     Explanation explain(VariableState what);
 
-    Explanation explain(VariableState what, int val);
+    void explain(VariableState what, int val, Explanation to);
 
     /**
      * Return the delta domain of this

@@ -90,7 +90,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
+    public void explain(VariableState what, int val, Explanation to) {
         throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
     }
 

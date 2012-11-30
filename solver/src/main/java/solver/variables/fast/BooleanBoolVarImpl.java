@@ -416,10 +416,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        to.add(solver.getExplainer().explain(this, val));
     }
 
     @Override

@@ -259,8 +259,8 @@ public class MinusView extends IntView<IntVar> {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        return var.explain(what, -val);
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, -val, to);
     }
 
     @Override

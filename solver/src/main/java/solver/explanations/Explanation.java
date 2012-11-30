@@ -60,17 +60,9 @@ public class Explanation extends Deduction {
 
     public static Explanation build() {
         if (stock.isEmpty()) {
-            Explanation e = new Explanation();
-            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
-                ExplanationEngine.LOGGER.info("::EXP*:: " + e.toString());
-            }
-            return e;
+            return new Explanation();
         } else {
-            Explanation e = stock.pollFirst();
-            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
-                ExplanationEngine.LOGGER.info("::EXP!:: " + e.toString());
-            }
-            return e;
+            return stock.pollFirst();
         }
     }
 
@@ -79,18 +71,10 @@ public class Explanation extends Deduction {
             stock.addLast(explanation);
         }
         explanation.reset();
-        if (ExplanationEngine.LOGGER.isInfoEnabled()) {
-            ExplanationEngine.LOGGER.info("::EXP?:: " + explanation.toString());
-        }
     }
 
     private Explanation() {
         super(Type.Exp);
-    }
-
-    private Explanation(Propagator p) {
-        this();
-        this.add(p);
     }
 
 
@@ -130,9 +114,6 @@ public class Explanation extends Deduction {
         }
         if (this.pid.add(p.getId())) {
             this.propagators.add(p);
-            if (ExplanationEngine.LOGGER.isInfoEnabled()) {
-                ExplanationEngine.LOGGER.info("::UPD:: " + this.toString());
-            }
         }
     }
 
@@ -152,9 +133,6 @@ public class Explanation extends Deduction {
             }
             if (this.did.add(d.id)) {
                 this.deductions.add(d);
-                if (ExplanationEngine.LOGGER.isInfoEnabled()) {
-                    ExplanationEngine.LOGGER.info("::UPD:: " + this.toString());
-                }
             }
         }
     }

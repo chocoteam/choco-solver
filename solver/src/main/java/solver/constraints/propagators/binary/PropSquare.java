@@ -279,8 +279,8 @@ public class PropSquare extends Propagator<IntVar> {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
                 int val = (int) Math.sqrt(((ValueRemoval) d).getVal());
-                e.add(vars[1].explain(VariableState.REM, val));
-                e.add(vars[1].explain(VariableState.REM, -val));
+                vars[1].explain(VariableState.REM, val, e);
+                vars[1].explain(VariableState.REM, -val, e);
             } else {
                 throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
             }
@@ -288,7 +288,7 @@ public class PropSquare extends Propagator<IntVar> {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
                 int val = ((ValueRemoval) d).getVal() ^ 2;
-                e.add(vars[0].explain(VariableState.REM, val));
+                vars[0].explain(VariableState.REM, val, e);
             } else {
                 throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
             }

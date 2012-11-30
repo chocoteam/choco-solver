@@ -174,11 +174,7 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        /*Explanation expl = new Explanation();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;*/
-        return null;
+    public void explain(VariableState what, int val, Explanation to) {
     }
 
     @Override

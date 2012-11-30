@@ -276,12 +276,10 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation explanation = Explanation.build();
+    public void explain(VariableState what, int val, Explanation to) {
         if (empty.get()) {
-            explanation.add(solver.getExplainer().explain(this, constante));
+            to.add(solver.getExplainer().explain(this, constante));
         }
-        return explanation;
     }
 
     @Override

@@ -261,10 +261,8 @@ public final class ScaleView extends IntView<IntVar> {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(var.explain(what, val / cste));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val / cste, to);
     }
 
     @Override

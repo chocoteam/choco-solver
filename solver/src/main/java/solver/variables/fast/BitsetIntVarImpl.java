@@ -550,10 +550,8 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        to.add(solver.getExplainer().explain(this, val));
     }
 
     @Override

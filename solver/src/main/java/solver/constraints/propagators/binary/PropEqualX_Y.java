@@ -222,14 +222,14 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         if (d.getVar() == x) {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
-                e.add(y.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+                y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == y) {
             e.add(aCause);
             if (d instanceof ValueRemoval) {
-                e.add(x.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+                x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
