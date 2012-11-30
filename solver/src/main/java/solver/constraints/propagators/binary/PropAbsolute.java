@@ -193,7 +193,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 			if(var==0){
 				vars[1].removeValue(val,aCause);
 				vars[1].removeValue(-val,aCause);
-			}else if(var==1){
+			}else {
 				if(!vars[1].contains(-val))
 					vars[0].removeValue(Math.abs(val),aCause);
 			}

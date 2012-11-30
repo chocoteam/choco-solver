@@ -106,7 +106,7 @@ public class TestCorrectness {
     @Test(groups = "1m")
     public void testINVERSECHANNELING() {
         long seed = System.currentTimeMillis();
-        for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+        for (int n = 2; n < (1 << 6) + 1; n *= 2) {
             CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
         }
     }
