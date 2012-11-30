@@ -142,14 +142,17 @@ public enum Views {
     }
 
     public static IntVar scale(IntVar ivar, int cste) {
-        IntVar var;
+		if(cste == -1){
+			return Views.minus(ivar);
+		}
         if (cste < 0) {
             throw new UnsupportedOperationException("scale required positive coefficient!");
         } else {
-            if (cste == 1) {
+			IntVar var;
+			if(cste == 0){
+				var = Views.fixed(0,ivar.getSolver());
+			} else if (cste == 1) {
                 var = ivar;
-            } else if (cste == -1) {
-                var = Views.minus(ivar);
             } else {
                 IView[] views = ivar.getViews();
                 for (int i = 0; i < views.length; i++) {
@@ -162,8 +165,8 @@ public enum Views {
                 }
                 var = new ScaleView(ivar, cste, ivar.getSolver());
             }
+			return var;
         }
-        return var;
     }
 
     public static IntVar abs(IntVar ivar) {
