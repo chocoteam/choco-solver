@@ -109,7 +109,7 @@ public class PropTimes extends Propagator<IntVar> {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
 
-    protected final void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
+    protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
         if (idx == 0) {
             awakeOnX();
         } else if (idx == 1) {
