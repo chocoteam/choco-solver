@@ -38,7 +38,7 @@ import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
 
 /**
- * X[i + o] = j <=> Y[j + o] = i
+ * X[i] = j+Ox <=> Y[j] = i+Oy
  * <p/>
  * <br/>
  *
@@ -47,106 +47,105 @@ import solver.variables.IntVar;
  */
 public class InverseChanneling extends IntConstraint<IntVar> {
 
-    protected IntVar[] X, Y;
+	protected IntVar[] X, Y;
+	protected final int Ox, Oy, n;
 
-    protected final int Ox, Oy;
+	public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver) {
+		this(X, Y, solver, getRelevantType(X,Y));
+	}
 
-    protected final int nbX, nbY;
+	public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver, AllDifferent.Type type) {
+		this(X,Y,0,0,solver,type);
+	}
 
-    public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver) {
-        this(X, Y, solver, AllDifferent.Type.BC);
-    }
+	public InverseChanneling(IntVar[] X, IntVar[] Y, int offSetX, int offSetY, Solver solver, AllDifferent.Type type) {
+		super(ArrayUtils.append(X, Y), solver);
+		this.X = X.clone();
+		this.Y = Y.clone();
+		if(X.length!=Y.length)throw new UnsupportedOperationException(X +" and "+Y+" should have same size");
+		n = Y.length;
+		// OFF SET CALCULATION (for people starting counting at 0 or 1... or 42!)
+		Ox = -offSetX;
+		Oy = -offSetY;
+		// propagators
+		setPropagators(new PropInverseChanneling(this.X, this.Y, offSetX, offSetY, solver, this));
+		switch (type) {
+			case AC:
+				addPropagators(new PropAllDiffAC(this.X, this, solver));
+				addPropagators(new PropAllDiffAC(this.Y, this, solver));
+				break;
+			case BC:
+			default:
+				addPropagators(new PropAllDiffBC(this.X, solver, this));
+				addPropagators(new PropAllDiffBC(this.Y, solver, this));
+				break;
+		}
+	}
 
-    public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver, AllDifferent.Type type) {
-        super(ArrayUtils.append(X, Y), solver);
-        this.X = X.clone();
-        this.Y = Y.clone();
-        nbX = X.length;
-        nbY = Y.length;
-        int _oX = Integer.MAX_VALUE;
-        for (int i = 0; i < nbX; i++) {
-            if (_oX > X[i].getLB()) {
-                _oX = X[i].getLB();
-            }
-        }
-        Ox = -_oX;
+	public static AllDifferent.Type getRelevantType(IntVar[] X, IntVar[] Y){
+		for(int i=0;i<X.length;i++){
+			if(!(X[i].hasEnumeratedDomain() && Y[i].hasEnumeratedDomain())){
+				return AllDifferent.Type.BC;
+			}
+		}
+		return AllDifferent.Type.AC;
+	}
 
-        int _oY = Integer.MAX_VALUE;
-        for (int i = 0; i < nbY; i++) {
-            if (_oY > Y[i].getLB()) {
-                _oY = Y[i].getLB();
-            }
-        }
-        Oy = -_oY;
-        setPropagators(new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver, this));
-        switch (type) {
-            case AC:
-                addPropagators(new PropAllDiffAC(this.X, this, solver));
-                addPropagators(new PropAllDiffAC(this.Y, this, solver));
-                break;
-            case BC:
-            default:
-                addPropagators(new PropAllDiffBC(this.X, solver, this));
-                addPropagators(new PropAllDiffBC(this.Y, solver, this));
-                break;
-    }
-    }
+	/**
+	 * Checks if the constraint is satisfied when all variables are instantiated.
+	 *
+	 * @param tuple an complete instantiation
+	 * @return true iff a solution
+	 */
+	@Override
+	public ESat isSatisfied(int[] tuple) {
+		for (int i = 0; i < n; i++) {
+			int j = tuple[i] + Ox;
+			if (tuple[j] != (i - Oy)) {
+				return ESat.FALSE;
+			}
+		}
+		return ESat.TRUE;
+	}
 
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < nbX; i++) {
-            int j = tuple[i] + Ox;
-            if (tuple[j] != (i - Oy)) {
-                return ESat.FALSE;
-            }
-        }
-        return ESat.TRUE;
-    }
+	@Override
+	public ESat isSatisfied() {
+		for (int i = 0; i < n; i++) {
+			// X[i] = j' && j = j' + Ox[i] => Y[j] = i' && i' = i - Oy[j]
+			if (X[i].instantiated()) {
+				int j = X[i].getValue() + Ox;
+				if(j < 0 || j > n){
+					return ESat.FALSE;
+				}else
+				if (Y[j].instantiated()){
+					if(Y[j].getValue() != (i - Oy)) {
+						return ESat.FALSE;
+					}
+				}else{
+					return ESat.UNDEFINED;
+				}
+			} else {
+				return ESat.UNDEFINED;
+			}
+		}
+		return ESat.TRUE;
+	}
 
-    @Override
-    public ESat isSatisfied() {
-        for (int i = 0; i < nbX; i++) {
-            // X[i] = j' && j = j' + Ox[i] => Y[j] = i' && i' = i - Oy[j]
-            if (X[i].instantiated()) {
-                int j = X[i].getValue() + Ox;
-                if(j < 0 || j > nbY){
-                    return ESat.FALSE;
-                }else
-                if (Y[j].instantiated()){
-                    if(Y[j].getValue() != (i - Oy)) {
-                        return ESat.FALSE;
-                    }
-                }else{
-                    return ESat.UNDEFINED;
-                }
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.TRUE;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("InverseChanneling({");
-        for (int i = 0; i < nbX; i++) {
-            if (i > 0) sb.append(", ");
-            sb.append(X[i]);
-        }
-        sb.append("}, {");
-        for (int i = 0; i < nbY; i++) {
-            if (i > 0) sb.append(", ");
-            sb.append(Y[i]);
-        }
-        sb.append("})");
-        return sb.toString();
-    }
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("InverseChanneling({");
+		for (int i = 0; i < n; i++) {
+			if (i > 0) sb.append(", ");
+			sb.append(X[i]);
+		}
+		sb.append("}, {");
+		for (int i = 0; i < n; i++) {
+			if (i > 0) sb.append(", ");
+			sb.append(Y[i]);
+		}
+		sb.append("})");
+		return sb.toString();
+	}
 
 }
