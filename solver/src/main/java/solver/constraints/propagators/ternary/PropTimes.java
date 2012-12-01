@@ -109,7 +109,7 @@ public class PropTimes extends Propagator<IntVar> {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
 
-    protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
+	protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
         if (idx == 0) {
             awakeOnX();
         } else if (idx == 1) {
@@ -117,13 +117,18 @@ public class PropTimes extends Propagator<IntVar> {
         } else if (idx == 2) {
             awakeOnZ();
 			if (!(v2.contains(0))) {
+				lb = false;
+				ub = false;
 				if(lb){
 					int r = Math.min(getZmax(), MAX);
-					v2.updateUpperBound(r, aCause);
+					lb = v2.updateUpperBound(r, aCause);
 				}
 				if(ub){
 					int r = Math.max(getZmin(), MIN);
-					v2.updateLowerBound(r, aCause);
+					ub = v2.updateLowerBound(r, aCause);
+				}
+				if(lb || ub){
+					filter(2,lb,ub);
 				}
 			}
 		}
