@@ -82,32 +82,68 @@ public interface Modeler {
         }
     };
 
-    Modeler modelInverseChannelingAC = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("InverseChannelingAC_" + n);
-            IEnvironment env = s.getEnvironment();
+	Modeler modelInverseChannelingAC = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("InverseChannelingAC_" + n);
+			IEnvironment env = s.getEnvironment();
 
-            IntVar[] X = new IntVar[n / 2];
-            IntVar[] Y = new IntVar[n / 2];
-            for (int i = 0; i < n / 2; i++) {
-                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
-                map.put(domains[i], X[i]);
-                Y[i] = VariableFactory.enumerated("Y_" + i, domains[i + (n / 2)], s);
-                map.put(domains[i + (n / 2)], Y[i]);
-            }
-            IntVar[] allvars = ArrayUtils.append(X, Y);
+			IntVar[] X = new IntVar[n / 2];
+			IntVar[] Y = new IntVar[n / 2];
+			for (int i = 0; i < n / 2; i++) {
+				X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
+				map.put(domains[i], X[i]);
+				Y[i] = VariableFactory.enumerated("Y_" + i, domains[i + (n / 2)], s);
+				map.put(domains[i + (n / 2)], Y[i]);
+			}
+			IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = new InverseChanneling(X, Y, s);
-            Constraint[] ctrs = new Constraint[]{ctr};
+			Constraint ctr = new InverseChanneling(X, Y, s);
+			Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
-            s.post(ctrs);
-            s.set(strategy);
+			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
+			s.post(ctrs);
+			s.set(strategy);
 
-            return s;
-        }
-    };
+			return s;
+		}
+	};
+
+	Modeler modelInverseChannelingBounds = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("InverseChannelingBC_" + n);
+			IEnvironment env = s.getEnvironment();
+			for(int i=0;i<domains.length;i++){
+				int m = domains[i][0];
+				int M = domains[i][domains[i].length-1];
+				domains[i] = new int[M-m+1];
+				for(int j=0;j<M-m+1;j++){
+					domains[i][j] = j+m;
+				}
+			}
+
+			IntVar[] X = new IntVar[n / 2];
+			IntVar[] Y = new IntVar[n / 2];
+			int off = n/2;
+			for (int i = 0; i < n / 2; i++) {
+				X[i] = VariableFactory.bounded("X_" + i, domains[i][0], domains[i][domains[i].length-1], s);
+				map.put(domains[i], X[i]);
+				Y[i] = VariableFactory.bounded("Y_" + i, domains[i+off][0], domains[i+off][domains[i+off].length-1], s);
+				map.put(domains[i + (n / 2)], Y[i]);
+			}
+			IntVar[] allvars = ArrayUtils.append(X, Y);
+
+			Constraint ctr = new InverseChanneling(X, Y, s);
+			Constraint[] ctrs = new Constraint[]{ctr};
+
+			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
+			s.post(ctrs);
+			s.set(strategy);
+
+			return s;
+		}
+	};
 
     Modeler modelNeqAC = new Modeler() {
         @Override
