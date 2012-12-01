@@ -60,9 +60,12 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     private int n;
     private int nbMaxValues;
     private int minValue;
+	private int minIndex,maxIndex;
     private TIntArrayList[] bound;
 	private TIntArrayList stamp;
     private int[] minVal, maxVal;
+	private BitSet kerRepresentant;
+	private int[] orderedNodes;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -99,6 +102,8 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         minVal = new int[n];
         maxVal = new int[n];
 		stamp = new TIntArrayList();
+		kerRepresentant = new BitSet(n);
+		orderedNodes = new int[n];
     }
 
     //***********************************************************************************
@@ -106,10 +111,16 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     //***********************************************************************************
 
     private void computeBounds() throws ContradictionException {
+		minIndex = vars[0].getLB();
+		maxIndex = vars[0].getUB();
         for (int i = 0; i < n; i++) {
             minVal[i] = vars[i].getLB();
             maxVal[i] = vars[i].getUB();
+			minIndex = Math.min(minIndex, minVal[i]);
+			maxIndex = Math.max(maxIndex, maxVal[i]);
         }
+		minIndex -= minValue;
+		maxIndex -= minValue;
     }
 
     private void sortLB() {
@@ -136,122 +147,106 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     private void pruneLB() throws ContradictionException {
         int node;
-        int min = -1;
-        int max = n + 1;
+        int min = Integer.MIN_VALUE;
+        int max = Integer.MIN_VALUE;
         int nbKer = 0;
-        for (int i = 0; i < nbMaxValues; i++) {
+		int index = 0;
+		kerRepresentant.clear();
+        for (int i = minIndex; i < maxIndex; i++) {
             for (int k = bound[i].size() - 1; k >= 0; k--) {
                 node = bound[i].get(k);
-                if (min == -1) {
+				orderedNodes[index++] = node;
+                if (min == Integer.MIN_VALUE) {
                     min = minVal[node];
                     max = maxVal[node];
                     nbKer++;
-                }
-                if (minVal[node] <= max) {
+                }else if (minVal[node] <= max) {
                     min = Math.max(min, minVal[node]);
                     max = Math.min(max, maxVal[node]);
                 } else {
                     min = minVal[node];
                     max = maxVal[node];
+					kerRepresentant.set(node);
                     nbKer++;
                 }
             }
         }
         vars[n].updateLowerBound(nbKer, aCause);
         if (nbKer == vars[n].getUB()) {
-            nbKer = 0;
-            min = -1;
-            max = n + 1;
-            for (int i = 0; i < nbMaxValues; i++) {
-                for (int k = bound[i].size() - 1; k >= 0; k--) {
-                    node = bound[i].get(k);
-                    if (min == -1) {
-                        min = minVal[node];
-                        max = maxVal[node];
-                        nbKer++;
-						stamp.clear();
-                    }
-                    if (minVal[node] <= max) {
-                        min = Math.max(min, minVal[node]);
-                        max = Math.min(max, maxVal[node]);
-						stamp.add(node);
-                    } else {
-						updateKer(min,true);
-                        min = minVal[node];
-                        max = maxVal[node];
-                        nbKer++;
-						stamp.clear();
-						stamp.add(node);
-                    }
-                }
-            }
-			updateKer(min,true);
+			stamp.clear();
+			for(int i=0;i<n;i++){
+				node = orderedNodes[i];
+				if(kerRepresentant.get(node)){
+					updateKer(minVal[node],true);
+					stamp.clear();
+				}
+				stamp.add(node);
+			}
+			updateKer(Integer.MAX_VALUE,true);
         }
     }
 
     private void pruneUB() throws ContradictionException {
         int node;
-        int min = -1;
-        int max = n + 1;
+        int min = Integer.MIN_VALUE;
+        int max = Integer.MIN_VALUE;
         int nbKer = 0;
-        for (int i = nbMaxValues - 1; i >= 0; i--) {
+		kerRepresentant.clear();
+		int index = 0;
+        for (int i = maxIndex; i>=minIndex; i--) {
             for (int k = bound[i].size() - 1; k >= 0; k--) {
                 node = bound[i].get(k);
-                if (min == -1) {
+				orderedNodes[index++] = node;
+                if (min == Integer.MIN_VALUE) {
                     min = minVal[node];
                     max = maxVal[node];
                     nbKer++;
-                }
-                if (maxVal[node] >= min) {
+                }else if (maxVal[node] >= min) {
                     max = Math.min(max, maxVal[node]);
                     min = Math.max(min, minVal[node]);
                 } else {
                     min = minVal[node];
                     max = maxVal[node];
+					kerRepresentant.set(node);
                     nbKer++;
                 }
             }
         }
         vars[n].updateLowerBound(nbKer, aCause);
         if (nbKer == vars[n].getUB()) {
-            min = -1;
-            max = n + 1;
-            nbKer = 0;
-            for (int i = nbMaxValues - 1; i >= 0; i--) {
-                for (int k = bound[i].size() - 1; k >= 0; k--) {
-                    node = bound[i].get(k);
-                    if (min == -1) {
-                        min = minVal[node];
-                        max = maxVal[node];
-                        nbKer++;
-						stamp.clear();
-                    }
-                    if (maxVal[node] >= min) {
-                        max = Math.min(max, maxVal[node]);
-                        min = Math.max(min, minVal[node]);
-						stamp.add(node);
-                    } else {
-						updateKer(max,false);
-                        min = minVal[node];
-                        max = maxVal[node];
-                        nbKer++;
-						stamp.clear();
-						stamp.add(node);
-                    }
-                }
-            }
-			updateKer(max,false);
+			stamp.clear();
+			for(int i=0;i<n;i++){
+				node = orderedNodes[i];
+				if(kerRepresentant.get(node)){
+					updateKer(maxVal[node],false);
+					stamp.clear();
+				}
+				stamp.add(node);
+			}
+			updateKer(Integer.MIN_VALUE,false);
         }
     }
 
-	private void updateKer(int value, boolean LB) throws ContradictionException {
+	private void updateKer(int newVal, boolean LB) throws ContradictionException {
 		if(LB){
+			int min = Integer.MIN_VALUE;
 			for(int i=stamp.size()-1;i>=0;i--){
-				vars[stamp.get(i)].updateLowerBound(value, aCause);
+				if(vars[stamp.get(i)].getUB()<newVal)
+				min = Math.max(min, vars[stamp.get(i)].getLB());
+			}
+			for(int i=stamp.size()-1;i>=0;i--){
+				if(vars[stamp.get(i)].getUB()<newVal)
+				vars[stamp.get(i)].updateLowerBound(min, aCause);
 			}
 		}else{
+			int max = Integer.MAX_VALUE;
 			for(int i=stamp.size()-1;i>=0;i--){
-				vars[stamp.get(i)].updateUpperBound(value, aCause);
+				if(vars[stamp.get(i)].getLB()>newVal)
+				max = Math.min(max, vars[stamp.get(i)].getUB());
+			}
+			for(int i=stamp.size()-1;i>=0;i--){
+				if(vars[stamp.get(i)].getLB()>newVal)
+				vars[stamp.get(i)].updateUpperBound(max, aCause);
 			}
 		}
 	}
@@ -262,6 +257,8 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+		vars[n].updateLowerBound(1,aCause);
+		vars[n].updateUpperBound(n,aCause);
         computeBounds();
         sortLB();
         pruneLB();
@@ -280,8 +277,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask
-                + EventType.INCLOW.mask + EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
+        return EventType.INCLOW.mask + EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
     }
 
     @Override
