@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.channeling;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
@@ -47,6 +47,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 30 sept. 2010
  */
+@Deprecated
 @SuppressWarnings({"UnnecessaryLocalVariable"})
 public class PropInverseChanneling extends Propagator<IntVar> {
 

@@ -31,8 +31,8 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.nary.PropInverseChanneling;
+import solver.constraints.propagators.nary.channeling.PropInverseChannelAC;
+import solver.constraints.propagators.nary.channeling.PropInverseChannelBC;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
@@ -48,47 +48,66 @@ import solver.variables.IntVar;
 public class InverseChanneling extends IntConstraint<IntVar> {
 
 	protected IntVar[] X, Y;
-	protected final int Ox, Oy, n;
+	protected final int n, minX, minY;
 
+	/**
+	 * Make an inverse channeling between X and Y:
+	 * X[i] = j+Ox <=> Y[j] = i+Oy
+	 * Performs AC if domains are enumerated.
+	 * If not, then it works on bounds without guaranteeing BC
+	 * (enumerated domains are strongly recommended)
+	 * The constraint requires that |X| = |Y|
+	 * @param X
+	 * @param Y
+	 * @param solver
+	 */
 	public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver) {
-		this(X, Y, solver, getRelevantType(X,Y));
+		this(X,Y,0,0,solver);
 	}
 
-	public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver, AllDifferent.Type type) {
-		this(X,Y,0,0,solver,type);
-	}
-
-	public InverseChanneling(IntVar[] X, IntVar[] Y, int offSetX, int offSetY, Solver solver, AllDifferent.Type type) {
+	/**
+	 * Make an inverse channeling between X and Y:
+	 * X[i] = j+Ox <=> Y[j] = i+Oy
+	 * Performs AC if domains are enumerated,
+	 * If not, then it works on bounds without guaranteeing BC
+	 * Indeed, it would require to know somehow holes in (bounded) domains
+	 * (enumerated domains are strongly recommended)
+	 * The constraint requires that |X| = |Y|
+	 * @param X
+	 * @param Y
+	 * @param minX lowest value in X:
+	 * usually 0 but if you start counting at 1 (which is the case in minizinc),
+	 * then this should be set to 1)
+	 * @param minY lowest value in Y
+	 * @param solver
+	 */
+	public InverseChanneling(IntVar[] X, IntVar[] Y, int minX, int minY, Solver solver) {
 		super(ArrayUtils.append(X, Y), solver);
 		this.X = X.clone();
 		this.Y = Y.clone();
 		if(X.length!=Y.length)throw new UnsupportedOperationException(X +" and "+Y+" should have same size");
 		n = Y.length;
-		// OFF SET CALCULATION (for people starting counting at 0 or 1... or 42!)
-		Ox = -offSetX;
-		Oy = -offSetY;
-		// propagators
-		setPropagators(new PropInverseChanneling(this.X, this.Y, offSetX, offSetY, solver, this));
-		switch (type) {
-			case BC:
-				addPropagators(new PropAllDiffBC(this.X, solver, this));
-				addPropagators(new PropAllDiffBC(this.Y, solver, this));
-				break;
-			case AC:
-			default:
-				addPropagators(new PropAllDiffAC(this.X, this, solver));
-				addPropagators(new PropAllDiffAC(this.Y, this, solver));
-				break;
+		this.minX = minX;
+		this.minY = minY;
+		if (allEnumerated(X,Y)) {
+			addPropagators(new PropAllDiffAC(this.X, this, solver));
+			addPropagators(new PropAllDiffAC(this.Y, this, solver));
+			addPropagators(new PropInverseChannelAC(this.X, this.Y, minX, minY, solver, this));
+		}
+		else{// Beware no BC on the conjunction of those propagators but only separately
+			addPropagators(new PropAllDiffBC(this.X, solver, this));
+			addPropagators(new PropAllDiffBC(this.Y, solver, this));
+			addPropagators(new PropInverseChannelBC(this.X, this.Y, minX, minY, solver, this));
 		}
 	}
 
-	public static AllDifferent.Type getRelevantType(IntVar[] X, IntVar[] Y){
+	private static boolean allEnumerated(IntVar[] X, IntVar[] Y){
 		for(int i=0;i<X.length;i++){
 			if(!(X[i].hasEnumeratedDomain() && Y[i].hasEnumeratedDomain())){
-				return AllDifferent.Type.BC;
+				return false;
 			}
 		}
-		return AllDifferent.Type.AC;
+		return true;
 	}
 
 	/**
@@ -100,8 +119,8 @@ public class InverseChanneling extends IntConstraint<IntVar> {
 	@Override
 	public ESat isSatisfied(int[] tuple) {
 		for (int i = 0; i < n; i++) {
-			int j = tuple[i] + Ox;
-			if (tuple[j] != (i - Oy)) {
+			int j = tuple[i] - minX;
+			if (tuple[j] != (i + minY)) {
 				return ESat.FALSE;
 			}
 		}
@@ -110,25 +129,20 @@ public class InverseChanneling extends IntConstraint<IntVar> {
 
 	@Override
 	public ESat isSatisfied() {
-		for (int i = 0; i < n; i++) {
-			// X[i] = j' && j = j' + Ox[i] => Y[j] = i' && i' = i - Oy[j]
-			if (X[i].instantiated()) {
-				int j = X[i].getValue() + Ox;
-				if(j < 0 || j > n){
-					return ESat.FALSE;
-				}else
-				if (Y[j].instantiated()){
-					if(Y[j].getValue() != (i - Oy)) {
-						return ESat.FALSE;
-					}
-				}else{
-					return ESat.UNDEFINED;
-				}
-			} else {
-				return ESat.UNDEFINED;
+		boolean allInst = true;
+		for(int i=0;i<n;i++){
+			if(!(vars[i].instantiated() && vars[i+n].instantiated())){
+				allInst = false;
+			}
+			if(X[i].instantiated() && !Y[X[i].getValue()-minX].contains(i+minY)){
+				return ESat.FALSE;
+			}
+			if(Y[i].instantiated() && !X[Y[i].getValue()-minY].contains(i+minX)){
+				return ESat.FALSE;
 			}
 		}
-		return ESat.TRUE;
+		if(allInst)return ESat.TRUE;
+		return ESat.UNDEFINED;
 	}
 
 	@Override

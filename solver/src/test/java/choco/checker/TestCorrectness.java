@@ -100,23 +100,28 @@ public class TestCorrectness {
         }
     }
 
-    /**
-     * TODO: Ce test pose problème: la contrainte inverse_channeling calcule automatiquement les x_off et y_off!
-     */
-    @Test(groups = "1m")
-    public void testINVERSECHANNELING() {
-        long seed = System.currentTimeMillis();
-        for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
-        }
-    }
+	@Test(groups = "1m")
+	public void testINVERSECHANNELING_AC() {
+		long seed = System.currentTimeMillis();
+		for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+			CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTBCEQ() {
-        long seed = System.currentTimeMillis();
-        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
-        }
+	@Test(groups = "1m")
+	public void testINVERSECHANNELING_Bounds() {
+		long seed = System.currentTimeMillis();
+		for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+			CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingBounds, n, -n / 2, 2 * n, seed, null);
+		}
+	}
+
+	@Test(groups = "1m")
+	public void testCOUNTBCEQ() {
+		long seed = System.currentTimeMillis();
+		for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+			CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+		}
     }
 
     @Test(groups = "1m")
