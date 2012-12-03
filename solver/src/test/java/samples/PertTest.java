@@ -30,6 +30,7 @@ package samples;
 import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
@@ -96,19 +97,20 @@ public class PertTest {
 
     @Test(groups = "1s")
     public void testAll() {
-        Solver sol;
-        sol = modeler();
-        PropagationStrategies.values()[0].make(sol);
-        sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-        long nbsol = sol.getMeasures().getSolutionCount();
-        long node = sol.getMeasures().getNodeCount();
-        for (int t = 1; t < PropagationStrategies.values().length; t++) {
-            sol = modeler();
-            PropagationStrategies.values()[t].make(sol);
-            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-            Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
-            Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
-        }
-    }
-
+		if(Configuration.PLUG_EXPLANATION){
+			Solver sol;
+			sol = modeler();
+			PropagationStrategies.values()[0].make(sol);
+			sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+			long nbsol = sol.getMeasures().getSolutionCount();
+			long node = sol.getMeasures().getNodeCount();
+			for (int t = 1; t < PropagationStrategies.values().length; t++) {
+				sol = modeler();
+				PropagationStrategies.values()[t].make(sol);
+				sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
+				Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
+				Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
+			}
+		}
+	}
 }
