@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
@@ -73,40 +74,42 @@ public class CycleLtTest {
 
     @Test(groups = "1s")
     public void testAll() {
-        Logger log = LoggerFactory.getLogger("bench");
-        StringBuilder st = new StringBuilder("\nCycle LT \n");
+		if(Configuration.PLUG_EXPLANATION){
+			Logger log = LoggerFactory.getLogger("bench");
+			StringBuilder st = new StringBuilder("\nCycle LT \n");
 
-        int n = 6;
-        int nbIt = 4;
-        st.append(StringUtils.pad("TIME ", -7, " "));
-        st.append(StringUtils.pad("NODES ", -7, " "));
-        st.append(StringUtils.pad("BCKT ", -7, " "));
-        st.append(StringUtils.pad("FILTER ", -15, " "));
-        st.append(StringUtils.pad("EVENTS ", -15, " "));
-        st.append(StringUtils.pad("PUSHED ", -15, " "));
-        st.append(StringUtils.pad("POPPED ", -15, " "));
-        st.append(StringUtils.pad("(DIFF)", -15, " "));
-        float[] times = new float[nbIt];
-        for (int j = 0; j < PropagationStrategies.values().length; j++) {
-            log.info(st.toString());
-            st.setLength(0);
-            st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
-            for (int i = 0; i < nbIt; i++) {
-                Solver rand = modeler(n);
-                PropagationStrategies.values()[j].make(rand);
-                rand.findAllSolutions();
-                st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
-                times[i] = rand.getMeasures().getInitialPropagationTimeCount();
-                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                log.info(st.toString());
-                st.setLength(0);
-            }
-            st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
-            st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
-            log.info(st.toString());
-            st.setLength(0);
-        }
+			int n = 6;
+			int nbIt = 4;
+			st.append(StringUtils.pad("TIME ", -7, " "));
+			st.append(StringUtils.pad("NODES ", -7, " "));
+			st.append(StringUtils.pad("BCKT ", -7, " "));
+			st.append(StringUtils.pad("FILTER ", -15, " "));
+			st.append(StringUtils.pad("EVENTS ", -15, " "));
+			st.append(StringUtils.pad("PUSHED ", -15, " "));
+			st.append(StringUtils.pad("POPPED ", -15, " "));
+			st.append(StringUtils.pad("(DIFF)", -15, " "));
+			float[] times = new float[nbIt];
+			for (int j = 0; j < PropagationStrategies.values().length; j++) {
+				log.info(st.toString());
+				st.setLength(0);
+				st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
+				for (int i = 0; i < nbIt; i++) {
+					Solver rand = modeler(n);
+					PropagationStrategies.values()[j].make(rand);
+					rand.findAllSolutions();
+					st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
+					times[i] = rand.getMeasures().getInitialPropagationTimeCount();
+					st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
+					st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
+					log.info(st.toString());
+					st.setLength(0);
+				}
+				st.append(StringUtils.pad(String.format("MOYENNE : %fms ", mean(prepare(times))), -15, " "));
+				st.append(StringUtils.pad(String.format("DEVIATION : %fms ", standarddeviation(prepare(times))), -15, " "));
+				log.info(st.toString());
+				st.setLength(0);
+			}
+		}
     }
 
 }

@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
@@ -111,34 +112,36 @@ public class ElementTest {
 
     @Test(groups = "1s")
     public void test5() {
-        Solver s = new Solver();
-        s.set(ExplanationFactory.engineFactory(s));
+		if(Configuration.PLUG_EXPLANATION){
+			Solver s = new Solver();
+			s.set(ExplanationFactory.engineFactory(s));
 
-        Random r = new Random(125);
-        int[] values = new int[10];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = r.nextInt(5);
-        }
+			Random r = new Random(125);
+			int[] values = new int[10];
+			for (int i = 0; i < values.length; i++) {
+				values[i] = r.nextInt(5);
+			}
 
-        IntVar[] vars = new IntVar[3];
-        IntVar[] indices = new IntVar[3];
-        List<Constraint> lcstrs = new ArrayList<Constraint>(1);
+			IntVar[] vars = new IntVar[3];
+			IntVar[] indices = new IntVar[3];
+			List<Constraint> lcstrs = new ArrayList<Constraint>(1);
 
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
-            indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
-            lcstrs.add(new Element(vars[i], values, indices[i], 0, s));
-        }
+			for (int i = 0; i < vars.length; i++) {
+				vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
+				indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
+				lcstrs.add(new Element(vars[i], values, indices[i], 0, s));
+			}
 
-        for (int i = 0; i < vars.length - 1; i++) {
-            lcstrs.add(new Arithmetic(vars[i], ">", vars[i + 1], s));
-        }
+			for (int i = 0; i < vars.length - 1; i++) {
+				lcstrs.add(new Arithmetic(vars[i], ">", vars[i + 1], s));
+			}
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-        s.post(cstrs);
+			Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+			s.post(cstrs);
 
-        s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+			s.findAllSolutions();
+			Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+		}
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
