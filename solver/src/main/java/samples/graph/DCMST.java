@@ -103,7 +103,8 @@ public class DCMST {
 
     public static void main(String[] args) {
         //DE,DR,instanciasT
-        bench("instanciasT");
+//        bench("DR");
+		execute(dir,"DR","output.csv",60000);
     }
 
     public static void bench(String type) {
@@ -143,6 +144,37 @@ public class DCMST {
             }
         }
     }
+
+	public static void execute(String dir, String type, String output, long tl){
+		if (optGiven) {
+            search = 0;
+        } else {
+            search = 1;
+        }
+		outFile = output;
+		DCMST.dir = dir;
+		TextWriter.clearFile(outFile);
+        TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
+        File folder = new File(dir + "/" + type);
+        String[] list = folder.list();
+        nMin = 100;
+        nMax = 900;
+        for (String s : list) {
+            File file = new File(dir + "/" + type + "/" + s);
+            if ((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))) {
+                instanceName = s;
+                System.out.println(s);
+                if (parse(file, nMin, nMax, dir, type, s)) {
+                    if (optGiven) {
+                        ub = optimum;
+                    }
+                    moreHK = false;
+                    solveDCMST(s);
+                }
+                System.gc();
+            }
+        }
+	}
 
     public static boolean parse(File file, int nMin, int nMax, String dirOpt, String type, String s) {
         DCMST_Utils inst = new DCMST_Utils();
