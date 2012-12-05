@@ -64,7 +64,7 @@ public class NQueenDualBinary extends AbstractNQueen {
                 solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
             }
         }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
+        solver.post(new InverseChanneling(vars, dualvars, 1, 1, solver));
     }
 
 
