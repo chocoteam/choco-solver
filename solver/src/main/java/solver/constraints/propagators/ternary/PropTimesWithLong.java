@@ -42,6 +42,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
+@Deprecated
 public class PropTimesWithLong extends PropTimes {
 
     public PropTimesWithLong(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,

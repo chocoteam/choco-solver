@@ -45,6 +45,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
+@Deprecated // bug somewhere
 public class PropTimes extends Propagator<IntVar> {
 
     protected static final int MAX = Integer.MAX_VALUE - 1, MIN = Integer.MIN_VALUE + 1;
@@ -73,7 +74,7 @@ public class PropTimes extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int varIdx, int mask) throws ContradictionException {
-		filter(varIdx,EventType.isInclow(mask),EventType.isDecupp(mask));
+		filter(varIdx, EventType.isInclow(mask), EventType.isDecupp(mask));//bug
     }
 
     @Override
