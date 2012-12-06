@@ -161,15 +161,15 @@ public class PropTimesZ extends Propagator<IntVar> {
 	private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
 		if(X.instantiated() && Y.instantiated()){
 			if(X.getValue()* Y.getValue()!= Z.getValue()){
-				contradiction(Z,""); 					// checker
+				contradiction(Z,""); 							// checker
 			}
 		}else if(X.instantiated()){
 			if(X.getValue()!=0){
 				double a = (double) Z.getValue()/(double) X.getValue();
-				if(a-(int)a>0.001){
-					contradiction(Z,"");				// not integer
+				if(Math.abs(a-Math.round(a))>0.001){
+					contradiction(Z,"");						// not integer
 				}
-				Y.instantiateTo((int)a,aCause);			// fix v1
+				Y.instantiateTo((int)Math.round(a),aCause);		// fix v1
 				setPassive();
 			}
 		} else{
@@ -191,14 +191,14 @@ public class PropTimesZ extends Propagator<IntVar> {
 				if(X.getLB()>0){
 					double a = z/(double)X.getLB();
 					double b = z/(double)X.getUB();
-					Y.updateUpperBound((int)a,aCause);
-					Y.updateLowerBound((int)b,aCause);
+					Y.updateLowerBound((int)a,aCause);
+					Y.updateUpperBound((int)b,aCause);
 				}
 				if(X.getUB()<0){
 					double a = z/(double)X.getLB();
 					double b = z/(double)X.getUB();
-					Y.updateUpperBound((int)a,aCause);
-					Y.updateLowerBound((int)b,aCause);
+					Y.updateLowerBound((int)a,aCause);
+					Y.updateUpperBound((int)b,aCause);
 				}
 			}
 		}
