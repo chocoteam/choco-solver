@@ -91,6 +91,12 @@ public enum RootDecision implements Decision {
     }
 
     @Override
+    public void opposite() {
+        throw new UnsupportedOperationException();
+    }
+
+
+    @Override
     public Deduction getNegativeDeduction() {
         return null;
     }

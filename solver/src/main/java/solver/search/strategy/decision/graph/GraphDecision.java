@@ -138,6 +138,11 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     }
 
     @Override
+    public void opposite() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void free() {
         previous = null;
         poolManager.returnE(this);

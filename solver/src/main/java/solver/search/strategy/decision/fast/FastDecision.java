@@ -116,6 +116,11 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
+    public void opposite() {
+        this.assignment = assignment.opposite();
+    }
+
+    @Override
     public void free() {
         previous = null;
         poolManager.returnE(this);

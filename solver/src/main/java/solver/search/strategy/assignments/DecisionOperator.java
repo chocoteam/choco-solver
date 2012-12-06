@@ -46,6 +46,8 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
 
     public abstract void unapply(V var, int value, ICause cause) throws ContradictionException;
 
+    public abstract DecisionOperator opposite();
+
     public abstract String toString();
 
     /**
@@ -79,6 +81,11 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         public boolean isValid(IntVar var, int value) {
             return var.contains(value);
         }
+
+        @Override
+        public DecisionOperator opposite() {
+            return int_neq;
+        }
     };
 
     public static DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
@@ -101,6 +108,11 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         @Override
         public boolean isValid(IntVar var, int value) {
             return var.contains(value);
+        }
+
+        @Override
+        public DecisionOperator opposite() {
+            return int_eq;
         }
     };
 
@@ -126,6 +138,11 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
             return var.getUB() >= value;
         }
 
+        @Override
+        public DecisionOperator opposite() {
+            return int_reverse_split;
+        }
+
     };
 
     public static DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
@@ -148,6 +165,11 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         @Override
         public boolean isValid(IntVar var, int value) {
             return var.getLB() <= value;
+        }
+
+        @Override
+        public DecisionOperator opposite() {
+            return int_split;
         }
     };
 }

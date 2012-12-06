@@ -26,15 +26,14 @@
  */
 package solver.explanations;
 
-import solver.Solver;
+import com.sun.istack.internal.Nullable;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 
 /**
  * <br/>
@@ -42,136 +41,27 @@ import java.util.ArrayList;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class DynamicBacktracking extends AbstractStrategy<Variable> implements ISearchMonitor {
+public class DynamicBacktracking extends ConflictBasedBackjumping {
 
-    RecorderExplanationEngine mExplanationEngine;
-    Solver mSolver;
-
-    AbstractStrategy<Variable> dStrategy;
-
-    ArrayList<Decision> decision_path; // list of decisions describing the decision path
-    int fix_path; // part of the decision path that should not be modified on restart
-    int current;
-
+    ArrayDeque<Decision> decision_path; // list of decisions describing the decision path
+    CombinedDecision cobdec;
 
     public DynamicBacktracking(RecorderExplanationEngine mExplanationEngine) {
-        super(new Variable[0]);
-        this.mExplanationEngine = mExplanationEngine;
-        this.mSolver = mExplanationEngine.solver;
-        mSolver.getSearchLoop().plugSearchMonitor(this);
-        decision_path = new ArrayList<Decision>(8);
-        mSolver.getSearchLoop().restartAfterEachFail(true);  // TODO: remove when a better solution has been found
+        super(mExplanationEngine);
+        decision_path = new ArrayDeque<Decision>(8);
+        cobdec = new CombinedDecision();
     }
 
-    @Override
-    public void beforeInitialize() {
-        this.dStrategy = mSolver.getSearchLoop().getStrategy();
-        mSolver.getSearchLoop().set(this);
-    }
-
-    @Override
-    public void init() throws ContradictionException {
-        this.dStrategy.init();
-    }
-
-    @Override
-    public Decision getDecision() {
-        if (current == decision_path.size()) {
-            return dStrategy.getDecision();
-        } else {
-            Decision dec;
-            // first apply the fix part
-            if (current < fix_path) {
-                dec = decision_path.get(current++); // from the last decision to the first one
-                dec.setPrevious(null);
-            }
-            // otherwise, change the way decisions are applied
-            else {
-                dec = decision_path.get(current++); // from the last decision to the first one
-
-                dec.setPrevious(null);
-                // TODO: is it really mandatory ?
-                Explanation explanation = new Explanation();
-                Decision d = dec.getPrevious();
-                while ((d != null)) {
-                    if (d.hasNext()) {
-                        explanation.add(d.getPositiveDeduction());
-                    }
-                    d = d.getPrevious();
-                }
-                mExplanationEngine.database.put(dec.getNegativeDeduction().id, explanation);
-            }
-//            AbstractStrategy.LOGGER.info("OVERRIDE DECISION : {}", dec);
-            return dec;
-        }
-    }
-
-    public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = new Explanation();
-            if (cex.v != null) {
-                cex.v.explain(VariableState.DOM, expl);
-            } else {
-                cex.c.explain(null, expl);
-            }
-            Explanation complete = mExplanationEngine.flatten(expl);
-
-            decision_path.clear();
-//            AbstractStrategy.LOGGER.info("START PATH REPAIR");
-            int topworld, nworld;
-            nworld = topworld = mSolver.getEnvironment().getWorldIndex();
-            Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
-            while (dec != RootDecision.ROOT) {
-                Deduction ded;
-//                System.out.printf("CHECK %s\n", dec);
-                // Find the deduction related to the decision
-                if (dec.hasNext()) { // variable assignment
-                    ded = dec.getPositiveDeduction();
-                } else { // variable refutation
-                    ded = dec.getNegativeDeduction();
-                }
-                if (complete.contain(ded))
-                // IF the current decision is part of the explanation
-                //      IF left branch: let the engine compute the oppsite, and post it
-                //      ELSE right branch: no opposite possible, should fail => compute the opposite and post it
-                {
-                    // NOTHING TO DO except getting the world index for the dbt
-                    if (nworld < topworld) { // we look for the "most shallow" index
-                        topworld = nworld;
-                    }
-//                    AbstractStrategy.LOGGER.info("{} in XP", dec);
-                    // we make a copy, because decisions are freed on backtracking
-                    decision_path.add(dec.copy());
-                } else
-                // ELSE the current decision is not part of the explanation, move it back to apply it as is.
-                {
-                    dec.buildPrevious();
-                    // we make a copy, because decisions are freed on backtracking
-                    decision_path.add(dec.copy());
-                }
-
-
-                dec = dec.getPrevious();
-                nworld--;
-            }
-            // Then remove decisions between ROOT decision and the first one belonging to the explanation
-            fix_path = topworld - (nworld + 1);
-            current = 0;
-            // Compute the world index to jump to
-            int upto = 2 + (mSolver.getEnvironment().getWorldIndex() - topworld);
-            mSolver.getSearchLoop().overridePreviousWorld(upto);
-            // CPRU: what is it for ?
-            /*dec = updateVRExplainUponbacktracking(upto, complete);
-            mExplanationEngine.emList.onContradiction(cex, complete, upto, dec);*/
-//            AbstractStrategy.LOGGER.info("END PATH REPAIR");
-        } else {
-            throw new UnsupportedOperationException("DynamicBacktracking.onContradiction incoherent state");
-        }
-    }
-
-    /*protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
+    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
+        decision_path.clear();
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
-        while (dec != RootDecision.ROOT && nworld > 0) {
+        Decision copy;
+        while (dec != RootDecision.ROOT && nworld > 1) {
+            // we make a copy, because decisions are freed on backtracking
+            copy = dec.copy();
+            copy.buildPrevious();
+            copy.opposite();
+            decision_path.add(copy);
             dec = dec.getPrevious();
             nworld--;
         }
@@ -190,95 +80,124 @@ public class DynamicBacktracking extends AbstractStrategy<Variable> implements I
                 mExplanationEngine.variableassignments.get(va.var.getId()).remove(va.val);
             }
             mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
+            decision_path.add(dec);
+            mSolver.getSearchLoop().decision = cobdec;
         }
         return dec;
-    }*/
+    }
 
 
-    @Override
-    public void onSolution() {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = mSolver.getSearchLoop().decision;
-        while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
-            dec = dec.getPrevious();
+    private class CombinedDecision implements Decision {
+
+        @Override
+        public Variable getDecisionVariable() {
+            throw new UnsupportedOperationException();
         }
-        if (dec != RootDecision.ROOT) {
-            Explanation explanation = new Explanation();
-            Decision d = dec.getPrevious();
-            while ((d != RootDecision.ROOT)) {
-                if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
-                }
-                d = d.getPrevious();
+
+        @Override
+        public Object getDecisionValue() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return true;
+        }
+
+        @Override
+        public void buildNext() {
+            // nothing to do
+        }
+
+        @Override
+        public void buildPrevious() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void apply() throws ContradictionException {
+            // apply the list of decisions
+            Decision tmp;
+            Decision dec = decision_path.pollFirst();
+            // erase the currant fake decision
+            dec.hasNext();
+            downbranch(dec);
+            while (!decision_path.isEmpty()) {
+                mSolver.getEnvironment().worldPush();
+                // get the following decision
+                tmp = decision_path.pollFirst();
+                // rebuild history
+                tmp.setPrevious(dec);
+                dec = tmp;
+                // then
+                downbranch(dec);
             }
-            mExplanationEngine.database.put(dec.getNegativeDeduction().id, explanation);
         }
-        mSolver.getSearchLoop().overridePreviousWorld(1);
-    }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private void downbranch(Decision dec) throws ContradictionException {
+            mSolver.getSearchLoop().decision = dec;
+            dec.buildNext();
+            mSolver.getSearchLoop().getObjectivemanager().apply(dec);
+        }
 
-    @Override
-    public void afterInitialize() {
-    }
+        @Override
+        public void setPrevious(Decision decision) {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void beforeInitialPropagation() {
-    }
+        @Override
+        public Decision getPrevious() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void afterInitialPropagation() {
-    }
+        @Override
+        public void free() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void beforeOpenNode() {
-    }
+        @Override
+        public Decision copy() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void afterOpenNode() {
-    }
+        @Override
+        public void opposite() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void beforeDownLeftBranch() {
-    }
+        @Override
+        public Deduction getNegativeDeduction() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void afterDownLeftBranch() {
-    }
+        @Override
+        public Deduction getPositiveDeduction() {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void beforeDownRightBranch() {
-    }
+        @Override
+        public Constraint getConstraint() {
+            return null;
+        }
 
-    @Override
-    public void afterDownRightBranch() {
-    }
+        @Override
+        public void explain(@Nullable Deduction d, Explanation e) {
+            throw new UnsupportedOperationException();
+        }
 
-    @Override
-    public void beforeUpBranch() {
-    }
+        @Override
+        public boolean reactOnPromotion() {
+            return false;
+        }
 
-    @Override
-    public void afterUpBranch() {
-    }
+        @Override
+        public int getPropagationConditions(int vIdx) {
+            return 0;
+        }
 
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void afterInterrupt() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
+        @Override
+        public String toString() {
+            return "[DBT]";
+        }
     }
 }

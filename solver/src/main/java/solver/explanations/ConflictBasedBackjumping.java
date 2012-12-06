@@ -41,8 +41,8 @@ import solver.search.strategy.decision.RootDecision;
  */
 public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISearchMonitor {
 
-    RecorderExplanationEngine mExplanationEngine;
-    Solver mSolver;
+    protected RecorderExplanationEngine mExplanationEngine;
+    protected Solver mSolver;
 
     public ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine) {
         this.mExplanationEngine = mExplanationEngine;
@@ -65,10 +65,19 @@ public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISear
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             mExplanationEngine.emList.onContradiction(cex, complete, upto, dec);
         } else {
-            throw new UnsupportedOperationException("ConflictBasedBackjumping.onContradiction incoherent state");
+            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
         }
     }
 
+    /**
+     * Identifie la dŽcision ˆ remettre en cause
+     * Met l'explication de la rŽfutation dans la base d'explications
+     * parce que comme c'est implicite au niveau de la search a bren'appara”trait pas sinon
+     *
+     * @param nworld
+     * @param expl
+     * @return
+     */
     protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {

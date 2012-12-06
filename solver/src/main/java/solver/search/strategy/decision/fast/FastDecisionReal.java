@@ -149,4 +149,9 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
         dec.branch = this.branch;
         return dec;
     }
+
+    @Override
+    public void opposite() {
+        throw new UnsupportedOperationException();
+    }
 }

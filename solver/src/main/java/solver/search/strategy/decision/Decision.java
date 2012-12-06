@@ -64,6 +64,8 @@ public interface Decision<V extends Variable> extends ICause {
 
     Decision copy();
 
+    void opposite();
+
     // explanation related ...
     Deduction getNegativeDeduction();
 
