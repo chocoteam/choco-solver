@@ -174,28 +174,28 @@ public class TestCompletenessConsistency {
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, null, seed + i, "bc");
     }
-
-    @Test(groups = "10s")
-    public void testTIMES1() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelTimes, 3, 2, 50, null, seed + i, "bc");
-    }
-
-    @Test(groups = "10s")
-    public void testTIMES2() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelTimes, 3, -25, 25, null, seed + i, "bc");
-    }
-
-
-    @Test(groups = "10s")
-    public void testTIMES3() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelTimes, 3, -50, -3, null, seed + i, "bc");
-    }
+//    NO CONSISTENCY ON TIMES CONSTRAINT
+//    @Test(groups = "10s")
+//    public void testTIMES1() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelTimes, 3, 2, 50, null, seed + i, "bc");
+//    }
+//
+//    @Test(groups = "10s")
+//    public void testTIMES2() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelTimes, 3, -25, 25, null, seed + i, "bc");
+//    }
+//
+//
+//    @Test(groups = "10s")
+//    public void testTIMES3() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelTimes, 3, -50, -3, null, seed + i, "bc");
+//    }
 
     @Test(groups = "10s")
     public void testABSOLUTEBC1() {
