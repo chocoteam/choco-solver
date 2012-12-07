@@ -26,6 +26,8 @@
  */
 package solver.propagation.hardcoded.util;
 
+import java.io.Serializable;
+
 /**
  * A mapping from an Id to an absolute Id
  * <br/>
@@ -33,7 +35,7 @@ package solver.propagation.hardcoded.util;
  * @author Charles Prud'homme
  * @since 05/07/12
  */
-public interface IId2AbId {
+public interface IId2AbId extends Serializable {
 
     int get(int key);
 

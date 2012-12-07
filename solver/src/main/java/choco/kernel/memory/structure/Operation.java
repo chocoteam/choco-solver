@@ -29,19 +29,22 @@ package choco.kernel.memory.structure;
 
 import choco.kernel.memory.IEnvironment;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 11/02/11
  */
-public abstract class Operation {
+public abstract class Operation implements Serializable {
 
-	protected Operation(IEnvironment environment) {
+    protected Operation(IEnvironment environment) {
         environment.save(this);
     }
 
-	protected Operation() {}
+    protected Operation() {
+    }
 
     public abstract void undo();
 }
