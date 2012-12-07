@@ -79,7 +79,7 @@ public class CorrectnessChecker {
                             _domains[d] = new int[]{val};
                             System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
-                            Solver test = modeler.model(nbVar, _domains, map, parameters);
+                            Solver test = modeler.model(nbVar, _domains, null, parameters);
                             try {
                                 if (test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
