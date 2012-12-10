@@ -123,7 +123,7 @@ public class TestCorrectness {
     public void testINVERSECHANNELING_AC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+            for (int n = 2; n < (1 << 4) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
             }
 
@@ -134,7 +134,7 @@ public class TestCorrectness {
     public void testINVERSECHANNELING_Bounds() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+            for (int n = 2; n < (1 << 4) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingBounds, n, -n / 2, 2 * n, seed, null);
             }
 
