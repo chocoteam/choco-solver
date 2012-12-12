@@ -39,6 +39,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.EventType;
@@ -264,6 +265,11 @@ public class ConstantView implements IntVar {
     public int nbConstraints() {
         //who cares?
         return 0;
+    }
+
+    @Override
+    public AntiDomain antiDomain() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

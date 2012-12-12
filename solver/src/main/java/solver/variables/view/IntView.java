@@ -36,6 +36,8 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBitset;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -160,6 +162,11 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDel
     @Override
     public boolean reactOnPromotion() {
         return reactOnRemoval;
+    }
+
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBitset(this);
     }
 
     @Override

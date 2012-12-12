@@ -34,6 +34,7 @@ import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.explanations.antidom.AntiDomain;
 import solver.propagation.queues.CircularQueue;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
@@ -51,7 +52,7 @@ import solver.variables.Variable;
  */
 public class RecorderExplanationEngine extends ExplanationEngine {
 
-    TIntObjectHashMap<OffsetIStateBitset> removedvalues; // maintien du domaine courant
+    TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
     TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
     TIntObjectHashMap<Explanation> database; // base d'explications
 
@@ -68,7 +69,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
         assert Configuration.PLUG_EXPLANATION : "Explanation is not activated (see Configuration.java)";
-        removedvalues = new TIntObjectHashMap<OffsetIStateBitset>();
+        removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
         database = new TIntObjectHashMap<Explanation>();
         variableassignments = new TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>>();
@@ -86,11 +87,11 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
     @Override
-    public OffsetIStateBitset getRemovedValues(IntVar v) {
+    public AntiDomain getRemovedValues(IntVar v) {
         int vid = v.getId();
-        OffsetIStateBitset toreturn = removedvalues.get(vid);
+        AntiDomain toreturn = removedvalues.get(vid);
         if (toreturn == null) {
-            toreturn = new OffsetIStateBitset(v); // .getSolver().getEnvironment().makeBitSet(v.getUB());
+            toreturn = v.antiDomain();
             removedvalues.put(vid, toreturn);
             valueremovals.put(vid, new TIntObjectHashMap<ValueRemoval>());
         }
@@ -184,7 +185,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         // 3. store it within the database
 
         // 4. store the removed value withing the inverse domain
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        AntiDomain invdom = getRemovedValues(var);
         invdom.set(val);
 
         // 5. explanations monitoring
@@ -193,7 +194,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
@@ -215,7 +216,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
@@ -238,7 +239,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        AntiDomain invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
 //        Explanation explanation = new Explanation();
         while (it.hasNext()) {

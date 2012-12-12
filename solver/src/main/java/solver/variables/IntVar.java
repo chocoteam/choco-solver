@@ -32,6 +32,7 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
@@ -323,4 +324,6 @@ public interface IntVar extends Variable<IntDelta, IIntDeltaMonitor> {
      * @return <code>true</code> if the domain is enumerated, <code>false</code> otherwise.
      */
     boolean hasEnumeratedDomain();
+
+    AntiDomain antiDomain();
 }

@@ -39,8 +39,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBitset;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -530,8 +531,14 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBitset(this);
+    }
+
     public void explain(VariableState what, Explanation to) {
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();

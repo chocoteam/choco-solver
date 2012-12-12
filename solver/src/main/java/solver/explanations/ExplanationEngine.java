@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.decision.Decision;
@@ -66,7 +67,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
     public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {
     }
 
-    public OffsetIStateBitset getRemovedValues(IntVar v) {
+    public AntiDomain getRemovedValues(IntVar v) {
         return null;
     }
 

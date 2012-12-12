@@ -40,8 +40,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBipartiteSet;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -453,8 +454,13 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBipartiteSet(this);
+    }
+
     public void explain(VariableState what, Explanation to) {
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
