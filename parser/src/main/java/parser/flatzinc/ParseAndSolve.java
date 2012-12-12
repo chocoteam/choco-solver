@@ -160,7 +160,7 @@ public class ParseAndSolve {
         for (String instance : instances) {
             AverageCSV acsv = null;
             if (!csv.equals("")) {
-                acsv = new AverageCSV(instance, csv, l);
+                acsv = new AverageCSV(csv, l);
             }
             GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp);
             for (int i = 0; i < l; i++) {
@@ -183,7 +183,7 @@ public class ParseAndSolve {
             }
             if (!csv.equals("")) {
                 assert acsv != null;
-                acsv.record();
+                acsv.record(instance, "");
             }
         }
     }
