@@ -27,6 +27,7 @@
 package solver.explanations.antidom;
 
 import choco.kernel.common.util.iterators.DisposableValueIterator;
+import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.variables.fast.BooleanBoolVarImpl;
 
 /**
@@ -37,22 +38,41 @@ import solver.variables.fast.BooleanBoolVarImpl;
  */
 public class AntiDomBool implements AntiDomain {
 
+    /**
+     * The offset, that is the minimal value of the domain (stored at index 0).
+     * Thus the entry at index i corresponds to x=i+offset).
+     */
+    protected final int offset;
+
+    /**
+     * indicate the value of the domain : false = 0, true = 1
+     */
+    protected int mValue;
+
+    /**
+     * A bi partite set indicating for each value whether it is present or not.
+     * If the set contains the domain, the variable is not instanciated.
+     */
+    protected final IndexedBipartiteSet notInstanciated;
+
     private DisposableValueIterator _viterator;
 
-    BooleanBoolVarImpl var;
-
     public AntiDomBool(BooleanBoolVarImpl var) {
-        this.var = var;
+        notInstanciated = var.getSolver().getEnvironment().getSharedBipartiteSetForBooleanVars();
+        this.offset = var.getSolver().getEnvironment().getNextOffset();
+        mValue = 0;
     }
 
     @Override
     public void set(int outsideval) {
-        // nothing to do
+        assert outsideval == 0 || outsideval == 1;
+        notInstanciated.remove(offset);
+        mValue = outsideval;
     }
 
     @Override
     public boolean get(int outsideval) {
-        return !var.contains(outsideval);
+        return !notInstanciated.contains(offset) && mValue == outsideval;
     }
 
     @Override
@@ -65,12 +85,13 @@ public class AntiDomBool implements AntiDomain {
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.next = !var.instantiated();
+                    next = !notInstanciated.contains(offset);
                 }
 
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
+                    next = !notInstanciated.contains(offset);
                 }
 
                 @Override
@@ -86,13 +107,13 @@ public class AntiDomBool implements AntiDomain {
                 @Override
                 public int next() {
                     next = false;
-                    return 1 - var.getValue();
+                    return mValue;
                 }
 
                 @Override
                 public int previous() {
                     next = false;
-                    return 1 - var.getValue();
+                    return mValue;
                 }
             };
         }

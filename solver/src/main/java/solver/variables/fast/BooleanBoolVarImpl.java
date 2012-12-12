@@ -188,7 +188,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         } else {
             if (value == 0 || value == 1) {
                 EventType e = EventType.INSTANTIATE;
-                notInstanciated.contains(value);
+                assert notInstanciated.contains(offset);
                 notInstanciated.remove(offset);
                 if (reactOnRemoval) {
                     delta.add(1 - value, cause);
@@ -407,12 +407,17 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
      */
     @Override
     public void explain(VariableState what, Explanation to) {
-        int val = 1 - this.getValue();
-        if ((what == VariableState.LB && val < this.getLB())
-                || (what == VariableState.UB && val > this.getUB())
-                || (what == VariableState.DOM)) {
-            to.add(solver.getExplainer().explain(this, val));
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
+        DisposableValueIterator it = invdom.getValueIterator();
+        while (it.hasNext()) {
+            int val = it.next();
+            if ((what == VariableState.LB && val < this.getLB())
+                    || (what == VariableState.UB && val > this.getUB())
+                    || (what == VariableState.DOM)) {
+                to.add(solver.getExplainer().explain(this, val));
+            }
         }
+        it.dispose();
     }
 
     @Override
