@@ -30,7 +30,6 @@ package solver.explanations;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
 import solver.variables.IntVar;
 
 /**
@@ -42,7 +41,7 @@ import solver.variables.IntVar;
 public class OffsetIStateBitset {
     private final int offset;
     // Lower bound of the current domain -- includes offset
-    private final IStateInt LB;
+//    private final IStateInt LB;
 
     IStateBitSet domain;
 
@@ -52,7 +51,7 @@ public class OffsetIStateBitset {
     public OffsetIStateBitset(IntVar A) {
         offset = A.getLB();
         IEnvironment env = A.getSolver().getEnvironment();
-        this.LB = env.makeInt(Integer.MAX_VALUE);
+//        this.LB = env.makeInt(Integer.MAX_VALUE);
         domain = A.getSolver().getEnvironment().makeBitSet(A.getUB() - offset + 1);
     }
 
@@ -60,7 +59,7 @@ public class OffsetIStateBitset {
     public void set(int outsideval) {
         int inside = outsideval - offset;
         domain.set(inside);
-        if (inside < this.LB.get()) this.LB.set(inside);
+//        if (inside < this.LB.get()) this.LB.set(inside);
     }
 
     public boolean get(int outsideval) {
@@ -77,7 +76,7 @@ public class OffsetIStateBitset {
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.value = (LB.get() < Integer.MAX_VALUE) ? LB.get() : -1;
+                    this.value = domain.nextSetBit(0);//LB.get() < Integer.MAX_VALUE) ? LB.get() : -1;
                 }
 
                 @Override

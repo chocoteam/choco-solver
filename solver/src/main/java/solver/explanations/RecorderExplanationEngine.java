@@ -173,10 +173,15 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         // 1. get the deduction
         Deduction vr = getValueRemoval(var, val);
         // 2. explain the deduction
-        Explanation expl = new Explanation();
+        Explanation expl = database.get(vr.id);
+        if (expl == null) {
+            expl = new Explanation();
+            database.put(vr.id, expl);
+        } else {
+            expl.reset();
+        }
         cause.explain(vr, expl);
         // 3. store it within the database
-        database.put(vr.id, expl);
 
         // 4. store the removed value withing the inverse domain
         OffsetIStateBitset invdom = getRemovedValues(var);
@@ -193,9 +198,14 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation expl = new Explanation();
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
                 cause.explain(vr, expl);
-                database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(expl);
             }
@@ -210,9 +220,14 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation expl = new Explanation();
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
                 cause.explain(vr, expl);
-                database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(explain);
             }
@@ -230,9 +245,14 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             int v = it.next();
             if (v != val) {
                 Deduction vr = getValueRemoval(var, v);
-                Explanation expl = new Explanation();
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
                 cause.explain(vr, expl);
-                database.put(vr.id, expl);
                 invdom.set(v);
 //                explanation.add(explain);
             }
