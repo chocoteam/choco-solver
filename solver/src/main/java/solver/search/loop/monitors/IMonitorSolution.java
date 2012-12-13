@@ -26,46 +26,13 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.search.loop.AbstractSearchLoop;
-import solver.variables.Variable;
-
 /**
- * A search monitor logger which prints solution during the search.
- * <p/>
+ * An interface to monitor solution instruction in the search loop
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 09/05/11
+ * @since 13/12/12
  */
-public final class LogSolutions implements IMonitorSolution {
-
-    private static Logger LOGGER = LoggerFactory.getLogger("solver");
-
-    final AbstractSearchLoop searchLoop;
-
-    public LogSolutions(AbstractSearchLoop searchLoop) {
-        this.searchLoop = searchLoop;
-    }
-
-    @Override
-    public void onSolution() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("- Solution #{} found. {} \n\t{}.",
-                    new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                            searchLoop.getMeasures().toOneShortLineString(),
-                            print(searchLoop.getStrategy().vars)}
-            );
-        }
-    }
-
-    static String print(Variable[] vars) {
-        StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
-        }
-        return s.toString();
-
-    }
+public interface IMonitorSolution extends ISearchMonitor {
+    void onSolution();
 }

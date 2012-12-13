@@ -38,7 +38,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 11/06/12
  */
-public class FailPerPropagator extends VoidSearchMonitor {
+public class FailPerPropagator implements IMonitorContradiction {
 
     protected TIntIntHashMap p2w;
 

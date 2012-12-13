@@ -27,6 +27,8 @@
 
 package solver.search.loop.monitors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -36,7 +38,9 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 18 aožt 2010
  */
-class LogStatEveryXXms extends VoidSearchMonitor implements ISearchMonitor{
+class LogStatEveryXXms implements IMonitorInitPropagation {
+
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     Thread printer;
 
@@ -62,6 +66,10 @@ class LogStatEveryXXms extends VoidSearchMonitor implements ISearchMonitor{
             }
         };
         printer.setDaemon(true);
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
     }
 
     @Override

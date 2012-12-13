@@ -39,8 +39,8 @@ import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.constraints.Constraint;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorClose;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor {
+public final class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -176,6 +176,10 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
                         searchLoop.getMeasures().getPropagationsCount());
             }
         }
+    }
+
+    @Override
+    public void afterClose() {
     }
 
     public void addOutputVar(String name, IntVar variable, Declaration type) {

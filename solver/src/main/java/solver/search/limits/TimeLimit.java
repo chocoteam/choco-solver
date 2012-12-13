@@ -28,8 +28,7 @@
 package solver.search.limits;
 
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.measure.IMeasures;
 
 /**
@@ -38,7 +37,7 @@ import solver.search.measure.IMeasures;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class TimeLimit extends VoidSearchMonitor implements ILimit, ISearchMonitor {
+public class TimeLimit implements ILimit, IMonitorOpenNode {
 
     private long timeLimit;
     private final IMeasures measures;
@@ -82,6 +81,10 @@ public class TimeLimit extends VoidSearchMonitor implements ILimit, ISearchMonit
     @Override
     public void beforeOpenNode() {
         this.measures.updateTimeCount();
+    }
+
+    @Override
+    public void afterOpenNode() {
     }
 
 }

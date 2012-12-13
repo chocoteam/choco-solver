@@ -34,8 +34,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -50,7 +48,7 @@ import java.io.Serializable;
  * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine extends VoidSearchMonitor implements Serializable, ISearchMonitor, IExplanationMonitor {
+public class ExplanationEngine implements Serializable, IExplanationMonitor {
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     ExplanationMonitorList emList;
     Solver solver;
@@ -140,7 +138,6 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      */
     public ExplanationEngine(Solver slv) {
         this.solver = slv;
-        slv.getSearchLoop().plugSearchMonitor(this);
         emList = new ExplanationMonitorList();
     }
 

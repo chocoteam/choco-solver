@@ -30,6 +30,8 @@ package samples.graph;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import samples.graph.input.SOP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Cause;
@@ -42,8 +44,8 @@ import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.basic.PropAntiSymmetric;
-import solver.constraints.propagators.gary.constraintSpecific.PropTransitiveClosureFastMaintenance;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
+import solver.constraints.propagators.gary.constraintSpecific.PropTransitiveClosureFastMaintenance;
 import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.PropKhun;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
@@ -54,8 +56,8 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -66,8 +68,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.io.File;
 import java.util.BitSet;
 
@@ -147,30 +148,30 @@ public class SOP {
         printOutput();
     }
 
-	public static void createModel() {
-		// create model
-		solver = new Solver();
-		initialUB = optimum;
-		System.out.println("initial UB : "+optimum);
-		graph = new DirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST,true);
-		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
-		try {
-			for (int i = 0; i < n - 1; i++) {
-				for (int j = 1; j < n; j++) {
-					if (distanceMatrix[i][j] != noVal) {
-						graph.getEnvelopGraph().addArc(i, j);
-					}
-				}
-				graph.getEnvelopGraph().removeArc(i, i);
-			}
-			graph.getEnvelopGraph().removeArc(0, n-1);
-			graph.getEnvelopGraph().removeArc(n-1,0);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
-	}
+    public static void createModel() {
+        // create model
+        solver = new Solver();
+        initialUB = optimum;
+        System.out.println("initial UB : " + optimum);
+        graph = new DirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
+        try {
+            for (int i = 0; i < n - 1; i++) {
+                for (int j = 1; j < n; j++) {
+                    if (distanceMatrix[i][j] != noVal) {
+                        graph.getEnvelopGraph().addArc(i, j);
+                    }
+                }
+                graph.getEnvelopGraph().removeArc(i, i);
+            }
+            graph.getEnvelopGraph().removeArc(0, n - 1);
+            graph.getEnvelopGraph().removeArc(n - 1, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
+    }
 
     public static void addPropagators() {
         // BASIC MODEL
@@ -243,22 +244,22 @@ public class SOP {
         solver.post(gc);
     }
 
-	public static void addTransitionGraph(){
-		transGraph = new DirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY,true);
-		for (int j = 1; j < n; j++) {
-			transGraph.getEnvelopGraph().addArc(0, j);
-			transGraph.getKernelGraph().addArc(0, j);
-		}
-		for (int i = 1; i < n - 1; i++) {
-			for (int j = 1; j < n; j++) {
-				if(i!=j && distanceMatrix[i][j]!=noVal)
-					transGraph.getEnvelopGraph().addArc(i, j);
-			}
-		}
-		gc.addPropagators(new PropAntiSymmetric(transGraph,gc,solver));
-		gc.addPropagators(new PropTransitivity(transGraph,solver,gc));
-		gc.addPropagators(new PropTransitiveClosureFastMaintenance(graph,transGraph,solver,gc));
-	}
+    public static void addTransitionGraph() {
+        transGraph = new DirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY, true);
+        for (int j = 1; j < n; j++) {
+            transGraph.getEnvelopGraph().addArc(0, j);
+            transGraph.getKernelGraph().addArc(0, j);
+        }
+        for (int i = 1; i < n - 1; i++) {
+            for (int j = 1; j < n; j++) {
+                if (i != j && distanceMatrix[i][j] != noVal)
+                    transGraph.getEnvelopGraph().addArc(i, j);
+            }
+        }
+        gc.addPropagators(new PropAntiSymmetric(transGraph, gc, solver));
+        gc.addPropagators(new PropTransitivity(transGraph, solver, gc));
+        gc.addPropagators(new PropTransitiveClosureFastMaintenance(graph, transGraph, solver, gc));
+    }
 
     public static void configureAndSolve() {
         //SOLVER CONFIG
@@ -285,7 +286,12 @@ public class SOP {
 //        PArc allArcs = new PArc(pengine, gc);
 //        solver.set(pengine.set(new Sort(allArcs).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorInitPropagation() {
+            @Override
+            public void beforeInitialPropagation() {
+            }
+
+            @Override
             public void afterInitialPropagation() {
                 if (totalCost.instantiated()) {
                     solver.getSearchLoop().stopAtFirstSolution(true);

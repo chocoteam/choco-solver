@@ -36,6 +36,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
 import solver.propagation.queues.CircularQueue;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -50,7 +51,7 @@ import solver.variables.Variable;
  * Here we just record the explanations in a HashMap ...
  * <p/>
  */
-public class RecorderExplanationEngine extends ExplanationEngine {
+public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation {
 
     TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
     TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
@@ -84,6 +85,10 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         for (Variable v : solver.getVars()) {
             getRemovedValues((IntVar) v);
         }
+    }
+
+    @Override
+    public void afterInitialPropagation() {
     }
 
     @Override

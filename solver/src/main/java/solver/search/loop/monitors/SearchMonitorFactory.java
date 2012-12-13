@@ -63,6 +63,10 @@ public enum SearchMonitorFactory {
         sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e));
     }
 
+    public static void logContradiction(Solver solver) {
+        solver.getSearchLoop().plugSearchMonitor(new LogContradiction());
+    }
+
     /**
      * Print one-line statistics every XX ms
      *

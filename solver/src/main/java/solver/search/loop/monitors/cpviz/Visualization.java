@@ -31,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.*;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
@@ -73,7 +72,8 @@ import static solver.search.loop.monitors.cpviz.CPVizConstant.*;
  */
 
 // BEWARE: indices must start at 1
-public class Visualization extends VoidSearchMonitor implements ISearchMonitor {
+public class Visualization implements IMonitorClose, IMonitorInitialize, IMonitorInitPropagation,
+        IMonitorDownBranch, IMonitorContradiction, IMonitorSolution {
 
     private static String pbid;
 
@@ -122,7 +122,7 @@ public class Visualization extends VoidSearchMonitor implements ISearchMonitor {
         this.solver = solver;
         this.parent_id = this.solver.getEnvironment().makeLong();
         if (configuration.isInfoEnabled()) {
-            configuration.info(C_CONF_TAG_IN, dir,pbname);
+            configuration.info(C_CONF_TAG_IN, dir, pbname);
         }
         solver.getSearchLoop().plugSearchMonitor(this);
     }
@@ -243,10 +243,18 @@ public class Visualization extends VoidSearchMonitor implements ISearchMonitor {
         }
     }
 
+    @Override
+    public void afterClose() {
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //****************************************************************************************************************//
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+    @Override
+    public void beforeInitialize() {
+    }
 
     @Override
     public void afterInitialize() {
@@ -275,8 +283,16 @@ public class Visualization extends VoidSearchMonitor implements ISearchMonitor {
     }
 
     @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
     public void afterDownLeftBranch() {
         node();
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
     }
 
     @Override
@@ -311,7 +327,7 @@ public class Visualization extends VoidSearchMonitor implements ISearchMonitor {
                 tree.info(T_FAIL_TAG, new Object[]{node_id, parent_id.get(), name, dsize,
                         currentDecision.getDecisionValue()});
             } else {
-                tree.info(T_TRY_TAG, new Object[]{node_id, parent_id.get(), name, dsize,currentDecision.getDecisionValue()});
+                tree.info(T_TRY_TAG, new Object[]{node_id, parent_id.get(), name, dsize, currentDecision.getDecisionValue()});
             }
             if (visualization.isInfoEnabled()) {
                 printVisualizerStat(state_id, node_id, !hasFailed, currentDecision);

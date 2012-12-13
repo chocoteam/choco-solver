@@ -26,87 +26,16 @@
  */
 package solver.search.loop.monitors;
 
-import solver.exception.ContradictionException;
-
 /**
- * An empty ISearchMonitor.
- * <p/>
+ * An interface to monitor restart instruction in the search loop
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 05/10/11
+ * @since 13/12/12
  */
-public class VoidSearchMonitor implements ISearchMonitor{
+public interface IMonitorRestart extends ISearchMonitor {
 
-    public void beforeInitialize() {
-    }
+    void beforeRestart();
 
-    public void afterInitialize() {
-    }
-
-
-    public void beforeInitialPropagation() {
-    }
-
-
-    public void afterInitialPropagation() {
-    }
-
-
-    public void beforeOpenNode() {
-    }
-
-
-    public void afterOpenNode() {
-    }
-
-
-    public void onSolution() {
-    }
-
-
-    public void beforeDownLeftBranch() {
-    }
-
-
-    public void afterDownLeftBranch() {
-    }
-
-
-    public void beforeDownRightBranch() {
-    }
-
-
-    public void afterDownRightBranch() {
-    }
-
-
-    public void beforeUpBranch() {
-    }
-
-
-    public void afterUpBranch() {
-    }
-
-
-    public void onContradiction(ContradictionException cex) {
-    }
-
-
-    public void beforeRestart() {
-    }
-
-
-    public void afterRestart() {
-    }
-
-    public void afterInterrupt() {
-    }
-
-    public void beforeClose() {
-    }
-
-
-    public void afterClose() {
-    }
+    void afterRestart();
 }

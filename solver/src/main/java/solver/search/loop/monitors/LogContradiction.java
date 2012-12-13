@@ -28,44 +28,22 @@ package solver.search.loop.monitors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.search.loop.AbstractSearchLoop;
-import solver.variables.Variable;
+import solver.exception.ContradictionException;
 
 /**
- * A search monitor logger which prints solution during the search.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 09/05/11
+ * @since 13/12/12
  */
-public final class LogSolutions implements IMonitorSolution {
+public class LogContradiction implements IMonitorContradiction {
 
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
-    final AbstractSearchLoop searchLoop;
-
-    public LogSolutions(AbstractSearchLoop searchLoop) {
-        this.searchLoop = searchLoop;
-    }
-
     @Override
-    public void onSolution() {
+    public void onContradiction(ContradictionException cex) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("- Solution #{} found. {} \n\t{}.",
-                    new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                            searchLoop.getMeasures().toOneShortLineString(),
-                            print(searchLoop.getStrategy().vars)}
-            );
+            LoggerFactory.getLogger("solver").info("\t/!\\ {}", cex.toString());
         }
-    }
-
-    static String print(Variable[] vars) {
-        StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
-        }
-        return s.toString();
-
     }
 }

@@ -28,8 +28,8 @@ package solver.explanations;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorContradiction;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
@@ -39,7 +39,7 @@ import solver.search.strategy.decision.RootDecision;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISearchMonitor {
+public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
 
     protected RecorderExplanationEngine mExplanationEngine;
     protected Solver mSolver;

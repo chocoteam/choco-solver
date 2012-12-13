@@ -37,9 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.IMonitorDownBranch;
+import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
 import solver.search.strategy.assignments.DecisionOperator;
@@ -49,6 +49,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
+
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -61,7 +62,8 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMonitor, IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
+public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
+        IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
@@ -190,81 +192,81 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
     }
 
-	@Override
-	public Decision<IntVar> computeDecision(IntVar variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		currentVal = variable.getLB();
-		if (sampling) {
-			int ds = variable.getDomainSize();
-			int n = random.nextInt(ds);
-			if (variable.hasEnumeratedDomain()) {
-				while (n-- > 0) {
-					currentVal = variable.nextValue(currentVal);
-				}
-			} else {
-				currentVal += n;
-			}
-		} else {
-			if (variable.hasEnumeratedDomain()) {
-				bests.clear();
-				double bestVal = Double.MAX_VALUE;
-				DisposableValueIterator it = variable.getValueIterator(true);
-				while (it.hasNext()) {
-					int value = it.next();
-					double current = vAct[currentVar].activity(value);
-					if (current < bestVal) {
-						bests.clear();
-						bests.add(value);
-						bestVal = current;
-					} else {
-						bests.add(value);
-					}
-				}
-				currentVal = bests.get(random.nextInt(bests.size()));
-			} else {
-				int lb = variable.getLB();
-				int ub = variable.getUB();
-				currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
-						lb : ub;
-			}
-		}
-		FastDecision currrent = decisionPool.getE();
-		if (currrent == null) {
-			currrent = new FastDecision(decisionPool);
-		}
-		currrent.set(variable, currentVal, DecisionOperator.int_eq);
+    @Override
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        currentVal = variable.getLB();
+        if (sampling) {
+            int ds = variable.getDomainSize();
+            int n = random.nextInt(ds);
+            if (variable.hasEnumeratedDomain()) {
+                while (n-- > 0) {
+                    currentVal = variable.nextValue(currentVal);
+                }
+            } else {
+                currentVal += n;
+            }
+        } else {
+            if (variable.hasEnumeratedDomain()) {
+                bests.clear();
+                double bestVal = Double.MAX_VALUE;
+                DisposableValueIterator it = variable.getValueIterator(true);
+                while (it.hasNext()) {
+                    int value = it.next();
+                    double current = vAct[currentVar].activity(value);
+                    if (current < bestVal) {
+                        bests.clear();
+                        bests.add(value);
+                        bestVal = current;
+                    } else {
+                        bests.add(value);
+                    }
+                }
+                currentVal = bests.get(random.nextInt(bests.size()));
+            } else {
+                int lb = variable.getLB();
+                int ub = variable.getUB();
+                currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
+                        lb : ub;
+            }
+        }
+        FastDecision currrent = decisionPool.getE();
+        if (currrent == null) {
+            currrent = new FastDecision(decisionPool);
+        }
+        currrent.set(variable, currentVal, DecisionOperator.int_eq);
 //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
-		return currrent;
-	}
+        return currrent;
+    }
 
     @Override
     public Decision getDecision() {
-		IntVar best = null;
-		bests.clear();
-		double bestVal = -1.0d;
-		for (int i = 0; i < vars.length; i++) {
-			int ds = vars[i].getDomainSize();
-			if (ds > 1) {
-				double a = A[v2i.get(vars[i].getId())] / ds;
-				if (a > bestVal) {
-					bests.clear();
-					bests.add(i);
-					bestVal = a;
-				} else if (a == bestVal) {
-					bests.add(i);
-				}
-			}
-		}
-		if (bests.size() > 0) {
-			currentVar = bests.get(random.nextInt(bests.size()));
-			best = vars[currentVar];
-		}
-		return computeDecision(best);
-	}
+        IntVar best = null;
+        bests.clear();
+        double bestVal = -1.0d;
+        for (int i = 0; i < vars.length; i++) {
+            int ds = vars[i].getDomainSize();
+            if (ds > 1) {
+                double a = A[v2i.get(vars[i].getId())] / ds;
+                if (a > bestVal) {
+                    bests.clear();
+                    bests.add(i);
+                    bestVal = a;
+                } else if (a == bestVal) {
+                    bests.add(i);
+                }
+            }
+        }
+        if (bests.size() > 0) {
+            currentVar = bests.get(random.nextInt(bests.size()));
+            best = vars[currentVar];
+        }
+        return computeDecision(best);
+    }
 
-	@Override
+    @Override
     public int compare(IntVar o1, IntVar o2) {
         if (sampling) {
             return random.nextBoolean() ? 1 : -1;
@@ -338,6 +340,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     @Override
+    public void beforeRestart() {
+    }
+
+    @Override
     public void afterRestart() {
         if (sampling) {
             nb_probes++;
@@ -381,10 +387,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
     }
 
-    @Override
-    public void afterInitialPropagation() {
-    }
-
     /**
      * Return true if the interval is small enough
      *
@@ -402,59 +404,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterInterrupt() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-    }
-
 
     private static interface IVal {
 

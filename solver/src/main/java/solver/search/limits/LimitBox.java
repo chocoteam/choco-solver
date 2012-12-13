@@ -29,8 +29,9 @@ package solver.search.limits;
 
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorInitialize;
+import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.monitors.IMonitorUpBranch;
 
 import java.io.Serializable;
 
@@ -46,7 +47,7 @@ import java.io.Serializable;
  * @see ILimit
  * @since 15 juil. 2010
  */
-public class LimitBox extends VoidSearchMonitor implements Serializable, ISearchMonitor {
+public class LimitBox implements Serializable, IMonitorInitialize, IMonitorOpenNode, IMonitorUpBranch {
 
     int index;
     ILimit[] limits;
@@ -123,8 +124,9 @@ public class LimitBox extends VoidSearchMonitor implements Serializable, ISearch
      * <br/>
      * <br/>
      * <b>One must consider also LimitBox.setThreadTimeLimit(long), that runs the limit in a separated thread.</b>
-     * @see LimitBox#setThreadTimeLimit(long)
+     *
      * @param timelimit maximal resolution time in millisecond
+     * @see LimitBox#setThreadTimeLimit(long)
      */
     public void setTimeLimit(long timelimit) {
         this.add(new TimeLimit(this.searchloop, timelimit));
@@ -207,13 +209,25 @@ public class LimitBox extends VoidSearchMonitor implements Serializable, ISearch
 
 
     @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
     public void afterInitialize() {
         this.init();
     }
 
     @Override
+    public void beforeOpenNode() {
+    }
+
+    @Override
     public void afterOpenNode() {
         this.hasEncounteredLimit();
+    }
+
+    @Override
+    public void beforeUpBranch() {
     }
 
     @Override

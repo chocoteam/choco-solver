@@ -27,19 +27,23 @@
 package solver.search.loop.monitors;
 
 import choco.kernel.common.util.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.Variable;
 
 /**
  * A search monitor logger which prints choices during the search.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
+public class LogChoices implements IMonitorDownBranch {
+
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     final Solver solver;
     final AbstractSearchLoop searchLoop;
@@ -59,6 +63,10 @@ public class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
     }
 
     @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
     public void beforeDownRightBranch() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[R]{} //{}", new Object[]{
@@ -67,11 +75,18 @@ public class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
         }
     }
 
+    @Override
+    public void afterDownRightBranch() {
+    }
+
 
     static String print(Variable[] vars) {
         StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
+        for (int i = 0; i < vars.length && s.length() < 120; i++) {
+            s.append(vars[i]).append(' ');
+        }
+        if (s.length() >= 120) {
+            s.append("...");
         }
         return s.toString();
 

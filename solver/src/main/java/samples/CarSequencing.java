@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.GCC_AC;
 import solver.constraints.nary.Sum;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -129,9 +129,14 @@ public class CarSequencing extends AbstractProblem {
     public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(cars, solver.getEnvironment()));
 //		solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
             int c = 0;
 
+            @Override
+            public void beforeOpenNode() {
+            }
+
+            @Override
             public void afterOpenNode() {
                 c++;
                 if (c % 100 == 0) {
