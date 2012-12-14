@@ -30,7 +30,6 @@ package solver.search.strategy.decision;
 import solver.constraints.Constraint;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.strategy.decision.fast.IFastDecision;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -42,7 +41,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 19 aožt 2010
  */
-public abstract class AbstractDecision<V extends Variable> extends IFastDecision<V> {
+public abstract class AbstractDecision<V extends Variable> extends Decision<V> {
 
     protected V var;
 
