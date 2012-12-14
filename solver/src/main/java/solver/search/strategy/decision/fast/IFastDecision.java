@@ -36,6 +36,6 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 6 oct. 2010
  */
-public interface IFastDecision<V extends Variable> extends Decision<V> {
+public abstract class IFastDecision<V extends Variable> extends Decision<V> {
 //    void set(V var, int value, DecisionOperator<V> assignment);
 }

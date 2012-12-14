@@ -29,12 +29,7 @@ package solver.search.strategy.decision.fast;
 
 import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
 import solver.search.strategy.decision.AbstractDecision;
-import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.RealVar;
 
 /**
@@ -49,9 +44,6 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
 
     double value;
 
-    int branch;
-
-
     final PoolManager<FastDecisionReal> poolManager;
 
     public FastDecisionReal(PoolManager<FastDecisionReal> poolManager) {
@@ -59,28 +51,8 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     }
 
     @Override
-    public RealVar getDecisionVariable() {
-        return var;
-    }
-
-    @Override
-    public Object getDecisionValue() {
+    public Double getDecisionValue() {
         return value;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-    @Override
-    public void buildPrevious() {
-        branch--;
     }
 
     @Override
@@ -105,53 +77,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
-
-    @Override
     public String toString() {
         return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), "<=", value, branch);
-    }
-
-
-    @Override
-    public void explain(Deduction d, Explanation e) {
-        ExplanationEngine explainer = var.getSolver().getExplainer();
-        e.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
-    }
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        //return var.getSolver().getExplainer().getVariableRefutation(var, value, this);
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-//        return var.getSolver().getExplainer().getVariableAssignment(var, value);
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Decision copy() {
-        FastDecisionReal dec = poolManager.getE();
-        if (dec == null) {
-            dec = new FastDecisionReal(poolManager);
-        }
-        dec.var = this.var;
-        dec.value = this.value;
-        dec.branch = this.branch;
-        return dec;
-    }
-
-    @Override
-    public void opposite() {
-        throw new UnsupportedOperationException();
     }
 }

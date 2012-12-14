@@ -39,8 +39,8 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 01/06/12
  */
-public enum RootDecision implements Decision {
-    ROOT;
+public class RootDecision extends Decision {
+    public static RootDecision ROOT = new RootDecision();
 
 
     @Override
@@ -54,6 +54,16 @@ public enum RootDecision implements Decision {
     }
 
     @Override
+    public boolean isLeft() {
+        return false;
+    }
+
+    @Override
+    public boolean isRight() {
+        return false;
+    }
+
+    @Override
     public boolean hasNext() {
         return false;
     }
@@ -63,7 +73,7 @@ public enum RootDecision implements Decision {
     }
 
     @Override
-    public void buildPrevious() {
+    public void rewind() {
     }
 
 
@@ -86,24 +96,8 @@ public enum RootDecision implements Decision {
     }
 
     @Override
-    public Decision copy() {
-        return ROOT;
-    }
-
-    @Override
-    public void opposite() {
+    public void reverse() {
         throw new UnsupportedOperationException();
-    }
-
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        return null;
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-        return null;
     }
 
     @Override

@@ -47,9 +47,6 @@ public enum Configuration {
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = false;
 
-    // Set to true to print contradiction information
-    public static final boolean PRINT_CONTRADICTION = false;
-
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;
 }

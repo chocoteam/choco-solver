@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
 import solver.variables.Variable;
 
 /**
@@ -40,34 +39,77 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public interface Decision<V extends Variable> extends ICause {
+public abstract class Decision<V extends Variable> implements ICause {
 
     Logger LOGGER = LoggerFactory.getLogger(Decision.class);
 
-    V getDecisionVariable();
+//    public Decision() {
+//        super(Type.Dec);
+//    }
 
-    Object getDecisionValue();
+    /**
+     * Return the variable object involves in the decision
+     *
+     * @return a variable V
+     */
+    public abstract V getDecisionVariable();
 
-    boolean hasNext();
+    /**
+     * Return the value object involves in the decision
+     *
+     * @return a value object
+     */
+    public abstract Object getDecisionValue();
 
-    void buildNext();
+    public abstract boolean isLeft();
 
-    void buildPrevious();
+    public abstract boolean isRight();
 
-    void apply() throws ContradictionException;
+    /**
+     * Return true if the decision can be refuted
+     *
+     * @return true if the decision can be refuted, false otherwise
+     */
+    public abstract boolean hasNext();
 
-    void setPrevious(Decision decision);
+    /**
+     * Build the refutation, hasNext() must be called before
+     */
+    public abstract void buildNext();
 
-    Decision getPrevious();
+    /**
+     * Force the decision to be in its creation state.
+     */
+    public abstract void rewind();
 
-    void free();
+    /**
+     * Apply the current decision
+     *
+     * @throws ContradictionException
+     */
+    public abstract void apply() throws ContradictionException;
 
-    Decision copy();
+    /**
+     * Set the previous decision applied in the tree search
+     *
+     * @param decision
+     */
+    public abstract void setPrevious(Decision decision);
 
-    void opposite();
+    /**
+     * Return the previous decision applied in the tree search
+     *
+     * @return
+     */
+    public abstract Decision getPrevious();
 
-    // explanation related ...
-    Deduction getNegativeDeduction();
+    /**
+     * Free the decision, ie, it can be reused
+     */
+    public abstract void free();
 
-    Deduction getPositiveDeduction();
+    /**
+     * Make a copy of the current decision and reverse it
+     */
+    public abstract void reverse();
 }

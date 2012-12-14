@@ -28,7 +28,10 @@
 package solver.search.strategy.decision;
 
 import solver.constraints.Constraint;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.search.strategy.decision.fast.IFastDecision;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -39,7 +42,13 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 19 aožt 2010
  */
-public abstract class AbstractDecision<V extends Variable> implements IFastDecision<V> {
+public abstract class AbstractDecision<V extends Variable> extends IFastDecision<V> {
+
+    protected V var;
+
+    protected Decision<V> assignment;
+
+    protected int branch;
 
     long fails;
 
@@ -54,16 +63,66 @@ public abstract class AbstractDecision<V extends Variable> implements IFastDecis
     }
 
     @Override
-    public Constraint getConstraint() {
+    public final Constraint getConstraint() {
         return null;
     }
 
-    public void incFail(){
+    public final void incFail() {
         fails++;
     }
 
-    public long getFails(){
+    public final long getFails() {
         return fails;
     }
 
+    @Override
+    public final boolean isLeft() {
+        return branch == 1;
+    }
+
+    @Override
+    public final boolean isRight() {
+        return branch == 2;
+    }
+
+    @Override
+    public final boolean hasNext() {
+        return branch < 2;
+    }
+
+    @Override
+    public final void buildNext() {
+        branch++;
+    }
+
+    @Override
+    public final void rewind() {
+        branch = 0;
+    }
+
+    @Override
+    public final V getDecisionVariable() {
+        return var;
+    }
+
+
+    @Override
+    public final boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public final int getPropagationConditions(int vIdx) {
+        return EventType.VOID.mask;
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void reverse() {
+        throw new UnsupportedOperationException();
+    }
 }
