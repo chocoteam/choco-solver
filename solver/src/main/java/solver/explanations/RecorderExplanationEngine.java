@@ -75,7 +75,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         database = new TIntObjectHashMap<Explanation>();
         variableassignments = new TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>>();
         variablerefutations = new TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>>();
-
+        solver.getSearchLoop().plugSearchMonitor(this);
         cbj = new ConflictBasedBackjumping(this);
 //        dbt = new DynamicBacktracking(this);
     }

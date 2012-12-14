@@ -118,4 +118,14 @@ public class RootDecision extends Decision {
     public int getPropagationConditions(int vIdx) {
         return 0;
     }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        return null;
+    }
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        return null;
+    }
 }

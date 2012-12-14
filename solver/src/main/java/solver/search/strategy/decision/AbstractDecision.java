@@ -125,4 +125,14 @@ public abstract class AbstractDecision<V extends Variable> extends IFastDecision
     public void reverse() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        throw new UnsupportedOperationException();
+    }
 }

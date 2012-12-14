@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
 import solver.variables.Variable;
 
 /**
@@ -112,4 +113,9 @@ public abstract class Decision<V extends Variable> implements ICause {
      * Make a copy of the current decision and reverse it
      */
     public abstract void reverse();
+
+    // explanation related ...
+    public abstract Deduction getNegativeDeduction();
+
+    public abstract Deduction getPositiveDeduction();
 }

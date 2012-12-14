@@ -31,9 +31,10 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
-import solver.variables.Variable;
+import solver.variables.IntVar;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -55,13 +56,13 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
     protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
         decision_path.clear();
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
-        Decision copy;
         while (dec != RootDecision.ROOT && nworld > 1) {
-            // we make a copy, because decisions are freed on backtracking
-            copy = dec.copy();
-            copy.buildPrevious();
-            copy.opposite();
-            decision_path.add(copy);
+            // 1. make a reverse copy of the decision, ready to be a LEFT branch
+            dec.reverse();
+            dec.rewind();
+            // 3. add it to the pool of decision to force
+            decision_path.add(dec);
+            // get the previous
             dec = dec.getPrevious();
             nworld--;
         }
@@ -82,21 +83,32 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
             decision_path.add(dec);
             mSolver.getSearchLoop().decision = cobdec;
+            return dec;
         }
         return dec;
     }
 
 
-    private class CombinedDecision implements Decision {
+    private class CombinedDecision extends Decision<IntVar> {
 
         @Override
-        public Variable getDecisionVariable() {
+        public IntVar getDecisionVariable() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Object getDecisionValue() {
+        public Integer getDecisionValue() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isLeft() {
+            return false;
+        }
+
+        @Override
+        public boolean isRight() {
+            return false;
         }
 
         @Override
@@ -110,7 +122,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         }
 
         @Override
-        public void buildPrevious() {
+        public void rewind() {
             throw new UnsupportedOperationException();
         }
 
@@ -118,14 +130,14 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         public void apply() throws ContradictionException {
             // apply the list of decisions
             Decision tmp;
-            Decision dec = decision_path.pollFirst();
-            // erase the currant fake decision
+            Decision dec = decision_path.pollLast();
+            // erase the current fake decision
             dec.hasNext();
             downbranch(dec);
             while (!decision_path.isEmpty()) {
                 mSolver.getEnvironment().worldPush();
                 // get the following decision
-                tmp = decision_path.pollFirst();
+                tmp = decision_path.pollLast();
                 // rebuild history
                 tmp.setPrevious(dec);
                 dec = tmp;
@@ -133,6 +145,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
                 downbranch(dec);
             }
         }
+
 
         private void downbranch(Decision dec) throws ContradictionException {
             mSolver.getSearchLoop().decision = dec;
@@ -147,21 +160,16 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
         @Override
         public Decision getPrevious() {
-            throw new UnsupportedOperationException();
+            return this;
         }
 
         @Override
         public void free() {
-            throw new UnsupportedOperationException();
+//            throw new UnsupportedOperationException();
         }
 
         @Override
-        public Decision copy() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void opposite() {
+        public void reverse() {
             throw new UnsupportedOperationException();
         }
 
@@ -197,7 +205,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
         @Override
         public String toString() {
-            return "[DBT]";
+            return "[DBT: " + Arrays.toString(decision_path.toArray()) + "]";
         }
     }
 }
