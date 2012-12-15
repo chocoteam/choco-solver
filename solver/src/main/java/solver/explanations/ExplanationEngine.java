@@ -36,7 +36,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -143,26 +142,13 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
 
 
     /**
-     * provides a VariableAssignment associated to a pair variable-value
+     * provides a BranchingDecision associated to a decision
      *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return the associated VariableAssignment
+     * @param decision an integer variable
+     * @param isLeft   is left branch decision
+     * @return the associated right BranchingDecision
      */
-
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * provides a ValueRefutation associated to a pair variable-value
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return the associated VariableRefutation
-     */
-
-    public VariableRefutation getVariableRefutation(IntVar var, int val) {
+    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
         return null;
     }
 
@@ -175,12 +161,6 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
     public void addExplanationMonitor(IExplanationMonitor mon) {
         emList.add(mon);
     }
-
-
-    public int getWorldIndex(Variable va, int val) {
-        return 0;
-    }
-
 
     @Override
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {

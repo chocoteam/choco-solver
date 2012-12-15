@@ -27,27 +27,40 @@
 
 package solver.explanations;
 
+import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
 
 /**
  * A specific deduction: variable assignment.
- * It stores the touch variable and the refuted value.
+ * It stores the touch variable and the assigned value.
  * <p/>
  * Created by IntelliJ IDEA.
  * User: njussien
- * Date: 04/10/11
- * Time: 13:23
+ * Date: 30 oct. 2010
+ * Time: 16:26:28
  */
-public class VariableRefutation extends VariableAssignment {
+public class BranchingDecision extends Deduction {
 
-    public VariableRefutation(Variable v, int vl) {
-        super(v, vl, Type.VarRef);
+    Decision decision;
+
+    public BranchingDecision(Decision decision, boolean isLeft) {
+        super(isLeft ? Type.DecLeft : Type.DecRight);
+        this.decision = decision;
+    }
+
+    @Override
+    public Variable getVar() {
+        return decision.getDecisionVariable();
+    }
+
+    public Decision getDecision() {
+        return decision;
     }
 
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder("");
-        s.append("refutation(").append(this.var.getName()).append(".NEQ.").append(this.val).append(")");
+        s.append("assign(").append(decision.toString()).append(")");
         return s.toString();
     }
 }

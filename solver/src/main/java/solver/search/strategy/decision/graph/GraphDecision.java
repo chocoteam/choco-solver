@@ -32,10 +32,10 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.strategy.assignments.GraphAssignment;
-import solver.search.strategy.decision.AbstractDecision;
+import solver.search.strategy.decision.Decision;
 import solver.variables.graph.GraphVar;
 
-public class GraphDecision extends AbstractDecision<GraphVar> {
+public class GraphDecision extends Decision<GraphVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -68,6 +68,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
         this.to = -1;
         assignment = graph_ass;
         branch = 0;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     public void setArc(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
@@ -76,6 +77,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
         this.to = to;
         assignment = graph_ass;
         branch = 0;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     //***********************************************************************************

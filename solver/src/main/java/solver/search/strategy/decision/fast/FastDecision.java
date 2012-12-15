@@ -29,11 +29,8 @@ package solver.search.strategy.decision.fast;
 
 import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
 import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.AbstractDecision;
+import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
 /**
@@ -42,7 +39,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class FastDecision extends AbstractDecision<IntVar> {
+public class FastDecision extends Decision<IntVar> {
 
     int value;
 
@@ -73,6 +70,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
         this.var = v;
         this.value = value;
         this.assignment = assignment;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override
@@ -89,22 +87,5 @@ public class FastDecision extends AbstractDecision<IntVar> {
     @Override
     public String toString() {
         return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
-    }
-
-
-    @Override
-    public void explain(Deduction d, Explanation e) {
-        ExplanationEngine explainer = var.getSolver().getExplainer();
-        e.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
-    }
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        return var.getSolver().getExplainer().getVariableRefutation(var, value);
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-        return var.getSolver().getExplainer().getVariableAssignment(var, value);
     }
 }

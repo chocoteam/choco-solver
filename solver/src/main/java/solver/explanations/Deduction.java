@@ -47,7 +47,7 @@ public abstract class Deduction implements Identity, Comparable<Deduction> {
     final int id;
 
     protected enum Type {
-        Exp, ValRem, VarAss, VarRef
+        Exp, ValRem, DecLeft, DecRight
     }
 
     final Type mType;

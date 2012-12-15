@@ -29,7 +29,7 @@ package solver.search.strategy.decision.fast;
 
 import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
-import solver.search.strategy.decision.AbstractDecision;
+import solver.search.strategy.decision.Decision;
 import solver.variables.RealVar;
 
 /**
@@ -38,7 +38,7 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class FastDecisionReal extends AbstractDecision<RealVar> {
+public class FastDecisionReal extends Decision<RealVar> {
 
     RealVar var;
 
@@ -68,6 +68,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
         branch = 0;
         this.var = v;
         this.value = value;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override

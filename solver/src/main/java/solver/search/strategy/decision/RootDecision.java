@@ -27,7 +27,6 @@
 package solver.search.strategy.decision;
 
 import com.sun.istack.internal.Nullable;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -42,7 +41,6 @@ import solver.variables.Variable;
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
 
-
     @Override
     public Variable getDecisionVariable() {
         return null;
@@ -51,16 +49,6 @@ public class RootDecision extends Decision {
     @Override
     public Object getDecisionValue() {
         return null;
-    }
-
-    @Override
-    public boolean isLeft() {
-        return false;
-    }
-
-    @Override
-    public boolean isRight() {
-        return false;
     }
 
     @Override
@@ -101,22 +89,7 @@ public class RootDecision extends Decision {
     }
 
     @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
     public void explain(@Nullable Deduction d, Explanation e) {
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 
     @Override

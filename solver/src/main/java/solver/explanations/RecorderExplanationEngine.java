@@ -57,15 +57,14 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
     TIntObjectHashMap<Explanation> database; // base d'explications
 
-    TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
-    TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
+    TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>> leftbranchdecisions; // maintien de la base de left BranchingDecision
+    TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>> rightbranchdecisions; // maintien de la base de right BranchingDecision
 
     protected TIntHashSet expanded = new TIntHashSet();
     protected TIntHashSet toexpand = new TIntHashSet();
     protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
 
     protected ConflictBasedBackjumping cbj;
-    protected DynamicBacktracking dbt;
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
@@ -73,8 +72,8 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
         database = new TIntObjectHashMap<Explanation>();
-        variableassignments = new TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>>();
-        variablerefutations = new TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>>();
+        leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
+        rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
         solver.getSearchLoop().plugSearchMonitor(this);
         cbj = new ConflictBasedBackjumping(this);
 //        dbt = new DynamicBacktracking(this);
@@ -125,54 +124,25 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     }
 
     @Override
-    public int getWorldIndex(Variable var, int val) {
-        int wi = solver.getEnvironment().getWorldIndex();
-        Decision dec = solver.getSearchLoop().decision;
-        while (!dec.getPositiveDeduction().getVar().equals(var)) {
-            dec = dec.getPrevious();
-            wi--;
-        }
-//        if ( ((VariableAssignment) dec.getPositiveDeduction()).val != val) {
-//            throw new UnsupportedOperationException("hohoho");
-//        }
-
-        return wi;
-    }
-
-    @Override
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {
-        int vid = var.getId();
-        TIntObjectHashMap<VariableAssignment> mapvar = variableassignments.get(vid);
+    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
+        int vid = decision.getDecisionVariable().getId();
+        TIntObjectHashMap<BranchingDecision> mapvar = isLeft ? leftbranchdecisions.get(vid) : rightbranchdecisions.get(vid);
+        BranchingDecision vr;
         if (mapvar == null) {
-            mapvar = new TIntObjectHashMap<VariableAssignment>();
-            variableassignments.put(vid, mapvar);
-            mapvar.put(val, new VariableAssignment(var, val));
+            mapvar = new TIntObjectHashMap<BranchingDecision>();
+            if (isLeft) {
+                leftbranchdecisions.put(vid, mapvar);
+            } else {
+                rightbranchdecisions.put(vid, mapvar);
+            }
         }
-        VariableAssignment vr = mapvar.get(val);
+        vr = mapvar.get(decision.getId());
         if (vr == null) {
-            vr = new VariableAssignment(var, val);
-            variableassignments.get(vid).put(val, vr);
+            vr = new BranchingDecision(decision, isLeft);
+            mapvar.put(decision.getId(), vr);
         }
         return vr;
     }
-
-    @Override
-    public VariableRefutation getVariableRefutation(IntVar var, int val) {
-        int vid = var.getId();
-        TIntObjectHashMap<VariableRefutation> mapvar = variablerefutations.get(vid);
-        if (mapvar == null) {
-            mapvar = new TIntObjectHashMap<VariableRefutation>();
-            variablerefutations.put(vid, mapvar);
-            mapvar.put(val, new VariableRefutation(var, val));
-        }
-        VariableRefutation vr = mapvar.get(val);
-        if (vr == null) {
-            vr = new VariableRefutation(var, val);
-            variablerefutations.get(vid).put(val, vr);
-        }
-        return vr;
-    }
-
 
     @Override
     public void removeValue(IntVar var, int val, ICause cause) {

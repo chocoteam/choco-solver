@@ -27,7 +27,6 @@
 package solver.explanations;
 
 import com.sun.istack.internal.Nullable;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -67,23 +66,19 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
             nworld--;
         }
         if (dec != RootDecision.ROOT) {
-            if (!dec.hasNext()) {
-                //                throw new UnsupportedOperationException("RecorderExplanationEngine.updateVRExplain should get to a POSITIVE decision");
-                Deduction vr = dec.getNegativeDeduction();
-                mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
-                return dec;
-            }
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if (assign.mType == Deduction.Type.VarAss) {
-                VariableAssignment va = (VariableAssignment) assign;
-                mExplanationEngine.variableassignments.get(va.var.getId()).remove(va.val);
-            }
-            mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
+            if (!dec.hasNext())
+                throw new UnsupportedOperationException("DynamicBacktracking.updatVRExplain should get to a POSITIVE decision");
             decision_path.add(dec);
+            Deduction left = dec.getPositiveDeduction();
+            expl.remove(left);
+            assert left.mType == Deduction.Type.DecLeft;
+            BranchingDecision va = (BranchingDecision) left;
+            mExplanationEngine.leftbranchdecisions.get(va.getVar().getId()).remove(va.getDecision().getId());
+
+            Deduction right = dec.getNegativeDeduction();
+            mExplanationEngine.database.put(right.id, mExplanationEngine.flatten(expl));
+
             mSolver.getSearchLoop().decision = cobdec;
-            return dec;
         }
         return dec;
     }
@@ -99,16 +94,6 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         @Override
         public Integer getDecisionValue() {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean isLeft() {
-            return false;
-        }
-
-        @Override
-        public boolean isRight() {
-            return false;
         }
 
         @Override
@@ -184,23 +169,8 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         }
 
         @Override
-        public Constraint getConstraint() {
-            return null;
-        }
-
-        @Override
         public void explain(@Nullable Deduction d, Explanation e) {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean reactOnPromotion() {
-            return false;
-        }
-
-        @Override
-        public int getPropagationConditions(int vIdx) {
-            return 0;
         }
 
         @Override

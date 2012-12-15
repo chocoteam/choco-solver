@@ -30,8 +30,13 @@ package solver.search.strategy.decision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
+import solver.Identity;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ExplanationEngine;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -40,48 +45,76 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public abstract class Decision<V extends Variable> implements ICause {
+public abstract class Decision<V extends Variable> implements Identity, ICause {
 
     Logger LOGGER = LoggerFactory.getLogger(Decision.class);
 
-//    public Decision() {
-//        super(Type.Dec);
-//    }
+    public static int _ID = 0;
+
+    final int id;
+
+    protected V var;
+
+    protected Decision<V> assignment;
+
+    protected int branch;
+
+    long fails;
+
+    int worldIndex; // indication on the world in which it has been selected
+
+    protected Decision previous;
+
+    public Decision() {
+        id = _ID++;
+    }
+
+    @Override
+    public final int getId() {
+        return id;
+    }
 
     /**
-     * Return the variable object involves in the decision
+     * Set the previous decision applied in the tree search
      *
-     * @return a variable V
+     * @param decision
      */
-    public abstract V getDecisionVariable();
+    public void setPrevious(Decision decision) {
+        this.previous = decision;
+    }
 
     /**
-     * Return the value object involves in the decision
+     * Return the previous decision applied in the tree search
      *
-     * @return a value object
+     * @return
      */
-    public abstract Object getDecisionValue();
+    public Decision getPrevious() {
+        return previous;
+    }
 
-    public abstract boolean isLeft();
+    protected void setWorldIndex(int wi) {
+        this.worldIndex = wi;
+    }
 
-    public abstract boolean isRight();
+    public int getWorldIndex() {
+        return worldIndex;
+    }
 
     /**
      * Return true if the decision can be refuted
      *
      * @return true if the decision can be refuted, false otherwise
      */
-    public abstract boolean hasNext();
+    public boolean hasNext() {
+        return branch < 2;
+    }
 
     /**
      * Build the refutation, hasNext() must be called before
      */
-    public abstract void buildNext();
-
-    /**
-     * Force the decision to be in its creation state.
-     */
-    public abstract void rewind();
+    public void buildNext() {
+        branch++;
+    }
 
     /**
      * Apply the current decision
@@ -91,18 +124,27 @@ public abstract class Decision<V extends Variable> implements ICause {
     public abstract void apply() throws ContradictionException;
 
     /**
-     * Set the previous decision applied in the tree search
-     *
-     * @param decision
+     * Force the decision to be in its creation state.
      */
-    public abstract void setPrevious(Decision decision);
+    public void rewind() {
+        branch = 0;
+    }
 
     /**
-     * Return the previous decision applied in the tree search
+     * Return the variable object involves in the decision
      *
-     * @return
+     * @return a variable V
      */
-    public abstract Decision getPrevious();
+    public V getDecisionVariable() {
+        return var;
+    }
+
+    /**
+     * Return the value object involves in the decision
+     *
+     * @return a value object
+     */
+    public abstract Object getDecisionValue();
 
     /**
      * Free the decision, ie, it can be reused
@@ -110,12 +152,52 @@ public abstract class Decision<V extends Variable> implements ICause {
     public abstract void free();
 
     /**
-     * Make a copy of the current decision and reverse it
+     * Reverse the decision operator
      */
-    public abstract void reverse();
+    public void reverse() {
+        throw new UnsupportedOperationException();
+    }
 
-    // explanation related ...
-    public abstract Deduction getNegativeDeduction();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public abstract Deduction getPositiveDeduction();
+    @Override
+    public final boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public final int getPropagationConditions(int vIdx) {
+        return EventType.VOID.mask;
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        ExplanationEngine explainer = var.getSolver().getExplainer();
+        if (branch < 2) {
+            e.add(explainer.explain(getPositiveDeduction()));
+        } else {
+            e.add(explainer.explain(getNegativeDeduction()));
+        }
+    }
+
+    public Deduction getNegativeDeduction() {
+        return var.getSolver().getExplainer().getDecision(this, false);
+    }
+
+    public Deduction getPositiveDeduction() {
+        return var.getSolver().getExplainer().getDecision(this, true);
+    }
+
+    public final Constraint getConstraint() {
+        return null;
+    }
+
+    public final void incFail() {
+        fails++;
+    }
+
+    public final long getFails() {
+        return fails;
+    }
+
 }

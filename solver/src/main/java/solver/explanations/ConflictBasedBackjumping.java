@@ -87,14 +87,14 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext())
                 throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if (assign.mType == Deduction.Type.VarAss) {
-                VariableAssignment va = (VariableAssignment) assign;
-                mExplanationEngine.variableassignments.get(va.var.getId()).remove(va.val);
-            }
-            mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
+            Deduction left = dec.getPositiveDeduction();
+            expl.remove(left);
+            assert left.mType == Deduction.Type.DecLeft;
+            BranchingDecision va = (BranchingDecision) left;
+            mExplanationEngine.leftbranchdecisions.get(va.getVar().getId()).remove(va.getDecision().getId());
+
+            Deduction right = dec.getNegativeDeduction();
+            mExplanationEngine.database.put(right.id, mExplanationEngine.flatten(expl));
         }
         return dec;
     }

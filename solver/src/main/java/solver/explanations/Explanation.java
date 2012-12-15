@@ -29,7 +29,6 @@ package solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.propagators.Propagator;
-import solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,10 +199,8 @@ public class Explanation extends Deduction {
         if (this.deductions != null) {
             for (int d = 0; d < deductions.size(); d++) {
                 Deduction dec = deductions.get(d);
-                if (dec.mType == Type.VarAss) {
-                    Variable va = ((VariableAssignment) dec).var;
-                    int val = ((VariableAssignment) dec).val;
-                    int world = explainer.getWorldIndex(va, val);
+                if (dec.mType == Type.DecLeft) {
+                    int world = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
                     if (world > topworld) {
                         topworld = world;
                     }
