@@ -142,7 +142,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
         int sat = 0;
         for (int i = 0; i < propagators.length; i++) {
             ESat entail = propagators[i].isEntailed();
-			//System.out.println(propagators[i]+" => "+entail);
+            //System.out.println(propagators[i]+" => "+entail);
             if (entail.equals(ESat.FALSE)) {
                 return entail;
             } else if (entail.equals(ESat.TRUE)) {
@@ -187,13 +187,18 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
     /**
      * Link propagators with variables.
+     *
+     * @param cut
      */
-    public void declare() {
+    public void declare(boolean cut) {
         for (int p = 0; p < propagators.length; p++) {
             staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
         }
         for (int v = 0; v < vars.length; v++) {
             vars[v].declareIn(this);
+        }
+        if (solver.getEngine() != null && solver.getEngine().isInitialized()) {
+            solver.getEngine().dynamicAddition(this, cut);
         }
     }
 
