@@ -46,7 +46,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable {
+public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -102,6 +102,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
 
     /**
      * Return the "idx" th propagator of this
+     *
      * @param idx position of the propagator
      * @return a propagator
      */
@@ -116,6 +117,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
 
     /**
      * Return the position of the variable in the propagator at position pidx
+     *
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
