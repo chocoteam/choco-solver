@@ -44,7 +44,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.PropagationUtils;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -182,7 +182,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     @Override
                     public void undo() {
                         state = NEW;
-    }
+                    }
                 },
                 new Operation() {
                     @Override
@@ -273,7 +273,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final void forcePropagate(EventType evt) throws ContradictionException {
         if (nbPendingEvt == 0) {
             if (Configuration.PRINT_PROPAGATION) {
-                PropagationUtils.printPropagation(null, this);
+                IPropagationEngine.Trace.printPropagation(null, this);
             }
             coarseERcalls++;
             propagate(evt.getStrengthenedMask());
@@ -415,14 +415,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void incNbPendingEvt() {
-        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 "+this;
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt++;
         //if(LoggerFactory.getLogger("solver").isDebugEnabled())
         //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
     public void decNbPendingEvt() {
-        assert (nbPendingEvt > 0) : "number of enqued records is < 0 "+this;
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0 " + this;
         nbPendingEvt--;
         //if(LoggerFactory.getLogger("solver").isDebugEnabled())
         //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);

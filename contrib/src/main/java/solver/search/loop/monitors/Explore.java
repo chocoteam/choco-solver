@@ -146,7 +146,8 @@ public class Explore {
     public static class NoPropagation implements IPropagationEngine {
 
         @Override
-        public void init(Solver solver) {
+        public boolean isInitialized() {
+            return true;
         }
 
         @Override
@@ -180,6 +181,10 @@ public class Explore {
 
         @Override
         public void desactivatePropagator(Propagator propagator) {
+        }
+
+        @Override
+        public void dynamicAddition(Constraint c, boolean cut) {
         }
     }
 }

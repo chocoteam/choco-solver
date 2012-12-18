@@ -38,7 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
@@ -138,11 +138,15 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
 
     protected Activity myActivity;
 
+    private boolean init;
+
+    final PropagationTrigger trigger; // an object that starts the propagation
+
 
     public ActivityBasedCstrEngine(Solver solver, Activity act, boolean sampling, boolean aging) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
-
+        this.trigger = new PropagationTrigger(this, solver);
         // 0. get the type of activity
         myActivity = act;
         this.sampling = sampling;
@@ -166,7 +170,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-
+        trigger.addAll(propagators);
         // 4. Map ID and index and prepare to store masks
         p2i = new AId2AbId(mp, Mp, -1);
         for (int j = 0; j < propagators.length; j++) {
@@ -187,6 +191,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         S = new double[Mp - mp + 1];
         I = new double[Mp - mp + 1];
         affected = new TIntHashSet();
+        init = true;
     }
 
     @Override
@@ -200,13 +205,17 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     }
 
     @Override
-    public void init(Solver solver) {
+    public boolean isInitialized() {
+        return init;
     }
 
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         nb_probes++;
         try {
             while (!prop_heap.isEmpty()) {
@@ -221,7 +230,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                     if (mask > 0) {
                         assert lastProp.isActive() : "propagator is not active";
                         if (Configuration.PRINT_PROPAGATION) {
-                            PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
+                            IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
@@ -326,7 +335,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         int nbp = variable.getNbProps();
         for (int p = 0; p < nbp; p++) {
@@ -336,11 +345,11 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                 int aid = p2i.get(prop.getId());
                 if (masks_f[aid][pindice] == 0) {
                     if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printSchedule(prop);
+                        IPropagationEngine.Trace.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
                 } else if (Configuration.PRINT_SCHEDULE) {
-                    PropagationUtils.printAlreadySchedule(prop);
+                    IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
 
                 masks_f[aid][pindice] |= type.strengthened_mask;
@@ -382,6 +391,11 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        throw new UnsupportedOperationException();
     }
 
     public enum Activity {

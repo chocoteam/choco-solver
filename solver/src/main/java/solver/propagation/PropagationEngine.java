@@ -70,6 +70,8 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected IEnvironment environment;
 
+    private boolean init;
+
 
     public PropagationEngine(Solver solver) {
         this.exception = new ContradictionException();
@@ -114,6 +116,7 @@ public class PropagationEngine implements IPropagationEngine {
             fines_p[j] = new Arc[propagators[j].getNbVars()];
         }
         pcidx = new int[nbProp];
+        init = true;
     }
 
     /**
@@ -128,7 +131,9 @@ public class PropagationEngine implements IPropagationEngine {
         return this;
     }
 
-    public void init(Solver solver) {
+    @Override
+    public boolean isInitialized() {
+        return init;
     }
 
     @Override
@@ -175,7 +180,7 @@ public class PropagationEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         int id = v2i.get(variable.getId());
         int to = vcidx[id];
@@ -205,5 +210,10 @@ public class PropagationEngine implements IPropagationEngine {
             // we don't remove the element from its master to avoid costly operations
             fines_p[id][i].flush();
         }
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -24,41 +24,35 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded.util;
+package solver.constraints;
 
-import java.util.Arrays;
+import org.testng.annotations.Factory;
+import solver.propagation.PropagationEngines;
 
-public class AId2AbId implements IId2AbId {
+import java.util.ArrayList;
+import java.util.List;
 
-    int[] map;
-    final int offset;
-    final int noValue;
-    int size;
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 17/12/12
+ */
+public class DynamicPostTestFactory {
 
-    public AId2AbId(int minKey, int maxKey, int noValue) {
-        this.size = Math.max(0, maxKey - minKey + 1);
-        this.offset = size == 0 ? 0 : minKey;
-        this.map = new int[size];
-        Arrays.fill(map, noValue);
-        this.noValue = noValue;
-    }
+    PropagationEngines[] engines = new PropagationEngines[]{
+            PropagationEngines.CONSTRAINTDRIVEN,
+            PropagationEngines.VARIABLEDRIVEN,
+            PropagationEngines.CONSTRAINTDRIVEN_7QD};
 
-    @Override
-    public int get(int key) {
-        key -= offset;
-        if (key < 0 || key > size) return noValue;
-        return map[key];
-    }
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<Object>(12);
 
-    @Override
-    public void set(int key, int value) {
-        int idx = key - offset;
-        if (idx >= size) {
-            int[] tmp = map;
-            map = new int[idx + 1];
-            System.arraycopy(tmp, 0, map, 0, size);
-            size = map.length;
+        for (int e = 0; e < engines.length; e++) {
+            PropagationEngines engine = engines[e];
+            lresult.add(new DynamicPostTest(engine));
         }
-        map[idx] = value;
+        return lresult.toArray();
     }
 }

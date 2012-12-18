@@ -37,7 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
@@ -64,25 +64,29 @@ public class ConstraintEngine implements IPropagationEngine {
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected final Variable[] variables;
-    protected final Propagator[] propagators;
+    protected Propagator[] propagators;
 
     protected final CircularQueue<Propagator> pro_queue_f;
     protected Propagator lastProp;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final boolean[] schedule;
-    protected final IBitset[] eventsets;
-    protected final int[][] eventmasks;
+    protected boolean[] schedule;
+    protected IBitset[] eventsets;
+    protected int[][] eventmasks;
 
+    private boolean init; // is ready to propagate?
+
+    final PropagationTrigger trigger; // an object that starts the propagation
 
     public ConstraintEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
+        this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
-        int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
+        int m = Integer.MAX_VALUE, M = 0;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
             for (int j = 0; j < cprops.length; j++, nbProp++) {
@@ -97,6 +101,8 @@ public class ConstraintEngine implements IPropagationEngine {
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
+        trigger.addAll(propagators);
+
         pro_queue_f = new CircularQueue<Propagator>(propagators.length / 2 + 1);
 
         schedule = new boolean[nbProp];
@@ -107,6 +113,7 @@ public class ConstraintEngine implements IPropagationEngine {
             eventmasks[i] = new int[nbv];
             eventsets[i] = BitsetFactory.make(nbv);
         }
+        init = true;
     }
 
     @Override
@@ -120,7 +127,8 @@ public class ConstraintEngine implements IPropagationEngine {
     }
 
     @Override
-    public void init(Solver solver) {
+    public boolean isInitialized() {
+        return init;
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -128,6 +136,9 @@ public class ConstraintEngine implements IPropagationEngine {
     public void propagate() throws ContradictionException {
         int mask, aid;
         IBitset evtset;
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
             // revision of the variable
@@ -137,7 +148,7 @@ public class ConstraintEngine implements IPropagationEngine {
             for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
                 assert lastProp.isActive() : "propagator is not active";
                 if (Configuration.PRINT_PROPAGATION) {
-                    PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
+                    IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                 }
                 // clear event
                 evtset.clear(v);
@@ -182,7 +193,7 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         int nbp = variable.getNbProps();
         for (int p = 0; p < nbp; p++) {
@@ -193,12 +204,12 @@ public class ConstraintEngine implements IPropagationEngine {
                 if (eventmasks[aid][pindice] == 0) { // not scheduled yet
                     assert !eventsets[aid].get(pindice);
                     if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printSchedule(prop);
+                        IPropagationEngine.Trace.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
                     eventsets[aid].set(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
-                    PropagationUtils.printAlreadySchedule(prop);
+                    IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
                 eventmasks[aid][pindice] |= type.strengthened_mask;
                 if (!schedule[aid]) {
@@ -233,5 +244,37 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        int osize = propagators.length;
+        int nbp = c.propagators.length;
+        int nsize = osize + nbp;
+        Propagator[] _propagators = propagators;
+        propagators = new Propagator[nsize];
+        System.arraycopy(_propagators, 0, propagators, 0, osize);
+        System.arraycopy(c.propagators, 0, propagators, osize, nbp);
+        for (int j = osize; j < nsize; j++) {
+            p2i.set(propagators[j].getId(), j);
+            trigger.add(propagators[j], cut);
+        }
+
+        boolean[] _schedule = schedule;
+        schedule = new boolean[nsize];
+        System.arraycopy(_schedule, 0, schedule, 0, osize);
+
+        int[][] _eventmasks = eventmasks;
+        eventmasks = new int[nsize][];
+        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
+
+        IBitset[] _eventsets = eventsets;
+        eventsets = new IBitset[nsize];
+        System.arraycopy(_eventsets, 0, eventsets, 0, osize);
+        for (int i = osize; i < nsize; i++) {
+            int nbv = propagators[i].getNbVars();
+            eventmasks[i] = new int[nbv];
+            eventsets[i] = BitsetFactory.make(nbv);
+        }
     }
 }
