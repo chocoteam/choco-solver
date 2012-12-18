@@ -45,13 +45,19 @@ import solver.variables.Variable;
 public enum Views {
     ;
 
+    private static final String CSTE_NAME = "cste -- ";
+
     public static IntVar fixed(int value, Solver solver) {
-        return fixed("cste -- " + value, value, solver);
+        return fixed(CSTE_NAME + value, value, solver);
     }
 
     public static IntVar fixed(String name, int value, Solver solver) {
         if (solver.cachedConstants.containsKey(value)) {
-            return solver.cachedConstants.get(value);
+            if (name.startsWith(CSTE_NAME)) {
+                return solver.cachedConstants.get(value);
+            } else {
+                return eq(solver.cachedConstants.get(value));
+            }
         }
         ConstantView cste;
         if (value == 0 || value == 1) {
@@ -142,16 +148,16 @@ public enum Views {
     }
 
     public static IntVar scale(IntVar ivar, int cste) {
-		if(cste == -1){
-			return Views.minus(ivar);
-		}
+        if (cste == -1) {
+            return Views.minus(ivar);
+        }
         if (cste < 0) {
             throw new UnsupportedOperationException("scale required positive coefficient!");
         } else {
-			IntVar var;
-			if(cste == 0){
-				var = Views.fixed(0,ivar.getSolver());
-			} else if (cste == 1) {
+            IntVar var;
+            if (cste == 0) {
+                var = Views.fixed(0, ivar.getSolver());
+            } else if (cste == 1) {
                 var = ivar;
             } else {
                 IView[] views = ivar.getViews();
@@ -165,7 +171,7 @@ public enum Views {
                 }
                 var = new ScaleView(ivar, cste, ivar.getSolver());
             }
-			return var;
+            return var;
         }
     }
 
