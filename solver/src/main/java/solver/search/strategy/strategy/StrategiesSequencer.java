@@ -119,11 +119,23 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
 			return null;
 		}
 		int idx = index.get();
-        Decision decision = strategies[idx].computeDecision(variable);
-        while (decision == null && idx < strategies.length - 1) {
-            decision = strategies[++idx].computeDecision(variable);
+        Decision decision = null;
+        while (decision == null && idx < strategies.length) {
+			if(contains(strategies[idx].vars,variable)){
+				decision = strategies[idx].computeDecision(variable);
+			}
+			idx++;
         }
         return decision;
+	}
+
+	private static boolean contains(Variable[] vars, Variable variable) {
+		for(Variable v:vars){
+			if(v.equals(variable)){
+				return true;
+			}
+		}
+		return false;
 	}
 
     /**

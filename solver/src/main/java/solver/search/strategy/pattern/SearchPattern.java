@@ -42,6 +42,12 @@ public enum SearchPattern {
 			return strategies;
 		}
 	},
+	LAST_FAIL_DEC {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_decisiondeduction(solver,strategies),strategies);
+		}
+	},
 	LAST_FAIL {
 		@Override
 		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
