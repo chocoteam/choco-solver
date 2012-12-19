@@ -33,7 +33,6 @@ import solver.search.strategy.decision.RootDecision;
 import solver.variables.IntVar;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 
 /**
  * <br/>
@@ -134,8 +133,10 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
         private void downbranch(Decision dec) throws ContradictionException {
             mSolver.getSearchLoop().decision = dec;
+            mSolver.getSearchLoop().smList.beforeDownLeftBranch();
             dec.buildNext();
             mSolver.getSearchLoop().getObjectivemanager().apply(dec);
+            mSolver.getSearchLoop().smList.afterDownLeftBranch();
         }
 
         @Override
@@ -175,7 +176,7 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
 
         @Override
         public String toString() {
-            return "[DBT: " + Arrays.toString(decision_path.toArray()) + "]";
+            return "[DBT]";
         }
     }
 }
