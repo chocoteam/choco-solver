@@ -127,6 +127,11 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDel
     }
 
     @Override
+    public int compareTo(Variable o) {
+        return this.getId() - o.getId();
+    }
+
+    @Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {

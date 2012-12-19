@@ -36,7 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
@@ -64,25 +64,30 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
     protected final Variable[] variables;
-    protected final Propagator[] propagators;
+    protected Propagator[] propagators;
 
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final IBitset notEmpty; // point out the no empty queues
-    protected final short[] scheduled; // also maintains the index of the queue!
-    protected final IBitset[] eventsets;
-    protected final int[][] eventmasks;
+    protected short[] scheduled; // also maintains the index of the queue!
+    protected IBitset[] eventsets;
+    protected int[][] eventmasks;
+    private boolean init;
+
+    final PropagationTrigger trigger; // an object that starts the propagation
+
 
     public SevenQueuesConstraintEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
+        this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<Propagator>();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
-        int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
+        int m = Integer.MAX_VALUE, M = 0;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
             for (int j = 0; j < cprops.length; j++, nbProp++) {
@@ -93,6 +98,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+        trigger.addAll(propagators);
+
         p2i = new AId2AbId(m, M, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
@@ -111,6 +118,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
             eventsets[i] = BitsetFactory.make(nbv);
         }
         notEmpty = BitsetFactory.make(8);
+        init = true;
     }
 
     @Override
@@ -124,7 +132,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     }
 
     @Override
-    public void init(Solver solver) {
+    public boolean isInitialized() {
+        return init;
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -132,6 +141,9 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void propagate() throws ContradictionException {
         int mask, aid;
         IBitset evtset;
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             while (!pro_queue[i].isEmpty()) {
                 lastProp = pro_queue[i].pollFirst();
@@ -142,7 +154,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 for (int v = evtset.nextSetBit(0); v >= 0; v = evtset.nextSetBit(v + 1)) {
                     assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     if (Configuration.PRINT_PROPAGATION) {
-                        PropagationUtils.printPropagation(lastProp.getVar(v), lastProp);
+                        IPropagationEngine.Trace.printPropagation(lastProp.getVar(v), lastProp);
                     }
                     // clear event
                     evtset.clear(v);
@@ -193,7 +205,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         int nbp = variable.getNbProps();
         for (int p = 0; p < nbp; p++) {
@@ -204,12 +216,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 if (eventmasks[aid][pindice] == 0) {
                     assert !eventsets[aid].get(pindice);
                     if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printSchedule(prop);
+                        IPropagationEngine.Trace.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
                     eventsets[aid].set(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
-                    PropagationUtils.printAlreadySchedule(prop);
+                    IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
                 eventmasks[aid][pindice] |= type.strengthened_mask;
                 if (scheduled[aid] == 0) {
@@ -247,5 +259,37 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        int osize = propagators.length;
+        int nbp = c.propagators.length;
+        int nsize = osize + nbp;
+        Propagator[] _propagators = propagators;
+        propagators = new Propagator[nsize];
+        System.arraycopy(_propagators, 0, propagators, 0, osize);
+        System.arraycopy(c.propagators, 0, propagators, osize, nbp);
+        for (int j = osize; j < nsize; j++) {
+            p2i.set(propagators[j].getId(), j);
+            trigger.add(propagators[j], cut);
+        }
+
+        short[] _scheduled = scheduled;
+        scheduled = new short[nsize];
+        System.arraycopy(_scheduled, 0, scheduled, 0, osize);
+
+        int[][] _eventmasks = eventmasks;
+        eventmasks = new int[nsize][];
+        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
+
+        IBitset[] _eventsets = eventsets;
+        eventsets = new IBitset[nsize];
+        System.arraycopy(_eventsets, 0, eventsets, 0, osize);
+        for (int i = osize; i < nsize; i++) {
+            int nbv = propagators[i].getNbVars();
+            eventmasks[i] = new int[nbv];
+            eventsets[i] = BitsetFactory.make(nbv);
+        }
     }
 }

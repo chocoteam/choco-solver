@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
@@ -72,10 +72,14 @@ public class ArcEngine implements IPropagationEngine {
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final TIntIntHashMap[] masks_f;
     protected final TIntIntHashMap[] idxVinP;
+    private boolean init;
+
+    final PropagationTrigger trigger; // an object that starts the propagation
 
     public ArcEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
+        this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
         int nbVar = 0;
@@ -105,6 +109,7 @@ public class ArcEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+        trigger.addAll(propagators);
         p2i = new AId2AbId(m, M, -1);
 //        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
@@ -127,6 +132,7 @@ public class ArcEngine implements IPropagationEngine {
                 masks_f[i].put(paid, -1);
             }
         }
+        init = true;
     }
 
     @Override
@@ -140,13 +146,17 @@ public class ArcEngine implements IPropagationEngine {
     }
 
     @Override
-    public void init(Solver solver) {
+    public boolean isInitialized() {
+        return init;
     }
 
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
         int vaid, paid, mask;
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         while (!arc_queue_v.isEmpty()) {
             lastVar = arc_queue_v.pollFirst();
             lastProp = arc_queue_p.pollFirst();
@@ -159,7 +169,7 @@ public class ArcEngine implements IPropagationEngine {
             if (mask > 0) {
                 assert lastProp.isActive() : "propagator is not active";
                 if (Configuration.PRINT_PROPAGATION) {
-                    PropagationUtils.printPropagation(lastVar, lastProp);
+                    IPropagationEngine.Trace.printPropagation(lastVar, lastProp);
                 }
                 lastProp.fineERcalls++;
                 lastProp.decNbPendingEvt();
@@ -191,7 +201,7 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         Propagator prop;
         int paid, cm, vaid = v2i.get(variable.getId());
@@ -204,7 +214,7 @@ public class ArcEngine implements IPropagationEngine {
                     cm = masks_f[vaid].get(paid);
                     if (cm == -1) {  // add the arc into the queue
                         if (Configuration.PRINT_SCHEDULE) {
-                            PropagationUtils.printSchedule(prop);
+                            IPropagationEngine.Trace.printSchedule(prop);
                         }
                         arc_queue_v.addLast(variable);
                         arc_queue_p.addLast(prop);
@@ -212,7 +222,7 @@ public class ArcEngine implements IPropagationEngine {
                         prop.incNbPendingEvt();
                     } else {
                         if (Configuration.PRINT_SCHEDULE) {
-                            PropagationUtils.printAlreadySchedule(prop);
+                            IPropagationEngine.Trace.printAlreadySchedule(prop);
                         }
                         cm -= (cm |= type.strengthened_mask);
                         masks_f[vaid].adjustValue(paid, cm);
@@ -250,5 +260,10 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        throw new UnsupportedOperationException();
     }
 }

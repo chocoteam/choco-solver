@@ -37,7 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
+import solver.propagation.PropagationTrigger;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
@@ -136,10 +136,15 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
 
     protected Activity myActivity;
 
+    private boolean init;
+
+    final PropagationTrigger trigger; // an object that starts the propagation
+
 
     public ActivityBasedVarEngine(Solver solver, Activity act, boolean sampling, boolean aging) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
+        this.trigger = new PropagationTrigger(this, solver);
 
         // 0. get the type of activity
         myActivity = act;
@@ -163,7 +168,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-
+        this.trigger.addAll(propagators);
         // 3. Retrieve the range of variable IDs
         int mv = Integer.MAX_VALUE, Mv = Integer.MIN_VALUE;
         for (int i = 0; i < variables.length; i++) {
@@ -195,6 +200,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         S = new double[Mv - mv + 1];
         I = new double[Mv - mv + 1];
         affected = new TIntHashSet();
+        init = true;
     }
 
     @Override
@@ -208,13 +214,17 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     }
 
     @Override
-    public void init(Solver solver) {
+    public boolean isInitialized() {
+        return init;
     }
 
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
         int id, aid, mask, nbp;
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         nb_probes++;
         try {
             while (!var_heap.isEmpty()) {
@@ -230,7 +240,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                     if (mask > 0) {
                         assert lastProp.isActive() : "propagator is not active:" + lastProp;
                         if (Configuration.PRINT_PROPAGATION) {
-                            PropagationUtils.printPropagation(lastVar, lastProp);
+                            IPropagationEngine.Trace.printPropagation(lastVar, lastProp);
                         }
                         masks_f[aid][p] = 0;
                         lastProp.fineERcalls++;
@@ -353,7 +363,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         if (Configuration.PRINT_VAR_EVENT) {
-            PropagationUtils.printModification(variable, type, cause);
+            IPropagationEngine.Trace.printModification(variable, type, cause);
         }
         int id = variable.getId();
         boolean _schedule = false;
@@ -365,11 +375,11 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 if (masks_f[aid][p] == 0) {
                     if (Configuration.PRINT_SCHEDULE) {
-                        PropagationUtils.printSchedule(prop);
+                        IPropagationEngine.Trace.printSchedule(prop);
                     }
                     prop.incNbPendingEvt();
                 } else if (Configuration.PRINT_SCHEDULE) {
-                    PropagationUtils.printAlreadySchedule(prop);
+                    IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
                 masks_f[aid][p] |= type.strengthened_mask;
                 _schedule = true;
@@ -412,6 +422,11 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
     @Override
     public void clear() {
         // void
+    }
+
+    @Override
+    public void dynamicAddition(Constraint c, boolean cut) {
+        throw new UnsupportedOperationException();
     }
 
     public enum Activity {
