@@ -71,7 +71,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
             //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            set(StrategyFactory.minDomMinVal(VariableFactory.toIntVar(solver.getVars()), solver.getEnvironment()));
+			solver.set(StrategyFactory.minDomMinVal(VariableFactory.toIntVar(solver.getVars()), solver.getEnvironment()));
+//            set(StrategyFactory.minDomMinVal(VariableFactory.toIntVar(solver.getVars()), solver.getEnvironment()));
         }
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
