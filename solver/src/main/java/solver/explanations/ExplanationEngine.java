@@ -33,11 +33,9 @@ import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -49,7 +47,7 @@ import java.io.Serializable;
  * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine extends VoidSearchMonitor implements Serializable, ISearchMonitor, IExplanationMonitor {
+public class ExplanationEngine implements Serializable, IExplanationMonitor {
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     ExplanationMonitorList emList;
     Solver solver;
@@ -66,7 +64,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
     public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {
     }
 
-    public OffsetIStateBitset getRemovedValues(IntVar v) {
+    public AntiDomain getRemovedValues(IntVar v) {
         return null;
     }
 
@@ -139,32 +137,18 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      */
     public ExplanationEngine(Solver slv) {
         this.solver = slv;
-        slv.getSearchLoop().plugSearchMonitor(this);
         emList = new ExplanationMonitorList();
     }
 
 
     /**
-     * provides a VariableAssignment associated to a pair variable-value
+     * provides a BranchingDecision associated to a decision
      *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return the associated VariableAssignment
+     * @param decision an integer variable
+     * @param isLeft   is left branch decision
+     * @return the associated right BranchingDecision
      */
-
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {
-        return null;
-    }
-
-    /**
-     * provides a ValueRefutation associated to a pair variable-value
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return the associated VariableRefutation
-     */
-
-    public VariableRefutation getVariableRefutation(IntVar var, int val) {
+    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
         return null;
     }
 
@@ -177,12 +161,6 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
     public void addExplanationMonitor(IExplanationMonitor mon) {
         emList.add(mon);
     }
-
-
-    public int getWorldIndex(Variable va, int val) {
-        return 0;
-    }
-
 
     @Override
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {

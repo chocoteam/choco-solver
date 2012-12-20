@@ -151,12 +151,13 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
      * returns an explanation of the current state of the Variable
      *
      * @param what specifies what we are interested in
+     * @param to
      * @return
      */
 
-    Explanation explain(VariableState what);
+    void explain(VariableState what, Explanation to);
 
-    Explanation explain(VariableState what, int val);
+    void explain(VariableState what, int val, Explanation to);
 
     /**
      * Return the delta domain of this

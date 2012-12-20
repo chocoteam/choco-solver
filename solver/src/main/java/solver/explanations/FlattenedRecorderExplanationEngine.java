@@ -48,7 +48,7 @@ public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngin
 
     @Override
     public Deduction explain(Deduction deduction) {
-        if (deduction.mType == Deduction.Type.VarRef) {
+        if (deduction.mType == Deduction.Type.DecRight) {
             return database.get(deduction.id);
         } else {
             return super.explain(deduction);

@@ -387,18 +387,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * returns a explanation for the decision mentionned in parameters
      *
      * @param d : a <code>Deduction</code> to explain
+     * @param e
      * @return a set of constraints and past decisions
      */
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(VariableState.DOM));
+            v.explain(VariableState.DOM, e);
         }
         // and the application of the current propagator
-        expl.add(this);
-        return expl;
+        e.add(this);
     }
 
     public boolean isCompletelyInstantiated() {

@@ -42,7 +42,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 30/01/12
  */
-public class LogEventCount extends VoidSearchMonitor implements ISearchMonitor, IVariableMonitor {
+public class LogEventCount implements IVariableMonitor, IMonitorClose {
 
     final Solver solver;
 
@@ -53,9 +53,13 @@ public class LogEventCount extends VoidSearchMonitor implements ISearchMonitor, 
         for (int i = 0; i < solver.getNbVars(); i++) {
             solver.getVar(i).addMonitor(this);
         }
-        countPerEvent = new TObjectLongHashMap(EventType.values().length);
+        countPerEvent = new TObjectLongHashMap<EventType>(EventType.values().length);
     }
 
+
+    @Override
+    public void beforeClose() {
+    }
 
     @Override
     public void afterClose() {

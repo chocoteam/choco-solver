@@ -27,6 +27,8 @@
 
 package samples.graph;
 
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import samples.graph.input.HCP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Solver;
@@ -34,17 +36,16 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
+import solver.variables.graph.UndirectedGraphVar;
+
 import java.io.File;
 
 /**
@@ -92,7 +93,7 @@ public class HCP_symImpact {
             boolean[][] matrix = HCP_Utils.generateKingTourInstance(size);
             solveUndirected(matrix, s);
             System.gc();
-			solveDirected(matrix,s);
+            solveDirected(matrix, s);
             System.gc();
         }
     }
@@ -221,7 +222,7 @@ public class HCP_symImpact {
     // MONITOR
     //***********************************************************************************
 
-    private static class Restarter extends VoidSearchMonitor implements ISearchMonitor {
+    private static class Restarter implements ISearchMonitor, IMonitorContradiction {
         int nbFails = 0;
 
         public void onContradiction(ContradictionException cex) {

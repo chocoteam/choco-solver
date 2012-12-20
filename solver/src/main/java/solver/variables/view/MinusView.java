@@ -247,20 +247,23 @@ public class MinusView extends IntView<IntVar> {
     }
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         switch (what) {
             case UB:
-                return var.explain(VariableState.LB);
+                var.explain(VariableState.LB, to);
+                break;
             case LB:
-                return var.explain(VariableState.UB);
+                var.explain(VariableState.UB, to);
+                break;
             default:
-                return var.explain(what);
+                var.explain(what, to);
+                break;
         }
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        return var.explain(what, -val);
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, -val, to);
     }
 
     @Override

@@ -39,6 +39,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.EventType;
@@ -267,21 +268,22 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        Explanation explanation = Explanation.build();
-        if (empty.get()) {
-            explanation.add(solver.getExplainer().explain(this, constante));
-        }
-        return explanation;
+    public AntiDomain antiDomain() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation explanation = Explanation.build();
+    public void explain(VariableState what, Explanation to) {
         if (empty.get()) {
-            explanation.add(solver.getExplainer().explain(this, constante));
+            to.add(solver.getExplainer().explain(this, constante));
         }
-        return explanation;
+    }
+
+    @Override
+    public void explain(VariableState what, int val, Explanation to) {
+        if (empty.get()) {
+            to.add(solver.getExplainer().explain(this, constante));
+        }
     }
 
     @Override

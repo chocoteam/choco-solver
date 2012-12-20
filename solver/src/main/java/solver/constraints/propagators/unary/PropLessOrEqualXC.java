@@ -48,9 +48,6 @@ import solver.variables.IntVar;
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropLessOrEqualXC extends Propagator<IntVar> {
 
-    Explanation mExp; // a unique explanation, created on demand
-
-
     private final int constant;
 
     public PropLessOrEqualXC(IntVar var, int cste, Solver solver,
@@ -91,10 +88,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        if (mExp == null) {
-            mExp = Explanation.build(aCause);
-        }
-        return mExp;
+    public void explain(Deduction d, Explanation e) {
+        e.add(aCause);
     }
 }

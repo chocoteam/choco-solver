@@ -30,7 +30,6 @@ import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
@@ -48,7 +47,6 @@ public class SendMoreMoney extends AbstractProblem {
 
     IntVar S, E, N, D, M, O, R, Y;
     IntVar[] ALL;
-    Solver solver;
 
     @Override
     public void createSolver() {
@@ -57,8 +55,6 @@ public class SendMoreMoney extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         S = VariableFactory.enumerated("S", 0, 9, solver);
         E = VariableFactory.enumerated("E", 0, 9, solver);
         N = VariableFactory.enumerated("N", 0, 9, solver);

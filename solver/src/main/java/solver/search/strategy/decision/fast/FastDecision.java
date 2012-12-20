@@ -29,13 +29,8 @@ package solver.search.strategy.decision.fast;
 
 import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
 import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.AbstractDecision;
 import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
@@ -44,16 +39,11 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class FastDecision extends AbstractDecision<IntVar> {
-
-    IntVar var;
+public class FastDecision extends Decision<IntVar> {
 
     int value;
 
-    int branch;
-
     DecisionOperator<IntVar> assignment;
-
 
     final PoolManager<FastDecision> poolManager;
 
@@ -62,28 +52,8 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
-    public IntVar getDecisionVariable() {
-        return var;
-    }
-
-    @Override
-    public Object getDecisionValue() {
+    public Integer getDecisionValue() {
         return value;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-    @Override
-    public void buildPrevious() {
-        branch--;
     }
 
     @Override
@@ -100,19 +70,12 @@ public class FastDecision extends AbstractDecision<IntVar> {
         this.var = v;
         this.value = value;
         this.assignment = assignment;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override
-    public Decision copy() {
-        FastDecision dec = poolManager.getE();
-        if (dec == null) {
-            dec = new FastDecision(poolManager);
-        }
-        dec.var = this.var;
-        dec.value = this.value;
-        dec.assignment = this.assignment;
-        dec.branch = this.branch;
-        return dec;
+    public void reverse() {
+        this.assignment = assignment.opposite();
     }
 
     @Override
@@ -122,36 +85,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
-
-    @Override
     public String toString() {
         return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
-    }
-
-
-    @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
-        ExplanationEngine explainer = var.getSolver().getExplainer();
-        expl.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
-        return expl;
-    }
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        return var.getSolver().getExplainer().getVariableRefutation(var, value);
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-        return var.getSolver().getExplainer().getVariableAssignment(var, value);
     }
 }

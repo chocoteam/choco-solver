@@ -51,7 +51,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
 public class BoolNotView extends IntView<BoolVar> implements BoolVar {
 
     public BoolNotView(BoolVar var, Solver solver) {
-        super("not("+var.getName()+")", var, solver);
+        super("not(" + var.getName() + ")", var, solver);
     }
 
     @Override
@@ -157,8 +157,8 @@ public class BoolNotView extends IntView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        return var.explain(what, val);
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val, to);
     }
 
     @Override

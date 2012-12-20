@@ -32,7 +32,7 @@ import solver.constraints.Arithmetic;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.hardcoded.VariableEngine;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -86,7 +86,7 @@ public class NumericalSequence extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 StringBuilder st = new StringBuilder();

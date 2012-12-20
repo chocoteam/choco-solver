@@ -258,8 +258,8 @@ public class OffsetView<IV extends IntVar> extends IntView<IV> {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        return var.explain(what, val - cste);
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val - cste, to);
     }
 
     @Override

@@ -39,7 +39,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.IMonitorContradiction;
+import solver.search.loop.monitors.IMonitorDownBranch;
+import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -62,7 +64,8 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 21/09/12
  */
-public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMonitor, ICause {
+public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
+        IMonitorContradiction, ICause {
 
     protected final int aging; // aging parameter
     protected double[][] Ilabel; // impact per labeling
@@ -244,6 +247,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
 
 
     @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
     public void afterDownLeftBranch() {
         if (asgntFailed) {
             updateImpact(1.0d, currentVar, currentVal);
@@ -254,6 +261,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
             searchSpaceSize.set(sssz);
         }
         reevaluateImpact();
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
     }
 
     @Override
@@ -409,85 +420,16 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void afterInterrupt() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
     public Constraint getConstraint() {
         return null;
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(VariableState.DOM));
+            v.explain(VariableState.DOM, e);
         }
-        return expl;
     }
 
     @Override
@@ -498,5 +440,13 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     @Override
     public int getPropagationConditions(int vIdx) {
         return 0;
+    }
+
+    @Override
+    public void beforeRestart() {
+    }
+
+    @Override
+    public void afterRestart() {
     }
 }

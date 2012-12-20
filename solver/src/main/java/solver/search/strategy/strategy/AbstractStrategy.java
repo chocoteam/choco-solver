@@ -68,7 +68,7 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
      *
      * @return the current decision
      */
-    public abstract Decision getDecision();
+    public abstract Decision<V> getDecision();
 
     /**
      * Creates a <code>String</code> object containing a pretty print of the current variables.
@@ -83,13 +83,14 @@ public abstract class AbstractStrategy<V extends Variable> implements Serializab
         return s.toString();
     }
 
-	/**
-	 * Computes a decision to be applied to variable var
-	 * This method should be implemented in order to use search patterns
-	 * @param var
-	 * @return a decision to be applied to variable var
-	 */
-	public Decision<V> computeDecision(V var){
-		return null;
-	}
+    /**
+     * Computes a decision to be applied to variable var
+     * This method should be implemented in order to use search patterns
+     *
+     * @param var
+     * @return a decision to be applied to variable var
+     */
+    public Decision<V> computeDecision(V var) {
+        return null;
+    }
 }

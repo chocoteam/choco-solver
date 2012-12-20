@@ -40,8 +40,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBipartiteSet;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -453,9 +454,13 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain(VariableState what) {
-        Explanation expl = Explanation.build();
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBipartiteSet(this);
+    }
+
+    public void explain(VariableState what, Explanation to) {
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
@@ -463,17 +468,15 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                expl.add(solver.getExplainer().explain(this, val));
+                to.add(solver.getExplainer().explain(this, val));
             }
         }
-        return expl;
+        it.dispose();
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        to.add(solver.getExplainer().explain(this, val));
     }
 
 

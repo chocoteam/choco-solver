@@ -28,9 +28,7 @@
 package solver.exception;
 
 import com.sun.istack.internal.NotNull;
-import org.slf4j.LoggerFactory;
 import solver.Cause;
-import solver.Configuration;
 import solver.ICause;
 import solver.variables.Variable;
 
@@ -40,7 +38,7 @@ import solver.variables.Variable;
  * A contradiction appears when at least one <code>Variable</code> object is not coherent
  * regarding all or part of <code>Constraint</code> network.
  * Empty domain, instantiation to an out-of-domain value, etc. throws contradiction.
- * <p>
+ * <p/>
  * For performance consideration, a <code>ContradictionException</code> is created everytime a contradiction
  * occurs. A unique object is build and set with specific case informations.
  *
@@ -64,6 +62,7 @@ public final class ContradictionException extends Exception {
 
     /**
      * Throws the unique <code>ContradictionException</code> filled with the specified paramaters.
+     *
      * @param c the constraint at the origin of the contradiction
      * @param v the variable concerned by the contradiction
      * @param s the message to print
@@ -73,7 +72,6 @@ public final class ContradictionException extends Exception {
         this.c = c;
         this.v = v;
         this.s = s;
-        if (Configuration.PRINT_CONTRADICTION) LoggerFactory.getLogger("solver").info("\t!! {}", this.toString());
         return this;
     }
 
@@ -81,7 +79,7 @@ public final class ContradictionException extends Exception {
      * {@inheritDoc}
      */
     public String toString() {
-        return "fail : " + (c == null ?c : c.getConstraint()) + "  " + v + "  " + s;
+        return "CONTRADICTION (" + (c == null ? "" : c.getConstraint() + ", ") + v + ") : " + s;
     }
 
     /**

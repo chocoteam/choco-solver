@@ -29,8 +29,6 @@ package solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.propagators.Propagator;
-import solver.propagation.queues.CircularQueue;
-import solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,36 +54,8 @@ public class Explanation extends Deduction {
     private List<Propagator> propagators;
     private TIntHashSet pid;
 
-    private static CircularQueue<Explanation> stock = new CircularQueue<Explanation>(8);
-
-    public static Explanation build() {
-        if (stock.isEmpty()) {
-            return new Explanation();
-        } else {
-            return stock.pollFirst();
-        }
-    }
-
-    public static Explanation build(Propagator propagator) {
-        Explanation exp = build();
-        exp.add(propagator);
-        return exp;
-    }
-
-    private static void free(Explanation explanation) {
-        if (stock.size() < 16) {
-            stock.addLast(explanation);
-        }
-        explanation.reset();
-    }
-
-    private Explanation() {
+    public Explanation() {
         super(Type.Exp);
-    }
-
-    private Explanation(Propagator p) {
-        this();
-        this.add(p);
     }
 
 
@@ -99,35 +69,15 @@ public class Explanation extends Deduction {
         int nbd = expl.nbDeductions();
         int nbp = expl.nbPropagators();
         if (nbd > 0 || nbp > 0) {
-            // 1. create deductions list if necessary
-            if (this.deductions == null && nbd > 0) {
-                this.deductions = new ArrayList<Deduction>(nbd);
-                this.did = new TIntHashSet(nbd);
-            }
-            // 2. add all deductions of expl
-            Deduction ded;
+            // 1. add all deductions of expl
             for (int i = 0; i < nbd; i++) {
-                ded = expl.getDeduction(i);
-                if (this.did.add(ded.id)) {
-                    this.deductions.add(ded);
-                }
+                add(expl.getDeduction(i));
             }
 
-            // 3. create propagators list if necessary
-            if (this.propagators == null && nbp > 0) {
-                this.propagators = new ArrayList<Propagator>(nbp);
-                this.pid = new TIntHashSet(nbp);
-            }
-            // 4. add all propagators of expl
-            Propagator prop;
+            // 2. add all propagators of expl
             for (int i = 0; i < nbp; i++) {
-                prop = expl.getPropagator(i);
-                if (this.pid.add(prop.getId())) {
-                    this.propagators.add(prop);
-                }
+                add(expl.getPropagator(i));
             }
-        } else {
-            free(expl);
         }
     }
 
@@ -157,7 +107,7 @@ public class Explanation extends Deduction {
             //throw new UnsupportedOperationException("ARG");
         } else {
             if (this.deductions == null) {
-                this.deductions = new ArrayList<Deduction>();
+                this.deductions = new ArrayList<Deduction>(4);
                 this.did = new TIntHashSet();
             }
             if (this.did.add(d.id)) {
@@ -249,10 +199,8 @@ public class Explanation extends Deduction {
         if (this.deductions != null) {
             for (int d = 0; d < deductions.size(); d++) {
                 Deduction dec = deductions.get(d);
-                if (dec.mType == Type.VarAss) {
-                    Variable va = ((VariableAssignment) dec).var;
-                    int val = ((VariableAssignment) dec).val;
-                    int world = explainer.getWorldIndex(va, val);
+                if (dec.mType == Type.DecLeft) {
+                    int world = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
                     if (world > topworld) {
                         topworld = world;
                     }

@@ -44,7 +44,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 14/03/12
  */
-public class MatrixOutput extends VoidSearchMonitor implements ISearchMonitor {
+public class MatrixOutput implements IMonitorClose {
 
     final Solver solver;
     final TIntIntHashMap v2idx, p2idx;
@@ -63,6 +63,10 @@ public class MatrixOutput extends VoidSearchMonitor implements ISearchMonitor {
         this.name = name;
     }
 
+
+    @Override
+    public void beforeClose() {
+    }
 
     @Override
     public void afterClose() {

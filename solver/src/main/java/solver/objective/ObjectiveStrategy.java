@@ -204,6 +204,11 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         public boolean isValid(IntVar var, int value) {
             return var.getUB() > value;
         }
+
+        @Override
+        public DecisionOperator opposite() {
+            return incLB;
+        }
     };
 
     private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
@@ -228,6 +233,11 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public boolean isValid(IntVar var, int value) {
             return var.getLB() < value;
+        }
+
+        @Override
+        public DecisionOperator opposite() {
+            return decUB;
         }
     };
 }

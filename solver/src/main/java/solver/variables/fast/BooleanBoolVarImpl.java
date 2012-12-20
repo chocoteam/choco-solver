@@ -39,8 +39,9 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBool;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
@@ -187,7 +188,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         } else {
             if (value == 0 || value == 1) {
                 EventType e = EventType.INSTANTIATE;
-                notInstanciated.contains(value);
+                assert notInstanciated.contains(offset);
                 notInstanciated.remove(offset);
                 if (reactOnRemoval) {
                     delta.add(1 - value, cause);
@@ -393,32 +394,35 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         }
     }
 
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBool(this);
+    }
+
     /**
      * {@inheritDoc}
      *
      * @param what
+     * @param to
      */
     @Override
-    public Explanation explain(VariableState what) {
-        Explanation expl = Explanation.build();
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+    public void explain(VariableState what, Explanation to) {
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
-                expl.add(solver.getExplainer().explain(this, val));
+                to.add(solver.getExplainer().explain(this, val));
             }
         }
-        return expl;
+        it.dispose();
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        to.add(solver.getExplainer().explain(this, val));
     }
 
     @Override

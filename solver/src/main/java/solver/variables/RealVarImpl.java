@@ -157,28 +157,11 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
         }
     }
 
-    public Explanation explain(VariableState what) {
-        /*Explanation expl = new Explanation(null, null);
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
-        DisposableValueIterator it = invdom.getValueIterator();
-        while (it.hasNext()) {
-            int val = it.next();
-            if ((what == VariableState.LB && val < this.getLB())
-                    || (what == VariableState.UB && val > this.getUB())
-                    || (what == VariableState.DOM)) {
-                expl.add(solver.getExplainer().explain(this, val));
-            }
-        }
-        return expl;*/
-        return null;
+    public void explain(VariableState what, Explanation to) {
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        /*Explanation expl = new Explanation();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;*/
-        return null;
+    public void explain(VariableState what, int val, Explanation to) {
     }
 
     @Override

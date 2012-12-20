@@ -29,6 +29,8 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import samples.graph.input.ATSP_Utils;
 import samples.graph.output.TextWriter;
 import solver.Cause;
@@ -39,7 +41,6 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
@@ -47,8 +48,8 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -57,8 +58,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.io.File;
 import java.util.BitSet;
@@ -133,7 +132,7 @@ public class ATSP {
         outFile = "atsp_fast.csv";
         TextWriter.clearFile(outFile);
         TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;pos;adAC;bst;\n", outFile);
-		bench();
+        bench();
 //        benchRandomWithSCC();
     }
 
@@ -218,8 +217,8 @@ public class ATSP {
     public static void createModel() {
         // create model
         solver = new Solver();
-		initialUB = optimum;
-		System.out.println(initialUB);
+        initialUB = optimum;
+        System.out.println(initialUB);
         System.out.println("initial UB : " + initialUB);
         graph = new DirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
@@ -339,7 +338,12 @@ public class ATSP {
 //        PArc allArcs = new PArc(pengine, gc);
 //        solver.set(pengine.set(new Sort(allArcs).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorInitPropagation() {
+            @Override
+            public void beforeInitialPropagation() {
+            }
+
+            @Override
             public void afterInitialPropagation() {
                 if (totalCost.instantiated()) {
                     solver.getSearchLoop().stopAtFirstSolution(true);

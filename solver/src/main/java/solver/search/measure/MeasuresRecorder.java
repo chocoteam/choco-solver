@@ -32,9 +32,11 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.*;
 
-public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasures {
+public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
+        IMonitorInitialize, IMonitorInitPropagation, IMonitorOpenNode, IMonitorRestart,
+        IMonitorSolution, IMonitorUpBranch {
 
     private static final float IN_MS = 1000 * 1000f;
 
@@ -278,6 +280,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
     public void afterInitialPropagation() {
         initialPropagationTimeCount = System.nanoTime() - startingTime;
     }
@@ -289,6 +295,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         if (depth > maxDepth) {
             maxDepth = depth;
         }
+    }
+
+    @Override
+    public void afterOpenNode() {
     }
 
     @Override
@@ -304,8 +314,16 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
     public void beforeDownRightBranch() {
         depth++;
+    }
+
+    @Override
+    public void afterDownRightBranch() {
     }
 
     @Override
@@ -315,8 +333,16 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void afterUpBranch() {
+    }
+
+    @Override
     public void onContradiction(ContradictionException cex) {
         failCount++;
+    }
+
+    @Override
+    public void beforeRestart() {
     }
 
     @Override
@@ -330,6 +356,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         updateTimeCount();
         updateMemoryUsed();
         updatePropagationCount();
+    }
+
+    @Override
+    public void afterClose() {
     }
 
     //****************************************************************************************************************//

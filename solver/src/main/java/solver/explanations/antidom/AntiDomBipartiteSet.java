@@ -25,11 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package solver.explanations.antidom;
 
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import solver.variables.IntVar;
 
@@ -39,78 +37,76 @@ import solver.variables.IntVar;
  * Date: 20/10/11
  * Time: 16:52
  */
-public class OffsetIStateBitset {
-    private final int offset;
-    // Lower bound of the current domain -- includes offset
-    private final IStateInt LB;
-
-    IStateBitSet domain;
+public class AntiDomBipartiteSet implements AntiDomain {
+    int offset;
+    IStateInt firstOut;
+    int[] values;
+    int[] pos;
 
     private DisposableValueIterator _viterator;
 
-
-    public OffsetIStateBitset(IntVar A) {
+    public AntiDomBipartiteSet(IntVar A) {
         offset = A.getLB();
-        IEnvironment env = A.getSolver().getEnvironment();
-        this.LB = env.makeInt(Integer.MAX_VALUE);
-        domain = A.getSolver().getEnvironment().makeBitSet(A.getUB() - offset + 1);
+        firstOut = A.getSolver().getEnvironment().makeInt();
+        values = new int[A.getDomainSize()];
+        pos = new int[A.getDomainSize()];
     }
 
 
     public void set(int outsideval) {
-        int inside = outsideval - offset;
-        domain.set(inside);
-        if (inside < this.LB.get()) this.LB.set(inside);
+        int fout = firstOut.add(1);
+        values[fout - 1] = outsideval;
+        pos[outsideval - offset] = fout - 1;
     }
 
     public boolean get(int outsideval) {
         int inside = outsideval - offset;
-        return domain.get(inside);
+        return pos[inside] < firstOut.get();
     }
 
-     public DisposableValueIterator getValueIterator() {
+    public DisposableValueIterator getValueIterator() {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {
 
-                int value;
+                int from;
+                int to;
+
 
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    this.value = (LB.get() < Integer.MAX_VALUE) ? LB.get() : -1 ;
+                    this.from = 0;
+                    this.to = firstOut.get();
                 }
 
                 @Override
                 public void topDownInit() {
-                    super.topDownInit();
+                    this.from = 0;
+                    this.to = firstOut.get();
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return this.value != -1;
+                    return from < to;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return this.value != -1;
+                    return from <= to;
                 }
 
                 @Override
                 public int next() {
-                    int old = this.value;
-                    this.value = domain.nextSetBit(this.value + 1);
-                    return old + offset;
+                    return values[from++] + offset;
                 }
 
                 @Override
                 public int previous() {
-                    int old = this.value;
-                    this.value = domain.prevSetBit(this.value - 1);
-                    return old + offset;
+                    return values[--to] + offset;
                 }
             };
         }
-            _viterator.bottomUpInit();
+        _viterator.bottomUpInit();
         return _viterator;
     }
 
@@ -123,6 +119,7 @@ public class OffsetIStateBitset {
         while (it.hasNext()) {
             bf.append(" " + it.next());
         }
+        it.dispose();
         bf.append("]");
         return bf.toString();
     }

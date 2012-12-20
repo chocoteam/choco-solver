@@ -30,8 +30,13 @@ package solver.search.strategy.decision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
+import solver.Identity;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ExplanationEngine;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -40,32 +45,159 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public interface Decision<V extends Variable> extends ICause {
+public abstract class Decision<V extends Variable> implements Identity, ICause {
 
     Logger LOGGER = LoggerFactory.getLogger(Decision.class);
 
-    V getDecisionVariable();
+    public static int _ID = 0;
 
-    Object getDecisionValue();
+    final int id;
 
-    boolean hasNext();
+    protected V var;
 
-    void buildNext();
+    protected Decision<V> assignment;
 
-    void buildPrevious();
+    protected int branch;
 
-    void apply() throws ContradictionException;
+    long fails;
 
-    void setPrevious(Decision decision);
+    int worldIndex; // indication on the world in which it has been selected
 
-    Decision getPrevious();
+    protected Decision previous;
 
-    void free();
+    public Decision() {
+        id = _ID++;
+    }
 
-    Decision copy();
+    @Override
+    public final int getId() {
+        return id;
+    }
 
-    // explanation related ...
-    Deduction getNegativeDeduction();
+    /**
+     * Set the previous decision applied in the tree search
+     *
+     * @param decision
+     */
+    public void setPrevious(Decision decision) {
+        this.previous = decision;
+    }
 
-    Deduction getPositiveDeduction();
+    /**
+     * Return the previous decision applied in the tree search
+     *
+     * @return
+     */
+    public Decision getPrevious() {
+        return previous;
+    }
+
+    protected void setWorldIndex(int wi) {
+        this.worldIndex = wi;
+    }
+
+    public int getWorldIndex() {
+        return worldIndex;
+    }
+
+    /**
+     * Return true if the decision can be refuted
+     *
+     * @return true if the decision can be refuted, false otherwise
+     */
+    public boolean hasNext() {
+        return branch < 2;
+    }
+
+    /**
+     * Build the refutation, hasNext() must be called before
+     */
+    public void buildNext() {
+        branch++;
+    }
+
+    /**
+     * Apply the current decision
+     *
+     * @throws ContradictionException
+     */
+    public abstract void apply() throws ContradictionException;
+
+    /**
+     * Force the decision to be in its creation state.
+     */
+    public void rewind() {
+        branch = 0;
+    }
+
+    /**
+     * Return the variable object involves in the decision
+     *
+     * @return a variable V
+     */
+    public V getDecisionVariable() {
+        return var;
+    }
+
+    /**
+     * Return the value object involves in the decision
+     *
+     * @return a value object
+     */
+    public abstract Object getDecisionValue();
+
+    /**
+     * Free the decision, ie, it can be reused
+     */
+    public abstract void free();
+
+    /**
+     * Reverse the decision operator
+     */
+    public void reverse() {
+        throw new UnsupportedOperationException();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public final boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public final int getPropagationConditions(int vIdx) {
+        return EventType.VOID.mask;
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        ExplanationEngine explainer = var.getSolver().getExplainer();
+        if (branch < 2) {
+            e.add(explainer.explain(getPositiveDeduction()));
+        } else {
+            e.add(explainer.explain(getNegativeDeduction()));
+        }
+    }
+
+    public Deduction getNegativeDeduction() {
+        return var.getSolver().getExplainer().getDecision(this, false);
+    }
+
+    public Deduction getPositiveDeduction() {
+        return var.getSolver().getExplainer().getDecision(this, true);
+    }
+
+    public final Constraint getConstraint() {
+        return null;
+    }
+
+    public final void incFail() {
+        fails++;
+    }
+
+    public final long getFails() {
+        return fails;
+    }
+
 }

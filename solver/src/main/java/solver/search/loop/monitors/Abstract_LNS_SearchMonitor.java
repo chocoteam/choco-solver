@@ -37,7 +37,7 @@ package solver.search.loop.monitors;
 import solver.Solver;
 import solver.exception.ContradictionException;
 
-public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
+public abstract class Abstract_LNS_SearchMonitor implements IMonitorSolution, IMonitorInterruption, IMonitorClose, IMonitorRestart {
 
     //***********************************************************************************
     // VARIABLES
@@ -67,7 +67,6 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
 
     @Override
     public void afterInterrupt() {
-        super.afterInterrupt();
         //		if(solver.getMeasures().getSolutionCount()==0){
         //			System.out.println("research complete : no solution");return;
         //		}
@@ -91,6 +90,10 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
     public void beforeClose() {
     }
 
+    @Override
+    public void afterClose() {
+    }
+
     /**
      * @return true iff the search is in a complete mode (no fixed variable)
      */
@@ -104,6 +107,10 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
     //***********************************************************************************
     // FIX VARIABLES FOR NEXT LNS STEP
     //***********************************************************************************
+
+    @Override
+    public void beforeRestart() {
+    }
 
     @Override
     public void afterRestart() {

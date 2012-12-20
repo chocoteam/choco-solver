@@ -38,7 +38,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 06/09/12
  */
-public class OutputCSV extends VoidSearchMonitor implements ISearchMonitor {
+public class OutputCSV implements IMonitorClose {
 
     final Solver solver;
     final String prefix;
@@ -50,6 +50,10 @@ public class OutputCSV extends VoidSearchMonitor implements ISearchMonitor {
         this.fileName = fileName;
     }
 
+
+    @Override
+    public void beforeClose() {
+    }
 
     @Override
     public void afterClose() {

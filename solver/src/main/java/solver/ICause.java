@@ -39,7 +39,7 @@ import java.io.Serializable;
  * As an example, propagator is a cause because it filters values from variable domain.
  * So do decision, objective manager, etc.
  * It has an impact on domain variables and so it can fails.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -49,23 +49,25 @@ public interface ICause extends Serializable {
 
     /**
      * returns the constraint associated to <code>this</code>, if any.
+     *
      * @return a constraint or null
      */
     Constraint getConstraint();
 
     /**
-     * returns an explanation based on <code>this</code>.
+     * Feeds an explanation based on <code>this</code>.
      *
      * @param d the deduction
-     * @return an explanation
+     * @param e explanation to feed
      */
-    Explanation explain(@Nullable Deduction d) ;
+    void explain(@Nullable Deduction d, Explanation e);
 
 
     /**
      * Returns the promomotion policy of <code>this</code>.
      * If <code>this</code> reacts on promotion, it must be informed of the promotion of an event it created.
      * (example: removing the lower bound of a variable is promoted in lower-bound modification)
+     *
      * @return <code>true</code> if <code>this</code> must be informed of promotion
      */
     boolean reactOnPromotion();
@@ -74,6 +76,7 @@ public interface ICause extends Serializable {
      * Gets the propagation conditions of <code>this</code> on the variable at position <code>vIdx</code> in its internal
      * structure. A propagation condition defines on which event occurring on the <code>vIdx</code>^th
      * variable <code>this</code> can do filter values.
+     *
      * @param vIdx index of the variable
      * @return a mask
      */

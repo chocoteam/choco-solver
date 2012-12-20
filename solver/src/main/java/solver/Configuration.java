@@ -36,7 +36,7 @@ package solver;
 public enum Configuration {
     ;
     // Set to true plugged explanation engine -- enable total deconnection from variable
-    public static final boolean PLUG_EXPLANATION = false;
+    public static final boolean PLUG_EXPLANATION = true;
 
     // Set to true to print propagation information
     public static final boolean PRINT_PROPAGATION = false;
@@ -46,9 +46,6 @@ public enum Configuration {
 
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = false;
-
-    // Set to true to print contradiction information
-    public static final boolean PRINT_CONTRADICTION = false;
 
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;

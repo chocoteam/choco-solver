@@ -31,8 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.recorders.conditions.ICondition;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorInitialize;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -127,12 +126,16 @@ public abstract class AbstractBenchProbas {
         }
     }
 
-    private static class ActivateCond extends VoidSearchMonitor implements ISearchMonitor {
+    private static class ActivateCond implements IMonitorInitialize {
 
         List<ICondition> conds = new ArrayList<ICondition>();
 
         public void add(ICondition cond) {
             conds.add(cond);
+        }
+
+        @Override
+        public void beforeInitialize() {
         }
 
         @Override

@@ -27,7 +27,6 @@
 package solver.search.strategy.decision;
 
 import com.sun.istack.internal.Nullable;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -39,9 +38,8 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 01/06/12
  */
-public enum RootDecision implements Decision {
-    ROOT;
-
+public class RootDecision extends Decision {
+    public static RootDecision ROOT = new RootDecision();
 
     @Override
     public Variable getDecisionVariable() {
@@ -63,7 +61,7 @@ public enum RootDecision implements Decision {
     }
 
     @Override
-    public void buildPrevious() {
+    public void rewind() {
     }
 
 
@@ -86,8 +84,12 @@ public enum RootDecision implements Decision {
     }
 
     @Override
-    public Decision copy() {
-        return ROOT;
+    public void reverse() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void explain(@Nullable Deduction d, Explanation e) {
     }
 
     @Override
@@ -98,25 +100,5 @@ public enum RootDecision implements Decision {
     @Override
     public Deduction getPositiveDeduction() {
         return null;
-    }
-
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
-    public Explanation explain(@Nullable Deduction d) {
-        return null;
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 }

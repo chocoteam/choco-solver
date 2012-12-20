@@ -29,6 +29,7 @@ package samples.graph;
 
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.setDataStructures.ISet;
 import samples.graph.input.DCMST_Utils;
 import samples.graph.output.TextWriter;
 import solver.Solver;
@@ -47,8 +48,8 @@ import solver.exception.ContradictionException;
 import solver.objective.ObjectiveManager;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -59,8 +60,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
-import java.io.*;
+
+import java.io.File;
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -222,7 +223,12 @@ public class DCMST {
 
         solver.post(gc);
 
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorInitPropagation() {
+            @Override
+            public void beforeInitialPropagation() {
+            }
+
+            @Override
             public void afterInitialPropagation() {
                 int narc = 0;
                 int nkarc = 0;

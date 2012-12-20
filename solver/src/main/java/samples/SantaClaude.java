@@ -27,12 +27,13 @@
 package samples;
 
 import choco.kernel.common.util.tools.ArrayUtils;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.real.RealConstraint;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
@@ -112,17 +113,17 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("*******************");
+                if (LoggerFactory.getLogger("solver").isInfoEnabled()) {
+                    LoggerFactory.getLogger("solver").info("*******************");
                     for (int i = 0; i < n_kids; i++) {
-                        LOGGER.info("Kids #{} has received the gift #{} at a cost of {} euros",
+                        LoggerFactory.getLogger("solver").info("Kids #{} has received the gift #{} at a cost of {} euros",
                                 new Object[]{i, kid_gift[i].getValue(), kid_price[i].getValue()});
                     }
-                    LOGGER.info("Total cost: {} euros", total_cost.getValue());
-                    LOGGER.info("Average: [{},{}] euros", average.getLB(), average.getUB());
+                    LoggerFactory.getLogger("solver").info("Total cost: {} euros", total_cost.getValue());
+                    LoggerFactory.getLogger("solver").info("Average: [{},{}] euros", average.getLB(), average.getUB());
                 }
             }
         });

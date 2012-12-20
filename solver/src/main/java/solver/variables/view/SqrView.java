@@ -357,17 +357,15 @@ public final class SqrView extends IntView<IntVar> {
 
 
     @Override
-    public Explanation explain(VariableState what) {
-        return var.explain(VariableState.DOM);
+    public void explain(VariableState what, Explanation to) {
+        var.explain(VariableState.DOM, to);
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
+    public void explain(VariableState what, int val, Explanation to) {
         int fl = floor_sqrt(val);
-        Explanation explanation = Explanation.build();
-        explanation.add(var.explain(what, fl));
-        explanation.add(var.explain(what, -fl));
-        return explanation;
+        var.explain(what, fl, to);
+        var.explain(what, -fl, to);
     }
 
     @Override

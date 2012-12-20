@@ -238,16 +238,14 @@ public final class AbsView extends IntView<IntVar> {
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        return var.explain(VariableState.DOM);
+    public void explain(VariableState what, Explanation to) {
+        var.explain(VariableState.DOM, to);
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = Explanation.build();
-        expl.add(var.explain(what, val));
-        expl.add(var.explain(what, -val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val, to);
+        var.explain(what, -val, to);
     }
 
     @Override

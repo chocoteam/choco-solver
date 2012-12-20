@@ -36,7 +36,8 @@ import solver.search.restart.IRestartStrategy;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public final class RestartManager extends VoidSearchMonitor implements ISearchMonitor{
+public final class RestartManager implements IMonitorInitialize, IMonitorOpenNode,
+        IMonitorSolution, IMonitorRestart {
 
     final IRestartStrategy restartStrategy; // restart strategy -- how do restarts are applied
 
@@ -56,10 +57,14 @@ public final class RestartManager extends VoidSearchMonitor implements ISearchMo
     }
 
     @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
     public void afterInitialize() {
         restartFromStrategyCount = 0;
         restartCutoff = restartStrategy.getScaleFactor();
-		restartStrategyLimit.overrideLimit(restartCutoff);
+        restartStrategyLimit.overrideLimit(restartCutoff);
     }
 
 
@@ -76,6 +81,10 @@ public final class RestartManager extends VoidSearchMonitor implements ISearchMo
     }
 
     @Override
+    public void afterOpenNode() {
+    }
+
+    @Override
     public void onSolution() {
         //reset the restart limit to allow diversification
 //		//I notice that solutions appear sometimes in cluster, at least for shop-scheduling.
@@ -83,6 +92,10 @@ public final class RestartManager extends VoidSearchMonitor implements ISearchMo
         restartStrategyLimit.overrideLimit(restartStrategyLimit.getLimitValue() + restartCutoff);
     }
 
+
+    @Override
+    public void beforeRestart() {
+    }
 
     @Override
     public void afterRestart() {

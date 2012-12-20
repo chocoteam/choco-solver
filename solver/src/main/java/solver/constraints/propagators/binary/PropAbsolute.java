@@ -205,26 +205,24 @@ public class PropAbsolute extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public Explanation explain(Deduction d) {
+    public void explain(Deduction d, Explanation e) {
         if (d.getVar() == vars[0]) {
-            Explanation explanation = Explanation.build(aCause);
+            e.add(aCause);
             if (d instanceof ValueRemoval) {
-                explanation.add(vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal()));
-                explanation.add(vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal()));
+                vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+                vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal(), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
-            return explanation;
         } else if (d.getVar() == vars[1]) {
-            Explanation explanation = Explanation.build(aCause);
+            e.add(aCause);
             if (d instanceof ValueRemoval) {
-                explanation.add(vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
+                vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);
             } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
-            return explanation;
         } else {
-            return super.explain(d);
+            super.explain(d, e);
         }
     }
 }

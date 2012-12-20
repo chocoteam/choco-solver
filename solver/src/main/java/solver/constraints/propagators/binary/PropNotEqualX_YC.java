@@ -148,18 +148,16 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
+    public void explain(Deduction d, Explanation e) {
         Variable var = d.getVar();
 
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            expl.add(y.explain(VariableState.DOM));
+            y.explain(VariableState.DOM, e);
         } else if (var != null) {
-            expl.add(x.explain(VariableState.DOM));
+            x.explain(VariableState.DOM, e);
         }
         // and the application of the current propagator
-        expl.add(this);
-        return expl;
+        e.add(aCause);
     }
 }

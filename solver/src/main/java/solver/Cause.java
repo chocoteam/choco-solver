@@ -31,11 +31,11 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 
 /**
-* <br/>
-*
-* @author Charles Prud'homme
-* @since 26/08/11
-*/
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 26/08/11
+ */
 public enum Cause implements ICause {
     Null;
 
@@ -45,8 +45,7 @@ public enum Cause implements ICause {
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        return null;
+    public void explain(Deduction d, Explanation e) {
     }
 
     @Override

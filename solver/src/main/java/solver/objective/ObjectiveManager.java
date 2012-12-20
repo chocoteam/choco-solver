@@ -188,11 +188,10 @@ public class ObjectiveManager implements ICause {
         }
     }
 
-    public Explanation explain(Deduction val) {
-        if (policy == ResolutionPolicy.SATISFACTION) {
-            return null;
+    public void explain(Deduction val, Explanation e) {
+        if (policy != ResolutionPolicy.SATISFACTION) {
+            objective.explain(VariableState.DOM, e);
         }
-        return objective.explain(VariableState.DOM);
     }
 
     // ICause methods (useless)

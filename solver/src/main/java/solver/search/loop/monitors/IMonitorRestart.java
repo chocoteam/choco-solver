@@ -24,46 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.strategy.decision;
-
-import solver.constraints.Constraint;
-import solver.search.strategy.decision.fast.IFastDecision;
-import solver.variables.Variable;
+package solver.search.loop.monitors;
 
 /**
- * A part implementation of <code>Deduction</code>. It implements the #setPrevious(Deduction)
- * and #getPrevious() methods
+ * An interface to monitor restart instruction in the search loop
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19 aožt 2010
+ * @since 13/12/12
  */
-public abstract class AbstractDecision<V extends Variable> implements IFastDecision<V> {
+public interface IMonitorRestart extends ISearchMonitor {
 
-    long fails;
+    void beforeRestart();
 
-    protected Decision previous;
-
-    public final void setPrevious(Decision decision) {
-        this.previous = decision;
-    }
-
-    public final Decision getPrevious() {
-        return previous;
-    }
-
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    public void incFail(){
-        fails++;
-    }
-
-    public long getFails(){
-        return fails;
-    }
-
+    void afterRestart();
 }

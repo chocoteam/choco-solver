@@ -28,6 +28,9 @@
 package solver.variables;
 
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetFactory;
+import choco.kernel.memory.setDataStructures.SetType;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
@@ -36,9 +39,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * Set variable to represent a set of integers in the range [0,n-1]
@@ -161,12 +161,12 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     // ACCESSORS
     //***********************************************************************************
 
-	@Override
+    @Override
     public ISet getKernel() {
         return kernel;
     }
 
-	@Override
+    @Override
     public ISet getEnvelope() {
         return envelope;
     }
@@ -176,12 +176,12 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     //***********************************************************************************
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
+    public void explain(VariableState what, int val, Explanation to) {
         throw new UnsupportedOperationException("SetVar does not (yet) implement method explain(...)");
     }
 

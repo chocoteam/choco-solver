@@ -32,21 +32,17 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.strategy.assignments.GraphAssignment;
-import solver.search.strategy.decision.AbstractDecision;
 import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 
-public class GraphDecision extends AbstractDecision<GraphVar> {
+public class GraphDecision extends Decision<GraphVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private int branch;
     protected GraphAssignment assignment;
     protected int from, to;
-    protected GraphVar g;
     protected final PoolManager<GraphDecision> poolManager;
 
     //***********************************************************************************
@@ -55,11 +51,6 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 
     public GraphDecision(PoolManager<GraphDecision> poolManager) {
         this.poolManager = poolManager;
-    }
-
-    @Override
-    public GraphVar getDecisionVariable() {
-        return g;
     }
 
     @Override
@@ -72,19 +63,21 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     }
 
     public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
-        g = variable;
+        var = variable;
         this.from = node;
         this.to = -1;
         assignment = graph_ass;
         branch = 0;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     public void setArc(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
-        g = variable;
+        var = variable;
         this.from = from;
         this.to = to;
         assignment = graph_ass;
         branch = 0;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     //***********************************************************************************
@@ -92,49 +85,20 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     //***********************************************************************************
 
     @Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-    @Override
-    public void buildPrevious() {
-        branch--;
-    }
-
-    @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
             if (to == -1) {
-                assignment.apply(g, from, this);
+                assignment.apply(var, from, this);
             } else {
-                assignment.apply(g, from, to, this);
+                assignment.apply(var, from, to, this);
             }
         } else if (branch == 2) {
             if (to == -1) {
-                assignment.unapply(g, from, this);
+                assignment.unapply(var, from, this);
             } else {
-                assignment.unapply(g, from, to, this);
+                assignment.unapply(var, from, to, this);
             }
         }
-    }
-
-    @Override
-    public Decision copy() {
-        GraphDecision dec = poolManager.getE();
-        if (dec == null) {
-            dec = new GraphDecision(poolManager);
-        }
-        dec.g = this.g;
-        dec.from = this.from;
-        dec.to = this.to;
-        dec.assignment = this.assignment;
-        dec.branch = this.branch;
-        return dec;
     }
 
     @Override
@@ -152,27 +116,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     }
 
     @Override
-    public Explanation explain(Deduction d) {
+    public void explain(Deduction d, Explanation e) {
         throw new UnsupportedOperationException("GraphDecision is not equipped for explanations");
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-        throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
     }
 }

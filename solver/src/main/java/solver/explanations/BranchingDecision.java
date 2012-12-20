@@ -25,17 +25,42 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision.fast;
+package solver.explanations;
 
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * A specific deduction: variable assignment.
+ * It stores the touch variable and the assigned value.
+ * <p/>
+ * Created by IntelliJ IDEA.
+ * User: njussien
+ * Date: 30 oct. 2010
+ * Time: 16:26:28
  */
-public interface IFastDecision<V extends Variable> extends Decision<V> {
-//    void set(V var, int value, DecisionOperator<V> assignment);
+public class BranchingDecision extends Deduction {
+
+    Decision decision;
+
+    public BranchingDecision(Decision decision, boolean isLeft) {
+        super(isLeft ? Type.DecLeft : Type.DecRight);
+        this.decision = decision;
+    }
+
+    @Override
+    public Variable getVar() {
+        return decision.getDecisionVariable();
+    }
+
+    public Decision getDecision() {
+        return decision;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("");
+        s.append("assign(").append(decision.toString()).append(")");
+        return s.toString();
+    }
 }

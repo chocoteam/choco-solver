@@ -95,10 +95,10 @@ public enum VariableFactory {
         checkIntVar(name, min, max);
         if (min == max) {
             return Views.fixed(name, min, solver);
+        } else if (min == 0 && max == 1) {
+            return new BooleanBoolVarImpl(name, solver);
         } else {
-            IntVar var = new IntervalIntVarImpl(name, min, max, solver);
-            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-            return var;
+            return new IntervalIntVarImpl(name, min, max, solver);
         }
     }
 
@@ -122,10 +122,10 @@ public enum VariableFactory {
         checkIntVar(name, min, max);
         if (min == max) {
             return Views.fixed(name, min, solver);
+        } else if (min == 0 && max == 1) {
+            return new BooleanBoolVarImpl(name, solver);
         } else {
-            BitsetIntVarImpl var = new BitsetIntVarImpl(name, min, max, solver);
-            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-            return var;
+            return new BitsetIntVarImpl(name, min, max, solver);
         }
     }
 

@@ -29,12 +29,7 @@ package solver.search.strategy.decision.fast;
 
 import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
-import solver.search.strategy.decision.AbstractDecision;
 import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.RealVar;
 
 /**
@@ -43,14 +38,11 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class FastDecisionReal extends AbstractDecision<RealVar> {
+public class FastDecisionReal extends Decision<RealVar> {
 
     RealVar var;
 
     double value;
-
-    int branch;
-
 
     final PoolManager<FastDecisionReal> poolManager;
 
@@ -59,28 +51,8 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     }
 
     @Override
-    public RealVar getDecisionVariable() {
-        return var;
-    }
-
-    @Override
-    public Object getDecisionValue() {
+    public Double getDecisionValue() {
         return value;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-    @Override
-    public void buildPrevious() {
-        branch--;
     }
 
     @Override
@@ -96,6 +68,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
         branch = 0;
         this.var = v;
         this.value = value;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override
@@ -105,50 +78,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
-
-    @Override
     public String toString() {
         return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), "<=", value, branch);
-    }
-
-
-    @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = Explanation.build();
-        ExplanationEngine explainer = var.getSolver().getExplainer();
-        expl.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegativeDeduction()));
-        return expl;
-    }
-
-    @Override
-    public Deduction getNegativeDeduction() {
-        //return var.getSolver().getExplainer().getVariableRefutation(var, value, this);
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Deduction getPositiveDeduction() {
-//        return var.getSolver().getExplainer().getVariableAssignment(var, value);
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Decision copy() {
-        FastDecisionReal dec = poolManager.getE();
-        if (dec == null) {
-            dec = new FastDecisionReal(poolManager);
-        }
-        dec.var = this.var;
-        dec.value = this.value;
-        dec.branch = this.branch;
-        return dec;
     }
 }

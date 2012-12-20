@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 06/09/12
  */
-public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
+public class AverageCSV implements IMonitorClose {
 
     final String fileName;
 
@@ -60,6 +60,10 @@ public class AverageCSV extends VoidSearchMonitor implements ISearchMonitor {
     public void setSolver(Solver aSolver) {
         currentSolver = aSolver;
         aSolver.getSearchLoop().plugSearchMonitor(this);
+    }
+
+    @Override
+    public void beforeClose() {
     }
 
     @Override

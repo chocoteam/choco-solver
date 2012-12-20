@@ -37,9 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.IMonitorDownBranch;
+import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
 import solver.search.strategy.assignments.DecisionOperator;
@@ -63,7 +63,8 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMonitor, IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
+public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
+        IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
@@ -345,6 +346,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     @Override
+    public void beforeRestart() {
+    }
+
+    @Override
     public void afterRestart() {
         if (sampling) {
             nb_probes++;
@@ -388,10 +393,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
     }
 
-    @Override
-    public void afterInitialPropagation() {
-    }
-
     /**
      * Return true if the interval is small enough
      *
@@ -409,59 +410,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterInterrupt() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-    }
-
 
     private static interface IVal {
 

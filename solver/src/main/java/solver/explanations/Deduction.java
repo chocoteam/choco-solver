@@ -27,6 +27,7 @@
 
 package solver.explanations;
 
+import solver.Identity;
 import solver.variables.Variable;
 
 /**
@@ -39,14 +40,14 @@ import solver.variables.Variable;
  * Date: 26 oct. 2010
  * Time: 12:57:36
  */
-public abstract class Deduction implements Comparable<Deduction> {
+public abstract class Deduction implements Identity, Comparable<Deduction> {
 
     public static int _ID = 0;
 
     final int id;
 
     protected enum Type {
-        Exp, ValRem, VarAss, VarRef
+        Exp, ValRem, DecLeft, DecRight
     }
 
     final Type mType;
@@ -73,5 +74,10 @@ public abstract class Deduction implements Comparable<Deduction> {
     @Override
     public int compareTo(Deduction o) {
         return this.id - o.id;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }

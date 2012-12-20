@@ -28,8 +28,8 @@ package solver.explanations;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorContradiction;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
@@ -39,10 +39,10 @@ import solver.search.strategy.decision.RootDecision;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISearchMonitor {
+public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
 
-    RecorderExplanationEngine mExplanationEngine;
-    Solver mSolver;
+    protected RecorderExplanationEngine mExplanationEngine;
+    protected Solver mSolver;
 
     public ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine) {
         this.mExplanationEngine = mExplanationEngine;
@@ -53,18 +53,31 @@ public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISear
     @Override
     public void onContradiction(ContradictionException cex) {
         if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
+            Explanation expl = new Explanation();
+            if (cex.v != null) {
+                cex.v.explain(VariableState.DOM, expl);
+            } else {
+                cex.c.explain(null, expl);
+            }
             Explanation complete = mExplanationEngine.flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(mExplanationEngine);
             mSolver.getSearchLoop().overridePreviousWorld(upto);
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             mExplanationEngine.emList.onContradiction(cex, complete, upto, dec);
         } else {
-            throw new UnsupportedOperationException("ConflictBasedBackjumping.onContradiction incoherent state");
+            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
         }
     }
 
+    /**
+     * Identifie la dŽcision ˆ remettre en cause
+     * Met l'explication de la rŽfutation dans la base d'explications
+     * parce que comme c'est implicite au niveau de la search a bren'appara”trait pas sinon
+     *
+     * @param nworld
+     * @param expl
+     * @return
+     */
     protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
@@ -74,14 +87,14 @@ public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISear
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext())
                 throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if (assign.mType == Deduction.Type.VarAss) {
-                VariableAssignment va = (VariableAssignment) assign;
-                mExplanationEngine.variableassignments.get(va.var.getId()).remove(va.val);
-            }
-            mExplanationEngine.database.put(vr.id, mExplanationEngine.flatten(expl));
+            Deduction left = dec.getPositiveDeduction();
+            expl.remove(left);
+            assert left.mType == Deduction.Type.DecLeft;
+            BranchingDecision va = (BranchingDecision) left;
+            mExplanationEngine.leftbranchdecisions.get(va.getVar().getId()).remove(va.getDecision().getId());
+
+            Deduction right = dec.getNegativeDeduction();
+            mExplanationEngine.database.put(right.id, mExplanationEngine.flatten(expl));
         }
         return dec;
     }
@@ -94,7 +107,7 @@ public class ConflictBasedBackjumping extends VoidSearchMonitor implements ISear
             dec = dec.getPrevious();
         }
         if (dec != RootDecision.ROOT) {
-            Explanation explanation = Explanation.build();
+            Explanation explanation = new Explanation();
             Decision d = dec.getPrevious();
             while ((d != RootDecision.ROOT)) {
                 if (d.hasNext()) {
