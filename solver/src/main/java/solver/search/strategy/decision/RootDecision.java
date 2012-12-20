@@ -41,6 +41,11 @@ import solver.variables.Variable;
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
 
+    // FOR SERIALIZATION
+    private Object readResolve() {
+        return ROOT;
+    }
+
     @Override
     public Variable getDecisionVariable() {
         return null;
