@@ -76,7 +76,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
         solver.getSearchLoop().plugSearchMonitor(this);
         cbj = new ConflictBasedBackjumping(this);
-//        dbt = new DynamicBacktracking(this);
+//        cbj = new DynamicBacktracking(this);
     }
 
     @Override

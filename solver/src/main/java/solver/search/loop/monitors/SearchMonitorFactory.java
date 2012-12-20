@@ -58,6 +58,25 @@ public enum SearchMonitorFactory {
         }
     }
 
+    /**
+     * Print statistics
+     *
+     * @param solver         solver to observe
+     * @param solution       print solutions
+     * @param choices        print choices
+     * @param solutionFormat ptint the solution wrt the format given
+     */
+    public static void log(Solver solver, boolean solution, boolean choices, ISolutionFormat solutionFormat) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.plugSearchMonitor(new LogBasic(solver));
+        if (solution) {
+            sl.plugSearchMonitor(new LogSolutions(sl, solutionFormat));
+        }
+        if (choices) {
+            sl.plugSearchMonitor(new LogChoices(solver));
+        }
+    }
+
     public static void logWithRank(Solver solver, int s, int e) {
         AbstractSearchLoop sl = solver.getSearchLoop();
         sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e));
