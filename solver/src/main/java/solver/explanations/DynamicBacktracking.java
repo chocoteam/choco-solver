@@ -27,6 +27,7 @@
 package solver.explanations;
 
 import com.sun.istack.internal.Nullable;
+import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -51,7 +52,11 @@ public class DynamicBacktracking extends ConflictBasedBackjumping {
         cobdec = new CombinedDecision();
     }
 
-    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
+    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
+        if (cause == mSolver.getSearchLoop().getObjectivemanager()) {
+            super.updateVRExplainUponbacktracking(nworld, expl, cause);
+        }
+
         decision_path.clear();
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {

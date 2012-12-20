@@ -29,11 +29,13 @@ package solver.constraints;
 
 import choco.kernel.ESat;
 import com.sun.istack.internal.Nullable;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.explanations.RecorderExplanationEngine;
 import solver.propagation.IPriority;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
@@ -198,6 +200,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
             vars[v].declareIn(this);
         }
         if (solver.getEngine() != null && solver.getEngine().isInitialized()) {
+            if (solver.getExplainer() instanceof RecorderExplanationEngine) {
+                LoggerFactory.getLogger("exp").warn("Explanation engine does not support constraint dynamic addition!");
+            }
             solver.getEngine().dynamicAddition(this, cut);
         }
     }

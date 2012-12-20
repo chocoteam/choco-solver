@@ -26,6 +26,7 @@
  */
 package solver.explanations;
 
+import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorContradiction;
@@ -62,7 +63,7 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
             Explanation complete = mExplanationEngine.flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(mExplanationEngine);
             mSolver.getSearchLoop().overridePreviousWorld(upto);
-            Decision dec = updateVRExplainUponbacktracking(upto, complete);
+            Decision dec = updateVRExplainUponbacktracking(upto, complete, cex.c);
             mExplanationEngine.emList.onContradiction(cex, complete, upto, dec);
         } else {
             throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
@@ -76,9 +77,10 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
      *
      * @param nworld
      * @param expl
+     * @param cause
      * @return
      */
-    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
+    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
             dec = dec.getPrevious();
