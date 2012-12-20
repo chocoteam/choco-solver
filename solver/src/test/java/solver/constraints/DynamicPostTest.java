@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.propagation.PropagationEngines;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -70,7 +70,11 @@ public class DynamicPostTest {
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
         final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
         final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
+            @Override
+            public void beforeOpenNode() {
+            }
+
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {
@@ -90,7 +94,11 @@ public class DynamicPostTest {
         final IntVar X = VariableFactory.enumerated("X", 1, 2, solver);
         final IntVar Y = VariableFactory.enumerated("Y", 1, 2, solver);
         final IntVar Z = VariableFactory.enumerated("Z", 1, 2, solver);
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
+            @Override
+            public void beforeOpenNode() {
+            }
+
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {

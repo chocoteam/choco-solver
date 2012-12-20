@@ -36,73 +36,75 @@ package samples.graph;
 
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.Views;
 
 /**
  * Example for enumerating some cliques in a given undirected graph
+ *
  * @author Jean-Guillaume Fages
  */
 public class Cliques {
 
-	public static void main(String[] args) {
-		int n = 5;
-		boolean[][] ex = new boolean[n][n];
-		ex[1][2] = true;
-		ex[2][3] = true;
-		ex[2][4] = true;
-		ex[1][3] = true;
-		ex[1][4] = true;
-		ex[3][4] = true;
-		findCliques(ex,1,2);
-	}
+    public static void main(String[] args) {
+        int n = 5;
+        boolean[][] ex = new boolean[n][n];
+        ex[1][2] = true;
+        ex[2][3] = true;
+        ex[2][4] = true;
+        ex[1][3] = true;
+        ex[1][4] = true;
+        ex[3][4] = true;
+        findCliques(ex, 1, 2);
+    }
 
-	/**
-	 * Enumerates all cliques of the input graph which contains edge (x,y)
-	 * (A clique has a loop on each of its nodes)
-	 * @param adjMatrix (input graph)
-	 * @param x a node of the graph
-	 * @param y a node of the graph
-	 */
-	public static void findCliques(boolean[][] adjMatrix,final int x, int y) {
-		Solver solver = new Solver();
-		// variable
-		final UndirectedGraphVar g = createGraphVar(adjMatrix,1,2,solver);
-		// constraint
-		solver.post(GraphConstraintFactory.nCliques(g, Views.fixed(1, solver), solver));
-		// search strategy (lexicographic)
-		solver.set(StrategyFactory.graphLexico(g));
-		// log
-		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
-			public void onSolution(){
-				System.out.println(g.getEnvelopGraph().getNeighborsOf(x));
-			}
-		});
-		// enumeration
-		solver.findAllSolutions();
-	}
+    /**
+     * Enumerates all cliques of the input graph which contains edge (x,y)
+     * (A clique has a loop on each of its nodes)
+     *
+     * @param adjMatrix (input graph)
+     * @param x         a node of the graph
+     * @param y         a node of the graph
+     */
+    public static void findCliques(boolean[][] adjMatrix, final int x, int y) {
+        Solver solver = new Solver();
+        // variable
+        final UndirectedGraphVar g = createGraphVar(adjMatrix, 1, 2, solver);
+        // constraint
+        solver.post(GraphConstraintFactory.nCliques(g, Views.fixed(1, solver), solver));
+        // search strategy (lexicographic)
+        solver.set(StrategyFactory.graphLexico(g));
+        // log
+        SearchMonitorFactory.log(solver, true, false);
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            public void onSolution() {
+                System.out.println(g.getEnvelopGraph().getNeighborsOf(x));
+            }
+        });
+        // enumeration
+        solver.findAllSolutions();
+    }
 
-	private static UndirectedGraphVar createGraphVar(boolean[][] adjMatrix, int x, int y, Solver solver){
-		int n = adjMatrix.length;
-		final UndirectedGraphVar g = new UndirectedGraphVar(solver, n, false);
-		for(int i=0;i<n;i++) {
-			g.getEnvelopGraph().activateNode(i);		// potential node
-			g.getEnvelopGraph().addEdge(i, i);			// potential loop
-			for(int j=i+1;j<n;j++) {
-				if(adjMatrix[i][j]) {
-					g.getEnvelopGraph().addEdge(i, j);	// potential edge
-				}
-			}
-		}
-		g.getKernelGraph().activateNode(x);	// mandatory node
-		g.getKernelGraph().activateNode(y);	// mandatory node
-		g.getEnvelopGraph().addEdge(x,x);	// mandatory loop
-		g.getEnvelopGraph().addEdge(y,y);	// mandatory loop
-		g.getKernelGraph().addEdge(x,y);	// mandatory edge
-		return g;
-	}
+    private static UndirectedGraphVar createGraphVar(boolean[][] adjMatrix, int x, int y, Solver solver) {
+        int n = adjMatrix.length;
+        final UndirectedGraphVar g = new UndirectedGraphVar(solver, n, false);
+        for (int i = 0; i < n; i++) {
+            g.getEnvelopGraph().activateNode(i);        // potential node
+            g.getEnvelopGraph().addEdge(i, i);            // potential loop
+            for (int j = i + 1; j < n; j++) {
+                if (adjMatrix[i][j]) {
+                    g.getEnvelopGraph().addEdge(i, j);    // potential edge
+                }
+            }
+        }
+        g.getKernelGraph().activateNode(x);    // mandatory node
+        g.getKernelGraph().activateNode(y);    // mandatory node
+        g.getEnvelopGraph().addEdge(x, x);    // mandatory loop
+        g.getEnvelopGraph().addEdge(y, y);    // mandatory loop
+        g.getKernelGraph().addEdge(x, y);    // mandatory edge
+        return g;
+    }
 }
