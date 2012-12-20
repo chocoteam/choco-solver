@@ -30,16 +30,16 @@ import java.util.Arrays;
 
 public class AId2AbId implements IId2AbId {
 
-    final int[] map;
+    int[] map;
     final int offset;
     final int noValue;
-    final int size;
+    int size;
 
     public AId2AbId(int minKey, int maxKey, int noValue) {
-        this.size = maxKey - minKey + 1;
+        this.size = Math.max(0, maxKey - minKey + 1);
+        this.offset = size == 0 ? 0 : minKey;
         this.map = new int[size];
         Arrays.fill(map, noValue);
-        offset = minKey;
         this.noValue = noValue;
     }
 
@@ -52,6 +52,13 @@ public class AId2AbId implements IId2AbId {
 
     @Override
     public void set(int key, int value) {
-        map[key - offset] = value;
+        int idx = key - offset;
+        if (idx >= size) {
+            int[] tmp = map;
+            map = new int[idx + 1];
+            System.arraycopy(tmp, 0, map, 0, size);
+            size = map.length;
+        }
+        map[idx] = value;
     }
 }

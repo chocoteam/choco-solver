@@ -24,22 +24,35 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded.util;
+package solver.constraints;
 
-import java.io.Serializable;
+import org.testng.annotations.Factory;
+import solver.propagation.PropagationEngines;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A mapping from an Id to an absolute Id
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 05/07/12
+ * @since 17/12/12
  */
-public interface IId2AbId extends Serializable {
+public class DynamicPostTestFactory {
 
-    int get(int key);
+    PropagationEngines[] engines = new PropagationEngines[]{
+            PropagationEngines.CONSTRAINTDRIVEN,
+            PropagationEngines.VARIABLEDRIVEN,
+            PropagationEngines.CONSTRAINTDRIVEN_7QD};
 
-    void set(int key, int value);
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<Object>(12);
 
+        for (int e = 0; e < engines.length; e++) {
+            PropagationEngines engine = engines[e];
+            lresult.add(new DynamicPostTest(engine));
+        }
+        return lresult.toArray();
+    }
 }
-

@@ -320,7 +320,6 @@ public class ReifiedTest {
         }
 
         solver.set(new VariableEngine(solver));
-        solver.getEngine().init(solver);
         try {
             solver.propagate();
             cp.updateUpperBound(5, Cause.Null);

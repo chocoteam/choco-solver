@@ -26,8 +26,9 @@
  */
 package solver.propagation;
 
+import org.slf4j.LoggerFactory;
 import solver.ICause;
-import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -44,15 +45,37 @@ import java.io.Serializable;
  */
 public interface IPropagationEngine extends Serializable {
 
-    /**
-     * Initializes <code>this</code>
-     *
-     * @param solver the solver
-     */
-    void init(Solver solver);
+    public enum Trace {
+        ;
+
+        public static void printPropagation(Variable v, Propagator p) {
+            LoggerFactory.getLogger("solver").info("[P] {}", "(" + v + "::" + p + ")");
+        }
+
+        public static void printModification(Variable v, EventType e, ICause c) {
+            LoggerFactory.getLogger("solver").info("\t[M] {} {} ({})", new Object[]{v, e, c});
+        }
+
+
+        public static void printSchedule(Propagator p) {
+            LoggerFactory.getLogger("solver").info("\t\t[S] {}", p);
+        }
+
+        public static void printAlreadySchedule(Propagator p) {
+            LoggerFactory.getLogger("solver").info("\t\t[s] {}", p);
+        }
+    }
 
     /**
-     * Reach a fixpoint
+     * Is the engine initialized?
+     * Important for dynamic addition of constraints
+     *
+     * @return
+     */
+    boolean isInitialized();
+
+    /**
+     * Launch the proapagation, ie, active propagators if necessary, then reach a fix point
      *
      * @throws ContradictionException if a contradiction occurrs
      */
@@ -89,4 +112,6 @@ public interface IPropagationEngine extends Serializable {
      * @param propagator propagator to desactivate
      */
     void desactivatePropagator(Propagator propagator);
+
+    void dynamicAddition(Constraint c, boolean cut);
 }

@@ -245,7 +245,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test1d() {
         // Z = X + Y + ...
         for (int seed = 2; seed < 9; seed += 1) {
@@ -273,7 +273,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "30s")
     public void test1e() {
         // Z = X^2
         for (int seed = 0; seed < 99999; seed ++) {
@@ -286,15 +286,15 @@ public class ViewsTest {
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
-                IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.sqr(x);
+				IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
+				IntVar x = Views.sqr(z);
                 solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
             }
             check(ref, solver, seed, false, true);
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "30s")
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();
@@ -317,7 +317,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test2() {
         // Z = X - Y
         for (int seed = 0; seed < 99999; seed ++) {
@@ -394,7 +394,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1s")
     public void test5() {
         // ~all-interval series
         int k = 5;
@@ -432,7 +432,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "1s")
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);

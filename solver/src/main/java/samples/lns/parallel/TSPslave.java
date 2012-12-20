@@ -25,35 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.parallel.schema;
+package samples.lns.parallel;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
+import choco.kernel.parallelism.AbstractParallelMaster;
+import choco.kernel.parallelism.AbstractParallelSlave;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
-import solver.search.strategy.assignments.GraphAssignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.graph.GraphDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
 import choco.kernel.memory.setDataStructures.SetType;
-import solver.variables.graph.GraphVar;
 import choco.kernel.memory.setDataStructures.ISet;
-
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 21/05/12
- * Time: 14:27
- */
 
 public class TSPslave extends AbstractParallelSlave {
 
@@ -102,11 +89,11 @@ public class TSPslave extends AbstractParallelSlave {
     //***********************************************************************************
 
 	@Override
-	public void solveSubProblem() {
+	public void work() {
 		final Solver solver = new Solver();
 		// variables
 		final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST,true);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST,true);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n-1;j++){
@@ -118,21 +105,11 @@ public class TSPslave extends AbstractParallelSlave {
 		undi.getKernelGraph().addEdge(0,n-1);
 		undi.getKernelGraph().addEdge(n-2,n-1);
 		// constraints
-		final Constraint gc = GraphConstraintFactory.makeConstraint(solver);
-		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtLeast(undi, 2, gc, solver));
-		gc.addPropagators(new PropNodeDegree_AtMost(undi, 2, gc, solver));
-		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, distMatrix, gc, solver));
-		gc.addPropagators(PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
-		solver.post(gc);
+		solver.post(GraphConstraintFactory.tsp(undi,totalCost,distMatrix,1,solver));
 		// config
-		solver.set(new FragSearch(undi));
-//		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
-//		solver.set(new Sort(new PArc(gc)).clearOut());
-//		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        // resolution
-//		solver.findSolution();
-//		outputCost = totalCost.getValue();
+		GraphStrategies strategy = new GraphStrategies(undi,distMatrix,null);
+		strategy.configure(10,true,true,false);
+		solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.BOTTOM_UP),strategy));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         //output
         if (solver.getMeasures().getSolutionCount() == 0 || !undi.instantiated()) {
@@ -178,98 +155,5 @@ public class TSPslave extends AbstractParallelSlave {
 
     public int getOutputCost() {
         return outputCost;
-    }
-
-    //***********************************************************************************
-    // SEARCH
-    //***********************************************************************************
-
-    private class FragSearch extends AbstractStrategy {
-        UndirectedGraphVar g;
-        int n, currentNode;
-        PoolManager<GraphDecision> pool;
-        private int[] e;
-
-        FragSearch(UndirectedGraphVar g) {
-            super(new GraphVar[]{g});
-            this.g = g;
-            this.n = g.getEnvelopGraph().getNbNodes();
-            pool = new PoolManager<GraphDecision>();
-        }
-
-        @Override
-        public void init() {
-            e = new int[n];
-            currentNode = -1;
-        }
-
-        @Override
-        public Decision getDecision() {
-            if (g.instantiated()) {
-                return null;
-            }
-            if (currentNode == -1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).getSize() == 2) {
-                currentNode = getNextSparseNode(g, n);
-            }
-            ISet nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
-            int maxE = -1;
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (!g.getKernelGraph().arcExists(currentNode, j)) {
-                    if (maxE == -1 || e[maxE] < e[j]) {
-                        maxE = j;
-                    }
-                }
-            }
-            if (maxE == -1) {
-                throw new UnsupportedOperationException();
-            }
-            GraphDecision fd = pool.getE();
-            if (fd == null) {
-                fd = new GraphDecision(pool);
-            }
-            fd.setArc(g, currentNode, maxE, GraphAssignment.graph_enforcer);
-            return fd;
-        }
-
-        private int getNextSparseNode(UndirectedGraphVar g, int n) {
-            int s = n;
-            int si;
-            for (int i = 0; i < n; i++) {
-                si = g.getEnvelopGraph().getSuccessorsOf(i).getSize();
-                if (si < s && si > 2) {
-                    s = si;
-                }
-            }
-            ISet nei;
-            for (int i = 0; i < n; i++) {
-                e[i] = 0;
-                nei = g.getEnvelopGraph().getPredecessorsOf(i);
-                for (int j = 0; j < n; j++) {
-                    if (g.getEnvelopGraph().getSuccessorsOf(j).getSize() == s) {
-                        e[i]++;
-                    }
-                }
-            }
-            int bestScore = -1;
-            int score;
-            int node = -1;
-            for (int i = 0; i < n; i++) {
-                if (g.getEnvelopGraph().getSuccessorsOf(i).getSize() == s) {
-                    nei = g.getEnvelopGraph().getSuccessorsOf(i);
-                    score = 0;
-                    for (int j = 0; j < n; j++) {
-                        score += e[j];
-                    }
-                    if (score > bestScore) {
-                        bestScore = score;
-                        node = i;
-                    }
-                }
-            }
-            if (node == -1) {
-                throw new UnsupportedOperationException();
-            }
-            return node;
-        }
     }
 }

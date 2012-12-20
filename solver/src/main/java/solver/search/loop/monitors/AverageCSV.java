@@ -41,19 +41,16 @@ import java.io.IOException;
  */
 public class AverageCSV implements IMonitorClose {
 
-    final String prefix;
     final String fileName;
 
     Solver currentSolver;
 
     int nb_probes;
     double[] mA;
-    long nbExecutions;
     double[] sA;
 
 
-    public AverageCSV(String prefix, String fileName, long nbExecutions) {
-        this.prefix = prefix;
+    public AverageCSV(String fileName, long nbExecutions) {
         this.fileName = fileName;
         this.mA = new double[13];
         nb_probes = nbExecutions > 1 ? -1 : 0;
@@ -88,15 +85,18 @@ public class AverageCSV implements IMonitorClose {
     /**
      * Record results
      */
-    public void record() {
+    public void record(String prefix, String postfix) {
         StringBuilder st = new StringBuilder(prefix);
         st.append(";");
         for (int i = 0; i < mA.length; i++) {
             st.append(String.format("%.4f;", mA[i]));
         }
-        for (int i = 0; i < mA.length; i++) {
-            st.append(String.format("%.4f;", Math.sqrt(sA[i] / (nb_probes - 1))));
+        if (nb_probes > 1) {
+            for (int i = 0; i < mA.length; i++) {
+                st.append(String.format("%.4f;", Math.sqrt(sA[i] / (nb_probes - 1))));
+            }
         }
+        st.append(postfix);
         st.append("\n");
         writeTextInto(st.toString(), fileName);
     }
@@ -113,9 +113,16 @@ public class AverageCSV implements IMonitorClose {
             boolean exist = aFile.exists();
             FileWriter out = new FileWriter(aFile, true);
             if (!exist) {
-                out.write(";AVERAGE;;;;;;;;;;;;;STD DEV;;;;;;;;;;;;;\n");
+                out.write(";AVERAGE;;;;;;;;;;;;;");
+                if (nb_probes > 1) {
+                    out.write("STD DEV;;;;;;;;;;;;;");
+                }
+                out.write("\n");
                 out.write("instance;solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
-                out.write("solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;\n");
+                if (nb_probes > 1) {
+                    out.write("solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;");
+                }
+                out.write("\n");
             }
             out.write(text);
             out.flush();

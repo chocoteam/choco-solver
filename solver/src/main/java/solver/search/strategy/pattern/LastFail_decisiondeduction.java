@@ -24,22 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded.util;
 
-import java.io.Serializable;
+package solver.search.strategy.pattern;
+
+import solver.Solver;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.Variable;
 
 /**
- * A mapping from an Id to an absolute Id
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 05/07/12
+ * Last fail which considers the last applied OR UNAPPLIED decision
+ * @author Jean-Guillaume Fages
  */
-public interface IId2AbId extends Serializable {
+public class LastFail_decisiondeduction extends LastFail{
 
-    int get(int key);
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    void set(int key, int value);
+	public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy){
+		super(solver,mainStrategy);
+	}
 
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	long nbFails;
+
+	public void beforeDownRightBranch() {
+		nbFails = solver.getMeasures().getFailCount();
+	}
+
+	public void afterDownRightBranch() {
+		if(nbFails!=solver.getMeasures().getFailCount())
+		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+	}
 }
-

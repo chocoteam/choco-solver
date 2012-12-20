@@ -44,7 +44,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.PropagationUtils;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -132,13 +132,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final Solver solver;
 
-    private static TIntSet set = new TIntHashSet();
+    private TIntSet set = new TIntHashSet();
 
     protected Propagator aCause; // cause of variable modifications.
     // The default value is 'this" but it can be overridden when using in reified propagator
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
-    private static <V extends Variable> void checkVariable(V[] vars) {
+    private <V extends Variable> void checkVariable(V[] vars) {
         set.clear();
         for (int i = 0; i < vars.length; i++) {
             Variable v = vars[i];
@@ -273,7 +273,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public final void forcePropagate(EventType evt) throws ContradictionException {
         if (nbPendingEvt == 0) {
             if (Configuration.PRINT_PROPAGATION) {
-                PropagationUtils.printPropagation(null, this);
+                IPropagationEngine.Trace.printPropagation(null, this);
             }
             coarseERcalls++;
             propagate(evt.getStrengthenedMask());

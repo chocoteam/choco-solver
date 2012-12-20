@@ -46,7 +46,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable {
+public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND

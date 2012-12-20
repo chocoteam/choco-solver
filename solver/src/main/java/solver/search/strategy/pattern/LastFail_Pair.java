@@ -25,60 +25,63 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package solver.search.strategy.pattern;
+
+import solver.Solver;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.Variable;
+
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 22/05/12
- * Time: 17:54
- */
-
-package samples.parallel.schema;
-
-/**Slave born to be mastered and solve sub-problems in parallel
+ * variant of Last Fail :
+ * the last fail stores a pair a variables once exactly one is instantiated,
+ * the Last Fail pattern is applied to the other.
  * @author Jean-Guillaume Fages
  */
-public abstract class AbstractParallelSlave {
+public class LastFail_Pair extends LastFail{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private AbstractParallelMaster master;
-	public final int id;
+	private Variable firstVar;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * Create a slave born to be mastered and solve sub-problems in parallel
-	 * @param master
-	 * @param id slave unique name
-	 */
-	public AbstractParallelSlave(AbstractParallelMaster master, int id){
-		this.master = master;
-		this.id = id;
+	public LastFail_Pair(Solver solver, AbstractStrategy<Variable> mainStrategy){
+		super(solver,mainStrategy);
 	}
 
 	//***********************************************************************************
-	// SUB-PROBLEM SOLVING
+	// METHODS
 	//***********************************************************************************
 
-	/**
-	 * Creates a new thread to solve the sub-problem
-	 */
-	public void solveSubProblemInParallel() {
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				solveSubProblem();
-				master.wishGranted();
+	@Override
+	public Decision getDecision() {
+		if(firstVar!=null && lastVar!=null){
+			if((firstVar.instantiated()?1:0) + (lastVar.instantiated()?1:0)==1){
+				return mainStrategy.computeDecision(firstVar.instantiated()?lastVar:firstVar);
 			}
-		});
-		t.start();
+		}
+		return null;
 	}
 
-	/**
-	 * Model and solve the subproblem
-	 */
-	public abstract void solveSubProblem();
+	@Override
+	public void afterDownRightBranch() {
+		firstVar = solver.getSearchLoop().decision.getDecisionVariable();
+	}
+
+	@Override
+	public void afterRestart() {
+		lastVar = null;
+		firstVar = null;
+	}
+
+	@Override
+	public void onSolution() {
+		lastVar = null;
+		firstVar = null;
+	}
 }

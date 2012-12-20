@@ -42,6 +42,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
+@Deprecated
 public class PropTimesWithLong extends PropTimes {
 
     public PropTimesWithLong(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
@@ -52,6 +53,26 @@ public class PropTimesWithLong extends PropTimes {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
     //****************************************************************************************************************//
+
+	protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
+        if (idx == 0) {
+            awakeOnX();
+        } else if (idx == 1) {
+            awakeOnY();
+        } else if (idx == 2) {
+            awakeOnZ();
+			if (!(v2.contains(0))) {
+				if(lb){
+					int r = Math.min((int)getZmax(), MAX);
+					v2.updateUpperBound(r, aCause);
+				}
+				if(ub){
+					int r = Math.max((int)getZmin(), MIN);
+					v2.updateLowerBound(r, aCause);
+				}
+			}
+		}
+	}
 
     /**
      * reaction when X (v0) is updated

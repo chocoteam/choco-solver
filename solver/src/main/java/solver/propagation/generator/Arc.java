@@ -31,8 +31,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationUtils;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -65,13 +65,13 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
     public void update(EventType evt) {
         if (evtmask == 0) {
             if (Configuration.PRINT_SCHEDULE) {
-                PropagationUtils.printSchedule(prop);
+                IPropagationEngine.Trace.printSchedule(prop);
             }
             prop.incNbPendingEvt();
             scheduler.schedule(this);
         } else {
             if (Configuration.PRINT_SCHEDULE) {
-                PropagationUtils.printAlreadySchedule(prop);
+                IPropagationEngine.Trace.printAlreadySchedule(prop);
             }
             // to treat case where this belongs to the current group executed
             // so the master group must be scheduled
@@ -91,7 +91,7 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
             int evtmask_ = evtmask;
             this.evtmask = 0; // and clean up mask
             if (Configuration.PRINT_PROPAGATION) {
-                PropagationUtils.printPropagation(var, prop);
+                IPropagationEngine.Trace.printPropagation(var, prop);
             }
             prop.fineERcalls++;
             prop.decNbPendingEvt();

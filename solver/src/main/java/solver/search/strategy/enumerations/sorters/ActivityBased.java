@@ -50,6 +50,7 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -196,6 +197,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     public Decision<IntVar> computeDecision(IntVar variable) {
         if (variable == null || variable.instantiated()) {
             return null;
+        }
+        if (vars[currentVar] != variable) {
+            // retrieve indice of the variable in vars
+            currentVar = Arrays.binarySearch(vars, variable);
+            assert vars[currentVar] == variable;
         }
         currentVal = variable.getLB();
         if (sampling) {

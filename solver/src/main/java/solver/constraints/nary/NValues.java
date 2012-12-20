@@ -54,8 +54,15 @@ public class NValues extends IntConstraint<IntVar> {
 		AtMost_BC {
 			@Override
 			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-				// added twice to perform fixpoint
 				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+				boolean enumDom = false;
+				for(IntVar v:vars){
+					if(v.hasEnumeratedDomain()){
+						enumDom = true;
+						break;
+					}
+				}
+				if(enumDom)// added twice to perform fixpoint
 				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
 			}
 		},
@@ -159,8 +166,8 @@ public class NValues extends IntConstraint<IntVar> {
             Variable var = vars[i];
             sb.append(var);
         }
-		sb.append(" = "+vars[vars.length-1]);
-        sb.append("})");
+        sb.append("}, "+vars[vars.length-1]);
+        sb.append(")");
         return sb.toString();
     }
 }

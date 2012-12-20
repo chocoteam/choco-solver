@@ -51,7 +51,6 @@ import java.util.Random;
 
 /**
  * <br/>
- *
  * @author Charles Prud'homme
  * @since 18/05/11
  */
@@ -235,6 +234,11 @@ public class AbsoluteTest {
     public void testBUG2() throws ContradictionException {
         int[][] r = enumerated(new int[]{-25,-24,-23,-22,-21,-20,-18,-17,-16,-15,-13,-11,-10,-9,-7,-6,-1,0,1,2,3,5,6,7},
                 new int[]{-25,-23,-22,-21,-20,-19,-16,-14,-12,-11,-9,-8,-7,-5,-4,-3,-1,0,1,2,4,5,6,7});
+		String s = "";
+		for(int k:r[0]){
+			s+=k+",";
+		}
+		System.out.println(s);
         Assert.assertEquals(r[0], new int[]{0,1,2,3,5,6,7});
         Assert.assertEquals(r[1], new int[]{-7,-5,-3,-1,0,1,2,5,6,7});
     }
@@ -272,8 +276,8 @@ public class AbsoluteTest {
             String message = String.format("[%d,%d] - [%d,%d]", minX, maxX, minY, maxY);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(),
                     message);
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),
-                    message);
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),message);
+            Assert.assertTrue(solver.getMeasures().getFailCount() == 0);
         }
     }
 

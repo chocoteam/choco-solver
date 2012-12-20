@@ -103,6 +103,7 @@ public class ConnectivityFinder {
         ISet act = graph.getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             p[i] = -1;
+			neighbors[i] = graph.getSuccessorsOf(i);
         }
         int first = act.getFirstElement();
         int cc = 0;

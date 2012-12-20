@@ -61,6 +61,7 @@ public final class ScaleView extends IntView<IntVar> {
 
     public ScaleView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "*" + cste + ")", var, solver);
+		assert (cste>0):"view cste must be >0";
         this.cste = cste;
     }
 

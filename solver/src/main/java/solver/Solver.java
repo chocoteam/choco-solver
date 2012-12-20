@@ -41,7 +41,6 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationUtils;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
@@ -52,6 +51,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
@@ -109,7 +109,7 @@ public class Solver implements Serializable {
      */
     protected AbstractSearchLoop search;
 
-	protected SearchPattern searchPattern = SearchPattern.NONE;
+    protected SearchPattern searchPattern = SearchPattern.NONE;
 
     protected IPropagationEngine engine;
 
@@ -175,17 +175,18 @@ public class Solver implements Serializable {
     }
 
     public void set(AbstractStrategy strategies) {
-		this.search.set(searchPattern.makeSearch(this,strategies));
+        this.search.set(searchPattern.makeSearch(this, strategies));
     }
 
-	/**
-	 * Set a search pattern
-	 * BEWARE : should be set BEFORE setting the search strategy
-	 * @param searchPattern
-	 */
-	public void set(SearchPattern searchPattern){
-		this.searchPattern = searchPattern;
-	}
+    /**
+     * Set a search pattern
+     * BEWARE : should be set BEFORE setting the search strategy
+     *
+     * @param searchPattern
+     */
+    public void set(SearchPattern searchPattern) {
+        this.searchPattern = searchPattern;
+    }
 
     /**
      * Attach a propagation engine <code>this</code>.
@@ -205,6 +206,9 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
+        if (getEngine() != null && getEngine().isInitialized()) {
+            throw new SolverException("Solver does not support dynamic variable addition");
+        }
         if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
@@ -228,7 +232,7 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        c.declare();
+        c.declare(false);
     }
 
     /**
@@ -248,7 +252,7 @@ public class Solver implements Serializable {
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            cs[i].declare();
+            cs[i].declare(false);
         }
     }
 
@@ -259,14 +263,30 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        c.declare();
+        c.declare(false);
 
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            cs[i].declare();
+            cs[i].declare(false);
         }
     }
+
+    /**
+     * Post a cut (permanent constraint) during the search has started, .
+     *
+     * @param c constraint to add
+     */
+    public void postCut(Constraint c) {
+        if (cIdx == cstrs.length) {
+            Constraint[] tmp = cstrs;
+            cstrs = new Constraint[tmp.length * 2];
+            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
+        }
+        cstrs[cIdx++] = c;
+        c.declare(true);
+    }
+
 
     public IEnvironment getEnvironment() {
         return environment;
@@ -354,8 +374,7 @@ public class Solver implements Serializable {
         if (engine == null) {
             this.set(new ConstraintEngine(this));
         }
-        engine.init(this);
-        PropagationUtils.primeEngine(this);
+        engine.propagate();
     }
 
     /**

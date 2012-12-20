@@ -348,6 +348,11 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public int compareTo(Variable o) {
+        return this.getId() - o.getId();
+    }
+
+    @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
         if (_viterator == null || !_viterator.isReusable()) {
             _viterator = new DisposableValueIterator() {

@@ -190,7 +190,8 @@ public class PropLagr_DCMST_withCuts extends Propagator implements GraphLagrangi
                         if (!oneNode.get(s)) {
                             counter[s]++;
                             if (counter[s] > maxDegree[s]) {
-                                throw new UnsupportedOperationException();
+								contradiction();
+//                                throw new UnsupportedOperationException();
                                 // contradiction mais devrait deja avoir ete capturee
                             }
                             if (counter[s] == maxDegree[s]) {
@@ -201,7 +202,8 @@ public class PropLagr_DCMST_withCuts extends Propagator implements GraphLagrangi
                                 ctt /= 2;
                                 System.out.println(ctt + " edges in k / " + n);
                                 if (ctt != n - 1)
-                                    throw new UnsupportedOperationException();
+									contradiction();
+//                                    throw new UnsupportedOperationException();
                                 // contradiction mais devrait deja avoir ete capturee
                             }
                             if (counter[s] == maxDegree[s] - 1) {

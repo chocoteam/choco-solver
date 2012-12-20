@@ -24,22 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.hardcoded.util;
 
-import java.io.Serializable;
+package choco.kernel.parallelism;
 
-/**
- * A mapping from an Id to an absolute Id
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 05/07/12
+/**Slave born to be mastered and work in parallel
+ * @author Jean-Guillaume Fages
  */
-public interface IId2AbId extends Serializable {
+public abstract class AbstractParallelSlave {
 
-    int get(int key);
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    void set(int key, int value);
+	private AbstractParallelMaster master;
+	public final int id;
 
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	/**
+	 * Create a slave born to be mastered and work in parallel
+	 * @param master
+	 * @param id slave unique name
+	 */
+	public AbstractParallelSlave(AbstractParallelMaster master, int id){
+		this.master = master;
+		this.id = id;
+	}
+
+	//***********************************************************************************
+	// SUB-PROBLEM SOLVING
+	//***********************************************************************************
+
+	/**
+	 * Creates a new thread to work in parallel
+	 */
+	public void workInParallel() {
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				work();
+				master.wishGranted();
+			}
+		});
+		t.start();
+	}
+
+	/**
+	 * do something
+	 */
+	public abstract void work();
 }
-

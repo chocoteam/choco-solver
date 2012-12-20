@@ -42,6 +42,12 @@ public enum SearchPattern {
 			return strategies;
 		}
 	},
+	LAST_FAIL_DEC {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_decisiondeduction(solver,strategies),strategies);
+		}
+	},
 	LAST_FAIL {
 		@Override
 		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
@@ -54,10 +60,34 @@ public enum SearchPattern {
 			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies),strategies);
 		}
 	},
+	LAST_FAIL_LIMITED_DEPTH_1 {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,1),strategies);
+		}
+	},
+	LAST_FAIL_LIMITED_DEPTH_3 {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,3),strategies);
+		}
+	},
+	LAST_FAIL_LIMITED_DEPTH_6 {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,6),strategies);
+		}
+	},
 	LAST_FAIL_DELAYED {
 		@Override
 		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
 			return new StaticStrategiesSequencer(new LastFail_Delayed(solver,strategies),strategies);
+		}
+	},
+	LAST_FAIL_PAIR {
+		@Override
+		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+			return new StaticStrategiesSequencer(new LastFail_Pair(solver,strategies),strategies);
 		}
 	};
 

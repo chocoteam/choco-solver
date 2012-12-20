@@ -30,6 +30,7 @@ package choco.explanations;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
@@ -106,9 +107,11 @@ public class EqualXYCExplTest {
 
     @Test (groups="10s")
     public void test1() {
-        model(125, 4);
-        model(125, 10);
-        model(153, 15);
-        model(1234, 12);
+		if(Configuration.PLUG_EXPLANATION){
+			model(125, 4);
+			model(125, 10);
+			model(153, 15);
+			model(1234, 12);
+		}
     }
 }

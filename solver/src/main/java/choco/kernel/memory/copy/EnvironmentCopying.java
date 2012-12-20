@@ -34,6 +34,7 @@ import gnu.trove.stack.array.TIntArrayStack;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetFactory;
 import choco.kernel.memory.setDataStructures.SetType;
+import solver.propagation.queues.LinkedList;
 
 import static choco.kernel.memory.copy.RecomputableElement.*;
 
@@ -244,6 +245,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
     @Override
     public void worldPop() {
         save.restore(--currentWorld);
+		restoreOperations(currentWorld);
         clonedWorldIdxStack.pop();
     }
 
@@ -395,9 +397,30 @@ public class EnvironmentCopying extends AbstractEnvironment {
         return SetFactory.makeCopiedSet(type,sizeMax,this);
     }
 
+	//***********************************************************************
+	// OPERATION MANAGEMENT
+	//***********************************************************************
+
+	private LinkedList<Operation> operations = new LinkedList<Operation>();
+	private LinkedList<Integer> operationWorlds = new LinkedList<Integer>();
+
     @Override
     public void save(Operation operation) {
-        throw new UnsupportedOperationException();
+		operations.addLast(operation);
+		operationWorlds.addLast(getWorldIndex());
     }
+
+	private void restoreOperations(int wi){
+		if(!operations.isEmpty()){
+			int oi = operationWorlds.pollLast();
+			if(oi>=wi){
+				Operation op = operations.pollLast();
+				op.undo();
+				restoreOperations(wi);
+			}else{
+				operationWorlds.addLast(oi);
+			}
+		}
+	}
 }
 

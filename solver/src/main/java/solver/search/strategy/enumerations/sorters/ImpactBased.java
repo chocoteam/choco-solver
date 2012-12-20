@@ -49,6 +49,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -118,6 +119,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     public Decision<IntVar> computeDecision(IntVar variable) {
         if (variable == null || variable.instantiated()) {
             return null;
+        }
+        if (vars[currentVar] != variable) {
+            // retrieve indice of the variable in vars
+            currentVar = Arrays.binarySearch(vars, variable);
+            assert vars[currentVar] == variable;
         }
         bests.clear();
         double bestImpact = 1.0;

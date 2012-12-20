@@ -67,7 +67,7 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
         this.cstrs[0] = new AllDifferent(vars, solver, type);
         this.cstrs[2] = new AllDifferent(preds, solver, type);
         this.cstrs[1] = new NoSubTours(vars, solver);
-        this.cstrs[3] = new InverseChanneling(this.vars, preds, solver, AllDifferent.Type.BC);
+        this.cstrs[3] = new InverseChanneling(this.vars, preds, solver);
     }
 }
 

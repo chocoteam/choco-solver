@@ -30,8 +30,8 @@ package solver.constraints.ternary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.ternary.PropTimes;
-import solver.constraints.propagators.ternary.PropTimesWithLong;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.ternary.*;
 import solver.variables.IntVar;
 
 /**
@@ -63,9 +63,15 @@ public class Times extends IntConstraint<IntVar> {
         this.Y = v2;
         this.Z = result;
         if (inIntBounds(X, Y)) {
-            setPropagators(new PropTimes(v1, v2, result, solver, this));
+//          setPropagators(new PropTimes(v1, v2, result, solver, this));
+            setPropagators(new Propagator[]{
+					new PropTimesXY(v1, v2, result, solver, this),
+					new PropTimesZ(v1, v2, result, solver, this)
+			});
+
         } else {
-            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
+			throw new UnsupportedOperationException("out of integer bounds. The long based propagator has not been updated");
+//            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
         }
     }
 

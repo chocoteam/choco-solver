@@ -73,7 +73,7 @@ public class NQueenDualGlobal extends AbstractNQueen {
         solver.post(new AllDifferent(dualdiag1, solver));
         solver.post(new AllDifferent(dualdiag2, solver));
 
-        solver.post(new InverseChanneling(vars, dualvars, solver));
+        solver.post(new InverseChanneling(vars, dualvars,1,1, solver));
     }
 
 

@@ -50,6 +50,6 @@ public class IntPredicate extends Predicate {
 
     @Override
     public boolean evaluate(Arc p) {
-        return op.apply(attribute.eval(p), value);
+        return op.apply(((IAttribute)attribute).eval(p), value);
     }
 }

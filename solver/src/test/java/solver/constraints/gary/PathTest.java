@@ -119,10 +119,10 @@ public class PathTest {
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "10s")
     public static void bigTrees() {
         for (int s = 0; s < 3; s++) {
-            for (int n = 100; n < 1000; n += 100) {
+            for (int n = 100; n < 400; n += 100) {
                 test(s, n, 1);
             }
         }
