@@ -226,13 +226,7 @@ public class Solver implements Serializable {
      * @param c a Constraint
      */
     public void post(Constraint c) {
-        if (cIdx == cstrs.length) {
-            Constraint[] tmp = cstrs;
-            cstrs = new Constraint[tmp.length * 2];
-            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
-        }
-        cstrs[cIdx++] = c;
-        c.declare(false);
+        _post(false, c);
     }
 
     /**
@@ -243,33 +237,8 @@ public class Solver implements Serializable {
      *
      * @param cs Constraints
      */
-    public void post(Constraint[] cs) {
-        while (cIdx + cs.length >= cstrs.length) {
-            Constraint[] tmp = cstrs;
-            cstrs = new Constraint[tmp.length * 2];
-            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
-        }
-        System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
-        cIdx += cs.length;
-        for (int i = 0; i < cs.length; i++) {
-            cs[i].declare(false);
-        }
-    }
-
-    public void post(Constraint c, Constraint... cs) {
-        while (cIdx + cs.length + 1 >= cstrs.length) {
-            Constraint[] tmp = cstrs;
-            cstrs = new Constraint[tmp.length * 2];
-            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
-        }
-        cstrs[cIdx++] = c;
-        c.declare(false);
-
-        System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
-        cIdx += cs.length;
-        for (int i = 0; i < cs.length; i++) {
-            cs[i].declare(false);
-        }
+    public void post(Constraint... cs) {
+        _post(false, cs);
     }
 
     /**
@@ -278,13 +247,32 @@ public class Solver implements Serializable {
      * @param c constraint to add
      */
     public void postCut(Constraint c) {
-        if (cIdx == cstrs.length) {
+        _post(true, c);
+    }
+
+    private void _post(boolean cut, Constraint... cs) {
+        boolean dynAdd = false;
+        if (engine != null && engine.isInitialized()) {
+            dynAdd = true;
+        }
+
+        if (cIdx + cs.length >= cstrs.length) {
+            int nsize = cstrs.length;
+            while (cIdx + cs.length >= nsize) {
+                nsize *= 3 / 2 + 1;
+            }
             Constraint[] tmp = cstrs;
-            cstrs = new Constraint[tmp.length * 2];
+            cstrs = new Constraint[nsize];
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
-        cstrs[cIdx++] = c;
-        c.declare(true);
+        System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
+        cIdx += cs.length;
+        for (int i = 0; i < cs.length; i++) {
+            cs[i].declare();
+            if (dynAdd) {
+                engine.dynamicAddition(cs[i], cut);
+            }
+        }
     }
 
 

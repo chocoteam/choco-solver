@@ -41,6 +41,11 @@ import solver.variables.Variable;
 public class RootDecision extends Decision {
     public static RootDecision ROOT = new RootDecision();
 
+    // FOR SERIALIZATION
+    private Object readResolve() {
+        return ROOT;
+    }
+
     @Override
     public Variable getDecisionVariable() {
         return null;
@@ -100,5 +105,10 @@ public class RootDecision extends Decision {
     @Override
     public Deduction getPositiveDeduction() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "ROOT";
     }
 }

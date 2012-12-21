@@ -56,7 +56,7 @@ public final class LogSolutions implements IMonitorSolution {
         this(searchLoop, new ISolutionFormat() {
             @Override
             public String print() {
-                return String.format("- Solution #{} found. {} \n\t{}.",
+                return String.format("- Solution #%s found. %s \n\t%s.",
                         new Object[]{searchLoop.getMeasures().getSolutionCount(),
                                 searchLoop.getMeasures().toOneShortLineString(),
                                 print(searchLoop.getStrategy().vars)
