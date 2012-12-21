@@ -52,12 +52,8 @@ public enum Views {
     }
 
     public static IntVar fixed(String name, int value, Solver solver) {
-        if (solver.cachedConstants.containsKey(value)) {
-            if (name.startsWith(CSTE_NAME)) {
-                return solver.cachedConstants.get(value);
-            } else {
-                return eq(solver.cachedConstants.get(value));
-            }
+        if (name.startsWith(CSTE_NAME) && solver.cachedConstants.containsKey(value)) {
+            return solver.cachedConstants.get(value);
         }
         ConstantView cste;
         if (value == 0 || value == 1) {
@@ -65,7 +61,9 @@ public enum Views {
         } else {
             cste = new ConstantView(name, value, solver);
         }
-        solver.cachedConstants.put(value, cste);
+        if (name.startsWith(CSTE_NAME)) {
+            solver.cachedConstants.put(value, cste);
+        }
         return cste;
     }
 
