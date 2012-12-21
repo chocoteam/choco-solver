@@ -106,4 +106,9 @@ public class RootDecision extends Decision {
     public Deduction getPositiveDeduction() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "ROOT";
+    }
 }
