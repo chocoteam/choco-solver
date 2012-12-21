@@ -36,6 +36,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.lex.Lex;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -132,7 +133,133 @@ public class LexTest {
         } catch (ContradictionException e) {
             Assert.fail();
         }
+        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
+    }
+
+    @Test
+    public void testBug1() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a2", new int[]{5, 8}, solver);
+        a[1] = VariableFactory.enumerated("a3", new int[]{-2, 0}, solver);
+
+        b[0] = VariableFactory.enumerated("b2", new int[]{5, 8}, solver);
+        b[1] = VariableFactory.enumerated("b3", new int[]{-3, -2}, solver);
+
+
+        solver.post(new Lex(a, b, true, solver));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(5, a[0].getUB());
+        SearchMonitorFactory.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test
+    public void testBug2() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{-2, 5}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-1, 1}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{3, 5}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-6, -1}, solver);
+
+
+        solver.post(new Lex(a, b, true, solver));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(-2, a[0].getUB());
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+    }
+
+    @Test
+    public void testBug3() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{5}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-1, 1}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{3, 5}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-6, -1}, solver);
+
+
+        solver.post(new Lex(a, b, true, solver));
+        try {
+            solver.propagate();
+            Assert.fail();
+        } catch (ContradictionException e) {
+        }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
+    }
+
+    @Test
+    public void testBug4() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[5];
+        IntVar[] b = new IntVar[5];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{2}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{1, 3, 4}, solver);
+        a[2] = VariableFactory.enumerated("a3", new int[]{1, 2, 3, 4, 5}, solver);
+        a[3] = VariableFactory.enumerated("a4", new int[]{1, 2}, solver);
+        a[4] = VariableFactory.enumerated("a5", new int[]{3, 4, 5}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{0, 1, 2}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{1}, solver);
+        b[2] = VariableFactory.enumerated("b3", new int[]{0, 1, 2, 3, 4}, solver);
+        b[3] = VariableFactory.enumerated("b4", new int[]{0, 1}, solver);
+        b[4] = VariableFactory.enumerated("b5", new int[]{0, 1, 2}, solver);
+
+
+        solver.post(new Lex(a, b, true, solver));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+        }
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 216);
+    }
+
+    @Test
+    public void testBug5() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[3];
+        IntVar[] b = new IntVar[3];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{-10, -3, 2}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-5, -4, 2}, solver);
+        a[2] = VariableFactory.enumerated("a3", new int[]{2}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{-10, -1, 3}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-5}, solver);
+        b[2] = VariableFactory.enumerated("b3", new int[]{-4, 2}, solver);
+
+
+        solver.post(new Lex(a, b, true, solver));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(-1, b[0].getLB());
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
     }
 }
