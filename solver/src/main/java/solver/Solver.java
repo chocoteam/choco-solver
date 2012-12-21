@@ -238,9 +238,6 @@ public class Solver implements Serializable {
      * @param cs Constraints
      */
     public void post(Constraint... cs) {
-        if (cs.length == 0) {
-            throw new SolverException("Missing parameter \"cs\" or input is empty");
-        }
         _post(false, cs);
     }
 
