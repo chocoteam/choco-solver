@@ -63,7 +63,7 @@ public class SetFactory {
 	 * @return a new set which can be restored during search, after some backtracks
 	 */
 	public static ISet makeStoredSet(SetType type, int maximumSize, IEnvironment environment){
-		if(HARD_CODED && environment instanceof EnvironmentTrailing)
+		if(HARD_CODED)
 		switch (type){
 			case SWAP_ARRAY:return new Set_Std_Swap_Array(environment,maximumSize);
 			case SWAP_HASH:return new Set_Std_Swap_Hash(environment,maximumSize);
