@@ -413,7 +413,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
 	private void restoreOperations(int wi){
 		if(!operations.isEmpty()){
 			int oi = operationWorlds.pollLast();
-			if(oi>=wi){
+			if(oi>wi){
 				Operation op = operations.pollLast();
 				op.undo();
 				restoreOperations(wi);
