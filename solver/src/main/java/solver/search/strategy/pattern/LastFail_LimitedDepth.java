@@ -36,45 +36,47 @@ import solver.variables.Variable;
  * restricted Last Fail : if the lastDecision has been stored too far away
  * from the current search node, then the Last Fail is not applied
  * => Should reduce pathological behaviors
+ *
  * @author Jean-Guillaume Fages
  */
-public class LastFail_LimitedDepth extends LastFail{
+public class LastFail_LimitedDepth extends LastFail {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int maxDepth;
-	private long worldIndex;
+    private int maxDepth;
+    private long worldIndex;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy){
-		this(solver,mainStrategy,1);
-	}
+    public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy) {
+        this(solver, mainStrategy, 1);
+    }
 
-	public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy, int maxDistance){
-		super(solver,mainStrategy);
-		maxDepth = maxDistance;
-	}
+    public LastFail_LimitedDepth(Solver solver, AbstractStrategy<Variable> mainStrategy, int maxDistance) {
+        super(solver, mainStrategy);
+        maxDepth = maxDistance;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public Decision getDecision() {
-		if(lastVar!=null && !lastVar.instantiated()
-		&& worldIndex - maxDepth < solver.getEnvironment().getWorldIndex()){
-			return mainStrategy.computeDecision(lastVar);
-		}
-		return null;
-	}
+    @Override
+    public Decision getDecision() {
+        if (lastVar != null && !lastVar.instantiated()
+                && worldIndex - maxDepth < solver.getEnvironment().getWorldIndex()) {
+            return mainStrategy.computeDecision(lastVar);
+        }
+        return null;
+    }
 
-	public void afterOpenNode() {
-		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-		worldIndex = solver.getEnvironment().getWorldIndex();
-	}
+    @Override
+    public void afterOpenNode() {
+        lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+        worldIndex = solver.getEnvironment().getWorldIndex();
+    }
 }

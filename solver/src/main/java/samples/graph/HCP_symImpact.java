@@ -37,7 +37,6 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorContradiction;
-import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -222,7 +221,7 @@ public class HCP_symImpact {
     // MONITOR
     //***********************************************************************************
 
-    private static class Restarter implements ISearchMonitor, IMonitorContradiction {
+    private static class Restarter implements IMonitorContradiction {
         int nbFails = 0;
 
         public void onContradiction(ContradictionException cex) {

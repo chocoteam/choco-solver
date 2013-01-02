@@ -29,6 +29,7 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
@@ -37,60 +38,63 @@ import solver.variables.Variable;
  * restricted Last Fail :
  * the last fail is not applied directly after a backtrack
  * It is delayed to the second decision after the backtrack
+ *
  * @author Jean-Guillaume Fages
  */
-public class LastFail_Delayed extends LastFail{
+public class LastFail_Delayed extends LastFail implements IMonitorContradiction {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	// Delays the Last Fail pattern to the second decision
-	private Variable tmp;
-	private long failStamp;
+    // Delays the Last Fail pattern to the second decision
+    private Variable tmp;
+    private long failStamp;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public LastFail_Delayed(Solver solver, AbstractStrategy<Variable> mainStrategy){
-		super(solver,mainStrategy);
-	}
+    public LastFail_Delayed(Solver solver, AbstractStrategy<Variable> mainStrategy) {
+        super(solver, mainStrategy);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public Decision getDecision() {
-		if(lastVar!=null && !lastVar.instantiated()
-		&& tmp!=null){
-			return mainStrategy.computeDecision(lastVar);
-		}
-		return null;
-	}
+    @Override
+    public Decision getDecision() {
+        if (lastVar != null && !lastVar.instantiated()
+                && tmp != null) {
+            return mainStrategy.computeDecision(lastVar);
+        }
+        return null;
+    }
 
-	public void afterOpenNode() {
-		tmp = solver.getSearchLoop().decision.getDecisionVariable();
-	}
+    @Override
+    public void afterOpenNode() {
+        tmp = solver.getSearchLoop().decision.getDecisionVariable();
+    }
 
-	@Override
-	public void afterRestart() {
-		lastVar = null;
-		tmp = null;
-	}
+    @Override
+    public void afterRestart() {
+        lastVar = null;
+        tmp = null;
+    }
 
-	@Override
-	public void onSolution() {
-		lastVar = null;
-		tmp = null;
-	}
+    @Override
+    public void onSolution() {
+        lastVar = null;
+        tmp = null;
+    }
 
-	public void onContradiction(ContradictionException cex) {
-		if(failStamp!=solver.getMeasures().getFailCount()){
-			failStamp = solver.getMeasures().getFailCount();
-			lastVar = tmp;
-			tmp = null;
-		}
-	}
+    @Override
+    public void onContradiction(ContradictionException cex) {
+        if (failStamp != solver.getMeasures().getFailCount()) {
+            failStamp = solver.getMeasures().getFailCount();
+            lastVar = tmp;
+            tmp = null;
+        }
+    }
 }

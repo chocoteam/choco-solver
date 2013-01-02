@@ -28,6 +28,7 @@
 package solver.search.strategy.pattern;
 
 import solver.Solver;
+import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
@@ -36,52 +37,65 @@ import solver.variables.Variable;
  * variant of Last Fail :
  * the last fail stores a pair a variables once exactly one is instantiated,
  * the Last Fail pattern is applied to the other.
+ *
  * @author Jean-Guillaume Fages
  */
-public class LastFail_Pair extends LastFail{
+public class LastFail_Pair extends LastFail implements IMonitorDownBranch {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private Variable firstVar;
+    private Variable firstVar;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public LastFail_Pair(Solver solver, AbstractStrategy<Variable> mainStrategy){
-		super(solver,mainStrategy);
-	}
+    public LastFail_Pair(Solver solver, AbstractStrategy<Variable> mainStrategy) {
+        super(solver, mainStrategy);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public Decision getDecision() {
-		if(firstVar!=null && lastVar!=null){
-			if((firstVar.instantiated()?1:0) + (lastVar.instantiated()?1:0)==1){
-				return mainStrategy.computeDecision(firstVar.instantiated()?lastVar:firstVar);
-			}
-		}
-		return null;
-	}
+    @Override
+    public Decision getDecision() {
+        if (firstVar != null && lastVar != null) {
+            if ((firstVar.instantiated() ? 1 : 0) + (lastVar.instantiated() ? 1 : 0) == 1) {
+                return mainStrategy.computeDecision(firstVar.instantiated() ? lastVar : firstVar);
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public void afterDownRightBranch() {
-		firstVar = solver.getSearchLoop().decision.getDecisionVariable();
-	}
+    @Override
+    public void beforeDownLeftBranch() {
+    }
 
-	@Override
-	public void afterRestart() {
-		lastVar = null;
-		firstVar = null;
-	}
+    @Override
+    public void afterDownLeftBranch() {
+    }
 
-	@Override
-	public void onSolution() {
-		lastVar = null;
-		firstVar = null;
-	}
+    @Override
+    public void beforeDownRightBranch() {
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+        firstVar = solver.getSearchLoop().decision.getDecisionVariable();
+    }
+
+    @Override
+    public void afterRestart() {
+        lastVar = null;
+        firstVar = null;
+    }
+
+    @Override
+    public void onSolution() {
+        lastVar = null;
+        firstVar = null;
+    }
 }

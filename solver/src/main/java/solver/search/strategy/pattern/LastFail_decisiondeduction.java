@@ -28,35 +28,47 @@
 package solver.search.strategy.pattern;
 
 import solver.Solver;
+import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
 /**
  * Last fail which considers the last applied OR UNAPPLIED decision
+ *
  * @author Jean-Guillaume Fages
  */
-public class LastFail_decisiondeduction extends LastFail{
+public class LastFail_decisiondeduction extends LastFail implements IMonitorDownBranch {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy){
-		super(solver,mainStrategy);
-	}
+    public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy) {
+        super(solver, mainStrategy);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	long nbFails;
+    long nbFails;
 
-	public void beforeDownRightBranch() {
-		nbFails = solver.getMeasures().getFailCount();
-	}
+    @Override
+    public void beforeDownLeftBranch() {
+    }
 
-	public void afterDownRightBranch() {
-		if(nbFails!=solver.getMeasures().getFailCount())
-		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-	}
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+        nbFails = solver.getMeasures().getFailCount();
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+        if (nbFails != solver.getMeasures().getFailCount())
+            lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+    }
 }

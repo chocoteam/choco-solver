@@ -29,7 +29,9 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
@@ -38,73 +40,70 @@ import solver.variables.Variable;
  * Last Fail pattern :
  * After a backtrack, the next decision to be computed should involve
  * the variable of the la decision (left branch, refutations are not considered)
+ *
  * @author Jean-Guillaume Fages
  */
-public class LastFail extends AbstractStrategy<Variable> implements ISearchMonitor{
+public class LastFail extends AbstractStrategy<Variable> implements IMonitorOpenNode, IMonitorRestart, IMonitorSolution {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected Variable lastVar;
-	protected AbstractStrategy<Variable> mainStrategy;
-	protected Solver solver;
+    protected Variable lastVar;
+    protected AbstractStrategy<Variable> mainStrategy;
+    protected Solver solver;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public LastFail(Solver solver, AbstractStrategy<Variable> mainStrategy){
-		super(solver.getVars());
-		this.solver = solver;
-		this.mainStrategy = mainStrategy;
-		solver.getSearchLoop().plugSearchMonitor(this);
-	}
+    public LastFail(Solver solver, AbstractStrategy<Variable> mainStrategy) {
+        super(solver.getVars());
+        this.solver = solver;
+        this.mainStrategy = mainStrategy;
+        solver.getSearchLoop().plugSearchMonitor(this);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void init() throws ContradictionException {}
+    @Override
+    public void init() throws ContradictionException {
+    }
 
-	@Override
-	public Decision getDecision() {
-		if(lastVar!=null && !lastVar.instantiated()){
-			return mainStrategy.computeDecision(lastVar);
-		}
-		return null;
-	}
+    @Override
+    public Decision getDecision() {
+        if (lastVar != null && !lastVar.instantiated()) {
+            return mainStrategy.computeDecision(lastVar);
+        }
+        return null;
+    }
 
-	//***********************************************************************************
-	// Monitor
-	//***********************************************************************************
+    //***********************************************************************************
+    // Monitor
+    //***********************************************************************************
 
-	public void afterOpenNode() {
-		lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-	}
-	public void afterRestart() {
-		lastVar = null;
-	}
+    @Override
+    public void beforeOpenNode() {
+    }
 
-	public void onSolution() {
-		lastVar = null;
-	}
-	// useless
-	public void beforeInitialize() {}
-	public void afterInitialize() {}
-	public void beforeInitialPropagation() {}
-	public void afterInitialPropagation() {}
-	public void beforeOpenNode() {}
-	public void beforeDownLeftBranch() {}
-	public void afterDownLeftBranch() {}
-	public void beforeDownRightBranch() {}
-	public void afterDownRightBranch() {}
-	public void beforeUpBranch() {}
-	public void afterUpBranch() {}
-	public void onContradiction(ContradictionException cex) {}
-	public void beforeRestart() {}
-	public void afterInterrupt() {}
-	public void beforeClose() {}
-	public void afterClose() {}
+    @Override
+    public void afterOpenNode() {
+        lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+    }
+
+    @Override
+    public void beforeRestart() {
+    }
+
+    @Override
+    public void afterRestart() {
+        lastVar = null;
+    }
+
+    @Override
+    public void onSolution() {
+        lastVar = null;
+    }
 }
