@@ -49,6 +49,6 @@ public class InverseBuilder implements IBuilder {
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         IntVar[] y = exps.get(1).toIntVarArray(solver);
-        return new InverseChanneling(x, y, solver);
+        return new InverseChanneling(x, y,1,1, solver);
     }
 }
