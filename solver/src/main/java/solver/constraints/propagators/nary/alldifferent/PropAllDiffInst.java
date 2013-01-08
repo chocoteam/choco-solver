@@ -27,6 +27,7 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -43,6 +44,7 @@ import solver.variables.IntVar;
 public class PropAllDiffInst extends Propagator<IntVar> {
 
     private final int n;
+    private TIntArrayStack toCheck = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -57,7 +59,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * @param sol
      */
     public PropAllDiffInst(IntVar[] vars, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.LINEAR, true);
+        super(vars, sol, constraint, PropagatorPriority.UNARY, true);
         n = vars.length;
     }
 
@@ -89,32 +91,37 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        toCheck.clear();
         for (int v = 0; v < n; v++) {
             if (vars[v].instantiated()) {
-                int val = vars[v].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != v) {
-                        vars[i].removeValue(val, aCause);
-                    }
-                }
+                toCheck.push(v);
             }
         }
-    }
+        fixpoint();
 
-    @Override
-    public boolean advise(int idxVarInProp, int mask) {
-        return super.advise(idxVarInProp, mask);
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        int val = vars[varIdx].getValue();
-        for (int i = 0; i < n; i++) {
-            if (i != varIdx) {
-                vars[i].removeValue(val, aCause);
+        toCheck.push(varIdx);
+        fixpoint();
+    }
+
+    private void fixpoint() throws ContradictionException {
+        while (toCheck.size() > 0) {
+            int vidx = toCheck.pop();
+            int val = vars[vidx].getValue();
+            for (int i = 0; i < n; i++) {
+                if (i != vidx) {
+                    if (vars[i].removeValue(val, aCause)) {
+                        if (vars[i].instantiated()) {
+                            toCheck.push(i);
+                        }
+                    }
+
+                }
             }
         }
     }

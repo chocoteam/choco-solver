@@ -27,7 +27,9 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,9 +40,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -67,7 +68,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private int[] matching;
     private int[] nodeSCC;
     private BitSet free;
-    private UnaryIntProcedure remProc;
+    private UnarySafeIntProcedure remProc;
     protected final IIntDeltaMonitor[] idms;
     private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
@@ -75,6 +76,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
+    boolean noMatching;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -118,6 +120,126 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
+        noMatching = false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
+            if ((mask & EventType.INSTANTIATE.mask) != 0) {
+                int val = vars[varIdx].getValue();
+                int j = map.get(val);
+                ISet nei = digraph.getPredecessorsOf(j);
+                for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+                    if (i != varIdx) {
+                        digraph.removeEdge(i, j);
+                    }
+                }
+                int i = digraph.getSuccessorsOf(j).getFirstElement();
+                if (i != -1 && i != varIdx) {
+                    digraph.removeEdge(i, j);
+                }
+            }
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            ESat rvalue = repairMatching();
+            switch (rvalue) {
+                case UNDEFINED:
+                    return false;
+                case FALSE:
+                    noMatching = true;
+                default:
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            for (int v = 0; v < n; v++) {
+                if (vars[v].instantiated()) {
+                    int val = vars[v].getValue();
+                    for (int i = 0; i < n; i++) {
+                        if (i != v) {
+                            vars[i].removeValue(val, aCause);
+                        }
+                    }
+                }
+            }
+            buildDigraph();
+            if (ESat.FALSE == repairMatching()) {
+                contradiction(null, "no match");
+            }
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
+        } else { // incremental
+//            free.clear();
+//            for (int i = 0; i < n; i++) {
+//                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+//                    free.set(i);
+//                }
+//            }
+//            for (int i = n; i < n2; i++) {
+//                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+//                    free.set(i);
+//                }
+//            }
+        }
+        filter();
+    }
+
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        if (noMatching) {
+            noMatching = false;
+            contradiction(null, "no matching");
+        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
+
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
     }
 
     @Override
@@ -167,19 +289,24 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // MATCHING
     //***********************************************************************************
 
-    private void repairMatching() throws ContradictionException {
-        for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
-            tryToMatch(i);
+    private ESat repairMatching() {
+        ESat rvalue = ESat.TRUE;
+        for (int i = free.nextSetBit(0); i >= 0 && i < n && rvalue != ESat.FALSE; i = free.nextSetBit(i + 1)) {
+            //todo gerer le TRUE absorbant
+            rvalue = tryToMatch(i);
         }
-        int p;
-        for (int i = 0; i < n; i++) {
-            p = digraph.getPredecessorsOf(i).getFirstElement();
-            matching[p] = i;
-            matching[i] = p;
+        if (rvalue != ESat.FALSE) {
+            int p;
+            for (int i = 0; i < n; i++) {
+                p = digraph.getPredecessorsOf(i).getFirstElement();
+                matching[p] = i;
+                matching[i] = p;
+            }
         }
+        return rvalue;
     }
 
-    private void tryToMatch(int i) throws ContradictionException {
+    private ESat tryToMatch(int i) {
         int mate = augmentPath_BFS(i);
         if (mate != -1) {
             free.clear(mate);
@@ -190,8 +317,10 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 digraph.addArc(tmp, father[tmp]);
                 tmp = father[tmp];
             }
+            return ESat.TRUE; // TODO: gérer le non reveil
         } else {
-            contradiction(vars[i], "no match");
+            //contradiction(vars[i], "no match");
+            return ESat.FALSE;
         }
     }
 
@@ -279,104 +408,16 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         }
     }
 
-    //***********************************************************************************
-    // PROPAGATION
-    //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            if (n2 < n * 2) {
-                contradiction(null, "");
-            }
-            for (int v = 0; v < n; v++) {
-                if (vars[v].instantiated()) {
-                    int val = vars[v].getValue();
-                    for (int i = 0; i < n; i++) {
-                        if (i != v) {
-                            vars[i].removeValue(val, aCause);
-                        }
-                    }
-                }
-            }
-            buildDigraph();
-        } else {
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-        }
-        repairMatching();
-        filter();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
-        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-        idms[varIdx].unfreeze();
-        if ((mask & EventType.INSTANTIATE.mask) != 0) {
-            int val = vars[varIdx].getValue();
-            int j = map.get(val);
-            ISet nei = digraph.getPredecessorsOf(j);
-            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                if (i != varIdx) {
-                    digraph.removeEdge(i, j);
-                    vars[i].removeValue(val, aCause);
-                }
-            }
-            int i = digraph.getSuccessorsOf(j).getFirstElement();
-            if (i != -1 && i != varIdx) {
-                digraph.removeEdge(i, j);
-                vars[i].removeValue(val, aCause);
-            }
-        }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
-
-    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
+    private class DirectedRemProc implements UnarySafeIntProcedure<Integer> {
         int idx;
 
-        public void execute(int i) throws ContradictionException {
+        public void execute(int i) {
             digraph.removeEdge(idx, map.get(i));
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idx) {
+        public UnarySafeIntProcedure set(Integer idx) {
             this.idx = idx;
             return this;
         }
