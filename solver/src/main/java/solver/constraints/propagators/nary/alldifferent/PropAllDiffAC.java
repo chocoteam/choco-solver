@@ -28,6 +28,7 @@ package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
+import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -76,7 +77,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
-    boolean noMatching;
+    IStateBool noMatching;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -120,7 +121,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
-        noMatching = false;
+        noMatching = solver.getEnvironment().makeBool(false);
     }
 
     @Override
@@ -164,7 +165,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 case UNDEFINED:
                     return false;
                 case FALSE:
-                    noMatching = true;
+                    noMatching.set(true);
                 default:
                     return true;
             }
@@ -217,8 +218,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (noMatching) {
-            noMatching = false;
+        if (noMatching.get()) {
+            noMatching.set(false);
             contradiction(null, "no matching");
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);

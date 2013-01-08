@@ -110,19 +110,24 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     private void fixpoint() throws ContradictionException {
-        while (toCheck.size() > 0) {
-            int vidx = toCheck.pop();
-            int val = vars[vidx].getValue();
-            for (int i = 0; i < n; i++) {
-                if (i != vidx) {
-                    if (vars[i].removeValue(val, aCause)) {
-                        if (vars[i].instantiated()) {
-                            toCheck.push(i);
+        try {
+            while (toCheck.size() > 0) {
+                int vidx = toCheck.pop();
+                int val = vars[vidx].getValue();
+                for (int i = 0; i < n; i++) {
+                    if (i != vidx) {
+                        if (vars[i].removeValue(val, aCause)) {
+                            if (vars[i].instantiated()) {
+                                toCheck.push(i);
+                            }
                         }
-                    }
 
+                    }
                 }
             }
+        } catch (ContradictionException cex) {
+            toCheck.clear();
+            throw cex;
         }
     }
 
