@@ -27,6 +27,7 @@
 package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -62,7 +63,7 @@ public class IntDeltaMonitor implements IIntDeltaMonitor {
 
     @Override
     public void freeze() {
-        assert delta.timeStamped():"delta is not timestamped";
+        assert delta.timeStamped() : "delta is not timestamped";
         lazyClear();
         this.frozenFirst = first; // freeze indices
         this.frozenLast = last = delta.size();
@@ -71,8 +72,8 @@ public class IntDeltaMonitor implements IIntDeltaMonitor {
     @Override
     public void unfreeze() {
         //propagator is idempotent
-		delta.lazyClear();	// fix 27/07/12
-		lazyClear(); 		// fix 27/07/12
+        delta.lazyClear();    // fix 27/07/12
+        lazyClear();         // fix 27/07/12
         this.first = this.last = delta.size();
     }
 
@@ -86,6 +87,19 @@ public class IntDeltaMonitor implements IIntDeltaMonitor {
     @Override
     public void clear() {
         this.first = this.last = 0;
+    }
+
+    @Override
+    public void forEach(SafeIntProcedure proc, EventType eventType) {
+        if (EventType.isRemove(eventType.mask)) {
+            for (int i = frozenFirst; i < frozenLast; i++) {
+                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+                    proc.execute(delta.get(i));
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override

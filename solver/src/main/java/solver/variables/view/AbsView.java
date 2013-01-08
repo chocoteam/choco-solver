@@ -30,6 +30,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -70,6 +71,28 @@ public final class AbsView extends IntView<IntVar> {
             return IIntDeltaMonitor.Default.NONE;
         }
         return new IntDeltaMonitor(var.getDelta(), propagator) {
+            @Override
+            public void forEach(SafeIntProcedure proc, EventType eventType) {
+                if (EventType.isRemove(eventType.mask)) {
+                    for (int i = frozenFirst; i < frozenLast; i++) {
+                        if (propagator != delta.getCause(i)) {
+                            int v = delta.get(i);
+                            if (!var.contains(-v)) {
+                                boolean found = false;
+                                for (int j = i + 1; !found && j < frozenLast; j++) {
+                                    if (delta.get(j) == -v) {
+                                        found = true;
+                                    }
+                                }
+                                if (!found) {
+                                    proc.execute(Math.abs(v));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                 if (EventType.isRemove(eventType.mask)) {
