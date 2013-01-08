@@ -28,10 +28,10 @@ package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
-import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -64,11 +64,11 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private DirectedGraph digraph;
+    protected int n, n2;
+    protected DirectedGraph digraph;
     private int[] matching;
     private int[] nodeSCC;
-    private BitSet free;
+    protected BitSet free;
     private UnarySafeIntProcedure remProc;
     protected final IIntDeltaMonitor[] idms;
     private StrongConnectivityFinder SCCfinder;
@@ -77,7 +77,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
-    IStateBool noMatching;
+    private TIntArrayStack toCheck = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -121,7 +121,6 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
-        noMatching = solver.getEnvironment().makeBool(false);
     }
 
     @Override
@@ -149,26 +148,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                     digraph.removeEdge(i, j);
                 }
             }
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            ESat rvalue = repairMatching();
-            switch (rvalue) {
-                case UNDEFINED:
-                    return false;
-                case FALSE:
-                    noMatching.set(true);
-                default:
-                    return true;
-            }
+            return true;
         }
         return false;
     }
@@ -180,49 +160,66 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            toCheck.clear();
             if (n2 < n * 2) {
                 contradiction(null, "");
             }
             for (int v = 0; v < n; v++) {
                 if (vars[v].instantiated()) {
-                    int val = vars[v].getValue();
-                    for (int i = 0; i < n; i++) {
-                        if (i != v) {
-                            vars[i].removeValue(val, aCause);
-                        }
-                    }
+                    toCheck.push(v);
                 }
             }
+            fixpoint();
             buildDigraph();
-            if (ESat.FALSE == repairMatching()) {
-                contradiction(null, "no match");
-            }
             for (int i = 0; i < idms.length; i++) {
                 idms[i].unfreeze();
             }
         } else { // incremental
-//            free.clear();
-//            for (int i = 0; i < n; i++) {
-//                if (digraph.getPredecessorsOf(i).getSize() == 0) {
-//                    free.set(i);
-//                }
-//            }
-//            for (int i = n; i < n2; i++) {
-//                if (digraph.getSuccessorsOf(i).getSize() == 0) {
-//                    free.set(i);
-//                }
-//            }
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
         }
+        repairMatching();
         filter();
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (noMatching.get()) {
-            noMatching.set(false);
-            contradiction(null, "no matching");
+        if ((mask & EventType.INSTANTIATE.mask) != 0) {
+            toCheck.push(varIdx);
+            fixpoint();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
+
+    private void fixpoint() throws ContradictionException {
+        try {
+            while (toCheck.size() > 0) {
+                int vidx = toCheck.pop();
+                int val = vars[vidx].getValue();
+                for (int i = 0; i < n; i++) {
+                    if (i != vidx) {
+                        if (vars[i].removeValue(val, aCause)) {
+                            if (vars[i].instantiated()) {
+                                toCheck.push(i);
+                            }
+                        }
+
+                    }
+                }
+            }
+        } catch (ContradictionException cex) {
+            toCheck.clear();
+            throw cex;
+        }
     }
 
     //***********************************************************************************
@@ -262,7 +259,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // Initialization
     //***********************************************************************************
 
-    private void buildDigraph() {
+    protected void buildDigraph() {
         for (int i = 0; i < n2; i++) {
             digraph.getSuccessorsOf(i).clear();
             digraph.getPredecessorsOf(i).clear();
@@ -290,24 +287,19 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // MATCHING
     //***********************************************************************************
 
-    private ESat repairMatching() {
-        ESat rvalue = ESat.TRUE;
-        for (int i = free.nextSetBit(0); i >= 0 && i < n && rvalue != ESat.FALSE; i = free.nextSetBit(i + 1)) {
-            //todo gerer le TRUE absorbant
-            rvalue = tryToMatch(i);
+    protected void repairMatching() throws ContradictionException {
+        for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
+            tryToMatch(i);
         }
-        if (rvalue != ESat.FALSE) {
-            int p;
-            for (int i = 0; i < n; i++) {
-                p = digraph.getPredecessorsOf(i).getFirstElement();
-                matching[p] = i;
-                matching[i] = p;
-            }
+        int p;
+        for (int i = 0; i < n; i++) {
+            p = digraph.getPredecessorsOf(i).getFirstElement();
+            matching[p] = i;
+            matching[i] = p;
         }
-        return rvalue;
     }
 
-    private ESat tryToMatch(int i) {
+    private void tryToMatch(int i) throws ContradictionException {
         int mate = augmentPath_BFS(i);
         if (mate != -1) {
             free.clear(mate);
@@ -318,10 +310,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 digraph.addArc(tmp, father[tmp]);
                 tmp = father[tmp];
             }
-            return ESat.TRUE; // TODO: gérer le non reveil
         } else {
-            //contradiction(vars[i], "no match");
-            return ESat.FALSE;
+            contradiction(vars[i], "no match");
         }
     }
 
@@ -369,7 +359,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         digraph.desactivateNode(n2);
     }
 
-    private void filter() throws ContradictionException {
+    protected void filter() throws ContradictionException {
         buildSCC();
         int j, ub;
         IntVar v;
