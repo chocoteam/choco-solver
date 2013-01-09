@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.Variable;
 
 /**
  * A search monitor logger which prints choices during the search.
@@ -47,18 +46,21 @@ public class LogChoices implements IMonitorDownBranch {
 
     final Solver solver;
     final AbstractSearchLoop searchLoop;
+    final IMessage message;
 
-    public LogChoices(Solver solver) {
+    public LogChoices(Solver solver, IMessage message) {
         this.solver = solver;
         this.searchLoop = solver.getSearchLoop();
+        this.message = message;
     }
+
 
     @Override
     public void beforeDownLeftBranch() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[L]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), print(searchLoop.getStrategy().vars)});
+                    searchLoop.decisionToString(), message.print()});
         }
     }
 
@@ -71,24 +73,11 @@ public class LogChoices implements IMonitorDownBranch {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[R]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), print(searchLoop.getStrategy().vars)});
+                    searchLoop.decisionToString(), message.print()});
         }
     }
 
     @Override
     public void afterDownRightBranch() {
-    }
-
-
-    static String print(Variable[] vars) {
-        StringBuilder s = new StringBuilder(32);
-        for (int i = 0; i < vars.length && s.length() < 120; i++) {
-            s.append(vars[i]).append(' ');
-        }
-        if (s.length() >= 120) {
-            s.append("...");
-        }
-        return s.toString();
-
     }
 }

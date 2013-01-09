@@ -32,7 +32,7 @@ package solver.search.loop.monitors;
  * @author Charles Prud'homme
  * @since 20/12/12
  */
-public interface ISolutionFormat {
+public interface IMessage {
     /**
      * Define the solution format
      *

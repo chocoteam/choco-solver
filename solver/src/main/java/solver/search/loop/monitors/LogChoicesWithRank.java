@@ -40,8 +40,8 @@ public final class LogChoicesWithRank extends LogChoices {
 
     final int start, end;
 
-    public LogChoicesWithRank(Solver solver, int start, int end) {
-        super(solver);
+    public LogChoicesWithRank(Solver solver, int start, int end, IMessage message) {
+        super(solver, message);
         this.start = start;
         this.end = end;
     }
