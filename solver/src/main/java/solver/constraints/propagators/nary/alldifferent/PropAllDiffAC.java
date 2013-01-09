@@ -27,8 +27,11 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -38,9 +41,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -62,12 +64,12 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private DirectedGraph digraph;
+    protected int n, n2;
+    protected DirectedGraph digraph;
     private int[] matching;
     private int[] nodeSCC;
-    private BitSet free;
-    private UnaryIntProcedure remProc;
+    protected BitSet free;
+    private UnarySafeIntProcedure remProc;
     protected final IIntDeltaMonitor[] idms;
     private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
@@ -75,6 +77,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
+    private TIntArrayStack toCheck = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -121,6 +124,123 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
+            if ((mask & EventType.INSTANTIATE.mask) != 0) {
+                int val = vars[varIdx].getValue();
+                int j = map.get(val);
+                ISet nei = digraph.getPredecessorsOf(j);
+                for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+                    if (i != varIdx) {
+                        digraph.removeEdge(i, j);
+                    }
+                }
+                int i = digraph.getSuccessorsOf(j).getFirstElement();
+                if (i != -1 && i != varIdx) {
+                    digraph.removeEdge(i, j);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            toCheck.clear();
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            for (int v = 0; v < n; v++) {
+                if (vars[v].instantiated()) {
+                    toCheck.push(v);
+                }
+            }
+            fixpoint();
+            buildDigraph();
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
+        } else { // incremental
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+        }
+        repairMatching();
+        filter();
+    }
+
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        if ((mask & EventType.INSTANTIATE.mask) != 0) {
+            toCheck.push(varIdx);
+            fixpoint();
+        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
+
+    private void fixpoint() throws ContradictionException {
+        try {
+            while (toCheck.size() > 0) {
+                int vidx = toCheck.pop();
+                int val = vars[vidx].getValue();
+                for (int i = 0; i < n; i++) {
+                    if (i != vidx) {
+                        if (vars[i].removeValue(val, aCause)) {
+                            if (vars[i].instantiated()) {
+                                toCheck.push(i);
+                            }
+                        }
+
+                    }
+                }
+            }
+        } catch (ContradictionException cex) {
+            toCheck.clear();
+            throw cex;
+        }
+    }
+
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append("PropAllDiffAC(");
@@ -139,7 +259,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // Initialization
     //***********************************************************************************
 
-    private void buildDigraph() {
+    protected void buildDigraph() {
         for (int i = 0; i < n2; i++) {
             digraph.getSuccessorsOf(i).clear();
             digraph.getPredecessorsOf(i).clear();
@@ -167,7 +287,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     // MATCHING
     //***********************************************************************************
 
-    private void repairMatching() throws ContradictionException {
+    protected void repairMatching() throws ContradictionException {
         for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
             tryToMatch(i);
         }
@@ -239,7 +359,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         digraph.desactivateNode(n2);
     }
 
-    private void filter() throws ContradictionException {
+    protected void filter() throws ContradictionException {
         buildSCC();
         int j, ub;
         IntVar v;
@@ -279,104 +399,16 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         }
     }
 
-    //***********************************************************************************
-    // PROPAGATION
-    //***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            if (n2 < n * 2) {
-                contradiction(null, "");
-            }
-            for (int v = 0; v < n; v++) {
-                if (vars[v].instantiated()) {
-                    int val = vars[v].getValue();
-                    for (int i = 0; i < n; i++) {
-                        if (i != v) {
-                            vars[i].removeValue(val, aCause);
-                        }
-                    }
-                }
-            }
-            buildDigraph();
-        } else {
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-        }
-        repairMatching();
-        filter();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
-        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-        idms[varIdx].unfreeze();
-        if ((mask & EventType.INSTANTIATE.mask) != 0) {
-            int val = vars[varIdx].getValue();
-            int j = map.get(val);
-            ISet nei = digraph.getPredecessorsOf(j);
-            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                if (i != varIdx) {
-                    digraph.removeEdge(i, j);
-                    vars[i].removeValue(val, aCause);
-                }
-            }
-            int i = digraph.getSuccessorsOf(j).getFirstElement();
-            if (i != -1 && i != varIdx) {
-                digraph.removeEdge(i, j);
-                vars[i].removeValue(val, aCause);
-            }
-        }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    @Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
-
-    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
+    private class DirectedRemProc implements UnarySafeIntProcedure<Integer> {
         int idx;
 
-        public void execute(int i) throws ContradictionException {
+        public void execute(int i) {
             digraph.removeEdge(idx, map.get(i));
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idx) {
+        public UnarySafeIntProcedure set(Integer idx) {
             this.idx = idx;
             return this;
         }

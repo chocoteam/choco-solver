@@ -24,46 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.SafeIntProcedure;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
+package choco.kernel.common.util.procedure;
+
+import java.io.Serializable;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 25/05/12
+ * @since 29 sept. 2010
  */
-public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta> {
+public interface SafeIntProcedure extends Serializable {
 
-    void forEach(SafeIntProcedure proc, EventType eventType);
-
-    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
-
-    public static enum Default implements IIntDeltaMonitor {
-        NONE() {
-            @Override
-            public void freeze() {
-            }
-
-            @Override
-            public void unfreeze() {
-            }
-
-            @Override
-            public void clear() {
-            }
-
-            @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType) {
-            }
-
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-            }
-        }
-    }
+    /**
+     * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
+     *
+     * @param i index
+     */
+    void execute(int i);
 }

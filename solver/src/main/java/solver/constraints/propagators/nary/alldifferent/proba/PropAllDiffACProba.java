@@ -24,27 +24,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.nary.alldifferent;
+package solver.constraints.propagators.nary.alldifferent.proba;
 
-import choco.kernel.ESat;
-import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-/**
- * Propagator for AllDifferent that only reacts on instantiation
- *
- * @author Charles Prud'homme
- */
-public class PropAllDiffInst extends Propagator<IntVar> {
+import java.util.Random;
 
-    private final int n;
-    private TIntArrayStack toCheck = new TIntArrayStack();
+/**
+ * Propagator for AllDifferent AC constraint for integer variables
+ * <p/>
+ * Uses Regin algorithm
+ * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
+ * per arc removed from the support
+ * Has a good average behavior in practice
+ * <p/>
+ * Runs incrementally for maintaining a matching
+ * <p/>
+ *
+ * @author Jean-Guillaume Fages
+ */
+public class PropAllDiffACProba extends PropAllDiffAC {
+
+    private Random random;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -58,92 +64,72 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * @param constraint
      * @param sol
      */
-    public PropAllDiffInst(IntVar[] vars, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.UNARY, true);
-        n = vars.length;
+    public PropAllDiffACProba(IntVar[] vars, Constraint constraint, Solver sol, long seed) {
+        super(vars, constraint, sol);
+        random = new Random(seed);
+    }
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        // BEWARE : le delta monitor a deja ete consomme!!
+        if (super.advise(varIdx, mask)) {
+            return random.nextBoolean();
+        }
+        return false;
+    }
+
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            buildDigraph();
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
+        } else { // incremental
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                    free.set(i);
+                }
+            }
+        }
+        repairMatching();
+        filter();
+    }
+
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
 
     //***********************************************************************************
     // INFO
     //***********************************************************************************
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
-    }
-
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append("PropAllDiffInst(");
+        st.append("PropAllDiffACProba(");
         int i = 0;
-        for (; i < Math.min(4, n); i++) {
+        for (; i < Math.min(4, vars.length); i++) {
             st.append(vars[i].getName()).append(", ");
         }
-        if (i < n - 2) {
+        if (i < vars.length - 2) {
             st.append("...,");
         }
-        st.append(vars[n - 1].getName()).append(")");
+        st.append(vars[vars.length - 1].getName()).append(")");
         return st.toString();
-    }
-
-    //***********************************************************************************
-    // PROPAGATION
-    //***********************************************************************************
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        toCheck.clear();
-        for (int v = 0; v < n; v++) {
-            if (vars[v].instantiated()) {
-                toCheck.push(v);
-            }
-        }
-        fixpoint();
-
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        toCheck.push(varIdx);
-        fixpoint();
-    }
-
-    private void fixpoint() throws ContradictionException {
-        try {
-            while (toCheck.size() > 0) {
-                int vidx = toCheck.pop();
-                int val = vars[vidx].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != vidx) {
-                        if (vars[i].removeValue(val, aCause)) {
-                            if (vars[i].instantiated()) {
-                                toCheck.push(i);
-                            }
-                        }
-
-                    }
-                }
-            }
-        } catch (ContradictionException cex) {
-            toCheck.clear();
-            throw cex;
-        }
-    }
-
-
-    @Override
-    public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
     }
 }
