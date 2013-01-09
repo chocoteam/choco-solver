@@ -41,7 +41,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.explanations.antidom.AntiDomBipartiteSet;
+import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -456,7 +456,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     @Override
     public AntiDomain antiDomain() {
-        return new AntiDomBipartiteSet(this);
+//        return new AntiDomBipartiteSet(this);
+        return new AntiDomBitset(this);
     }
 
     public void explain(VariableState what, Explanation to) {
