@@ -24,70 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.view;
+package solver.variables.delta;
 
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.IntDelta;
 
 /**
- * A view delta is designed to store nothing (like NoDelta),
- * but a delta monitor based on the variable observed.
+ * Interface for delta bounded dedicated to integer variable
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/08/11
+ * @since 11/01/13
  */
-public abstract class ViewDelta implements IntDelta {
+public interface IIntervalDelta extends IntDelta {
+    /**
+     * Adds a new value interval to the delta
+     *
+     * @param lb    lower bound of removed interval
+     * @param ub    upper bound of removed interval
+     * @param cause of the removal
+     */
+    void add(int lb, int ub, ICause cause);
 
-    protected final IntDelta delta;
+    /**
+     * Return the lower bound of idx^th interval stored in the delta, if any
+     *
+     * @param idx rank of the interval
+     * @return idx^th interval
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    int getLB(int idx) throws IndexOutOfBoundsException;
 
-    public ViewDelta(IntDelta delta) {
-        this.delta = delta;
-    }
+    /**
+     * Return the upper bound idx^th interval stored in the delta, if any
+     *
+     * @param idx rank of the interval
+     * @return idx^th interval
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    int getUB(int idx) throws IndexOutOfBoundsException;
 
-    /*@Override
-    public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-        return new IntDeltaMonitor(this,propagator);
-    }*/
-
-    @Override
-    public void add(int value, ICause cause) {
-        throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
-    }
-
-    @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        return delta.get(idx);
-    }
-
-    @Override
-    public ICause getCause(int idx) throws IndexOutOfBoundsException {
-        return delta.getCause(idx);
-    }
-
-    @Override
-    public int size() {
-        return delta.size();
-    }
-
-    @Override
-    public void clear() {
-        delta.clear();
-    }
-
-    @Override
-    public void lazyClear() {
-        delta.lazyClear();
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return delta.getSearchLoop();
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return delta.timeStamped();
-    }
+    /**
+     * Return the cause of the idx^th cause stored in the delta, if any
+     *
+     * @param idx rank of the interval
+     * @return cause of the removal
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    ICause getCause(int idx) throws IndexOutOfBoundsException;
 }

@@ -46,7 +46,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMonitor, SetVar> implements SetVar {
+public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -208,7 +208,6 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
         }
     }
 
-    @Override
     public SetDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new SetDeltaMonitor(delta, propagator);

@@ -24,99 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.monitor;
+package solver.variables.view;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.SafeIntProcedure;
-import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
+import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 
 /**
+ * A delta monitor dedicated to views
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 07/12/11
+ * @since 11/01/13
  */
-public class IntDeltaMonitor implements IIntDeltaMonitor {
+public class ViewDeltaMonitor implements IIntDeltaMonitor {
 
-    protected final IntDelta delta;
-    protected int first, last, frozenFirst, frozenLast;
+    IIntDeltaMonitor deltamonitor;
     protected ICause propagator;
+    protected IFunction function;
 
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
-
-    public IntDeltaMonitor(IntDelta delta, ICause propagator) {
-        this.delta = delta;
-        loop = delta.getSearchLoop();
-        this.first = 0;
-        this.last = 0;
-        this.frozenFirst = 0;
-        this.frozenLast = 0;
+    public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor, ICause propagator, IFunction function) {
+        this.deltamonitor = deltamonitor;
         this.propagator = propagator;
+        this.function = function;
     }
+
 
     @Override
     public void freeze() {
-        assert delta.timeStamped() : "delta is not timestamped";
-        lazyClear();
-        this.frozenFirst = first; // freeze indices
-        this.frozenLast = last = delta.size();
+        this.deltamonitor.freeze();
     }
 
     @Override
     public void unfreeze() {
-        //propagator is idempotent
-        delta.lazyClear();    // fix 27/07/12
-        lazyClear();         // fix 27/07/12
-        this.first = this.last = delta.size();
-    }
-
-    public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
-            clear();
-            timestamp = loop.timeStamp;
-        }
+        this.deltamonitor.unfreeze();
     }
 
     @Override
     public void clear() {
-        this.first = this.last = 0;
+        this.deltamonitor.clear();
     }
+
 
     @Override
     public void forEach(SafeIntProcedure proc, EventType eventType) {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        deltamonitor.forEach(proc, eventType, function);
     }
 
     @Override
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        deltamonitor.forEach(proc, eventType, function);
     }
 
     @Override
-    public String toString() {
-        return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
+    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
+        throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
+        throw new UnsupportedOperationException();
+    }
+
 }

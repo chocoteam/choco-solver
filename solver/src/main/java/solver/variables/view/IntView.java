@@ -43,13 +43,12 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
- * Invoking an operation on the view exectutes the appropriate operation on the view's varaible."
+ * Invoking an operation on the view executes the appropriate operation on the view's varaible."
  * <p/>
  * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
  * C. Shulte and G. Tack.<br/>
@@ -59,12 +58,12 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView<IV>>
-        implements IView<IntDelta, IIntDeltaMonitor>, IntVar {
+public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extends AbstractVariable<ID, IntView<ID, IV>>
+        implements IView<ID>, IntVar<ID> {
 
     protected final IV var;
 
-    protected IntDelta delta;
+    protected ID delta;
 
     protected boolean reactOnRemoval;
 
@@ -73,7 +72,7 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDel
     public IntView(String name, IV var, Solver solver) {
         super(name, solver);
         this.var = var;
-        this.delta = NoDelta.singleton;
+        this.delta = (ID) NoDelta.singleton;
         this.reactOnRemoval = false;
         this.var.subscribeView(this);
         this.solver.associates(this);
@@ -119,7 +118,7 @@ public abstract class IntView<IV extends IntVar> extends AbstractVariable<IntDel
         return heuristicVal;
     }
 
-    public IntDelta getDelta() {
+    public ID getDelta() {
         return delta;
     }
 

@@ -32,72 +32,86 @@ import solver.ICause;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * A class to store the removed intervals of an integer variable.
+ * <p/>
+ * It defines methods to <code>add</code> a value, <code>clear</code> the structure
+ * and execute a <code>Procedure</code> for each value stored.
  */
-public final class OneValueDelta implements IEnumDelta {
+public final class IntervalDelta implements IIntervalDelta {
+    private static final int SIZE = 32;
 
-
-    int value;
-    ICause cause;
-    boolean set;
+    int[] from;
+    int[] to;
+    ICause[] causes;
+    int last;
     int timestamp = -1;
     final AbstractSearchLoop loop;
 
-    public OneValueDelta(AbstractSearchLoop loop) {
+    public IntervalDelta(AbstractSearchLoop loop) {
+        from = new int[SIZE];
+        to = new int[SIZE];
+        causes = new ICause[SIZE];
         this.loop = loop;
+    }
+
+    private void ensureCapacity() {
+        if (last >= from.length) {
+            int[] tmp = new int[last * 3 / 2 + 1];
+            System.arraycopy(from, 0, tmp, 0, last);
+            from = tmp;
+            tmp = new int[last * 3 / 2 + 1];
+            System.arraycopy(to, 0, tmp, 0, last);
+            to = tmp;
+            ICause[] tmpc = new ICause[last * 3 / 2 + 1];
+            System.arraycopy(causes, 0, tmpc, 0, last);
+            causes = tmpc;
+        }
     }
 
     public void lazyClear() {
         if (timestamp - loop.timeStamp != 0) {
-            set = false;
-            timestamp = loop.timeStamp;
+            clear();
         }
     }
 
     @Override
-    public void add(int value, ICause cause) {
+    public void add(int lb, int ub, ICause cause) {
         if (Configuration.LAZY_UPDATE) {
             lazyClear();
         }
-        this.value = value;
-        this.cause = cause;
-        set = true;
+        ensureCapacity();
+        causes[last] = cause;
+        from[last] = lb;
+        to[last++] = ub;
     }
 
     @Override
-    public int get(int idx) {
-        if (idx < 1) {
-            return value;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
+    public int getLB(int idx) {
+        return from[idx];
+    }
+
+    @Override
+    public int getUB(int idx) {
+        return to[idx];
     }
 
     @Override
     public ICause getCause(int idx) {
-        if (idx < 1) {
-            return cause;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
+        return causes[idx];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int size() {
-        return set ? 1 : 0;
+        return last;
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
+        last = 0;
+        timestamp = loop.timeStamp;
     }
 
     @Override
@@ -105,4 +119,8 @@ public final class OneValueDelta implements IEnumDelta {
         return timestamp == loop.timeStamp;
     }
 
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
 }

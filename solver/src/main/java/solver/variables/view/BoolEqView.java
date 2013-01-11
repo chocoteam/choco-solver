@@ -32,6 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.delta.OneValueDelta;
 
 /**
  * A specific view for equality on bool var
@@ -40,7 +41,7 @@ import solver.variables.BoolVar;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public class BoolEqView extends OffsetView<BoolVar> implements BoolVar {
+public class BoolEqView extends OffsetView<OneValueDelta, BoolVar<OneValueDelta>> implements BoolVar<OneValueDelta> {
 
     public BoolEqView(BoolVar var, Solver solver) {
         super(var, 0, solver);

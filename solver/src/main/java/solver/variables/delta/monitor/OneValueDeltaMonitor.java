@@ -31,22 +31,24 @@ import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.delta.IEnumDelta;
+import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 
 /**
+ * A monitor for OneValueDelta
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class OneIntDeltaMonitor implements IIntDeltaMonitor {
+public class OneValueDeltaMonitor implements IIntDeltaMonitor {
 
-    protected final IntDelta delta;
+    protected final IEnumDelta delta;
     protected boolean used;
     protected ICause propagator;
 
-    public OneIntDeltaMonitor(IntDelta delta, ICause propagator) {
+    public OneValueDeltaMonitor(IEnumDelta delta, ICause propagator) {
         this.delta = delta;
         used = false;
         this.propagator = propagator;
@@ -81,6 +83,22 @@ public class OneIntDeltaMonitor implements IIntDeltaMonitor {
         if (EventType.isRemove(eventType.mask)) {
             if (used && propagator != delta.getCause(0))
                 proc.execute(delta.get(0));
+        }
+    }
+
+    @Override
+    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
+        if (EventType.isRemove(eventType.mask)) {
+            if (used && propagator != delta.getCause(0))
+                proc.execute(function.transform(delta.get(0)));
+        }
+    }
+
+    @Override
+    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
+        if (EventType.isRemove(eventType.mask)) {
+            if (used && propagator != delta.getCause(0))
+                proc.execute(function.transform(delta.get(0)));
         }
     }
 }

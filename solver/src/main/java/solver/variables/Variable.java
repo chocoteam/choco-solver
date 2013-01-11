@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.IDelta;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -46,7 +45,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends Identity, Serializable, Comparable<Variable> {
+public interface Variable<D extends IDelta> extends Identity, Serializable, Comparable<Variable> {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -151,8 +150,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
      * returns an explanation of the current state of the Variable
      *
      * @param what specifies what we are interested in
-     * @param to
-     * @return
+     * @param to   explanation to feed
      */
 
     void explain(VariableState what, Explanation to);
@@ -162,7 +160,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
     /**
      * Return the delta domain of this
      *
-     * @return
+     * @return the delta domain of the variable
      */
     D getDelta();
 
@@ -171,14 +169,6 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
      * If the delta already exists, has no effect.
      */
     void createDelta();
-
-    /**
-     * Allow to monitor removed values of <code>this</code>.
-     *
-     * @param propagator the cause that requires to monitor delta
-     * @return a delta monitor
-     */
-    DM monitorDelta(ICause propagator);
 
     /**
      * Link the propagator to this
@@ -192,7 +182,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
     /**
      * Analysis propagator event reaction on this, and adapt this
      *
-     * @param mask
+     * @param mask event mask
      */
     void recordMask(int mask);
 
@@ -223,7 +213,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>> extends
      * Throws a contradiction exception based on <cause, message>
      *
      * @param cause   ICause causing the exception
-     * @param event
+     * @param event   event causing the contradiction
      * @param message the detailed message  @throws ContradictionException expected behavior
      */
     void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;

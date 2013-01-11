@@ -37,11 +37,16 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 25/05/12
  */
-public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta> {
+public interface IIntDeltaMonitor extends IDeltaMonitor {
 
     void forEach(SafeIntProcedure proc, EventType eventType);
 
     void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
+
+    void forEach(SafeIntProcedure proc, EventType eventType, IFunction function);
+
+    void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException;
+
 
     public static enum Default implements IIntDeltaMonitor {
         NONE() {
@@ -63,6 +68,14 @@ public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta> {
 
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+            }
+
+            @Override
+            public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
+            }
+
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
             }
         }
     }

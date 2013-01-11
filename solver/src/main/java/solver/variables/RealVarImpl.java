@@ -34,7 +34,6 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 
 /**
@@ -44,7 +43,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, RealVar> implements RealVar {
+public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements RealVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -172,11 +171,6 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
     @Override
     public void createDelta() {
         throw new SolverException("Unable to create delta for RealVar!");
-    }
-
-    @Override
-    public IDeltaMonitor<NoDelta> monitorDelta(ICause propagator) {
-        return null;
     }
 
     public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {

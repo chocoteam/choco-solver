@@ -31,6 +31,7 @@ import choco.kernel.ESat;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -39,7 +40,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface BoolVar extends IntVar {
+public interface BoolVar<ID extends IntDelta> extends IntVar<ID> {
 
     ESat getBooleanValue();
 

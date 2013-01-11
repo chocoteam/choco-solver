@@ -29,8 +29,6 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -39,9 +37,10 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
 
 
 /**
@@ -55,12 +54,12 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends IntView<IntVar> {
+public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;
 
-    public AbsView(final IntVar var, Solver solver) {
+    public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);
     }
 
@@ -70,51 +69,13 @@ public final class AbsView extends IntView<IntVar> {
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new IntDeltaMonitor(var.getDelta(), propagator) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator, new IFunction() {
             @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType) {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            int v = delta.get(i);
-                            if (!var.contains(-v)) {
-                                boolean found = false;
-                                for (int j = i + 1; !found && j < frozenLast; j++) {
-                                    if (delta.get(j) == -v) {
-                                        found = true;
-                                    }
-                                }
-                                if (!found) {
-                                    proc.execute(Math.abs(v));
-                                }
-                            }
-                        }
-                    }
-                }
+            public int transform(int i) {
+                // beware, the value i * i could have been treated previously, for instance, i and -i
+                return Math.abs(i);
             }
-
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            int v = delta.get(i);
-                            if (!var.contains(-v)) {
-                                boolean found = false;
-                                for (int j = i + 1; !found && j < frozenLast; j++) {
-                                    if (delta.get(j) == -v) {
-                                        found = true;
-                                    }
-                                }
-                                if (!found) {
-                                    proc.execute(Math.abs(v));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
+        });
     }
 
     @Override

@@ -27,37 +27,13 @@
 
 package solver.variables.delta;
 
-import solver.ICause;
-
 /**
+ * An empty interface for delta dedicated to integer variable
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 23/03/11
  */
-public interface IntDelta extends IDelta{
+public interface IntDelta extends IDelta {
 
-    /**
-     * Adds a new value to the delta
-     * @param value value to add
-     * @param cause of the removal
-     */
-    void add(int value, ICause cause);
-
-
-    /**
-     * Return the idx^th value stored in the delta, if any
-     * @param idx rank of the value
-     * @return idx^th value
-     * @throws IndexOutOfBoundsException if idx is out of the bounds
-     */
-    int get(int idx) throws IndexOutOfBoundsException;
-
-	/**
-     * Return the cause of the idx^th value stored in the delta, if any
-     * @param idx rank of the value
-     * @return cause of the removal
-     * @throws IndexOutOfBoundsException if idx is out of the bounds
-     */
-	ICause getCause(int idx) throws IndexOutOfBoundsException;
 }
