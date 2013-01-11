@@ -70,6 +70,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     boolean wrongSolution;
     int nbSolution;
+    boolean userinterruption = true;
 
     public FZNLayout() {
         super();
@@ -79,6 +80,15 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
         output_arrays_names = new ArrayList<String>();
         output_arrays_vars = new ArrayList<IntVar[]>();
         output_arrays_types = new ArrayList<Declaration.DType>();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (isInterrupted()) {
+                    LOGGER.info("% User interruption...");
+                    beforeClose();
+                }
+            }
+        });
     }
 
     @Override
@@ -179,6 +189,11 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                         searchLoop.getMeasures().getPropagationsCount());
             }
         }
+        userinterruption = false;
+    }
+
+    public boolean isUserinterruption() {
+        return userinterruption;
     }
 
     @Override

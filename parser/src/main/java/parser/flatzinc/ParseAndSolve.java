@@ -109,6 +109,8 @@ public class ParseAndSolve {
     @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
     protected long l = 1;
 
+    private boolean userinterruption = true;
+
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
     }
@@ -157,10 +159,18 @@ public class ParseAndSolve {
 
 
     protected void parseandsolve() throws IOException {
-        for (String instance : instances) {
+        for (final String instance : instances) {
             AverageCSV acsv = null;
             if (!csv.equals("")) {
                 acsv = new AverageCSV(csv, l);
+                final AverageCSV finalAcsv = acsv;
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        if (userinterruption) {
+                            finalAcsv.record(instance, "user interruption");
+                        }
+                    }
+                });
             }
             GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp);
             for (int i = 0; i < l; i++) {
@@ -186,6 +196,7 @@ public class ParseAndSolve {
                 acsv.record(instance, "");
             }
         }
+        userinterruption = false;
     }
 
     protected void makeEngine(Solver solver) {
@@ -213,4 +224,7 @@ public class ParseAndSolve {
         }
     }
 
+    private boolean isUserinterruption() {
+        return userinterruption;
+    }
 }
