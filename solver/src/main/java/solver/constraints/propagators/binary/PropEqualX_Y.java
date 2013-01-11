@@ -68,8 +68,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         this.x = x;
         this.y = y;
         idms = new IIntDeltaMonitor[2];
-        idms[0] = x.monitorDelta(this);
-        idms[1] = y.monitorDelta(this);
+        idms[0] = vars[0].hasEnumeratedDomain() ? vars[0].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
+        idms[1] = vars[1].hasEnumeratedDomain() ? vars[1].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         rem_proc = new RemProc(this);
     }
 

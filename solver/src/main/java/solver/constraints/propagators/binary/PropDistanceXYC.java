@@ -71,7 +71,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         if (operator == EQ) {
             this.idms = new IIntDeltaMonitor[this.vars.length];
             for (int i = 0; i < this.vars.length; i++) {
-                idms[i] = this.vars[i].monitorDelta(this);
+                idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
             }
         } else {
             this.idms = new IIntDeltaMonitor[0];
