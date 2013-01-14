@@ -37,7 +37,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -67,15 +66,36 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
-            return IIntDeltaMonitor.Default.NONE;
+            //return IIntDeltaMonitor.Default.NONE;
+            throw new UnsupportedOperationException();
         }
-        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator, new IFunction() {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
+
             @Override
-            public int transform(int i) {
-                // beware, the value i * i could have been treated previously, for instance, i and -i
-                return Math.abs(i);
+            protected void filter() {
+                for (int i = 0; i < values.size(); i++) {
+                    int v = values.toArray()[i];
+                    if (!var.contains(-v)) {
+                        boolean found = false;
+                        for (int j = i + 1; !found && j < values.size(); j++) {
+                            if (values.toArray()[j] == -v) {
+                                found = true;
+                            }
+                        }
+                        if (found) {
+                            values.remove(v);
+                            i--;
+                        }
+                    }
+
+                }
             }
-        });
+
+            @Override
+            protected int transform(int value) {
+                return Math.abs(value);
+            }
+        };
     }
 
     @Override

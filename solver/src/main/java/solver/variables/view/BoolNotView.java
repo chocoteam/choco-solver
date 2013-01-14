@@ -36,7 +36,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.OneValueDelta;
 
@@ -165,11 +164,12 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
         if (var.getDelta() == null) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator), propagator, new IFunction() {
+        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator), propagator) {
+
             @Override
-            public int transform(int i) {
-                return 1 - i;
+            protected int transform(int value) {
+                return 1 - value;
             }
-        });
+        };
     }
 }

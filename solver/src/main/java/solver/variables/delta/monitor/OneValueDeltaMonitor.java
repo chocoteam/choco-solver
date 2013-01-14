@@ -32,7 +32,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 
 /**
@@ -86,19 +85,4 @@ public class OneValueDeltaMonitor implements IIntDeltaMonitor {
         }
     }
 
-    @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
-        if (EventType.isRemove(eventType.mask)) {
-            if (used && propagator != delta.getCause(0))
-                proc.execute(function.transform(delta.get(0)));
-        }
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            if (used && propagator != delta.getCause(0))
-                proc.execute(function.transform(delta.get(0)));
-        }
-    }
 }

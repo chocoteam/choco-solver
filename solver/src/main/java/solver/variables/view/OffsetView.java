@@ -37,7 +37,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -70,14 +69,15 @@ public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntV
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
-            return IIntDeltaMonitor.Default.NONE;
+            //return IIntDeltaMonitor.Default.NONE;
+            throw new UnsupportedOperationException();
         }
-        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator, new IFunction() {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
-            public int transform(int i) {
-                return i + cste;
+            protected int transform(int value) {
+                return -value;
             }
-        });
+        };
     }
 
     @Override

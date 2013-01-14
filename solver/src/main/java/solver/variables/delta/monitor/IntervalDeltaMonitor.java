@@ -33,7 +33,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
 
@@ -116,40 +115,6 @@ public class IntervalDeltaMonitor implements IIntDeltaMonitor {
                     int ub = delta.getUB(i);
                     for (; lb <= ub; lb++) {
                         proc.execute(lb);
-                    }
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    int lb = delta.getLB(i);
-                    int ub = delta.getUB(i);
-                    for (; lb <= ub; lb++) {
-                        proc.execute(function.transform(lb));
-                    }
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    int lb = delta.getLB(i);
-                    int ub = delta.getUB(i);
-                    for (; lb <= ub; lb++) {
-                        proc.execute(function.transform(lb));
                     }
                 }
             }

@@ -34,7 +34,6 @@ import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
 
 /**
@@ -109,32 +108,6 @@ public class EnumDeltaMonitor implements IIntDeltaMonitor {
             for (int i = frozenFirst; i < frozenLast; i++) {
                 if (propagator == Cause.Null || propagator != delta.getCause(i)) {
                     proc.execute(delta.get(i));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(function.transform(delta.get(i)));
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
-        if (EventType.isRemove(eventType.mask)) {
-            for (int i = frozenFirst; i < frozenLast; i++) {
-                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-                    proc.execute(function.transform(delta.get(i)));
                 }
             }
         } else {

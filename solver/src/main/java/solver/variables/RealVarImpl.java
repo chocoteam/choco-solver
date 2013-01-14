@@ -37,7 +37,7 @@ import solver.explanations.VariableState;
 import solver.variables.delta.NoDelta;
 
 /**
- * An implementation of RealVar, variable for continuous contraints (solved using IBEX).
+ * An implementation of RealVar, variable for continuous constraints (solved using IBEX).
  * <br/>
  *
  * @author Charles Prud'homme

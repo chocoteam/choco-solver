@@ -43,11 +43,6 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
 
     void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
 
-    void forEach(SafeIntProcedure proc, EventType eventType, IFunction function);
-
-    void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException;
-
-
     public static enum Default implements IIntDeltaMonitor {
         NONE() {
             @Override
@@ -68,14 +63,6 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
 
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-            }
-
-            @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
-            }
-
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
             }
         }
     }

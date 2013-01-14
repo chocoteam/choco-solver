@@ -28,11 +28,13 @@ package solver.variables.view;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.SafeIntProcedure;
+import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.delta.IFunction;
 import solver.variables.delta.IIntDeltaMonitor;
+
+import java.util.ArrayList;
 
 /**
  * A delta monitor dedicated to views
@@ -41,16 +43,27 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 11/01/13
  */
-public class ViewDeltaMonitor implements IIntDeltaMonitor {
+public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
+
+    private class Filler implements SafeIntProcedure {
+
+        @Override
+        public void execute(int i) {
+            values.add(i);
+        }
+    }
 
     IIntDeltaMonitor deltamonitor;
     protected ICause propagator;
-    protected IFunction function;
+    protected TIntArrayList values;
+    protected ArrayList<ICause> causes;
+    protected Filler filler;
 
-    public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor, ICause propagator, IFunction function) {
+    public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor, ICause propagator) {
         this.deltamonitor = deltamonitor;
         this.propagator = propagator;
-        this.function = function;
+        values = new TIntArrayList(8);
+        filler = new Filler();
     }
 
 
@@ -72,22 +85,28 @@ public class ViewDeltaMonitor implements IIntDeltaMonitor {
 
     @Override
     public void forEach(SafeIntProcedure proc, EventType eventType) {
-        deltamonitor.forEach(proc, eventType, function);
+        values.clear();
+        deltamonitor.forEach(filler, eventType);
+        filter();
+        for (int v = 0; v < values.size(); v++) {
+            proc.execute(transform(values.toArray()[v]));
+        }
     }
 
     @Override
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-        deltamonitor.forEach(proc, eventType, function);
+        values.clear();
+        deltamonitor.forEach(filler, eventType);
+        filter();
+        for (int v = 0; v < values.size(); v++) {
+            proc.execute(transform(values.toArray()[v]));
+        }
     }
 
-    @Override
-    public void forEach(SafeIntProcedure proc, EventType eventType, IFunction function) {
-        throw new UnsupportedOperationException();
+    protected void filter() {
+        // nothing to do
     }
 
-    @Override
-    public void forEach(IntProcedure proc, EventType eventType, IFunction function) throws ContradictionException {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract int transform(int value);
 
 }
