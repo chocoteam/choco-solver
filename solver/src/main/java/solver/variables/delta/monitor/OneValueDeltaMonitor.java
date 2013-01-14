@@ -24,85 +24,65 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables.delta.monitor;
 
-package solver.variables.delta;
-
-import solver.Configuration;
+import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import solver.variables.delta.IEnumDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
+ * A monitor for OneValueDelta
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @since 07/12/11
  */
-public final class OneValueDelta implements IEnumDelta {
+public class OneValueDeltaMonitor implements IIntDeltaMonitor {
 
+    protected final IEnumDelta delta;
+    protected boolean used;
+    protected ICause propagator;
 
-    int value;
-    ICause cause;
-    boolean set;
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
-
-    public OneValueDelta(AbstractSearchLoop loop) {
-        this.loop = loop;
-    }
-
-    public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
-            set = false;
-            timestamp = loop.timeStamp;
-        }
+    public OneValueDeltaMonitor(IEnumDelta delta, ICause propagator) {
+        this.delta = delta;
+        used = false;
+        this.propagator = propagator;
     }
 
     @Override
-    public void add(int value, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
-        this.value = value;
-        this.cause = cause;
-        set = true;
+    public void freeze() {
+        used = delta.size() == 1;
     }
 
     @Override
-    public int get(int idx) {
-        if (idx < 1) {
-            return value;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
-    }
-
-    @Override
-    public ICause getCause(int idx) {
-        if (idx < 1) {
-            return cause;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
-    }
-
-    @Override
-    public int size() {
-        return set ? 1 : 0;
+    public void unfreeze() {
+        used = false;
+        delta.lazyClear(); // fix 27/07/12
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException();
+        used = false;
     }
 
     @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
+    public void forEach(SafeIntProcedure proc, EventType eventType) {
+        if (EventType.isRemove(eventType.mask)) {
+            if (used && propagator != delta.getCause(0))
+                proc.execute(delta.get(0));
+        }
     }
 
     @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
+    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+        if (EventType.isRemove(eventType.mask)) {
+            if (used && propagator != delta.getCause(0))
+                proc.execute(delta.get(0));
+        }
     }
 
 }

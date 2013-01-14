@@ -40,7 +40,7 @@ import solver.variables.delta.IntDelta;
 
 /**
  * Interface for integer variables. Provides every required services.
- * The domain is explictly represented but is not (and should not be) accessible from outside.
+ * The domain is explicitly represented but is not (and should not be) accessible from outside.
  * <br/>
  * <p/>
  * CPRU r544: remove default implementation
@@ -48,7 +48,7 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable<IntDelta, IIntDeltaMonitor> {
+public interface IntVar<ID extends IntDelta> extends Variable<ID> {
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -324,6 +324,15 @@ public interface IntVar extends Variable<IntDelta, IIntDeltaMonitor> {
      * @return <code>true</code> if the domain is enumerated, <code>false</code> otherwise.
      */
     boolean hasEnumeratedDomain();
+
+    /**
+     * Allow to monitor removed values of <code>this</code>.
+     *
+     * @param propagator the cause that requires to monitor delta
+     * @return a delta monitor
+     */
+    <DM extends IIntDeltaMonitor> DM monitorDelta(ICause propagator);
+
 
     AntiDomain antiDomain();
 }

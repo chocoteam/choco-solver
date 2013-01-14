@@ -29,7 +29,6 @@ package solver.variables.view;
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
@@ -37,10 +36,8 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
+import solver.variables.delta.OneValueDelta;
 
 /**
  * <br/>
@@ -48,7 +45,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
-public class BoolNotView extends IntView<BoolVar> implements BoolVar {
+public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> implements BoolVar<OneValueDelta> {
 
     public BoolNotView(BoolVar var, Solver solver) {
         super("not(" + var.getName() + ")", var, solver);
@@ -164,19 +161,14 @@ public class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
-        if (var.getDelta() == NoDelta.singleton) {
+        if (var.getDelta() == null) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new IntDeltaMonitor(var.getDelta(), propagator) {
+        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator), propagator) {
+
             @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            proc.execute(1 - delta.get(i));
-                        }
-                    }
-                }
+            protected int transform(int value) {
+                return 1 - value;
             }
         };
     }

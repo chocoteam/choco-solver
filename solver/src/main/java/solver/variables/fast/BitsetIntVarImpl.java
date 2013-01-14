@@ -47,10 +47,10 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.EnumDelta;
+import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
+import solver.variables.delta.monitor.EnumDeltaMonitor;
 
 /**
  * <br/>
@@ -58,7 +58,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<IEnumDelta>> implements IntVar<IEnumDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -75,7 +75,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     private final int OFFSET;
     private final int LENGTH;
 
-    private IntDelta delta = NoDelta.singleton;
+    private IEnumDelta delta = NoDelta.singleton;
 
     protected HeuristicVal heuristicVal;
 
@@ -469,7 +469,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IEnumDelta getDelta() {
         return delta;
     }
 
@@ -506,9 +506,9 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         }
     }
 
-    public IntDeltaMonitor monitorDelta(ICause propagator) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new IntDeltaMonitor(delta, propagator);
+        return new EnumDeltaMonitor(delta, propagator);
     }
 
 

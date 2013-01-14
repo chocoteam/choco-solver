@@ -37,21 +37,21 @@ public class GraphDelta implements IGraphDelta {
     // VARIABLES
     //***********************************************************************************
 
-	private IntDelta[] deltaOfType;
-	private long timestamp;
-	private final AbstractSearchLoop loop;
+    private IEnumDelta[] deltaOfType;
+    private long timestamp;
+    private final AbstractSearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public GraphDelta(AbstractSearchLoop loop) {
-		deltaOfType = new IntDelta[NB];
-		this.loop = loop;
-		for(int i=0;i<NB;i++){
-			deltaOfType[i] = new EnumDelta(loop);
-		}
-		timestamp = loop.timeStamp;
+        deltaOfType = new IEnumDelta[NB];
+        this.loop = loop;
+        for (int i = 0; i < NB; i++) {
+            deltaOfType[i] = new EnumDelta(loop);
+        }
+        timestamp = loop.timeStamp;
     }
 
     //***********************************************************************************
@@ -67,42 +67,42 @@ public class GraphDelta implements IGraphDelta {
     // ACCESSORS
     //***********************************************************************************
 
-	@Override
+    @Override
     public void clear() {
-		for(int i=0;i<NB;i++){
-			deltaOfType[i].clear();
-		}
-		timestamp = loop.timeStamp;
+        for (int i = 0; i < NB; i++) {
+            deltaOfType[i].clear();
+        }
+        timestamp = loop.timeStamp;
     }
 
-	@Override
-	public int getSize(int i) {
-		return deltaOfType[i].size();
-	}
+    @Override
+    public int getSize(int i) {
+        return deltaOfType[i].size();
+    }
 
-	@Override
-	public void add(int element, int type, ICause cause) {
-		if(Configuration.LAZY_UPDATE){
-			lazyClear();
-		}
-		deltaOfType[type].add(element,cause);
-	}
+    @Override
+    public void add(int element, int type, ICause cause) {
+        if (Configuration.LAZY_UPDATE) {
+            lazyClear();
+        }
+        deltaOfType[type].add(element, cause);
+    }
 
-	public void lazyClear() {
-		if(timestamp!=loop.timeStamp){
-			clear();
-		}
-	}
+    public void lazyClear() {
+        if (timestamp != loop.timeStamp) {
+            clear();
+        }
+    }
 
-	@Override
-	public int get(int index, int type) {
-		return deltaOfType[type].get(index);
-	}
+    @Override
+    public int get(int index, int type) {
+        return deltaOfType[type].get(index);
+    }
 
-	@Override
-	public ICause getCause(int index, int type) {
-		return deltaOfType[type].getCause(index);
-	}
+    @Override
+    public ICause getCause(int index, int type) {
+        return deltaOfType[type].getCause(index);
+    }
 
     @Override
     public AbstractSearchLoop getSearchLoop() {

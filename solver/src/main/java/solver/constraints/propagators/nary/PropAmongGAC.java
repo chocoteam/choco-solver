@@ -80,7 +80,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         nb_vars = vars.length - 1;
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            idms[i] = vars[i].monitorDelta(this);
+            idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);

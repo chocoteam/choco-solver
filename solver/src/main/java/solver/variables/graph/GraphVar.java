@@ -49,8 +49,8 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
-        implements Variable<IGraphDelta, IGraphDeltaMonitor> {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
+        implements Variable<IGraphDelta> {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -302,7 +302,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         }
     }
 
-    @Override
     public IGraphDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new GraphDeltaMonitor(delta, propagator);

@@ -28,8 +28,6 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.SafeIntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -39,8 +37,8 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
 
 /**
  * View for -V, where V is a IntVar or view
@@ -53,7 +51,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView<IntVar> {
+public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
@@ -66,29 +64,13 @@ public class MinusView extends IntView<IntVar> {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
-            return IIntDeltaMonitor.Default.NONE;
+            //return IIntDeltaMonitor.Default.NONE;
+            throw new UnsupportedOperationException();
         }
-        return new IntDeltaMonitor(var.getDelta(), propagator) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
-            public void forEach(SafeIntProcedure proc, EventType eventType) {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            proc.execute(-delta.get(i));
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            proc.execute(-delta.get(i));
-                        }
-                    }
-                }
+            protected int transform(int value) {
+                return -value;
             }
         };
     }

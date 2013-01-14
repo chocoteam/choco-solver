@@ -37,16 +37,16 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 10/02/11
  */
-public enum NoDelta implements IntDelta {
+public enum NoDelta implements IEnumDelta, IIntervalDelta {
     singleton;
 
     @Override
     public void add(int value, ICause cause) {
     }
 
-	@Override
-	public void clear() {
-	}
+    @Override
+    public void clear() {
+    }
 
     @Override
     public void lazyClear() {
@@ -63,11 +63,26 @@ public enum NoDelta implements IntDelta {
     }
 
     @Override
+    public void add(int lb, int ub, ICause cause) {
+    }
+
+    @Override
+    public int getLB(int idx) throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException("NoDelta#getLB(): fordidden call, size must be checked before!");
+    }
+
+    @Override
+    public int getUB(int idx) throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException("NoDelta#getUB(): fordidden call, size must be checked before!");
+    }
+
+
+    @Override
     public int get(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
 
-	@Override
+    @Override
     public ICause getCause(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }

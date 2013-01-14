@@ -24,40 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.strategy.enumerations.values.domains;
-
-import solver.variables.domain.IntervalIntDomain;
+package solver.variables.delta;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/01/11
+ * @since 11/01/13
  */
-public class IntervalHVDomain implements HeuristicValDomain {
+public interface IFunction {
 
-    final IntervalIntDomain domain;
+    int transform(int i);
 
-    int lower, upper;
-    boolean updateYet = false;
-
-    public IntervalHVDomain(IntervalIntDomain domain) {
-        this.domain = domain;
-    }
-
-    @Override
-    public boolean contains(int val) {
-        if (updateYet) {
-            return val >= lower && val <= upper;
-        } else {
-            return domain.contains(val);
-        }
-    }
-
-    @Override
-    public void update() {
-        lower = domain.getLB();
-        upper = domain.getUB();
-    }
 }

@@ -46,11 +46,11 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
-import solver.variables.delta.monitor.OneIntDeltaMonitor;
+import solver.variables.delta.monitor.OneValueDeltaMonitor;
 
 /**
  * <br/>
@@ -58,7 +58,7 @@ import solver.variables.delta.monitor.OneIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -81,7 +81,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     protected final IndexedBipartiteSet notInstanciated;
 
-    IntDelta delta = NoDelta.singleton;
+    IEnumDelta delta = NoDelta.singleton;
 
     protected boolean reactOnRemoval = false;
 
@@ -348,7 +348,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IEnumDelta getDelta() {
         return delta;
     }
 
@@ -373,9 +373,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new OneIntDeltaMonitor(delta, propagator);
+        return new OneValueDeltaMonitor(delta, propagator);
     }
 
 

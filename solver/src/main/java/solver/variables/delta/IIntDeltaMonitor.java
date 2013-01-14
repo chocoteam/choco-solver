@@ -37,7 +37,7 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 25/05/12
  */
-public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta> {
+public interface IIntDeltaMonitor extends IDeltaMonitor {
 
     void forEach(SafeIntProcedure proc, EventType eventType);
 

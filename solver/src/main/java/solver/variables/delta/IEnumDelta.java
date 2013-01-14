@@ -24,85 +24,41 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.variables.delta;
 
-import solver.Configuration;
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
 
 /**
+ * Interface for delta enumerated dedicated to integer variable
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @since 11/01/13
  */
-public final class OneValueDelta implements IEnumDelta {
+public interface IEnumDelta extends IntDelta {
+    /**
+     * Adds a new value to the delta
+     *
+     * @param value value to add
+     * @param cause of the removal
+     */
+    void add(int value, ICause cause);
 
+    /**
+     * Return the idx^th value stored in the delta, if any
+     *
+     * @param idx rank of the value
+     * @return idx^th value
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    int get(int idx) throws IndexOutOfBoundsException;
 
-    int value;
-    ICause cause;
-    boolean set;
-    int timestamp = -1;
-    final AbstractSearchLoop loop;
-
-    public OneValueDelta(AbstractSearchLoop loop) {
-        this.loop = loop;
-    }
-
-    public void lazyClear() {
-        if (timestamp - loop.timeStamp != 0) {
-            set = false;
-            timestamp = loop.timeStamp;
-        }
-    }
-
-    @Override
-    public void add(int value, ICause cause) {
-        if (Configuration.LAZY_UPDATE) {
-            lazyClear();
-        }
-        this.value = value;
-        this.cause = cause;
-        set = true;
-    }
-
-    @Override
-    public int get(int idx) {
-        if (idx < 1) {
-            return value;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
-    }
-
-    @Override
-    public ICause getCause(int idx) {
-        if (idx < 1) {
-            return cause;
-        } else {
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
-    }
-
-    @Override
-    public int size() {
-        return set ? 1 : 0;
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public AbstractSearchLoop getSearchLoop() {
-        return loop;
-    }
-
-    @Override
-    public boolean timeStamped() {
-        return timestamp == loop.timeStamp;
-    }
-
+    /**
+     * Return the cause of the idx^th value stored in the delta, if any
+     *
+     * @param idx rank of the value
+     * @return cause of the removal
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    ICause getCause(int idx) throws IndexOutOfBoundsException;
 }

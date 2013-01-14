@@ -29,7 +29,6 @@ package solver.variables;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 
 /**
@@ -39,7 +38,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public interface RealVar extends Variable<NoDelta, IDeltaMonitor<NoDelta>> {
+public interface RealVar extends Variable<NoDelta> {
 
     /**
      * Retrieves the lower bound of the variable

@@ -47,6 +47,7 @@ import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
@@ -61,7 +62,7 @@ import solver.variables.domain.IIntDomain;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ConstantView implements IntVar {
+public class ConstantView implements IntVar<IntDelta> {
 
     protected final int constante;
     protected final String name;

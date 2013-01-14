@@ -27,35 +27,37 @@
 package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.SafeIntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.SetDelta;
+import solver.variables.delta.IEnumDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
- * @author Jean-Guillaume Fages
- * @since Oct 2012
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 07/12/11
  */
-public class SetDeltaMonitor implements IDeltaMonitor {
+public class EnumDeltaMonitor implements IIntDeltaMonitor {
 
-    protected final SetDelta delta;
-
-    protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
-    protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+    protected final IEnumDelta delta;
+    protected int first, last, frozenFirst, frozenLast;
     protected ICause propagator;
 
     int timestamp = -1;
     final AbstractSearchLoop loop;
 
-    public SetDeltaMonitor(SetDelta delta, ICause propagator) {
+    public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
         this.delta = delta;
         loop = delta.getSearchLoop();
-        this.first = new int[2];
-        this.last = new int[2];
-        this.frozenFirst = new int[2];
-        this.frozenLast = new int[2];
+        this.first = 0;
+        this.last = 0;
+        this.frozenFirst = 0;
+        this.frozenLast = 0;
         this.propagator = propagator;
     }
 
@@ -63,22 +65,16 @@ public class SetDeltaMonitor implements IDeltaMonitor {
     public void freeze() {
         assert delta.timeStamped() : "delta is not timestamped";
         lazyClear();
-        for (int i = 0; i < 2; i++) {
-            this.frozenFirst[i] = first[i]; // freeze indices
-            this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
-        }
+        this.frozenFirst = first; // freeze indices
+        this.frozenLast = last = delta.size();
     }
 
     @Override
     public void unfreeze() {
-        timestamp = loop.timeStamp;
-        for (int i = 0; i < 2; i++) {
-            this.first[i] = last[i] = delta.getSize(i);
-        }
-
-        // VRAIMENT UTILE?
+        //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
-        lazyClear();        // fix 27/07/12
+        lazyClear();         // fix 27/07/12
+        this.first = this.last = delta.size();
     }
 
     public void lazyClear() {
@@ -90,25 +86,37 @@ public class SetDeltaMonitor implements IDeltaMonitor {
 
     @Override
     public void clear() {
-        for (int i = 0; i < 2; i++) {
-            this.first[i] = last[i] = 0;
+        this.first = this.last = 0;
+    }
+
+    @Override
+    public void forEach(SafeIntProcedure proc, EventType eventType) {
+        if (EventType.isRemove(eventType.mask)) {
+            for (int i = frozenFirst; i < frozenLast; i++) {
+                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+                    proc.execute(delta.get(i));
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 
-    @Deprecated
-    public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-        int x;
-        if (evt == EventType.ADD_TO_KER) {
-            x = SetDelta.KERNEL;
-        } else if (evt == EventType.REMOVE_FROM_ENVELOPE) {
-            x = SetDelta.ENVELOP;
-        } else {
-            throw new UnsupportedOperationException("The event in parameter should be ADD_TO_KER or REMOVE_FROM_ENVELOPE");
-        }
-        for (int i = frozenFirst[x]; i < frozenLast[x]; i++) {
-            if (delta.getCause(i, x) != propagator) {
-                proc.execute(delta.get(i, x));
+    @Override
+    public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+        if (EventType.isRemove(eventType.mask)) {
+            for (int i = frozenFirst; i < frozenLast; i++) {
+                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+                    proc.execute(delta.get(i));
+                }
             }
+        } else {
+            throw new UnsupportedOperationException();
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
     }
 }

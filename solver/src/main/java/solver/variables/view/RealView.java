@@ -35,7 +35,6 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.*;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 
 /**
@@ -44,8 +43,8 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 20/07/12
  */
-public class RealView extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, RealVar>
-        implements IView<NoDelta, IDeltaMonitor<NoDelta>>, RealVar {
+public class RealView extends AbstractVariable<NoDelta, RealVar>
+        implements IView<NoDelta>, RealVar {
 
     protected final IntVar var;
 
@@ -154,11 +153,6 @@ public class RealView extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, 
 
     @Override
     public void createDelta() {
-    }
-
-    @Override
-    public IDeltaMonitor<NoDelta> monitorDelta(ICause propagator) {
-        return null;
     }
 
     public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
