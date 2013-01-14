@@ -73,21 +73,21 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
             @Override
             protected void filter() {
-                for (int i = 0; i < values.size(); i++) {
-                    int v = values.toArray()[i];
+                int[] _values = values.toArray();
+                values.clear();
+                for (int i = 0; i < _values.length; i++) {
+                    int v = _values[i];
                     if (!var.contains(-v)) {
                         boolean found = false;
-                        for (int j = i + 1; !found && j < values.size(); j++) {
-                            if (values.toArray()[j] == -v) {
+                        for (int j = i + 1; !found && j < _values.length; j++) {
+                            if (_values[j] == -v) {
                                 found = true;
                             }
                         }
-                        if (found) {
-                            values.remove(v);
-                            i--;
+                        if (!found) {
+                            values.add(v);
                         }
                     }
-
                 }
             }
 
