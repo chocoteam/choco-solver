@@ -50,6 +50,7 @@ import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IIntervalDelta;
 import solver.variables.delta.IntervalDelta;
+import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntervalDeltaMonitor;
 
 /**
@@ -66,7 +67,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
     private final IStateInt LB, UB, SIZE;
 
-    IIntervalDelta delta = null;//NoDelta.singleton;
+    IIntervalDelta delta = NoDelta.singleton;
 
     protected HeuristicVal heuristicVal;
 

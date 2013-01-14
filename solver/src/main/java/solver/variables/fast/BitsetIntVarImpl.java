@@ -49,6 +49,7 @@ import solver.variables.IntVar;
 import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.EnumDeltaMonitor;
 
 /**
@@ -74,7 +75,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
     private final int OFFSET;
     private final int LENGTH;
 
-    private IEnumDelta delta = null;
+    private IEnumDelta delta = NoDelta.singleton;
 
     protected HeuristicVal heuristicVal;
 
