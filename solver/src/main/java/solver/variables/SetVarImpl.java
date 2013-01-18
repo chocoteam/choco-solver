@@ -46,7 +46,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements SetVar {
+public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -100,27 +100,38 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetVar> impl
     }
 
     @Override
-    public boolean addToKernel(int value, ICause cause) throws ContradictionException {
-        if (!envelope.contain(value)) {
+    public boolean addToKernel(int element, ICause cause) throws ContradictionException {
+        if (!envelope.contain(element)) {
             contradiction(cause, null, "");
+			return true;
         }
-        if (!kernel.contain(value)) {
-            kernel.add(value);
-            return true;
-        }
-        return false;
+		if (kernel.contain(element)) {
+        	return false;
+		}
+		kernel.add(element);
+		if (reactOnModification) {
+			delta.add(element, SetDelta.KERNEL, cause);
+		}
+		EventType e = EventType.ADD_TO_KER;
+		notifyPropagators(e, cause);
+		return true;
     }
 
     @Override
-    public boolean removeFromEnvelope(int value, ICause cause) throws ContradictionException {
-        if (kernel.contain(value)) {
-            contradiction(cause, null, "");
+    public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
+        if (kernel.contain(element)) {
+            contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
+			return true;
         }
-        if (envelope.contain(value)) {
-            envelope.remove(value);
-            return true;
+        if (!envelope.remove(element)) {
+            return false;
         }
-        return false;
+		if (reactOnModification) {
+			delta.add(element, SetDelta.ENVELOP, cause);
+		}
+		EventType e = EventType.REMOVE_FROM_ENVELOPE;
+		notifyPropagators(e, cause);
+		return true;
     }
 
     @Override
@@ -135,7 +146,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetVar> impl
         if (envelope.getSize() != value.length) {
             for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
                 if (!kernel.contain(i)) {
-                    envelope.remove(i);
+					removeFromEnvelope(i,cause);
                 }
             }
         }
@@ -208,6 +219,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetVar> impl
         }
     }
 
+	@Override
     public SetDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new SetDeltaMonitor(delta, propagator);
