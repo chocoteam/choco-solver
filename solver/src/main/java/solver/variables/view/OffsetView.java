@@ -75,7 +75,7 @@ public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntV
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
             protected int transform(int value) {
-                return -value;
+                return value + cste;
             }
         };
     }

@@ -167,12 +167,12 @@ public class ParseAndSolve {
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     public void run() {
                         if (userinterruption) {
-                            finalAcsv.record(instance, "user interruption");
+                            finalAcsv.record(instance, ";**ERROR**;");
                         }
                     }
                 });
             }
-            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp);
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp, tl);
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
@@ -184,16 +184,13 @@ public class ParseAndSolve {
                     acsv.setSolver(solver);
                 }
                 expeng.make(solver);
-                if (tl > -1) {
-                    solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
-                }
 
                 LOGGER.info("% solve instance...");
                 solver.solve();
             }
             if (!csv.equals("")) {
                 assert acsv != null;
-                acsv.record(instance, "");
+                acsv.record(instance, gc.getDescription());
             }
         }
         userinterruption = false;
