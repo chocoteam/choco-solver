@@ -84,9 +84,9 @@ public class PropGraphChannel extends Propagator<Variable>{
 	 */
 	public PropGraphChannel(SetVar[] setsV, GraphVar gV, Solver solver, Constraint c) {
 		super(ArrayUtils.append(setsV,new Variable[]{gV}), solver, c, PropagatorPriority.LINEAR);
-		n = sets.length;
 		this.sets = setsV;
 		this.g = gV;
+		n = sets.length;
 		assert (n==g.getEnvelopGraph().getNbNodes());
 		sdm = new SetDeltaMonitor[n];
 		for(int i=0;i<n;i++){
@@ -125,8 +125,11 @@ public class PropGraphChannel extends Propagator<Variable>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask
-				+  EventType.ENFORCEARC.mask+EventType.REMOVEARC.mask;
+		if(vIdx<n){
+			return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
+		}else{
+			return EventType.ENFORCEARC.mask+EventType.REMOVEARC.mask;
+		}
 	}
 
 	@Override
@@ -139,6 +142,18 @@ public class PropGraphChannel extends Propagator<Variable>{
 			tmp = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
 				sets[i].addToKernel(j,aCause);
+			}
+			tmp = sets[i].getEnvelope();
+			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+				if(!g.getEnvelopGraph().arcExists(i,j)){
+					sets[i].removeFromEnvelope(j,aCause);
+				}
+			}
+			tmp = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+				if(!sets[i].getEnvelope().contain(j)){
+					g.removeArc(i,j,aCause);
+				}
 			}
 		}
 		for(int i=0;i<n;i++){
