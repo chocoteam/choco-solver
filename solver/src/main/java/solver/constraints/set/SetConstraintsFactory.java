@@ -33,10 +33,16 @@ import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.set.*;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.VariableFactory;
+import solver.variables.graph.DirectedGraphVar;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 
 /**
+ * Constraints over set variables
  * @author Jean-Guillaume Fages
  */
 public final class SetConstraintsFactory {
@@ -98,7 +104,7 @@ public final class SetConstraintsFactory {
 	public static Constraint all_disjoint(SetVar[] sets, Solver solver) {
 		Constraint c = new Constraint(sets, solver);
 		c.setPropagators(	new PropAllDisjoint(sets,solver,c),
-							new PropAtMost1Empty(sets,solver,c));
+				new PropAtMost1Empty(sets,solver,c));
 		return c;
 	}
 
@@ -112,7 +118,7 @@ public final class SetConstraintsFactory {
 	public static Constraint all_different(SetVar[] sets, Solver solver) {
 		Constraint c = new Constraint(sets, solver);
 		c.setPropagators(	new PropAllDiff_Set(sets,solver,c),
-							new PropAtMost1Empty(sets,solver,c));
+				new PropAtMost1Empty(sets,solver,c));
 		return c;
 	}
 
@@ -139,6 +145,158 @@ public final class SetConstraintsFactory {
 		SetVar union = VariableFactory.set("union",universe,universe,solver);
 		Constraint c = all_disjoint(sets,solver);
 		c.setPropagators(new PropUnion(sets, union, solver, c));
+		return c;
+	}
+
+	/**
+	 * Inverse set constraint
+	 * x in sets[y] <=> y in inverses[x]
+	 * @param sets
+	 * @param inverses
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint inverse_set(SetVar[] sets, SetVar[] inverses, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropInverse(sets, inverses, solver, c));
+		return c;
+	}
+
+	/**
+	 * Symmetric sets constraint
+	 * x in sets[y] <=> y in sets[x]
+	 * @param sets
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint symmetric(SetVar[] sets, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropSymmetric(sets, solver, c));
+		return c;
+	}
+
+	/**
+	 * Element constraint over sets
+	 * states that array[index] = set
+	 * @param index
+	 * @param array
+	 * @param set
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint element(IntVar index, SetVar[] array, SetVar set, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropElement(index, array, set, solver, c));
+		return c;
+	}
+
+	/**
+	 * Member constraint over sets
+	 * states that set belongs to array
+	 * @param array
+	 * @param set
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint member(SetVar[] array, SetVar set, Solver solver) {
+		Constraint c = new Constraint(solver);
+		IntVar index = VariableFactory.enumerated("idx_tmp",0,array.length,solver);
+		c.setPropagators(new PropElement(index, array, set, solver, c));
+		return c;
+	}
+
+	/**
+	 * Member constraint over an IntVar and a SetVar
+	 * states that intVar is in SetVar
+	 * @param setVar
+	 * @param intVar
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint member(SetVar setVar, IntVar intVar, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropIntMemberSet(setVar, intVar, solver, c));
+		return c;
+	}
+
+	/**
+	 * Retrieves the maximum element of the set
+	 * MAXIMUM_ELEMENT_OF(set) = maxElement
+	 * @param set
+	 * @param maxElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint maxElement(SetVar set, IntVar maxElement, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropMaxElement(set, maxElement, solver, c));
+		return c;
+	}
+
+	/**
+	 * Retrieves the minimum element of the set
+	 * MINIMUM_ELEMENT_OF(set) = minElement
+	 * @param set
+	 * @param minElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint minElement(SetVar set, IntVar minElement, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropMinElement(set, minElement, solver, c));
+		return c;
+	}
+
+	//***********************************************************************************
+	// BOOLEAN CHANNELING
+	//***********************************************************************************
+
+	/**
+	 * Channeling between a set variable and boolean variables
+	 * @param set
+	 * @param bools
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint bool_channel(SetVar set, BoolVar[] bools, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropBoolChannel(set, bools, solver, c));
+		return c;
+	}
+
+	//***********************************************************************************
+	// GRAPH CHANNELING
+	//***********************************************************************************
+
+	/**
+	 * Channeling between a graph variable and set variables
+	 * representing either node neighbors or node successors
+	 * @param sets
+	 * @param g
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint graph_channel(SetVar[] sets, GraphVar g, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropGraphChannel(sets, g, solver, c));
+		if(!g.isDirected()){
+			c.addPropagators(new PropSymmetric(sets,solver,c));
+		}
+		return c;
+	}
+
+	/**
+	 * Channeling between a directed graph variable and set variables
+	 * representing node successors and predecessors
+	 * @param succs
+	 * @param preds
+	 * @param g
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint graph_channel(SetVar[] succs, SetVar[] preds, DirectedGraphVar g, Solver solver) {
+		Constraint c = graph_channel(succs, g, solver);
+		c.addPropagators(new PropInverse(succs,preds,solver,c));
 		return c;
 	}
 }
