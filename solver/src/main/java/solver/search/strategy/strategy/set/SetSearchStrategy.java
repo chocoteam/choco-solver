@@ -73,16 +73,23 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 	@Override
 	public Decision<SetVar> getDecision() {
 		for(SetVar s:vars){
-			if(!s.instantiated()){
-				FastDecisionSet d = pool.getE();
-				if(d==null){
-					d = new FastDecisionSet(pool);
-				}
-				for(int i=s.getEnvelope().getFirstElement();i>=0;i=s.getEnvelope().getNextElement()){
-					if(!s.getKernel().contain(i)){
-						d.set(s,i,DecisionOperator.set_force);
-						return d;
+			Decision<SetVar> d = computeDecision(s);
+			if(d!=null)return d;
+		}
+		return null;
+	}
+
+	@Override
+	public Decision<SetVar> computeDecision(SetVar s) {
+		if(!s.instantiated()){
+			for(int i=s.getEnvelope().getFirstElement();i>=0;i=s.getEnvelope().getNextElement()){
+				if(!s.getKernel().contain(i)){
+					FastDecisionSet d = pool.getE();
+					if(d==null){
+						d = new FastDecisionSet(pool);
 					}
+					d.set(s,i,DecisionOperator.set_force);
+					return d;
 				}
 			}
 		}
