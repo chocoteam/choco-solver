@@ -47,17 +47,16 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 
 /**
- * Retrieves the minimum element of the set
- * MINIMUM_ELEMENT_OF(set) = max
+ * A propagator ensuring that |set| = card
  * @author Jean-Guillaume Fages
  */
-public class PropMinElement extends Propagator<Variable>{
+public class PropCardinality extends Propagator<Variable>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private IntVar min;
+	private IntVar card;
 	private SetVar set;
 
 	//***********************************************************************************
@@ -65,16 +64,15 @@ public class PropMinElement extends Propagator<Variable>{
 	//***********************************************************************************
 
 	/**
-	 * Retrieves the minimum element of the set
-	 * MINIMUM_ELEMENT_OF(setVar) = min
+	 * Propagator ensuring that |setVar| = cardinality
 	 * @param setVar
-	 * @param min
+	 * @param cardinality
 	 * @param solver
 	 * @param c
 	 */
-	public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,min}, solver, c, PropagatorPriority.BINARY);
-		this.min = min;
+	public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
+		super(new Variable[]{setVar,cardinality}, solver, c, PropagatorPriority.BINARY);
+		this.card = cardinality;
 		this.set = setVar;
 	}
 
@@ -90,23 +88,26 @@ public class PropMinElement extends Propagator<Variable>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			min.updateUpperBound(j,aCause);
-		}
-		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		int lb = min.getLB();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(j<lb){
-				set.removeFromEnvelope(j,aCause);
-			}else{
-				if(minVal>j){
-					minVal = j;
+		int k = set.getKernel().getSize();
+		card.updateLowerBound(k,aCause);
+		int e = set.getEnvelope().getSize();
+		card.updateUpperBound(e,aCause);
+		if(card.instantiated()){
+			int c = card.getValue();
+			ISet env = set.getEnvelope();
+			if(c==k){
+				ISet ker = set.getEnvelope();
+				for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
+					if(!ker.contain(j)){
+						set.removeFromEnvelope(j,aCause);
+					}
+				}
+			}else if(c==e){
+				for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
+					set.addToKernel(j,aCause);
 				}
 			}
 		}
-		min.updateLowerBound(minVal,aCause);
 	}
 
 	@Override
@@ -116,22 +117,9 @@ public class PropMinElement extends Propagator<Variable>{
 
 	@Override
 	public ESat isEntailed() {
-		int lb = min.getLB();
-		int ub = min.getUB();
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j<lb){
-				return ESat.FALSE;
-			}
-		}
-		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(minVal>j){
-				minVal = j;
-			}
-		}
-		if(minVal>ub){
+		int k = set.getKernel().getSize();
+		int e = set.getEnvelope().getSize();
+		if(k>card.getUB() || e<card.getLB()){
 			return ESat.FALSE;
 		}
 		if(isCompletelyInstantiated()){

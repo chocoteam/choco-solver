@@ -39,10 +39,11 @@ import solver.variables.SetVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Constraints over set variables
+ * TODO add offset for people counting from 1 to n
+ * instead of from 0 to n-1 (Java stupid standard)
  * @author Jean-Guillaume Fages
  */
 public final class SetConstraintsFactory {
@@ -76,6 +77,153 @@ public final class SetConstraintsFactory {
 	public static Constraint intersection(SetVar[] sets, SetVar intersection, Solver solver) {
 		Constraint c = new Constraint(ArrayUtils.append(sets,new SetVar[]{intersection}),solver);
 		c.setPropagators(new PropIntersection(sets, intersection, solver, c));
+		return c;
+	}
+
+	/**
+	 * Constraint which ensures that i<j <=> sets[i] subseteq sets[j]
+	 * @param sets
+	 * @param solver
+	 * @return A constraint which ensures that i<j <=> sets[i] subseteq sets[j]
+	 */
+	public static Constraint subsetEq(SetVar[] sets, Solver solver) {
+		Constraint c = new Constraint(sets,solver);
+		for(int i=0;i<sets.length-1;i++){
+			c.addPropagators(new PropSubsetEq(sets[i], sets[i+1], solver, c));
+		}
+		return c;
+	}
+
+	/**
+	 * Cardinality constraint: |set| = card
+	 * @param set
+	 * @param card
+	 * @param solver
+	 * @return A constraint ensuring that |set| = card
+	 */
+	public static Constraint cardinality(SetVar set, IntVar card, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropCardinality(set, card, solver, c));
+		return c;
+	}
+
+	/**
+	 * Sums elements of a set
+	 * sum(set) = sum
+	 * @param set
+	 * @param sum
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint sumElements(SetVar set, IntVar sum, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropSumOfElements(set, sum, solver, c));
+		return c;
+	}
+
+	/**
+	 * Sums weights given by a set of indexes
+	 * SUM(weights[i] | i in indexes) = sum
+	 * @param indexes
+	 * @param weights
+	 * @param sum
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint sumElements(SetVar indexes, int[] weights, IntVar sum, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropSumOfElements(indexes, weights, sum, solver, c));
+		return c;
+	}
+
+	/**
+	 * Retrieves the maximum element of the set
+	 * MAXIMUM_ELEMENT_OF(set) = maxElement
+	 * @param set
+	 * @param maxElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint maxElement(SetVar set, IntVar maxElement, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropMaxElement(set, maxElement, solver, c));
+		return c;
+	}
+
+	/**
+	 * Retrieves the minimum element of the set
+	 * MINIMUM_ELEMENT_OF(set) = minElement
+	 * @param set
+	 * @param minElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint minElement(SetVar set, IntVar minElement, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropMinElement(set, minElement, solver, c));
+		return c;
+	}
+
+	//***********************************************************************************
+	// CHANNELING CONSTRAINTS
+	//***********************************************************************************
+
+	/**
+	 * Channeling between a set variable and boolean variables
+	 * @param set
+	 * @param bools
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint bool_channel(SetVar set, BoolVar[] bools, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropBoolChannel(set, bools, solver, c));
+		return c;
+	}
+
+	/**
+	 * Channeling between set variables and integer variables
+	 * x in ints[y] <=> y in sets[x]
+	 * @param sets
+	 * @param ints
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint int_channel(SetVar[] sets, IntVar[] ints, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropIntChannel(sets, ints, solver, c));
+		return c;
+	}
+
+	/**
+	 * Channeling between a graph variable and set variables
+	 * representing either node neighbors or node successors
+	 * @param sets
+	 * @param g
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint graph_channel(SetVar[] sets, GraphVar g, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropGraphChannel(sets, g, solver, c));
+		if(!g.isDirected()){
+			c.addPropagators(new PropSymmetric(sets,solver,c));
+		}
+		return c;
+	}
+
+	/**
+	 * Channeling between a directed graph variable and set variables
+	 * representing node successors and predecessors
+	 * @param succs
+	 * @param preds
+	 * @param g
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint graph_channel(SetVar[] succs, SetVar[] preds, DirectedGraphVar g, Solver solver) {
+		Constraint c = graph_channel(succs, g, solver);
+		c.addPropagators(new PropInverse(succs,preds,solver,c));
 		return c;
 	}
 
@@ -216,87 +364,6 @@ public final class SetConstraintsFactory {
 	public static Constraint member(SetVar setVar, IntVar intVar, Solver solver) {
 		Constraint c = new Constraint(solver);
 		c.setPropagators(new PropIntMemberSet(setVar, intVar, solver, c));
-		return c;
-	}
-
-	/**
-	 * Retrieves the maximum element of the set
-	 * MAXIMUM_ELEMENT_OF(set) = maxElement
-	 * @param set
-	 * @param maxElement
-	 * @param solver
-	 * @return
-	 */
-	public static Constraint maxElement(SetVar set, IntVar maxElement, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMaxElement(set, maxElement, solver, c));
-		return c;
-	}
-
-	/**
-	 * Retrieves the minimum element of the set
-	 * MINIMUM_ELEMENT_OF(set) = minElement
-	 * @param set
-	 * @param minElement
-	 * @param solver
-	 * @return
-	 */
-	public static Constraint minElement(SetVar set, IntVar minElement, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMinElement(set, minElement, solver, c));
-		return c;
-	}
-
-	//***********************************************************************************
-	// BOOLEAN CHANNELING
-	//***********************************************************************************
-
-	/**
-	 * Channeling between a set variable and boolean variables
-	 * @param set
-	 * @param bools
-	 * @param solver
-	 * @return
-	 */
-	public static Constraint bool_channel(SetVar set, BoolVar[] bools, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropBoolChannel(set, bools, solver, c));
-		return c;
-	}
-
-	//***********************************************************************************
-	// GRAPH CHANNELING
-	//***********************************************************************************
-
-	/**
-	 * Channeling between a graph variable and set variables
-	 * representing either node neighbors or node successors
-	 * @param sets
-	 * @param g
-	 * @param solver
-	 * @return
-	 */
-	public static Constraint graph_channel(SetVar[] sets, GraphVar g, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropGraphChannel(sets, g, solver, c));
-		if(!g.isDirected()){
-			c.addPropagators(new PropSymmetric(sets,solver,c));
-		}
-		return c;
-	}
-
-	/**
-	 * Channeling between a directed graph variable and set variables
-	 * representing node successors and predecessors
-	 * @param succs
-	 * @param preds
-	 * @param g
-	 * @param solver
-	 * @return
-	 */
-	public static Constraint graph_channel(SetVar[] succs, SetVar[] preds, DirectedGraphVar g, Solver solver) {
-		Constraint c = graph_channel(succs, g, solver);
-		c.addPropagators(new PropInverse(succs,preds,solver,c));
 		return c;
 	}
 }

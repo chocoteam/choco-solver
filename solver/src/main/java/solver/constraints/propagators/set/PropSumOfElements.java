@@ -47,35 +47,49 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 
 /**
- * Retrieves the minimum element of the set
- * MINIMUM_ELEMENT_OF(set) = max
+ * Sums elements given by a set variable
  * @author Jean-Guillaume Fages
  */
-public class PropMinElement extends Propagator<Variable>{
+public class PropSumOfElements extends Propagator<Variable>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private IntVar min;
+	private IntVar sum;
 	private SetVar set;
+	private int[] coefs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Retrieves the minimum element of the set
-	 * MINIMUM_ELEMENT_OF(setVar) = min
-	 * @param setVar
-	 * @param min
+	 * Sums weights given by a set of indexes
+	 * SUM(weights[i] | i in indexes) = sum
+	 * @param indexes
+	 * @param weights
+	 * @param sum
 	 * @param solver
 	 * @param c
 	 */
-	public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,min}, solver, c, PropagatorPriority.BINARY);
-		this.min = min;
-		this.set = setVar;
+	public PropSumOfElements(SetVar indexes, int[] weights, IntVar sum, Solver solver, Constraint c) {
+		super(new Variable[]{indexes,sum}, solver, c, PropagatorPriority.BINARY);
+		this.sum = sum;
+		this.set = indexes;
+		this.coefs = weights;
+	}
+
+	/**
+	 * Sums elements of a set
+	 * SUM(setVar) = sum
+	 * @param setVar
+	 * @param sum
+	 * @param solver
+	 * @param c
+	 */
+	public PropSumOfElements(SetVar setVar, IntVar sum, Solver solver, Constraint c) {
+		this(setVar,null,sum,solver,c);
 	}
 
 	//***********************************************************************************
@@ -90,53 +104,76 @@ public class PropMinElement extends Propagator<Variable>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			min.updateUpperBound(j,aCause);
-		}
-		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		int lb = min.getLB();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(j<lb){
-				set.removeFromEnvelope(j,aCause);
-			}else{
-				if(minVal>j){
-					minVal = j;
+		if(coefs!=null){
+			ISet tmp = set.getEnvelope();
+			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+				if(j<0 || j>=coefs.length){
+					set.removeFromEnvelope(j,aCause);
 				}
 			}
 		}
-		min.updateLowerBound(minVal,aCause);
+		propagate(0,0);
 	}
 
 	@Override
 	public void propagate(int i, int mask) throws ContradictionException {
-		propagate(0);
+		ISet tmp = set.getKernel();
+		int sK = 0;
+		int sE = 0;
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			sK+=get(j);
+		}
+		tmp = set.getEnvelope();
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			sE+=get(j);
+		}
+		sum.updateLowerBound(sK,aCause);
+		sum.updateUpperBound(sE,aCause);
+		boolean again = false;
+		// filter set
+		int lb = sum.getLB();
+		int ub = sum.getUB();
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			if(sE-get(j)<lb){
+				if(set.addToKernel(j,aCause)){
+					again = true;
+				}
+			}else if(sK+get(j)>ub){
+				if(set.removeFromEnvelope(j,aCause)){
+					again = true;
+				}
+			}
+		}
+		if(again){
+			propagate(0,0);
+		}
 	}
 
 	@Override
 	public ESat isEntailed() {
-		int lb = min.getLB();
-		int ub = min.getUB();
 		ISet tmp = set.getKernel();
+		int sK = 0;
+		int sE = 0;
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j<lb){
-				return ESat.FALSE;
-			}
+			sK+=get(j);
 		}
 		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(minVal>j){
-				minVal = j;
-			}
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			sE+=get(j);
 		}
-		if(minVal>ub){
+		// filter set
+		int lb = sum.getLB();
+		int ub = sum.getUB();
+		if(lb>sE || ub<sK){
 			return ESat.FALSE;
 		}
 		if(isCompletelyInstantiated()){
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
+	}
+
+	private int get(int j){
+		return (coefs==null)?1:coefs[j];
 	}
 }

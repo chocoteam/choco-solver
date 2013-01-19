@@ -81,8 +81,8 @@ public class PropMaxElement extends Propagator<Variable>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask
-				+EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
+		if(vIdx==0) return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
+		else return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
 	}
 
 	@Override

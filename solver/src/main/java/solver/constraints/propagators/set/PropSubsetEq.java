@@ -35,6 +35,7 @@
 package solver.constraints.propagators.set;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -42,40 +43,53 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.variables.SetVar;
-import solver.variables.Variable;
+import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
- * Retrieves the minimum element of the set
- * MINIMUM_ELEMENT_OF(set) = max
+ * Ensures that X subseteq Y
  * @author Jean-Guillaume Fages
  */
-public class PropMinElement extends Propagator<Variable>{
+public class PropSubsetEq extends Propagator<SetVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private IntVar min;
-	private SetVar set;
+	private SetDeltaMonitor[] sdm;
+	private IntProcedure elementForced,elementRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Retrieves the minimum element of the set
-	 * MINIMUM_ELEMENT_OF(setVar) = min
-	 * @param setVar
-	 * @param min
+	 * Ensures that X subseteq Y
+	 *
+	 * @param X
+	 * @param Y
 	 * @param solver
 	 * @param c
 	 */
-	public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,min}, solver, c, PropagatorPriority.BINARY);
-		this.min = min;
-		this.set = setVar;
+	public PropSubsetEq(SetVar X, SetVar Y, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+		super(new SetVar[]{X,Y}, solver, c, PropagatorPriority.LINEAR);
+		// delta monitors
+		sdm = new SetDeltaMonitor[2];
+		for(int i=0;i<2;i++){
+			sdm[i] = this.vars[i].monitorDelta(this);
+		}
+		elementForced = new IntProcedure() {
+			@Override
+			public void execute(int element) throws ContradictionException {
+				vars[1].addToKernel(element,aCause);
+			}
+		};
+		elementRemoved = new IntProcedure() {
+			@Override
+			public void execute(int element) throws ContradictionException {
+				vars[0].removeFromEnvelope(element,aCause);
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -84,59 +98,50 @@ public class PropMinElement extends Propagator<Variable>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0) return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-		else return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
+		if(vIdx==0)
+			return EventType.ADD_TO_KER.mask;
+		else
+			return EventType.REMOVE_FROM_ENVELOPE.mask;
 	}
 
 	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet tmp = set.getKernel();
+	public void propagate(int evtmask) throws ContradictionException{
+		ISet tmp = vars[0].getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			min.updateUpperBound(j,aCause);
+			vars[1].addToKernel(j,aCause);
+		}tmp = vars[0].getEnvelope();
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			if(!vars[1].getEnvelope().contain(j))
+				vars[0].removeFromEnvelope(j,aCause);
 		}
-		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		int lb = min.getLB();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(j<lb){
-				set.removeFromEnvelope(j,aCause);
-			}else{
-				if(minVal>j){
-					minVal = j;
-				}
-			}
-		}
-		min.updateLowerBound(minVal,aCause);
+		sdm[0].unfreeze();
+		sdm[1].unfreeze();
 	}
 
 	@Override
 	public void propagate(int i, int mask) throws ContradictionException {
-		propagate(0);
+		sdm[i].freeze();
+		if(i==0)
+			sdm[i].forEach(elementForced,EventType.ADD_TO_KER);
+		else
+			sdm[i].forEach(elementRemoved,EventType.REMOVE_FROM_ENVELOPE);
+		sdm[i].unfreeze();
 	}
 
 	@Override
 	public ESat isEntailed() {
-		int lb = min.getLB();
-		int ub = min.getUB();
-		ISet tmp = set.getKernel();
+		ISet tmp = vars[0].getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j<lb){
+			if(!vars[1].getEnvelope().contain(j)){
 				return ESat.FALSE;
 			}
 		}
-		tmp = set.getEnvelope();
-		int minVal = tmp.getFirstElement();
-		for(int j=minVal;j>=0;j=tmp.getNextElement()){
-			if(minVal>j){
-				minVal = j;
+		tmp = vars[0].getEnvelope();
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			if(!vars[1].getKernel().contain(j)){
+				return ESat.UNDEFINED;
 			}
 		}
-		if(minVal>ub){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
+		return ESat.TRUE;
 	}
 }
