@@ -39,7 +39,7 @@ import solver.variables.IntVar;
 /**
  * A Factory to declare constraint based on integer variables (only).
  * One can call directly the constructor of constraints, but it is recommended
- * to use the Factory, because signatures are ensured to be up-to-date.
+ * to use the Factory, because signatures and javadoc are ensured to be up-to-date.
  * <br/>
  *
  * @author Charles Prud'homme
