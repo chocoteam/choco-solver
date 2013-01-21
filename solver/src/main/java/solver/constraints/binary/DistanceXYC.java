@@ -30,11 +30,10 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.Operator;
 import solver.constraints.propagators.binary.PropDistanceXYC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-
-import static solver.constraints.binary.DistanceXYC.Op.*;
 
 /**
  * Ensures: <br/>
@@ -47,36 +46,26 @@ import static solver.constraints.binary.DistanceXYC.Op.*;
  */
 public class DistanceXYC extends IntConstraint<IntVar> {
 
-    public static enum Op {
-        EQ(0), LT(1), GT(2), NQ(3);
-
-        final int pOp;
-
-        Op(int pOp) {
-            this.pOp = pOp;
-        }
-    }
-
     final int cste;
-    final Op operator;
+    final Operator operator;
 
 
-    public DistanceXYC(IntVar X, IntVar Y, Op operator, int cste, Solver solver) {
+    public DistanceXYC(IntVar X, IntVar Y, Operator operator, int cste, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
         this.cste = cste;
         this.operator = operator;
-        setPropagators(new PropDistanceXYC(vars, operator.pOp, cste, solver, this));
+        setPropagators(new PropDistanceXYC(vars, operator, cste, solver, this));
     }
 
     @Override
     public ESat isSatisfied(int[] tuple) {
-        if (operator == EQ) {
+        if (operator == Operator.EQ) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) == cste);
-        } else if (operator == LT) {
+        } else if (operator == Operator.LT) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) < cste);
-        } else if (operator == GT) {
+        } else if (operator == Operator.GT) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) > cste);
-        } else if (operator == NQ) {
+        } else if (operator == Operator.NQ) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) != cste);
         } else {
             throw new SolverException("operator not known");

@@ -30,7 +30,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Arithmetic;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.Sum;
@@ -221,7 +221,7 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 0, 4, -10};
         IntVar index = VariableFactory.enumerated("index", -3, 10, s);
         IntVar value = VariableFactory.enumerated("value", -20, 20, s);
-        s.post(new Element(index, values, value, s));
+        s.post(IntConstraintFactory.element(index, values, value, s));
 
         Visualization visu = new Visualization("Element", s, dir + "/out");
 

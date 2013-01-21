@@ -32,7 +32,7 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.unary.Member;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -51,11 +51,11 @@ public class SetInBuilder implements IBuilder {
         IntVar var = exps.get(0).intVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            return new Member(var, values, solver);
+            return IntConstraintFactory.member(var, values, solver);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            return new Member(var, low, upp, solver);
+            return IntConstraintFactory.member(var, low, upp, solver);
         }
         Exit.log("SetVar unavailable");
         return null;

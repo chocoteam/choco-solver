@@ -24,32 +24,43 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints;
 
-package parser.flatzinc.ast.constraints;
-
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.variables.IntVar;
-
-import java.util.List;
+import gnu.trove.map.hash.THashMap;
 
 /**
- * b &#8712; 1..n &#8743; as[b] = c where n is the length of as
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 21/01/13
  */
-public class ArrayVarElementBuilder implements IBuilder {
+public enum Operator {
 
-    @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar b = exps.get(0).intVarValue(solver);
-        IntVar[] as = exps.get(1).toIntVarArray(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.element(c, as, b, 1, solver);
+    EQ(0), LT(1), GT(2), NQ(3), LE(4), GE(5), PL(6), MN(7);
+
+    int num;
+
+    private Operator(int num) {
+        this.num = num;
+    }
+
+    static THashMap<String, Operator> operators = new THashMap<String, Operator>() {{
+        operators.put("=", Operator.EQ);
+        operators.put(">", Operator.GT);
+        operators.put(">=", Operator.GE);
+        operators.put("<", Operator.LT);
+        operators.put("<=", Operator.LE);
+        operators.put("!=", Operator.EQ);
+        operators.put("+", Operator.PL);
+        operators.put("-", Operator.MN);
+    }};
+
+
+    public static Operator get(String name) {
+        return operators.get(name);
+    }
+
+    public int num() {
+        return num;
     }
 }

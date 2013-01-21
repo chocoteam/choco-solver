@@ -41,8 +41,6 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.DivXYZ;
 import solver.constraints.ternary.Times;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -56,6 +54,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import static solver.constraints.IntConstraintFactory.member;
+import static solver.constraints.IntConstraintFactory.not_member;
 
 /**
  * <br/>
@@ -105,9 +106,12 @@ public class ReifiedTest {
         z.toString();
 
         List<Constraint> lcstrs = new ArrayList<Constraint>();
-        lcstrs.add(new ReifiedConstraint(a, new Member(x, new int[]{1, 1}, s), new NotMember(x, new int[]{1, 1}, s), s));
-        lcstrs.add(new ReifiedConstraint(b, new Member(y, new int[]{1, 1}, s), new NotMember(y, new int[]{1, 1}, s), s));
-        lcstrs.add(new ReifiedConstraint(c, new Member(z, new int[]{1, 1}, s), new NotMember(z, new int[]{1, 1}, s), s));
+        lcstrs.add(new ReifiedConstraint(a, member(x, new int[]{1, 1}, s),
+                not_member(x, new int[]{1, 1}, s), s));
+        lcstrs.add(new ReifiedConstraint(b, member(y, new int[]{1, 1}, s),
+                not_member(y, new int[]{1, 1}, s), s));
+        lcstrs.add(new ReifiedConstraint(c, member(z, new int[]{1, 1}, s),
+                not_member(z, new int[]{1, 1}, s), s));
 
         lcstrs.add(Sum.leq(new IntVar[]{a, b, c}, 1, s));
 
@@ -201,8 +205,8 @@ public class ReifiedTest {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = new Member(X[j], p, q, s2);
-                    Constraint ocA = new NotMember(X[j], p, q, s2);
+                    Constraint cA = member(X[j], p, q, s2);
+                    Constraint ocA = not_member(X[j], p, q, s2);
 
                     s2.post(new ReifiedConstraint(a, cA, ocA, s2));
                 }

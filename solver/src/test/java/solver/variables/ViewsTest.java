@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Arithmetic;
-import solver.constraints.binary.Absolute;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.Max;
@@ -51,17 +51,17 @@ public class ViewsTest {
     public static void check(Solver ref, Solver solver, long seed, boolean strict, boolean solveAll) {
 //        SearchMonitorFactory.log(ref, true, true);
 //        SearchMonitorFactory.log(solver, true, true);
-        if(solveAll){
+        if (solveAll) {
             ref.findAllSolutions();
             solver.findAllSolutions();
-        }else{
+        } else {
 //            System.out.printf("%s\n", ref.toString());
             ref.findSolution();
 //            System.out.printf("%s\n", solver.toString());
             solver.findSolution();
         }
         Assert.assertEquals(solver.getMeasures().getSolutionCount(),
-                ref.getMeasures().getSolutionCount(), "solutions ("+seed + ")");
+                ref.getMeasures().getSolutionCount(), "solutions (" + seed + ")");
 //        System.out.printf("%d : %d vs. %d  -- ", seed, ref.getMeasures().getNodeCount(),
 //                solver.getMeasures().getNodeCount());
         if (strict) {
@@ -80,7 +80,7 @@ public class ViewsTest {
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -106,7 +106,7 @@ public class ViewsTest {
     public void test1a() {
         // Z = X + Y (bounded)
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -156,14 +156,14 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1b() {
         // Z = |X|
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 2, ref);
 
-                ref.post(new Absolute(z, x, ref));
+                ref.post(IntConstraintFactory.absolute(z, x, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -179,7 +179,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1bb() {
         // Z = X + c
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -202,7 +202,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1bbb() {
         // Z = X * c
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -225,14 +225,14 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1c() {
         // Z = -X
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
-                ref.post(new Arithmetic(z, "+", x,"=",0, ref));
+                ref.post(new Arithmetic(z, "+", x, "=", 0, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -276,7 +276,7 @@ public class ViewsTest {
     @Test(groups = "30s")
     public void test1e() {
         // Z = X^2
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -286,8 +286,8 @@ public class ViewsTest {
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
-				IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
-				IntVar x = Views.sqr(z);
+                IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
+                IntVar x = Views.sqr(z);
                 solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
             }
             check(ref, solver, seed, false, true);
@@ -320,7 +320,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test2() {
         // Z = X - Y
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -345,7 +345,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test3() {
         // Z = |X - Y|
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -354,7 +354,7 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(new Absolute(az, z, ref));
+                ref.post(IntConstraintFactory.absolute(az, z, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
             }
             {
@@ -370,7 +370,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test4() {
         // Z = |X - Y| + AllDiff
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -379,7 +379,7 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(new Absolute(az, z, ref));
+                ref.post(IntConstraintFactory.absolute(az, z, ref));
                 ref.post(new AllDifferent(new IntVar[]{x, y, az}, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
             }
@@ -398,7 +398,7 @@ public class ViewsTest {
     public void test5() {
         // ~all-interval series
         int k = 5;
-        for (int seed = 0; seed < 99; seed ++) {
+        for (int seed = 0; seed < 99; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -407,7 +407,7 @@ public class ViewsTest {
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
                     ref.post(Sum.eq(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, 0, ref));
-                    ref.post(new Absolute(t[i], y[i], ref));
+                    ref.post(IntConstraintFactory.absolute(t[i], y[i], ref));
                 }
                 ref.post(new AllDifferent(x, ref));
                 ref.post(new AllDifferent(t, ref));

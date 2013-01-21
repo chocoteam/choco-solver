@@ -32,9 +32,8 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -55,13 +54,13 @@ public class SetInReifBuilder implements IBuilder {
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            cs[0] = new Member(a, values, solver);
-            cs[1] = new NotMember(a, values, solver);
+            cs[0] = IntConstraintFactory.member(a, values, solver);
+            cs[1] = IntConstraintFactory.not_member(a, values, solver);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            cs[0] = new Member(a, low, upp, solver);
-            cs[1] = new NotMember(a, low, upp, solver);
+            cs[0] = IntConstraintFactory.member(a, low, upp, solver);
+            cs[1] = IntConstraintFactory.not_member(a, low, upp, solver);
         } else {
             Exit.log("SetVar unavailable");
             return null;

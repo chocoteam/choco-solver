@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.DistanceXYZ;
-import solver.constraints.unary.Member;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -87,7 +87,7 @@ public class AllIntervalSeries extends AbstractProblem {
         } else {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
-                solver.post(new Member(dist[i], 1, m - 1, solver));
+                solver.post(IntConstraintFactory.member(dist[i], 1, m - 1, solver));
             }
         }
 

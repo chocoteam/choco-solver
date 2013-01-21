@@ -31,9 +31,9 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.unary.Member;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -119,8 +119,8 @@ public class Partition extends AbstractProblem {
             sxy[i] = sx[i];
             sy[i] = Views.sqr(y[i]);
             sxy[size + i] = sy[i];
-            solver.post(new Member(sx[i], 1, 4 * size * size, solver));
-            solver.post(new Member(sy[i], 1, 4 * size * size, solver));
+            solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size, solver));
+            solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size, solver));
         }
         heavy[1] = Sum.eq(sxy, coeffs, 0, solver);
         solver.post(heavy[1]);

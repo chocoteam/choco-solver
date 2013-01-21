@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
@@ -86,8 +86,8 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.post(new Element(square1[i], mod, vars[i], solver));
-            solver.post(new Element(square2[i], div, vars[i], solver));
+            solver.post(IntConstraintFactory.element(square1[i], mod, vars[i], solver));
+            solver.post(IntConstraintFactory.element(square2[i], div, vars[i], solver));
         }
 
 

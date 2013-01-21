@@ -30,10 +30,9 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -90,8 +89,8 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = new Member(X[j], p, q, solver);
-                    Constraint ocA = new NotMember(X[j], p, q, solver);
+                    Constraint cA = IntConstraintFactory.member(X[j], p, q, solver);
+                    Constraint ocA = IntConstraintFactory.not_member(X[j], p, q, solver);
 
                     solver.post(new ReifiedConstraint(a, cA, ocA, solver));
                 }

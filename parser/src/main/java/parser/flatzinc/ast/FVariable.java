@@ -34,7 +34,7 @@ import parser.flatzinc.FZNLayout;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import solver.Solver;
-import solver.constraints.unary.Member;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.*;
 import solver.variables.view.Views;
 
@@ -190,7 +190,7 @@ public final class FVariable {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
             int lb = type.getLow();
             int ub = type.getUpp();
-            solver.post(new Member(iv, lb, ub, solver));
+            solver.post(IntConstraintFactory.member(iv, lb, ub, solver));
         } else {
             int size = type.getUpp() - type.getLow() + 1;
             if (size < 256) {
@@ -219,7 +219,7 @@ public final class FVariable {
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
             int[] values = type.getValues();
-            solver.post(new Member(iv, values, solver));
+            solver.post(IntConstraintFactory.member(iv, values, solver));
         } else {
             iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getValues(), solver);
         }

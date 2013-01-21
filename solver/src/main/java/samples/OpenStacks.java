@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
@@ -109,7 +109,7 @@ public class OpenStacks extends AbstractProblem {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
-                solver.post(new Element(value, orders[i], scheds[t - 1], 0, solver));
+                solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1], 0, solver));
                 solver.post(Sum.eq(new IntVar[]{o[i][t - 1], value}, o[i][t], solver));
             }
         }

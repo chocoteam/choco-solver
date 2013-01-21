@@ -32,6 +32,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.ternary.DistanceXYZ;
@@ -70,7 +71,7 @@ public class DistanceTest {
                 Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                solver.post(new DistanceXYC(X, Y, DistanceXYC.Op.EQ, 5, solver));
+                solver.post(IntConstraintFactory.distance(X, Y, "=", 5, solver));
                 solver.set(StrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
                 solver.findAllSolutions();
                 Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
@@ -89,7 +90,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, k, s1);
                 IntVar Y = VariableFactory.enumerated("Y", 1, k, s1);
                 vs1 = new IntVar[]{X, Y};
-                Constraint c = new DistanceXYC(X, Y, DistanceXYC.Op.EQ, k / 2, s1);
+                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2, s1);
                 s1.post(c);
                 p1 = c.propagators[0];
             }
@@ -97,7 +98,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, k, s2);
                 IntVar Y = VariableFactory.enumerated("Y", 1, k, s2);
                 vs2 = new IntVar[]{X, Y};
-                Constraint c = new DistanceXYC(X, Y, DistanceXYC.Op.EQ, k / 2, s2);
+                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2, s2);
                 s2.post(c);
                 p2 = c.propagators[0];
             }
@@ -140,7 +141,7 @@ public class DistanceTest {
         IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
         solver.post(new DistanceXYZ(X, Y, DistanceXYZ.Relop.EQ, Z, solver));
-        solver.set(StrategyFactory.inputOrderMinVal(new IntVar[]{Z,X,Y,Z}, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(new IntVar[]{Z, X, Y, Z}, solver.getEnvironment()));
         SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         System.out.printf("end\n");

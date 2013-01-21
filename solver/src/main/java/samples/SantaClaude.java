@@ -29,7 +29,7 @@ package samples;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.real.RealConstraint;
@@ -82,7 +82,7 @@ public class SantaClaude extends AbstractProblem {
         }
         solver.post(new AllDifferent(kid_gift, solver));
         for (int i = 0; i < n_kids; i++) {
-            solver.post(new Element(kid_price[i], gift_price, kid_gift[i], 0, solver));
+            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0, solver));
         }
         solver.post(Sum.eq(kid_price, total_cost, solver));
 

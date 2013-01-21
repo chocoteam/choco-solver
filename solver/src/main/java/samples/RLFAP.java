@@ -34,7 +34,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.DistanceXYC;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Count;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -121,9 +121,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.post(new DistanceXYC(vars[ci[0] - 1], vars[ci[1] - 1],
-                    (ci[2] == 0 ? DistanceXYC.Op.EQ : DistanceXYC.Op.GT),
-                    ci[3], solver));
+            solver.post(IntConstraintFactory.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3], solver));
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;

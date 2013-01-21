@@ -29,7 +29,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Arithmetic;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.IMonitorSolution;
@@ -65,7 +65,7 @@ public class NumericalSequence extends AbstractProblem {
         }
         for (int i = 1; i < n - 1; i++) {
             // U[i+1] = U[U[i]-1]-1
-            solver.post(new Element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
+            solver.post(IntConstraintFactory.element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
         }
         for (int i = 1; i < n / 2; i++) {
             // U[n + 1 - i] = n+ 1 - U[i]

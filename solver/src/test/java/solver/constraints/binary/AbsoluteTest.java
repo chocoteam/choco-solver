@@ -34,6 +34,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
@@ -51,6 +52,7 @@ import java.util.Random;
 
 /**
  * <br/>
+ *
  * @author Charles Prud'homme
  * @since 18/05/11
  */
@@ -61,7 +63,7 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.bounded("X", xl, xu, solver);
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
 
-        solver.post(new Absolute(X, Y, solver));
+        solver.post(IntConstraintFactory.absolute(X, Y, solver));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
@@ -73,7 +75,7 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.enumerated("X", x, solver);
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
-        solver.post(new Absolute(X, Y, solver));
+        solver.post(IntConstraintFactory.absolute(X, Y, solver));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
@@ -225,22 +227,22 @@ public class AbsoluteTest {
 
     @Test(groups = "1s")
     public void testBUG1() throws ContradictionException {
-        int[][] r = enumerated(new int[]{-21,3,5,9}, new int[]{-23,3,5,7});
-        Assert.assertEquals(r[0], new int[]{3,5});
-        Assert.assertEquals(r[1], new int[]{3,5});
+        int[][] r = enumerated(new int[]{-21, 3, 5, 9}, new int[]{-23, 3, 5, 7});
+        Assert.assertEquals(r[0], new int[]{3, 5});
+        Assert.assertEquals(r[1], new int[]{3, 5});
     }
 
     @Test(groups = "1s")
     public void testBUG2() throws ContradictionException {
-        int[][] r = enumerated(new int[]{-25,-24,-23,-22,-21,-20,-18,-17,-16,-15,-13,-11,-10,-9,-7,-6,-1,0,1,2,3,5,6,7},
-                new int[]{-25,-23,-22,-21,-20,-19,-16,-14,-12,-11,-9,-8,-7,-5,-4,-3,-1,0,1,2,4,5,6,7});
-		String s = "";
-		for(int k:r[0]){
-			s+=k+",";
-		}
-		System.out.println(s);
-        Assert.assertEquals(r[0], new int[]{0,1,2,3,5,6,7});
-        Assert.assertEquals(r[1], new int[]{-7,-5,-3,-1,0,1,2,5,6,7});
+        int[][] r = enumerated(new int[]{-25, -24, -23, -22, -21, -20, -18, -17, -16, -15, -13, -11, -10, -9, -7, -6, -1, 0, 1, 2, 3, 5, 6, 7},
+                new int[]{-25, -23, -22, -21, -20, -19, -16, -14, -12, -11, -9, -8, -7, -5, -4, -3, -1, 0, 1, 2, 4, 5, 6, 7});
+        String s = "";
+        for (int k : r[0]) {
+            s += k + ",";
+        }
+        System.out.println(s);
+        Assert.assertEquals(r[0], new int[]{0, 1, 2, 3, 5, 6, 7});
+        Assert.assertEquals(r[1], new int[]{-7, -5, -3, -1, 0, 1, 2, 5, 6, 7});
     }
 
     @Test(groups = "10s")
@@ -262,7 +264,7 @@ public class AbsoluteTest {
             IntVar X = VariableFactory.bounded("X", minX, maxX, solver);
             IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
 
-            Constraint abs = new Absolute(X, Y, solver);
+            Constraint abs = IntConstraintFactory.absolute(X, Y, solver);
             solver.post(abs);
             solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
             IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
@@ -276,7 +278,7 @@ public class AbsoluteTest {
             String message = String.format("[%d,%d] - [%d,%d]", minX, maxX, minY, maxY);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(),
                     message);
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),message);
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), message);
             Assert.assertTrue(solver.getMeasures().getFailCount() == 0);
         }
     }
@@ -301,7 +303,7 @@ public class AbsoluteTest {
                         IntVar X = VariableFactory.enumerated("X", domains[0], solver);
                         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
 
-                        Constraint abs = new Absolute(X, Y, solver);
+                        Constraint abs = IntConstraintFactory.absolute(X, Y, solver);
                         solver.post(abs);
                         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
                         IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
