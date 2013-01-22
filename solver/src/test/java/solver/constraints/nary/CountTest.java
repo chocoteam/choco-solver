@@ -33,7 +33,6 @@ import samples.MagicSeries;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.extension.LargeCSP;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.search.strategy.StrategyFactory;
@@ -207,7 +206,7 @@ public class CountTest {
             offsets[i] = newvs[i].getLB();
         }
         LargeRelation relation = new IterTuplesTable(tuples, offsets, sizes);
-        return new LargeCSP(newvs, relation, LargeCSP.Type.AC32, solverO);
+        return IntConstraintFactory.table_ac32(newvs, relation);
     }
 
     /**

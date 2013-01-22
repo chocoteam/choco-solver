@@ -31,6 +31,10 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
+import solver.constraints.extension.BinCSP;
+import solver.constraints.extension.LargeCSP;
+import solver.constraints.propagators.extension.binary.BinRelation;
+import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropIndexValue;
 import solver.constraints.propagators.nary.PropNoSubtour;
 import solver.constraints.propagators.nary.PropSubcircuit;
@@ -460,6 +464,47 @@ public enum IntConstraintFactory {
     public static Constraint subcircuit(IntVar[] vars) {
         Solver solver = vars[0].getSolver();
         return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver));
+    }
+
+    /**
+     * Create a table constraint (AC2001: Arc Consistency version 2001) over a couple of variables VAR1 and VAR2, .
+     *
+     * @param VAR1     first variable
+     * @param VAR2     second variable
+     * @param relation the relation between the two variables
+     */
+    public static BinCSP table_ac2001(IntVar VAR1, IntVar VAR2, BinRelation relation) {
+        return new BinCSP(VAR1, VAR2, relation);
+    }
+
+    /**
+     * Create a table constraint (AC2001: Arc Consistency version 2001) over a list of variables VARS.
+     *
+     * @param VARS     first variable
+     * @param relation the relation between the two variables
+     */
+    public static LargeCSP table_ac2001(IntVar[] VARS, LargeRelation relation) {
+        return new LargeCSP(VARS, relation, LargeCSP.Type.AC2001, VARS[0].getSolver());
+    }
+
+    /**
+     * Create a table constraint (AC32: Arc Consistency version 32) over a list of variables VARS.
+     *
+     * @param VARS     first variable
+     * @param relation the relation between the two variables
+     */
+    public static LargeCSP table_ac32(IntVar[] VARS, LargeRelation relation) {
+        return new LargeCSP(VARS, relation, LargeCSP.Type.AC32, VARS[0].getSolver());
+    }
+
+    /**
+     * Create a table constraint (FC: Forward Checking) over a list of variables VARS.
+     *
+     * @param VARS     first variable
+     * @param relation the relation between the two variables
+     */
+    public static LargeCSP table_fc(IntVar[] VARS, LargeRelation relation) {
+        return new LargeCSP(VARS, relation, LargeCSP.Type.FC, VARS[0].getSolver());
     }
 
 
