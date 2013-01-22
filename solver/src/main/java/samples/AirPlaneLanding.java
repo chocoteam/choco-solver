@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
@@ -153,7 +153,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j], solver);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i], solver);
-                Constraint cr = new ReifiedConstraint(boolVar, c1, c2, solver);
+                Constraint cr = IntConstraintFactory.reified(boolVar, c1, c2);
                 solver.post(cr);
                 ranking.put(cr,
                         Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],

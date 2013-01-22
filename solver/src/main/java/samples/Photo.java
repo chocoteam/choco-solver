@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -77,11 +76,7 @@ public class Photo extends AbstractProblem {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
             dist[i] = Views.abs(Sum.var(positions[pa], Views.minus(positions[pb])));
-            solver.post(new ReifiedConstraint(
-                    viols[i],
-                    Sum.geq(new IntVar[]{dist[i]}, 2, solver),
-                    Sum.leq(new IntVar[]{dist[i]}, 1, solver),
-                    solver));
+            solver.post(IntConstraintFactory.reified(viols[i], Sum.geq(new IntVar[]{dist[i]}, 2, solver), Sum.leq(new IntVar[]{dist[i]}, 1, solver)));
         }
         solver.post(Sum.eq(viols, violations, solver));
         solver.post(new AllDifferent(positions, solver));

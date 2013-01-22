@@ -40,7 +40,6 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -460,18 +459,18 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         Node.or(Literal.pos(bvars[1]), Literal.pos(bvars[2]), Literal.pos(bvars[3]))
                 );
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n), solver));
-                solver.post(new ReifiedConstraint(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n), solver));
-                solver.post(new ReifiedConstraint(bvars[2], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[3], IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r), solver));
+                solver.post(IntConstraintFactory.reified(bvars[0], IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n)));
+                solver.post(IntConstraintFactory.reified(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
+                solver.post(IntConstraintFactory.reified(bvars[2], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[3], IntConstraintFactory.arithm(s[t + 2], "=", r), IntConstraintFactory.arithm(s[t + 2], "!=", r)));
             }
             int t = data.nbDays() - 2;
             BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
 //            solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             ALogicTree tree = Node.implies(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
             solver.post(new ConjunctiveNormalForm(tree, solver));
-            solver.post(new ReifiedConstraint(bvars[0], IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n), solver));
-            solver.post(new ReifiedConstraint(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n), solver));
+            solver.post(IntConstraintFactory.reified(bvars[0], IntConstraintFactory.arithm(s[t], "=", n), IntConstraintFactory.arithm(s[t], "!=", n)));
+            solver.post(IntConstraintFactory.reified(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
         }
     }
 
@@ -504,12 +503,12 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         Node.and(Literal.pos(bvars[4]), Literal.pos(bvars[5]))
                 );
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], IntConstraintFactory.arithm(s[t], "=", r), IntConstraintFactory.arithm(s[t], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[2], IntConstraintFactory.arithm(s[t + 7], "=", r), IntConstraintFactory.arithm(s[t + 7], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[3], IntConstraintFactory.arithm(s[t + 8], "=", r), IntConstraintFactory.arithm(s[t + 8], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[4], IntConstraintFactory.arithm(s[t + 14], "=", r), IntConstraintFactory.arithm(s[t + 14], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[5], IntConstraintFactory.arithm(s[t + 15], "=", r), IntConstraintFactory.arithm(s[t + 15], "!=", r), solver));
+                solver.post(IntConstraintFactory.reified(bvars[0], IntConstraintFactory.arithm(s[t], "=", r), IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[2], IntConstraintFactory.arithm(s[t + 7], "=", r), IntConstraintFactory.arithm(s[t + 7], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[3], IntConstraintFactory.arithm(s[t + 8], "=", r), IntConstraintFactory.arithm(s[t + 8], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[4], IntConstraintFactory.arithm(s[t + 14], "=", r), IntConstraintFactory.arithm(s[t + 14], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[5], IntConstraintFactory.arithm(s[t + 15], "=", r), IntConstraintFactory.arithm(s[t + 15], "!=", r)));
 
                 /*solver.post(ConstraintFactory.implies(
          ConstraintFactory.and(
@@ -569,8 +568,8 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
                 ALogicTree tree = Node.ifOnlyIf(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], IntConstraintFactory.arithm(s[t], "=", r), IntConstraintFactory.arithm(s[t], "!=", r), solver));
-                solver.post(new ReifiedConstraint(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r), solver));
+                solver.post(IntConstraintFactory.reified(bvars[0], IntConstraintFactory.arithm(s[t], "=", r), IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(IntConstraintFactory.reified(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));
             }
         }

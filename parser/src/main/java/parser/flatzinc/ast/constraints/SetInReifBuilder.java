@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -66,7 +65,7 @@ public class SetInReifBuilder implements IBuilder {
             return null;
         }
         BoolVar r = exps.get(2).boolVarValue(solver);
-        return new ReifiedConstraint(r, cs[0], cs[1], solver);
+        return IntConstraintFactory.reified(r, cs[0], cs[1]);
 
     }
 }

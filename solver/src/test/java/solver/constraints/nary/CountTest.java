@@ -36,7 +36,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.LargeCSP;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -223,8 +222,7 @@ public class CountTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = Views.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval),
-                    IntConstraintFactory.arithm(vs[i], "!=", vval), solver));
+            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return Sum.eq(bs, occ, solver);
     }

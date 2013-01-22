@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -231,8 +230,7 @@ public class AmongTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = Views.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval),
-                    IntConstraintFactory.arithm(vs[i], "!=", vval), solver));
+            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return Sum.eq(bs, occ, solver);
     }
@@ -240,8 +238,7 @@ public class AmongTest {
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.member(vs[i], values),
-                    IntConstraintFactory.not_member(vs[i], values), solver));
+            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values)));
         }
         return Sum.eq(bs, occ, solver);
     }

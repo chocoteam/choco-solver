@@ -31,8 +31,8 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -59,6 +59,6 @@ public class IntLinLeReifBuilder implements IBuilder {
         Constraint cc = Sum.leq(bs, as, c, solver);
         Constraint oc = Sum.geq(bs, as, c + 1, solver);
 
-        return new ReifiedConstraint(r, cc, oc, solver);
+        return IntConstraintFactory.reified(r, cc, oc);
     }
 }

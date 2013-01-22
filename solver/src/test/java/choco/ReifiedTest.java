@@ -37,7 +37,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -80,7 +79,7 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
-            Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
+            Constraint[] cstrs = new Constraint[]{IntConstraintFactory.reified(b, cons, oppCons)};
 
             s.post(cstrs);
             s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
@@ -103,12 +102,9 @@ public class ReifiedTest {
         z.toString();
 
         List<Constraint> lcstrs = new ArrayList<Constraint>();
-        lcstrs.add(new ReifiedConstraint(a, member(x, new int[]{1, 1}),
-                not_member(x, new int[]{1, 1}), s));
-        lcstrs.add(new ReifiedConstraint(b, member(y, new int[]{1, 1}),
-                not_member(y, new int[]{1, 1}), s));
-        lcstrs.add(new ReifiedConstraint(c, member(z, new int[]{1, 1}),
-                not_member(z, new int[]{1, 1}), s));
+        lcstrs.add(IntConstraintFactory.reified(a, member(x, new int[]{1, 1}), not_member(x, new int[]{1, 1})));
+        lcstrs.add(IntConstraintFactory.reified(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1})));
+        lcstrs.add(IntConstraintFactory.reified(c, member(z, new int[]{1, 1}), not_member(z, new int[]{1, 1})));
 
         lcstrs.add(Sum.leq(new IntVar[]{a, b, c}, 1, s));
 
@@ -137,7 +133,7 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "!=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "=", y);
 
-            Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
+            Constraint[] cstrs = new Constraint[]{IntConstraintFactory.reified(b, cons, oppCons)};
 
             s.post(cstrs);
             s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
@@ -205,7 +201,7 @@ public class ReifiedTest {
                     Constraint cA = member(X[j], p, q);
                     Constraint ocA = not_member(X[j], p, q);
 
-                    s2.post(new ReifiedConstraint(a, cA, ocA, s2));
+                    s2.post(IntConstraintFactory.reified(a, cA, ocA));
                 }
             }
         }
@@ -297,13 +293,7 @@ public class ReifiedTest {
         IntVar cp = VariableFactory.enumerated("cp", 1, 10, solver);
         BoolVar[] bv = VariableFactory.boolArray("b1", 10, solver);
         for (int i = 1; i <= 10; i++) {
-            solver.post(new
-                    ReifiedConstraint(
-                    bv[i - 1],
-                    IntConstraintFactory.arithm(cp, "=", i),
-                    IntConstraintFactory.arithm(cp, "!=", i),
-                    solver
-            ));
+            solver.post(IntConstraintFactory.reified(bv[i - 1], IntConstraintFactory.arithm(cp, "=", i), IntConstraintFactory.arithm(cp, "!=", i)));
         }
 
         IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
@@ -311,13 +301,7 @@ public class ReifiedTest {
 
         BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
         for (int i = 1; i <= 10; i++) {
-            solver.post(new
-                    ReifiedConstraint(
-                    bv2[i - 1],
-                    IntConstraintFactory.arithm(Views.fixed(i, solver), "<", cp),
-                    IntConstraintFactory.arithm(Views.fixed(i, solver), ">=", cp),
-                    solver
-            ));
+            solver.post(IntConstraintFactory.reified(bv2[i - 1], IntConstraintFactory.arithm(Views.fixed(i, solver), "<", cp), IntConstraintFactory.arithm(Views.fixed(i, solver), ">=", cp)));
         }
 
         solver.set(new VariableEngine(solver));
@@ -355,8 +339,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
-        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+        s.post(IntConstraintFactory.reified(ab[0], constraints[0], constraints[1]));
+        s.post(IntConstraintFactory.reified(ab[1], constraints[2], constraints[3]));
 
 
         //one row must be wrong
@@ -391,8 +375,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
-        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+        s.post(IntConstraintFactory.reified(ab[0], constraints[0], constraints[1]));
+        s.post(IntConstraintFactory.reified(ab[1], constraints[2], constraints[3]));
 
 
         //one row must be wrong
@@ -427,8 +411,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
-        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+        s.post(IntConstraintFactory.reified(ab[0], constraints[0], constraints[1]));
+        s.post(IntConstraintFactory.reified(ab[1], constraints[2], constraints[3]));
 
 
         //one row must be wrong
@@ -464,8 +448,8 @@ public class ReifiedTest {
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
-        s.post(new ReifiedConstraint(ab[0], constraints[0], constraints[1], s));
-        s.post(new ReifiedConstraint(ab[1], constraints[2], constraints[3], s));
+        s.post(IntConstraintFactory.reified(ab[0], constraints[0], constraints[1]));
+        s.post(IntConstraintFactory.reified(ab[1], constraints[2], constraints[3]));
 
 
         //one row must be wrong

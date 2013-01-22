@@ -30,7 +30,6 @@ import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -102,11 +101,7 @@ public class BACP extends AbstractProblem {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
-                        new ReifiedConstraint(x[i][j],
-                                IntConstraintFactory.arithm(course_period[j], "=", i),
-                                IntConstraintFactory.arithm(course_period[j], "!=", i),
-                                solver
-                        )
+                        IntConstraintFactory.reified(x[i][j], IntConstraintFactory.arithm(course_period[j], "=", i), IntConstraintFactory.arithm(course_period[j], "!=", i))
                 );
             }
 //            sum(i in courses) (x[p, i])>=courses_per_period_lb /\

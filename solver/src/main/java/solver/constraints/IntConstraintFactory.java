@@ -36,10 +36,12 @@ import solver.constraints.propagators.nary.PropNoSubtour;
 import solver.constraints.propagators.nary.PropSubcircuit;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.sum.PropSumEq;
+import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -369,6 +371,25 @@ public enum IntConstraintFactory {
      */
     public static Constraint circuit(IntVar[] vars) {
         return circuit(vars, 0);
+    }
+
+
+    /**
+     * Ensures:<br/>
+     * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
+     * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
+     * <p/>
+     * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
+     * Example of use: <br/>
+     * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
+     * b1 is equal to 1 <=> v1 = 2, b1 is equal to 0 <=> v1 != 2.
+     *
+     * @param BVAR  variable of reification
+     * @param CSTR1 the constraint to be satisfied when BVAR = 1
+     * @param CSTR2 the constraint to be satisfied when BVAR = 0
+     */
+    public static ReifiedConstraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
+        return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
 
     /**

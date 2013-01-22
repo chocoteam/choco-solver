@@ -32,7 +32,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -73,10 +72,7 @@ public class CNFTest {
                 ));
             }
 //        IntVar view = Views.offset(y, 11);
-            solver.post(new ReifiedConstraint(b,
-                    IntConstraintFactory.arithm(x, ">=", y),
-                    IntConstraintFactory.arithm(x, "<", y),
-                    solver));
+            solver.post(IntConstraintFactory.reified(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             System.out.printf("%d\n", solver.getMeasures().getSolutionCount());

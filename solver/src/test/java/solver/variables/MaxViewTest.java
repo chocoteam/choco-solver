@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 
 import java.util.Random;
@@ -49,21 +48,9 @@ public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
         BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
-        solver.post(new ReifiedConstraint(
-                bs[0],
-                IntConstraintFactory.arithm(z, "=", x),
-                IntConstraintFactory.arithm(z, "!=", x),
-                solver));
-        solver.post(new ReifiedConstraint(
-                bs[1],
-                IntConstraintFactory.arithm(z, "=", y),
-                IntConstraintFactory.arithm(z, "!=", y),
-                solver));
-        solver.post(new ReifiedConstraint(
-                bs[2],
-                IntConstraintFactory.arithm(x, ">=", y),
-                IntConstraintFactory.arithm(x, "<", y),
-                solver));
+        solver.post(IntConstraintFactory.reified(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
+        solver.post(IntConstraintFactory.reified(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
+        solver.post(IntConstraintFactory.reified(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
         solver.post(new ConjunctiveNormalForm(
                 Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
                         Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))),

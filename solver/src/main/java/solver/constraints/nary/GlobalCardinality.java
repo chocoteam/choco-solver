@@ -35,7 +35,6 @@ import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinality;
 import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinaltyLowUp;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.exception.SolverException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -167,9 +166,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             IntVar cste = Views.fixed(i + offset, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                cstrs.add(new ReifiedConstraint(
-                        bs[j], IntConstraintFactory.arithm(vars[j], "=", cste),
-                        IntConstraintFactory.arithm(vars[j], "!=", cste), solver));
+                cstrs.add(IntConstraintFactory.reified(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste)));
             }
             cstrs.add(Sum.eq(bs, card[i], solver));
         }
@@ -182,9 +179,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             IntVar cste = Views.fixed(i + offset, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                cstrs.add(new ReifiedConstraint(
-                        bs[j], IntConstraintFactory.arithm(vars[j], "=", cste),
-                        IntConstraintFactory.arithm(vars[j], "!=", cste), solver));
+                cstrs.add(IntConstraintFactory.reified(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste)));
             }
             cstrs.add(Sum.geq(bs, minOccurrences[i], solver));
             cstrs.add(Sum.leq(bs, maxOccurrences[i], solver));

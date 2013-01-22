@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -92,7 +91,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     Constraint cA = IntConstraintFactory.member(X[j], p, q);
                     Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(new ReifiedConstraint(a, cA, ocA, solver));
+                    solver.post(IntConstraintFactory.reified(a, cA, ocA));
                 }
             }
         }
