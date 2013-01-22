@@ -32,7 +32,10 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.cnf.*;
+import solver.constraints.nary.cnf.ALogicTree;
+import solver.constraints.nary.cnf.Literal;
+import solver.constraints.nary.cnf.LogicTreeToolBox;
+import solver.constraints.nary.cnf.Node;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -229,7 +232,7 @@ public class LogicTreeTest {
                     Literal.pos(rCNF[0]),
                     Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
             );
-            sCNF.post(new ConjunctiveNormalForm(tree, sCNF));
+            sCNF.post(IntConstraintFactory.clauses(tree, sCNF));
             sCNF.set(StrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
 
             //SearchMonitorFactory.log(sCNF, true, true);

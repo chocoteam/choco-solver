@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.search.strategy.StrategyFactory;
@@ -117,9 +116,7 @@ public class OpenStacks extends AbstractProblem {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
                 solver.post(IntConstraintFactory.reified(btmp[0], IntConstraintFactory.arithm(o[i][j - 1], "<", Views.fixed(norders[i], solver)), IntConstraintFactory.arithm(o[i][j - 1], ">=", Views.fixed(norders[i], solver))));
                 solver.post(IntConstraintFactory.reified(btmp[1], IntConstraintFactory.arithm(o[i][j], ">", Views.fixed(0, solver)), IntConstraintFactory.arithm(o[i][j], "<=", Views.fixed(0, solver))));
-                solver.post(new ConjunctiveNormalForm(
-                        Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))),
-                        solver));
+                solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
             }
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);

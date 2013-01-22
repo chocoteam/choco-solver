@@ -33,6 +33,8 @@ import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
 import solver.constraints.extension.BinCSP;
 import solver.constraints.extension.LargeCSP;
+import solver.constraints.nary.cnf.ALogicTree;
+import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropIndexValue;
@@ -377,6 +379,17 @@ public enum IntConstraintFactory {
         return circuit(vars, 0);
     }
 
+
+    /**
+     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
+     *
+     * @param TREE   the syntactic tree
+     * @param SOLVER solver is required, as the TREE can be declared without any variables
+     * @return
+     */
+    public static ConjunctiveNormalForm clauses(ALogicTree TREE, Solver SOLVER) {
+        return new ConjunctiveNormalForm(TREE, SOLVER);
+    }
 
     /**
      * Ensures:<br/>

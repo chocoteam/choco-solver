@@ -44,7 +44,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
@@ -103,7 +102,7 @@ public class LexChainTest {
             //refor.post(new ConjunctiveNormalForm(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        solver.post(new ConjunctiveNormalForm(Node.and(trees), solver));
+        solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         return solver;
     }

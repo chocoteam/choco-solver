@@ -29,7 +29,6 @@ package solver.constraints.nary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -55,21 +54,15 @@ public class CNFTest {
             IntVar y = VariableFactory.bounded("y", 0, 24, solver);
 
             if (i == 0) {
-                solver.post(new ConjunctiveNormalForm(
-                        Node.implies(
-                                Literal.pos(a),
-                                Literal.pos(b)
-                        ),
-                        solver
-                ));
+                solver.post(IntConstraintFactory.clauses(Node.implies(
+                        Literal.pos(a),
+                        Literal.pos(b)
+                ), solver));
             } else {
-                solver.post(new ConjunctiveNormalForm(
-                        Node.implies(
-                                Literal.neg(b),
-                                Literal.neg(a)
-                        ),
-                        solver
-                ));
+                solver.post(IntConstraintFactory.clauses(Node.implies(
+                        Literal.neg(b),
+                        Literal.neg(a)
+                ), solver));
             }
 //        IntVar view = Views.offset(y, 11);
             solver.post(IntConstraintFactory.reified(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));

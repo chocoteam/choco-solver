@@ -31,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.search.strategy.StrategyFactory;
@@ -51,11 +50,8 @@ public class MaxViewTest {
         solver.post(IntConstraintFactory.reified(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
         solver.post(IntConstraintFactory.reified(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
         solver.post(IntConstraintFactory.reified(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
-        solver.post(new ConjunctiveNormalForm(
-                Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
-                        Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))),
-                solver
-        ));
+        solver.post(IntConstraintFactory.clauses(Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
+                Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))), solver));
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {

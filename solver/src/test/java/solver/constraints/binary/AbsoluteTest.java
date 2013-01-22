@@ -36,7 +36,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.exception.ContradictionException;
@@ -106,7 +105,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.reified(b1, Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver)));
         solver.post(IntConstraintFactory.reified(b2, Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
-        solver.post(new ConjunctiveNormalForm(root, solver));
+        solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
@@ -123,7 +122,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.reified(b1, Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver)));
         solver.post(IntConstraintFactory.reified(b2, Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
-        solver.post(new ConjunctiveNormalForm(root, solver));
+        solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
