@@ -53,7 +53,7 @@ public enum Operator {
         operators.put(">=", Operator.GE);
         operators.put("<", Operator.LT);
         operators.put("<=", Operator.LE);
-        operators.put("!=", Operator.EQ);
+        operators.put("!=", Operator.NQ);
         operators.put("+", Operator.PL);
         operators.put("-", Operator.MN);
     }
