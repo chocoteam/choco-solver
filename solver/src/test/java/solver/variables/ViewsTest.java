@@ -30,7 +30,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
@@ -185,7 +184,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -1, 3, ref);
 
-                ref.post(new Arithmetic(z, "=", x, "+", 1, solver));
+                ref.post(IntConstraintFactory.arithm(z, "=", x, "+", 1));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -231,7 +230,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
-                ref.post(new Arithmetic(z, "+", x, "=", 0, ref));
+                ref.post(IntConstraintFactory.arithm(z, "+", x, "=", 0));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -410,8 +409,8 @@ public class ViewsTest {
                 }
                 ref.post(new AllDifferent(x, ref));
                 ref.post(new AllDifferent(t, ref));
-                ref.post(new Arithmetic(x[1], ">", x[0], ref));
-                ref.post(new Arithmetic(t[0], ">", t[k - 2], ref));
+                ref.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
+                ref.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
                 ref.set(StrategyFactory.random(x, ref.getEnvironment(), seed));
             }
             {
@@ -422,8 +421,8 @@ public class ViewsTest {
                 }
                 solver.post(new AllDifferent(x, solver));
                 solver.post(new AllDifferent(t, solver));
-                solver.post(new Arithmetic(x[1], ">", x[0], solver));
-                solver.post(new Arithmetic(t[0], ">", t[k - 2], solver));
+                solver.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
+                solver.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
                 solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
             }
             check(ref, solver, k, true, true);

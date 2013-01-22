@@ -36,7 +36,7 @@ import gnu.trove.map.hash.THashMap;
  */
 public enum Operator {
 
-    EQ(0), LT(1), GT(2), NQ(3), LE(4), GE(5), PL(6), MN(7);
+    NONE(-1), EQ(0), LT(1), GT(2), NQ(3), LE(4), GE(5), PL(6), MN(7);
 
     int num;
 
@@ -45,6 +45,7 @@ public enum Operator {
     }
 
     static THashMap<String, Operator> operators = new THashMap<String, Operator>() {{
+        operators.put("@", Operator.NONE);
         operators.put("=", Operator.EQ);
         operators.put(">", Operator.GT);
         operators.put(">=", Operator.GE);
@@ -58,9 +59,5 @@ public enum Operator {
 
     public static Operator get(String name) {
         return operators.get(name);
-    }
-
-    public int num() {
-        return num;
     }
 }

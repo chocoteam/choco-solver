@@ -1,8 +1,8 @@
 package choco.proba;
 
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import static solver.constraints.ConstraintFactory.lt;
 
 /**
  * Created by IntelliJ IDEA.
@@ -50,10 +48,10 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         Collection<Constraint> allCstrs = new ArrayList<Constraint>();
         // break symmetries
         for (int i = 0; i < size - 1; i++) {
-            allCstrs.add(lt(x[i], x[i + 1], solver));
-            allCstrs.add(lt(y[i], y[i + 1], solver));
+            allCstrs.add(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
+            allCstrs.add(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
         }
-        allCstrs.add(lt(x[0], y[0], solver));
+        allCstrs.add(IntConstraintFactory.arithm(x[0], "<", y[0]));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -79,10 +77,10 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             sy[i] = Views.sqr(y[i]);
             allVars.add(sy[i]);
             sxy[size + i] = sy[i];
-            allCstrs.add(new Arithmetic(sx[i], ">=", 1, solver));
-            allCstrs.add(new Arithmetic(sy[i], ">=", 1, solver));
-            allCstrs.add(new Arithmetic(sx[i], "<=", 4 * size * size, solver));
-            allCstrs.add(new Arithmetic(sy[i], "<=", 4 * size * size, solver));
+            allCstrs.add(IntConstraintFactory.arithm(sx[i], ">=", 1));
+            allCstrs.add(IntConstraintFactory.arithm(sy[i], ">=", 1));
+            allCstrs.add(IntConstraintFactory.arithm(sx[i], "<=", 4 * size * size));
+            allCstrs.add(IntConstraintFactory.arithm(sy[i], "<=", 4 * size * size));
         }
         allCstrs.add(Sum.eq(sxy, coeffs, 0, solver));
 

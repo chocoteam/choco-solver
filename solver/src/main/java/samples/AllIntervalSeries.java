@@ -29,7 +29,6 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
@@ -97,8 +96,8 @@ public class AllIntervalSeries extends AbstractProblem {
 
         // break symetries
         OTHERS = new Constraint[2];
-        OTHERS[0] = (new Arithmetic(vars[1], ">", vars[0], solver));
-        OTHERS[1] = (new Arithmetic(dist[0], ">", dist[m - 2], solver));
+        OTHERS[0] = (IntConstraintFactory.arithm(vars[1], ">", vars[0]));
+        OTHERS[1] = (IntConstraintFactory.arithm(dist[0], ">", dist[m - 2]));
         solver.post(OTHERS);
     }
 

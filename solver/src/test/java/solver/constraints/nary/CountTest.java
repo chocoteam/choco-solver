@@ -31,8 +31,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.MagicSeries;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.extension.LargeCSP;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
@@ -223,8 +223,8 @@ public class CountTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = Views.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new Arithmetic(vs[i], "=", vval, solver),
-                    new Arithmetic(vs[i], "!=", vval, solver), solver));
+            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval),
+                    IntConstraintFactory.arithm(vs[i], "!=", vval), solver));
         }
         return Sum.eq(bs, occ, solver);
     }

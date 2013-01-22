@@ -33,7 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
@@ -104,7 +103,7 @@ public class AbsoluteTest {
         BoolVar b1 = VariableFactory.bool("b1", solver);
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
-        solver.post(ConstraintFactory.geq(X, 0, solver));
+        solver.post(IntConstraintFactory.arithm(X, ">=", 0));
         solver.post(new ReifiedConstraint(b1,
                 Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
                 Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));
@@ -125,7 +124,7 @@ public class AbsoluteTest {
         BoolVar b1 = VariableFactory.bool("b1", solver);
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
-        solver.post(ConstraintFactory.geq(X, 0, solver));
+        solver.post(IntConstraintFactory.arithm(X, ">=", 0));
         solver.post(new ReifiedConstraint(b1,
                 Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
                 Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));

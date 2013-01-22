@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
@@ -60,7 +59,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
                 IntVar Z = Views.abs(Sum.var(X, Views.minus(Y)));
-                solver.post(ConstraintFactory.eq(Z, 5, solver));
+                solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(StrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
                 solver.findAllSolutions();
                 nbSol = solver.getMeasures().getSolutionCount();

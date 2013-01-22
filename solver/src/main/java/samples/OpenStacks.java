@@ -30,7 +30,6 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.Sum;
@@ -103,7 +102,7 @@ public class OpenStacks extends AbstractProblem {
         for (int i = 0; i < nc; i++) {
             o[i] = VariableFactory.enumeratedArray("o_" + i, np + 1, 0, norders[i], solver);
             // no order at t = 0
-            solver.post(ConstraintFactory.eq(o[i][0], 0, solver));
+            solver.post(IntConstraintFactory.arithm(o[i][0], "=", 0));
         }
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
@@ -119,13 +118,13 @@ public class OpenStacks extends AbstractProblem {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
                 solver.post(new ReifiedConstraint(
                         btmp[0],
-                        ConstraintFactory.lt(o[i][j - 1], Views.fixed(norders[i], solver), solver),
-                        ConstraintFactory.geq(o[i][j - 1], Views.fixed(norders[i], solver), solver),
+                        IntConstraintFactory.arithm(o[i][j - 1], "<", Views.fixed(norders[i], solver)),
+                        IntConstraintFactory.arithm(o[i][j - 1], ">=", Views.fixed(norders[i], solver)),
                         solver));
                 solver.post(new ReifiedConstraint(
                         btmp[1],
-                        ConstraintFactory.gt(o[i][j], Views.fixed(0, solver), solver),
-                        ConstraintFactory.leq(o[i][j], Views.fixed(0, solver), solver),
+                        IntConstraintFactory.arithm(o[i][j], ">", Views.fixed(0, solver)),
+                        IntConstraintFactory.arithm(o[i][j], "<=", Views.fixed(0, solver)),
                         solver));
                 solver.post(new ConjunctiveNormalForm(
                         Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))),

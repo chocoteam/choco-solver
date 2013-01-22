@@ -30,9 +30,9 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.common.util.tools.StringUtils;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinality;
 import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinaltyLowUp;
 import solver.constraints.reified.ReifiedConstraint;
@@ -168,8 +168,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(new ReifiedConstraint(
-                        bs[j], new Arithmetic(vars[j], "=", cste, solver),
-                        new Arithmetic(vars[j], "!=", cste, solver), solver));
+                        bs[j], IntConstraintFactory.arithm(vars[j], "=", cste),
+                        IntConstraintFactory.arithm(vars[j], "!=", cste), solver));
             }
             cstrs.add(Sum.eq(bs, card[i], solver));
         }
@@ -183,8 +183,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(new ReifiedConstraint(
-                        bs[j], new Arithmetic(vars[j], "=", cste, solver),
-                        new Arithmetic(vars[j], "!=", cste, solver), solver));
+                        bs[j], IntConstraintFactory.arithm(vars[j], "=", cste),
+                        IntConstraintFactory.arithm(vars[j], "!=", cste), solver));
             }
             cstrs.add(Sum.geq(bs, minOccurrences[i], solver));
             cstrs.add(Sum.leq(bs, maxOccurrences[i], solver));

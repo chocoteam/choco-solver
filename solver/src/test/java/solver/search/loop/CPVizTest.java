@@ -29,7 +29,6 @@ package solver.search.loop;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.InverseChanneling;
@@ -63,9 +62,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
         s.findAllSolutions();
@@ -81,9 +80,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -113,9 +112,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -145,9 +144,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -183,10 +182,10 @@ public class CPVizTest {
         R = VariableFactory.enumerated("R", 0, 9, solver);
         Y = VariableFactory.enumerated("Y", 0, 9, solver);
 
-        solver.post(new Arithmetic(S, "!=", 0, solver));
-        solver.post(new Arithmetic(M, "!=", 0, solver));
-        solver.post(new Arithmetic(S, "!=", 0, solver));
-        solver.post(new Arithmetic(M, "!=", 0, solver));
+        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
         solver.post(new AllDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, solver));
 
 
@@ -282,9 +281,9 @@ public class CPVizTest {
         s.post(Sum.eq(varDiag1, ms, s));
         s.post(Sum.eq(varDiag2, ms, s));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
-        s.post(new Arithmetic(vars[0][0], "<", vars[0][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][0], s));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][0]));
 
         Visualization visu = new Visualization("DomainMatrix", s, dir + "/out");
 
@@ -325,9 +324,9 @@ public class CPVizTest {
         s.post(Sum.eq(varDiag1, ms, s));
         s.post(Sum.eq(varDiag2, ms, s));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
-        s.post(new Arithmetic(vars[0][0], "<", vars[0][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][0], s));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][0]));
 
 
         Visualization visu = new Visualization("AllDifferentMatrix", s, dir + "/out");

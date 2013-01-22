@@ -1,7 +1,6 @@
 package choco.proba;
 
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
@@ -39,8 +38,8 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
             IntVar tmp = Sum.var(vars[i + 1], Views.minus(vars[i]));
             dist[i] = VariableFactory.enumerated("dist[" + i + "]", -size, size, solver);//Views.abs(tmp);
             this.cstrs[k++] = IntConstraintFactory.absolute(dist[i], tmp);
-            this.cstrs[k++] = new Arithmetic(dist[i], ">", 0, solver);
-            this.cstrs[k] = new Arithmetic(dist[i], "<", size, solver);
+            this.cstrs[k++] = IntConstraintFactory.arithm(dist[i], ">", 0);
+            this.cstrs[k] = IntConstraintFactory.arithm(dist[i], "<", size);
         }
         this.allVars[0] = vars[0];
         for (int i = 1, k = 1; i < vars.length - 1; i++, k++) {
@@ -49,8 +48,8 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
         }
         this.cstrs[3 * (size - 1)] = new AllDifferent(vars, solver, type);
         this.cstrs[3 * (size - 1) + 1] = new AllDifferent(dist, solver, type);
-        Constraint o1 = new Arithmetic(vars[1], ">", vars[0], solver);
-        Constraint o2 = new Arithmetic(dist[0], ">", dist[size - 2], solver);
+        Constraint o1 = IntConstraintFactory.arithm(vars[1], ">", vars[0]);
+        Constraint o2 = IntConstraintFactory.arithm(dist[0], ">", dist[size - 2]);
 
         this.cstrs[3 * (size - 1) + 2] = o1;
         this.cstrs[3 * (size - 1) + 3] = o2;

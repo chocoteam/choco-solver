@@ -31,7 +31,7 @@ import choco.kernel.common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.enumerations.sorters.ImpactBased;
@@ -102,9 +102,9 @@ public class MagicSquare extends AbstractProblem {
         solver.post(Sum.eq(diag2, coeffs, ms, solver));
 
         // Symetries breaking
-        solver.post(ConstraintFactory.lt(matrix[0][n - 1], matrix[n - 1][0], solver));
-        solver.post(ConstraintFactory.lt(matrix[0][0], matrix[n - 1][n - 1], solver));
-        solver.post(ConstraintFactory.lt(matrix[0][0], matrix[n - 1][0], solver));
+        solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
+        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
+        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
     }
 

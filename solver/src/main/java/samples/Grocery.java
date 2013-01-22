@@ -29,7 +29,6 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
@@ -83,9 +82,9 @@ public class Grocery extends AbstractProblem {
 
         // symetries
         LEQ = new Constraint[3];
-        LEQ[0] = (ConstraintFactory.leq(vars[0], vars[1], solver));
-        LEQ[1] = (ConstraintFactory.leq(vars[1], vars[2], solver));
-        LEQ[2] = (ConstraintFactory.leq(vars[2], vars[3], solver));
+        LEQ[0] = (IntConstraintFactory.arithm(vars[0], "<=", vars[1]));
+        LEQ[1] = (IntConstraintFactory.arithm(vars[1], "<=", vars[2]));
+        LEQ[2] = (IntConstraintFactory.arithm(vars[2], "<=", vars[3]));
         solver.post(LEQ);
 
     }

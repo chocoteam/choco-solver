@@ -30,9 +30,8 @@ package samples;
 import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
@@ -77,11 +76,11 @@ public class GolombRuler extends AbstractProblem {
     public void buildModel() {
         ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
 
-        solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
+        solver.post(IntConstraintFactory.arithm(ticks[0], "=", 0));
 
         lex = new Constraint[m - 1];
         for (int i = 0; i < m - 1; i++) {
-            lex[i] = new Arithmetic(ticks[i + 1], ">", ticks[i], solver);
+            lex[i] = IntConstraintFactory.arithm(ticks[i + 1], ">", ticks[i]);
         }
         solver.post(lex);
 
@@ -95,7 +94,7 @@ public class GolombRuler extends AbstractProblem {
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
                 distances[k] = Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver);
                 solver.post(distances[k]);
-                solver.post(new Arithmetic(diffs[k], ">=", (j - i) * (j - i + 1) / 2, solver));
+                solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
                 solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
                 m_diffs[i][j] = diffs[k];
             }
@@ -105,7 +104,7 @@ public class GolombRuler extends AbstractProblem {
 
         // break symetries
         if (m > 2) {
-            solver.post(ConstraintFactory.lt(diffs[0], diffs[diffs.length - 1], solver));
+            solver.post(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
     }
 

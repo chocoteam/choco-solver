@@ -33,7 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
@@ -134,7 +133,7 @@ public class ElementTest {
             }
 
             for (int i = 0; i < vars.length - 1; i++) {
-                lcstrs.add(new Arithmetic(vars[i], ">", vars[i + 1], s));
+                lcstrs.add(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
             }
 
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
@@ -168,7 +167,7 @@ public class ElementTest {
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));
-            lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
+            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

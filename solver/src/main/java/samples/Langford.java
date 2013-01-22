@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -86,10 +86,10 @@ public class Langford extends AbstractProblem {
         lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                lights[i + j * n] = ConstraintFactory.eq(Views.offset(position[i + j * n], i + 2), position[i + (j + 1) * n], solver);
+                lights[i + j * n] = IntConstraintFactory.arithm(Views.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
             }
         }
-        lights[(k - 1) * n] = ConstraintFactory.lt(position[0], position[n * k - 1], solver);
+        lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
         solver.post(lights);
         alldiff = new AllDifferent(position, solver);
         solver.post(alldiff);

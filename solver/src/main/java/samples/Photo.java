@@ -30,7 +30,7 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
@@ -85,7 +85,7 @@ public class Photo extends AbstractProblem {
         }
         solver.post(Sum.eq(viols, violations, solver));
         solver.post(new AllDifferent(positions, solver));
-        solver.post(new Arithmetic(positions[1], ">", positions[0], solver));
+        solver.post(IntConstraintFactory.arithm(positions[1], ">", positions[0]));
     }
 
     @Override

@@ -30,8 +30,8 @@ package parser.flatzinc.ast.constraints;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -49,6 +49,6 @@ public class IntLeBuilder implements IBuilder {
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
-        return new Arithmetic(a, "<=", b, solver);
+        return IntConstraintFactory.arithm(a, "<=", b);
     }
 }

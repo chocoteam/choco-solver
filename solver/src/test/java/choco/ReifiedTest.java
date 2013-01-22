@@ -33,9 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
@@ -79,8 +77,8 @@ public class ReifiedTest {
             IntVar y = VariableFactory.enumerated("y", values[1], s);
             IntVar[] vars = new IntVar[]{b, x, y};
 
-            Constraint cons = ConstraintFactory.eq(x, y, s);
-            Constraint oppCons = ConstraintFactory.neq(x, y, s);
+            Constraint cons = IntConstraintFactory.arithm(x, "=", y);
+            Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
             Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
 
@@ -136,8 +134,8 @@ public class ReifiedTest {
             IntVar y = VariableFactory.enumerated("y", values[1], s);
             IntVar[] vars = new IntVar[]{b, x, y};
 
-            Constraint cons = ConstraintFactory.neq(x, y, s);
-            Constraint oppCons = ConstraintFactory.eq(x, y, s);
+            Constraint cons = IntConstraintFactory.arithm(x, "!=", y);
+            Constraint oppCons = IntConstraintFactory.arithm(x, "=", y);
 
             Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
 
@@ -302,22 +300,22 @@ public class ReifiedTest {
             solver.post(new
                     ReifiedConstraint(
                     bv[i - 1],
-                    new Arithmetic(cp, "=", i, solver),
-                    new Arithmetic(cp, "!=", i, solver),
+                    IntConstraintFactory.arithm(cp, "=", i),
+                    IntConstraintFactory.arithm(cp, "!=", i),
                     solver
             ));
         }
 
         IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
-        solver.post(new Arithmetic(cp2, ">=", cp, solver));
+        solver.post(IntConstraintFactory.arithm(cp2, ">=", cp));
 
         BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
         for (int i = 1; i <= 10; i++) {
             solver.post(new
                     ReifiedConstraint(
                     bv2[i - 1],
-                    new Arithmetic(Views.fixed(i, solver), "<", cp, solver),
-                    new Arithmetic(Views.fixed(i, solver), ">=", cp, solver),
+                    IntConstraintFactory.arithm(Views.fixed(i, solver), "<", cp),
+                    IntConstraintFactory.arithm(Views.fixed(i, solver), ">=", cp),
                     solver
             ));
         }
@@ -350,10 +348,10 @@ public class ReifiedTest {
         s.post(Sum.eq(new IntVar[]{row[0], row[1], calc[1]}, new int[]{1, 1, -1}, 0, s));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
-        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
-        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
-        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
+        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
+        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
+        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
@@ -386,10 +384,10 @@ public class ReifiedTest {
         s.post(IntConstraintFactory.times(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
-        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
-        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
-        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
+        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
+        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
+        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
@@ -422,10 +420,10 @@ public class ReifiedTest {
         s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
-        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
-        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
-        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
+        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
+        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
+        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 
@@ -459,10 +457,10 @@ public class ReifiedTest {
         s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
-        constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
-        constraints[1] = new Arithmetic(row[1], "!=", calc[0], s);
-        constraints[2] = new Arithmetic(row[2], "=", calc[1], s);
-        constraints[3] = new Arithmetic(row[2], "!=", calc[1], s);
+        constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
+        constraints[1] = IntConstraintFactory.arithm(row[1], "!=", calc[0]);
+        constraints[2] = IntConstraintFactory.arithm(row[2], "=", calc[1]);
+        constraints[3] = IntConstraintFactory.arithm(row[2], "!=", calc[1]);
 
         BoolVar[] ab = VariableFactory.boolArray("A", 2, s);
 

@@ -37,7 +37,7 @@ import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
@@ -207,7 +207,7 @@ public class SOP {
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j && distanceMatrix[i][j] == -1) {
-                    solver.post(ConstraintFactory.lt(pos[j], pos[i], solver));
+                    solver.post(IntConstraintFactory.arithm(pos[j], "<", pos[i]));
                 }
             }
         }

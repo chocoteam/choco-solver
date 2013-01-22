@@ -28,7 +28,6 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.hardcoded.VariableEngine;
@@ -69,7 +68,7 @@ public class NumericalSequence extends AbstractProblem {
         }
         for (int i = 1; i < n / 2; i++) {
             // U[n + 1 - i] = n+ 1 - U[i]
-            solver.post(new Arithmetic(U[n - 1 - i], "+", U[i], "=", n + 1, solver));
+            solver.post(IntConstraintFactory.arithm(U[n - 1 - i], "+", U[i], "=", n + 1));
         }
         solver.post(new AllDifferent(U, solver));
     }

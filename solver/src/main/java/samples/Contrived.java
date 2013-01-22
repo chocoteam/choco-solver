@@ -29,7 +29,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -74,11 +74,11 @@ public class Contrived extends AbstractProblem {
 
         solver.post(new AllDifferent(v, solver));
         solver.post(new AllDifferent(w, solver));
-        solver.post(new Arithmetic(v[3], "=", v[4], solver));
-        solver.post(new Arithmetic(v[0], "=", w[0], solver));
-        solver.post(new Arithmetic(v[1], "=", w[1], solver));
-        solver.post(new Arithmetic(v[2], "=", w[2], solver));
-        solver.post(new Arithmetic(v[3], "=", w[3], solver));
+        solver.post(IntConstraintFactory.arithm(v[3], "=", v[4]));
+        solver.post(IntConstraintFactory.arithm(v[0], "=", w[0]));
+        solver.post(IntConstraintFactory.arithm(v[1], "=", w[1]));
+        solver.post(IntConstraintFactory.arithm(v[2], "=", w[2]));
+        solver.post(IntConstraintFactory.arithm(v[3], "=", w[3]));
 
     }
 

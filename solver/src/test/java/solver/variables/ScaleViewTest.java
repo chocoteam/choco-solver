@@ -32,7 +32,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -59,7 +58,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, 4, s)
+                IntConstraintFactory.arithm(Y, "!=", 4)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -82,7 +81,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, -2, s)
+                IntConstraintFactory.arithm(Y, "!=", -2)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -103,8 +102,8 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s)
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -125,8 +124,8 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s),
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1),
                 IntConstraintFactory.times(X, C, Y)
         };
 

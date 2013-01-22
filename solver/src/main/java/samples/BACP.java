@@ -28,7 +28,7 @@ package samples;
 
 import choco.kernel.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -103,8 +103,8 @@ public class BACP extends AbstractProblem {
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
                         new ReifiedConstraint(x[i][j],
-                                new Arithmetic(course_period[j], "=", i, solver),
-                                new Arithmetic(course_period[j], "!=", i, solver),
+                                IntConstraintFactory.arithm(course_period[j], "=", i),
+                                IntConstraintFactory.arithm(course_period[j], "!=", i),
                                 solver
                         )
                 );
@@ -116,9 +116,9 @@ public class BACP extends AbstractProblem {
 //            load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
             solver.post(Sum.eq(x[i], course_load, load[i], 1, solver));
 //            load[p] >= load_per_period_lb /\
-            solver.post(new Arithmetic(load[i], ">=", load_per_period_lb, solver));
+            solver.post(IntConstraintFactory.arithm(load[i], ">=", load_per_period_lb));
 //            load[p] <= objective
-            solver.post(new Arithmetic(load[i], "<=", objective, solver));
+            solver.post(IntConstraintFactory.arithm(load[i], "<=", objective));
         }
 
         prerequisite(3, 1);
@@ -191,7 +191,7 @@ public class BACP extends AbstractProblem {
     }
 
     private void prerequisite(int a, int b) {
-        solver.post(new Arithmetic(course_period[b - 1], "<", course_period[a - 1], solver));
+        solver.post(IntConstraintFactory.arithm(course_period[b - 1], "<", course_period[a - 1]));
     }
 
 

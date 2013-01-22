@@ -32,7 +32,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
@@ -86,9 +85,9 @@ public class EqualXYCExplTest {
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));
-            lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
+            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
             lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i], 0));
-            lcstrss.add(new Arithmetic(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3, sol));
+            lcstrss.add(IntConstraintFactory.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

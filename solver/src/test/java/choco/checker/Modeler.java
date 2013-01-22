@@ -33,7 +33,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
@@ -72,7 +71,7 @@ public interface Modeler {
             } catch (ArrayIndexOutOfBoundsException ce) {
                 System.out.printf("");
             }
-            Constraint ctr = ConstraintFactory.eq(vars[0], vars[1], s);
+            Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -157,7 +156,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = ConstraintFactory.neq(vars[0], vars[1], s);
+            Constraint ctr = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

@@ -41,9 +41,6 @@ import solver.variables.view.Views;
 
 import java.util.Arrays;
 
-import static solver.constraints.ConstraintFactory.eq;
-import static solver.constraints.ConstraintFactory.lt;
-
 /**
  * CSPLib prob049:<br/>
  * "This problem consists in finding a partition of numbers 1..N into two sets A and B such that:
@@ -84,11 +81,11 @@ public class Partition extends AbstractProblem {
 
 //        break symmetries
         for (int i = 0; i < size - 1; i++) {
-            solver.post(lt(x[i], x[i + 1], solver));
-            solver.post(lt(y[i], y[i + 1], solver));
+            solver.post(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
+            solver.post(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
         }
-        solver.post(lt(x[0], y[0], solver));
-        solver.post(eq(x[0], 1, solver));
+        solver.post(IntConstraintFactory.arithm(x[0], "<", y[0]));
+        solver.post(IntConstraintFactory.arithm(x[0], "=", 1));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {

@@ -30,7 +30,6 @@ import choco.checker.DomainBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
@@ -52,18 +51,18 @@ public class MaxViewTest {
         BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
         solver.post(new ReifiedConstraint(
                 bs[0],
-                ConstraintFactory.eq(z, x, solver),
-                ConstraintFactory.neq(z, x, solver),
+                IntConstraintFactory.arithm(z, "=", x),
+                IntConstraintFactory.arithm(z, "!=", x),
                 solver));
         solver.post(new ReifiedConstraint(
                 bs[1],
-                ConstraintFactory.eq(z, y, solver),
-                ConstraintFactory.neq(z, y, solver),
+                IntConstraintFactory.arithm(z, "=", y),
+                IntConstraintFactory.arithm(z, "!=", y),
                 solver));
         solver.post(new ReifiedConstraint(
                 bs[2],
-                ConstraintFactory.geq(x, y, solver),
-                ConstraintFactory.lt(x, y, solver),
+                IntConstraintFactory.arithm(x, ">=", y),
+                IntConstraintFactory.arithm(x, "<", y),
                 solver));
         solver.post(new ConjunctiveNormalForm(
                 Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),

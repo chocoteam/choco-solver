@@ -56,6 +56,19 @@ public enum IntConstraintFactory {
     //##################################################################################################################
 
     /**
+     * Ensures: VAR OP CSTE, where OP in {"=", "!=", ">","<",">=","<="}
+     *
+     * @param VAR  a variable
+     * @param OP   an operator
+     * @param CSTE a constant
+     */
+    public static Arithmetic arithm(IntVar VAR, String OP, int CSTE) {
+        Operator op = Operator.get(OP);
+        return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
+    }
+
+
+    /**
      * Ensures VAR takes its values in TABLE
      *
      * @param VAR   an integer variable
@@ -107,6 +120,18 @@ public enum IntConstraintFactory {
     public static Absolute absolute(IntVar VAR1, IntVar VAR2) {
         assert VAR1.getSolver() == VAR2.getSolver();
         return new Absolute(VAR1, VAR2, VAR1.getSolver());
+    }
+
+    /**
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     *
+     * @param VAR1 first variable
+     * @param OP   an operator
+     * @param VAR2 second variable
+     */
+    public static Arithmetic arithm(IntVar VAR1, String OP, IntVar VAR2) {
+        Operator op = Operator.get(OP);
+        return new Arithmetic(VAR1, op, VAR2, VAR1.getSolver());
     }
 
     /**
@@ -196,6 +221,21 @@ public enum IntConstraintFactory {
     //##################################################################################################################
     //TERNARIES ########################################################################################################
     //##################################################################################################################
+
+    /**
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     *
+     * @param VAR1 first variable
+     * @param OP1  an operator
+     * @param VAR2 second variable
+     * @param OP2  another operator
+     * @param CSTE an operator
+     */
+    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+        Operator op1 = Operator.get(OP1);
+        Operator op2 = Operator.get(OP2);
+        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
+    }
 
     /**
      * Ensures: <br/>
