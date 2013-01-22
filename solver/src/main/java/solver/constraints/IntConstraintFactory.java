@@ -35,6 +35,8 @@ import solver.constraints.extension.BinCSP;
 import solver.constraints.extension.LargeCSP;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.nary.cnf.Literal;
+import solver.constraints.nary.cnf.Node;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropIndexValue;
@@ -389,6 +391,31 @@ public enum IntConstraintFactory {
      */
     public static ConjunctiveNormalForm clauses(ALogicTree TREE, Solver SOLVER) {
         return new ConjunctiveNormalForm(TREE, SOLVER);
+    }
+
+    /**
+     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
+     *
+     * @param POSLITS positive literals
+     * @param NEGLITS negative literals
+     */
+    public static ConjunctiveNormalForm clauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
+        Solver solver;
+        if (POSLITS.length > 0) {
+            solver = POSLITS[0].getSolver();
+        } else {
+            solver = NEGLITS[0].getSolver();
+        }
+        Literal[] lits = new Literal[POSLITS.length + NEGLITS.length];
+        int i = 0;
+        for (; i < POSLITS.length; i++) {
+            lits[i] = Literal.pos(POSLITS[i]);
+        }
+        for (int j = 0; j < NEGLITS.length; j++) {
+            lits[j + i] = Literal.neg(NEGLITS[j]);
+        }
+        ALogicTree tree = Node.or(lits);
+        return new ConjunctiveNormalForm(tree, solver);
     }
 
     /**
