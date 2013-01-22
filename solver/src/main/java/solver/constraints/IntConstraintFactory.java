@@ -26,15 +26,22 @@
  */
 package solver.constraints;
 
+import solver.Solver;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
+import solver.constraints.propagators.nary.PropIndexValue;
+import solver.constraints.propagators.nary.PropNoSubtour;
+import solver.constraints.propagators.nary.PropSubcircuit;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -50,6 +57,16 @@ public enum IntConstraintFactory {
 
 
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
+
+    /**
+     * Create an empty constraint to be filled with propagators
+     *
+     * @param solver
+     * @return an empty constraint to be filled with propagators
+     */
+    public static Constraint makeEmptyConstraint(Solver solver) {
+        return new Constraint(solver);
+    }
 
     //##################################################################################################################
     // UNARIES #########################################################################################################
@@ -321,6 +338,108 @@ public enum IntConstraintFactory {
     //##################################################################################################################
     //GLOBALS ##########################################################################################################
     //##################################################################################################################
+
+
+    /**
+     * Creates a circuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a covering circuit
+     * where vars[i] = j means that j is the successor of i.
+     *
+     * @param vars
+     * @return a circuit constraint
+     */
+    public static Constraint circuit(IntVar[] vars, int offset) {
+        Solver solver = vars[0].getSolver();
+        Constraint c = new Constraint(solver);
+        c.setPropagators(
+                new PropAllDiffAC(vars, c, solver),
+                new PropNoSubtour<IntVar>(vars, offset, solver, c));
+        return c;
+    }
+
+    /**
+     * Creates a circuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a covering circuit
+     * where vars[i] = j means that j is the successor of i.
+     *
+     * @param vars
+     * @return a circuit constraint
+     */
+    public static Constraint circuit(IntVar[] vars) {
+        return circuit(vars, 0);
+    }
+
+    /**
+     * Creates a subcircuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a single circuit of subcircuitSize nodes
+     * where vars[i] = j means that j is the successor of i.
+     * and vars[i] = i means that i is not part of the circuit
+     *
+     * @param vars
+     * @param offset
+     * @param subcircuitSize expected number of nodes in the circuit
+     * @return a circuit constraint
+     */
+    public static Constraint subcircuit(IntVar[] vars, int offset, IntVar subcircuitSize) {
+        int n = vars.length;
+        Solver solver = vars[0].getSolver();
+        IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
+        Constraint c = new Constraint(solver);
+        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, subcircuitSize}, new int[]{1, 1}, 2, n, solver, c));
+        c.addPropagators(new PropAllDiffAC(vars, c, solver));
+        c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
+        c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
+        return c;
+    }
+
+    /**
+     * Creates a subcircuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a single circuit of subcircuitSize nodes
+     * where vars[i] = j means that j is the successor of i.
+     * and vars[i] = i means that i is not part of the circuit
+     *
+     * @param vars
+     * @param subcircuitSize expected number of nodes in the circuit
+     * @return a circuit constraint
+     */
+    public static Constraint subcircuit(IntVar[] vars, IntVar subcircuitSize) {
+        return subcircuit(vars, 0, subcircuitSize);
+    }
+
+    /**
+     * Creates a subcircuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a single circuit
+     * where vars[i] = j means that j is the successor of i.
+     * and vars[i] = i means that i is not part of the circuit
+     *
+     * @param vars
+     * @param offset
+     * @return a circuit constraint
+     */
+    public static Constraint subcircuit(IntVar[] vars, int offset) {
+        Solver solver = vars[0].getSolver();
+        return subcircuit(vars, offset, VariableFactory.bounded("subcircuit length", 0, vars.length, solver));
+    }
+
+    /**
+     * Creates a subcircuit constraint which ensures that
+     * <p/>
+     * the elements of vars define a single circuit
+     * where vars[i] = j means that j is the successor of i.
+     * and vars[i] = i means that i is not part of the circuit
+     *
+     * @param vars
+     * @return a circuit constraint
+     */
+    public static Constraint subcircuit(IntVar[] vars) {
+        Solver solver = vars[0].getSolver();
+        return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver));
+    }
 
 
 }
