@@ -44,7 +44,9 @@ public enum Operator {
         this.num = num;
     }
 
-    static THashMap<String, Operator> operators = new THashMap<String, Operator>() {{
+    static THashMap<String, Operator> operators = new THashMap<String, Operator>();
+
+    static {
         operators.put("@", Operator.NONE);
         operators.put("=", Operator.EQ);
         operators.put(">", Operator.GT);
@@ -54,7 +56,9 @@ public enum Operator {
         operators.put("!=", Operator.EQ);
         operators.put("+", Operator.PL);
         operators.put("-", Operator.MN);
-    }};
+    }
+
+    ;
 
 
     public static Operator get(String name) {
