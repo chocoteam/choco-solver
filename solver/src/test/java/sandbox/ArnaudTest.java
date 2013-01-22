@@ -66,7 +66,7 @@ public class ArnaudTest {
         }
         //create constraints
         for (int i = 0; i < nv; i++) {
-            s.post(IntConstraintFactory.element(vars[2 * i + 1], values[i % 5], vars[2 * i], s));
+            s.post(IntConstraintFactory.element(vars[2 * i + 1], values[i % 5], vars[2 * i]));
         }
         long t2 = System.currentTimeMillis();
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));

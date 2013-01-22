@@ -121,7 +121,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.post(IntConstraintFactory.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3], solver));
+            solver.post(IntConstraintFactory.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]));
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;

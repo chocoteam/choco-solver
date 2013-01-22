@@ -221,7 +221,7 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 0, 4, -10};
         IntVar index = VariableFactory.enumerated("index", -3, 10, s);
         IntVar value = VariableFactory.enumerated("value", -20, 20, s);
-        s.post(IntConstraintFactory.element(index, values, value, s));
+        s.post(IntConstraintFactory.element(index, values, value));
 
         Visualization visu = new Visualization("Element", s, dir + "/out");
 

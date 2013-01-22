@@ -38,7 +38,7 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
         for (int i = 0, k = 0; i < size - 1; i++, k++) {
             IntVar tmp = Sum.var(vars[i + 1], Views.minus(vars[i]));
             dist[i] = VariableFactory.enumerated("dist[" + i + "]", -size, size, solver);//Views.abs(tmp);
-            this.cstrs[k++] = IntConstraintFactory.absolute(dist[i], tmp, solver);
+            this.cstrs[k++] = IntConstraintFactory.absolute(dist[i], tmp);
             this.cstrs[k++] = new Arithmetic(dist[i], ">", 0, solver);
             this.cstrs[k] = new Arithmetic(dist[i], "<", size, solver);
         }

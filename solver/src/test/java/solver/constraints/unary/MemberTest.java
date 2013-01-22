@@ -88,7 +88,7 @@ public class MemberTest {
                 int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
                 vars[0] = VariableFactory.enumerated("v", values[0], s);
 
-                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1], s)};
+                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
@@ -116,7 +116,7 @@ public class MemberTest {
 
                 vars[0] = VariableFactory.bounded("v", lb, ub, s);
 
-                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1], s)};
+                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(StrategyFactory.presetI(vars, s.getEnvironment()));

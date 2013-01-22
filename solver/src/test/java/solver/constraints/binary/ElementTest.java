@@ -56,7 +56,7 @@ public class ElementTest {
     private static void model(Solver s, IEnvironment env, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
-        s.post(IntConstraintFactory.element(var, values, index, offset, s));
+        s.post(IntConstraintFactory.element(var, values, index, offset));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
         s.set(StrategyFactory.random(allvars, env));
@@ -130,7 +130,7 @@ public class ElementTest {
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
                 indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
-                lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0, s));
+                lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0));
             }
 
             for (int i = 0; i < vars.length - 1; i++) {
@@ -167,7 +167,7 @@ public class ElementTest {
         ref.set(StrategyFactory.random(allvarsr, ref.getEnvironment(), seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, ref));
+            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));
             lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
         }
 

@@ -85,7 +85,7 @@ public class SquareTests {
         int[] dom2 = values.toArray();
         Arrays.sort(dom2);
         IntVar B = VariableFactory.enumerated("X", dom2, solver);
-        solver.post(IntConstraintFactory.square(B, A, solver));
+        solver.post(IntConstraintFactory.square(B, A));
         solver.post(new Arithmetic(B, ">", 0, solver));
 //        SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
@@ -125,7 +125,7 @@ public class SquareTests {
         dom2[0] = dom[0][n] < 0 ? dom[0][n] * dom[0][n] : 0;
         dom2[1] = Math.max(dom[0][0] * dom[0][0], dom[0][n] * dom[0][1]);
         IntVar B = VariableFactory.bounded("B", dom2[0], dom2[1], solver);
-        solver.post(IntConstraintFactory.square(B, A, solver));
+        solver.post(IntConstraintFactory.square(B, A));
         solver.post(new Arithmetic(B, ">", 0, solver));
         SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));

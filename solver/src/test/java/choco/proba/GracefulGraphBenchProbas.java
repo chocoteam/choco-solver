@@ -54,7 +54,7 @@ public class GracefulGraphBenchProbas extends AbstractBenchProbas {
             for (int j = i + 1; j < size; j++) {
                 if (graph[i][j]) {
                     IntVar tmp = Sum.var(nodeLabel[i], Views.minus(nodeLabel[j]));
-                    this.cstrs[c++] = IntConstraintFactory.absolute(edgeLabel[e++], tmp, solver);
+                    this.cstrs[c++] = IntConstraintFactory.absolute(edgeLabel[e++], tmp);
                 }
             }
         }

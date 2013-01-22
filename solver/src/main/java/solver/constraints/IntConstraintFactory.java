@@ -26,7 +26,6 @@
  */
 package solver.constraints;
 
-import solver.Solver;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.binary.Element;
@@ -58,47 +57,43 @@ public enum IntConstraintFactory {
     /**
      * Ensures VAR takes its values in TABLE
      *
-     * @param VAR    an integer variable
-     * @param TABLE  an array of values
-     * @param solver SOLVER
+     * @param VAR   an integer variable
+     * @param TABLE an array of values
      */
-    public static Member member(IntVar VAR, int[] TABLE, Solver solver) {
-        return new Member(VAR, TABLE, solver);
+    public static Member member(IntVar VAR, int[] TABLE) {
+        return new Member(VAR, TABLE, VAR.getSolver());
     }
 
     /**
      * Ensures VAR takes its values in [LB, UB]
      *
-     * @param VAR    an integer variable
-     * @param LB     the lower bound of the interval
-     * @param UB     the upper bound of the interval
-     * @param solver SOLVER
+     * @param VAR an integer variable
+     * @param LB  the lower bound of the interval
+     * @param UB  the upper bound of the interval
      */
-    public static Member member(IntVar VAR, int LB, int UB, Solver solver) {
-        return new Member(VAR, LB, UB, solver);
+    public static Member member(IntVar VAR, int LB, int UB) {
+        return new Member(VAR, LB, UB, VAR.getSolver());
     }
 
     /**
      * Ensures VAR does not take its values in TABLE
      *
-     * @param VAR    an integer variable
-     * @param TABLE  an array of values
-     * @param solver SOLVER
+     * @param VAR   an integer variable
+     * @param TABLE an array of values
      */
-    public static NotMember not_member(IntVar VAR, int[] TABLE, Solver solver) {
-        return new NotMember(VAR, TABLE, solver);
+    public static NotMember not_member(IntVar VAR, int[] TABLE) {
+        return new NotMember(VAR, TABLE, VAR.getSolver());
     }
 
     /**
      * Ensures VAR does not take its values in [LB, UB]
      *
-     * @param VAR    an integer variable
-     * @param LB     the lower bound of the interval
-     * @param UB     the upper bound of the interval
-     * @param solver SOLVER
+     * @param VAR an integer variable
+     * @param LB  the lower bound of the interval
+     * @param UB  the upper bound of the interval
      */
-    public static NotMember not_member(IntVar VAR, int LB, int UB, Solver solver) {
-        return new NotMember(VAR, LB, UB, solver);
+    public static NotMember not_member(IntVar VAR, int LB, int UB) {
+        return new NotMember(VAR, LB, UB, VAR.getSolver());
     }
 
     //##################################################################################################################
@@ -108,8 +103,9 @@ public enum IntConstraintFactory {
     /**
      * Enforces VAR1 = |VAR2|
      */
-    public static Absolute absolute(IntVar VAR1, IntVar VAR2, Solver solver) {
-        return new Absolute(VAR1, VAR2, solver);
+    public static Absolute absolute(IntVar VAR1, IntVar VAR2) {
+        assert VAR1.getSolver() == VAR2.getSolver();
+        return new Absolute(VAR1, VAR2, VAR1.getSolver());
     }
 
     /**
@@ -118,83 +114,81 @@ public enum IntConstraintFactory {
      * <br/>
      * where OP can take its value among {"=", ">", "<", "!="}
      */
-    public static DistanceXYC distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE, Solver solver) {
+    public static DistanceXYC distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
+        assert VAR1.getSolver() == VAR2.getSolver();
         Operator op = Operator.get(OP);
         if (op != Operator.EQ && op != Operator.GT && op != Operator.LT && op != Operator.MN) {
             throw new SolverException("Unexpected operator for distance");
         }
-        return new DistanceXYC(VAR1, VAR2, op, CSTE, solver);
+        return new DistanceXYC(VAR1, VAR2, op, CSTE, VAR1.getSolver());
     }
 
     /**
      * Build ELEMENT constraint: VALUE = TABLE[INDEX]
      *
-     * @param value  VALUE
-     * @param table  TABLE
-     * @param index  INDEX
-     * @param offset offset matching INDEX.LB and TABLE[0]
-     * @param solver the attached solver
+     * @param VALUE  value variable
+     * @param TABLE  array of int
+     * @param INDEX  index variable
+     * @param OFFSET offset matching INDEX.LB and TABLE[0]
      */
-    public static Element element(IntVar value, int[] table, IntVar index, int offset, Solver solver) {
-        return new Element(value, table, index, offset, "none", solver);
+    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
+        assert VALUE.getSolver() == INDEX.getSolver();
+        return new Element(VALUE, TABLE, INDEX, OFFSET, "none", VALUE.getSolver());
     }
 
     /**
      * Build ELEMENT constraint: VALUE = TABLE[INDEX]
      *
-     * @param value  VALUE
-     * @param table  TABLE
-     * @param index  INDEX
-     * @param offset offset matching INDEX.LB and TABLE[0]
-     * @param sort   "asc","desc", detect" : values are sorted wrt <code>sort</code>
-     * @param solver the attached solver
+     * @param VALUE  VALUE
+     * @param TABLE  TABLE
+     * @param INDEX  INDEX
+     * @param OFFSET offset matching INDEX.LB and TABLE[0]
+     * @param SORT   "asc","desc", detect" : values are sorted wrt <code>sort</code>
      */
-    public static Element element(IntVar value, int[] table, IntVar index, int offset, String sort, Solver solver) {
-        return new Element(value, table, index, offset, sort, solver);
+    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
+        return new Element(VALUE, TABLE, INDEX, OFFSET, SORT, VALUE.getSolver());
     }
 
     /**
      * Build ELEMENT constraint: VALUE = TABLE[INDEX]
      *
-     * @param value  VALUE
-     * @param table  TABLE
-     * @param index  INDEX
-     * @param solver the attached solver
+     * @param VALUE value variable
+     * @param TABLE array of int
+     * @param INDEX index variable
      */
-    public static Element element(IntVar value, int[] table, IntVar index, Solver solver) {
-        return new Element(value, table, index, 0, "none", solver);
+    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX) {
+        return new Element(VALUE, TABLE, INDEX, 0, "none", VALUE.getSolver());
     }
 
     /**
      * Build ELEMENT constraint: VALUE = TABLE[INDEX]
      *
-     * @param value  VALUE
-     * @param table  TABLE
-     * @param index  INDEX
-     * @param sort   "asc","desc", detect" : values are sorted wrt <code>sort</code>
-     * @param solver the attached solver
+     * @param VALUE value variable
+     * @param TABLE array of int
+     * @param INDEX index variable
+     * @param SORT  "asc","desc", detect" : values are sorted wrt <code>sort</code>
      */
-    public static Element element(IntVar value, int[] table, IntVar index, String sort, Solver solver) {
-        return new Element(value, table, index, 0, sort, solver);
+    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, String SORT) {
+        return new Element(VALUE, TABLE, INDEX, 0, SORT, VALUE.getSolver());
     }
 
     /**
      * Build an ELEMENT constraint: VALUE = TABLE[INDEX] where TABLE is an array of variables.
      *
-     * @param value  VALUE
-     * @param table  TABLE
-     * @param index  INDEX
-     * @param solver the attached solver
+     * @param VALUE value variable
+     * @param TABLE array of variables
+     * @param INDEX index variable
      */
-    public static Element element(IntVar value, IntVar[] table, IntVar index, int offset, Solver solver) {
-        return new Element(value, table, index, offset, solver);
+    public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int offset) {
+        return new Element(VALUE, TABLE, INDEX, offset, VALUE.getSolver());
     }
 
     /**
      * Enforces VAR1 = VAR2^2
      */
-    public static Square square(IntVar VAR1, IntVar VAR2, Solver solver) {
-        return new Square(VAR1, VAR2, solver);
+    public static Square square(IntVar VAR1, IntVar VAR2) {
+        assert VAR1.getSolver() == VAR2.getSolver();
+        return new Square(VAR1, VAR2, VAR1.getSolver());
     }
 
 

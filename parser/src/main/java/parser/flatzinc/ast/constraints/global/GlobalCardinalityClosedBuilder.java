@@ -54,7 +54,7 @@ public class GlobalCardinalityClosedBuilder implements IBuilder {
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
 
         for (int i = 0; i < vars.length; i++) {
-            solver.post(IntConstraintFactory.member(vars[i], values, solver));
+            solver.post(IntConstraintFactory.member(vars[i], values));
         }
         // si nbVAL > 2*NBVAR => BC
         boolean ac = values.length <= 2 * vars.length;

@@ -105,11 +105,11 @@ public class WarehouseLocation extends AbstractProblem {
         // A warehouse is open, if it supplies to a store
         IntVar ONE = Views.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0, solver));
+            solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s], solver));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
         }
         for (int w = 0; w < nWH; w++) {
             solver.post(new Count(w, suppliers, Count.Relop.GEQ, open[w], solver));

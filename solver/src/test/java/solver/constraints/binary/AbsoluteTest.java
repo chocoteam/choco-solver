@@ -63,7 +63,7 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.bounded("X", xl, xu, solver);
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
 
-        solver.post(IntConstraintFactory.absolute(X, Y, solver));
+        solver.post(IntConstraintFactory.absolute(X, Y));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
@@ -75,7 +75,7 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.enumerated("X", x, solver);
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
-        solver.post(IntConstraintFactory.absolute(X, Y, solver));
+        solver.post(IntConstraintFactory.absolute(X, Y));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
@@ -264,7 +264,7 @@ public class AbsoluteTest {
             IntVar X = VariableFactory.bounded("X", minX, maxX, solver);
             IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
 
-            Constraint abs = IntConstraintFactory.absolute(X, Y, solver);
+            Constraint abs = IntConstraintFactory.absolute(X, Y);
             solver.post(abs);
             solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
             IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
@@ -303,7 +303,7 @@ public class AbsoluteTest {
                         IntVar X = VariableFactory.enumerated("X", domains[0], solver);
                         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
 
-                        Constraint abs = IntConstraintFactory.absolute(X, Y, solver);
+                        Constraint abs = IntConstraintFactory.absolute(X, Y);
                         solver.post(abs);
                         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
                         IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);

@@ -119,8 +119,8 @@ public class Partition extends AbstractProblem {
             sxy[i] = sx[i];
             sy[i] = Views.sqr(y[i]);
             sxy[size + i] = sy[i];
-            solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size, solver));
-            solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size, solver));
+            solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
+            solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
         }
         heavy[1] = Sum.eq(sxy, coeffs, 0, solver);
         solver.post(heavy[1]);

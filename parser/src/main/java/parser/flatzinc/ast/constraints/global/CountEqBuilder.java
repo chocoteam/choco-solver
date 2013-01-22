@@ -61,7 +61,7 @@ public class CountEqBuilder implements IBuilder {
             for (int i = ylb; i <= yub; i++) {
                 solver.post(new Count(i, x, Count.Relop.EQ, cs[i - ylb], solver));
             }
-            return IntConstraintFactory.element(c, cs, y, ylb, solver);
+            return IntConstraintFactory.element(c, cs, y, ylb);
         } else {
             IntVar[] x = exps.get(0).toIntVarArray(solver);
             int y = exps.get(1).intValue();

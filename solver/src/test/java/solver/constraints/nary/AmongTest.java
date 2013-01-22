@@ -241,8 +241,8 @@ public class AmongTest {
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.member(vs[i], values, solver),
-                    IntConstraintFactory.not_member(vs[i], values, solver), solver));
+            solver.post(new ReifiedConstraint(bs[i], IntConstraintFactory.member(vs[i], values),
+                    IntConstraintFactory.not_member(vs[i], values), solver));
         }
         return Sum.eq(bs, occ, solver);
     }

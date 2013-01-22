@@ -54,13 +54,13 @@ public class SetInReifBuilder implements IBuilder {
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            cs[0] = IntConstraintFactory.member(a, values, solver);
-            cs[1] = IntConstraintFactory.not_member(a, values, solver);
+            cs[0] = IntConstraintFactory.member(a, values);
+            cs[1] = IntConstraintFactory.not_member(a, values);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            cs[0] = IntConstraintFactory.member(a, low, upp, solver);
-            cs[1] = IntConstraintFactory.not_member(a, low, upp, solver);
+            cs[0] = IntConstraintFactory.member(a, low, upp);
+            cs[1] = IntConstraintFactory.not_member(a, low, upp);
         } else {
             Exit.log("SetVar unavailable");
             return null;

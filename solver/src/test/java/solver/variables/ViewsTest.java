@@ -163,7 +163,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 2, ref);
 
-                ref.post(IntConstraintFactory.absolute(z, x, ref));
+                ref.post(IntConstraintFactory.absolute(z, x));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -354,7 +354,7 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(IntConstraintFactory.absolute(az, z, ref));
+                ref.post(IntConstraintFactory.absolute(az, z));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
             }
             {
@@ -379,7 +379,7 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(IntConstraintFactory.absolute(az, z, ref));
+                ref.post(IntConstraintFactory.absolute(az, z));
                 ref.post(new AllDifferent(new IntVar[]{x, y, az}, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
             }
@@ -407,7 +407,7 @@ public class ViewsTest {
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
                     ref.post(Sum.eq(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, 0, ref));
-                    ref.post(IntConstraintFactory.absolute(t[i], y[i], ref));
+                    ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
                 ref.post(new AllDifferent(x, ref));
                 ref.post(new AllDifferent(t, ref));

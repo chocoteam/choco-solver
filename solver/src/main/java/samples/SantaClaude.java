@@ -82,7 +82,7 @@ public class SantaClaude extends AbstractProblem {
         }
         solver.post(new AllDifferent(kid_gift, solver));
         for (int i = 0; i < n_kids; i++) {
-            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0, solver));
+            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0));
         }
         solver.post(Sum.eq(kid_price, total_cost, solver));
 

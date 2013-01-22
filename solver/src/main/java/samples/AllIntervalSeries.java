@@ -87,7 +87,7 @@ public class AllIntervalSeries extends AbstractProblem {
         } else {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
-                solver.post(IntConstraintFactory.member(dist[i], 1, m - 1, solver));
+                solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }
 

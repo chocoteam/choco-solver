@@ -106,12 +106,12 @@ public class ReifiedTest {
         z.toString();
 
         List<Constraint> lcstrs = new ArrayList<Constraint>();
-        lcstrs.add(new ReifiedConstraint(a, member(x, new int[]{1, 1}, s),
-                not_member(x, new int[]{1, 1}, s), s));
-        lcstrs.add(new ReifiedConstraint(b, member(y, new int[]{1, 1}, s),
-                not_member(y, new int[]{1, 1}, s), s));
-        lcstrs.add(new ReifiedConstraint(c, member(z, new int[]{1, 1}, s),
-                not_member(z, new int[]{1, 1}, s), s));
+        lcstrs.add(new ReifiedConstraint(a, member(x, new int[]{1, 1}),
+                not_member(x, new int[]{1, 1}), s));
+        lcstrs.add(new ReifiedConstraint(b, member(y, new int[]{1, 1}),
+                not_member(y, new int[]{1, 1}), s));
+        lcstrs.add(new ReifiedConstraint(c, member(z, new int[]{1, 1}),
+                not_member(z, new int[]{1, 1}), s));
 
         lcstrs.add(Sum.leq(new IntVar[]{a, b, c}, 1, s));
 
@@ -205,8 +205,8 @@ public class ReifiedTest {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = member(X[j], p, q, s2);
-                    Constraint ocA = not_member(X[j], p, q, s2);
+                    Constraint cA = member(X[j], p, q);
+                    Constraint ocA = not_member(X[j], p, q);
 
                     s2.post(new ReifiedConstraint(a, cA, ocA, s2));
                 }

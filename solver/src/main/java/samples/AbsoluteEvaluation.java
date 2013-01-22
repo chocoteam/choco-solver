@@ -71,7 +71,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
         vars[0] = VariableFactory.bounded("X", minX, maxX, solver);
         vars[1] = VariableFactory.bounded("Y", minY, maxY, solver);
 
-        Constraint abs = IntConstraintFactory.absolute(vars[0], vars[1], solver);
+        Constraint abs = IntConstraintFactory.absolute(vars[0], vars[1]);
         solver.post(abs);
 
 

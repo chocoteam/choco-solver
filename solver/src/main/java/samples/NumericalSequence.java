@@ -65,7 +65,7 @@ public class NumericalSequence extends AbstractProblem {
         }
         for (int i = 1; i < n - 1; i++) {
             // U[i+1] = U[U[i]-1]-1
-            solver.post(IntConstraintFactory.element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
+            solver.post(IntConstraintFactory.element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1));
         }
         for (int i = 1; i < n / 2; i++) {
             // U[n + 1 - i] = n+ 1 - U[i]
