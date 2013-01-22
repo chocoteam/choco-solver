@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.ternary.Times;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.view.Views;
@@ -127,7 +127,7 @@ public class ScaleViewTest {
         Constraint[] cstrs = {
                 ConstraintFactory.geq(Y, low + coeff - 1, s),
                 ConstraintFactory.leq(Y, upp - coeff - 1, s),
-                new Times(X, C, Y, s)
+                IntConstraintFactory.times(X, C, Y)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -151,7 +151,7 @@ public class ScaleViewTest {
             sb.findAllSolutions();
             sc.findAllSolutions();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-			//Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+            //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
         }
     }
 

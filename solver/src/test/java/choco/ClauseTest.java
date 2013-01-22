@@ -34,11 +34,11 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.ternary.Times;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -239,7 +239,7 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
 
                 solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
                 solver.findAllSolutions();
@@ -282,7 +282,7 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
                 try {
                     solver.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);

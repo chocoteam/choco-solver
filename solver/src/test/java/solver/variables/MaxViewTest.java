@@ -31,11 +31,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.ternary.Max;
 import solver.search.strategy.StrategyFactory;
 
 import java.util.Random;
@@ -73,11 +73,11 @@ public class MaxViewTest {
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
-        solver.post(new Max(z, x, y, solver));
+        solver.post(IntConstraintFactory.max(z, x, y));
     }
 
     @Test
-    public void testMax1(){
+    public void testMax1() {
         Random random = new Random();
         for (int seed = 1; seed < 9999; seed++) {
             random.setSeed(seed);
@@ -104,13 +104,13 @@ public class MaxViewTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
     @Test
-    public void testMax2(){
+    public void testMax2() {
         Random random = new Random();
         for (int seed = 0; seed < 9999; seed++) {
             random.setSeed(seed);
@@ -138,8 +138,8 @@ public class MaxViewTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 }

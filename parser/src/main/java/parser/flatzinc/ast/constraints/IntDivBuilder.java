@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ternary.DivXYZ;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -50,6 +50,6 @@ public class IntDivBuilder implements IBuilder {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return new DivXYZ(a, b, c, solver);
+        return IntConstraintFactory.eucl_div(a, b, c);
     }
 }

@@ -30,7 +30,7 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
-import solver.constraints.ternary.DistanceXYZ;
+import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
@@ -215,6 +215,67 @@ public enum IntConstraintFactory {
         }
         return new DistanceXYZ(VAR1, VAR2, op, VAR3, VAR1.getSolver());
 
+    }
+
+    /**
+     * Ensures VAR1 / VAR2 = VAR 3, rounding towards 0 -- Euclidean division
+     *
+     * @param VAR1 dividend
+     * @param VAR2 divisor
+     * @param VAR3 result
+     */
+    public static DivXYZ eucl_div(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
+        return new DivXYZ(VAR1, VAR2, VAR3, VAR1.getSolver());
+    }
+
+    /**
+     * Ensures: VAR1 = MAX(VAR2, VAR3)
+     *
+     * @param VAR1 result
+     * @param VAR2 first variable
+     * @param VAR3 second variable
+     */
+    public static Max max(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
+        return new Max(VAR1, VAR2, VAR3, VAR1.getSolver());
+    }
+
+    /**
+     * Ensures:  VAR1 = MIN(VAR2, VAR3)
+     *
+     * @param VAR1 result
+     * @param VAR2 first variable
+     * @param VAR3 second variable
+     */
+    public static Min min(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
+        return new Min(VAR1, VAR2, VAR3, VAR1.getSolver());
+    }
+
+    /**
+     * Ensures VAR1 % VAR2 = VAR 3,
+     * <br/>i.e.:<br/>
+     * - VAR1 / VAR2 = T1 and,<br/>
+     * - T1 * VAR2 = T2 and,<br/>
+     * - Z + T2 = VAR1<br/>
+     * <br/>
+     * where T1 = T2 = [-|VAR1|, |VAR1|]
+     *
+     * @param VAR1 first variable
+     * @param VAR2 second variable
+     * @param VAR3 result
+     */
+    public static ModXYZ mod(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
+        return new ModXYZ(VAR1, VAR2, VAR3, VAR1.getSolver());
+    }
+
+    /**
+     * Ensures: VAR1 * VAR2 = VAR3
+     *
+     * @param VAR1 first variable
+     * @param VAR2 second variable
+     * @param VAR3 result
+     */
+    public static Times times(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
+        return new Times(VAR1, VAR2, VAR3, VAR1.getSolver());
     }
 
     //##################################################################################################################

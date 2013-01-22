@@ -35,7 +35,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.Max;
-import solver.constraints.ternary.Times;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.view.Views;
@@ -138,7 +137,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 2, ref);
-                ref.post(new Max(z, x, y, ref));
+                ref.post(IntConstraintFactory.max(z, x, y));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
 
             }
@@ -209,7 +208,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -4, 4, ref);
 
-                ref.post(new Times(x, Views.fixed(2, ref), z, ref));
+                ref.post(IntConstraintFactory.times(x, Views.fixed(2, ref), z));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -282,7 +281,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(new Times(x, x, z, ref));
+                ref.post(IntConstraintFactory.times(x, x, z));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -304,13 +303,13 @@ public class ViewsTest {
             IntVar y = VariableFactory.enumerated("y", -999, 999, ref);
             IntVar z = VariableFactory.enumerated("z", -9999, 9999, ref);
             ref.post(Sum.eq(new IntVar[]{z, x}, new int[]{1, 1}, 180, ref));
-            ref.post(new Max(y, Views.fixed(0, ref), z, ref));
+            ref.post(IntConstraintFactory.max(y, Views.fixed(0, ref), z));
         }
         {
             IntVar x = VariableFactory.enumerated("x", 160, 187, solver);
             IntVar y = VariableFactory.enumerated("y", -999, 999, solver);
             IntVar z = Views.offset(Views.minus(x), 180);
-            solver.post(new Max(y, Views.fixed(0, solver), z, solver));
+            solver.post(IntConstraintFactory.max(y, Views.fixed(0, solver), z));
 
             check(ref, solver, 0, false, true);
         }

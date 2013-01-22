@@ -36,11 +36,10 @@ import solver.Solver;
 import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.ternary.DivXYZ;
-import solver.constraints.ternary.Times;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -384,7 +383,7 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = Views.scale(row[0], 2);
         calc[1] = VariableFactory.bounded("C", 0, 1600, s);
-        s.post(new Times(row[0], row[1], calc[1], s));
+        s.post(IntConstraintFactory.times(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
@@ -419,8 +418,8 @@ public class ReifiedTest {
 
         IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
 
-        s.post(new DivXYZ(row[0], Views.fixed(2, s), calc[0], s));
-        s.post(new DivXYZ(row[0], row[1], calc[1], s));
+        s.post(IntConstraintFactory.eucl_div(row[0], Views.fixed(2, s), calc[0]));
+        s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = new Arithmetic(row[1], "=", calc[0], s);
@@ -456,8 +455,8 @@ public class ReifiedTest {
 
         IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
 
-        s.post(new DivXYZ(row[0], Views.fixed(25, s), calc[0], s));
-        s.post(new DivXYZ(row[0], row[1], calc[1], s));
+        s.post(IntConstraintFactory.eucl_div(row[0], Views.fixed(25, s), calc[0]));
+        s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = new Arithmetic(row[1], "=", calc[0], s);

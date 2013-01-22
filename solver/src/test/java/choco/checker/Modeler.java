@@ -38,7 +38,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
-import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
@@ -264,7 +263,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new Times(vars[0], vars[1], vars[2], s);
+            Constraint ctr = IntConstraintFactory.times(vars[0], vars[1], vars[2]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
