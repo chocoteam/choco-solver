@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.ternary.DistanceXYZ;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -82,7 +81,7 @@ public class AllIntervalSeries extends AbstractProblem {
         if (!use_views) {
             dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
             for (int i = 0; i < m - 1; i++) {
-                solver.post(new DistanceXYZ(vars[i + 1], vars[i], DistanceXYZ.Relop.EQ, dist[i], solver));
+                solver.post(IntConstraintFactory.distance(vars[i + 1], vars[i], "=", dist[i]));
             }
         } else {
             for (int i = 0; i < m - 1; i++) {

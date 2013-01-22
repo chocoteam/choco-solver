@@ -30,6 +30,7 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
+import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.exception.SolverException;
@@ -117,7 +118,7 @@ public enum IntConstraintFactory {
     public static DistanceXYC distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
         assert VAR1.getSolver() == VAR2.getSolver();
         Operator op = Operator.get(OP);
-        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT && op != Operator.MN) {
+        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT && op != Operator.NQ) {
             throw new SolverException("Unexpected operator for distance");
         }
         return new DistanceXYC(VAR1, VAR2, op, CSTE, VAR1.getSolver());
@@ -196,6 +197,25 @@ public enum IntConstraintFactory {
     //TERNARIES ########################################################################################################
     //##################################################################################################################
 
+    /**
+     * Ensures: <br/>
+     * |VAR1-VAR2| OP CSTE
+     * <br/>
+     * where OP can take its value among {"=", ">", "<"}
+     *
+     * @param VAR1 first variable
+     * @param VAR2 second variable
+     * @param OP   an operator
+     * @param VAR3 resulting variable
+     */
+    public static DistanceXYZ distance(IntVar VAR1, IntVar VAR2, String OP, IntVar VAR3) {
+        Operator op = Operator.get(OP);
+        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
+            throw new SolverException("Unexpected operator for distance");
+        }
+        return new DistanceXYZ(VAR1, VAR2, op, VAR3, VAR1.getSolver());
+
+    }
 
     //##################################################################################################################
     //GLOBALS ##########################################################################################################
