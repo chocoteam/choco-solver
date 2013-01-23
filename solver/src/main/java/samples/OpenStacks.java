@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.search.strategy.StrategyFactory;
@@ -95,7 +94,7 @@ public class OpenStacks extends AbstractProblem {
     public void buildModel() {
         setUp();
         scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
-        solver.post(new AllDifferent(scheds, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(scheds));
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
             o[i] = VariableFactory.enumeratedArray("o_" + i, np + 1, 0, norders[i], solver);

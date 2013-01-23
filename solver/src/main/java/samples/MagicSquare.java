@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.enumerations.sorters.ImpactBased;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -55,9 +54,6 @@ public class MagicSquare extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic square size.", required = false)
     int n = 5;
-
-    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar[] vars;
 
@@ -90,7 +86,7 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(new AllDifferent(vars, solver, type));
+        solver.post(IntConstraintFactory.alldifferent_bc(vars));
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);

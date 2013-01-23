@@ -39,7 +39,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -211,7 +210,7 @@ public class SOP {
                 }
             }
         }
-        solver.post(new AllDifferent(pos, solver, AllDifferent.Type.AC));
+        solver.post(IntConstraintFactory.alldifferent_ac(pos));
         gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
         if (config.get(rg)) {
             gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));

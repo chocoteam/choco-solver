@@ -64,7 +64,7 @@ public class AllDifferentTest {
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("v_" + i, 1, n, s);
         }
-        s.post(new AllDifferent(vars, s));
+        s.post(IntConstraintFactory.alldifferent_bc(vars));
         if (simple) {
 
             for (int i = 0; i < n - 1; i++) {
@@ -87,8 +87,8 @@ public class AllDifferentTest {
                 s.post(IntConstraintFactory.arithm(diag1[i], "=", vars[i], "-", i));
                 s.post(IntConstraintFactory.arithm(diag2[i], "=", vars[i], "+", i));
             }
-            s.post(new AllDifferent(diag1, s));
-            s.post(new AllDifferent(diag2, s));
+            s.post(IntConstraintFactory.alldifferent_bc(diag1));
+            s.post(IntConstraintFactory.alldifferent_bc(diag2));
         }
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
         s.set(strategy);
@@ -126,7 +126,7 @@ public class AllDifferentTest {
         List<Constraint> lcstrs1 = new ArrayList<Constraint>(1);
         List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
 
-        lcstrs1.add(new AllDifferent(vars, s));
+        lcstrs1.add(IntConstraintFactory.alldifferent_bc(vars));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -165,7 +165,7 @@ public class AllDifferentTest {
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(10);
 
-        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
+        lcstrs.add(IntConstraintFactory.alldifferent_bc(vars));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
@@ -246,10 +246,10 @@ public class AllDifferentTest {
                 lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.NEQS));
                 break;
             case 2:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
+                lcstrs.add(IntConstraintFactory.alldifferent_bc(vars));
                 break;
             case 3:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
+                lcstrs.add(IntConstraintFactory.alldifferent_ac(vars));
                 break;
         }
 

@@ -36,7 +36,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -162,7 +161,7 @@ public class ReifiedTest {
             vars1[j] = VariableFactory.enumerated("v_" + j, values[j], s1);
         }
 
-        s1.post(new AllDifferent(vars1, s1, AllDifferent.Type.AC));
+        s1.post(IntConstraintFactory.alldifferent_ac(vars1));
 
         s1.set(StrategyFactory.presetI(vars1, s1.getEnvironment()));
         return s1;

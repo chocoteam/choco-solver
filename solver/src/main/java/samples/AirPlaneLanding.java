@@ -36,7 +36,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
@@ -182,7 +181,7 @@ public class AirPlaneLanding extends AbstractProblem {
         solver.post(Sum.eq(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t, 1, solver));
         solver.post(Sum.eq(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, 0, solver));
 
-        solver.post(new AllDifferent(planes, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(planes));
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {

@@ -30,7 +30,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -72,8 +71,8 @@ public class Contrived extends AbstractProblem {
         v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
         w = VariableFactory.boundedArray("v", l, 1, d, solver);
 
-        solver.post(new AllDifferent(v, solver));
-        solver.post(new AllDifferent(w, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(v));
+        solver.post(IntConstraintFactory.alldifferent_bc(w));
         solver.post(IntConstraintFactory.arithm(v[3], "=", v[4]));
         solver.post(IntConstraintFactory.arithm(v[0], "=", w[0]));
         solver.post(IntConstraintFactory.arithm(v[1], "=", w[1]));

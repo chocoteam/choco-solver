@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
@@ -66,7 +65,7 @@ public class SendMoreMoney extends AbstractProblem {
 
         solver.post(IntConstraintFactory.arithm(S, "!=", 0));
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
-        solver.post(new AllDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{S, E, N, D, M, O, R, Y}));
 
 
         ALL = new IntVar[]{

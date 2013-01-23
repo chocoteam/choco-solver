@@ -33,7 +33,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.channeling.DomainChanneling;
 import solver.constraints.nary.lex.Lex;
 import solver.search.loop.monitors.cpviz.Visualization;
@@ -186,7 +185,7 @@ public class CPVizTest {
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
         solver.post(IntConstraintFactory.arithm(S, "!=", 0));
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
-        solver.post(new AllDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{S, E, N, D, M, O, R, Y}));
 
 
         IntVar[] ALL = new IntVar[]{
@@ -265,7 +264,7 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(new AllDifferent(ArrayUtils.flatten(vars), s));
+        s.post(IntConstraintFactory.alldifferent_bc(ArrayUtils.flatten(vars)));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -308,7 +307,7 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(new AllDifferent(ArrayUtils.flatten(vars), s));
+        s.post(IntConstraintFactory.alldifferent_bc(ArrayUtils.flatten(vars)));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -354,7 +353,7 @@ public class CPVizTest {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
             solver.post(new DomainChanneling(bool[i], var[i], solver));
         }
-        solver.post(new AllDifferent(var, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(var));
 
         Visualization visu = new Visualization("BinaryMatrix", solver, dir + "/out");
 

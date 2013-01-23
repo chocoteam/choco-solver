@@ -99,7 +99,7 @@ public class GolombRuler extends AbstractProblem {
                 m_diffs[i][j] = diffs[k];
             }
         }
-        alldiff = new AllDifferent(diffs, solver, type);
+        alldiff = IntConstraintFactory.alldifferent_bc(diffs);
         solver.post(alldiff);
 
         // break symetries

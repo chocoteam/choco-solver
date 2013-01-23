@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
@@ -72,7 +71,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
         List<Constraint> ADS = new ArrayList<Constraint>();
 
-        Constraint cc = new AllDifferent(vars, solver);
+        Constraint cc = IntConstraintFactory.alldifferent_bc(vars);
         solver.post(cc);
         ADS.add(cc);
 
@@ -95,12 +94,12 @@ public class OrthoLatinSquare extends AbstractProblem {
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             System.arraycopy(square1, i * m, ry, 0, m);
-            cc = new AllDifferent(ry, solver);
+            cc = IntConstraintFactory.alldifferent_bc(ry);
             solver.post(cc);
             ADS.add(cc);
             ry = new IntVar[m];
             System.arraycopy(square2, i * m, ry, 0, m);
-            cc = new AllDifferent(ry, solver);
+            cc = IntConstraintFactory.alldifferent_bc(ry);
             solver.post(cc);
             ADS.add(cc);
         }
@@ -109,14 +108,14 @@ public class OrthoLatinSquare extends AbstractProblem {
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            cc = new AllDifferent(cy, solver);
+            cc = IntConstraintFactory.alldifferent_bc(cy);
             solver.post(cc);
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            cc = new AllDifferent(cy, solver);
+            cc = IntConstraintFactory.alldifferent_bc(cy);
             solver.post(cc);
             ADS.add(cc);
         }

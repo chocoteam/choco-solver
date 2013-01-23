@@ -44,7 +44,6 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.NValues;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.channeling.PropGraphRelation;
@@ -97,7 +96,7 @@ public class Dobble {
         // constraints
         for (int i = 0; i < nbCards; i++) {
             // Symbols on the same card are different
-            solver.post(new AllDifferent(cardSymbols[i], solver, AllDifferent.Type.AC));
+            solver.post(IntConstraintFactory.alldifferent_ac(cardSymbols[i]));
             for (int j = 0; j < nbSymbolsPerCard - 1; j++) { // symmetry breaking
                 solver.post(IntConstraintFactory.arithm(cardSymbols[i][j], "<", cardSymbols[i][j + 1]));
             }

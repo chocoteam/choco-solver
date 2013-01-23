@@ -30,7 +30,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -59,7 +58,7 @@ public class BigLeq extends AbstractProblem {
         for (int i = 0; i < m - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }
-        solver.post(new AllDifferent(vars, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(vars));
     }
 
     @Override

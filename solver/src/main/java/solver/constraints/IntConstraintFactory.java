@@ -33,6 +33,7 @@ import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
 import solver.constraints.extension.BinCSP;
 import solver.constraints.extension.LargeCSP;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
@@ -349,6 +350,33 @@ public enum IntConstraintFactory {
     //GLOBALS ##########################################################################################################
     //##################################################################################################################
 
+    /**
+     * Ensures that all variables from VARS take a different value (Arc Consistency algorithm).
+     * <br/>
+     * Uses Regin algorithm
+     * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
+     * per arc removed from the support.
+     * Has a good average behavior in practice
+     *
+     * @param VARS list of variables
+     */
+    public static AllDifferent alldifferent_ac(IntVar[] VARS) {
+        return IntConstraintFactory.alldifferent_ac(VARS);
+    }
+
+    /**
+     * Ensures that all variables from VARS take a different value (Bound Consistency algorithm).
+     * <br/>
+     * Based on: </br>
+     * "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
+     * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
+     * <br/>
+     *
+     * @param VARS list of variables
+     */
+    public static AllDifferent alldifferent_bc(IntVar[] VARS) {
+        return IntConstraintFactory.alldifferent_bc(VARS);
+    }
 
     /**
      * Creates a circuit constraint which ensures that

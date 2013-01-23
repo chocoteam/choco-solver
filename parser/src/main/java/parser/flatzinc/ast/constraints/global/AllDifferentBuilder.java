@@ -32,7 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -51,6 +51,6 @@ public class AllDifferentBuilder implements IBuilder {
         if (vars.length == 1) {
             return null;
         }
-        return new AllDifferent(vars, solver);
+        return IntConstraintFactory.alldifferent_bc(vars);
     }
 }

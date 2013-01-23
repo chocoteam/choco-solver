@@ -36,8 +36,8 @@ import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -275,7 +275,7 @@ public class ATSP {
             } else {
                 gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
             }
-            solver.post(new AllDifferent(pos, solver, AllDifferent.Type.BC));
+            solver.post(IntConstraintFactory.alldifferent_bc(pos));
         }
         if (khun) {
 //			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);

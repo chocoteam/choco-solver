@@ -38,7 +38,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -154,7 +153,7 @@ public class DeBruijn {
 
 
         // All values in x should be different
-        s.post(new AllDifferent(x, s));
+        s.post(IntConstraintFactory.alldifferent_bc(x));
 
         // Symmetry breaking: the minimum value in x should be the
         // first element.

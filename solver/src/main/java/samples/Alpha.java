@@ -28,8 +28,8 @@ package samples;
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -80,7 +80,7 @@ public class Alpha extends AbstractProblem {
         solver.post(Sum.eq(extract("theme"), 72, solver));
         solver.post(Sum.eq(extract("violin"), 100, solver));
         solver.post(Sum.eq(extract("waltz"), 34, solver));
-        solver.post(new AllDifferent(letters, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(letters));
     }
 
     private IntVar[] extract(String word) {

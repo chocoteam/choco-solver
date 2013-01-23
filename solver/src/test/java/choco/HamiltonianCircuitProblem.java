@@ -27,6 +27,7 @@
 
 package choco;
 
+import choco.kernel.memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;
@@ -34,14 +35,15 @@ import samples.graph.input.GraphGenerator;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.NoSubTours;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
+import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
@@ -51,7 +53,6 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 /**
@@ -133,7 +134,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
     private void basicModel() {
         // create model
-        graph = new DirectedGraphVar(solver, n, gt, SetType.LINKED_LIST,true);
+        graph = new DirectedGraphVar(solver, n, gt, SetType.LINKED_LIST, true);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {
@@ -189,7 +190,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         }
         gc.addPropagators(new PropIntVarChanneling(integers, graph, gc, solver));
         if (bc) {
-            return new AllDifferent(integers, solver, AllDifferent.Type.BC);
+            return IntConstraintFactory.alldifferent_bc(integers);
         } else {
             return new AllDifferent(integers, solver, AllDifferent.Type.NEQS);
         }

@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.StrategyFactory;
@@ -80,7 +79,7 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.post(new AllDifferent(kid_gift, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(kid_gift));
         for (int i = 0; i < n_kids; i++) {
             solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0));
         }

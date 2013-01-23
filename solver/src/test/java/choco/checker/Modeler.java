@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.*;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -178,7 +177,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -199,7 +198,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.BC);
+            Constraint ctr = IntConstraintFactory.alldifferent_bc(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -220,7 +219,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -241,7 +240,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

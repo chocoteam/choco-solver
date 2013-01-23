@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -129,7 +128,7 @@ public class Partition extends AbstractProblem {
         solver.post(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
         solver.post(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
 
-        heavy[2] = new AllDifferent(xy, solver);
+        heavy[2] = IntConstraintFactory.alldifferent_bc(xy);
         solver.post(heavy[2]);
 
         vars = xy;

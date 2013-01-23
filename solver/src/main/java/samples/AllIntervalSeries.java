@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -90,8 +89,8 @@ public class AllIntervalSeries extends AbstractProblem {
         }
 
         ALLDIFF = new Constraint[2];
-        ALLDIFF[0] = (new AllDifferent(vars, solver));
-        ALLDIFF[1] = (new AllDifferent(dist, solver));
+        ALLDIFF[0] = (IntConstraintFactory.alldifferent_bc(vars));
+        ALLDIFF[1] = (IntConstraintFactory.alldifferent_bc(dist));
         solver.post(ALLDIFF);
 
         // break symetries

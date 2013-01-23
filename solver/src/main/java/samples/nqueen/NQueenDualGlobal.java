@@ -29,7 +29,6 @@ package samples.nqueen;
 
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -68,10 +67,10 @@ public class NQueenDualGlobal extends AbstractNQueen {
             solver.post(IntConstraintFactory.arithm(dualdiag1[i], "=", dualvars[i], "+", i));
             solver.post(IntConstraintFactory.arithm(dualdiag2[i], "=", dualvars[i], "-", i));
         }
-        solver.post(new AllDifferent(diag1, solver));
-        solver.post(new AllDifferent(diag2, solver));
-        solver.post(new AllDifferent(dualdiag1, solver));
-        solver.post(new AllDifferent(dualdiag2, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(diag1));
+        solver.post(IntConstraintFactory.alldifferent_bc(diag2));
+        solver.post(IntConstraintFactory.alldifferent_bc(dualdiag1));
+        solver.post(IntConstraintFactory.alldifferent_bc(dualdiag2));
 
         solver.post(new InverseChanneling(vars, dualvars, 1, 1, solver));
     }

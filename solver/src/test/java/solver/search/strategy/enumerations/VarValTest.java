@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
@@ -477,7 +476,7 @@ public class VarValTest {
         }
         IntVar[][] tvars = ArrayUtils.transpose(vars);
         for (int j = 0; j < r; j++) {
-            solver.post(new AllDifferent(tvars[j], solver, AllDifferent.Type.BC));
+            solver.post(IntConstraintFactory.alldifferent_bc(tvars[j]));
         }
 
 //        solver.set(StrategyFactory.presetI(ArrayUtils.flatten(vars), solver.getEnvironment()));

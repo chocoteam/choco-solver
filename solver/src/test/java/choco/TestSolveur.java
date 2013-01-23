@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -92,7 +91,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferent(vars, s);
+                cstrs[i] = IntConstraintFactory.alldifferent_bc(vars);
             }
 
             s.post(cstrs);

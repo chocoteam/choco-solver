@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -91,7 +90,7 @@ public class Langford extends AbstractProblem {
         }
         lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
         solver.post(lights);
-        alldiff = new AllDifferent(position, solver);
+        alldiff = IntConstraintFactory.alldifferent_bc(position);
         solver.post(alldiff);
     }
 

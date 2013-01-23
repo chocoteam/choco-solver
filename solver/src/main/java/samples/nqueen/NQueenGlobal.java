@@ -27,7 +27,7 @@
 
 package samples.nqueen;
 
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -53,9 +53,9 @@ public class NQueenGlobal extends AbstractNQueen {
             diag2[i] = Views.offset(vars[i], -i);
         }
 
-        solver.post(new AllDifferent(vars, solver));
-        solver.post(new AllDifferent(diag1, solver));
-        solver.post(new AllDifferent(diag2, solver));
+        solver.post(IntConstraintFactory.alldifferent_bc(vars));
+        solver.post(IntConstraintFactory.alldifferent_bc(diag1));
+        solver.post(IntConstraintFactory.alldifferent_bc(diag2));
     }
 
     @Override
