@@ -30,8 +30,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -79,7 +79,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("Social golfer "+g+"-"+w+"-"+s);
+        solver = new Solver("Social golfer " + g + "-" + w + "-" + s);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class SocialGolfer extends AbstractProblem {
 
         // break symetries on first group
         for (int i = 1; i < p; i++) {
-            solver.post(new Lex(P[i][0], P[i - 1][0], false, solver));
+            solver.post(IntConstraintFactory.lex_less_eq(P[i][0], P[i - 1][0]));
         }
     }
 

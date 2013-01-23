@@ -46,6 +46,6 @@ public class MinTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.min(vars[0], vars[1], vars[2]);
+        return IntConstraintFactory.minimum(vars[0], vars[1], vars[2]);
     }
 }

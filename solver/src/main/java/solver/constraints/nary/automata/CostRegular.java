@@ -37,8 +37,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.nary.automata.FA.CostAutomaton;
-import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.costregular.Arc;
@@ -66,25 +64,8 @@ public class CostRegular extends IntConstraint<IntVar> {
 //        super(vars, solver, storeThreshold);
 //    }
 
-    public CostRegular(IntVar[] ivars, IntVar cost, IAutomaton automaton, int[][][] costs, Solver solver) {
-        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
-        cautomaton =
-                CostAutomaton.makeSingleResource(automaton, costs, cost.getLB(), cost.getUB());
-        graph = initGraph(vars, cautomaton, solver.getEnvironment());
-        setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));
-    }
-
-    public CostRegular(IntVar[] ivars, IntVar cost, IAutomaton automaton, int[][] costs, Solver solver) {
-        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
-        cautomaton =
-                CostAutomaton.makeSingleResource(automaton, costs, cost.getLB(), cost.getUB());
-        graph = initGraph(vars, cautomaton, solver.getEnvironment());
-        setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));
-    }
-
     public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton, Solver solver) {
         super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
-        int zIdx = vars.length - 1;
         this.cautomaton = cautomaton;
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));

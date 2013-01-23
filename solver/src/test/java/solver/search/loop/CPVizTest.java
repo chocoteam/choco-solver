@@ -31,10 +31,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
-import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.channeling.DomainChanneling;
-import solver.constraints.nary.lex.Lex;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.*;
 import solver.variables.BoolVar;
@@ -238,7 +235,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(new DomainChanneling(bool, var, s));
+        s.post(IntConstraintFactory.channeling(bool, var));
 
         Visualization visu = new Visualization("BinaryVector", s, dir + "/out");
 
@@ -351,7 +348,7 @@ public class CPVizTest {
         BoolVar[][] bool = new BoolVar[n][n];
         for (int i = 0; i < n; i++) {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
-            solver.post(new DomainChanneling(bool[i], var[i], solver));
+            solver.post(IntConstraintFactory.channeling(bool[i], var[i]));
         }
         solver.post(IntConstraintFactory.alldifferent_bc(var));
 
@@ -374,7 +371,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(new DomainChanneling(bool, var, s));
+        s.post(IntConstraintFactory.channeling(bool, var));
 
         Visualization visu = new Visualization("BoolChanneling", s, dir + "/out");
 
@@ -426,7 +423,7 @@ public class CPVizTest {
 
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 1, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 1, s);
-        s.post(new Lex(X, Y, false, s));
+        s.post(IntConstraintFactory.lex_less_eq(X, Y));
 
         Visualization visu = new Visualization("LexLe", s, dir + "/out");
         visu.createTree();
@@ -445,7 +442,7 @@ public class CPVizTest {
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 2, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 2, s);
 
-        s.post(new InverseChanneling(X, Y, s));
+        s.post(IntConstraintFactory.channeling(X, Y));
 
         Visualization visu = new Visualization("Inverse", s, dir + "/out");
         visu.createTree();

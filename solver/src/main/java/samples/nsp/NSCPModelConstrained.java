@@ -29,7 +29,6 @@ package samples.nsp;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Count;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.automata.CostRegular;
@@ -314,7 +313,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(new Count(a, shifts[e], Count.Relop.EQ, occurrences[e][a], solver));
+                solver.post(IntConstraintFactory.count(a, shifts[e], "=", occurrences[e][a]));
             }
         }
     }
@@ -349,7 +348,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = VariableFactory.bounded("nW" + t + data.getLiteral(a) + e, lb, ub, solver);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(new Count(a, vars, Count.Relop.EQ, occ, solver));
+                    solver.post(IntConstraintFactory.count(a, vars, "=", occ));
                 }
             }
         }

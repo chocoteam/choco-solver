@@ -31,6 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
@@ -68,7 +69,7 @@ public class MagicSeries extends AbstractProblem {
 
         counts = new Count[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = new Count(i, vars, Count.Relop.EQ, Views.eq(vars[i]), solver);
+            counts[i] = IntConstraintFactory.count(i, vars, "=", Views.eq(vars[i]));
             solver.post(counts[i]);
         }
         solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1

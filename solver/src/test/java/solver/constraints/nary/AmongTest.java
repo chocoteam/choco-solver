@@ -91,7 +91,7 @@ public class AmongTest {
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Among(value, vars, occ, solver));
+            solver.post(IntConstraintFactory.among(occ, vars, value));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
@@ -108,7 +108,7 @@ public class AmongTest {
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Among(values, vars, occ, solver));
+            solver.post(IntConstraintFactory.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -148,7 +148,7 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, val
                     ));
                 } else {
-                    solver.post(new Among(val, vs, ivc, solver));
+                    solver.post(IntConstraintFactory.among(ivc, vs, val));
                 }
             }
             solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
@@ -201,7 +201,7 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, values
                     ));
                 } else {
-                    solver.post(new Among(values, vs, ivc, solver));
+                    solver.post(IntConstraintFactory.among(ivc, vs, values));
                 }
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));

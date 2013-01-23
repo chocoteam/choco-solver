@@ -65,7 +65,7 @@ public class Max extends IntConstraint<IntVar> {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(IntConstraintFactory.max(z, a, b));
+            solver.post(IntConstraintFactory.maximum(z, a, b));
             return z;
         }
     }

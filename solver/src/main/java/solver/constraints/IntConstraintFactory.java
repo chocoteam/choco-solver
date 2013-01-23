@@ -33,16 +33,22 @@ import solver.constraints.binary.Element;
 import solver.constraints.binary.Square;
 import solver.constraints.extension.BinCSP;
 import solver.constraints.extension.LargeCSP;
+import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.automata.CostRegular;
+import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.MultiCostRegular;
 import solver.constraints.nary.automata.Regular;
+import solver.constraints.nary.channeling.DomainChanneling;
+import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.lex.Lex;
+import solver.constraints.nary.lex.LexChain;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropIndexValue;
@@ -64,6 +70,8 @@ import solver.variables.VariableFactory;
  * One can call directly the constructor of constraints, but it is recommended
  * to use the Factory, because signatures and javadoc are ensured to be up-to-date.
  * <br/>
+ * As much as possible, the API names of global constraints must match
+ * those define in the <a href="http://www.emn.fr/z-info/sdemasse/gccat/index.html">Global Constraint Catalog</a>.
  *
  * @author Charles Prud'homme
  * @since 21/01/13
@@ -302,25 +310,25 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Ensures: VAR1 = MAX(VAR2, VAR3)
+     * Ensures: MAX = MAX(VAR1, VAR2)
      *
-     * @param VAR1 result
-     * @param VAR2 first variable
-     * @param VAR3 second variable
+     * @param MAX  a variable
+     * @param VAR1 a variable
+     * @param VAR2 a variable
      */
-    public static Max max(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
-        return new Max(VAR1, VAR2, VAR3, VAR1.getSolver());
+    public static Max maximum(IntVar MAX, IntVar VAR1, IntVar VAR2) {
+        return new Max(MAX, VAR1, VAR2, MAX.getSolver());
     }
 
     /**
      * Ensures:  VAR1 = MIN(VAR2, VAR3)
      *
+     * @param MIN  result
      * @param VAR1 result
      * @param VAR2 first variable
-     * @param VAR3 second variable
      */
-    public static Min min(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
-        return new Min(VAR1, VAR2, VAR3, VAR1.getSolver());
+    public static Min minimum(IntVar MIN, IntVar VAR1, IntVar VAR2) {
+        return new Min(MIN, VAR1, VAR2, MIN.getSolver());
     }
 
     /**
@@ -366,7 +374,7 @@ public enum IntConstraintFactory {
      * @param VARS list of variables
      */
     public static AllDifferent alldifferent_ac(IntVar[] VARS) {
-        return IntConstraintFactory.alldifferent_ac(VARS);
+        return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.AC);
     }
 
     /**
@@ -380,7 +388,113 @@ public enum IntConstraintFactory {
      * @param VARS list of variables
      */
     public static AllDifferent alldifferent_bc(IntVar[] VARS) {
-        return IntConstraintFactory.alldifferent_bc(VARS);
+        return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.BC);
+    }
+
+    /**
+     * NVAR is the number of variables of the collection VARIABLES that take their value in VALUE.
+     *
+     * @param NVAR  a variable
+     * @param VARS  vector of variables
+     * @param VALUE a value
+     */
+    public static Among among(IntVar NVAR, IntVar[] VARS, int VALUE) {
+        return new Among(NVAR, VARS, VALUE, NVAR.getSolver());
+    }
+
+    /**
+     * NVAR is the number of variables of the collection VARIABLES that take their value in VALUES.
+     *
+     * @param NVAR   a variable
+     * @param VARS   vector of variables
+     * @param VALUES set of values
+     */
+    public static Among among(IntVar NVAR, IntVar[] VARS, int[] VALUES) {
+        return new Among(NVAR, VARS, VALUES, NVAR.getSolver());
+    }
+
+    /**
+     * The number of distinct values taken by the variables of the collection VARS is greater than or equal to NVAL.
+     * Performs Generalized Arc Consistency based on Maximum Bipartite Matching.
+     * The worst case time complexity is O(nm) but this is very pessimistic.
+     * In practice it is more like O(m) where m is the number of variable-value pairs.
+     *
+     * @param NVAL a variable
+     * @param VARS a vector of variables
+     */
+    public static AtLeastNValues atleast_nvalues(IntVar NVAL, IntVar[] VARS) {
+        return new AtLeastNValues(NVAL, VARS, NVAL.getSolver());
+    }
+
+    /**
+     * The number of distinct values taken by the variables of the collection VARS is less than or equal to NVAL.
+     * <br/>
+     * Performs Bound Consistency in O(n+d) with
+     * n = |VARS|
+     * d = maxValue - minValue (from initial domains)
+     * <p/>
+     * => very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
+     * =>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+     *
+     * @param NVAL a variable
+     * @param VARS a vector of variables
+     */
+    public static AtMostNValues atmost_nvalues(IntVar NVAL, IntVar[] VARS) {
+        return new AtMostNValues(VARS, NVAL, NVAL.getSolver(), AtMostNValues.Algo.BC);
+    }
+
+    /**
+     * The number of distinct values taken by the variables of the collection VARS is less than or equal to NVAL.
+     * <br/>
+     * Performs Greedy algorithm.
+     * No level of consistency but better than BC in general (for enumerated domains with holes)
+     *
+     * @param NVAL a variable
+     * @param VARS a vector of variables
+     */
+    public static AtMostNValues atmost_nvalues_greedy(IntVar NVAL, IntVar[] VARS) {
+        return new AtMostNValues(VARS, NVAL, NVAL.getSolver(), AtMostNValues.Algo.Greedy);
+    }
+
+    /**
+     * Maps the boolean assignments variables BVARS with the standard assignment variable VAR.
+     * VAR = i <-> BVARS[i] = 1
+     *
+     * @param BVARS array of boolean variables
+     * @param VAR   observed variable
+     */
+    public static DomainChanneling channeling(BoolVar[] BVARS, IntVar VAR) {
+        return new DomainChanneling(BVARS, VAR, VAR.getSolver());
+    }
+
+    /**
+     * Make an inverse channeling between VARS1 and VARS2:
+     * VARS1[i] = j <=> VARS2[j] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     *
+     * @param VARS1 vector of variables
+     * @param VARS2 vector of variables
+     */
+    public static InverseChanneling channeling(IntVar[] VARS1, IntVar[] VARS2) {
+        return new InverseChanneling(VARS1, VARS2, 0, 0, VARS1[0].getSolver());
+    }
+
+    /**
+     * Make an inverse channeling between VARS1 and VARS2:
+     * VARS1[i] = j <=> VARS2[j] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     *
+     * @param VARS1 vector of variables
+     * @param MIN1  lowest value in VARS1 if not 0
+     * @param VARS2 vector of variables
+     * @param MIN1  lowest value in VARS2 if not 0
+     */
+    public static InverseChanneling channeling(IntVar[] VARS1, int MIN1, IntVar[] VARS2, int MIN2) {
+        return new InverseChanneling(VARS1, VARS2, MIN1, MIN2, VARS1[0].getSolver());
     }
 
     /**
@@ -452,6 +566,41 @@ public enum IntConstraintFactory {
     }
 
     /**
+     * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
+     * Enforce condition N RELOP LIMIT to hold.
+     *
+     * @param VALUE an int
+     * @param VARS  a vector of variables
+     * @param RELOP an operator, among {"=", ">=", "<="}
+     * @param LIMIT a variable
+     */
+    public static Count count(int VALUE, IntVar[] VARS, String RELOP, IntVar LIMIT) {
+        Operator op = Operator.get(RELOP);
+        if (op != Operator.EQ && op != Operator.GE && op != Operator.LE) {
+            throw new SolverException("Unexpected operator for count");
+        }
+        return new Count(VALUE, VARS, op, LIMIT, LIMIT.getSolver());
+    }
+
+
+    /**
+     * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
+     * Enforce condition N RELOP LIMIT to hold.
+     *
+     * @param VALUE an int
+     * @param VARS  a vector of variables
+     * @param RELOP an operator, among {"=", ">=", "<="}
+     * @param LIMIT an int
+     */
+    public static Count count(int VALUE, IntVar[] VARS, String RELOP, int LIMIT) {
+        Operator op = Operator.get(RELOP);
+        if (op != Operator.EQ && op != Operator.GE && op != Operator.LE) {
+            throw new SolverException("Unexpected operator for count");
+        }
+        return new Count(VALUE, VARS, op, LIMIT, VARS[0].getSolver());
+    }
+
+    /**
      * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
      * and that the sum of the COSTS associated to each assignment is bounded by the COST variable.
      *
@@ -461,7 +610,9 @@ public enum IntConstraintFactory {
      * @param COSTS     assignments costs
      */
     public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, IAutomaton AUTOMATON, int[][] COSTS) {
-        return new CostRegular(VARS, COST, AUTOMATON, COSTS, VARS[0].getSolver());
+        return new CostRegular(VARS, COST,
+                CostAutomaton.makeSingleResource(AUTOMATON, COSTS, COST.getLB(), COST.getUB()),
+                VARS[0].getSolver());
     }
 
     /**
@@ -477,21 +628,130 @@ public enum IntConstraintFactory {
      * @param COSTS     assignments costs
      */
     public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, IAutomaton AUTOMATON, int[][][] COSTS) {
-        return new CostRegular(VARS, COST, AUTOMATON, COSTS, VARS[0].getSolver());
+        return new CostRegular(VARS, COST,
+                CostAutomaton.makeSingleResource(AUTOMATON, COSTS, COST.getLB(), COST.getUB()),
+                VARS[0].getSolver());
     }
 
     /**
-     * Ensures that the assignment of a sequence of variables is recognized by AUTOMATON, a deterministic finite automaton,
+     * Ensures that the assignment of a sequence of variables is recognized by CAUTOMATON, a deterministic finite automaton,
      * and that the sum of the costs associated to each assignment is bounded by the cost variable.
      * This version allows to specify different costs according to the automaton state at which the assignment occurs
      * (i.e. the transition starts)
      *
-     * @param VARS      sequence of variables
-     * @param COST      cost variable
-     * @param AUTOMATON a deterministic finite automaton defining the regular language and the costs
+     * @param VARS       sequence of variables
+     * @param COST       cost variable
+     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
      */
-    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton AUTOMATON) {
-        return new CostRegular(VARS, COST, AUTOMATON, VARS[0].getSolver());
+    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
+        return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
+    }
+
+    /**
+     * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection
+     * VARS<sub>i</sub> is lexicographically strictly less than than VARS<sub>i+1</sub>
+     *
+     * @param VARS collection of vectors of variables
+     */
+    public static LexChain lex_chain_less(IntVar[]... VARS) {
+        return new LexChain(true, VARS[0][0].getSolver(), VARS);
+    }
+
+
+    /**
+     * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection
+     * VARS<sub>i</sub> is lexicographically less or equal than than VARS<sub>i+1</sub>
+     *
+     * @param VARS collection of vectors of variables
+     */
+    public static LexChain lex_chain_less_eq(IntVar[]... VARS) {
+        return new LexChain(false, VARS[0][0].getSolver(), VARS);
+    }
+
+    /**
+     * Ensures that VARS1 is lexicographically strictly less than VARS2.
+     *
+     * @param VARS1 vector of variables
+     * @param VARS2 vector of variables
+     */
+    public static Lex lex_less(IntVar[] VARS1, IntVar[] VARS2) {
+        return new Lex(VARS1, VARS2, true, VARS1[0].getSolver());
+    }
+
+    /**
+     * Ensures that VARS1 is lexicographically less or equal than VARS2.
+     *
+     * @param VARS1 vector of variables
+     * @param VARS2 vector of variables
+     */
+    public static Lex lex_less_eq(IntVar[] VARS1, IntVar[] VARS2) {
+        return new Lex(VARS1, VARS2, false, VARS1[0].getSolver());
+    }
+
+    /**
+     * MAX is the maximum value of the collection of domain variables VARS
+     *
+     * @param MAX  a variable
+     * @param VARS a vector of variables
+     */
+    public static MaxOfAList maximum(IntVar MAX, IntVar[] VARS) {
+        return new MaxOfAList(MAX, VARS, MAX.getSolver());
+    }
+
+    /**
+     * MIN is the minimum value of the collection of domain variables VARS
+     *
+     * @param MIN  a variable
+     * @param VARS a vector of variables
+     */
+    public static MinOfAList minimum(IntVar MIN, IntVar[] VARS) {
+        return new MinOfAList(MIN, VARS, MIN.getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     *
+     * @param VARS      sequence of variables
+     * @param CVARS     cost variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][] COSTS) {
+        return new MultiCostRegular(VARS, CVARS,
+                CostAutomaton.makeMultiResources(AUTOMATON, COSTS, CVARS),
+                VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS      sequence of variables
+     * @param CVARS     cost variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][][] COSTS) {
+        return new MultiCostRegular(VARS, CVARS,
+                CostAutomaton.makeMultiResources(AUTOMATON, COSTS, CVARS),
+                VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS       sequence of variables
+     * @param CVARS      cost variables
+     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
+        return new MultiCostRegular(VARS, CVARS, CAUTOMATON, VARS[0].getSolver());
     }
 
     /**
@@ -534,48 +794,6 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
         c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
         return c;
-    }
-
-    /**
-     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
-     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
-     *
-     * @param VARS      sequence of variables
-     * @param CVARS     cost variables
-     * @param AUTOMATON a deterministic finite automaton defining the regular language
-     * @param COSTS     assignments costs
-     */
-    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][] COSTS) {
-        return new MultiCostRegular(VARS, CVARS, AUTOMATON, COSTS, VARS[0].getSolver());
-    }
-
-    /**
-     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
-     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
-     * This version allows to specify different costs according to the automaton state at which the assignment occurs
-     * (i.e. the transition starts)
-     *
-     * @param VARS      sequence of variables
-     * @param CVARS     cost variables
-     * @param AUTOMATON a deterministic finite automaton defining the regular language
-     * @param COSTS     assignments costs
-     */
-    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][][] COSTS) {
-        return new MultiCostRegular(VARS, CVARS, AUTOMATON, COSTS, VARS[0].getSolver());
-    }
-
-    /**
-     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
-     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
-     * This version allows to specify different costs according to the automaton state at which the assignment occurs
-     * (i.e. the transition starts)
-     *
-     * @param VARS       sequence of variables
-     * @param CVARS      cost variables
-     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
-     */
-    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
-        return new MultiCostRegular(VARS, CVARS, CAUTOMATON, VARS[0].getSolver());
     }
 
 

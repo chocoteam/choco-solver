@@ -35,7 +35,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Count;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
@@ -133,10 +132,10 @@ public class RLFAP extends AbstractProblem {
             freqs = values.toArray();
             Arrays.sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.post(new Count(freqs[i], vars, Count.Relop.EQ, cards[i], solver));
+                solver.post(IntConstraintFactory.count(freqs[i], vars, "=", cards[i]));
             }
             nb0 = VariableFactory.bounded("nb0", 0, freqs.length, solver);
-            solver.post(new Count(0, cards, Count.Relop.EQ, nb0, solver));
+            solver.post(IntConstraintFactory.count(0, cards, "=", nb0));
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];

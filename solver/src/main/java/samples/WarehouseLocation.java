@@ -32,7 +32,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -112,12 +111,12 @@ public class WarehouseLocation extends AbstractProblem {
             solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
         }
         for (int w = 0; w < nWH; w++) {
-            solver.post(new Count(w, suppliers, Count.Relop.GEQ, open[w], solver));
+            solver.post(IntConstraintFactory.count(w, suppliers, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
             IntVar counter = Views.fixed(capacity[w], solver);
-            solver.post(new Count(w, suppliers, Count.Relop.LEQ, counter, solver));
+            solver.post(IntConstraintFactory.count(w, suppliers, "<=", counter));
         }
 
         int[] coeffs = new int[nWH + nS];

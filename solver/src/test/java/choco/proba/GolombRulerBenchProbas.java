@@ -5,7 +5,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -58,7 +57,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
         }
 
         allCstrs.add(IntConstraintFactory.arithm(ticks[0], "=", 0));
-        allCstrs.add(new LexChain(true, solver, ticks));
+        allCstrs.add(IntConstraintFactory.lex_chain_less(ticks));
 
         diffs = new IntVar[(size * size - size) / 2];
         for (int k = 0, i = 0; i < size - 1; i++) {

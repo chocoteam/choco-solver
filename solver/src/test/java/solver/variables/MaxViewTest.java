@@ -55,7 +55,7 @@ public class MaxViewTest {
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
-        solver.post(IntConstraintFactory.max(z, x, y));
+        solver.post(IntConstraintFactory.maximum(z, x, y));
     }
 
     @Test

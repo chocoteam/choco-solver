@@ -64,7 +64,7 @@ public class Min extends IntConstraint<IntVar> {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.min(a.getLB(), b.getLB()), Math.min(a.getUB(), b.getUB()), solver);
-            solver.post(IntConstraintFactory.min(z, a, b));
+            solver.post(IntConstraintFactory.minimum(z, a, b));
             return z;
         }
     }

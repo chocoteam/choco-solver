@@ -34,7 +34,8 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.*;
+import solver.constraints.nary.GCC_AC;
+import solver.constraints.nary.NValues;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -97,7 +98,7 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = new InverseChanneling(X, Y, s);
+            Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
@@ -133,7 +134,7 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = new InverseChanneling(X, Y, s);
+            Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
@@ -306,19 +307,16 @@ public interface Modeler {
             IntVar occVar = VariableFactory.bounded("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Count.Relop ro = null;
+            String ro = "=";
             switch (params[0]) {
-                case 0:
-                    ro = Count.Relop.EQ;
-                    break;
                 case 1:
-                    ro = Count.Relop.LEQ;
+                    ro = "<=";
                     break;
                 case 2:
-                    ro = Count.Relop.GEQ;
+                    ro = ">=";
                     break;
             }
-            Constraint ctr = new Count(params[1], vars, ro, occVar, s);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -342,19 +340,16 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Count.Relop ro = null;
+            String ro = "=";
             switch (params[0]) {
-                case 0:
-                    ro = Count.Relop.EQ;
-                    break;
                 case 1:
-                    ro = Count.Relop.LEQ;
+                    ro = "<=";
                     break;
                 case 2:
-                    ro = Count.Relop.GEQ;
+                    ro = ">=";
                     break;
             }
-            Constraint ctr = new Count(params[1], vars, ro, occVar, s);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -425,7 +420,7 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Constraint ctr = new Among(params, vars, occVar, s);
+            Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -449,7 +444,7 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Constraint ctr = new Among(params, vars, occVar, s);
+            Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = new Assignment(vars, new InputOrder(vars, s.getEnvironment()),

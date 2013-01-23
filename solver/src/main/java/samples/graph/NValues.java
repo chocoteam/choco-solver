@@ -28,7 +28,7 @@ package samples.graph;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.nary.AtMostNValues;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -79,7 +79,7 @@ public class NValues extends AbstractProblem {
         vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
         vars[3] = VariableFactory.enumerated("vars_3", new int[]{2, 3}, solver);
         IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
-        solver.post(new AtMostNValues(vars, nVal, solver, AtMostNValues.Algo.Greedy));
+        solver.post(IntConstraintFactory.atmost_nvalues_greedy(nVal, vars));
     }
 
     @Override

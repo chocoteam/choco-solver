@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -129,7 +128,7 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.post(new Lex(ry1, ry2, true, solver));
+            solver.post(IntConstraintFactory.lex_less(ry1, ry2));
         }
 
     }

@@ -50,6 +50,6 @@ public class IntMinBuilder implements IBuilder {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.min(c, a, b);
+        return IntConstraintFactory.minimum(c, a, b);
     }
 }

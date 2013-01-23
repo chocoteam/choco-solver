@@ -31,7 +31,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.StrategyFactory;
@@ -104,13 +103,13 @@ public class BIBD extends AbstractProblem {
         // r ones per row
         IntVar R = Views.fixed(r, solver);
         for (int i = 0; i < v; i++) {
-            solver.post(new Count(1, vars[i], Count.Relop.EQ, R, solver));
+            solver.post(IntConstraintFactory.count(1, vars[i], "=", R));
             //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
         IntVar K = Views.fixed(k, solver);
         for (int j = 0; j < b; j++) {
-            solver.post(new Count(1, _vars[j], Count.Relop.EQ, K, solver));
+            solver.post(IntConstraintFactory.count(1, _vars[j], "=", K));
             //solver.post(Sum.eq(_vars[j], K, solver));
         }
 

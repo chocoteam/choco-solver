@@ -45,55 +45,55 @@ import java.util.BitSet;
  */
 public class AtLeastNValues extends IntConstraint<IntVar> {
 
-	/**
-	 * AtLeastNValues Constraint (similar to SoftAllDiff)
-	 * The number of distinct values in vars is at least nValues
-	 * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
-	 * The worst case time complexity is O(nm) but this is very pessimistic
-	 * In practice it is more like O(m) where m is the number of variable-value pairs
-	 *
-	 * @param vars
-	 * @param nValues
-	 * @param solver
-	 */
-	public AtLeastNValues(IntVar[] vars, IntVar nValues, Solver solver) {
-		super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
-		setPropagators(new PropAtLeastNValues_AC(vars,nValues,this,solver));
-	}
+    /**
+     * AtLeastNValues Constraint (similar to SoftAllDiff)
+     * The number of distinct values in vars is at least nValues
+     * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
+     * The worst case time complexity is O(nm) but this is very pessimistic
+     * In practice it is more like O(m) where m is the number of variable-value pairs
+     *
+     * @param nValues
+     * @param vars
+     * @param solver
+     */
+    public AtLeastNValues(IntVar nValues, IntVar[] vars, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
+        setPropagators(new PropAtLeastNValues_AC(vars, nValues, this, solver));
+    }
 
-	/**
-	 * Checks if the constraint is satisfied when all variables are instantiated.
-	 *
-	 * @param tuple an complete instantiation
-	 * @return true iff a solution
-	 */
-	@Override
-	public ESat isSatisfied(int[] tuple) {
-		int minval = tuple[0];
-		for (int i = 0; i < tuple.length-1; i++) {
-			if(minval>tuple[i])
-				minval = tuple[i];
-		}
-		BitSet values = new BitSet(tuple.length-1);
-        for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]-minval);
+    /**
+     * Checks if the constraint is satisfied when all variables are instantiated.
+     *
+     * @param tuple an complete instantiation
+     * @return true iff a solution
+     */
+    @Override
+    public ESat isSatisfied(int[] tuple) {
+        int minval = tuple[0];
+        for (int i = 0; i < tuple.length - 1; i++) {
+            if (minval > tuple[i])
+                minval = tuple[i];
         }
-		if(values.cardinality()>=tuple[tuple.length-1]){
-			return ESat.TRUE;
-		}
+        BitSet values = new BitSet(tuple.length - 1);
+        for (int i = 0; i < tuple.length - 1; i++) {
+            values.set(tuple[i] - minval);
+        }
+        if (values.cardinality() >= tuple[tuple.length - 1]) {
+            return ESat.TRUE;
+        }
         return ESat.FALSE;
-	}
+    }
 
-	public String toString() {
-		StringBuilder sb = new StringBuilder(32);
-		sb.append("AtLeastNValue({");
-		for (int i = 0; i < vars.length-1; i++) {
-			if (i > 0) sb.append(", ");
-			Variable var = vars[i];
-			sb.append(var);
-		}
-		sb.append(" >= "+vars[vars.length-1]);
-		sb.append("})");
-		return sb.toString();
-	}
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("AtLeastNValue({");
+        for (int i = 0; i < vars.length - 1; i++) {
+            if (i > 0) sb.append(", ");
+            Variable var = vars[i];
+            sb.append(var);
+        }
+        sb.append(" >= " + vars[vars.length - 1]);
+        sb.append("})");
+        return sb.toString();
+    }
 }

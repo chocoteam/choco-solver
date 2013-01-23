@@ -46,7 +46,7 @@ public class MaxTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return IntConstraintFactory.max(vars[0], vars[1], vars[2]);
+        return IntConstraintFactory.maximum(vars[0], vars[1], vars[2]);
     }
 
 

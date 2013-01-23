@@ -28,7 +28,6 @@
 package samples.nqueen;
 
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -64,7 +63,7 @@ public class NQueenDualBinary extends AbstractNQueen {
                 solver.post(IntConstraintFactory.arithm(dualvars[i], "!=", dualvars[j], "+", k));
             }
         }
-        solver.post(new InverseChanneling(vars, dualvars, 1, 1, solver));
+        solver.post(IntConstraintFactory.channeling(vars, 1, dualvars, 1));
     }
 
 
