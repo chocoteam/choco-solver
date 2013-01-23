@@ -48,7 +48,7 @@ import solver.variables.SetVar;
  * Ensures that all sets are different
  * @author Jean-Guillaume Fages
  */
-public class PropAllDiff_Set extends Propagator<SetVar>{
+public class PropAllDiff extends Propagator<SetVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -66,7 +66,7 @@ public class PropAllDiff_Set extends Propagator<SetVar>{
 	 * @param solver
 	 * @param c
 	 */
-	public PropAllDiff_Set(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+	public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
 		super(sets, solver, c, PropagatorPriority.LINEAR);
 		n = sets.length;
 	}

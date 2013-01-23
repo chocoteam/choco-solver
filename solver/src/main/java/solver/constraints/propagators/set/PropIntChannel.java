@@ -51,8 +51,8 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
- * Channelling with integer variables
- * x in int[y] <=> y in set[x]
+ * Channeling between set variables and integer variables
+ * x in sets[y-offSet1] <=> ints[x-offSet2] = y
  * @author Jean-Guillaume Fages
  */
 public class PropIntChannel extends Propagator<Variable>{
@@ -64,6 +64,7 @@ public class PropIntChannel extends Propagator<Variable>{
 	private int nInts, nSets, idx;
 	private SetVar[] sets;
 	private IntVar[] ints;
+	private int offSet1,offSet2;
 	private SetDeltaMonitor[] sdm;
 	private IIntDeltaMonitor[] idm;
 	private IntProcedure elementForced,elementRemoved,valRem;
@@ -73,13 +74,15 @@ public class PropIntChannel extends Propagator<Variable>{
 	//***********************************************************************************
 
 	/**
-	 * Channelling with integer variables
-	 * x in int[y] <=> y in set[x]
+	 * Channeling between set variables and integer variables
+	 * x in sets[y-offSet1] <=> ints[x-offSet2] = y
 	 */
-	public PropIntChannel(SetVar[] setsV, IntVar[] intsV, Solver solver, Constraint c) {
+	public PropIntChannel(SetVar[] setsV, IntVar[] intsV,final int offSet1,final int offSet2, Solver solver, Constraint c) {
 		super(ArrayUtils.append(setsV,intsV), solver, c, PropagatorPriority.LINEAR);
 		this.sets = setsV;
 		this.ints = intsV;
+		this.offSet1 = offSet1;
+		this.offSet2 = offSet2;
 		nSets = sets.length;
 		nInts = intsV.length;
 		// delta monitors
@@ -95,19 +98,19 @@ public class PropIntChannel extends Propagator<Variable>{
 		elementForced = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				ints[element].instantiateTo(idx,aCause);
+				ints[element-offSet2].instantiateTo(idx,aCause);
 			}
 		};
 		elementRemoved = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				ints[element].removeValue(idx,aCause);
+				ints[element-offSet2].removeValue(idx,aCause);
 			}
 		};
 		valRem = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				sets[element].removeFromEnvelope(idx,aCause);
+				sets[element-offSet1].removeFromEnvelope(idx,aCause);
 			}
 		};
 	}
@@ -126,30 +129,30 @@ public class PropIntChannel extends Propagator<Variable>{
 	@Override
 	public void propagate(int evtmask) throws ContradictionException{
 		for(int i=0;i<nInts;i++){
-			ints[i].updateLowerBound(0,aCause);
-			ints[i].updateUpperBound(nSets-1,aCause);
+			ints[i].updateLowerBound(offSet1,aCause);
+			ints[i].updateUpperBound(nSets-1+offSet1,aCause);
 		}
 		for(int i=0;i<nInts;i++){
 			int ub = ints[i].getUB();
 			for(int j=ints[i].getLB();j>=ub;j=ints[i].nextValue(j)){
-				if(j<0 || j>=sets.length || !sets[j].contains(i)){
+				if(!sets[j-offSet1].contains(i+offSet2)){
 					ints[i].removeValue(j,aCause);
 				}
 			}
 			if(ints[i].instantiated()){
-				sets[ints[i].getValue()].addToKernel(i,aCause);
+				sets[ints[i].getValue()-offSet1].addToKernel(i+offSet2,aCause);
 			}
 		}
 		for(int i=0;i<nSets;i++){
 			ISet tmp = sets[i].getEnvelope();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<0||j>nInts || !ints[j].contains(i)){
+				if(j<offSet2||j>nInts-1+offSet2 || !ints[j-offSet2].contains(i+offSet1)){
 					sets[i].removeFromEnvelope(j,aCause);
 				}
 			}
 			tmp = sets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				ints[j].instantiateTo(i,aCause);
+				ints[j-offSet2].instantiateTo(i+offSet1,aCause);
 			}
 		}
 		for(int i=0;i<nSets;i++){
@@ -164,6 +167,7 @@ public class PropIntChannel extends Propagator<Variable>{
 	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 		idx = idxVarInProp;
 		if(idx<nSets){
+			idx += offSet1;
 			sdm[idxVarInProp].freeze();
 			sdm[idxVarInProp].forEach(elementForced,EventType.ADD_TO_KER);
 			sdm[idxVarInProp].forEach(elementRemoved,EventType.REMOVE_FROM_ENVELOPE);
@@ -171,8 +175,9 @@ public class PropIntChannel extends Propagator<Variable>{
 		}else{
 			idx-=nSets;
 			if(ints[idx].instantiated()){
-				sets[ints[idx].getValue()].addToKernel(idx,aCause);
+				sets[ints[idx].getValue()-offSet1].addToKernel(idx+offSet2,aCause);
 			}
+			idx += offSet2;
 			idm[idxVarInProp].freeze();
 			idm[idxVarInProp].forEach(valRem,EventType.REMOVE);
 			idm[idxVarInProp].unfreeze();
@@ -184,7 +189,7 @@ public class PropIntChannel extends Propagator<Variable>{
 		for(int i=0;i<nInts;i++){
 			if(ints[i].instantiated()){
 				int val = ints[i].getValue();
-				if(val<0 || val>=nSets || !sets[val].getEnvelope().contain(i)){
+				if(val<offSet1 || val>=nSets+offSet1 || !sets[val-offSet1].getEnvelope().contain(i+offSet2)){
 					return ESat.FALSE;
 				}
 			}
@@ -192,7 +197,7 @@ public class PropIntChannel extends Propagator<Variable>{
 		for(int i=0;i<nSets;i++){
 			ISet tmp = sets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<0 || j>=nInts || !ints[j].contains(i)){
+				if(j<offSet2 || j>=nInts+offSet2 || !ints[j-offSet2].contains(i+offSet1)){
 					return ESat.FALSE;
 				}
 			}

@@ -60,6 +60,7 @@ public class PropBoolChannel extends Propagator<Variable>{
 	//***********************************************************************************
 
 	private int n;
+	private int offSet;
 	private BoolVar[] bools;
 	private SetVar set;
 	private SetDeltaMonitor sdm;
@@ -71,28 +72,30 @@ public class PropBoolChannel extends Propagator<Variable>{
 
 	/**
 	 * Channeling between a set variable and boolean variables
+	 * i in setVar <=> boolVars[i-offSet] = TRUE
 	 * @param setVar
 	 * @param boolVars
 	 * @param solver
 	 * @param c
 	 */
-	public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, Solver solver, Constraint c) {
+	public PropBoolChannel(SetVar setVar, BoolVar[] boolVars,final int offSet, Solver solver, Constraint c) {
 		super(ArrayUtils.append(boolVars, new Variable[]{setVar}), solver, c, PropagatorPriority.UNARY);
 		this.n = bools.length;
 		this.bools = boolVars;
 		this.set = setVar;
 		this.sdm = this.set.monitorDelta(this);
+		this.offSet = offSet;
 		// PROCEDURES
 		setForced = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				bools[element].setToTrue(aCause);
+				bools[element-offSet].setToTrue(aCause);
 			}
 		};
 		setRemoved = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				bools[element].setToFalse(aCause);
+				bools[element-offSet].setToFalse(aCause);
 			}
 		};
 	}
@@ -111,23 +114,23 @@ public class PropBoolChannel extends Propagator<Variable>{
 		for(int i=0;i<n;i++){
 			if(bools[i].instantiated()){
 				if(bools[i].getValue()==0){
-					set.removeFromEnvelope(i,aCause);
+					set.removeFromEnvelope(i+offSet,aCause);
 				}else{
-					set.addToKernel(i,aCause);
+					set.addToKernel(i+offSet,aCause);
 				}
-			}else if(!set.getEnvelope().contain(i)){
+			}else if(!set.getEnvelope().contain(i+offSet)){
 				bools[i].setToFalse(aCause);
 			}
 		}
 		ISet tmp = set.getEnvelope();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j<0 || j>=n){
+			if(j<offSet || j>=n+offSet){
 				set.removeFromEnvelope(j,aCause);
 			}
 		}
 		tmp = set.getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			bools[j].setToTrue(aCause);
+			bools[j-offSet].setToTrue(aCause);
 		}
 		sdm.unfreeze();
 	}
@@ -136,9 +139,9 @@ public class PropBoolChannel extends Propagator<Variable>{
 	public void propagate(int i, int mask) throws ContradictionException {
 		if(i<n){
 			if(bools[i].getValue()==0){
-				set.removeFromEnvelope(i,aCause);
+				set.removeFromEnvelope(i+offSet,aCause);
 			}else{
-				set.addToKernel(i,aCause);
+				set.addToKernel(i+offSet,aCause);
 			}
 		}else{
 			sdm.freeze();
@@ -152,13 +155,13 @@ public class PropBoolChannel extends Propagator<Variable>{
 	public ESat isEntailed() {
 		ISet tmp = set.getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(bools[j].instantiatedTo(0)){
+			if(bools[j-offSet].instantiatedTo(0)){
 				return ESat.FALSE;
 			}
 		}
 		for(int i=0;i<n;i++){
 			if(bools[i].instantiatedTo(1)){
-				if(!set.getEnvelope().contain(i)){
+				if(!set.getEnvelope().contain(i+offSet)){
 					return ESat.FALSE;
 				}
 			}

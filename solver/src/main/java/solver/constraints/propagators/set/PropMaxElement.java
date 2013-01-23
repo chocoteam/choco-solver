@@ -45,7 +45,6 @@ import solver.variables.*;
 
 /**
  * Retrieves the maximum element of the set
- * MAXIMUM_ELEMENT_OF(set) = max
  * @author Jean-Guillaume Fages
  */
 public class PropMaxElement extends Propagator<Variable>{
@@ -56,6 +55,8 @@ public class PropMaxElement extends Propagator<Variable>{
 
 	private IntVar max;
 	private SetVar set;
+	private int offSet;
+	private int[] weights;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -63,16 +64,32 @@ public class PropMaxElement extends Propagator<Variable>{
 
 	/**
 	 * Retrieves the maximum element of the set
-	 * MAXIMUM_ELEMENT_OF(setVar) = max
+	 * MAX{i | i in setVar} = max
 	 * @param setVar
 	 * @param max
 	 * @param solver
 	 * @param c
 	 */
 	public PropMaxElement(SetVar setVar, IntVar max, Solver solver, Constraint c) {
+		this(setVar,null,0,max,solver,c);
+	}
+
+	/**
+	 * Retrieves the maximum element induced by set
+	 * MAX{weight[i-offset] | i in setVar} = max
+	 * @param setVar
+	 * @param weights
+	 * @param offset
+	 * @param max
+	 * @param solver
+	 * @param c
+	 */
+	public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, Solver solver, Constraint c) {
 		super(new Variable[]{setVar,max}, solver, c, PropagatorPriority.BINARY);
 		this.max = max;
 		this.set = setVar;
+		this.weights = weights;
+		this.offSet = offset;
 	}
 
 	//***********************************************************************************
@@ -89,17 +106,18 @@ public class PropMaxElement extends Propagator<Variable>{
 	public void propagate(int evtmask) throws ContradictionException {
 		ISet tmp = set.getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			max.updateLowerBound(j,aCause);
+			max.updateLowerBound(get(j),aCause);
 		}
 		tmp = set.getEnvelope();
-		int maxVal = tmp.getFirstElement();
+		int maxVal = get(tmp.getFirstElement());
 		int ub = max.getUB();
-		for(int j=maxVal;j>=0;j=tmp.getNextElement()){
-			if(j>ub){
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			int k = get(j);
+			if(k>ub){
 				set.removeFromEnvelope(j,aCause);
 			}else{
-				if(maxVal<j){
-					maxVal = j;
+				if(maxVal<k){
+					maxVal = k;
 				}
 			}
 		}
@@ -117,15 +135,15 @@ public class PropMaxElement extends Propagator<Variable>{
 		int ub = max.getUB();
 		ISet tmp = set.getKernel();
 		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j>ub){
+			if(get(j)>ub){
 				return ESat.FALSE;
 			}
 		}
 		tmp = set.getEnvelope();
-		int maxVal = tmp.getFirstElement();
-		for(int j=maxVal;j>=0;j=tmp.getNextElement()){
-			if(maxVal<j){
-				maxVal = j;
+		int maxVal = get(tmp.getFirstElement());
+		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
+			if(maxVal<get(j)){
+				maxVal = get(j);
 			}
 		}
 		if(maxVal<lb){
@@ -135,5 +153,9 @@ public class PropMaxElement extends Propagator<Variable>{
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
+	}
+
+	private int get(int j){
+		return (weights==null)?j:weights[j-offSet];
 	}
 }

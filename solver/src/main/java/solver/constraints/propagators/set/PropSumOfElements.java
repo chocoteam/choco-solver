@@ -58,7 +58,8 @@ public class PropSumOfElements extends Propagator<Variable>{
 
 	private IntVar sum;
 	private SetVar set;
-	private int[] coefs;
+	private int offSet;
+	private int[] weights;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -66,30 +67,32 @@ public class PropSumOfElements extends Propagator<Variable>{
 
 	/**
 	 * Sums weights given by a set of indexes
-	 * SUM(weights[i] | i in indexes) = sum
+	 * SUM(weights[i-offset] | i in indexes) = sum
 	 * @param indexes
 	 * @param weights
+	 * @param offset
 	 * @param sum
 	 * @param solver
 	 * @param c
 	 */
-	public PropSumOfElements(SetVar indexes, int[] weights, IntVar sum, Solver solver, Constraint c) {
+	public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, Solver solver, Constraint c) {
 		super(new Variable[]{indexes,sum}, solver, c, PropagatorPriority.BINARY);
 		this.sum = sum;
 		this.set = indexes;
-		this.coefs = weights;
+		this.weights = weights;
+		this.offSet = offset;
 	}
 
 	/**
 	 * Sums elements of a set
-	 * SUM(setVar) = sum
+	 * SUM(i | i in setVar) = sum
 	 * @param setVar
 	 * @param sum
 	 * @param solver
 	 * @param c
 	 */
 	public PropSumOfElements(SetVar setVar, IntVar sum, Solver solver, Constraint c) {
-		this(setVar,null,sum,solver,c);
+		this(setVar,null,0,sum,solver,c);
 	}
 
 	//***********************************************************************************
@@ -104,10 +107,10 @@ public class PropSumOfElements extends Propagator<Variable>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if(coefs!=null){
+		if(weights !=null){
 			ISet tmp = set.getEnvelope();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<0 || j>=coefs.length){
+				if(j<offSet || j>= weights.length+offSet){
 					set.removeFromEnvelope(j,aCause);
 				}
 			}
@@ -174,6 +177,6 @@ public class PropSumOfElements extends Propagator<Variable>{
 	}
 
 	private int get(int j){
-		return (coefs==null)?1:coefs[j];
+		return (weights ==null)?j: weights[j-offSet];
 	}
 }

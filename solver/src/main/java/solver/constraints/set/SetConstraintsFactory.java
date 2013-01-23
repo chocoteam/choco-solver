@@ -51,7 +51,7 @@ public final class SetConstraintsFactory {
 	private SetConstraintsFactory(){}
 
 	//***********************************************************************************
-	// BASICS
+	// BASICS : union/inter/subset/card
 	//***********************************************************************************
 
 	/**
@@ -107,91 +107,128 @@ public final class SetConstraintsFactory {
 		return c;
 	}
 
+	//TODO nbEmpty
+
+	//***********************************************************************************
+	// SUM - MAX - MIN
+	//***********************************************************************************
+
 	/**
 	 * Sums elements of a set
-	 * sum(set) = sum
+	 * SUM{i | i in set} = sum
 	 * @param set
 	 * @param sum
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint sumElements(SetVar set, IntVar sum, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropSumOfElements(set, sum, solver, c));
-		return c;
+	public static Constraint sum(SetVar set, IntVar sum, Solver solver) {
+		return sum(set,null,0,sum,solver);
 	}
 
 	/**
 	 * Sums weights given by a set of indexes
-	 * SUM(weights[i] | i in indexes) = sum
+	 * SUM(weights[i-offset] | i in indexes) = sum
 	 * @param indexes
 	 * @param weights
+	 * @param offset (0 by default but generally 1 with MiniZinc API)
 	 * @param sum
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint sumElements(SetVar indexes, int[] weights, IntVar sum, Solver solver) {
+	public static Constraint sum(SetVar indexes, int[] weights, int offset, IntVar sum, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropSumOfElements(indexes, weights, sum, solver, c));
+		c.setPropagators(new PropSumOfElements(indexes, weights, offset, sum, solver, c));
 		return c;
 	}
 
 	/**
 	 * Retrieves the maximum element of the set
-	 * MAXIMUM_ELEMENT_OF(set) = maxElement
+	 * MAX{i | i in set} = maxElement
 	 * @param set
 	 * @param maxElement
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint maxElement(SetVar set, IntVar maxElement, Solver solver) {
+	public static Constraint max(SetVar set, IntVar maxElement, Solver solver) {
+		return max(set, null, 0, maxElement, solver);
+	}
+
+	/**
+	 * Retrieves the maximum element induced by a set
+	 * MAX{weights[i-offSet] |Êi in set} = maxElement
+	 * @param set
+	 * @param weights
+	 * @param offSet (0 by default but generally 1 with MiniZinc API)
+	 * @param maxElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint max(SetVar set, int[] weights, int offSet, IntVar maxElement, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMaxElement(set, maxElement, solver, c));
+		c.setPropagators(new PropMaxElement(set, weights, offSet, maxElement, solver, c));
 		return c;
 	}
 
 	/**
 	 * Retrieves the minimum element of the set
-	 * MINIMUM_ELEMENT_OF(set) = minElement
+	 * MIN{i | i in set} = minElement
 	 * @param set
 	 * @param minElement
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint minElement(SetVar set, IntVar minElement, Solver solver) {
+	public static Constraint min(SetVar set, IntVar minElement, Solver solver) {
+		return min(set, null, 0, minElement, solver);
+	}
+
+	/**
+	 * Retrieves the minimum element induced by set
+	 * MIN{weights[i-offSet] | i in set} = minElement
+	 * @param set
+	 * @param weights
+	 * @param offSet (0 by default but generally 1 with MiniZinc API)
+	 * @param minElement
+	 * @param solver
+	 * @return
+	 */
+	public static Constraint min(SetVar set, int[] weights, int offSet, IntVar minElement, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMinElement(set, minElement, solver, c));
+		c.setPropagators(new PropMinElement(set, weights, offSet, minElement, solver, c));
 		return c;
 	}
 
 	//***********************************************************************************
-	// CHANNELING CONSTRAINTS
+	// CHANNELING CONSTRAINTS : bool/int/graph
 	//***********************************************************************************
 
 	/**
 	 * Channeling between a set variable and boolean variables
+	 * i in set <=> bools[i-offSet] = TRUE
 	 * @param set
 	 * @param bools
+	 * @param offSet (0 by default but generally 1 with MiniZinc API)
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint bool_channel(SetVar set, BoolVar[] bools, Solver solver) {
+	public static Constraint bool_channel(SetVar set, BoolVar[] bools, int offSet, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropBoolChannel(set, bools, solver, c));
+		c.setPropagators(new PropBoolChannel(set, bools, offSet, solver, c));
 		return c;
 	}
 
 	/**
 	 * Channeling between set variables and integer variables
-	 * x in ints[y] <=> y in sets[x]
+	 * x in sets[y-offSet1] <=> ints[x-offSet2] = y
 	 * @param sets
 	 * @param ints
+	 * @param offSet1 (0 by default but generally 1 with MiniZinc API)
+	 * @param offSet2 (0 by default but generally 1 with MiniZinc API)
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint int_channel(SetVar[] sets, IntVar[] ints, Solver solver) {
+	public static Constraint int_channel(SetVar[] sets, IntVar[] ints, int offSet1, int offSet2, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropIntChannel(sets, ints, solver, c));
+		c.setPropagators(new PropIntChannel(sets, ints, offSet1, offSet2, solver, c));
 		return c;
 	}
 
@@ -252,7 +289,7 @@ public final class SetConstraintsFactory {
 	public static Constraint all_disjoint(SetVar[] sets, Solver solver) {
 		Constraint c = new Constraint(sets, solver);
 		c.setPropagators(	new PropAllDisjoint(sets,solver,c),
-				new PropAtMost1Empty(sets,solver,c));
+				new PropAtMost1Empty(sets,solver,c));// TODO really?
 		return c;
 	}
 
@@ -265,7 +302,7 @@ public final class SetConstraintsFactory {
 	 */
 	public static Constraint all_different(SetVar[] sets, Solver solver) {
 		Constraint c = new Constraint(sets, solver);
-		c.setPropagators(	new PropAllDiff_Set(sets,solver,c),
+		c.setPropagators(	new PropAllDiff(sets,solver,c),
 				new PropAtMost1Empty(sets,solver,c));
 		return c;
 	}
@@ -295,6 +332,8 @@ public final class SetConstraintsFactory {
 		c.setPropagators(new PropUnion(sets, union, solver, c));
 		return c;
 	}
+
+	//TODO add offSet from here
 
 	/**
 	 * Inverse set constraint
