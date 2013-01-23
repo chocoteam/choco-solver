@@ -28,10 +28,12 @@ package solver.constraints.nary.automata;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.hash.TIntHashSet;import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -64,26 +66,25 @@ public class CostRegular extends IntConstraint<IntVar> {
 //        super(vars, solver, storeThreshold);
 //    }
 
-    public CostRegular(IntVar[] vars, IAutomaton automaton, int[][][] costs, Solver solver) {
-        super(vars, solver);
-        int zIdx = vars.length - 1;
+    public CostRegular(IntVar[] ivars, IntVar cost, IAutomaton automaton, int[][][] costs, Solver solver) {
+        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
         cautomaton =
-                CostAutomaton.makeSingleResource(automaton, costs, vars[zIdx].getLB(), vars[zIdx].getUB());
+                CostAutomaton.makeSingleResource(automaton, costs, cost.getLB(), cost.getUB());
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));
     }
 
-    public CostRegular(IntVar[] vars, IAutomaton automaton, int[][] costs, Solver solver) {
-        super(vars, solver);
-        int zIdx = vars.length - 1;
+    public CostRegular(IntVar[] ivars, IntVar cost, IAutomaton automaton, int[][] costs, Solver solver) {
+        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
         cautomaton =
-                CostAutomaton.makeSingleResource(automaton, costs, vars[zIdx].getLB(), vars[zIdx].getUB());
+                CostAutomaton.makeSingleResource(automaton, costs, cost.getLB(), cost.getUB());
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));
     }
 
-    public CostRegular(IntVar[] vars, ICostAutomaton cautomaton, Solver solver) {
-        super(vars, solver);
+    public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton, Solver solver) {
+        super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
+        int zIdx = vars.length - 1;
         this.cautomaton = cautomaton;
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));

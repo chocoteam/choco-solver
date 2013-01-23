@@ -30,9 +30,9 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.automata.FA.IAutomaton;
-import solver.constraints.nary.automata.Regular;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -101,7 +101,7 @@ public class Nonogram extends AbstractProblem {
             regexp.append(i == m - 1 ? '*' : '+');
         }
         IAutomaton auto = new FiniteAutomaton(regexp.toString());
-        solver.post(new Regular(cells, auto, solver));
+        solver.post(IntConstraintFactory.regular(cells, auto));
     }
 
 

@@ -34,8 +34,6 @@ import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.MultiCostRegular;
-import solver.constraints.nary.automata.Regular;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
@@ -598,7 +596,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         FiniteAutomaton automaton = this.makeForbiddenPatternsAsAutomaton();
         description += "pat[regular/" + automaton.getNbStates() + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(new Regular(shifts[e], automaton, solver));
+            solver.post(IntConstraintFactory.regular(shifts[e], automaton));
         }
     }
 
@@ -612,7 +610,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(new MultiCostRegular(shifts[e], occurrences[e], automaton, costs, solver));
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], occurrences[e], automaton, costs));
         }
     }
 
@@ -638,7 +636,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int lb = data.getWeekCounterLB(e, r);
             int ub = data.getWeekCounterUB(e, r);
             IntVar[] occs = VariableFactory.boundedArray("nWR", data.nbWeeks(), lb, ub, solver);
-            solver.post(new MultiCostRegular(shifts[e], ArrayUtils.append(occurrences[e], occs), automaton, costs, solver));
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], ArrayUtils.append(occurrences[e], occs), automaton, costs));
         }
     }
 

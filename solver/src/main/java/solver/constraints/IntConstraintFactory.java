@@ -34,6 +34,11 @@ import solver.constraints.binary.Square;
 import solver.constraints.extension.BinCSP;
 import solver.constraints.extension.LargeCSP;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.automata.CostRegular;
+import solver.constraints.nary.automata.FA.IAutomaton;
+import solver.constraints.nary.automata.FA.ICostAutomaton;
+import solver.constraints.nary.automata.MultiCostRegular;
+import solver.constraints.nary.automata.Regular;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
@@ -447,6 +452,49 @@ public enum IntConstraintFactory {
     }
 
     /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the COSTS associated to each assignment is bounded by the COST variable.
+     *
+     * @param VARS      sequence of variables
+     * @param COST      cost variable
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, IAutomaton AUTOMATON, int[][] COSTS) {
+        return new CostRegular(VARS, COST, AUTOMATON, COSTS, VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the COSTS associated to each assignment is bounded by the COST variable.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     * <p/>
+     *
+     * @param VARS      sequence of variables
+     * @param COST      cost variable
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, IAutomaton AUTOMATON, int[][][] COSTS) {
+        return new CostRegular(VARS, COST, AUTOMATON, COSTS, VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of variables is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the costs associated to each assignment is bounded by the cost variable.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS      sequence of variables
+     * @param COST      cost variable
+     * @param AUTOMATON a deterministic finite automaton defining the regular language and the costs
+     */
+    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton AUTOMATON) {
+        return new CostRegular(VARS, COST, AUTOMATON, VARS[0].getSolver());
+    }
+
+    /**
      * Ensures:<br/>
      * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
      * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
@@ -486,6 +534,62 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
         c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
         return c;
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     *
+     * @param VARS      sequence of variables
+     * @param CVARS     cost variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][] COSTS) {
+        return new MultiCostRegular(VARS, CVARS, AUTOMATON, COSTS, VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS      sequence of variables
+     * @param CVARS     cost variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     * @param COSTS     assignments costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, IAutomaton AUTOMATON, int[][][][] COSTS) {
+        return new MultiCostRegular(VARS, CVARS, AUTOMATON, COSTS, VARS[0].getSolver());
+    }
+
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS       sequence of variables
+     * @param CVARS      cost variables
+     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
+        return new MultiCostRegular(VARS, CVARS, CAUTOMATON, VARS[0].getSolver());
+    }
+
+
+    /**
+     * Enforces the sequence of VARS to be a word
+     * recognized by the deterministic finite automaton AUTOMATON.
+     * For example regexp = "(1|2)(3*)(4|5)";
+     * The same dfa can be used for different propagators.
+     *
+     * @param VARS      sequence of variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     */
+    public static Regular regular(IntVar[] VARS, IAutomaton AUTOMATON) {
+        return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
     }
 
     /**
