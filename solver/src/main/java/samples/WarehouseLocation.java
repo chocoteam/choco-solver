@@ -32,7 +32,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -122,7 +121,7 @@ public class WarehouseLocation extends AbstractProblem {
         int[] coeffs = new int[nWH + nS];
         Arrays.fill(coeffs, 0, nWH, cost);
         Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(Sum.eq(ArrayUtils.append(open, costPerStore), coeffs, totCost, 1, solver));
+        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost, 1));
     }
 
     @Override

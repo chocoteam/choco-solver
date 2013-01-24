@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.search.strategy.StrategyFactory;
@@ -106,7 +105,7 @@ public class OpenStacks extends AbstractProblem {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
                 solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1], 0));
-                solver.post(Sum.eq(new IntVar[]{o[i][t - 1], value}, o[i][t], solver));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]));
             }
         }
         o2b = VariableFactory.boolMatrix("b", np, nc, solver);
@@ -120,7 +119,7 @@ public class OpenStacks extends AbstractProblem {
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);
         for (int i = 0; i < np; i++) {
-            solver.post(Sum.eq(o2b[i], open[i], solver));
+            solver.post(IntConstraintFactory.sum(o2b[i], "=", open[i]));
         }
 
 

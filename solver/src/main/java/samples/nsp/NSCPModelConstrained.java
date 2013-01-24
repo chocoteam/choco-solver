@@ -30,7 +30,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.cnf.ALogicTree;
@@ -244,7 +243,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverCounterCoupling(Solver solver, int a) {
         description += "coupling[" + a + "] ";
-        solver.post(Sum.eq(ArrayUtils.getColumn(occurrences, a, IntVar.class), data.getTotalCover(a), solver));
+        solver.post(IntConstraintFactory.sum(ArrayUtils.getColumn(occurrences, a, IntVar.class), "=", data.getTotalCover(a)));
     }
 
     private void makeCoverCounterCouplingAndEquity(Solver solver) {
@@ -278,7 +277,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             g++;
         }
         description += "couplingEquality[" + a + "] ";
-        solver.post(Sum.eq(occ, sizes, data.getTotalCover(a), solver));
+        solver.post(IntConstraintFactory.scalar(occ, sizes, "=", data.getTotalCover(a)));
     }
 
 

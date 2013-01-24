@@ -52,6 +52,9 @@ public class DistanceXYC extends IntConstraint<IntVar> {
 
     public DistanceXYC(IntVar X, IntVar Y, Operator operator, int cste, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
+        if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
+            throw new SolverException("Unexpected operator for distance");
+        }
         this.cste = cste;
         this.operator = operator;
         setPropagators(new PropDistanceXYC(vars, operator, cste, solver, this));

@@ -34,7 +34,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
@@ -102,8 +101,8 @@ public class AbsoluteTest {
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
-        solver.post(IntConstraintFactory.reified(b1, Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver)));
-        solver.post(IntConstraintFactory.reified(b2, Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver)));
+        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "!=", 0)));
+        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
@@ -119,8 +118,8 @@ public class AbsoluteTest {
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
-        solver.post(IntConstraintFactory.reified(b1, Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver)));
-        solver.post(IntConstraintFactory.reified(b2, Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver)));
+        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "!=", 0)));
+        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));

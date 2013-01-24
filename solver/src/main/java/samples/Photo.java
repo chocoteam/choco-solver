@@ -75,9 +75,9 @@ public class Photo extends AbstractProblem {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
             dist[i] = Views.abs(Sum.var(positions[pa], Views.minus(positions[pb])));
-            solver.post(IntConstraintFactory.reified(viols[i], Sum.geq(new IntVar[]{dist[i]}, 2, solver), Sum.leq(new IntVar[]{dist[i]}, 1, solver)));
+            solver.post(IntConstraintFactory.reified(viols[i], IntConstraintFactory.sum(new IntVar[]{dist[i]}, ">=", 2), IntConstraintFactory.sum(new IntVar[]{dist[i]}, "<=", 1)));
         }
-        solver.post(Sum.eq(viols, violations, solver));
+        solver.post(IntConstraintFactory.sum(viols, "=", violations));
         solver.post(IntConstraintFactory.alldifferent_bc(positions));
         solver.post(IntConstraintFactory.arithm(positions[1], ">", positions[0]));
     }

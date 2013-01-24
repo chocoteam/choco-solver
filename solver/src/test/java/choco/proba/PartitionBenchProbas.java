@@ -3,7 +3,6 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -64,7 +63,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        allCstrs.add(Sum.eq(xy, coeffs, 0, solver));
+        allCstrs.add(IntConstraintFactory.scalar(xy, coeffs, "=", 0));
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -82,14 +81,14 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             allCstrs.add(IntConstraintFactory.arithm(sx[i], "<=", 4 * size * size));
             allCstrs.add(IntConstraintFactory.arithm(sy[i], "<=", 4 * size * size));
         }
-        allCstrs.add(Sum.eq(sxy, coeffs, 0, solver));
+        allCstrs.add(IntConstraintFactory.scalar(sxy, coeffs, "=", 0));
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        allCstrs.add(Sum.eq(x, coeffs, 2 * size * (2 * size + 1) / 4, solver));
-        allCstrs.add(Sum.eq(y, coeffs, 2 * size * (2 * size + 1) / 4, solver));
-        allCstrs.add(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
-        allCstrs.add(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
+        allCstrs.add(IntConstraintFactory.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        allCstrs.add(IntConstraintFactory.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        allCstrs.add(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        allCstrs.add(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
 
         allCstrs.add(new AllDifferent(xy, solver, type));
 

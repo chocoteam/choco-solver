@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -69,7 +68,7 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("item", 4, 0, 711, solver);
-        solver.post(Sum.eq(vars, 711, solver));
+        solver.post(IntConstraintFactory.sum(vars, "=", 711));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
         IntVar _711 = Views.fixed(711 * 100 * 100 * 100, solver);

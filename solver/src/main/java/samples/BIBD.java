@@ -31,7 +31,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -122,7 +121,7 @@ public class BIBD extends AbstractProblem {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
                 //solver.post(new Count(1, score, Count.Relop.EQ, L, solver));
-                solver.post(Sum.eq(score, L, solver));
+                solver.post(IntConstraintFactory.sum(score, "=", L));
             }
         }
         // Symmetry breaking

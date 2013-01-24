@@ -32,7 +32,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -55,8 +54,8 @@ public class IntLinEqReifBuilder implements IBuilder {
 
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        Constraint cc = Sum.eq(bs, as, c, solver);
-        Constraint oc = Sum.neq(bs, as, c, solver);
+        Constraint cc = IntConstraintFactory.scalar(bs, as, "=", c);
+        Constraint oc = IntConstraintFactory.scalar(bs, as, "!=", c);
 
         return IntConstraintFactory.reified(r, cc, oc);
     }

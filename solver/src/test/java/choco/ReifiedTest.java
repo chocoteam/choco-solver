@@ -35,7 +35,6 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -105,7 +104,7 @@ public class ReifiedTest {
         lcstrs.add(IntConstraintFactory.reified(b, member(y, new int[]{1, 1}), not_member(y, new int[]{1, 1})));
         lcstrs.add(IntConstraintFactory.reified(c, member(z, new int[]{1, 1}), not_member(z, new int[]{1, 1})));
 
-        lcstrs.add(Sum.leq(new IntVar[]{a, b, c}, 1, s));
+        lcstrs.add(IntConstraintFactory.sum(new IntVar[]{a, b, c}, "<=", 1));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
@@ -225,7 +224,7 @@ public class ReifiedTest {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                s2.post(Sum.leq(ai, q - p + 1, s2));
+                s2.post(IntConstraintFactory.sum(ai, "<=", q - p + 1));
             }
         }
 
@@ -328,7 +327,7 @@ public class ReifiedTest {
         IntVar calc[] = new IntVar[2];
         calc[0] = Views.offset(row[0], 2);
         calc[1] = VariableFactory.bounded("C", 0, 80, s);
-        s.post(Sum.eq(new IntVar[]{row[0], row[1], calc[1]}, new int[]{1, 1, -1}, 0, s));
+        s.post(IntConstraintFactory.scalar(new IntVar[]{row[0], row[1], calc[1]}, new int[]{1, 1, -1}, "=", 0));
 
         Constraint[] constraints = new Constraint[4];
         constraints[0] = IntConstraintFactory.arithm(row[1], "=", calc[0]);
@@ -344,7 +343,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(Sum.eq(ab, ab.length - max_abs, s));
+        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
 
         s.findAllSolutions();
 
@@ -380,7 +379,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(Sum.eq(ab, ab.length - max_abs, s));
+        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
 
         s.findAllSolutions();
 
@@ -416,7 +415,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(Sum.eq(ab, ab.length - max_abs, s));
+        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
 
         SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
@@ -453,7 +452,7 @@ public class ReifiedTest {
 
         //one row must be wrong
         int max_abs = 1;
-        s.post(Sum.eq(ab, ab.length - max_abs, s));
+        s.post(IntConstraintFactory.sum(ab, "=", ab.length - max_abs));
 
         SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();

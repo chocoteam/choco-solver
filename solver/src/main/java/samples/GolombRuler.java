@@ -32,7 +32,6 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -92,10 +91,10 @@ public class GolombRuler extends AbstractProblem {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                distances[k] = Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver);
+                distances[k] = IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, "=", 0);
                 solver.post(distances[k]);
                 solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
+                solver.post(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, "<=", -((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
         }

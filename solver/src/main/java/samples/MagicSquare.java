@@ -32,7 +32,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.enumerations.sorters.ImpactBased;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -91,11 +90,11 @@ public class MagicSquare extends AbstractProblem {
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(Sum.eq(matrix[i], coeffs, ms, solver));
-            solver.post(Sum.eq(invMatrix[i], coeffs, ms, solver));
+            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
+            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
         }
-        solver.post(Sum.eq(diag1, coeffs, ms, solver));
-        solver.post(Sum.eq(diag2, coeffs, ms, solver));
+        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
+        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
 
         // Symetries breaking
         solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));

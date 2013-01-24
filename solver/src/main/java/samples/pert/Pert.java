@@ -33,7 +33,6 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -105,7 +104,7 @@ public class Pert extends AbstractProblem {
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, "<=", -duration);
     }
 
     @Override

@@ -28,7 +28,6 @@ package samples; /**
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
@@ -77,7 +76,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(Sum.eq(ALL, COEFFS, 0, solver));
+        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, "=", 0));
     }
 
     @Override

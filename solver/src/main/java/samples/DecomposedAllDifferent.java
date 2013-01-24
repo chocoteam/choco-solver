@@ -31,7 +31,6 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -116,7 +115,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(Sum.leq(ai, q - p + 1, solver));
+                solver.post(IntConstraintFactory.sum(ai, "<=", q - p + 1));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

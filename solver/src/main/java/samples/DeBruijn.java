@@ -37,7 +37,6 @@ package samples;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -121,7 +120,7 @@ public class DeBruijn {
         for (int i = 0; i < m; i++) {
             binary[i] = VariableFactory.boolArray("binary" + i, n, s);
             IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
-            s.post(Sum.build(sum, coefs, 0, Sum.Type.EQ, s));
+            s.post(IntConstraintFactory.scalar(sum, coefs, "=", 0));
 //            s.post(ConstraintFactory.eq(x[i], Sum.build(binary[i], weights)));
         }
 

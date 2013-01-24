@@ -168,7 +168,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(IntConstraintFactory.reified(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste)));
             }
-            cstrs.add(Sum.eq(bs, card[i], solver));
+            cstrs.add(IntConstraintFactory.sum(bs, "=", card[i]));
         }
         return cstrs.toArray(new Constraint[cstrs.size()]);
     }
@@ -181,8 +181,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(IntConstraintFactory.reified(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste)));
             }
-            cstrs.add(Sum.geq(bs, minOccurrences[i], solver));
-            cstrs.add(Sum.leq(bs, maxOccurrences[i], solver));
+            cstrs.add(IntConstraintFactory.sum(bs, ">=", minOccurrences[i]));
+            cstrs.add(IntConstraintFactory.sum(bs, "<=", maxOccurrences[i]));
         }
         return cstrs.toArray(new Constraint[cstrs.size()]);
     }

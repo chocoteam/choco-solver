@@ -470,7 +470,7 @@ public class VarValTest {
                 rows[i][j] = j;
                 idx[j] = j;
             }
-            Constraint cstr = Sum.eq(vars[i], coeffs[i], 0, solver);
+            Constraint cstr = IntConstraintFactory.scalar(vars[i], coeffs[i], "=", 0);
             solver.post(cstr);
             metrics[i] = cstr.getMetric(Sum.METRIC_COEFFS);
         }

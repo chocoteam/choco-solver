@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;
 import solver.constraints.propagators.nary.PropCount;
+import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.view.Views;
 
@@ -64,11 +65,12 @@ public class Count extends IntConstraint<IntVar> {
                 leq = false;
                 geq = true;
                 break;
-            default:
             case EQ:
                 leq = true;
                 geq = true;
                 break;
+            default:
+                throw new SolverException("Unexpected operator for Count");
         }
         setPropagators(new PropCount(value, this.vars, leq, geq, solver, this));
     }
@@ -85,11 +87,12 @@ public class Count extends IntConstraint<IntVar> {
                 leq = false;
                 geq = true;
                 break;
-            default:
             case EQ:
                 leq = true;
                 geq = true;
                 break;
+            default:
+                throw new SolverException("Unexpected operator for Count");
         }
         //CPRU  double to simulate idempotency
         setPropagators(new PropCount(value, this.vars, leq, geq, solver, this),

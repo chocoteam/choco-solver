@@ -31,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.LogicTreeToolBox;
@@ -219,7 +218,7 @@ public class LogicTreeTest {
         Solver solver = new Solver();
         BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
 
-        solver.post(IntConstraintFactory.reified(rows[0], Sum.eq(new BoolVar[]{rows[1], rows[2]}, 2, solver), Sum.leq(new BoolVar[]{rows[1], rows[2]}, 1, solver))
+        solver.post(IntConstraintFactory.reified(rows[0], IntConstraintFactory.sum(new BoolVar[]{rows[1], rows[2]}, "=", 2), IntConstraintFactory.sum(new BoolVar[]{rows[1], rows[2]}, "<=", 1))
         );
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();

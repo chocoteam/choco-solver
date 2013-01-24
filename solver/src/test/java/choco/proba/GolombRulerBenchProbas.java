@@ -65,7 +65,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
                 diffs[k] = Sum.var(ticks[j], Views.minus(ticks[i]));
                 allVars.add(diffs[k]);
                 allCstrs.add(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                allCstrs.add(Sum.leq(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, -((size - 1 - j + i) * (size - j + i)) / 2, solver));
+                allCstrs.add(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, "<=", -((size - 1 - j + i) * (size - j + i)) / 2));
             }
         }
         allCstrs.add(new AllDifferent(diffs, solver, type));

@@ -47,6 +47,9 @@ public class DistanceXYZ extends IntConstraint<IntVar> {
 
     public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z, Solver solver) {
         super(new IntVar[]{x, y, z}, solver);
+        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
+            throw new SolverException("Unexpected operator for distance");
+        }
         this.operator = op;
         setPropagators(new PropDistanceXYZ(vars, op, solver, this));
     }

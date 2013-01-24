@@ -29,7 +29,6 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -52,7 +51,7 @@ public class BigSum extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 0, 5000, solver);
-        solver.post(Sum.eq(vars, 500000, solver));
+        solver.post(IntConstraintFactory.sum(vars, "=", 500000));
         solver.post(IntConstraintFactory.alldifferent_bc(vars));
     }
 

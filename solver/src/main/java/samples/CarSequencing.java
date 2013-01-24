@@ -28,8 +28,8 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.GCC_AC;
-import solver.constraints.nary.Sum;
 import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -103,7 +103,7 @@ public class CarSequencing extends AbstractProblem {
                 solver.post(new GCC_AC(carSequence, idleConfs[optNum], atLeast, solver));
 
                 // all others configurations may be chosen
-                solver.post(Sum.geq(atLeast, optfreq[optNum][1] - optfreq[optNum][0], solver));
+                solver.post(IntConstraintFactory.sum(atLeast, ">=", optfreq[optNum][1] - optfreq[optNum][0]));
             }
         }
 

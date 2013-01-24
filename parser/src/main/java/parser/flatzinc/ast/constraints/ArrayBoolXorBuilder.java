@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -54,7 +53,7 @@ public class ArrayBoolXorBuilder implements IBuilder {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
         IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
-        solver.post(Sum.eq(as, res, solver));
+        solver.post(IntConstraintFactory.sum(as, "=", res));
         return IntConstraintFactory.mod(res, Views.fixed(2, solver), Views.fixed(1, solver));
     }
 }

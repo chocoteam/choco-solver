@@ -31,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -79,7 +80,7 @@ public class SumTests {
             x[i - 1] = VariableFactory.bounded("x_" + i, dom[i][0], dom[i][n - 1], solver);
             coeffs[i - 1] = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
         }
-        Constraint c = Sum.eq(x, coeffs, r, (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n), solver);
+        Constraint c = IntConstraintFactory.scalar(x, coeffs, "=", r, (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n));
         solver.post(c);
 //        System.out.printf("%s\n", solver);
 

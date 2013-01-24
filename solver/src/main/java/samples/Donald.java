@@ -29,7 +29,6 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -72,15 +71,12 @@ public class Donald extends AbstractProblem {
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
         solver.post(IntConstraintFactory.alldifferent_bc(letters));
-        solver.post(Sum.eq(
-                new IntVar[]{d, o, n, a, l, d,
-                        g, e, r, a, l, d,
-                        r, o, b, e, r, t},
-                new int[]{100000, 10000, 1000, 100, 10, 1,
-                        100000, 10000, 1000, 100, 10, 1,
-                        -100000, -10000, -1000, -100, -10, -1,
-                }, 0, solver
-        ));
+        solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
+                g, e, r, a, l, d,
+                r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
+                100000, 10000, 1000, 100, 10, 1,
+                -100000, -10000, -1000, -100, -10, -1,
+        }, "=", 0));
 
 
     }

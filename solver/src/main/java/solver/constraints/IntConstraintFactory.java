@@ -60,7 +60,6 @@ import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.exception.SolverException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -184,9 +183,6 @@ public enum IntConstraintFactory {
     public static DistanceXYC distance(IntVar VAR1, IntVar VAR2, String OP, int CSTE) {
         assert VAR1.getSolver() == VAR2.getSolver();
         Operator op = Operator.get(OP);
-        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT && op != Operator.NQ) {
-            throw new SolverException("Unexpected operator for distance");
-        }
         return new DistanceXYC(VAR1, VAR2, op, CSTE, VAR1.getSolver());
     }
 
@@ -291,9 +287,6 @@ public enum IntConstraintFactory {
      */
     public static DistanceXYZ distance(IntVar VAR1, IntVar VAR2, String OP, IntVar VAR3) {
         Operator op = Operator.get(OP);
-        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
-            throw new SolverException("Unexpected operator for distance");
-        }
         return new DistanceXYZ(VAR1, VAR2, op, VAR3, VAR1.getSolver());
 
     }
@@ -576,9 +569,6 @@ public enum IntConstraintFactory {
      */
     public static Count count(int VALUE, IntVar[] VARS, String RELOP, IntVar LIMIT) {
         Operator op = Operator.get(RELOP);
-        if (op != Operator.EQ && op != Operator.GE && op != Operator.LE) {
-            throw new SolverException("Unexpected operator for count");
-        }
         return new Count(VALUE, VARS, op, LIMIT, LIMIT.getSolver());
     }
 
@@ -594,9 +584,6 @@ public enum IntConstraintFactory {
      */
     public static Count count(int VALUE, IntVar[] VARS, String RELOP, int LIMIT) {
         Operator op = Operator.get(RELOP);
-        if (op != Operator.EQ && op != Operator.GE && op != Operator.LE) {
-            throw new SolverException("Unexpected operator for count");
-        }
         return new Count(VALUE, VARS, op, LIMIT, VARS[0].getSolver());
     }
 
@@ -854,6 +841,53 @@ public enum IntConstraintFactory {
     public static Constraint subcircuit(IntVar[] vars) {
         Solver solver = vars[0].getSolver();
         return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver));
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OP SUM.
+     *
+     * @param VARS a vector of variables
+     * @param OP   an operator among {"=", "!=", ">=","<="}
+     * @param SUM  an int
+     */
+    public static Sum sum(IntVar[] VARS, String OP, int SUM) {
+        return Sum.build(VARS, SUM, Operator.get(OP), VARS[0].getSolver());
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OP SUM.
+     *
+     * @param VARS a vector of variables
+     * @param OP   an operator among {"=", "!=", ">=","<="}
+     * @param SUM  a variable
+     */
+    public static Sum sum(IntVar[] VARS, String OP, IntVar SUM) {
+        return Sum.build(VARS, SUM, Operator.get(OP), VARS[0].getSolver());
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> OP SUM.
+     *
+     * @param VARS   a vector of variables
+     * @param COEFFS a vector of int
+     * @param OP     an operator among {"=", "!=", ">=","<="}
+     * @param SUM    an int
+     */
+    public static Sum scalar(IntVar[] VARS, int[] COEFFS, String OP, int SUM) {
+        return Sum.build(VARS, COEFFS, Operator.get(OP), SUM, VARS[0].getSolver());
+    }
+
+    /**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> OP COEFF * SUM.
+     *
+     * @param VARS   a vector of variables
+     * @param COEFFS a vector of int
+     * @param OP     an operator among {"=", "!=", ">=","<="}
+     * @param COEFF  an int
+     * @param SUM    a variable
+     */
+    public static Sum scalar(IntVar[] VARS, int[] COEFFS, String OP, IntVar SUM, int COEFF) {
+        return Sum.build(VARS, COEFFS, SUM, COEFF, Operator.get(OP), VARS[0].getSolver());
     }
 
     /**

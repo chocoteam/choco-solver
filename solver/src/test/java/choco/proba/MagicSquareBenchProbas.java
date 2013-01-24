@@ -3,7 +3,6 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -60,11 +59,11 @@ public class MagicSquareBenchProbas extends AbstractBenchProbas {
         int[] coeffs = new int[size];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < size; i++) {
-            this.cstrs[c++] = Sum.eq(matrix[i], coeffs, ms, solver);
-            this.cstrs[c++] = Sum.eq(invMatrix[i], coeffs, ms, solver);
+            this.cstrs[c++] = IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms);
+            this.cstrs[c++] = IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms);
         }
-        this.cstrs[c++] = Sum.eq(diag1, coeffs, ms, solver);
-        this.cstrs[c++] = Sum.eq(diag2, coeffs, ms, solver);
+        this.cstrs[c++] = IntConstraintFactory.scalar(diag1, coeffs, "=", ms);
+        this.cstrs[c++] = IntConstraintFactory.scalar(diag2, coeffs, "=", ms);
 
         // Symetries breaking
         this.cstrs[c++] = IntConstraintFactory.arithm(matrix[0][size - 1], "<", matrix[size - 1][0]);

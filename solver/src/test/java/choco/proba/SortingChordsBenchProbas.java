@@ -3,7 +3,6 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
@@ -130,7 +129,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         coeffs[size-1] = -1;
         IntVar[] sumVars = ArrayUtils.append(costvars,new IntVar[]{obj});  //*/
         //m.addConstraint(Choco.leq(Choco.sum(costvars), obj));
-        this.cstrs[nbCstrs] = Sum.eq(costvars, obj, solver);
+        this.cstrs[nbCstrs] = IntConstraintFactory.sum(costvars, "=", obj);
         //this.cstrs[nbCstrs] = Sum.leq(sumVars, coeffs, 0, solver);
     }
 

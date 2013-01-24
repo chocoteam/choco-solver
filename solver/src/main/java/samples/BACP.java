@@ -29,7 +29,6 @@ package samples;
 import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -105,11 +104,11 @@ public class BACP extends AbstractProblem {
                 );
             }
 //            sum(i in courses) (x[p, i])>=courses_per_period_lb /\
-            solver.post(Sum.geq(x[i], courses_per_period_lb, solver));
+            solver.post(IntConstraintFactory.sum(x[i], ">=", courses_per_period_lb));
 //            sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            solver.post(Sum.leq(x[i], courses_per_period_ub, solver));
+            solver.post(IntConstraintFactory.sum(x[i], "<=", courses_per_period_ub));
 //            load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
-            solver.post(Sum.eq(x[i], course_load, load[i], 1, solver));
+            solver.post(IntConstraintFactory.scalar(x[i], course_load, "=", load[i], 1));
 //            load[p] >= load_per_period_lb /\
             solver.post(IntConstraintFactory.arithm(load[i], ">=", load_per_period_lb));
 //            load[p] <= objective

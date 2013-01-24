@@ -35,7 +35,6 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
@@ -175,17 +174,17 @@ public class AirPlaneLanding extends AbstractProblem {
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
-        solver.post(Sum.eq(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e, 1, solver));
+        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e, 1));
 
         IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
-        solver.post(Sum.eq(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t, 1, solver));
-        solver.post(Sum.eq(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, 0, solver));
+        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t, 1));
+        solver.post(IntConstraintFactory.scalar(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, "=", 0));
 
         solver.post(IntConstraintFactory.alldifferent_bc(planes));
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, "<=", -duration);
     }
 
     @Override
