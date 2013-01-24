@@ -28,7 +28,6 @@
 package solver.search.strategy.pattern;
 
 import solver.Solver;
-import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
@@ -37,7 +36,7 @@ import solver.variables.Variable;
  *
  * @author Jean-Guillaume Fages
  */
-public class LastFail_decisiondeduction extends LastFail implements IMonitorDownBranch {
+public class LastFail_decisiondeduction extends LastFail {
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -52,14 +51,6 @@ public class LastFail_decisiondeduction extends LastFail implements IMonitorDown
     //***********************************************************************************
 
     long nbFails;
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
 
     @Override
     public void beforeDownRightBranch() {

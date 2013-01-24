@@ -73,7 +73,7 @@ public class LastFail_Delayed extends LastFail implements IMonitorContradiction 
     }
 
     @Override
-    public void afterOpenNode() {
+    public void beforeDownLeftBranch() {
         tmp = solver.getSearchLoop().decision.getDecisionVariable();
     }
 
