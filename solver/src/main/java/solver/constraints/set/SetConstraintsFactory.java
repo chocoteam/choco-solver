@@ -42,7 +42,6 @@ import solver.variables.graph.GraphVar;
 
 /**
  * Constraints over set variables
- * instead of from 0 to n-1 (Java stupid standard)
  * @author Jean-Guillaume Fages
  */
 public final class SetConstraintsFactory {
@@ -106,9 +105,35 @@ public final class SetConstraintsFactory {
 		return c;
 	}
 
-	// TODO nbEmpty
+	/**
+	 * Restricts the number of empty sets
+	 * |{s in sets such that |s|=0}| = nbEmpty
+	 * @param sets
+	 * @param nbEmpty
+	 * @param solver
+	 * @return A constraint ensuring that |{s in sets such that |s|=0}| = nbEmpty
+	 */
+	public static Constraint nbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropNbEmpty(sets, nbEmpty, solver, c));
+		return c;
+	}
 
-	// TODO offSet (passer par une vue?)
+	/**
+	 * set2 is an offSet view of set1
+	 * x in set1 <=> x+offSet in set2
+	 *
+	 * @param set1
+	 * @param set2
+	 * @param offSet
+	 * @param solver
+	 * @return a constraint ensuring that set2 is an offSet view of set1
+	 */
+	public static Constraint offSet(SetVar set1, SetVar set2, int offSet, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropOffSet(set1, set2, offSet, solver, c));
+		return c;
+	}
 
 	//***********************************************************************************
 	// SUM - MAX - MIN
@@ -282,15 +307,14 @@ public final class SetConstraintsFactory {
 
 	/**
 	 * Sets are all disjoints
-	 * there cannot be more than one empty sets
+	 * Note that there can be multiple empty sets
 	 * @param sets
 	 * @param solver
-	 * @return a constraint ensuring that sets are all disjoint
+	 * @return a constraint ensuring that non-empty sets are all disjoint
 	 */
 	public static Constraint all_disjoint(SetVar[] sets, Solver solver) {
 		Constraint c = new Constraint(sets, solver);
-		c.setPropagators(	new PropAllDisjoint(sets,solver,c),
-				new PropAtMost1Empty(sets,solver,c));// TODO really?
+		c.setPropagators(new PropAllDisjoint(sets,solver,c));
 		return c;
 	}
 
