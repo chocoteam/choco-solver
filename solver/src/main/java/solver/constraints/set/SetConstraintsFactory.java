@@ -42,7 +42,6 @@ import solver.variables.graph.GraphVar;
 
 /**
  * Constraints over set variables
- * TODO add offset for people counting from 1 to n
  * instead of from 0 to n-1 (Java stupid standard)
  * @author Jean-Guillaume Fages
  */
@@ -107,7 +106,9 @@ public final class SetConstraintsFactory {
 		return c;
 	}
 
-	//TODO nbEmpty
+	// TODO nbEmpty
+
+	// TODO offSet (passer par une vue?)
 
 	//***********************************************************************************
 	// SUM - MAX - MIN
@@ -244,7 +245,7 @@ public final class SetConstraintsFactory {
 		Constraint c = new Constraint(solver);
 		c.setPropagators(new PropGraphChannel(sets, g, solver, c));
 		if(!g.isDirected()){
-			c.addPropagators(new PropSymmetric(sets,solver,c));
+			c.addPropagators(new PropSymmetric(sets,0,solver,c));
 		}
 		return c;
 	}
@@ -260,7 +261,7 @@ public final class SetConstraintsFactory {
 	 */
 	public static Constraint graph_channel(SetVar[] succs, SetVar[] preds, DirectedGraphVar g, Solver solver) {
 		Constraint c = graph_channel(succs, g, solver);
-		c.addPropagators(new PropInverse(succs,preds,solver,c));
+		c.addPropagators(new PropInverse(succs,preds,0,0,solver,c));
 		return c;
 	}
 
@@ -333,47 +334,49 @@ public final class SetConstraintsFactory {
 		return c;
 	}
 
-	//TODO add offSet from here
-
 	/**
 	 * Inverse set constraint
-	 * x in sets[y] <=> y in inverses[x]
+	 * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
 	 * @param sets
 	 * @param inverses
+	 * @param offSet1 (0 by default but generally 1 with MiniZinc API)
+	 * @param offSet2 (0 by default but generally 1 with MiniZinc API)
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint inverse_set(SetVar[] sets, SetVar[] inverses, Solver solver) {
+	public static Constraint inverse_set(SetVar[] sets, SetVar[] inverses, int offSet1, int offSet2, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropInverse(sets, inverses, solver, c));
+		c.setPropagators(new PropInverse(sets, inverses, offSet1, offSet2, solver, c));
 		return c;
 	}
 
 	/**
 	 * Symmetric sets constraint
-	 * x in sets[y] <=> y in sets[x]
+	 * x in sets[y-offSet] <=> y in sets[x-offSet]
 	 * @param sets
+	 * @param offSet (0 by default but generally 1 with MiniZinc API)
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint symmetric(SetVar[] sets, Solver solver) {
+	public static Constraint symmetric(SetVar[] sets, int offSet, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropSymmetric(sets, solver, c));
+		c.setPropagators(new PropSymmetric(sets, offSet, solver, c));
 		return c;
 	}
 
 	/**
 	 * Element constraint over sets
-	 * states that array[index] = set
+	 * states that array[index-offSet] = set
 	 * @param index
 	 * @param array
+	 * @param offSet (0 by default but generally 1 with MiniZinc API)
 	 * @param set
 	 * @param solver
 	 * @return
 	 */
-	public static Constraint element(IntVar index, SetVar[] array, SetVar set, Solver solver) {
+	public static Constraint element(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver) {
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropElement(index, array, set, solver, c));
+		c.setPropagators(new PropElement(index, array, offSet, set, solver, c));
 		return c;
 	}
 
@@ -386,10 +389,8 @@ public final class SetConstraintsFactory {
 	 * @return
 	 */
 	public static Constraint member(SetVar[] array, SetVar set, Solver solver) {
-		Constraint c = new Constraint(solver);
-		IntVar index = VariableFactory.enumerated("idx_tmp",0,array.length,solver);
-		c.setPropagators(new PropElement(index, array, set, solver, c));
-		return c;
+		IntVar index = VariableFactory.enumerated("idx_tmp",0,array.length-1,solver);
+		return element(index, array, 0, set, solver);
 	}
 
 	/**

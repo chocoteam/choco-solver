@@ -51,7 +51,7 @@ import solver.variables.Variable;
 /**
  * Propagator for element constraint over sets
  * states that
- * array[index] = set
+ * array[index-offSet] = set
  * @author Jean-Guillaume Fages
  */
 public class PropElement extends Propagator<Variable>{
@@ -64,6 +64,7 @@ public class PropElement extends Propagator<Variable>{
 	private IntVar index;
 	private SetVar set;
 	private SetVar[] array;
+	private int offSet;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -71,18 +72,20 @@ public class PropElement extends Propagator<Variable>{
 
 	/**
 	 * Propagator for element constraint over sets
-	 * states that array[index] = set
+	 * states that array[index-offSet] = set
 	 * @param index
 	 * @param array
+	 * @param offSet
 	 * @param set
 	 * @param solver
 	 * @param c
 	 */
-	public PropElement(IntVar index, SetVar[] array, SetVar set, Solver solver, Constraint c) {
+	public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver, Constraint c) {
 		super(ArrayUtils.append(array, new Variable[]{set,index}), solver, c, PropagatorPriority.LINEAR);
 		this.index = index;
 		this.array = array;
 		this.set   = set;
+		this.offSet= offSet;
 		constructiveDisjunction = SetFactory.makeLinkedList(false);
 	}
 
@@ -92,7 +95,11 @@ public class PropElement extends Propagator<Variable>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask+EventType.INT_ALL_MASK();
+		if(vIdx<=array.length){
+			return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
+		}else {
+			return EventType.INT_ALL_MASK();
+		}
 	}
 
 	@Override
@@ -102,21 +109,21 @@ public class PropElement extends Propagator<Variable>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		index.updateLowerBound(0,aCause);
-		index.updateUpperBound(array.length-1,aCause);
+		index.updateLowerBound(offSet,aCause);
+		index.updateUpperBound(array.length-1+offSet,aCause);
 		if(index.instantiated()){
 			// filter set and array
-			setEq(set,array[index.getValue()]);
-			setEq(array[index.getValue()],set);
+			setEq(set,array[index.getValue()-offSet]);
+			setEq(array[index.getValue()-offSet],set);
 		}else{
 			// filter index
 			int ub = index.getUB();
 			boolean noEmptyKer = true;
 			for(int i=index.getLB();i<=ub;i=index.nextValue(i)){
-				if(disjoint(set,array[i]) || disjoint(array[i],set)){// array[i] != set
+				if(disjoint(set,array[i-offSet]) || disjoint(array[i-offSet],set)){// array[i] != set
 					index.removeValue(i,aCause);
 				}else{
-					if(array[i].getKernel().getSize()==0){
+					if(array[i-offSet].getKernel().getSize()==0){
 						noEmptyKer = false;
 					}
 				}
@@ -125,7 +132,7 @@ public class PropElement extends Propagator<Variable>{
 			// filter set (constructive disjunction)
 			if(noEmptyKer){// from ker
 				constructiveDisjunction.clear();
-				ISet tmpSet = array[index.getLB()].getKernel();
+				ISet tmpSet = array[index.getLB()-offSet].getKernel();
 				for(int j=tmpSet.getFirstElement();j>=0;j=tmpSet.getNextElement()){
 					constructiveDisjunction.add(j);
 				}
@@ -136,7 +143,7 @@ public class PropElement extends Propagator<Variable>{
 				tmpSet = constructiveDisjunction;
 				for(int j=tmpSet.getFirstElement();j>=0;j=tmpSet.getNextElement()){
 					for(int i=index.nextValue(index.getLB());i<=ub;i=index.nextValue(i)){
-						if(!array[i].getKernel().contain(j)){
+						if(!array[i-offSet].getKernel().contain(j)){
 							tmpSet.remove(j);
 							break;
 						}
@@ -151,7 +158,7 @@ public class PropElement extends Propagator<Variable>{
 				for(int j=tmpSet.getFirstElement();j>=0;j=tmpSet.getNextElement()){
 					boolean valueExists = false;
 					for(int i=index.getLB();i<=ub;i=index.nextValue(i)){
-						if(array[i].getEnvelope().contain(j)){
+						if(array[i-offSet].getEnvelope().contain(j)){
 							valueExists=true;
 							break;
 						}
@@ -192,10 +199,10 @@ public class PropElement extends Propagator<Variable>{
 	@Override
 	public ESat isEntailed() {
 		if(index.instantiated()){
-			if(disjoint(set,array[index.getValue()])||disjoint(array[index.getValue()],set)){
+			if(disjoint(set,array[index.getValue()-offSet])||disjoint(array[index.getValue()-offSet],set)){
 				return ESat.FALSE;
 			}else{
-				if(set.instantiated() && array[index.getValue()].instantiated()){
+				if(set.instantiated() && array[index.getValue()-offSet].instantiated()){
 					return ESat.TRUE;
 				}else{
 					return ESat.UNDEFINED;

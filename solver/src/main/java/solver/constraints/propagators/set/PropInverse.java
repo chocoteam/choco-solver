@@ -49,7 +49,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * Inverse set propagator
- * x in set[y] <=> y in invset[x]
+ * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
  * @author Jean-Guillaume Fages
  */
 public class PropInverse extends Propagator<SetVar>{
@@ -60,6 +60,7 @@ public class PropInverse extends Propagator<SetVar>{
 
 	private int n, n2, idx;
 	private SetVar[] sets,invsets,toFilter;
+	private int offSet1,offSet2,offSet;
 	private SetDeltaMonitor[] sdm;
 	private IntProcedure elementForced,elementRemoved;
 
@@ -69,12 +70,14 @@ public class PropInverse extends Propagator<SetVar>{
 
 	/**
 	 * Inverse set propagator
-	 * x in set[y] <=> y in invset[x]
+	 * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
 	 */
-	public PropInverse(SetVar[] sets, SetVar[] invsets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+	public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
 		super(ArrayUtils.append(sets,invsets), solver, c, PropagatorPriority.LINEAR);
 		n = sets.length;
 		n2 = invsets.length;
+		this.offSet1 = offSet1;
+		this.offSet2 = offSet2;
 		this.sets = sets;
 		this.invsets = invsets;
 		// delta monitors
@@ -85,13 +88,13 @@ public class PropInverse extends Propagator<SetVar>{
 		elementForced = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				toFilter[element].addToKernel(idx,aCause);
+				toFilter[element-offSet].addToKernel(idx,aCause);
 			}
 		};
 		elementRemoved = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				toFilter[element].removeFromEnvelope(idx,aCause);
+				toFilter[element-offSet].removeFromEnvelope(idx,aCause);
 			}
 		};
 	}
@@ -110,25 +113,25 @@ public class PropInverse extends Propagator<SetVar>{
 		for(int i=0;i<n;i++){
 			ISet tmp = sets[i].getEnvelope();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<0||j>n2 || !invsets[j].getEnvelope().contain(i)){
+				if(j<offSet1||j>=n2+offSet1 || !invsets[j-offSet2].getEnvelope().contain(i+offSet1)){
 					sets[i].removeFromEnvelope(j,aCause);
 				}
 			}
 			tmp = sets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				invsets[j].addToKernel(i,aCause);
+				invsets[j-offSet2].addToKernel(i+offSet1,aCause);
 			}
 		}
 		for(int i=0;i<n2;i++){
 			ISet tmp = invsets[i].getEnvelope();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<0||j>n || !sets[j].getEnvelope().contain(i)){
+				if(j<offSet2||j>=n+offSet2 || !sets[j-offSet1].getEnvelope().contain(i+offSet2)){
 					invsets[i].removeFromEnvelope(j,aCause);
 				}
 			}
 			tmp = invsets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				sets[j].addToKernel(i,aCause);
+				sets[j-offSet1].addToKernel(i+offSet2,aCause);
 			}
 		}
 		for(int i=0;i<n+n2;i++){
@@ -143,6 +146,11 @@ public class PropInverse extends Propagator<SetVar>{
 		if(idx>=n){
 			idx-=n;
 			toFilter = sets;
+			idx += offSet2;
+			offSet = offSet1;
+		}else{
+			idx += offSet1;
+			offSet = offSet2;
 		}
 		sdm[idxVarInProp].freeze();
 		sdm[idxVarInProp].forEach(elementForced,EventType.ADD_TO_KER);
@@ -155,7 +163,7 @@ public class PropInverse extends Propagator<SetVar>{
 		for(int i=0;i<n;i++){
 			ISet tmp = sets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(!invsets[j].getEnvelope().contain(i)){
+				if(!invsets[j-offSet2].getEnvelope().contain(i+offSet1)){
 					return ESat.FALSE;
 				}
 			}
@@ -163,7 +171,7 @@ public class PropInverse extends Propagator<SetVar>{
 		for(int i=0;i<n2;i++){
 			ISet tmp = invsets[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(!sets[j].getEnvelope().contain(i)){
+				if(!sets[j-offSet1].getEnvelope().contain(i+offSet2)){
 					return ESat.FALSE;
 				}
 			}

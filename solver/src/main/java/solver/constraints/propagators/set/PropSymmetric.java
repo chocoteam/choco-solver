@@ -48,7 +48,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * Propagator for symmetric sets
- * x in set[y] <=> y in set[x]
+ * x in set[y-offSet] <=> y in set[x-offSet]
  * @author Jean-Guillaume Fages
  */
 public class PropSymmetric extends Propagator<SetVar>{
@@ -57,7 +57,7 @@ public class PropSymmetric extends Propagator<SetVar>{
 	// VARIABLES
 	//***********************************************************************************
 
-	private int n, currentSet;
+	private int n, currentSet, offSet;
 	private SetDeltaMonitor[] sdm;
 	private IntProcedure elementForced,elementRemoved;
 
@@ -67,11 +67,12 @@ public class PropSymmetric extends Propagator<SetVar>{
 
 	/**
 	 * Propagator for symmetric sets
-	 * x in set[y] <=> y in set[x]
+	 * x in set[y-offSet] <=> y in set[x-offSet]
 	 */
-	public PropSymmetric(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+	public PropSymmetric(SetVar[] sets, final int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
 		super(sets, solver, c, PropagatorPriority.LINEAR);
 		n = sets.length;
+		this.offSet = offSet;
 		sdm = new SetDeltaMonitor[n];
 		for(int i=0;i<n;i++){
 			sdm[i] = this.vars[i].monitorDelta(this);
@@ -79,13 +80,13 @@ public class PropSymmetric extends Propagator<SetVar>{
 		elementForced = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				vars[element].addToKernel(currentSet,aCause);
+				vars[element-offSet].addToKernel(currentSet,aCause);
 			}
 		};
 		elementRemoved = new IntProcedure() {
 			@Override
 			public void execute(int element) throws ContradictionException {
-				vars[element].removeFromEnvelope(currentSet,aCause);
+				vars[element-offSet].removeFromEnvelope(currentSet,aCause);
 			}
 		};
 	}
@@ -104,13 +105,13 @@ public class PropSymmetric extends Propagator<SetVar>{
 		for(int i=0;i<n;i++){
 			ISet s = vars[i].getEnvelope();
 			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-				if(j<0 || j>n || !vars[j].getEnvelope().contain(i)){
+				if(j<offSet || j>=n+offSet || !vars[j-offSet].getEnvelope().contain(i+offSet)){
 					vars[i].removeFromEnvelope(j,aCause);
 				}
 			}
 			s = vars[i].getKernel();
 			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-				vars[j].addToKernel(i,aCause);
+				vars[j-offSet].addToKernel(i+offSet,aCause);
 			}
 		}
 		for(int i=0;i<n;i++){
@@ -120,7 +121,7 @@ public class PropSymmetric extends Propagator<SetVar>{
 
 	@Override
 	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		currentSet = idxVarInProp;
+		currentSet = idxVarInProp+offSet;
 		sdm[currentSet].freeze();
 		sdm[currentSet].forEach(elementForced, EventType.ADD_TO_KER);
 		sdm[currentSet].forEach(elementRemoved,EventType.REMOVE_FROM_ENVELOPE);
@@ -132,7 +133,7 @@ public class PropSymmetric extends Propagator<SetVar>{
 		for(int i=0;i<n;i++){
 			ISet tmp = vars[i].getKernel();
 			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(!vars[j].getEnvelope().contain(i)){
+				if(!vars[j-offSet].getEnvelope().contain(i+offSet)){
 					return ESat.FALSE;
 				}
 			}
