@@ -117,7 +117,7 @@ public class PropIntersection extends Propagator<SetVar>{
 		ISet set;
 		SetVar intersection = vars[k];
 		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			set = vars[0].getEnvelope();
+			set = vars[0].getKernel();
 			for(int j=set.getFirstElement(); j>=0; j=set.getNextElement()){
 				boolean all = true;
 				for(int i=1;i<k;i++){
@@ -137,8 +137,10 @@ public class PropIntersection extends Propagator<SetVar>{
 					}
 				}else{
 					for(int i=0;i<k;i++)
-						if(!vars[i].getEnvelope().contain(j))
+						if(!vars[i].getEnvelope().contain(j)){
 							intersection.removeFromEnvelope(j,aCause);
+							break;
+						}
 				}
 			}
 		}
@@ -148,29 +150,36 @@ public class PropIntersection extends Propagator<SetVar>{
 			for(int i=0;i<k;i++)
 				if(vars[i].getEnvelope().contain(j)){
 					all &= vars[i].getKernel().contain(j);
-					if(all && i==k-1){
-						contradiction(vars[k],"");
-					}
 				}else{
 					all = false;
+					interRemToTreat.remove(j);
 					break;
 				}
-			interRemToTreat.remove(j);
+			if(all){
+				contradiction(vars[k],"");
+			}
 		}
 		set = setAddToTreat;
 		for(int j=set.getFirstElement();j>=0;j=set.getNextElement()){
 			if(intersection.getEnvelope().contain(j) && !intersection.getKernel().contain(j)){
 				boolean allKer = true;
 				for(int i=0;i<k;i++){
+					if(!vars[i].getEnvelope().contain(j)){
+						setAddToTreat.remove(j);
+						intersection.removeFromEnvelope(j,aCause);
+						allKer = false;
+						break;
+					}
 					if(!vars[i].getKernel().contain(j)){
 						allKer = false;
 						break;
 					}
 				}
-				if(allKer)
+				if(allKer){
 					intersection.addToKernel(j,aCause);
+					setAddToTreat.remove(j);
+				}
 			}
-			setAddToTreat.remove(j);
 		}
 		// ------------------
 		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0)
