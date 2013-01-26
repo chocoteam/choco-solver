@@ -25,30 +25,66 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 26/01/13
+ * Time: 13:30
+ */
 
-import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
+package choco.checker.fmk;
 
-import java.util.ArrayList;
-import java.util.List;
+import gnu.trove.list.array.TIntArrayList;
+import java.util.Random;
+import static choco.checker.DomainBuilder.buildFullDomains;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @author Jean-Guillaume Fages
+ * @since 01/13
  */
-public class TestCorrectnessFactory {
+public class Domain {
+	int[] valsEnv;
+	int[] valsKer;
+	public Domain(int[] valsInDom){
+		this(valsInDom,null);
+	}
+	public Domain(int[] valsInEnv, int[] valsInKer){
+		valsEnv = valsInEnv;
+		valsKer = valsInKer;
+	}
+	public int[] getIntDom(){
+		return valsEnv;
+	}
+	public int[] getSetEnv(){
+		return valsEnv;
+	}
+	public int[] getSetKer(){
+		return valsKer;
+	}
 
-    @Factory
-    public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+	public static Domain buildBoolDomain(Random r) {
+		int d = r.nextInt(3);
+		switch (d){
+			case 0:return new Domain(new int[]{0});
+			case 1:return new Domain(new int[]{1});
+			case 2:return new Domain(new int[]{0,1});
+			default:throw new UnsupportedOperationException();
+		}
+	}
 
-        for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCorrectness(sl));
-        }
-        return lresult.toArray();
-    }
+	public static Domain buildIntDomain(int lowerB, int ds, Random r, double density, boolean homogeneou) {
+		return new Domain(buildFullDomains(1, lowerB, ds, r, density, homogeneou)[0]);
+	}
 
+	public static Domain buildSetDomain(int ds, Random r, double density, boolean homogeneou) {
+		int[] env = buildFullDomains(1, 0, ds, r, density, homogeneou)[0];
+		int nbK = r.nextInt(env.length);
+		TIntArrayList l = new TIntArrayList(env);
+		l.shuffle(r);
+		int[] ker = new int[nbK];
+		for(int i=0;i<nbK;i++){
+			ker[i] = l.get(i);
+		}
+		return new Domain(env,ker);
+	}
 }
