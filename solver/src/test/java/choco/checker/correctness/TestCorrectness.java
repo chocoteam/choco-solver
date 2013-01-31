@@ -31,11 +31,10 @@ import choco.checker.Modeler;
 import org.testng.annotations.Test;
 import solver.search.loop.SearchLoops;
 
-
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 15/02/11
  */
 public class TestCorrectness {
@@ -368,6 +367,28 @@ public class TestCorrectness {
 				time = System.currentTimeMillis();
 				CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, false);
 				System.out.println("false "+(int)(System.currentTimeMillis()-time));
+			}
+		}
+	}
+
+	@Test(groups = "1m")
+	public void testCircuit() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 100; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n-1, seed, false);
+				CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n, seed, true);
+			}
+		}
+	}
+
+	@Test(groups = "1m")
+	public void testSubcircuit() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 100; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelSubcircuit, n, 0, n-1, seed, false);
+				CorrectnessChecker.checkCorrectness(Modeler.modelSubcircuit, n, 0, n-1, seed, true);
 			}
 		}
 	}

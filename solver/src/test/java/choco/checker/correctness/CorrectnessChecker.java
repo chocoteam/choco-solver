@@ -52,18 +52,17 @@ public class CorrectnessChecker {
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
-
         THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
         int loop = 0;
-        for (int ds = nbVar; ds < upperB; ds++) {
+		for (int ds = lowerB; ds <= upperB; ds++) {
             for (int ide = 0; ide < densities.length; ide++) {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
                     int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
                     Solver ref = referencePropagation(modeler, nbVar, domains, map, parameters);
-                    if (ref == null) break; // no solution found for this generated problem
+					if (ref == null) break; // no solution found for this generated problem
                     // otherwise, link original domains with refernce one.
                     IntVar[] rvars = new IntVar[nbVar];
                     for (int k = 0; k < nbVar; k++) {
@@ -113,13 +112,13 @@ public class CorrectnessChecker {
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-        Solver ref = modeler.model(nbVar, domains, map, parameters);
-        ref.getEnvironment().worldPush();
+		Solver ref = modeler.model(nbVar, domains, map, parameters);
+		ref.getEnvironment().worldPush();
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
-            return null;
+			LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+			return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {
