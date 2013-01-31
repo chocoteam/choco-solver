@@ -311,10 +311,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private void afterDownBranch() {
         for (int i = 0; i < A.length; i++) {
+            if (vars[i].getDomainSize() > 1) {
+                A[i] *= sampling ? ONE : g;
+            }
             if (affected.get(i)) {
                 A[i] += 1;
-            } else if (vars[i].getDomainSize() > 1) {
-                A[i] *= sampling ? ONE : g;
             }
         }
 

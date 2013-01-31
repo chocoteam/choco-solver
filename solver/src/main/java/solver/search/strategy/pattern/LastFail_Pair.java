@@ -71,18 +71,6 @@ public class LastFail_Pair extends LastFail implements IMonitorDownBranch {
     }
 
     @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
     public void afterDownRightBranch() {
         firstVar = solver.getSearchLoop().decision.getDecisionVariable();
     }

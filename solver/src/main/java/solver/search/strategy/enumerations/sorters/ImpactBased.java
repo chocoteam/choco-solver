@@ -90,6 +90,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     protected boolean learnsAndFails; // does the learning pahse leads to a failure
     protected IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
+    protected long timeLimit = Integer.MAX_VALUE; // a time limit for init()
+
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
      * <p/>
@@ -185,9 +187,15 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         return computeDecision(best);
     }
 
+    public void setTimeLimit(long timeLimit) {
+        if (timeLimit > -1) {
+            this.timeLimit = timeLimit;
+        }
+    }
+
     @Override
     public void init() throws ContradictionException {
-        // TIME LIMIT??
+        long tl = System.currentTimeMillis() + this.timeLimit;
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
         offsets = new int[vars.length];
@@ -195,11 +203,13 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         double before = searchSpaceSize();
         searchSpaceSize.set(before);
         learnsAndFails = false;
+        loop:
         for (int i = 0; i < vars.length; i++) {
             IntVar v = vars[i];
-            int dsz = v.getDomainSize();
+            int offset = v.getLB();
+            int UB = v.getUB();
+            int dsz = UB - offset + 1;//v.getDomainSize();
             if (!v.instantiated()) { // if the variable is not instantiated
-                int offset = v.getLB();
                 Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
                 offsets[i] = offset;
 
@@ -207,6 +217,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                     if (v.getDomainSize() < split) { // try each value
                         DisposableValueIterator it = v.getValueIterator(true);
                         while (it.hasNext()) {
+                            if (System.currentTimeMillis() > tl) {
+                                break loop;
+                            }
                             int a = it.next();
                             double im = computeImpact(v, a, before);
                             Ilabel[i][a - offset] = im;
@@ -217,6 +230,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         int size = dsz / split;
                         DisposableValueIterator it = v.getValueIterator(true);
                         while (it.hasNext()) {
+                            if (System.currentTimeMillis() > tl) {
+                                break loop;
+                            }
                             int a = it.next();
                             double im;
                             if (step % size == 0) {
@@ -230,6 +246,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         it.dispose();
                     }
                 } else {
+                    if (System.currentTimeMillis() > tl) {
+                        break loop;
+                    }
                     // A. choose 3 values in the domain to have an estimation of the impact
                     double i1 = computeImpact(v, v.getLB(), before);
                     double i2 = computeImpact(v, v.getUB(), before);
@@ -242,6 +261,18 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             // If the initialisation detects a failure, then the problem has no solution!
             learnsAndFails = false;
             throw solver.getEngine().getContradictionException().set(this, lAfVar, "Impact::init:: detect failures");
+        } else if (System.currentTimeMillis() > tl) {
+            LOGGER.debug("ImpactBased Search stops its init phase -- reach time limit!");
+            for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
+                IntVar v = vars[i];
+                int offset = v.getLB();
+                int UB = v.getUB();
+                int dsz = UB - offset + 1;//v.getDomainSize();
+                if (!v.instantiated() && Ilabel[i] == null) {
+                    Ilabel[i] = new double[v.hasEnumeratedDomain() ? dsz : 1];
+                    offsets[i] = offset;
+                }
+            }
         }
     }
 
@@ -358,6 +389,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         for (int i = 0; i < vars.length; i++) {
             size *= vars[i].getDomainSize();
             assert size > 0 : "Search space is not correct!";
+        }
+        if (size == Double.POSITIVE_INFINITY) {
+            size = Double.MAX_VALUE;
         }
         return size;
     }
