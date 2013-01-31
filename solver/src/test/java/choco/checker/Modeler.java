@@ -681,4 +681,36 @@ public interface Modeler {
             return s;
         }
     };
+
+	Modeler modelTree = new Modeler() {
+	        @Override
+	        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+	            Solver s = new Solver("tree_" + n);
+	            IEnvironment env = s.getEnvironment();
+
+				IntVar[] vars = new IntVar[n];
+				IntVar[] succs = new IntVar[n-1];
+	            TIntArrayList vals = new TIntArrayList();
+	            for (int i = 0; i < n; i++) {
+	                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+					if(i<n-1){
+						succs[i] = vars[i];
+					}
+	                for (int j : domains[i]) {
+	                    if (!vals.contains(j)) {
+	                        vals.add(j);
+	                    }
+	                }
+	                if (map != null) map.put(domains[i], vars[i]);
+	            }
+				IntVar nbRoots = vars[n-1];
+	            Constraint ctr = new Tree(succs,nbRoots,0,s,(Boolean)parameters);
+	            Constraint[] ctrs = new Constraint[]{ctr};
+
+	            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+	            s.post(ctrs);
+	            s.set(strategy);
+	            return s;
+	        }
+	    };
 }

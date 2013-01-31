@@ -39,321 +39,336 @@ import solver.search.loop.SearchLoops;
  * @since 15/02/11
  */
 public class TestCorrectness {
-    private SearchLoops slType; // search loop type default value
+	private SearchLoops slType; // search loop type default value
 
-    public TestCorrectness() {
-        this.slType = SearchLoops.BINARY;
-    }
+	public TestCorrectness() {
+		this.slType = SearchLoops.BINARY;
+	}
 
-    public TestCorrectness(SearchLoops sl) {
-        this.slType = slType;
-    }
+	public TestCorrectness(SearchLoops sl) {
+		this.slType = slType;
+	}
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups = "1m")
-    public void testTIMES() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testTIMES() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testABSOLUTE() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testABSOLUTE() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelEqAC, 2, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelEqAC, 2, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testNEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNeqAC, 2, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testNEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNeqAC, 2, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    // ALLDIFFERENT
-    @Test(groups = "1m")
-    public void testALLDIFFERENTAC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffAC, n, -n / 2, 2 * n, seed, null);
-            }
+	// ALLDIFFERENT
+	@Test(groups = "1m")
+	public void testALLDIFFERENTAC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffAC, n, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testALLDIFFERENTBC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffBC, n, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testALLDIFFERENTBC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffBC, n, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    // INVERSE
-    @Test(groups = "1m")
-    public void testINVERSECHANNELING_AC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 4) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
-            }
+	// INVERSE
+	@Test(groups = "1m")
+	public void testINVERSECHANNELING_AC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 4) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testINVERSECHANNELING_Bounds() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 4) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingBounds, n, -n / 2, 2 * n, seed, null);
-            }
+	@Test(groups = "1m")
+	public void testINVERSECHANNELING_Bounds() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 4) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingBounds, n, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    // COUNT
-    @Test(groups = "1m")
-    public void testCOUNTBCEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
-            }
+	// COUNT
+	@Test(groups = "1m")
+	public void testCOUNTBCEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTACEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
-            }
+	@Test(groups = "1m")
+	public void testCOUNTACEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTBCLEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testCOUNTBCLEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTACLEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testCOUNTACLEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTBCGEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
-            }
+	@Test(groups = "1m")
+	public void testCOUNTBCGEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testCOUNTACGEQ() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
-            }
+	@Test(groups = "1m")
+	public void testCOUNTACGEQ() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    // LEX
-    @Test(groups = "1m")
-    public void testLEX1() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2 * n, seed, true);
-            }
+	// LEX
+	@Test(groups = "1m")
+	public void testLEX1() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2 * n, seed, true);
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testLEX2() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2 * n, seed, false);
-            }
+	@Test(groups = "1m")
+	public void testLEX2() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2 * n, seed, false);
+			}
 
-        }
-    }
+		}
+	}
 
-    // ELEMENT
-    @Test(groups = "1m")
-    public void testELEMENTBC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNthBC, 2, -n / 2, 2 * n, seed, null);
-            }
+	// ELEMENT
+	@Test(groups = "1m")
+	public void testELEMENTBC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNthBC, 2, -n / 2, 2 * n, seed, null);
+			}
 
-        }
-    }
+		}
+	}
 
-    // AMONG
-    @Test(groups = "1m")
-    public void testAMONGAC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
-            }
+	// AMONG
+	@Test(groups = "1m")
+	public void testAMONGAC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testAMONGBC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testAMONGBC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    // NValue
-    @Test(groups = "1m")
-    public void testNVALUES() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	// NValue
+	@Test(groups = "1m")
+	public void testNVALUES() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testNVALUES_AtMostBC() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testNVALUES_AtMostBC() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testNVALUES_AtLeastAC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtLeastAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testNVALUES_AtLeastAC() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtLeastAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testNVALUES_AtMostGreedy() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostGreedy, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testNVALUES_AtMostGreedy() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostGreedy, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testNVALUES_simple() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_simple, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testNVALUES_simple() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelNValues_simple, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    // GCC
-    @Test(groups = "1m")
-    public void testGCC_AD_CARDS() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Cards, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	// GCC
+	@Test(groups = "1m")
+	public void testGCC_AD_CARDS() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Cards, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testGCC_AD_FAST() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Fast, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testGCC_AD_FAST() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Fast, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
 
-    @Test(groups = "1m")
-    public void testGCC_AD_LOWUP() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_LowUp, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
+	@Test(groups = "1m")
+	public void testGCC_AD_LOWUP() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_LowUp, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+			}
 
-        }
-    }
+		}
+	}
+
+	@Test(groups = "1m")
+	public void testTree() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 33; n *= 2) {
+				long time = System.currentTimeMillis();
+				CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, true);
+				System.out.println("true "+(int)(System.currentTimeMillis()-time));
+				time = System.currentTimeMillis();
+				CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, false);
+				System.out.println("false "+(int)(System.currentTimeMillis()-time));
+			}
+		}
+	}
 }
