@@ -376,7 +376,6 @@ public class TestCorrectness {
 		for (int i = 0; i < 20; i++) {
 			long seed = System.currentTimeMillis();
 			for (int n = 2; n < 100; n *= 2) {
-				CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n-1, seed, false);
 				CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n, seed, true);
 			}
 		}
@@ -387,7 +386,6 @@ public class TestCorrectness {
 		for (int i = 0; i < 20; i++) {
 			long seed = System.currentTimeMillis();
 			for (int n = 2; n < 100; n *= 2) {
-				CorrectnessChecker.checkCorrectness(Modeler.modelSubcircuit, n, 0, n-1, seed, false);
 				CorrectnessChecker.checkCorrectness(Modeler.modelSubcircuit, n, 0, n-1, seed, true);
 			}
 		}

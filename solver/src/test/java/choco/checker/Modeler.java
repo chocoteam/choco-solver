@@ -721,9 +721,6 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			Constraint ctr = ConstraintFactory.circuit(vars,0,s);
-			if((Boolean)parameters){
-				ctr.addPropagators(new PropCircuit_AntiArboFiltering(vars,0,ctr,s));
-			}
 			Constraint[] ctrs = new Constraint[]{ctr};
 			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 			s.post(ctrs);
@@ -743,9 +740,6 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			Constraint ctr = ConstraintFactory.subcircuit(vars, 0, s);
-			if((Boolean)parameters){
-				ctr.addPropagators(new PropSubcircuit_AntiArboFiltering(vars,0,ctr,s));
-			}
 			Constraint[] ctrs = new Constraint[]{ctr};
 			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 			s.post(ctrs);
