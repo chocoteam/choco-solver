@@ -390,4 +390,14 @@ public class TestCorrectness {
 			}
 		}
 	}
+
+	@Test(groups = "1m")
+	public void testDiffn() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 100; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4*n, 1,n/10, seed, true);
+			}
+		}
+	}
 }
