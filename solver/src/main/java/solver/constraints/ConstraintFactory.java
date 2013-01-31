@@ -29,10 +29,14 @@ package solver.constraints;
 
 import solver.Solver;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.PropNoSubtour;
-import solver.constraints.propagators.nary.PropSubcircuit;
+import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
+import solver.constraints.propagators.nary.circuit.PropNoSubtour;
+import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.sum.PropSumEq;
+import solver.constraints.propagators.nary.tree.PropAntiArborescences;
+import solver.constraints.propagators.nary.tree.PropKLoops;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -250,7 +254,8 @@ public class ConstraintFactory {
         Constraint c = new Constraint(solver);
         c.setPropagators(
                 new PropAllDiffAC(vars, c, solver),
-                new PropNoSubtour(vars, offset, solver, c));
+                new PropNoSubtour(vars, offset, solver, c),
+				new PropCircuit_AntiArboFiltering(vars,offset,c,solver));
         return c;
     }
 
@@ -289,6 +294,7 @@ public class ConstraintFactory {
         c.addPropagators(new PropAllDiffAC(vars, c, solver));
         c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
         c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
+		c.addPropagators(new PropSubcircuit_AntiArboFiltering(vars,offset,c,solver));
         return c;
     }
 
@@ -339,4 +345,35 @@ public class ConstraintFactory {
         return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver), solver);
     }
 
+	/**
+	 * Partition succs variables into nbArbo (anti) arborescences
+	 * roots are represented by loops
+	 * Note that the filtering over nbArbo is quite light
+	 * @param succs successors variables
+	 * @param nbArbo number of arborescences (=number of loops)
+	 * @param solver
+	 * @return a tree constraint
+	 */
+	public static Constraint tree(IntVar[] succs, IntVar nbArbo, Solver solver) {
+		return tree(succs, nbArbo, 0, solver, false);
+	}
+
+	/**
+	 * Partition succs variables into nbArbo (anti) arborescences
+	 * roots are represented by loops
+	 * Note that the filtering over nbArbo is quite light
+	 * @param succs successors variables
+	 * @param nbArbo number of arborescences (=number of loops)
+	 * @param offSet
+	 * @param solver
+	 * @param linear use a theoretically linear time algorithm (to consider for large scale problem)
+	 *        Otherwise, use a n.log(n) algorithm (faster on medium size instances in practice)
+	 * @return a tree constraint
+	 */
+	public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet, Solver solver, boolean linear) {
+		Constraint c = makeEmptyConstraint(solver);
+		c.setPropagators(new PropAntiArborescences(succs,offSet,c,solver,linear),
+				new PropKLoops(succs,nbArbo,offSet,c,solver));
+		return c;
+	}
 }

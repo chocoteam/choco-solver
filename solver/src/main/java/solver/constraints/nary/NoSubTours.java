@@ -30,7 +30,7 @@ package solver.constraints.nary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.PropNoSubtour;
+import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import java.util.BitSet;
