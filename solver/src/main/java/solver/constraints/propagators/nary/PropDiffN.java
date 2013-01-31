@@ -122,6 +122,22 @@ public class PropDiffN extends Propagator<IntVar> {
 
 	protected void filterFromBox(int b) throws ContradictionException {
 		ISet s = overlappingBoxes.getNeighborsOf(b);
+		// check energy
+		int xm = vars[b].getLB();
+		int xM = vars[b].getUB()+vars[b+2*n].getUB();
+		int ym = vars[b+n].getLB();
+		int yM = vars[b+n].getUB()+vars[b+3*n].getUB();
+		int am = vars[b+2*n].getLB()*vars[b+3*n].getLB();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			xm = Math.min(xm,vars[j].getLB());
+			xM = Math.max(xM,vars[j].getUB()+vars[j+2*n].getUB());
+			ym = Math.min(ym,vars[j+n].getLB());
+			yM = Math.max(yM,vars[j+n].getUB()+vars[j+3*n].getUB());
+			am+= vars[b+2*n].getLB()*vars[b+3*n].getLB();
+			if(am>(xM-xm)*(yM-ym)){
+				contradiction(vars[b],"");
+			}
+		}
 		// mandatory part of box b
 		int earliestStart_xi = vars[b].getUB()-vars[b+2*n].getUB();
 		int earliestEnd_xi = vars[b].getLB()-vars[b+2*n].getLB();
