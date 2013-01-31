@@ -39,8 +39,6 @@ import solver.constraints.binary.Element;
 import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
-import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
-import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
 import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -700,7 +698,7 @@ public interface Modeler {
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			IntVar nbRoots = vars[n-1];
-			Constraint ctr = new Tree(succs,nbRoots,0,s,(Boolean)parameters);
+			Constraint ctr = ConstraintFactory.tree(succs,nbRoots,0,s,(Boolean)parameters);
 			Constraint[] ctrs = new Constraint[]{ctr};
 
 			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
