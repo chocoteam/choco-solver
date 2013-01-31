@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.circuit;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;

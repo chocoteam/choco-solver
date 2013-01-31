@@ -29,8 +29,8 @@ package solver.constraints;
 
 import solver.Solver;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.PropNoSubtour;
-import solver.constraints.propagators.nary.PropSubcircuit;
+import solver.constraints.propagators.nary.circuit.PropNoSubtour;
+import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.variables.IntVar;
