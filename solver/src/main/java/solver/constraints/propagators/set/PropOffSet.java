@@ -1,0 +1,157 @@
+/**
+ *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  All rights reserved.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the Ecole des Mines de Nantes nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package solver.constraints.propagators.set;
+
+import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
+import solver.variables.SetVar;
+import solver.variables.delta.monitor.SetDeltaMonitor;
+
+/**
+ * set2 is an offSet view of set1
+ * x in set1 <=> x+offSet in set2
+ * @author Jean-Guillaume Fages
+ */
+public class PropOffSet extends Propagator<SetVar>{
+
+	private int offSet,tmp;
+	private SetVar tmpSet;
+	private IntProcedure forced,removed;
+	private SetDeltaMonitor[] sdm;
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	/**
+	 * set2 is an offSet view of set1
+	 * x in set1 <=> x+offSet in set2
+	 */
+	public PropOffSet(SetVar set1, SetVar set2, int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+		super(new SetVar[]{set1,set2}, solver, c, PropagatorPriority.UNARY);
+		this.offSet = offSet;
+		sdm = new SetDeltaMonitor[2];
+		sdm[0] = set1.monitorDelta(this);
+		sdm[1] = set2.monitorDelta(this);
+		this.forced = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				tmpSet.addToKernel(i+tmp,aCause);
+			}
+		};
+		this.removed = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				tmpSet.removeFromEnvelope(i+tmp,aCause);
+			}
+		};
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVE_FROM_ENVELOPE.mask+EventType.ADD_TO_KER.mask;
+	}
+
+	@Override
+	public void propagate(int evtmask) throws ContradictionException{
+		// kernel
+		ISet s = vars[0].getKernel();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			vars[1].addToKernel(j+offSet,aCause);
+		}
+		s = vars[1].getKernel();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			vars[0].addToKernel(j-offSet,aCause);
+		}
+		// envelope
+		s = vars[0].getEnvelope();
+		ISet s2 = vars[1].getEnvelope();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			if(!s2.contain(j+offSet)){
+				vars[0].removeFromEnvelope(j,aCause);
+			}
+		}
+		s = vars[1].getEnvelope();
+		s2 = vars[0].getEnvelope();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			if(!s2.contain(j-offSet)){
+				vars[1].removeFromEnvelope(j,aCause);
+			}
+		}
+		sdm[0].unfreeze();
+		sdm[1].unfreeze();
+	}
+
+	@Override
+	public void propagate(int v, int mask) throws ContradictionException {
+		sdm[v].freeze();
+		if(v==0){
+			tmp = offSet;
+			tmpSet = vars[1];
+		}else{
+			tmp = -offSet;
+			tmpSet = vars[0];
+		}
+		sdm[v].forEach(forced, EventType.ADD_TO_KER);
+		sdm[v].forEach(removed,EventType.REMOVE_FROM_ENVELOPE);
+		sdm[v].unfreeze();
+	}
+
+	@Override
+	public ESat isEntailed() {
+		ISet s = vars[0].getKernel();
+		ISet s2 = vars[1].getEnvelope();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			if(!s2.contain(j + offSet)){
+				return ESat.FALSE;
+			}
+		}
+		s = vars[1].getKernel();
+		s2 = vars[0].getEnvelope();
+		for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
+			if(!s2.contain(j-offSet)){
+				return ESat.FALSE;
+			}
+		}
+		if(isCompletelyInstantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
+}

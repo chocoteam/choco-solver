@@ -25,8 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package choco.checker.correctness;
 
+import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -36,9 +37,9 @@ import solver.variables.IntVar;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
-import static choco.checker.DomainBuilder.buildDomainsFromVar;
 import static choco.checker.DomainBuilder.buildFullDomains;
 
 /**
@@ -47,16 +48,10 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  * @author Charles Prud'homme
  * @since 15/02/11
  */
-public class ConsistencyChecker {
+public class CorrectnessChecker {
 
-    enum Consistency {
-        ac, bc
-    }
-
-    public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
+    public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
-
-        Consistency _consistency = Consistency.valueOf(consistency);
 
         THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
@@ -74,10 +69,8 @@ public class ConsistencyChecker {
                     for (int k = 0; k < nbVar; k++) {
                         rvars[k] = map.get(domains[k]);
                     }
-                    // and get the reduced domain
-                    domains = buildDomainsFromVar(rvars);
                     for (int d = 0; d < domains.length; d++) {
-                        int[] values = getValues(domains[d], _consistency);
+                        int[] values = getRemovedValues(rvars[d], domains[d]);
                         for (int v = 0; v < values.length; v++) {
                             loop++;
                             int val = values[v];
@@ -87,21 +80,28 @@ public class ConsistencyChecker {
                             _domains[d] = new int[]{val};
                             System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
-                            Solver test = modeler.model(nbVar, _domains, map, parameters);
+                            Solver test = modeler.model(nbVar, _domains, null, parameters);
                             try {
-                                if (!test.findSolution()) {
+                                if (test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                             new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                    LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+                                    ref.getEnvironment().worldPop();
                                     LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
-                                    writeDown(ref);
-                                    Assert.fail("no solution found");
+                                    Assert.fail("one solution found");
                                 }
                             } catch (Exception e) {
                                 LoggerFactory.getLogger("test").error(e.getMessage());
                                 LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                         new Object[]{ds, ide, h, rvars[d], val, loop, seed});
                                 LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
-                                writeDown(ref);
+                                File f = new File("SOLVER_ERROR.ser");
+                                try {
+                                    Solver.writeInFile(ref, f);
+                                } catch (IOException ee) {
+                                    ee.printStackTrace();
+                                }
+                                LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
                                 Assert.fail();
                             }
                         }
@@ -109,46 +109,41 @@ public class ConsistencyChecker {
                 }
             }
         }
+        System.out.printf("loop: %d\n", loop);
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
         Solver ref = modeler.model(nbVar, domains, map, parameters);
+        ref.getEnvironment().worldPush();
         try {
             ref.propagate();
         } catch (ContradictionException e) {
             LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
-            writeDown(ref);
+            File f = new File("SOLVER_ERROR.ser");
+            try {
+                Solver.writeInFile(ref, f);
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
             LoggerFactory.getLogger("test").error(e.getMessage());
             LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
             Assert.fail();
         }
         return ref;
     }
 
-    private static int[] getValues(int[] domain, Consistency consistency) {
-        switch (consistency) {
-            case ac:
-                return domain;
-            case bc:
-                if (domain.length == 1) {
-                    return new int[]{domain[0]};
-                } else {
-                    return new int[]{domain[0], domain[domain.length - 1]};
-                }
-            default:
-                throw new UnsupportedOperationException();
+    private static int[] getRemovedValues(IntVar variable, int[] domain) {
+        int[] _values = domain.clone();
+        int k = 0;
+        for (int i = 0; i < domain.length; i++) {
+            if (!variable.contains(domain[i])) {
+                _values[k++] = domain[i];
+            }
         }
+        return Arrays.copyOfRange(_values, 0, k);
     }
 
-    protected static void writeDown(Solver ref) {
-        File f = new File("SOLVER_ERROR.ser");
-        try {
-            Solver.writeInFile(ref, f);
-        } catch (IOException ee) {
-            ee.printStackTrace();
-        }
-        LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
-    }
 }

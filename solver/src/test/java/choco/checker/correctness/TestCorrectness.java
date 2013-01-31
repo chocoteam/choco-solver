@@ -25,8 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package choco.checker.correctness;
 
+import choco.checker.Modeler;
 import org.testng.annotations.Test;
 import solver.search.loop.SearchLoops;
 

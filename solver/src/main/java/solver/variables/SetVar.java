@@ -31,6 +31,7 @@ import choco.kernel.memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;
+import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * A Set Variable is defined by a domain which is a set interval [S_low,S_up]
@@ -105,4 +106,10 @@ public interface SetVar extends Variable<SetDelta> {
      */
     int[] getValue();
 
+	/**
+	 * Allow propagator to monitor element removal/enforcing of this
+	 * @param propagator
+	 * @return a new SetDeltaMonitor
+	 */
+	public SetDeltaMonitor monitorDelta(ICause propagator);
 }

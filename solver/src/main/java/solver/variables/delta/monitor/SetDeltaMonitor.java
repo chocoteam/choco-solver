@@ -95,7 +95,6 @@ public class SetDeltaMonitor implements IDeltaMonitor {
         }
     }
 
-    @Deprecated
     public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
         int x;
         if (evt == EventType.ADD_TO_KER) {

@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -270,4 +271,21 @@ public enum VariableFactory {
         end.addMonitor(update);
         return new IntVar[]{start, duration, end};
     }
+
+	// SETS
+	public static SetVar set(String name, Solver solver){
+		return new SetVarImpl(name,solver) ;
+	}
+
+	public static SetVar set(String name, ISet envelop, ISet kernel, Solver solver){
+		SetVar s = set(name,solver);
+		for(int i=envelop.getFirstElement();i>=0;i=envelop.getNextElement()){
+			s.getEnvelope().add(i);
+		}
+		if(kernel!=null)
+			for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
+				s.getKernel().add(i);
+			}
+		return s;
+	}
 }

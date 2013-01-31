@@ -44,7 +44,9 @@ import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
 import solver.search.strategy.strategy.graph.NodeStrategy;
+import solver.search.strategy.strategy.set.SetSearchStrategy;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
@@ -282,4 +284,8 @@ public final class StrategyFactory {
     public static <G extends GraphVar> AbstractStrategy graphRandom(G g, long seed) {
         return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.ARCS);
     }
+
+	public static SetSearchStrategy setLex(SetVar[] sets){
+		return new SetSearchStrategy(sets);
+	}
 }
