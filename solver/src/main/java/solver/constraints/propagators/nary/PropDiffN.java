@@ -133,7 +133,7 @@ public class PropDiffN extends Propagator<IntVar> {
 			xM = Math.max(xM,vars[j].getUB()+vars[j+2*n].getUB());
 			ym = Math.min(ym,vars[j+n].getLB());
 			yM = Math.max(yM,vars[j+n].getUB()+vars[j+3*n].getUB());
-			am+= vars[b+2*n].getLB()*vars[b+3*n].getLB();
+			am+= vars[j+2*n].getLB()*vars[j+3*n].getLB();
 			if(am>(xM-xm)*(yM-ym)){
 				contradiction(vars[b],"");
 			}
