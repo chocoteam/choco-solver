@@ -27,7 +27,9 @@
 
 package solver.constraints;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
+import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
 import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.circuit.PropNoSubtour;
@@ -374,6 +376,22 @@ public class ConstraintFactory {
 		Constraint c = makeEmptyConstraint(solver);
 		c.setPropagators(new PropAntiArborescences(succs,offSet,c,solver,linear),
 				new PropKLoops(succs,nbArbo,offSet,c,solver));
+		return c;
+	}
+
+	/**
+	 *Constrains rectangles, given by their origins x,y and sizes dx,dy, to be non-overlapping.
+	 * @param x coordinate
+	 * @param y coordinate
+	 * @param dx width
+	 * @param dy height
+	 * @param solver
+	 * @return a non-overlapping constraint
+	 */
+	public static Constraint diffn(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, Solver solver){
+		Constraint c = new Constraint(ArrayUtils.append(x,y,dx,dy),solver);
+		// (not idempotent, so requires too propagators)
+		c.setPropagators(new PropDiffN(x,y,dx,dy,c,solver),new PropDiffN(x,y,dx,dy,c,solver));
 		return c;
 	}
 }

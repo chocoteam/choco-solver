@@ -745,4 +745,37 @@ public interface Modeler {
 			return s;
 		}
 	};
+
+	Modeler modelDiffn = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver s = new Solver("diffn_" + n);
+			IEnvironment env = s.getEnvironment();
+			IntVar[] vars = new IntVar[n];
+			if(n%4!=0){
+				throw new UnsupportedOperationException();
+			}
+			int k = n/4;
+			IntVar[] x = new IntVar[k];
+			IntVar[] y = new IntVar[k];
+			IntVar[] dx = new IntVar[k];
+			IntVar[] dy = new IntVar[k];
+			for (int i = 0; i < n; i++) {
+				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+				if (map != null) map.put(domains[i], vars[i]);
+			}
+			for (int i = 0; i < k; i++) {
+				x[i] = vars[i];
+				y[i] = vars[i+k];
+				dx[i] = vars[i+2*k];
+				dy[i] = vars[i+3*k];
+			}
+			Constraint ctr = ConstraintFactory.diffn(x, y, dx, dy, s);
+			Constraint[] ctrs = new Constraint[]{ctr};
+			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+			s.post(ctrs);
+			s.set(strategy);
+			return s;
+		}
+	};
 }
