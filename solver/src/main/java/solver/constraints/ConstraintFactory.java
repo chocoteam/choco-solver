@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
+import solver.constraints.propagators.nary.graphBasedCumulative.PropLocalCumulGraphSweep;
 import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit;
@@ -54,298 +55,298 @@ import solver.variables.view.Views;
  */
 public class ConstraintFactory {
 
-    protected ConstraintFactory() {
-    }
+	protected ConstraintFactory() {
+	}
 
-    /**
-     * Create a <b>X = c</b> constraint.
-     * <br/>Based on <code>EqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, "=", c, solver);
-    }
+	/**
+	 * Create a <b>X = c</b> constraint.
+	 * <br/>Based on <code>EqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, int c, Solver solver) {
+		return new Arithmetic(x, "=", c, solver);
+	}
 
-    /**
-     * Create a <b>X = Y</b> constraint.
-     * <br/>Based on <code>EqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(x, "=", y, solver);
-    }
+	/**
+	 * Create a <b>X = Y</b> constraint.
+	 * <br/>Based on <code>EqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, IntVar y, Solver solver) {
+		return new Arithmetic(x, "=", y, solver);
+	}
 
-    /**
-     * Create a <b>X = Y + C</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
-        return new Arithmetic(x, "=", y, "+", c, solver);
-    }
+	/**
+	 * Create a <b>X = Y + C</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
+		return new Arithmetic(x, "=", y, "+", c, solver);
+	}
 
-    /**
-     * Create a <b>X =/= c</b> constraint.
-     * <br/>Based on <code>NotEqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, "!=", c, solver);
-    }
+	/**
+	 * Create a <b>X =/= c</b> constraint.
+	 * <br/>Based on <code>NotEqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, int c, Solver solver) {
+		return new Arithmetic(x, "!=", c, solver);
+	}
 
-    /**
-     * Create a <b>X =/= Y</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(x, "!=", y, solver);
-    }
+	/**
+	 * Create a <b>X =/= Y</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, IntVar y, Solver solver) {
+		return new Arithmetic(x, "!=", y, solver);
+	}
 
-    /**
-     * Create a <b>X =/= Y + C</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
-        return new Arithmetic(x, "!=", y, "+", c, solver);
-    }
+	/**
+	 * Create a <b>X =/= Y + C</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
+		return new Arithmetic(x, "!=", y, "+", c, solver);
+	}
 
-    /**
-     * Create a <b>X <= Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint leq(IntVar x, IntVar y, Solver solver) {
+	/**
+	 * Create a <b>X <= Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint leq(IntVar x, IntVar y, Solver solver) {
 //        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
-        return new Arithmetic(y, ">=", x, solver);
-    }
+		return new Arithmetic(y, ">=", x, solver);
+	}
 
-    /**
-     * Create a <b>X <= c</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint leq(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, "<=", c, solver);
-    }
+	/**
+	 * Create a <b>X <= c</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint leq(IntVar x, int c, Solver solver) {
+		return new Arithmetic(x, "<=", c, solver);
+	}
 
-    /**
-     * Create a <b>X < Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint lt(IntVar x, int c, Solver solver) {
-        return new Arithmetic(Views.fixed(c, solver), ">=", x, "+", 1, solver);
-    }
+	/**
+	 * Create a <b>X < Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint lt(IntVar x, int c, Solver solver) {
+		return new Arithmetic(Views.fixed(c, solver), ">=", x, "+", 1, solver);
+	}
 
-    /**
-     * Create a <b>X < Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint lt(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(y, ">=", x, "+", 1, solver);
-    }
+	/**
+	 * Create a <b>X < Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint lt(IntVar x, IntVar y, Solver solver) {
+		return new Arithmetic(y, ">=", x, "+", 1, solver);
+	}
 
-    /**
-     * Create a <b>X >= Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint geq(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(x, ">=", y, solver);
-    }
+	/**
+	 * Create a <b>X >= Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint geq(IntVar x, IntVar y, Solver solver) {
+		return new Arithmetic(x, ">=", y, solver);
+	}
 
-    /**
-     * Create a <b>X >= c</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant object
-     * @param solver
-     */
-    public static Constraint geq(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, ">=", c, solver);
-    }
+	/**
+	 * Create a <b>X >= c</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant object
+	 * @param solver
+	 */
+	public static Constraint geq(IntVar x, int c, Solver solver) {
+		return new Arithmetic(x, ">=", c, solver);
+	}
 
-    /**
-     * Create a <b>X > Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint gt(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, ">", c, solver);
-    }
+	/**
+	 * Create a <b>X > Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint gt(IntVar x, int c, Solver solver) {
+		return new Arithmetic(x, ">", c, solver);
+	}
 
-    /**
-     * Create a <b>X > Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(x, ">", y, solver);
-    }
+	/**
+	 * Create a <b>X > Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint gt(IntVar x, IntVar y, Solver solver) {
+		return new Arithmetic(x, ">", y, solver);
+	}
 
-    //*****************************************************************************
-    // GLOBAL CONSTRAINTS
-    //*****************************************************************************
+	//*****************************************************************************
+	// GLOBAL CONSTRAINTS
+	//*****************************************************************************
 
-    /**
-     * Create an empty constraint to be filled with propagators
-     *
-     * @param solver
-     * @return an empty constraint to be filled with propagators
-     */
-    public static Constraint makeEmptyConstraint(Solver solver) {
-        return new Constraint(solver);
-    }
+	/**
+	 * Create an empty constraint to be filled with propagators
+	 *
+	 * @param solver
+	 * @return an empty constraint to be filled with propagators
+	 */
+	public static Constraint makeEmptyConstraint(Solver solver) {
+		return new Constraint(solver);
+	}
 
-    /**
-     * Creates a circuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a covering circuit
-     * where vars[i] = j means that j is the successor of i.
-     *
-     * @param vars
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint circuit(IntVar[] vars, int offset, Solver solver) {
-        Constraint c = new Constraint(solver);
-        c.setPropagators(
-                new PropAllDiffAC(vars, c, solver),
-                new PropNoSubtour(vars, offset, solver, c),
+	/**
+	 * Creates a circuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a covering circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 *
+	 * @param vars
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint circuit(IntVar[] vars, int offset, Solver solver) {
+		Constraint c = new Constraint(solver);
+		c.setPropagators(
+				new PropAllDiffAC(vars, c, solver),
+				new PropNoSubtour(vars, offset, solver, c),
 				new PropCircuit_AntiArboFiltering(vars,offset,c,solver));
-        return c;
-    }
+		return c;
+	}
 
-    /**
-     * Creates a circuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a covering circuit
-     * where vars[i] = j means that j is the successor of i.
-     *
-     * @param vars
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint circuit(IntVar[] vars, Solver solver) {
-        return circuit(vars, 0, solver);
-    }
+	/**
+	 * Creates a circuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a covering circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 *
+	 * @param vars
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint circuit(IntVar[] vars, Solver solver) {
+		return circuit(vars, 0, solver);
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a single circuit of subcircuitSize nodes
-     * where vars[i] = j means that j is the successor of i.
-     * and vars[i] = i means that i is not part of the circuit
-     *
-     * @param vars
-     * @param offset
-     * @param subcircuitSize expected number of nodes in the circuit
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint subcircuit(IntVar[] vars, int offset, IntVar subcircuitSize, Solver solver) {
-        int n = vars.length;
-        IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
-        Constraint c = new Constraint(solver);
-        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, subcircuitSize}, new int[]{1, 1}, 2, n, solver, c));
-        c.addPropagators(new PropAllDiffAC(vars, c, solver));
-        c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
-        c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
+	/**
+	 * Creates a subcircuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a single circuit of subcircuitSize nodes
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param offset
+	 * @param subcircuitSize expected number of nodes in the circuit
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, int offset, IntVar subcircuitSize, Solver solver) {
+		int n = vars.length;
+		IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
+		Constraint c = new Constraint(solver);
+		c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, subcircuitSize}, new int[]{1, 1}, 2, n, solver, c));
+		c.addPropagators(new PropAllDiffAC(vars, c, solver));
+		c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
+		c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
 		c.addPropagators(new PropSubcircuit_AntiArboFiltering(vars,offset,c,solver));
-        return c;
-    }
+		return c;
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a single circuit of subcircuitSize nodes
-     * where vars[i] = j means that j is the successor of i.
-     * and vars[i] = i means that i is not part of the circuit
-     *
-     * @param vars
-     * @param subcircuitSize expected number of nodes in the circuit
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint subcircuit(IntVar[] vars, IntVar subcircuitSize, Solver solver) {
-        return subcircuit(vars, 0, subcircuitSize, solver);
-    }
+	/**
+	 * Creates a subcircuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a single circuit of subcircuitSize nodes
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param subcircuitSize expected number of nodes in the circuit
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, IntVar subcircuitSize, Solver solver) {
+		return subcircuit(vars, 0, subcircuitSize, solver);
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a single circuit
-     * where vars[i] = j means that j is the successor of i.
-     * and vars[i] = i means that i is not part of the circuit
-     *
-     * @param vars
-     * @param offset
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint subcircuit(IntVar[] vars, int offset, Solver solver) {
-        return subcircuit(vars, offset, VariableFactory.bounded("subcircuit length", 0, vars.length, solver), solver);
-    }
+	/**
+	 * Creates a subcircuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a single circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param offset
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, int offset, Solver solver) {
+		return subcircuit(vars, offset, VariableFactory.bounded("subcircuit length", 0, vars.length, solver), solver);
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
-     * <p/>
-     * the elements of vars define a single circuit
-     * where vars[i] = j means that j is the successor of i.
-     * and vars[i] = i means that i is not part of the circuit
-     *
-     * @param vars
-     * @param solver
-     * @return a circuit constraint
-     */
-    public static Constraint subcircuit(IntVar[] vars, Solver solver) {
-        return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver), solver);
-    }
+	/**
+	 * Creates a subcircuit constraint which ensures that
+	 * <p/>
+	 * the elements of vars define a single circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, Solver solver) {
+		return subcircuit(vars, 0, VariableFactory.bounded("subcircuit length", 0, vars.length, solver), solver);
+	}
 
 	/**
 	 * Partition succs variables into nbArbo (anti) arborescences
@@ -392,6 +393,26 @@ public class ConstraintFactory {
 		Constraint c = new Constraint(ArrayUtils.append(x,y,dx,dy),solver);
 		// (not idempotent, so requires too propagators)
 		c.setPropagators(new PropDiffN(x,y,dx,dy,c,solver),new PropDiffN(x,y,dx,dy,c,solver));
+		return c;
+	}
+
+	/**
+	 * Graph based cumulative constraint
+	 * Maintains incrementally overlapping tasks
+	 * Performs energy checks and sweep algorithm (Arnaud's) Locally
+	 * Can scale up to 1000 tasks
+	 * @param starts
+	 * @param durations
+	 * @param ends
+	 * @param heights
+	 * @param solver
+	 * @return a cumulative constraint
+	 */
+	public static Constraint cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, IntVar capa, Solver solver){
+		Constraint c = new Constraint(ArrayUtils.append(starts,durations,ends,heights),solver);
+		c.setPropagators(
+				new PropLocalCumulGraphSweep(starts,durations,ends,heights,capa,c,solver),
+				new PropLocalCumulGraphSweep(starts,durations,ends,heights,capa,c,solver));
 		return c;
 	}
 }

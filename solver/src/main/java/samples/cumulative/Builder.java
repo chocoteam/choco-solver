@@ -2,6 +2,7 @@ package samples.cumulative;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.scheduling.Cumulative;
 import solver.constraints.nary.scheduling.Cumulative.Type;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -177,7 +178,7 @@ public class Builder {
 	*/
 
 	public IMeasures buildNSolve(int n, int capa, int[] ls, int[] us,
-                                 int[] ld, int[] ud, int[] le, int[] ue, int[] h, Type type) {
+                                 int[] ld, int[] ud, int[] le, int[] ue, int[] h) {
         IntVar[] starts = new IntVar[n];
 		IntVar[] durations = new IntVar[n];
 		IntVar[] ends = new IntVar[n];
@@ -190,7 +191,10 @@ public class Builder {
 			ends[i] = task[2];
 			heights[i] = VariableFactory.bounded("h"+i, h[i], h[i], solver);
 		}
-		Constraint c = new Cumulative(starts, durations, ends, heights, capa, solver, type);
+
+		IntVar capaVar = VariableFactory.bounded("capa",capa,capa,solver);
+		Constraint c = ConstraintFactory.cumulative(starts, durations, ends, heights, capaVar, solver);
+//		Constraint c = new Cumulative(starts, durations, ends, heights, capa, solver);
 		solver.post(c);
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
