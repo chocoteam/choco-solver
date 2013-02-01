@@ -136,7 +136,7 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 			IntVar[] varsLocal = new IntVar[k*4];
 			int idx = 0;
 			for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
-				varsLocal[idx] = s[i];
+				varsLocal[idx]   = s[i];
 				varsLocal[idx+k] = d[i];
 				varsLocal[idx+2*k] = e[i];
 				varsLocal[idx+3*k] = h[i];

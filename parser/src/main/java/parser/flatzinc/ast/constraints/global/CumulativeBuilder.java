@@ -30,11 +30,13 @@ package parser.flatzinc.ast.constraints.global;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.exception.ContradictionException;
+import solver.variables.*;
 import solver.variables.view.Views;
 
 import java.util.List;
@@ -47,41 +49,78 @@ import java.util.List;
  */
 public class CumulativeBuilder implements IBuilder {
 
-    @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] starts = exps.get(0).toIntVarArray(solver);
-        IntVar[] durations = exps.get(1).toIntVarArray(solver);
-        IntVar[] resources = exps.get(2).toIntVarArray(solver);
-        IntVar[] ends = new IntVar[starts.length];
-        boolean decomp = false; // can be true IFF durations, resources and limit are fixed!
+//	@Override
+//	public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+//		IntVar[] starts = exps.get(0).toIntVarArray(solver);
+//		IntVar[] durations = exps.get(1).toIntVarArray(solver);
+//		IntVar[] resources = exps.get(2).toIntVarArray(solver);
+//		IntVar[] ends = new IntVar[starts.length];
+//		boolean decomp = false; // can be true IFF durations, resources and limit are fixed!
+//
+//		for (int i = 0; i < starts.length; i++) {
+//			if (durations[i].instantiated()) {
+//				ends[i] = Views.offset(starts[i], durations[i].getValue());
+//			} else {
+//				ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
+//						starts[i].getLB() + durations[i].getLB(),
+//						starts[i].getUB() + durations[i].getUB(),
+//						solver);
+//				solver.post(Sum.eq(new IntVar[]{starts[i], durations[i]}, ends[i], solver));
+//				decomp = true;
+//			}
+//			if (!resources[i].instantiated()) {
+//				decomp = true;
+//			}
+//
+//		}
+//		IntVar limit = exps.get(3).intVarValue(solver);
+//		if (!limit.instantiated()) {
+//			decomp = true;
+//		}
+//
+//	        /*if (!decomp) {
+//	            if (starts.length > 10000) {
+//	                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.GREEDY);
+//	            } else {
+//	                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.DYNAMIC_SWEEP);
+//	            }
+//	        }*/
+//		return null;
+//	}
 
-        for (int i = 0; i < starts.length; i++) {
-            if (durations[i].instantiated()) {
-                ends[i] = Views.offset(starts[i], durations[i].getValue());
-            } else {
-                ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
-                        starts[i].getLB() + durations[i].getLB(),
-                        starts[i].getUB() + durations[i].getUB(),
-                        solver);
-                solver.post(Sum.eq(new IntVar[]{starts[i], durations[i]}, ends[i], solver));
-                decomp = true;
-            }
-            if (!resources[i].instantiated()) {
-                decomp = true;
-            }
-        }
-        IntVar limit = exps.get(3).intVarValue(solver);
-        if (!limit.instantiated()) {
-            decomp = true;
-        }
-
-        /*if (!decomp) {
-            if (starts.length > 10000) {
-                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.GREEDY);
-            } else {
-                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.DYNAMIC_SWEEP);
-            }
-        }*/
-        return null;
-    }
+	@Override
+	public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+		final IntVar[] starts = exps.get(0).toIntVarArray(solver);
+		final IntVar[] durations = exps.get(1).toIntVarArray(solver);
+		final IntVar[] resources = exps.get(2).toIntVarArray(solver);
+		final IntVar[] ends = new IntVar[starts.length];
+		final IntVar limit = exps.get(3).intVarValue(solver);
+		for (int i = 0; i < starts.length; i++) {
+			ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
+					starts[i].getLB() + durations[i].getLB(),
+					starts[i].getUB() + durations[i].getUB(),
+					solver);
+			final IntVar start = starts[i];
+			final IntVar end = ends[i];
+			final IntVar duration = durations[i];
+			IVariableMonitor update = new IVariableMonitor() {
+				@Override
+				public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+					// start
+					start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+					start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+					// end
+					end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+					end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+					// duration
+					duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+					duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+				}
+			};
+			start.addMonitor(update);
+			duration.addMonitor(update);
+			end.addMonitor(update);
+		}
+		return ConstraintFactory.cumulative(starts,durations,ends,resources,limit,solver);
+	}
 }
