@@ -77,7 +77,7 @@ public class PropDiffN extends Propagator<IntVar> {
 		if(!boxesToCompute.contain(v)){
 			boxesToCompute.add(v);
 		}
-		return super.advise(v,mask);
+		return super.advise(varIdx,mask);
 	}
 
 	@Override
@@ -90,6 +90,9 @@ public class PropDiffN extends Propagator<IntVar> {
 				for(int j=i+1;j<n;j++){
 					if(overlap(i,j)){
 						overlappingBoxes.addEdge(i,j);
+						if(boxInstantiated(i)&&boxInstantiated(j)){
+							contradiction(vars[i],"");
+						}
 					}
 				}
 			}
@@ -98,10 +101,10 @@ public class PropDiffN extends Propagator<IntVar> {
 				boxesToCompute.add(i);
 			}
 		}
-		for(int i=boxesToCompute.getFirstElement();i>=0;i=boxesToCompute.getFirstElement()){
-			boxesToCompute.remove(i);
+		for(int i=boxesToCompute.getFirstElement();i>=0;i=boxesToCompute.getNextElement()){
 			filterFromBox(i);
 		}
+		boxesToCompute.clear();
 	}
 
 	private boolean overlap(int i, int j) {
@@ -112,12 +115,9 @@ public class PropDiffN extends Propagator<IntVar> {
 		return true;
 	}
 
-	private boolean disjoint(int i, int j, boolean x) {
-		int off = (x)?0:n;
-		if(vars[i+off].getLB()>=vars[j+off].getUB()+vars[j+off+2*n].getUB()){
-			return false;
-		}
-		return true;
+	private boolean disjoint(int i, int j, boolean horizontal) {
+		int off = (horizontal)?0:n;
+		return (vars[i+off].getLB()>=vars[j+off].getUB()+vars[j+off+2*n].getUB());
 	}
 
 	protected void filterFromBox(int b) throws ContradictionException {
@@ -139,50 +139,50 @@ public class PropDiffN extends Propagator<IntVar> {
 			}
 		}
 		// mandatory part of box b
-		int earliestStart_xi = vars[b].getUB()-vars[b+2*n].getUB();
-		int earliestEnd_xi = vars[b].getLB()-vars[b+2*n].getLB();
-		int earliestStart_yi = vars[b+n].getUB()-vars[b+3*n].getUB();
-		int earliestEnd_yi = vars[b+n].getLB()-vars[b+3*n].getLB();
+		int mps_xi = vars[b].getUB();
+		int mpe_xi = vars[b].getLB()+vars[b+2*n].getLB();
+		int mps_yi = vars[b+n].getUB();
+		int mpe_yi = vars[b+n].getLB()+vars[b+3*n].getLB();
 		// mandatory part exists
-		if(earliestStart_xi<=earliestEnd_xi && earliestStart_yi<=earliestEnd_yi){
+		if(mps_xi<=mpe_xi && mps_yi<=mpe_yi){
 			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-				filterBox(b,j,earliestStart_xi,earliestEnd_xi,earliestStart_yi,earliestEnd_yi);
+				filterBox(b,j,mps_xi,mpe_xi,mps_yi,mpe_yi);
 			}
 		}
 	}
 
-	private void filterBox(int i, int j, int es_xi, int ee_xi, int es_yi, int ee_yi) throws ContradictionException {
+	private void filterBox(int i, int j, int mps_xi, int mpe_xi, int mps_yi, int mpe_yi) throws ContradictionException {
 		// mandatory part of box j
-		int earliestEnd_xj = vars[j].getLB()-vars[j+2*n].getLB();
-		int earliestStart_xj = vars[j].getUB()-vars[j+2*n].getUB();
-		int earliestEnd_yj = vars[j+n].getLB()-vars[j+3*n].getLB();
-		int earliestStart_yj = vars[j+n].getUB()-vars[j+3*n].getUB();
+		int mps_xj = vars[j].getUB();
+		int mpe_xj = vars[j].getLB()+vars[j+2*n].getLB();
+		int mps_yj = vars[j+n].getUB();
+		int mpe_yj = vars[j+n].getLB()+vars[j+3*n].getLB();
 		// mandatory part exists
-		if(earliestStart_xj<=earliestEnd_xj && earliestStart_yj<=earliestEnd_yj){
-			boolean overH = earliestStart_xj < ee_xi && earliestEnd_xj > es_xi;
-			boolean overV = earliestStart_yj < ee_yi && earliestEnd_yj > es_yi;
+		if(mps_xj<=mpe_xj && mps_yj<=mpe_yj){
+			boolean overH = mps_xj < mpe_xi && mpe_xj > mps_xi;
+			boolean overV = mps_yj < mpe_yi && mpe_yj > mps_yi;
 			if(overH && overV){// mandatory parts overlap
 				contradiction(vars[i],"");
 			}
 			else if(overH){// mandatory parts overlap horizontally only
-				if(es_yi<earliestStart_yj){
-					vars[j+n].updateLowerBound(ee_yi,aCause);
-					vars[i+n].updateUpperBound(earliestStart_yj-vars[i+3*n].getLB(),aCause);
-					vars[i+3*n].updateUpperBound(earliestStart_yj-vars[i+n].getUB(),aCause);
+				if(mps_yi<mps_yj){
+					vars[j+n].updateLowerBound(mpe_yi,aCause);
+					vars[i+n].updateUpperBound(mps_yj-vars[i+3*n].getLB(),aCause);
+					vars[i+3*n].updateUpperBound(mps_yj-vars[i+n].getUB(),aCause);
 				}else{
-					vars[i+n].updateLowerBound(earliestEnd_yj,aCause);
-					vars[j+n].updateUpperBound(es_yi-vars[j+3*n].getLB(),aCause);
-					vars[j+3*n].updateUpperBound(es_yi-vars[j+n].getUB(),aCause);
+					vars[i+n].updateLowerBound(mpe_yj,aCause);
+					vars[j+n].updateUpperBound(mps_yi-vars[j+3*n].getLB(),aCause);
+					vars[j+3*n].updateUpperBound(mps_yi-vars[j+n].getUB(),aCause);
 				}
 			}else if(overV){// mandatory parts overlap vertically only
-				if(es_xi<earliestStart_xj){
-					vars[j].updateLowerBound(ee_xi,aCause);
-					vars[i].updateUpperBound(earliestStart_xj-vars[i+2*n].getLB(),aCause);
-					vars[i+2*n].updateUpperBound(earliestStart_xj-vars[i].getUB(),aCause);
+				if(mps_xi<mps_xj){
+					vars[j].updateLowerBound(mpe_xi,aCause);
+					vars[i].updateUpperBound(mps_xj-vars[i+2*n].getLB(),aCause);
+					vars[i+2*n].updateUpperBound(mps_xj-vars[i].getUB(),aCause);
 				}else{
-					vars[i].updateLowerBound(earliestEnd_xj,aCause);
-					vars[j].updateUpperBound(es_xi-vars[j+2*n].getLB(),aCause);
-					vars[j+2*n].updateUpperBound(es_xi-vars[j].getUB(),aCause);
+					vars[i].updateLowerBound(mpe_xj,aCause);
+					vars[j].updateUpperBound(mps_xi-vars[j+2*n].getLB(),aCause);
+					vars[j+2*n].updateUpperBound(mps_xi-vars[j].getUB(),aCause);
 				}
 			}
 		}
@@ -198,8 +198,8 @@ public class PropDiffN extends Propagator<IntVar> {
 		for(int i=0;i<n;i++){
 			if(boxInstantiated(i))
 				for(int j=i+1;j<n;j++){
-					if(overlap(i,j)){
-						if(boxInstantiated(j)){
+					if(boxInstantiated(j)){
+						if(overlap(i,j)){
 							return ESat.FALSE;
 						}
 					}
