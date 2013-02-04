@@ -116,7 +116,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
                         return;
 
                     default:
-                    case Ibex.NOTHING: // and the constraint does not filter nor state on its status
+                    case Ibex.NOT_SIGNIFICANT: // and the constraint does not filter nor state on its status
                         // nothing to do
                         return;
 
@@ -137,7 +137,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
                         return;
 
                     default:
-                    case Ibex.NOTHING:  // and the constraint does not filter nor state on its status
+                    case Ibex.NOT_SIGNIFICANT:  // and the constraint does not filter nor state on its status
                         // nothing to do
                         return;
 
@@ -158,7 +158,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
                         //  => unexpected!!
                         assert false : "RealReifiedPropagator: the constraint filters although the boolean is unknown";
                     default:
-                    case Ibex.NOTHING: // and the constraint does not filter nor state on its status
+                    case Ibex.NOT_SIGNIFICANT: // and the constraint does not filter nor state on its status
                         // nothing to do
 
                 }

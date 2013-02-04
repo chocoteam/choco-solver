@@ -47,7 +47,14 @@ public class Ibex {
     public static final int FAIL = 0;
     public static final int ENTAILED = 1;
     public static final int CONTRACT = 2;
-    public static final int NOTHING = 3;
+    public static final int NOT_SIGNIFICANT = 3;
+    public static final int INFLATE = 4;
+    public static final int ALL_IN = 5;
+    public static final int ALL_OUT = 6;
+    public static final int POINT_OUT = 7;
+    public static final int POINT_IN = 8;
+    public static final int POINT_UNKNOWN = 9;
+
 
     /* Constants for describing a boolean domain (by an integer). */
     public static final int FALSE = 0;
@@ -120,9 +127,11 @@ public class Ibex {
      *         been reduced by more than 0.1%. If reif==FALSE, the removed part of the domain is inside c.
      *         If reif==TRUE, the removed part is outside.
      *         <p/>
-     *         NOTHING  - No bound has been reduced and nothing could be proven.
+     *         NOT_SIGNIFICANT  - No bound has been reduced and nothing could be proven.
      */
     public native int contract(int i, double bounds[], int reif);
+
+    public native int inflate(int i, double point[], double bounds[], boolean in);
 
 
     /**

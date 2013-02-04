@@ -62,7 +62,7 @@ public class RealTest {
     }
 
     @Test(groups = "1s")
-    public void test2a() {
+    public void test2() {
         Ibex ibex = new Ibex();
         ibex.add_ctr(2, "{0}^2+{1}^<=1");
 
@@ -75,24 +75,51 @@ public class RealTest {
         domains = new double[]{-2., 1., -2., 1.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
         Assert.assertEquals(domains, new double[]{-1., 1., -1., 1.});
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOT_SIGNIFICANT);
 
 
         // CASE 2: the boolean is set to FALSE
         Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE), Ibex.FAIL);
         Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE), Ibex.ENTAILED);
-        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOTHING);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
         Assert.assertEquals(domains, new double[]{vv, 2., -vv, vv});
 
         // CASE 2: the boolean is set to UNKNOWN
         Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
         Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
-        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOT_SIGNIFICANT);
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
         Assert.assertEquals(domains, new double[]{0., 2., -vv, vv});
+
+
+        ibex.release();
+    }
+
+    @Test(groups = "1s")
+    public void test3() {
+        Ibex ibex = new Ibex();
+        ibex.add_ctr(2, "{0}^2+{1}^<=1");
+
+        double[] domains;
+
+        domains = new double[]{0., 1., 0., 1.};
+        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
+        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.ALL_IN);
+        domains = new double[]{1., 2., 1., 2.};
+        Assert.assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.POINT_OUT);
+        domains = new double[]{0., 1., -1., 0.};
+        Assert.assertEquals(ibex.inflate(0, new double[]{1., 0.}, domains, true), Ibex.NOT_SIGNIFICANT);
+
+        domains = new double[]{-1., 0., -1., 0.};
+        Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.INFLATE);
+        Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.ALL_OUT);
+        domains = new double[]{0., .5, 0., .5};
+        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.POINT_IN);
+        domains = new double[]{0., 1.01, -1., 0.};
+        Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
 
 
         ibex.release();
