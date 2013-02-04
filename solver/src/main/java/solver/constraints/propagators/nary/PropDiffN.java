@@ -84,8 +84,6 @@ public class PropDiffN extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			for(int i=0;i<n;i++){
-				vars[i+2*n].updateLowerBound(1,aCause);
-				vars[i+3*n].updateLowerBound(1,aCause);
 				overlappingBoxes.getNeighborsOf(i).clear();
 			}
 			for(int i=0;i<n;i++){
