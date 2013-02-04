@@ -30,6 +30,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.real.IntToRealPropagator;
 import solver.constraints.propagators.real.RealPropagator;
+import solver.constraints.propagators.real.RealReifiedPropagator;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 
@@ -58,25 +60,75 @@ public class RealConstraint extends Constraint {
     }
 
     /**
-     * add a function to <code>this</code>.
+     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
      * <br/>
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
      * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is avalaible in the documentation of IBEX.
+     * <br/> A complete list is available in the documentation of IBEX.
      * <p/>
      * <p/>
      * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, Ibex.HC4, solver);
+     * RealConstraint rc = new RealConstraint(solver);
+     * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
      * </pre>
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
-     * @param option    propagation option index (0 is DEFAULT)
-     * @param vars      array of variables
+     * @param option    propagation option index (Ibex.COMPO is DEFAULT)
+     * @param rvars     a list of real variables
      */
-    public void addFunction(String functions, int option, RealVar... vars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, vars, option, solver, this));
+    public void addFunction(String functions, int option, RealVar... rvars) {
+        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, option, solver, this));
+    }
+
+    /**
+     * add one or more functions, separated with semi-colon ";" to <code>this</code>.
+     * <br/>
+     * A function is a string declared using the following format:
+     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+     * <br/> A complete list is available in the documentation of IBEX.
+     * <p/>
+     * <p/>
+     * <blockquote><pre>
+     * RealConstraint rc = new RealConstraint(solver);
+     * rc.addFunction("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
+     * <p/>
+     * </pre>
+     * </blockquote>
+     *
+     * @param functions list of functions, separated by a semi-colon
+     * @param rvars     a list of real variables
+     */
+    public void addFunction(String functions, RealVar... rvars) {
+        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, Ibex.COMPO, solver, this));
+    }
+
+    /**
+     * Reified one or more functions, separated with semi-colon ";" to <code>this</code>.
+     * <br/>
+     * A function is a string declared using the following format:
+     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+     * <br/> A complete list is available in the documentation of IBEX.
+     * <p/>
+     * The reified variable <code>bvar</code> is valid for the entire list of functions (as a conjunction).
+     * Its value is TRUE if the list of functions is satisfied, FALSE if the list of functions is unsatisfied.
+     * <p/>
+     * <blockquote><pre>
+     * RealConstraint rc = new RealConstraint(solver);
+     * rc.addReifiedFunction(bv, "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", Ibex.HC4, x,y);
+     * </pre>
+     * </blockquote>
+     *
+     * @param bvar      a boolean variable stating the status of the functions
+     * @param functions list of functions, separated by a semi-colon
+     * @param option    propagation option index (Ibex.COMPO is DEFAULT)
+     * @param rvars     a list of real variables
+     */
+    public void addReifiedFunction(BoolVar bvar, String functions, int option, RealVar... rvars) {
+        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, option, solver, this));
     }
 
     /**
@@ -85,19 +137,25 @@ public class RealConstraint extends Constraint {
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
      * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is avalaible in the documentation of IBEX.
+     * <br/> A complete list is available in the documentation of IBEX.
+     * <p/>
+     * The reified variable <code>bvar</code> is valid for the entire list of functions (as a conjunction).
+     * Its value is TRUE if the list of functions is satisfied, FALSE if the list of functions is unsatisfied.
      * <p/>
      * <p/>
      * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, solver);
+     * RealConstraint rc = new RealConstraint(solver);
+     * rc.addReifiedFunction(bv, "({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
+     * <p/>
      * </pre>
      * </blockquote>
      *
+     * @param bvar      a boolean variable stating the status of the functions
      * @param functions list of functions, separated by a semi-colon
-     * @param vars      array of variables
+     * @param rvars     a list of real variables
      */
-    public void addFunction(String functions, RealVar... vars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, vars, 0, solver, this));
+    public void addReifiedFunction(String functions, BoolVar bvar, RealVar... rvars) {
+        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, Ibex.COMPO, solver, this));
     }
 
     /**

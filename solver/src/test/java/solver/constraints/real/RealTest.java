@@ -26,15 +26,19 @@
  */
 package solver.constraints.real;
 
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 19/07/12
  */
-public class Test {
+public class RealTest {
 
-    public static void main(String[] args) {
+    @Test(groups = "1s")
+    public void test1() {
 
         Ibex ibex = new Ibex();
 
@@ -54,6 +58,43 @@ public class Test {
         } else {
             System.out.println("Nothing.");
         }
+        ibex.release();
+    }
+
+    @Test(groups = "1s")
+    public void test2a() {
+        Ibex ibex = new Ibex();
+        ibex.add_ctr(2, "{0}^2+{1}^<=1");
+
+        double[] domains;
+        double vv = Math.sqrt(2.) / 2.;
+
+        // CASE 1: the boolean is set to TRUE
+        Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.TRUE), Ibex.FAIL);
+        Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE), Ibex.ENTAILED);
+        domains = new double[]{-2., 1., -2., 1.};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
+        Assert.assertEquals(domains, new double[]{-1., 1., -1., 1.});
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
+
+
+        // CASE 2: the boolean is set to FALSE
+        Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE), Ibex.FAIL);
+        Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE), Ibex.ENTAILED);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOTHING);
+        domains = new double[]{0., 2., -vv, vv};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
+        Assert.assertEquals(domains, new double[]{vv, 2., -vv, vv});
+
+        // CASE 2: the boolean is set to UNKNOWN
+        Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
+        Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+        domains = new double[]{0., 2., -vv, vv};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
+        Assert.assertEquals(domains, new double[]{0., 2., -vv, vv});
+
+
         ibex.release();
     }
 }

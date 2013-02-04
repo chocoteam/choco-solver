@@ -1,30 +1,3 @@
-/*
- * Copyright (c) 1999-2012, Ecole des Mines de Nantes
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Ecole des Mines de Nantes nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package solver.constraints.real;/*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
@@ -82,7 +55,7 @@ public class Ibex {
     public static final int FALSE_OR_TRUE = 2;
 
     static {
-        System.loadLibrary("ibex");
+        System.loadLibrary("ibex-java");
     }
 
     /**
@@ -117,25 +90,35 @@ public class Ibex {
 
 
     /**
-     * Call the contractor associated to a constraint.
+     * Call the contractor associated to a constraint or its negation.
+     * <p/>
+     * We consider here the reified constraint R(b,c) : b<=>c(x_1,...,x_n).
      *
      * @param i      - Number of the constraint (in the order of creation)
      * @param bounds - The bounds of domains under the following form:
      *               (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
-     *               lower (resp. upper) bound of the domain of the ith variable.
-     * @param reif   - Domain of the reification with the following accepted values:
+     *               lower (resp. upper) bound of the domain of x_i.
+     * @param reif   - Domain of the reification variable b with the following accepted values:
      *               FALSE, TRUE, FALSE_OR_TRUE.
-     * @return The status of contraction or fail/entailment test:
+     * @return The status of contraction or fail/entailment test. Note that the name of the constant
+     *         in return refers to the constraint c, not R. Hence "FAIL" means that no tuple satisfies c (should
+     *         R be satisfiable or not).
      *         <p/>
-     *         FAIL     - No tuple satisfy the constraint. This value can only be returned
-     *         if reif=1 or reif=2. Bounds of are not impacted.
+     *         FAIL     - No tuple satisfies c. If reif==FALSE, the bounds of x may have been impacted (the part
+     *         of the domain inside c has been removed and the remaining part has been proven to be
+     *         outside c). If reif==TRUE, the bounds have not been impacted but we have to consider
+     *         that the domain has been reduced to the empty set. If reif==FALSE_OR_TRUE, bounds have
+     *         not been impacted.
      *         <p/>
-     *         ENTAILED - All the tuples satisfy the constraint. This value can only be
-     *         returned if reif=0 or reif=2. Bounds of are not impacted.
+     *         ENTAILED - All the tuples satisfy the constraint. If reif==FALSE, the bounds have not been impacted
+     *         but we have to consider that the domain has been reduced to the empty set. If reif==TRUE,
+     *         the bounds of x may have been impacted (the part of the domain outside c has been removed
+     *         and the remaining part has been proven to be inside c). If reif==FALSE_OR_TRUE, bounds have
+     *         not been impacted.
      *         <p/>
-     *         CONTRACT - At least one bound has been reduced by more than 0.1%. This
-     *         value can only be returned if reif=0 or reif=1. If reif=1 (resp. 0),
-     *         all the removed part is inconsistent (resp. consistent).
+     *         CONTRACT - This value can only be returned if reif==FALSE or reif==TRUE. At least one bound of x has
+     *         been reduced by more than 0.1%. If reif==FALSE, the removed part of the domain is inside c.
+     *         If reif==TRUE, the removed part is outside.
      *         <p/>
      *         NOTHING  - No bound has been reduced and nothing could be proven.
      */
@@ -143,7 +126,7 @@ public class Ibex {
 
 
     /**
-     * Same as contract(int, double bounds[], int reif) with reif=1.
+     * Same as contract(int, double bounds[], int reif) with reif=TRUE.
      */
     public native int contract(int i, double bounds[]);
 
