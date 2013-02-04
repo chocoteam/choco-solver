@@ -794,9 +794,10 @@ public interface Modeler {
 			IntVar[] d = new IntVar[k];
 			IntVar[] e = new IntVar[k];
 			IntVar[] h = new IntVar[k];
+			Task[] tasks = new Task[k];
 			for (int i = 0; i < n; i++) {
-//				vars[i] = VariableFactory.bounded("v_" + i, domains[i][0],domains[i][domains[i].length-1], solver);
-				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], solver);
+				vars[i] = VariableFactory.bounded("v_" + i, domains[i][0],domains[i][domains[i].length-1], solver);
+//				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], solver);
 				if (map != null) map.put(domains[i], vars[i]);
 			}
 			for (int i = 0; i < k; i++) {
@@ -804,29 +805,11 @@ public interface Modeler {
 				d[i] = vars[i+k];
 				e[i] = vars[i+2*k];
 				h[i] = vars[i+3*k];
-				final IntVar start = s[i];
-				final IntVar end = e[i];
-				final IntVar duration = d[i];
-				IVariableMonitor update = new IVariableMonitor() {
-					@Override
-					public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
-						// start
-						start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-						start.updateUpperBound(end.getUB() - duration.getLB(), cause);
-						// end
-						end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-						end.updateUpperBound(start.getUB() + duration.getUB(), cause);
-						// duration
-						duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-						duration.updateUpperBound(end.getUB() - start.getLB(), cause);
-					}
-				};
-				start.addMonitor(update);
-				duration.addMonitor(update);
-				end.addMonitor(update);
+				tasks[i] = new Task(s[i],d[i],e[i]);
+
 			}
 			IntVar capa = vars[n-1];
-			Constraint ctr = ConstraintFactory.cumulative(s,d,e,h,capa, solver);
+			Constraint ctr = ConstraintFactory.cumulative(tasks,h,capa, solver);
 			Constraint[] ctrs = new Constraint[]{ctr};
 			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 			solver.post(ctrs);

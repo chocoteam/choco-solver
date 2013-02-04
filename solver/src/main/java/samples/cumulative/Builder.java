@@ -9,6 +9,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
+import solver.variables.Task;
 import solver.variables.VariableFactory;
 
 
@@ -183,17 +184,19 @@ public class Builder {
 		IntVar[] durations = new IntVar[n];
 		IntVar[] ends = new IntVar[n];
 		IntVar[] heights = new IntVar[n];
+		Task[] tasks = new Task[n];
 		Solver solver = new Solver();
 		for(int i=0;i<n;i++) {
-			IntVar[] task = VariableFactory.task("t"+i, ls[i], us[i], ld[i], ld[i], le[i], ue[i], solver);
-			starts[i] = task[0];
-			durations[i] = task[1];
-			ends[i] = task[2];
+			Task task = VariableFactory.task_bounded("t"+i, ls[i], us[i], ld[i], ld[i], le[i], ue[i], solver);
+			tasks[i] = task;
+			starts[i] = task.getStart();
+			durations[i] = task.getDuration();
+			ends[i] = task.getEnd();
 			heights[i] = VariableFactory.bounded("h"+i, h[i], h[i], solver);
 		}
 
 		IntVar capaVar = VariableFactory.bounded("capa",capa,capa,solver);
-		Constraint c = ConstraintFactory.cumulative(starts, durations, ends, heights, capaVar, solver);
+		Constraint c = ConstraintFactory.cumulative(tasks, heights, capaVar, solver);
 //		Constraint c = new Cumulative(starts, durations, ends, heights, capa, solver);
 		solver.post(c);
 		if (this.branchingStrategy.equals("minsize")) {

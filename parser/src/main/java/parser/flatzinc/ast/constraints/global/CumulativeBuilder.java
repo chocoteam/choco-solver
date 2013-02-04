@@ -30,18 +30,16 @@ package parser.flatzinc.ast.constraints.global;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.exception.ContradictionException;
 import solver.variables.*;
 import java.util.List;
 
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 26/01/11
  */
 public class CumulativeBuilder implements IBuilder {
@@ -52,33 +50,15 @@ public class CumulativeBuilder implements IBuilder {
 		final IntVar[] durations = exps.get(1).toIntVarArray(solver);
 		final IntVar[] resources = exps.get(2).toIntVarArray(solver);
 		final IntVar[] ends = new IntVar[starts.length];
+		Task[] tasks = new Task[starts.length];
 		final IntVar limit = exps.get(3).intVarValue(solver);
 		for (int i = 0; i < starts.length; i++) {
 			ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
 					starts[i].getLB() + durations[i].getLB(),
 					starts[i].getUB() + durations[i].getUB(),
 					solver);
-			final IntVar start = starts[i];
-			final IntVar end = ends[i];
-			final IntVar duration = durations[i];
-			IVariableMonitor update = new IVariableMonitor() {
-				@Override
-				public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
-					// start
-					start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-					start.updateUpperBound(end.getUB() - duration.getLB(), cause);
-					// end
-					end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-					end.updateUpperBound(start.getUB() + duration.getUB(), cause);
-					// duration
-					duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-					duration.updateUpperBound(end.getUB() - start.getLB(), cause);
-				}
-			};
-			start.addMonitor(update);
-			duration.addMonitor(update);
-			end.addMonitor(update);
+			tasks[i] = new Task(starts[i],durations[i],ends[i]);
 		}
-		return ConstraintFactory.cumulative(starts,durations,ends,resources,limit,solver);
+		return ConstraintFactory.cumulative(tasks,resources,limit,solver);
 	}
 }

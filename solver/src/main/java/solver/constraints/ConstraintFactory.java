@@ -41,6 +41,7 @@ import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
 import solver.variables.IntVar;
+import solver.variables.Task;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
 
@@ -399,16 +400,23 @@ public class ConstraintFactory {
 	/**
 	 * Graph based cumulative constraint
 	 * Maintains incrementally overlapping tasks
-	 * Performs energy checks and sweep algorithm (Arnaud's) Locally
+	 * Performs energy checks and a time-dependant filtering
 	 * Can scale up to 1000 tasks
-	 * @param starts
-	 * @param durations
-	 * @param ends
+	 * @param tasks
 	 * @param heights
 	 * @param solver
 	 * @return a cumulative constraint
 	 */
-	public static Constraint cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, IntVar capa, Solver solver){
+	public static Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capa, Solver solver){
+		int n = tasks.length;
+		IntVar[] starts = new IntVar[n];
+		IntVar[] durations = new IntVar[n];
+		IntVar[] ends = new IntVar[n];
+		for(int i=0;i<n;i++){
+			starts[i] = tasks[i].getStart();
+			durations[i] = tasks[i].getDuration();
+			ends[i] = tasks[i].getEnd();
+		}
 		Constraint c = new Constraint(ArrayUtils.append(starts,durations,ends,heights),solver);
 		c.setPropagators(
 				new PropLocalCumulGraphSweep(starts,durations,ends,heights,capa,c,solver),
