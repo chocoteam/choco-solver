@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
@@ -40,13 +41,13 @@ import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.ternary.Times;
+import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 
 /**
  * <br/>
@@ -776,6 +777,61 @@ public interface Modeler {
 			s.post(ctrs);
 			s.set(strategy);
 			return s;
+		}
+	};
+
+	Modeler modelCumul = new Modeler() {
+		@Override
+		public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+			Solver solver = new Solver("cumulative_" + n);
+			IEnvironment env = solver.getEnvironment();
+			IntVar[] vars = new IntVar[n];
+			if(n%4!=1){
+				throw new UnsupportedOperationException();
+			}
+			int k = n/4;
+			IntVar[] s = new IntVar[k];
+			IntVar[] d = new IntVar[k];
+			IntVar[] e = new IntVar[k];
+			IntVar[] h = new IntVar[k];
+			for (int i = 0; i < n; i++) {
+//				vars[i] = VariableFactory.bounded("v_" + i, domains[i][0],domains[i][domains[i].length-1], solver);
+				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], solver);
+				if (map != null) map.put(domains[i], vars[i]);
+			}
+			for (int i = 0; i < k; i++) {
+				s[i] = vars[i];
+				d[i] = vars[i+k];
+				e[i] = vars[i+2*k];
+				h[i] = vars[i+3*k];
+				final IntVar start = s[i];
+				final IntVar end = e[i];
+				final IntVar duration = d[i];
+				IVariableMonitor update = new IVariableMonitor() {
+					@Override
+					public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+						// start
+						start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+						start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+						// end
+						end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+						end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+						// duration
+						duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+						duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+					}
+				};
+				start.addMonitor(update);
+				duration.addMonitor(update);
+				end.addMonitor(update);
+			}
+			IntVar capa = vars[n-1];
+			Constraint ctr = ConstraintFactory.cumulative(s,d,e,h,capa, solver);
+			Constraint[] ctrs = new Constraint[]{ctr};
+			AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+			solver.post(ctrs);
+			solver.set(strategy);
+			return solver;
 		}
 	};
 }

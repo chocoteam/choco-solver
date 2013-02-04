@@ -35,16 +35,16 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.nary.graphBasedCumulative.sweep.StaticSweep;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.UndirectedGraph;
+import java.util.BitSet;
 
 /**
  * Graph based cumulative
  * Maintains incrementally overlapping tasks
- * Performs energy checks and sweep algorithm (Arnaud's) Locally
+ * Performs energy checking and mandatory part based filtering
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
@@ -57,8 +57,8 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 	private ISet toCompute, tasks;
 
 	public PropLocalCumulGraphSweep(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Constraint constraint, Solver solver) {
-		super(ArrayUtils.append(s,d,e,h), solver, constraint, PropagatorPriority.LINEAR, false);
-		n = s.length;
+		super(ArrayUtils.append(s,d,e,h,new IntVar[]{capa}), solver, constraint, PropagatorPriority.LINEAR, false);
+		this.n = s.length;
 		if(!(n==d.length && n==e.length && n==h.length)){
 			throw new UnsupportedOperationException();
 		}
@@ -81,6 +81,14 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			toCompute.clear();
+			for(int i=0;i<n;i++){
+				s[i].updateLowerBound(e[i].getLB()-d[i].getUB(),aCause);
+				s[i].updateUpperBound(e[i].getUB()-d[i].getLB(),aCause);
+				e[i].updateUpperBound(s[i].getUB()+d[i].getUB(),aCause);
+				e[i].updateLowerBound(s[i].getLB()+d[i].getLB(),aCause);
+				d[i].updateUpperBound(e[i].getUB()-s[i].getLB(),aCause);
+				d[i].updateLowerBound(e[i].getLB()-s[i].getUB(),aCause);
+			}
 			energyOn(g.getActiveNodes());
 			sweepOn(g.getActiveNodes());
 			for(int i=0;i<n;i++){
@@ -102,15 +110,15 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int varIdx, int mask) throws ContradictionException {
-		int v = varIdx%n;
-		ISet s = g.getNeighborsOf(v);
-		for(int i=s.getFirstElement();i>=0;i=s.getNextElement()){
-			if(disjoint(v, i)){
-				g.removeEdge(v,i);
+		if(varIdx<4*n){int v = varIdx%n;
+			if(!toCompute.contain(v)){
+				toCompute.add(v);
 			}
-		}
-		if(!toCompute.contain(v)){
-			toCompute.add(v);
+		}else{
+			toCompute.clear();
+			for(int i=0;i<n;i++){
+				toCompute.add(i);
+			}
 		}
 		forcePropagate(EventType.CUSTOM_PROPAGATION);
 	}
@@ -124,60 +132,120 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 		tasks.add(taskIndex);
 		ISet env = g.getNeighborsOf(taskIndex);
 		for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			tasks.add(i);
+			if(disjoint(taskIndex,i)){
+				g.removeEdge(taskIndex,i);
+			}else{
+				tasks.add(i);
+			}
 		}
-		energyOn(tasks);
 		sweepOn(tasks);
+		energyOn(tasks);
 	}
 
 	protected void sweepOn(ISet tasks) throws ContradictionException {
-		if(tasks.getSize()>1){
-			int k = tasks.getSize();
-			IntVar[] varsLocal = new IntVar[k*4];
-			int idx = 0;
-			for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
-				varsLocal[idx]   = s[i];
-				varsLocal[idx+k] = d[i];
-				varsLocal[idx+2*k] = e[i];
-				varsLocal[idx+3*k] = h[i];
-				idx++;
+		// todo add sweep algorithm once fixed
+		naiveFilter(tasks);
+	}
+
+	private void naiveFilter(ISet tasks) throws ContradictionException {
+		int min = Integer.MAX_VALUE/2;
+		int max = Integer.MIN_VALUE/2;
+		for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
+			if(s[i].getUB()<e[i].getLB()){
+				min = Math.min(min,s[i].getUB());
+				max = Math.max(max,e[i].getLB());
 			}
-			StaticSweep ss = new StaticSweep(varsLocal,capa.getUB(),this,0,aCause);
-			ss.mainLoop();
+		}
+		if(min<max){
+			int[] time = new int[max-min];
+			int capaMax = capa.getUB();
+			for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
+					for(int t=s[i].getUB();t<e[i].getLB();t++){
+						time[t-min] += h[i].getLB();
+						// checker
+						if(time[t-min]>capaMax){
+							contradiction(s[i],"");
+						}
+					}
+			}
+			for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
+				if(d[i].getLB()>0 && h[i].getLB()>0){
+					// filters
+					if(s[i].getLB()+d[i].getLB()>min){
+						filterInf(i, min, max, time, capaMax);
+					}
+					if(e[i].getUB()-d[i].getLB()<max){
+						filterSup(i, min, max, time, capaMax);
+					}
+				}
+			}
+		}
+	}
+
+	private void filterInf(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		int nbOk = 0;
+		for(int t=s[i].getLB() ;t<s[i].getUB();t++){
+			if(t<min || t>=max || h[i].getLB()+time[t-min]<=capaMax){
+				nbOk ++;
+				if(nbOk==d[i].getLB()){
+					return;
+				}
+			}else{
+				nbOk = 0;
+				s[i].updateLowerBound(t+1,aCause);
+			}
+		}
+	}
+
+	private void filterSup(int i, int min, int max, int[] time, int capaMax) throws ContradictionException {
+		int nbOk = 0;
+		for(int t=e[i].getUB() ;t>e[i].getLB();t--){
+			if(t-1<min || t-1>=max || h[i].getLB()+time[t-min-1]<=capaMax){
+				nbOk ++;
+				if(nbOk==d[i].getLB()){
+					return;
+				}
+			}else{
+				nbOk = 0;
+				e[i].updateUpperBound(t-1,aCause);
+			}
 		}
 	}
 
 	protected void energyOn(ISet tasks) throws ContradictionException {
-		int xMin = -99999;
-		int xMax =  99999;
+		int xMin = Integer.MAX_VALUE/2;
+		int xMax = Integer.MIN_VALUE/2;
 		int surface =   0;
 		int camax = capa.getUB();
 		for(int i=tasks.getFirstElement();i>=0;i=tasks.getNextElement()){
 			surface += d[i].getLB()*h[i].getLB();
 			xMax = Math.max(xMax,e[i].getUB());
 			xMin = Math.min(xMin,s[i].getLB());
-			if(surface>(xMax-xMin)*camax){
-				contradiction(vars[0],"");
+			if(xMax>=xMin && surface>(xMax-xMin)*camax){
+				contradiction(vars[i],"");
 			}
 		}
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if (!isCompletelyInstantiated()) {
+		if(!isCompletelyInstantiated()){
 			return ESat.UNDEFINED;
 		}
+		int min = s[0].getUB();
+		int max = e[0].getLB();
 		for(int i=0;i<n;i++){
-			int x = s[i].getValue();
-			int y = e[i].getValue();
-			for(int t=x;t<y;t++){
-				int conso = h[i].getValue();
-				for(int j=0;j<n;j++){
-					if(i!=j && s[j].getValue()>=t && e[j].getValue()<t){
-						conso+=h[j].getValue();
-					}
-				}
-				if(conso>capa.getValue()){
+			min = Math.min(min,s[i].getUB());
+			max = Math.max(max,e[i].getLB());
+		}
+		if(max<=min){
+			return ESat.TRUE;
+		}
+		int[] consoMin = new int[max-min];
+		for(int i=0;i<n;i++){
+			for(int t=s[i].getUB();t<e[i].getLB();t++){
+				consoMin[t-min] += h[i].getLB();
+				if(consoMin[t-min]>capa.getUB()){
 					return ESat.FALSE;
 				}
 			}
@@ -187,7 +255,7 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("CumulativePropSweep(");
+		StringBuilder sb = new StringBuilder("CumulativeGraphProp(");
 		sb.append("");
 		for (int i = 0; i < n; i++) {
 			if (i > 0) sb.append(",");
