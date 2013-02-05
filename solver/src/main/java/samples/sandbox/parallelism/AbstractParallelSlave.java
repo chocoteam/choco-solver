@@ -25,66 +25,53 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.parallelism;
+package samples.sandbox.parallelism;
 
-/**
- * Master a set of slaves which will work in parallel
- * @param <S>
+/**Slave born to be mastered and work in parallel
+ * @author Jean-Guillaume Fages
  */
-public class AbstractParallelMaster<S extends AbstractParallelSlave> {
+public abstract class AbstractParallelSlave {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected S[] slaves;
-	private int nbWorkingSlaves;
-	private Thread mainThread;
-	private boolean wait;
-
-	public AbstractParallelMaster(){
-		mainThread = Thread.currentThread();
-	}
+	private AbstractParallelMaster master;
+	public final int id;
 
 	//***********************************************************************************
-	// DISTRIBUTED METHODS
+	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Make the slaves work in parallel
+	 * Create a slave born to be mastered and work in parallel
+	 * @param master
+	 * @param id slave unique name
 	 */
-	public void distributedSlavery() {
-		nbWorkingSlaves = slaves.length;
-		for(int i=0;i<slaves.length;i++){
-			slaves[i].workInParallel();
-		}
-		wait = true;
-		try {
-			while(wait)
-				mainThread.sleep(20);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
+	public AbstractParallelSlave(AbstractParallelMaster master, int id){
+		this.master = master;
+		this.id = id;
+	}
+
+	//***********************************************************************************
+	// SUB-PROBLEM SOLVING
+	//***********************************************************************************
+
+	/**
+	 * Creates a new thread to work in parallel
+	 */
+	public void workInParallel() {
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				work();
+				master.wishGranted();
+			}
+		});
+		t.start();
 	}
 
 	/**
-	 * Make the slaves work in sequence
+	 * do something
 	 */
-	public void sequentialSlavery() {
-		nbWorkingSlaves = slaves.length;
-		for(int i=0;i<slaves.length;i++){
-			slaves[i].work();
-		}
-	}
-
-	/**
-	 * A slave notify the master that he fulfilled his task
-	 */
-	public synchronized void wishGranted() {
-		nbWorkingSlaves--;
-		if(nbWorkingSlaves == 0){
-			wait = false;
-		}
-	}
+	public abstract void work();
 }

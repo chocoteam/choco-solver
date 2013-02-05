@@ -25,53 +25,66 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.parallelism;
+package samples.sandbox.parallelism;
 
-/**Slave born to be mastered and work in parallel
- * @author Jean-Guillaume Fages
+/**
+ * Master a set of slaves which will work in parallel
+ * @param <S>
  */
-public abstract class AbstractParallelSlave {
+public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private AbstractParallelMaster master;
-	public final int id;
+	protected S[] slaves;
+	private int nbWorkingSlaves;
+	private Thread mainThread;
+	private boolean wait;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
-
-	/**
-	 * Create a slave born to be mastered and work in parallel
-	 * @param master
-	 * @param id slave unique name
-	 */
-	public AbstractParallelSlave(AbstractParallelMaster master, int id){
-		this.master = master;
-		this.id = id;
+	public AbstractParallelMaster(){
+		mainThread = Thread.currentThread();
 	}
 
 	//***********************************************************************************
-	// SUB-PROBLEM SOLVING
+	// DISTRIBUTED METHODS
 	//***********************************************************************************
 
 	/**
-	 * Creates a new thread to work in parallel
+	 * Make the slaves work in parallel
 	 */
-	public void workInParallel() {
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				work();
-				master.wishGranted();
-			}
-		});
-		t.start();
+	public void distributedSlavery() {
+		nbWorkingSlaves = slaves.length;
+		for(int i=0;i<slaves.length;i++){
+			slaves[i].workInParallel();
+		}
+		wait = true;
+		try {
+			while(wait)
+				mainThread.sleep(20);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 	}
 
 	/**
-	 * do something
+	 * Make the slaves work in sequence
 	 */
-	public abstract void work();
+	public void sequentialSlavery() {
+		nbWorkingSlaves = slaves.length;
+		for(int i=0;i<slaves.length;i++){
+			slaves[i].work();
+		}
+	}
+
+	/**
+	 * A slave notify the master that he fulfilled his task
+	 */
+	public synchronized void wishGranted() {
+		nbWorkingSlaves--;
+		if(nbWorkingSlaves == 0){
+			wait = false;
+		}
+	}
 }

@@ -29,7 +29,7 @@ package samples.sandbox.lns.parallel;
 
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.parallelism.AbstractParallelMaster;
+import samples.sandbox.parallelism.AbstractParallelMaster;
 import samples.sandbox.graph.input.TSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
