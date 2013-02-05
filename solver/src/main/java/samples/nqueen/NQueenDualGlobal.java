@@ -27,9 +27,7 @@
 
 package samples.nqueen;
 
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -62,18 +60,18 @@ public class NQueenDualGlobal extends AbstractNQueen {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(ConstraintFactory.eq(diag1[i], vars[i], i, solver));
-            solver.post(ConstraintFactory.eq(diag2[i], vars[i], -i, solver));
+            solver.post(IntConstraintFactory.arithm(diag1[i], "=", vars[i], "+", i));
+            solver.post(IntConstraintFactory.arithm(diag2[i], "=", vars[i], "-", i));
 
-            solver.post(ConstraintFactory.eq(dualdiag1[i], dualvars[i], i, solver));
-            solver.post(ConstraintFactory.eq(dualdiag2[i], dualvars[i], -i, solver));
+            solver.post(IntConstraintFactory.arithm(dualdiag1[i], "=", dualvars[i], "+", i));
+            solver.post(IntConstraintFactory.arithm(dualdiag2[i], "=", dualvars[i], "-", i));
         }
-        solver.post(new AllDifferent(diag1, solver));
-        solver.post(new AllDifferent(diag2, solver));
-        solver.post(new AllDifferent(dualdiag1, solver));
-        solver.post(new AllDifferent(dualdiag2, solver));
+        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(dualdiag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(dualdiag2, "BC"));
 
-        solver.post(new InverseChanneling(vars, dualvars,1,1, solver));
+        solver.post(IntConstraintFactory.channeling(vars, 1, dualvars, 1));
     }
 
 

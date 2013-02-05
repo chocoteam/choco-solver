@@ -32,8 +32,7 @@ import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -100,12 +99,12 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.post(new AllDifferent(tvars, solver));
+            solver.post(IntConstraintFactory.alldifferent(tvars, "BC"));
         }
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, "<=", -duration);
     }
 
     @Override
