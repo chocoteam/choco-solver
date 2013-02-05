@@ -51,6 +51,7 @@ public class Task {
 	//***********************************************************************************
 
 	private IntVar start, duration, end;
+	private IVariableMonitor update;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -59,16 +60,14 @@ public class Task {
 	/**
 	 * Container representing a task:
 	 * It ensures that: start + duration = end
-	 * The initial update may rise a ContradictionException
 	 * @param s start variable
 	 * @param d duration variable
 	 * @param e end variable
 	 */
-	public Task(IntVar s, IntVar d, IntVar e) throws ContradictionException {
+	public Task(IntVar s, IntVar d, IntVar e) {
 		start = s;
 		duration = d;
 		end = e;
-		IVariableMonitor update;
 		if(s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()){
 			update = new IVariableMonitor() {
 				@Override
@@ -106,8 +105,18 @@ public class Task {
 		start.addMonitor(update);
 		duration.addMonitor(update);
 		end.addMonitor(update);
-		// initial update:
-		update.onUpdate(null,null, Cause.Null);
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	/**
+	 * Applies BC-filtering so that start + duration = end
+	 * @throws ContradictionException
+	 */
+	public void ensureBoundConsistency() throws ContradictionException {
+		update.onUpdate(start,EventType.REMOVE, Cause.Null);
 	}
 
 	//***********************************************************************************

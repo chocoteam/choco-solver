@@ -405,13 +405,12 @@ public enum VariableFactory {
 
 	/**
 	 * Build a Task software component (not a variable) which ensures that START + DURATION = END
-	 * Rises a ContradictionException if START + DURATION cannot be equal to END
 	 * @param START IntVar representing the start of the task
 	 * @param DURATION IntVar representing the duration of the task
 	 * @param END IntVar representing the end of the task
 	 * @return A task Object ensuring that START + DURATION = END
 	 */
-	public static Task task(IntVar START, IntVar DURATION, IntVar END) throws ContradictionException {
+	public static Task task(IntVar START, IntVar DURATION, IntVar END) {
 		return new Task(START,DURATION,END);
 	}
 
