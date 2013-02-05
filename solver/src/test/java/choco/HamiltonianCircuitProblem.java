@@ -371,7 +371,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        solver.post(new AllDifferent(vars, solver, AllDifferent.Type.NEQS), IntConstraintFactory.no_sub_tours(vars));
+        solver.post(IntConstraintFactory.circuit(vars));
         Boolean status = solver.findAllSolutions();
         if (status == null) {
             return -1;

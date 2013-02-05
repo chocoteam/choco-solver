@@ -853,15 +853,6 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Ensures that graph defined by VARS has no subcircuit.
-     *
-     * @param VARS collection of variables
-     */
-    public static NoSubTours no_sub_tours(IntVar[] VARS) {
-        return new NoSubTours(VARS, VARS[0].getSolver());
-    }
-
-    /**
      * Let N be the number of distinct values assigned to the variables of the VARS collection.
      * Enforce condition N = NVALUES to hold.
      * <p/>

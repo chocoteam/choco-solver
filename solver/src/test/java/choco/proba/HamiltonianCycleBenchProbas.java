@@ -63,10 +63,9 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
             allVars[k++] = preds[i];
         }
         // contraintes
-        this.cstrs[0] = new AllDifferent(vars, solver, type);
-        this.cstrs[2] = new AllDifferent(preds, solver, type);
-        this.cstrs[1] = IntConstraintFactory.no_sub_tours(vars);
-        this.cstrs[3] = IntConstraintFactory.channeling(this.vars, preds);
+        this.cstrs[0] = IntConstraintFactory.circuit(vars);
+        this.cstrs[1] = new AllDifferent(preds, solver, type);
+        this.cstrs[2] = IntConstraintFactory.channeling(this.vars, preds);
     }
 }
 
