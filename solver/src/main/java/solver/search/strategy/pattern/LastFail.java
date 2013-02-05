@@ -29,7 +29,7 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
@@ -43,7 +43,7 @@ import solver.variables.Variable;
  *
  * @author Jean-Guillaume Fages
  */
-public class LastFail extends AbstractStrategy<Variable> implements IMonitorOpenNode, IMonitorRestart, IMonitorSolution {
+public class LastFail extends AbstractStrategy<Variable> implements IMonitorRestart, IMonitorSolution, IMonitorDownBranch {
 
     //***********************************************************************************
     // VARIABLES
@@ -85,12 +85,20 @@ public class LastFail extends AbstractStrategy<Variable> implements IMonitorOpen
     //***********************************************************************************
 
     @Override
-    public void beforeOpenNode() {
+    public void beforeDownLeftBranch() {
+        lastVar = solver.getSearchLoop().decision.getDecisionVariable();
     }
 
     @Override
-    public void afterOpenNode() {
-        lastVar = solver.getSearchLoop().decision.getDecisionVariable();
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+    }
+
+    @Override
+    public void afterDownRightBranch() {
     }
 
     @Override

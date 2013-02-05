@@ -28,7 +28,7 @@ package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.set.hash.TIntHashSet;
@@ -104,6 +104,38 @@ public class PropAmongGAC extends Propagator<IntVar> {
     }
 
     @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            if (varIdx == nb_vars) {
+                return true;
+            } else {
+                needFilter = false;
+                if (EventType.isInstantiate(mask)) {
+                    if (both.get(varIdx)) {
+                        IntVar var = vars[varIdx];
+                        int val = var.getValue();
+                        if (setValues.contains(val)) {
+                            LB.add(1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        } else {
+                            UB.add(-1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        }
+                    }
+                } else {
+                    idms[varIdx].freeze();
+                    idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                    idms[varIdx].unfreeze();
+                }
+                return needFilter;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void propagate(int evtmask) throws ContradictionException {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             int lb = 0;
@@ -125,11 +157,11 @@ public class PropAmongGAC extends Propagator<IntVar> {
             }
             LB.set(lb);
             UB.set(ub);
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
         }
         filter();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     protected void filter() throws ContradictionException {
@@ -154,33 +186,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (varIdx == nb_vars) {
-            filter();
-        } else {
-            needFilter = false;
-            if (EventType.isInstantiate(mask)) {
-                if (both.get(varIdx)) {
-                    IntVar var = vars[varIdx];
-                    int val = var.getValue();
-                    if (setValues.contains(val)) {
-                        LB.add(1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    } else {
-                        UB.add(-1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    }
-                }
-            } else {
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-            }
-            if (needFilter) {
-                filter();
-            }
-        }
+        filter();
     }
 
     /**
@@ -189,7 +195,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
      * @throws ContradictionException if contradiction occurs.
      */
     private void removeOnlyValues() throws ContradictionException {
-        int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
@@ -267,7 +272,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    protected static class RemProc implements UnaryIntProcedure<Integer> {
+    protected static class RemProc implements UnarySafeIntProcedure<Integer> {
 
         final PropAmongGAC p;
         int varIdx;
@@ -277,13 +282,13 @@ public class PropAmongGAC extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer integer) {
+        public UnarySafeIntProcedure set(Integer integer) {
             varIdx = integer;
             return this;
         }
 
         @Override
-        public void execute(int val) throws ContradictionException {
+        public void execute(int val) {
             if (p.both.get(varIdx)) {
                 if (p.setValues.contains(val)) {
                     p.occs[varIdx].add(-1);

@@ -390,6 +390,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             size *= vars[i].getDomainSize();
             assert size > 0 : "Search space is not correct!";
         }
+        if (size == Double.POSITIVE_INFINITY) {
+            size = Double.MAX_VALUE;
+        }
         return size;
     }
 

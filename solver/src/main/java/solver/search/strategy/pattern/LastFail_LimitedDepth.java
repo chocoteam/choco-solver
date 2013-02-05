@@ -75,7 +75,7 @@ public class LastFail_LimitedDepth extends LastFail {
     }
 
     @Override
-    public void afterOpenNode() {
+    public void beforeDownLeftBranch() {
         lastVar = solver.getSearchLoop().decision.getDecisionVariable();
         worldIndex = solver.getEnvironment().getWorldIndex();
     }

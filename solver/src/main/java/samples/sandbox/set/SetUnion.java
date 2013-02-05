@@ -25,41 +25,59 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.pattern;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 14/01/13
+ * Time: 18:25
+ */
+
+package samples.sandbox.set;
 
 import solver.Solver;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.Variable;
+import solver.constraints.set.SetConstraintsFactory;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.StrategyFactory;
+import solver.variables.SetVar;
+import solver.variables.SetVarImpl;
 
-/**
- * Last fail which considers the last applied OR UNAPPLIED decision
- *
- * @author Jean-Guillaume Fages
- */
-public class LastFail_decisiondeduction extends LastFail {
+public class SetUnion {
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	public static void main(String[] args){
+		Solver solver = new Solver();
+		SetVar x = new SetVarImpl("x",solver) ;
+		SetVar y = new SetVarImpl("y",solver) ;
+		SetVar z = new SetVarImpl("z",solver) ;
 
-    public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy) {
-        super(solver, mainStrategy);
-    }
+		x.getEnvelope().add(2);
+		x.getEnvelope().add(1);
+		x.getEnvelope().add(3);
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+		y.getEnvelope().add(6);
+		y.getEnvelope().add(2);
+		y.getEnvelope().add(7);
 
-    long nbFails;
+		z.getEnvelope().add(1);
+		z.getEnvelope().add(2);
+		z.getEnvelope().add(5);
+		z.getEnvelope().add(7);
+		z.getEnvelope().add(3);
 
-    @Override
-    public void beforeDownRightBranch() {
-        nbFails = solver.getMeasures().getFailCount();
-    }
+//		x.getKernel().add(3);
+//		z.getKernel().add(7);
 
-    @Override
-    public void afterDownRightBranch() {
-        if (nbFails != solver.getMeasures().getFailCount())
-            lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-    }
+		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z, solver));
+//		solver.post(SetConstraintsFactory.intersection(new SetVar[]{x, y}, z, solver));
+		solver.set(StrategyFactory.setLex(new SetVar[]{x,y,z}));
+		SearchMonitorFactory.log(solver, true, false);
+
+
+		solver.findSolution();
+//		solver.findAllSolutions();
+		do{
+			System.out.println(x.getEnvelope()+" "+x.instantiated());
+			System.out.println(y.getEnvelope()+" "+y.instantiated());
+			System.out.println(z.getEnvelope()+" "+z.instantiated());
+		}while (solver.nextSolution());
+	}
 }

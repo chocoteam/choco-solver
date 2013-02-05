@@ -29,9 +29,11 @@ package solver.constraints.nary;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -114,6 +116,25 @@ public class AmongTest {
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
+    }
+
+    @Test
+    public void test4() {
+        Solver solver = new Solver();
+        IntVar[] vars = VariableFactory.enumeratedArray("o", 4, new int[]{0, 1, 2, 5}, solver);
+        int[] values = {1, 2, 0};
+        IntVar occ = VariableFactory.bounded("oc", 0, 4, solver);
+        solver.post(IntConstraintFactory.among(occ, vars, values));
+        try {
+            solver.propagate();
+
+            vars[0].removeValue(1, Cause.Null);
+            vars[0].removeValue(2, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        solver.findAllSolutions();
     }
 
     public long randomOcc(long nbsol, int seed, boolean enumvar, int nbtest, boolean gac) {

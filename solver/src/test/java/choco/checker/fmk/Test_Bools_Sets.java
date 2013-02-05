@@ -25,41 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.pattern;
+package choco.checker.fmk;
 
-import solver.Solver;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.Variable;
+import org.testng.annotations.Test;
+import solver.search.loop.SearchLoops;
+
 
 /**
- * Last fail which considers the last applied OR UNAPPLIED decision
- *
  * @author Jean-Guillaume Fages
+ * @since 01/13
  */
-public class LastFail_decisiondeduction extends LastFail {
+public class Test_Bools_Sets {
+	private SearchLoops slType; // search loop type default value
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	public Test_Bools_Sets() {
+		this.slType = SearchLoops.BINARY;
+	}
 
-    public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy) {
-        super(solver, mainStrategy);
-    }
+	public Test_Bools_Sets(SearchLoops sl) {
+		this.slType = slType;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    long nbFails;
-
-    @Override
-    public void beforeDownRightBranch() {
-        nbFails = solver.getMeasures().getFailCount();
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        if (nbFails != solver.getMeasures().getFailCount())
-            lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	@Test(groups = "10s")
+	public void testBOOL_SUM() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+				Correctness.checkCorrectness(Model.boolSum, n, -n / 2, 2 * n, seed, null);
+			}
+		}
+	}
+	@Test(groups = "1m")
+	public void testSETS() {
+		for (int i = 0; i < 10; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+				Correctness.checkCorrectness(Model.setUnion, n, -n / 2, 2 * n, seed, null);
+				Correctness.checkCorrectness(Model.setInter, n, -n / 2, 2 * n, seed, null);
+				Correctness.checkCorrectness(Model.setDisj, n, -n / 2, 2 * n, seed, null);
+				Correctness.checkCorrectness(Model.setDiff, n, -n / 2, 2 * n, seed, null);
+				Correctness.checkCorrectness(Model.setSubSet, n, -n / 2, 2 * n, seed, null);
+				Correctness.checkCorrectness(Model.setAllEq, n, -n / 2, 2 * n, seed, null);
+			}
+		}
+	}
 }

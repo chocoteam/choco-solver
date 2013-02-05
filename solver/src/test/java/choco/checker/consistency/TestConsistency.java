@@ -25,8 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package choco.checker.consistency;
 
+import choco.checker.Modeler;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -37,21 +38,21 @@ import solver.variables.EventType;
 
 import java.io.IOException;
 
-import static choco.checker.ConsistencyChecker.checkConsistency;
+import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
 
 /**
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public class TestCompletenessConsistency {
+public class TestConsistency {
 
     private SearchLoops slType; // search loop type default value
 
-    public TestCompletenessConsistency() {
+    public TestConsistency() {
         this.slType = SearchLoops.BINARY;
     }
 
-    public TestCompletenessConsistency(SearchLoops peType) {
+    public TestConsistency(SearchLoops peType) {
         this.slType = peType;
     }
 

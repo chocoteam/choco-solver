@@ -55,7 +55,7 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
 
     protected V var;
 
-    protected Decision<V> assignment;
+//    protected Decision<V> assignment; //WTF???
 
     protected int branch;
 

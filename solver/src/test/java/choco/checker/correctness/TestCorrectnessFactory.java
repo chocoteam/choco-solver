@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package choco.checker.correctness;
 
 import org.testng.annotations.Factory;
 import solver.search.loop.SearchLoops;
@@ -39,14 +39,14 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-public class TestCompletenessConsistencyFactory {
-
+public class TestCorrectnessFactory {
 
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
-      for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCompletenessConsistency(sl));
+
+        for (SearchLoops sl : SearchLoops.values()) {
+            lresult.add(new TestCorrectness(sl));
         }
         return lresult.toArray();
     }

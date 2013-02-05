@@ -25,8 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package choco.checker.consistency;
 
+import choco.checker.Modeler;
 import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;

@@ -25,41 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.pattern;
+package choco.checker.consistency;
 
-import solver.Solver;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.Variable;
+import org.testng.annotations.Factory;
+import solver.search.loop.SearchLoops;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Last fail which considers the last applied OR UNAPPLIED decision
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @since 1 oct. 2010
  */
-public class LastFail_decisiondeduction extends LastFail {
+public class TestConsistencyFactory {
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
 
-    public LastFail_decisiondeduction(Solver solver, AbstractStrategy<Variable> mainStrategy) {
-        super(solver, mainStrategy);
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<Object>(12);
+      for (SearchLoops sl : SearchLoops.values()) {
+            lresult.add(new TestConsistency(sl));
+        }
+        return lresult.toArray();
     }
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    long nbFails;
-
-    @Override
-    public void beforeDownRightBranch() {
-        nbFails = solver.getMeasures().getFailCount();
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-        if (nbFails != solver.getMeasures().getFailCount())
-            lastVar = solver.getSearchLoop().decision.getDecisionVariable();
-    }
 }
