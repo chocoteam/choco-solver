@@ -38,6 +38,11 @@ package solver.constraints.real;/*
  */
 public class Ibex {
 
+    /* A contraction is considered as
+     * significant when at least 1% of a
+     * domain has been reduced */
+    public static final double RATIO = 0.01;
+
     /* Possible contraction strategies. */
     public static final int COMPO = 0;
     public static final int HC4 = 1;
@@ -47,14 +52,15 @@ public class Ibex {
     public static final int FAIL = 0;
     public static final int ENTAILED = 1;
     public static final int CONTRACT = 2;
-    public static final int NOT_SIGNIFICANT = 3;
-    public static final int INFLATE = 4;
-    public static final int ALL_IN = 5;
-    public static final int ALL_OUT = 6;
-    public static final int POINT_OUT = 7;
-    public static final int POINT_IN = 8;
-    public static final int POINT_UNKNOWN = 9;
 
+    /* Constant for both contraction & inflation. */
+    public static final int NOT_SIGNIFICANT = 3;
+
+    /* Constants for the status of a inflation. */
+    public static final int INFLATE = 4;
+    public static final int FULL_INFLATE = 5;
+    public static final int BAD_POINT = 6;
+    public static final int UNKNOWN_POINT = 7;
 
     /* Constants for describing a boolean domain (by an integer). */
     public static final int FALSE = 0;
@@ -107,31 +113,74 @@ public class Ibex {
      *               lower (resp. upper) bound of the domain of x_i.
      * @param reif   - Domain of the reification variable b with the following accepted values:
      *               FALSE, TRUE, FALSE_OR_TRUE.
-     * @return The status of contraction or fail/entailment test. Note that the name of the constant
-     *         in return refers to the constraint c, not R. Hence "FAIL" means that no tuple satisfies c (should
-     *         R be satisfiable or not).
+     * @return The status of contraction or fail/entailment test. Note that the name of the
+     *         constant in return refers to the constraint c, not R. Hence "FAIL" means that
+     *         no tuple satisfies c (should  R be satisfiable or not).
      *         <p/>
-     *         FAIL     - No tuple satisfies c. If reif==FALSE, the bounds of x may have been impacted (the part
-     *         of the domain inside c has been removed and the remaining part has been proven to be
-     *         outside c). If reif==TRUE, the bounds have not been impacted but we have to consider
-     *         that the domain has been reduced to the empty set. If reif==FALSE_OR_TRUE, bounds have
+     *         FAIL            - No tuple satisfies c. If reif==FALSE, the bounds of x may have been
+     *         impacted (the part of the domain inside c has been removed and the
+     *         remaining part has been proven to be outside c). If reif==TRUE, the
+     *         bounds have not been impacted but we have to consider that the domain
+     *         has been reduced to the empty set. If reif==FALSE_OR_TRUE, bounds have
      *         not been impacted.
      *         <p/>
-     *         ENTAILED - All the tuples satisfy the constraint. If reif==FALSE, the bounds have not been impacted
-     *         but we have to consider that the domain has been reduced to the empty set. If reif==TRUE,
-     *         the bounds of x may have been impacted (the part of the domain outside c has been removed
-     *         and the remaining part has been proven to be inside c). If reif==FALSE_OR_TRUE, bounds have
-     *         not been impacted.
+     *         ENTAILED        - All the tuples satisfy the constraint. If reif==FALSE, the bounds have
+     *         not been impacted but we have to consider that the domain has been
+     *         reduced to the empty set. If reif==TRUE, the bounds of x may have been
+     *         impacted (the part of the domain outside c has been removed and the
+     *         remaining part has been proven to be inside c). If reif==FALSE_OR_TRUE,
+     *         bounds have not been impacted.
      *         <p/>
-     *         CONTRACT - This value can only be returned if reif==FALSE or reif==TRUE. At least one bound of x has
-     *         been reduced by more than 0.1%. If reif==FALSE, the removed part of the domain is inside c.
-     *         If reif==TRUE, the removed part is outside.
+     *         CONTRACT        - This value can only be returned if reif==FALSE or reif==TRUE. At least
+     *         one bound of x has been reduced by more than RATIO. If reif==FALSE, the
+     *         removed part of the domain is inside c. If reif==TRUE, the removed part
+     *         is outside.
      *         <p/>
-     *         NOT_SIGNIFICANT  - No bound has been reduced and nothing could be proven.
+     *         NOT_SIGNIFICANT - No bound has been reduced and nothing could be proven.
      */
     public native int contract(int i, double bounds[], int reif);
 
-    public native int inflate(int i, double point[], double bounds[], boolean in);
+
+    /**
+     * Inflate a point to a box with respect to a constraint or its negation.
+     * <p/>
+     * Given a constraint "c", we say that a point is "inside" (resp. "outside") if it satisfies
+     * (resp. does not satisfy) c. A box is said to be "inside"/"outside" if all its points are
+     * inside/outside c.
+     * <p/>
+     * This method takes an initial point "p" and an enclosing box "x". It tries to inflate p
+     * inside x with respect to a constraint "c" or its negation. That is, it builds a box "y",
+     * containing p and contained in "x":
+     * <br/>
+     * p &isin; y &sube; x
+     * <br/>
+     * If in==TRUE, y must be inside c. Otherwise, it must be outside.
+     *
+     * @param i      - Number of the constraint c (in the order of creation)
+     * @param bounds - The bounds of the enclosing box x under the following form:
+     *               (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
+     *               lower (resp. upper) bound of the domain of x_i.
+     * @param in     - TRUE if the box has to be inflated inside c (-> inner region),
+     *               FALSE if it has to be inflated outside c (-> forbidden region).
+     * @return The status of inflation. If in==TRUE (resp. FALSE):
+     *         <p/>
+     *         NOT_SIGNIFICANT - The point p has been proven to be inside (resp. outside). However, it
+     *         could not be inflated to a "significant" box y. A box y is considered to
+     *         be significant if, on <b>each</b> of its dimension, the width of the
+     *         interval y_i is at least RATIO times the width of x_i.
+     *         <p/>
+     *         INFLATE         - The point p has been inflated to a significant box y that is inside
+     *         (reps. outside) the constraint.
+     *         <p/>
+     *         FULL_INFLATE    - The whole box x has been proven to be inside (resp. outside).
+     *         <p/>
+     *         BAD_POINT       - No inflation was possible because p has been proven to be outside (resp.
+     *         inside).
+     *         <p/>
+     *         UNKWOWN_POINT   - No inflation at all could be done and it could even not be decided
+     *         whether p is inside or outside the constraint.
+     */
+    public native int inflate(int i, double p[], double bounds[], boolean in);
 
 
     /**
@@ -144,4 +193,5 @@ public class Ibex {
      * Free IBEX structures from memory
      */
     public native void release();
-}
+};
+

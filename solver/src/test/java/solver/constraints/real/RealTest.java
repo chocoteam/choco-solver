@@ -107,17 +107,17 @@ public class RealTest {
 
         domains = new double[]{0., 1., 0., 1.};
         Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
-        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.ALL_IN);
+        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.FULL_INFLATE);
         domains = new double[]{1., 2., 1., 2.};
-        Assert.assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.POINT_OUT);
+        Assert.assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.BAD_POINT);
         domains = new double[]{0., 1., -1., 0.};
         Assert.assertEquals(ibex.inflate(0, new double[]{1., 0.}, domains, true), Ibex.NOT_SIGNIFICANT);
 
         domains = new double[]{-1., 0., -1., 0.};
         Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.INFLATE);
-        Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.ALL_OUT);
+        Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.FULL_INFLATE);
         domains = new double[]{0., .5, 0., .5};
-        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.POINT_IN);
+        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
         domains = new double[]{0., 1.01, -1., 0.};
         Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
 
