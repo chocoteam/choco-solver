@@ -31,7 +31,7 @@ import choco.kernel.memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;
-import samples.graph.input.GraphGenerator;
+import samples.sandbox.graph.input.GraphGenerator;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;

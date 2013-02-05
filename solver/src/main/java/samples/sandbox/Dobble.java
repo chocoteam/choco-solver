@@ -32,7 +32,7 @@
  * Time: 16:13
  */
 
-package samples;
+package samples.sandbox;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;

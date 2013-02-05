@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.setDataStructures.ISet;
-import samples.graph.input.DCMST_Utils;
-import samples.graph.output.TextWriter;
+import samples.sandbox.graph.input.DCMST_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -105,7 +105,7 @@ public class DCMST {
     public static void main(String[] args) {
         //DE,DR,instanciasT
 //        bench("DR");
-		execute(dir,"DR","output.csv",60000);
+        execute(dir, "DR", "output.csv", 60000);
     }
 
     public static void bench(String type) {
@@ -146,15 +146,15 @@ public class DCMST {
         }
     }
 
-	public static void execute(String dir, String type, String output, long tl){
-		if (optGiven) {
+    public static void execute(String dir, String type, String output, long tl) {
+        if (optGiven) {
             search = 0;
         } else {
             search = 1;
         }
-		outFile = output;
-		DCMST.dir = dir;
-		TextWriter.clearFile(outFile);
+        outFile = output;
+        DCMST.dir = dir;
+        TextWriter.clearFile(outFile);
         TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
         File folder = new File(dir + "/" + type);
         String[] list = folder.list();
@@ -175,7 +175,7 @@ public class DCMST {
                 System.gc();
             }
         }
-	}
+    }
 
     public static boolean parse(File file, int nMin, int nMax, String dirOpt, String type, String s) {
         DCMST_Utils inst = new DCMST_Utils();

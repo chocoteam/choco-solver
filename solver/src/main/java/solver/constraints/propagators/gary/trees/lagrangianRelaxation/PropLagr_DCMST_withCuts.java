@@ -29,9 +29,10 @@ package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateDouble;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import samples.graph.DCMST;
+import samples.sandbox.graph.DCMST;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -43,7 +44,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
@@ -190,7 +191,7 @@ public class PropLagr_DCMST_withCuts extends Propagator implements GraphLagrangi
                         if (!oneNode.get(s)) {
                             counter[s]++;
                             if (counter[s] > maxDegree[s]) {
-								contradiction();
+                                contradiction();
 //                                throw new UnsupportedOperationException();
                                 // contradiction mais devrait deja avoir ete capturee
                             }
@@ -202,7 +203,7 @@ public class PropLagr_DCMST_withCuts extends Propagator implements GraphLagrangi
                                 ctt /= 2;
                                 System.out.println(ctt + " edges in k / " + n);
                                 if (ctt != n - 1)
-									contradiction();
+                                    contradiction();
 //                                    throw new UnsupportedOperationException();
                                 // contradiction mais devrait deja avoir ete capturee
                             }

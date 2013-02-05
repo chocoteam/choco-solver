@@ -32,7 +32,7 @@
  * Time: 02:12
  */
 
-package samples.graph.output;
+package samples.sandbox.graph.output;
 
 import java.io.FileWriter;
 import java.io.IOException;

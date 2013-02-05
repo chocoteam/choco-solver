@@ -25,13 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.Environments;
 import choco.kernel.memory.setDataStructures.SetType;
-import samples.graph.input.TSP_Utils;
-import samples.graph.output.TextWriter;
+import samples.sandbox.graph.input.TSP_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
 import solver.SolverProperties;
 import solver.constraints.Constraint;

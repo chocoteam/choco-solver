@@ -32,7 +32,7 @@
  * Time: 14:03
  */
 
-package samples.graph.input;
+package samples.sandbox.graph.input;
 
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;

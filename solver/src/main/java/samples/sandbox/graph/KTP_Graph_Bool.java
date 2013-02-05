@@ -25,15 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import samples.graph.input.HCP_Utils;
-import samples.graph.output.TextWriter;
+import samples.sandbox.graph.input.HCP_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
