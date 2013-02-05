@@ -2,8 +2,7 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.NoSubTours;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -64,10 +63,9 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
             allVars[k++] = preds[i];
         }
         // contraintes
-        this.cstrs[0] = new AllDifferent(vars, solver, type);
-        this.cstrs[2] = new AllDifferent(preds, solver, type);
-        this.cstrs[1] = new NoSubTours(vars, solver);
-        this.cstrs[3] = new InverseChanneling(this.vars, preds, solver);
+        this.cstrs[0] = IntConstraintFactory.circuit(vars);
+        this.cstrs[1] = new AllDifferent(preds, solver, type);
+        this.cstrs[2] = IntConstraintFactory.channeling(this.vars, preds);
     }
 }
 

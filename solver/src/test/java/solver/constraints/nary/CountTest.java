@@ -31,12 +31,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.MagicSeries;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.extension.LargeCSP;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -105,7 +103,7 @@ public class CountTest {
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Count(value, vars, Count.Relop.EQ, occ, solver));
+            solver.post(IntConstraintFactory.count(value, vars, "=", occ));
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -144,10 +142,10 @@ public class CountTest {
                 if (gac) {
                     solver.post(getTableForOccurence(solver, vs, ivc, val, sizeDom));
                 } else {
-                    solver.post(new Count(val, vs, Count.Relop.EQ, ivc, solver));
+                    solver.post(IntConstraintFactory.count(val, vs, "=", ivc));
                 }
             }
-            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -208,7 +206,7 @@ public class CountTest {
             offsets[i] = newvs[i].getLB();
         }
         LargeRelation relation = new IterTuplesTable(tuples, offsets, sizes);
-        return new LargeCSP(newvs, relation, LargeCSP.Type.AC32, solverO);
+        return IntConstraintFactory.table(newvs, relation, "AC32");
     }
 
     /**
@@ -223,10 +221,9 @@ public class CountTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = Views.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new Arithmetic(vs[i], "=", vval, solver),
-                    new Arithmetic(vs[i], "!=", vval, solver), solver));
+            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
-        return Sum.eq(bs, occ, solver);
+        return IntConstraintFactory.sum(bs, "=", occ);
     }
 
 }

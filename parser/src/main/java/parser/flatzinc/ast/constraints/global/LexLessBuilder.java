@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.lex.Lex;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -47,6 +47,6 @@ public class LexLessBuilder implements IBuilder {
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] xs = exps.get(0).toIntVarArray(solver);
         IntVar[] ys = exps.get(1).toIntVarArray(solver);
-        return new Lex(xs, ys, true, solver);
+        return IntConstraintFactory.lex_less(xs, ys);
     }
 }

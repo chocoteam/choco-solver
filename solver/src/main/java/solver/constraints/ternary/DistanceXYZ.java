@@ -29,6 +29,7 @@ package solver.constraints.ternary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.Operator;
 import solver.constraints.propagators.ternary.PropDistanceXYZ;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
@@ -41,31 +42,25 @@ import solver.variables.IntVar;
  */
 public class DistanceXYZ extends IntConstraint<IntVar> {
 
-    public static enum Relop {
-        EQ(0), LT(1), GT(2);
-        final int pval;
-
-        Relop(int pval) {
-            this.pval = pval;
-        }
-    }
-
-    Relop operator;
+    Operator operator;
 
 
-    public DistanceXYZ(IntVar x, IntVar y, Relop op, IntVar z, Solver solver) {
+    public DistanceXYZ(IntVar x, IntVar y, Operator op, IntVar z, Solver solver) {
         super(new IntVar[]{x, y, z}, solver);
+        if (op != Operator.EQ && op != Operator.GT && op != Operator.LT) {
+            throw new SolverException("Unexpected operator for distance");
+        }
         this.operator = op;
-        setPropagators(new PropDistanceXYZ(vars, op.pval, solver, this));
+        setPropagators(new PropDistanceXYZ(vars, op, solver, this));
     }
 
     @Override
     public ESat isSatisfied(int[] tuple) {
-        if (operator == Relop.EQ) {
+        if (operator == Operator.EQ) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) == tuple[2]);
-        } else if (operator == Relop.LT) {
+        } else if (operator == Operator.LT) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) < tuple[2]);
-        } else if (operator == Relop.GT) {
+        } else if (operator == Operator.GT) {
             return ESat.eval(Math.abs(tuple[0] - tuple[1]) > tuple[2]);
         } else {
             throw new SolverException("operator not known");

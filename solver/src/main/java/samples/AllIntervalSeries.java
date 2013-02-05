@@ -29,12 +29,9 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.ternary.DistanceXYZ;
-import solver.constraints.unary.Member;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -82,24 +79,24 @@ public class AllIntervalSeries extends AbstractProblem {
         if (!use_views) {
             dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
             for (int i = 0; i < m - 1; i++) {
-                solver.post(new DistanceXYZ(vars[i + 1], vars[i], DistanceXYZ.Relop.EQ, dist[i], solver));
+                solver.post(IntConstraintFactory.distance(vars[i + 1], vars[i], "=", dist[i]));
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
-                solver.post(new Member(dist[i], 1, m - 1, solver));
+                solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }
 
         ALLDIFF = new Constraint[2];
-        ALLDIFF[0] = (new AllDifferent(vars, solver));
-        ALLDIFF[1] = (new AllDifferent(dist, solver));
+        ALLDIFF[0] = (IntConstraintFactory.alldifferent(vars, "BC"));
+        ALLDIFF[1] = (IntConstraintFactory.alldifferent(dist, "BC"));
         solver.post(ALLDIFF);
 
         // break symetries
         OTHERS = new Constraint[2];
-        OTHERS[0] = (new Arithmetic(vars[1], ">", vars[0], solver));
-        OTHERS[1] = (new Arithmetic(dist[0], ">", dist[m - 2], solver));
+        OTHERS[0] = (IntConstraintFactory.arithm(vars[1], ">", vars[0]));
+        OTHERS[1] = (IntConstraintFactory.arithm(dist[0], ">", dist[m - 2]));
         solver.post(OTHERS);
     }
 

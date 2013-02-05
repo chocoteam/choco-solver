@@ -30,7 +30,7 @@ package solver.explanations.samples;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -44,9 +44,9 @@ import solver.variables.VariableFactory;
  */
 public class ExplainedOCProblem extends AbstractProblem {
 
-    IntVar[] vars ;
+    IntVar[] vars;
     int n = 4;
-    int vals = n-1;
+    int vals = n - 1;
 
     @Override
     public void createSolver() {
@@ -55,10 +55,10 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2*n, 1, vals, solver);
+        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
         for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n ; j++)
-                solver.post(new Arithmetic(vars[2 * i], "!=", vars[2 * j], solver));
+            for (int j = i + 1; j < n; j++)
+                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
         }
     }
 
@@ -101,7 +101,7 @@ public class ExplainedOCProblem extends AbstractProblem {
         }
     }
 
-     public static void main(String[] args) {
+    public static void main(String[] args) {
         new ExplainedOCProblem().execute(args);
     }
 }

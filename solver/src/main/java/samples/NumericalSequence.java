@@ -28,9 +28,7 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.StrategyFactory;
@@ -65,13 +63,13 @@ public class NumericalSequence extends AbstractProblem {
         }
         for (int i = 1; i < n - 1; i++) {
             // U[i+1] = U[U[i]-1]-1
-            solver.post(new Element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
+            solver.post(IntConstraintFactory.element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1));
         }
         for (int i = 1; i < n / 2; i++) {
             // U[n + 1 - i] = n+ 1 - U[i]
-            solver.post(new Arithmetic(U[n - 1 - i], "+", U[i], "=", n + 1, solver));
+            solver.post(IntConstraintFactory.arithm(U[n - 1 - i], "+", U[i], "=", n + 1));
         }
-        solver.post(new AllDifferent(U, solver));
+        solver.post(IntConstraintFactory.alldifferent(U, "BC"));
     }
 
     @Override

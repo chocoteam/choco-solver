@@ -29,7 +29,7 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -56,9 +56,9 @@ public class Pigeons extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("p", n, 1, n - 1, solver);
 
-        for (int i = 0; i < n-1; i++) {
-            for (int j = i + 1; j < n ; j++) {
-                solver.post(new Arithmetic(vars[i], "!=", vars[j], solver));
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));
             }
         }
     }

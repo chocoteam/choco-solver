@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -52,6 +52,6 @@ public class BoolXorBuilder implements IBuilder {
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
 
-        return new ConjunctiveNormalForm(Node.reified(Literal.pos(r), Node.xor(Literal.pos(a), Literal.pos(b))), solver);
+        return IntConstraintFactory.clauses(Node.reified(Literal.pos(r), Node.xor(Literal.pos(a), Literal.pos(b))), solver);
     }
 }

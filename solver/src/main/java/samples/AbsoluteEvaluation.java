@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Absolute;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -71,7 +71,7 @@ public class AbsoluteEvaluation extends AbstractProblem {
         vars[0] = VariableFactory.bounded("X", minX, maxX, solver);
         vars[1] = VariableFactory.bounded("Y", minY, maxY, solver);
 
-        Constraint abs = new Absolute(vars[0], vars[1], solver);
+        Constraint abs = IntConstraintFactory.absolute(vars[0], vars[1]);
         solver.post(abs);
 
 

@@ -32,7 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -63,7 +63,7 @@ public class CumulativeBuilder implements IBuilder {
                         starts[i].getLB() + durations[i].getLB(),
                         starts[i].getUB() + durations[i].getUB(),
                         solver);
-                solver.post(Sum.eq(new IntVar[]{starts[i], durations[i]}, ends[i], solver));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{starts[i], durations[i]}, "=", ends[i]));
                 decomp = true;
             }
             if (!resources[i].instantiated()) {

@@ -30,15 +30,10 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -98,43 +93,33 @@ public class OpenStacks extends AbstractProblem {
     public void buildModel() {
         setUp();
         scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
-        solver.post(new AllDifferent(scheds, solver));
+        solver.post(IntConstraintFactory.alldifferent(scheds, "BC"));
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
             o[i] = VariableFactory.enumeratedArray("o_" + i, np + 1, 0, norders[i], solver);
             // no order at t = 0
-            solver.post(ConstraintFactory.eq(o[i][0], 0, solver));
+            solver.post(IntConstraintFactory.arithm(o[i][0], "=", 0));
         }
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
-                solver.post(new Element(value, orders[i], scheds[t - 1], 0, solver));
-                solver.post(Sum.eq(new IntVar[]{o[i][t - 1], value}, o[i][t], solver));
+                solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1], 0));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]));
             }
         }
         o2b = VariableFactory.boolMatrix("b", np, nc, solver);
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
-                solver.post(new ReifiedConstraint(
-                        btmp[0],
-                        ConstraintFactory.lt(o[i][j - 1], Views.fixed(norders[i], solver), solver),
-                        ConstraintFactory.geq(o[i][j - 1], Views.fixed(norders[i], solver), solver),
-                        solver));
-                solver.post(new ReifiedConstraint(
-                        btmp[1],
-                        ConstraintFactory.gt(o[i][j], Views.fixed(0, solver), solver),
-                        ConstraintFactory.leq(o[i][j], Views.fixed(0, solver), solver),
-                        solver));
-                solver.post(new ConjunctiveNormalForm(
-                        Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))),
-                        solver));
+                solver.post(IntConstraintFactory.reified(btmp[0], IntConstraintFactory.arithm(o[i][j - 1], "<", Views.fixed(norders[i], solver)), IntConstraintFactory.arithm(o[i][j - 1], ">=", Views.fixed(norders[i], solver))));
+                solver.post(IntConstraintFactory.reified(btmp[1], IntConstraintFactory.arithm(o[i][j], ">", Views.fixed(0, solver)), IntConstraintFactory.arithm(o[i][j], "<=", Views.fixed(0, solver))));
+                solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
             }
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);
         for (int i = 0; i < np; i++) {
-            solver.post(Sum.eq(o2b[i], open[i], solver));
+            solver.post(IntConstraintFactory.sum(o2b[i], "=", open[i]));
         }
 
 

@@ -50,134 +50,136 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * Propagator for Member constraint: iv is in set
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropIntMemberSet extends Propagator<Variable>{
+public class PropIntMemberSet extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IntVar iv;
-	private SetVar set;
-	private SetDeltaMonitor sdm;
-	private IntProcedure elemRem;
+    private IntVar iv;
+    private SetVar set;
+    private SetDeltaMonitor sdm;
+    private IntProcedure elemRem;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Propagator for Member constraint
-	 * val(intVar) is in setVar
-	 * @param setVar
-	 * @param intVar
-	 * @param solver
-	 * @param c
-	 */
-	public PropIntMemberSet(SetVar setVar, IntVar intVar, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,intVar}, solver, c, PropagatorPriority.BINARY);
-		this.iv = intVar;
-		this.set = setVar;
-		this.sdm = setVar.monitorDelta(this);
-		elemRem = new IntProcedure() {
-			@Override
-			public void execute(int i) throws ContradictionException {
-				iv.removeValue(i,aCause);
-			}
-		};
-	}
+    /**
+     * Propagator for Member constraint
+     * val(intVar) is in setVar
+     *
+     * @param setVar
+     * @param intVar
+     * @param solver
+     * @param c
+     */
+    public PropIntMemberSet(SetVar setVar, IntVar intVar, Solver solver, Constraint c) {
+        super(new Variable[]{setVar, intVar}, solver, c, PropagatorPriority.BINARY);
+        this.iv = intVar;
+        this.set = setVar;
+        this.sdm = setVar.monitorDelta(this);
+        elemRem = new IntProcedure() {
+            @Override
+            public void execute(int i) throws ContradictionException {
+                iv.removeValue(i, aCause);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVE_FROM_ENVELOPE.mask+EventType.INSTANTIATE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INSTANTIATE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if(iv.instantiated()){
-			set.addToKernel(iv.getValue(),aCause);
-			setPassive();
-			return;
-		}
-		ISet tmp = set.getEnvelope();
-		int maxVal = tmp.getFirstElement();
-		int minVal = maxVal;
-		for(int j=maxVal;j>=0;j=tmp.getNextElement()){
-			if(maxVal<j){
-				maxVal = j;
-			}
-			if(minVal>j){
-				minVal = j;
-			}
-		}
-		iv.updateUpperBound(maxVal,aCause);
-		iv.updateLowerBound(minVal,aCause);
-		minVal = iv.getLB();
-		maxVal = iv.getUB();
-		for(int i=minVal;i<=maxVal;i=iv.nextValue(i)){
-			if(!set.getEnvelope().contain(i)){
-				iv.removeValue(i,aCause);
-			}
-		}
-		if(iv.instantiated()){
-			set.addToKernel(iv.getValue(),aCause);
-			setPassive();
-		}
-		sdm.unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if (iv.instantiated()) {
+            set.addToKernel(iv.getValue(), aCause);
+            setPassive();
+            return;
+        }
+        ISet tmp = set.getEnvelope();
+        int maxVal = tmp.getFirstElement();
+        int minVal = maxVal;
+        for (int j = maxVal; j >= 0; j = tmp.getNextElement()) {
+            if (maxVal < j) {
+                maxVal = j;
+            }
+            if (minVal > j) {
+                minVal = j;
+            }
+        }
+        iv.updateUpperBound(maxVal, aCause);
+        iv.updateLowerBound(minVal, aCause);
+        minVal = iv.getLB();
+        maxVal = iv.getUB();
+        for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
+            if (!set.getEnvelope().contain(i)) {
+                iv.removeValue(i, aCause);
+            }
+        }
+        if (iv.instantiated()) {
+            set.addToKernel(iv.getValue(), aCause);
+            setPassive();
+        }
+        sdm.unfreeze();
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		if(i==1){
-			set.addToKernel(iv.getValue(),aCause);
-			setPassive();
-		}else{
-			sdm.freeze();
-			sdm.forEach(elemRem,EventType.REMOVE_FROM_ENVELOPE);
-			sdm.unfreeze();
-			if(iv.instantiated()){
-				set.addToKernel(iv.getValue(),aCause);
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        if (i == 1) {
+            set.addToKernel(iv.getValue(), aCause);
+            setPassive();
+        } else {
+            sdm.freeze();
+            sdm.forEach(elemRem, EventType.REMOVE_FROM_ENVELOPE);
+            sdm.unfreeze();
+            if (iv.instantiated()) {
+                set.addToKernel(iv.getValue(), aCause);
+                setPassive();
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if(iv.instantiated()){
-			if(!set.getEnvelope().contain(iv.getValue())){
-				return ESat.FALSE;
-			}else{
-				if(set.instantiated()){
-					return ESat.TRUE;
-				}else{
-					return ESat.UNDEFINED;
-				}
-			}
-		}else{
-			int minVal = iv.getLB();
-			int maxVal = iv.getUB();
-			boolean all = true;
-			for(int i=minVal;i<=maxVal;i=iv.nextValue(i)){
-				if(!set.getKernel().contain(i)){
-					all = false;
-					break;
-				}
-			}
-			if(all){
-				return ESat.TRUE;
-			}
-			for(int i=minVal;i<=maxVal;i=iv.nextValue(i)){
-				if(set.getEnvelope().contain(i)){
-					return ESat.UNDEFINED;
-				}
-			}
-			return ESat.FALSE;
-		}
-	}
+    @Override
+    public ESat isEntailed() {
+        if (iv.instantiated()) {
+            if (!set.getEnvelope().contain(iv.getValue())) {
+                return ESat.FALSE;
+            } else {
+                if (set.instantiated()) {
+                    return ESat.TRUE;
+                } else {
+                    return ESat.UNDEFINED;
+                }
+            }
+        } else {
+            int minVal = iv.getLB();
+            int maxVal = iv.getUB();
+            boolean all = true;
+            for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
+                if (!set.getKernel().contain(i)) {
+                    all = false;
+                    break;
+                }
+            }
+            if (all) {
+                return ESat.TRUE;
+            }
+            for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
+                if (set.getEnvelope().contain(i)) {
+                    return ESat.UNDEFINED;
+                }
+            }
+            return ESat.FALSE;
+        }
+    }
 }

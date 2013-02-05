@@ -31,9 +31,7 @@ import choco.kernel.common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.enumerations.sorters.ImpactBased;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -55,9 +53,6 @@ public class MagicSquare extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic square size.", required = false)
     int n = 5;
-
-    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar[] vars;
 
@@ -90,21 +85,21 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(new AllDifferent(vars, solver, type));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
-            solver.post(Sum.eq(matrix[i], coeffs, ms, solver));
-            solver.post(Sum.eq(invMatrix[i], coeffs, ms, solver));
+            solver.post(IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms));
+            solver.post(IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms));
         }
-        solver.post(Sum.eq(diag1, coeffs, ms, solver));
-        solver.post(Sum.eq(diag2, coeffs, ms, solver));
+        solver.post(IntConstraintFactory.scalar(diag1, coeffs, "=", ms));
+        solver.post(IntConstraintFactory.scalar(diag2, coeffs, "=", ms));
 
         // Symetries breaking
-        solver.post(ConstraintFactory.lt(matrix[0][n - 1], matrix[n - 1][0], solver));
-        solver.post(ConstraintFactory.lt(matrix[0][0], matrix[n - 1][n - 1], solver));
-        solver.post(ConstraintFactory.lt(matrix[0][0], matrix[n - 1][0], solver));
+        solver.post(IntConstraintFactory.arithm(matrix[0][n - 1], "<", matrix[n - 1][0]));
+        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][n - 1]));
+        solver.post(IntConstraintFactory.arithm(matrix[0][0], "<", matrix[n - 1][0]));
 
     }
 

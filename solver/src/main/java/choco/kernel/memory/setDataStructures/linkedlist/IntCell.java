@@ -27,12 +27,14 @@
 
 package choco.kernel.memory.setDataStructures.linkedlist;
 
+import java.io.Serializable;
+
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 f�vr. 2011
  */
-public class IntCell {
+public class IntCell implements Serializable {
 
     int element;
     IntCell next;

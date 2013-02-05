@@ -30,10 +30,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -104,13 +102,13 @@ public class BIBD extends AbstractProblem {
         // r ones per row
         IntVar R = Views.fixed(r, solver);
         for (int i = 0; i < v; i++) {
-            solver.post(new Count(1, vars[i], Count.Relop.EQ, R, solver));
+            solver.post(IntConstraintFactory.count(1, vars[i], "=", R));
             //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
         IntVar K = Views.fixed(k, solver);
         for (int j = 0; j < b; j++) {
-            solver.post(new Count(1, _vars[j], Count.Relop.EQ, K, solver));
+            solver.post(IntConstraintFactory.count(1, _vars[j], "=", K));
             //solver.post(Sum.eq(_vars[j], K, solver));
         }
 
@@ -120,10 +118,10 @@ public class BIBD extends AbstractProblem {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
                 for (int j = 0; j < b; j++) {
-                    solver.post(new Times(_vars[j][i1], _vars[j][i2], score[j], solver));
+                    solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
                 //solver.post(new Count(1, score, Count.Relop.EQ, L, solver));
-                solver.post(Sum.eq(score, L, solver));
+                solver.post(IntConstraintFactory.sum(score, "=", L));
             }
         }
         // Symmetry breaking

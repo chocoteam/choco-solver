@@ -285,7 +285,7 @@ public final class StrategyFactory {
         return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.ARCS);
     }
 
-	public static SetSearchStrategy setLex(SetVar[] sets){
-		return new SetSearchStrategy(sets);
-	}
+    public static SetSearchStrategy setLex(SetVar[] sets) {
+        return new SetSearchStrategy(sets);
+    }
 }

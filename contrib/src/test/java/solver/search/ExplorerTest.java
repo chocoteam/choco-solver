@@ -29,8 +29,8 @@ package solver.search;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.Explore;
 import solver.variables.IntVar;
@@ -50,7 +50,7 @@ public class ExplorerTest {
         IntVar[] ivars = VariableFactory.enumeratedArray("x", n, 1, n, solver);
         Constraint[] icons = new Constraint[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            icons[i] = new Arithmetic(ivars[i], "!=", ivars[i + 1], solver);
+            icons[i] = IntConstraintFactory.arithm(ivars[i], "!=", ivars[i + 1]);
         }
         solver.post(icons);
         Explore exp = new Explore(solver, ivars);

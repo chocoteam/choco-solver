@@ -46,84 +46,86 @@ import solver.variables.SetVar;
 
 /**
  * At most one set can be empty
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropAtMost1Empty extends Propagator<SetVar>{
+public class PropAtMost1Empty extends Propagator<SetVar> {
 
-	private IStateInt emptySetIndex;
+    private IStateInt emptySetIndex;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * At most one set in the array sets can be empty
-	 * @param sets
-	 * @param solver
-	 * @param c
-	 */
-	public PropAtMost1Empty(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(sets, solver, c, PropagatorPriority.UNARY);
-		emptySetIndex = environment.makeInt(-1);
-	}
+    /**
+     * At most one set in the array sets can be empty
+     *
+     * @param sets
+     * @param solver
+     * @param c
+     */
+    public PropAtMost1Empty(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(sets, solver, c, PropagatorPriority.UNARY);
+        emptySetIndex = environment.makeInt(-1);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVE_FROM_ENVELOPE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVE_FROM_ENVELOPE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		for(int i=0;i<vars.length;i++){
-			propagate(i,0);
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < vars.length; i++) {
+            propagate(i, 0);
+        }
+    }
 
-	@Override
-	public void propagate(int v, int mask) throws ContradictionException {
-		if(vars[v].getEnvelope().getSize()==0){
-			if(emptySetIndex.get()!=-1){
-				contradiction(vars[v],"");
-			}else{
-				emptySetIndex.set(v);
-				for(int i=0;i<vars.length;i++){
-					int s = vars[i].getEnvelope().getSize();
-					if(i!=v && s!=vars[i].getKernel().getSize()){
-						if(s==0){
-							contradiction(vars[i],"");
-						}else if(s==1){
-							vars[i].addToKernel(vars[i].getEnvelope().getFirstElement(),aCause);
-						}
-					}
-				}
-			}
-		}
-		if(vars[v].getEnvelope().getSize()==1 && emptySetIndex.get()!=-1){
-			vars[v].addToKernel(vars[v].getEnvelope().getFirstElement(),aCause);
-		}
-	}
+    @Override
+    public void propagate(int v, int mask) throws ContradictionException {
+        if (vars[v].getEnvelope().getSize() == 0) {
+            if (emptySetIndex.get() != -1) {
+                contradiction(vars[v], "");
+            } else {
+                emptySetIndex.set(v);
+                for (int i = 0; i < vars.length; i++) {
+                    int s = vars[i].getEnvelope().getSize();
+                    if (i != v && s != vars[i].getKernel().getSize()) {
+                        if (s == 0) {
+                            contradiction(vars[i], "");
+                        } else if (s == 1) {
+                            vars[i].addToKernel(vars[i].getEnvelope().getFirstElement(), aCause);
+                        }
+                    }
+                }
+            }
+        }
+        if (vars[v].getEnvelope().getSize() == 1 && emptySetIndex.get() != -1) {
+            vars[v].addToKernel(vars[v].getEnvelope().getFirstElement(), aCause);
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		boolean none = true;
-		boolean allInstantiated = true;
-		for(int i=0;i<vars.length;i++){
-			if(vars[i].getEnvelope().getSize()==0){
-				if(!none){
-					return ESat.FALSE;
-				}
-				none = false;
-			}else if(!vars[i].instantiated()){
-				allInstantiated = false;
-			}
-		}
-		if(allInstantiated){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        boolean none = true;
+        boolean allInstantiated = true;
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i].getEnvelope().getSize() == 0) {
+                if (!none) {
+                    return ESat.FALSE;
+                }
+                none = false;
+            } else if (!vars[i].instantiated()) {
+                allInstantiated = false;
+            }
+        }
+        if (allInstantiated) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

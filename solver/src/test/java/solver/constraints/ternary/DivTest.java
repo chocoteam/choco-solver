@@ -28,6 +28,7 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 /**
@@ -36,15 +37,15 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 16/07/12
  */
-public class DivTest extends AbstractTernaryTest{
+public class DivTest extends AbstractTernaryTest {
 
     @Override
     protected int validTuple(int vx, int vy, int vz) {
-        return vy!=0 && vz == vx / vy?1:0;
+        return vy != 0 && vz == vx / vy ? 1 : 0;
     }
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return new DivXYZ(vars[0], vars[1], vars[2], solver);
+        return IntConstraintFactory.eucl_div(vars[0], vars[1], vars[2]);
     }
 }

@@ -40,10 +40,18 @@ import solver.variables.IntVar;
  */
 public class BinCSP extends IntConstraint<IntVar> {
 
+    public enum Algorithm {
+        AC2001
+    }
 
-    public BinCSP(IntVar x, IntVar y, BinRelation relation) {
+
+    public BinCSP(IntVar x, IntVar y, BinRelation relation, Algorithm algo) {
         super(new IntVar[]{x, y}, x.getSolver());
-        setPropagators(new PropBinAC2001(x, y, relation, solver, this));
+        switch (algo) {
+            case AC2001:
+            default:
+                setPropagators(new PropBinAC2001(x, y, relation, solver, this));
+        }
     }
 
     @Override

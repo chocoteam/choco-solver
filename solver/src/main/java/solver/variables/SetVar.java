@@ -106,10 +106,11 @@ public interface SetVar extends Variable<SetDelta> {
      */
     int[] getValue();
 
-	/**
-	 * Allow propagator to monitor element removal/enforcing of this
-	 * @param propagator
-	 * @return a new SetDeltaMonitor
-	 */
-	public SetDeltaMonitor monitorDelta(ICause propagator);
+    /**
+     * Allow propagator to monitor element removal/enforcing of this
+     *
+     * @param propagator
+     * @return a new SetDeltaMonitor
+     */
+    public SetDeltaMonitor monitorDelta(ICause propagator);
 }

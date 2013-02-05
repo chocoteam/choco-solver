@@ -78,8 +78,8 @@ public class DynamicPostTest {
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.post(new Arithmetic(X, "=", Y, solver));
-                    solver.post(new Arithmetic(Y, "=", Z, solver));
+                    solver.post(IntConstraintFactory.arithm(X, "=", Y));
+                    solver.post(IntConstraintFactory.arithm(Y, "=", Z));
                 }
             }
         });
@@ -102,8 +102,8 @@ public class DynamicPostTest {
             @Override
             public void afterOpenNode() {
                 if (solver.getMeasures().getNodeCount() == 1) {
-                    solver.postCut(new Arithmetic(X, "=", Y, solver));
-                    solver.postCut(new Arithmetic(Y, "=", Z, solver));
+                    solver.postCut(IntConstraintFactory.arithm(X, "=", Y));
+                    solver.postCut(IntConstraintFactory.arithm(Y, "=", Z));
                 }
             }
         });

@@ -32,8 +32,9 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
+
 import java.util.List;
 
 /**
@@ -44,13 +45,13 @@ public class DiffNBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-		IntVar[] x = exps.get(0).toIntVarArray(solver);
-		IntVar[] y = exps.get(1).toIntVarArray(solver);
-		IntVar[] dx = exps.get(2).toIntVarArray(solver);
-		IntVar[] dy = exps.get(3).toIntVarArray(solver);
+        IntVar[] x = exps.get(0).toIntVarArray(solver);
+        IntVar[] y = exps.get(1).toIntVarArray(solver);
+        IntVar[] dx = exps.get(2).toIntVarArray(solver);
+        IntVar[] dy = exps.get(3).toIntVarArray(solver);
         if (x.length == 1) {
             return null;
         }
-        return ConstraintFactory.diffn(x,y,dx,dy, solver);
+        return IntConstraintFactory.diffn(x, y, dx, dy);
     }
 }

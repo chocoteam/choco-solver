@@ -30,12 +30,9 @@ import choco.checker.DomainBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.ternary.Max;
 import solver.search.strategy.StrategyFactory;
 
 import java.util.Random;
@@ -50,34 +47,19 @@ public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
         BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
-        solver.post(new ReifiedConstraint(
-                bs[0],
-                ConstraintFactory.eq(z, x, solver),
-                ConstraintFactory.neq(z, x, solver),
-                solver));
-        solver.post(new ReifiedConstraint(
-                bs[1],
-                ConstraintFactory.eq(z, y, solver),
-                ConstraintFactory.neq(z, y, solver),
-                solver));
-        solver.post(new ReifiedConstraint(
-                bs[2],
-                ConstraintFactory.geq(x, y, solver),
-                ConstraintFactory.lt(x, y, solver),
-                solver));
-        solver.post(new ConjunctiveNormalForm(
-                Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
-                        Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))),
-                solver
-        ));
+        solver.post(IntConstraintFactory.reified(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
+        solver.post(IntConstraintFactory.reified(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
+        solver.post(IntConstraintFactory.reified(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+        solver.post(IntConstraintFactory.clauses(Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
+                Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))), solver));
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
-        solver.post(new Max(z, x, y, solver));
+        solver.post(IntConstraintFactory.maximum(z, x, y));
     }
 
     @Test
-    public void testMax1(){
+    public void testMax1() {
         Random random = new Random();
         for (int seed = 1; seed < 9999; seed++) {
             random.setSeed(seed);
@@ -104,13 +86,13 @@ public class MaxViewTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 
     @Test
-    public void testMax2(){
+    public void testMax2() {
         Random random = new Random();
         for (int seed = 0; seed < 9999; seed++) {
             random.setSeed(seed);
@@ -138,8 +120,8 @@ public class MaxViewTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS (" + seed + ")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES (" + seed + ")");
         }
     }
 }

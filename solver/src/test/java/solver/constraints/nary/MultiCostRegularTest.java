@@ -30,8 +30,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.MultiCostRegular;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -114,7 +114,7 @@ public class MultiCostRegularTest {
         }
         this.costMatrix = csts;
 
-        solver.post(new MultiCostRegular(sequence, bounds, auto, costMatrix, solver));
+        solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, auto, costMatrix));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
         solver.set(StrategyFactory.random(ArrayUtils.append(sequence, bounds), solver.getEnvironment(), seed));
         return solver;
@@ -127,7 +127,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(5, i + seed);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4, "seed:"+(seed+i));
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4, "seed:" + (seed + i));
         }
     }
 
@@ -137,7 +137,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(7, i);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 6, "seed:"+(seed+i));
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 6, "seed:" + (seed + i));
         }
     }
 
@@ -147,7 +147,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(14, i);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 141, "seed:"+(seed+i));
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 141, "seed:" + (seed + i));
         }
     }
 
@@ -157,7 +157,7 @@ public class MultiCostRegularTest {
         for (int i = 0; i < 2000; i++) {
             Solver solver = make(21, i);
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 85, "seed:"+(seed+i));
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 85, "seed:" + (seed + i));
         }
     }
 

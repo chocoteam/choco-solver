@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -60,6 +60,6 @@ public class BoolClauseBuilder implements IBuilder {
             lits[i + al] = Literal.neg(bs[i]);
         }
 
-        return new ConjunctiveNormalForm(Node.or(lits), solver);
+        return IntConstraintFactory.clauses(Node.or(lits), solver);
     }
 }

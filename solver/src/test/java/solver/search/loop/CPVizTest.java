@@ -29,14 +29,7 @@ package solver.search.loop;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.GlobalCardinality;
-import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.channeling.DomainChanneling;
-import solver.constraints.nary.lex.Lex;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.*;
 import solver.variables.BoolVar;
@@ -63,9 +56,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
         s.findAllSolutions();
@@ -81,9 +74,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -113,9 +106,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -145,9 +138,9 @@ public class CPVizTest {
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                s.post(new Arithmetic(Q[i], "!=", Q[j], s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "+", k, s));
-                s.post(new Arithmetic(Q[i], "!=", Q[j], "-", k, s));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j]));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "+", k));
+                s.post(IntConstraintFactory.arithm(Q[i], "!=", Q[j], "-", k));
             }
         }
 
@@ -183,11 +176,11 @@ public class CPVizTest {
         R = VariableFactory.enumerated("R", 0, 9, solver);
         Y = VariableFactory.enumerated("Y", 0, 9, solver);
 
-        solver.post(new Arithmetic(S, "!=", 0, solver));
-        solver.post(new Arithmetic(M, "!=", 0, solver));
-        solver.post(new Arithmetic(S, "!=", 0, solver));
-        solver.post(new Arithmetic(M, "!=", 0, solver));
-        solver.post(new AllDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, solver));
+        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
+        solver.post(IntConstraintFactory.alldifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
 
 
         IntVar[] ALL = new IntVar[]{
@@ -199,7 +192,7 @@ public class CPVizTest {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(Sum.eq(ALL, COEFFS, 0, solver));
+        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, "=", 0));
 
         Visualization visu = new Visualization("AllDifferent", solver, dir + "/out");
 
@@ -221,7 +214,7 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 0, 4, -10};
         IntVar index = VariableFactory.enumerated("index", -3, 10, s);
         IntVar value = VariableFactory.enumerated("value", -20, 20, s);
-        s.post(new Element(index, values, value, s));
+        s.post(IntConstraintFactory.element(index, values, value));
 
         Visualization visu = new Visualization("Element", s, dir + "/out");
 
@@ -240,7 +233,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(new DomainChanneling(bool, var, s));
+        s.post(IntConstraintFactory.channeling(bool, var));
 
         Visualization visu = new Visualization("BinaryVector", s, dir + "/out");
 
@@ -266,25 +259,25 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(new AllDifferent(ArrayUtils.flatten(vars), s));
+        s.post(IntConstraintFactory.alldifferent(ArrayUtils.flatten(vars), "BC"));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
             // All rows must be equal to the magic sum
-            s.post(Sum.eq(vars[i], ms, s));
+            s.post(IntConstraintFactory.sum(vars[i], "=", ms));
             // All columns must be equal to the magic sum
-            s.post(Sum.eq(ArrayUtils.getColumn(vars, i), ms, s));
+            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), "=", ms));
             //record diagonals variable
             varDiag1[i] = vars[i][i];
             varDiag2[i] = vars[(n - 1) - i][i];
         }
         // Every diagonal have to be equal to the magic sum
-        s.post(Sum.eq(varDiag1, ms, s));
-        s.post(Sum.eq(varDiag2, ms, s));
+        s.post(IntConstraintFactory.sum(varDiag1, "=", ms));
+        s.post(IntConstraintFactory.sum(varDiag2, "=", ms));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
-        s.post(new Arithmetic(vars[0][0], "<", vars[0][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][0], s));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][0]));
 
         Visualization visu = new Visualization("DomainMatrix", s, dir + "/out");
 
@@ -309,25 +302,25 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(new AllDifferent(ArrayUtils.flatten(vars), s));
+        s.post(IntConstraintFactory.alldifferent(ArrayUtils.flatten(vars), "BC"));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
             // All rows must be equal to the magic sum
-            s.post(Sum.eq(vars[i], ms, s));
+            s.post(IntConstraintFactory.sum(vars[i], "=", ms));
             // All columns must be equal to the magic sum
-            s.post(Sum.eq(ArrayUtils.getColumn(vars, i), ms, s));
+            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), "=", ms));
             //record diagonals variable
             varDiag1[i] = vars[i][i];
             varDiag2[i] = vars[(n - 1) - i][i];
         }
         // Every diagonal have to be equal to the magic sum
-        s.post(Sum.eq(varDiag1, ms, s));
-        s.post(Sum.eq(varDiag2, ms, s));
+        s.post(IntConstraintFactory.sum(varDiag1, "=", ms));
+        s.post(IntConstraintFactory.sum(varDiag2, "=", ms));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
-        s.post(new Arithmetic(vars[0][0], "<", vars[0][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][n - 1], s));
-        s.post(new Arithmetic(vars[0][0], "<", vars[n - 1][0], s));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));
+        s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][0]));
 
 
         Visualization visu = new Visualization("AllDifferentMatrix", s, dir + "/out");
@@ -353,9 +346,9 @@ public class CPVizTest {
         BoolVar[][] bool = new BoolVar[n][n];
         for (int i = 0; i < n; i++) {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
-            solver.post(new DomainChanneling(bool[i], var[i], solver));
+            solver.post(IntConstraintFactory.channeling(bool[i], var[i]));
         }
-        solver.post(new AllDifferent(var, solver));
+        solver.post(IntConstraintFactory.alldifferent(var, "BC"));
 
         Visualization visu = new Visualization("BinaryMatrix", solver, dir + "/out");
 
@@ -376,7 +369,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(new DomainChanneling(bool, var, s));
+        s.post(IntConstraintFactory.channeling(bool, var));
 
         Visualization visu = new Visualization("BoolChanneling", s, dir + "/out");
 
@@ -428,7 +421,7 @@ public class CPVizTest {
 
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 1, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 1, s);
-        s.post(new Lex(X, Y, false, s));
+        s.post(IntConstraintFactory.lex_less_eq(X, Y));
 
         Visualization visu = new Visualization("LexLe", s, dir + "/out");
         visu.createTree();
@@ -447,7 +440,7 @@ public class CPVizTest {
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 2, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 2, s);
 
-        s.post(new InverseChanneling(X, Y, s));
+        s.post(IntConstraintFactory.channeling(X, Y));
 
         Visualization visu = new Visualization("Inverse", s, dir + "/out");
         visu.createTree();
@@ -470,7 +463,7 @@ public class CPVizTest {
         int[] low = new int[]{0, 1, 0};
         int[] up = new int[]{1, 2, 1};
 
-        s.post(GlobalCardinality.make(X, low, up, -1, GlobalCardinality.Consistency.BC, s));
+        s.post(IntConstraintFactory.global_cardinality_low_up(X, values, low, up, false, "BC"));
 
         Visualization visu = new Visualization("Gcc", s, dir + "/out");
         visu.createTree();

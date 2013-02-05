@@ -61,7 +61,7 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
      */
     public abstract boolean isValid(V var, int value);
 
-	// INTEGERS 
+    // INTEGERS
     public static DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
 
         @Override
@@ -176,8 +176,8 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
     };
 
 
-	// SETS
-	public static DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
+    // SETS
+    public static DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
 
         @Override
         public void apply(SetVar var, int element, ICause cause) throws ContradictionException {

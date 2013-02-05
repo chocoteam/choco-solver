@@ -272,20 +272,20 @@ public enum VariableFactory {
         return new IntVar[]{start, duration, end};
     }
 
-	// SETS
-	public static SetVar set(String name, Solver solver){
-		return new SetVarImpl(name,solver) ;
-	}
+    // SETS
+    public static SetVar set(String name, Solver solver) {
+        return new SetVarImpl(name, solver);
+    }
 
-	public static SetVar set(String name, ISet envelop, ISet kernel, Solver solver){
-		SetVar s = set(name,solver);
-		for(int i=envelop.getFirstElement();i>=0;i=envelop.getNextElement()){
-			s.getEnvelope().add(i);
-		}
-		if(kernel!=null)
-			for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
-				s.getKernel().add(i);
-			}
-		return s;
-	}
+    public static SetVar set(String name, ISet envelop, ISet kernel, Solver solver) {
+        SetVar s = set(name, solver);
+        for (int i = envelop.getFirstElement(); i >= 0; i = envelop.getNextElement()) {
+            s.getEnvelope().add(i);
+        }
+        if (kernel != null)
+            for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
+                s.getKernel().add(i);
+            }
+        return s;
+    }
 }

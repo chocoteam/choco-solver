@@ -48,115 +48,118 @@ import solver.variables.Variable;
 
 /**
  * Retrieves the minimum element of the set
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropMinElement extends Propagator<Variable>{
+public class PropMinElement extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IntVar min;
-	private SetVar set;
-	private int offSet;
-	private int[] weights;
+    private IntVar min;
+    private SetVar set;
+    private int offSet;
+    private int[] weights;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Retrieves the minimum element of the set
-	 * MIN(i | i in setVar) = min
-	 * @param setVar
-	 * @param min
-	 * @param solver
-	 * @param c
-	 */
-	public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
-		this(setVar,null,0,min,solver,c);
-	}
+    /**
+     * Retrieves the minimum element of the set
+     * MIN(i | i in setVar) = min
+     *
+     * @param setVar
+     * @param min
+     * @param solver
+     * @param c
+     */
+    public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
+        this(setVar, null, 0, min, solver, c);
+    }
 
-	/**
-	 * Retrieves the minimum element induced by setVar
-	 * MIN{weights[i-offSet] | i in setVar} = min
-	 * @param setVar
-	 * @param weights
-	 * @param offSet
-	 * @param min
-	 * @param solver
-	 * @param c
-	 */
-	public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,min}, solver, c, PropagatorPriority.BINARY);
-		this.min = min;
-		this.set = setVar;
-	}
+    /**
+     * Retrieves the minimum element induced by setVar
+     * MIN{weights[i-offSet] | i in setVar} = min
+     *
+     * @param setVar
+     * @param weights
+     * @param offSet
+     * @param min
+     * @param solver
+     * @param c
+     */
+    public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, Solver solver, Constraint c) {
+        super(new Variable[]{setVar, min}, solver, c, PropagatorPriority.BINARY);
+        this.min = min;
+        this.set = setVar;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0) return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-		else return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+        else return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			min.updateUpperBound(get(j),aCause);
-		}
-		tmp = set.getEnvelope();
-		int minVal = get(tmp.getFirstElement());
-		int lb = min.getLB();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			int k = get(j);
-			if(k<lb){
-				set.removeFromEnvelope(j,aCause);
-			}else{
-				if(minVal>k){
-					minVal = k;
-				}
-			}
-		}
-		min.updateLowerBound(minVal,aCause);
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            min.updateUpperBound(get(j), aCause);
+        }
+        tmp = set.getEnvelope();
+        int minVal = get(tmp.getFirstElement());
+        int lb = min.getLB();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            int k = get(j);
+            if (k < lb) {
+                set.removeFromEnvelope(j, aCause);
+            } else {
+                if (minVal > k) {
+                    minVal = k;
+                }
+            }
+        }
+        min.updateLowerBound(minVal, aCause);
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		propagate(0);
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        propagate(0);
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int lb = min.getLB();
-		int ub = min.getUB();
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(get(j)<lb){
-				return ESat.FALSE;
-			}
-		}
-		tmp = set.getEnvelope();
-		int minVal = get(tmp.getFirstElement());
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(minVal>get(j)){
-				minVal = get(j);
-			}
-		}
-		if(minVal>ub){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int lb = min.getLB();
+        int ub = min.getUB();
+        ISet tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (get(j) < lb) {
+                return ESat.FALSE;
+            }
+        }
+        tmp = set.getEnvelope();
+        int minVal = get(tmp.getFirstElement());
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (minVal > get(j)) {
+                minVal = get(j);
+            }
+        }
+        if (minVal > ub) {
+            return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	private int get(int j){
-		return (weights==null)?j:weights[j-offSet];
-	}
+    private int get(int j) {
+        return (weights == null) ? j : weights[j - offSet];
+    }
 }

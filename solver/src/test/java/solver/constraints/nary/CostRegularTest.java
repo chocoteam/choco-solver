@@ -29,7 +29,7 @@ package solver.constraints.nary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.automata.CostRegular;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.automata.FA.utils.Counter;
@@ -55,11 +55,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 10;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 3, 4, solver);
+        IntVar cost = VariableFactory.bounded("z", 3, 4, solver);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -80,7 +80,7 @@ public class CostRegularTest {
             costs[i][0][1] = 1;
             costs[i][1][1] = 1;
         }
-        solver.post(new CostRegular(vars, auto, costs, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -92,11 +92,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 10;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 3, 4, solver);
+        IntVar cost = VariableFactory.bounded("z", 3, 4, solver);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -121,7 +121,7 @@ public class CostRegularTest {
 
         auto.addCounter(c);
 
-        solver.post(new CostRegular(vars, auto, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -133,11 +133,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 28;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 0, 4, solver);
+        IntVar cost = VariableFactory.bounded("z", 0, 4, solver);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<String>();
@@ -170,7 +170,7 @@ public class CostRegularTest {
             costs[i][1] = 1;
         }
 
-        solver.post(new CostRegular(vars, auto, costs, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -182,11 +182,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 28;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 0, 4, solver);
+        IntVar cost = VariableFactory.bounded("z", 0, 4, solver);
 
         // different rules are formulated as patterns that must NOT be matched by x
         List<String> forbiddenRegExps = new ArrayList<String>();
@@ -222,7 +222,7 @@ public class CostRegularTest {
         ICounter c = new Counter(costs, 0, 4);
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
-        solver.post(new CostRegular(vars, cauto, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, cauto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -234,11 +234,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 12;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 10, 10, solver);
+        IntVar cost = VariableFactory.bounded("z", 10, 10, solver);
 
 
         FiniteAutomaton auto = new FiniteAutomaton();
@@ -262,7 +262,7 @@ public class CostRegularTest {
             }
         }
 
-        solver.post(new CostRegular(vars, auto, costs, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -276,11 +276,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 12;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 10, 10, solver);
+        IntVar cost = VariableFactory.bounded("z", 10, 10, solver);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -305,7 +305,7 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 10, 10));
 
-        solver.post(new CostRegular(vars, auto, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -319,11 +319,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 13;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 4, 6, solver);
+        IntVar cost = VariableFactory.bounded("z", 4, 6, solver);
 
         FiniteAutomaton auto = new FiniteAutomaton();
         int start = auto.addState();
@@ -344,7 +344,7 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
 
-        solver.post(new CostRegular(vars, auto, costs, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -357,11 +357,11 @@ public class CostRegularTest {
         Solver solver = new Solver();
 
         int n = 13;
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", 4, 6, solver);
+        IntVar cost = VariableFactory.bounded("z", 4, 6, solver);
 
         CostAutomaton auto = new CostAutomaton();
         int start = auto.addState();
@@ -384,7 +384,7 @@ public class CostRegularTest {
 
         auto.addCounter(new CounterState(costs, 4, 6));
 
-        solver.post(new CostRegular(vars, auto, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -409,13 +409,13 @@ public class CostRegularTest {
         }
 
         Solver solver = new Solver();
-        IntVar[] vars = new IntVar[n + 1];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        vars[n] = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
+        IntVar cost = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
 
-        solver.post(new CostRegular(vars, auto, c2, solver));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, c2));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();

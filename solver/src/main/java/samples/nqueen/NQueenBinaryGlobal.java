@@ -27,8 +27,7 @@
 
 package samples.nqueen;
 
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -48,12 +47,12 @@ public class NQueenBinaryGlobal extends AbstractNQueen {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
         }
 
-        solver.post(new AllDifferent(vars, solver));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
     }

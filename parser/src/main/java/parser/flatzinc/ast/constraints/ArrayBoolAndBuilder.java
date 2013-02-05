@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -52,7 +52,7 @@ public class ArrayBoolAndBuilder implements IBuilder {
         BoolVar r = exps.get(1).boolVarValue(solver);
 
         if (as.length == 0)
-            return new ConjunctiveNormalForm(Literal.pos(r), solver);
+            return IntConstraintFactory.clauses(Literal.pos(r), solver);
 
         Literal[] l_as = new Literal[as.length];
         for (int i = 0; i < as.length; i++) {
@@ -60,7 +60,7 @@ public class ArrayBoolAndBuilder implements IBuilder {
         }
         Literal l_r = Literal.pos(r);
 
-        return new ConjunctiveNormalForm(Node.reified(l_r, Node.and(l_as)), solver);
+        return IntConstraintFactory.clauses(Node.reified(l_r, Node.and(l_as)), solver);
 
     }
 }

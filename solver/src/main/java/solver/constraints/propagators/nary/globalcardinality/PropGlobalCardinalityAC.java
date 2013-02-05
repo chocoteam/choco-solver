@@ -43,7 +43,9 @@ import solver.variables.delta.IIntDeltaMonitor;
  *
  * @author Charles Prud'homme
  * @since 15/06/11
+ * @deprecated
  */
+@Deprecated
 public class PropGlobalCardinalityAC extends Propagator<IntVar> {
 
     public FlowStructure struct;
