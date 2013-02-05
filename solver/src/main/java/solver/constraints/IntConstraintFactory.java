@@ -985,6 +985,28 @@ public enum IntConstraintFactory {
     }
 
     /**
+     * Ensures that graph defined by VARS has no subcircuit.
+     *
+     * @param VARS collection of variables
+     */
+    public static NoSubTours no_sub_tours(IntVar[] VARS) {
+        return new NoSubTours(VARS, VARS[0].getSolver());
+    }
+
+    /**
+     * Enforces the sequence of VARS to be a word
+     * recognized by the deterministic finite automaton AUTOMATON.
+     * For example regexp = "(1|2)(3*)(4|5)";
+     * The same dfa can be used for different propagators.
+     *
+     * @param VARS      sequence of variables
+     * @param AUTOMATON a deterministic finite automaton defining the regular language
+     */
+    public static Regular regular(IntVar[] VARS, IAutomaton AUTOMATON) {
+        return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
+    }
+
+    /**
      * Ensures:<br/>
      * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
      * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
@@ -1001,6 +1023,7 @@ public enum IntConstraintFactory {
     public static ReifiedConstraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
         return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
+
 
     /**
      * Creates a subcircuit constraint which ensures that
@@ -1024,20 +1047,6 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropIndexValue(vars, offset, nbLoops, c, solver));
         c.addPropagators(new PropSubcircuit(vars, offset, subcircuitSize, c, solver));
         return c;
-    }
-
-
-    /**
-     * Enforces the sequence of VARS to be a word
-     * recognized by the deterministic finite automaton AUTOMATON.
-     * For example regexp = "(1|2)(3*)(4|5)";
-     * The same dfa can be used for different propagators.
-     *
-     * @param VARS      sequence of variables
-     * @param AUTOMATON a deterministic finite automaton defining the regular language
-     */
-    public static Regular regular(IntVar[] VARS, IAutomaton AUTOMATON) {
-        return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
     }
 
     /**

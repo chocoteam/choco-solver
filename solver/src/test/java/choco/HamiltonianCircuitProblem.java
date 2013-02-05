@@ -37,7 +37,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.NoSubTours;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -372,7 +371,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        solver.post(new AllDifferent(vars, solver, AllDifferent.Type.NEQS), new NoSubTours(vars, solver));
+        solver.post(new AllDifferent(vars, solver, AllDifferent.Type.NEQS), IntConstraintFactory.no_sub_tours(vars));
         Boolean status = solver.findAllSolutions();
         if (status == null) {
             return -1;

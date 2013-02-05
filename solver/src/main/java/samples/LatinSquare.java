@@ -97,8 +97,9 @@ public class LatinSquare extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
-        //SearchMonitorFactory.log(solver, true, true);        /*IPropagationEngine engine = solver.getEngine();
-				engine.addGroup(Group.buildQueue(
+        //SearchMonitorFactory.log(solver, true, true);
+        /*IPropagationEngine engine = solver.getEngine();
+                engine.addGroup(Group.buildQueue(
 						Predicates.member(vars), Policy.FIXPOINT
 				));*/
     }
