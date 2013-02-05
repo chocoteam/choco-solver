@@ -220,7 +220,7 @@ public class ATSP {
         initialUB = optimum;
         System.out.println(initialUB);
         System.out.println("initial UB : " + initialUB);
-        graph = new DirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
         try {
             for (int i = 0; i < n - 1; i++) {

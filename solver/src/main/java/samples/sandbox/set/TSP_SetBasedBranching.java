@@ -120,7 +120,7 @@ public class TSP_SetBasedBranching {
         solver.set(SearchPattern.LAST_FAIL);
         // variables
         totalCost = VariableFactory.bounded("obj", 0, upperBound, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         final SetVar[] sets = new SetVar[n];
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);

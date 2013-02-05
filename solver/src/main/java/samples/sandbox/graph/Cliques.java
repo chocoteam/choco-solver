@@ -90,7 +90,7 @@ public class Cliques {
 
     private static UndirectedGraphVar createGraphVar(boolean[][] adjMatrix, int x, int y, Solver solver) {
         int n = adjMatrix.length;
-        final UndirectedGraphVar g = new UndirectedGraphVar(solver, n, false);
+        final UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, false);
         for (int i = 0; i < n; i++) {
             g.getEnvelopGraph().activateNode(i);        // potential node
             g.getEnvelopGraph().addEdge(i, i);            // potential loop

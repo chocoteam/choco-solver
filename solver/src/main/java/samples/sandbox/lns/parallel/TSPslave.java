@@ -93,7 +93,7 @@ public class TSPslave extends AbstractParallelSlave {
         final Solver solver = new Solver();
         // variables
         final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n - 1; j++) {

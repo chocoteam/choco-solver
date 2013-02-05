@@ -133,7 +133,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
     private void basicModel() {
         // create model
-        graph = new DirectedGraphVar(solver, n, gt, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G",solver, n, gt, SetType.LINKED_LIST, true);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {

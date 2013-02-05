@@ -49,7 +49,7 @@ public class ArborescenceTest {
 
     public static Solver model(int n, int seed, boolean naive, boolean simple, long nbMaxSols) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer, false);
+        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, false);
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);

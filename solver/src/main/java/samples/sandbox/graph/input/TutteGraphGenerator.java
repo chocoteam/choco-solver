@@ -65,7 +65,7 @@ public class TutteGraphGenerator {
         int diam = 8;
         boolean[][] output = new boolean[n][n];
         Solver solver = new Solver();
-        UndirectedGraphVar g = new UndirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
         Constraint c = GraphConstraintFactory.makeConstraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
@@ -111,7 +111,7 @@ public class TutteGraphGenerator {
     public static ArrayList<int[][]> createAllTutteGraphs(final int n) {
         final ArrayList<int[][]> output = new ArrayList();
         Solver solver = new Solver();
-        final UndirectedGraphVar g = new UndirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
         Constraint c = GraphConstraintFactory.makeConstraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));

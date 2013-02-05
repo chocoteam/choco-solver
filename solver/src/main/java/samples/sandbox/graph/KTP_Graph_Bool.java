@@ -113,7 +113,7 @@ public class KTP_Graph_Bool {
         }
         solver = new Solver();
         // variables
-        UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (matrix[i][j]) {

@@ -123,7 +123,7 @@ public class HCP_symImpact {
         }
         solver = new Solver();
         // variables
-        UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (matrix[i][j]) {
@@ -172,7 +172,7 @@ public class HCP_symImpact {
         }
         solver = new Solver();
         // variables
-        DirectedGraphVar dir = new DirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        DirectedGraphVar dir = new DirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         dir.getKernelGraph().activateNode(n - 1);
         for (int i = 0; i < n - 1; i++) {
             dir.getKernelGraph().activateNode(i);

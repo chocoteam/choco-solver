@@ -86,7 +86,7 @@ public class Tree extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        g = new DirectedGraphVar(solver, n, gtype, SetType.LINKED_LIST, false);
+        g = new DirectedGraphVar("G",solver, n, gtype, SetType.LINKED_LIST, false);
         nTree = VariableFactory.enumerated("NTREE ", 1, 1, solver);
         try {
             for (int i = 0; i < n; i++) {
