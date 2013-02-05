@@ -29,7 +29,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -57,7 +57,7 @@ public class Ordering extends AbstractProblem {
         vars = VariableFactory.boundedArray("v", n, 1, n, solver);
         cstrs = new Constraint[n - 1];
         for (int i = 0; i < n - 1; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], solver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
         }
         solver.post(cstrs);
     }

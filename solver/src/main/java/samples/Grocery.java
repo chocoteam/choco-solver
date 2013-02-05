@@ -29,9 +29,7 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.Sum;
-import solver.constraints.ternary.Times;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -70,22 +68,22 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("item", 4, 0, 711, solver);
-        solver.post(Sum.eq(vars, 711, solver));
+        solver.post(IntConstraintFactory.sum(vars, "=", 711));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
         IntVar _711 = Views.fixed(711 * 100 * 100 * 100, solver);
 
         TMP = new Constraint[3];
-        TMP[0] = (new Times(vars[0], vars[1], tmp[0], solver));
-        TMP[1] = (new Times(vars[2], vars[3], tmp[1], solver));
-        TMP[2] = (new Times(tmp[0], tmp[1], _711, solver));
+        TMP[0] = (IntConstraintFactory.times(vars[0], vars[1], tmp[0]));
+        TMP[1] = (IntConstraintFactory.times(vars[2], vars[3], tmp[1]));
+        TMP[2] = (IntConstraintFactory.times(tmp[0], tmp[1], _711));
         solver.post(TMP);
 
         // symetries
         LEQ = new Constraint[3];
-        LEQ[0] = (ConstraintFactory.leq(vars[0], vars[1], solver));
-        LEQ[1] = (ConstraintFactory.leq(vars[1], vars[2], solver));
-        LEQ[2] = (ConstraintFactory.leq(vars[2], vars[3], solver));
+        LEQ[0] = (IntConstraintFactory.arithm(vars[0], "<=", vars[1]));
+        LEQ[1] = (IntConstraintFactory.arithm(vars[1], "<=", vars[2]));
+        LEQ[2] = (IntConstraintFactory.arithm(vars[2], "<=", vars[3]));
         solver.post(LEQ);
 
     }

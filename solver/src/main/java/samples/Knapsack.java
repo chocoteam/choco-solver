@@ -30,6 +30,7 @@ package samples;
 import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
@@ -108,12 +109,12 @@ public class Knapsack extends AbstractProblem {
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
 
 
-        c_size = Sum.eq(objects, volumes, scalar, 1, solver);
-        c_energy = Sum.eq(objects, energies, power, 1, solver);
+        c_size = IntConstraintFactory.scalar(objects, volumes, "=", scalar, 1);
+        c_energy = IntConstraintFactory.scalar(objects, energies, "=", power, 1);
 
         solver.post(c_size);
         solver.post(c_energy);
-        solver.post(new solver.constraints.nary.Knapsack(objects, scalar, power, volumes, energies, solver));
+        solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 
     @Override

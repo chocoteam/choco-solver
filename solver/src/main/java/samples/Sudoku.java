@@ -31,7 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -89,9 +89,9 @@ public class Sudoku extends AbstractProblem {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(new AllDifferent(rows[i], solver, AllDifferent.Type.AC));
-            solver.post(new AllDifferent(cols[i], solver, AllDifferent.Type.AC));
-            solver.post(new AllDifferent(carres[i], solver, AllDifferent.Type.AC));
+            solver.post(IntConstraintFactory.alldifferent(rows[i], "AC"));
+            solver.post(IntConstraintFactory.alldifferent(cols[i], "AC"));
+            solver.post(IntConstraintFactory.alldifferent(carres[i], "AC"));
         }
 
 

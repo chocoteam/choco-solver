@@ -28,7 +28,7 @@ package samples;
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -79,7 +79,7 @@ public class Eq20 extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 0, 10, solver);
         for (int i = 0; i < coeffs.length; i++) {
-            solver.post(Sum.eq(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), coeffs[i][0], solver));
+            solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), "=", coeffs[i][0]));
         }
     }
 

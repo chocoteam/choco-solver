@@ -28,7 +28,7 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.Assignment;
@@ -61,7 +61,7 @@ public class StressTest3 extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.boolArray("v", s, solver);
         for (int i = 0; i < s - 1; i++) {
-            solver.post(ConstraintFactory.eq(vars[i], vars[i + 1], solver));
+            solver.post(IntConstraintFactory.arithm(vars[i], "=", vars[i + 1]));
         }
     }
 

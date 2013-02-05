@@ -34,8 +34,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.DistanceXYC;
-import solver.constraints.nary.Count;
+import solver.constraints.IntConstraintFactory;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
@@ -121,9 +120,7 @@ public class RLFAP extends AbstractProblem {
 
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
-            solver.post(new DistanceXYC(vars[ci[0] - 1], vars[ci[1] - 1],
-                    (ci[2] == 0 ? DistanceXYC.Op.EQ : DistanceXYC.Op.GT),
-                    ci[3], solver));
+            solver.post(IntConstraintFactory.distance(vars[ci[0] - 1], vars[ci[1] - 1], (ci[2] == 0 ? "=" : ">"), ci[3]));
 
             // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
             graph[ci[0] - 1][ci[1] - 1] = 1;
@@ -135,10 +132,10 @@ public class RLFAP extends AbstractProblem {
             freqs = values.toArray();
             Arrays.sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.post(new Count(freqs[i], vars, Count.Relop.EQ, cards[i], solver));
+                solver.post(IntConstraintFactory.count(freqs[i], vars, "=", cards[i]));
             }
             nb0 = VariableFactory.bounded("nb0", 0, freqs.length, solver);
-            solver.post(new Count(0, cards, Count.Relop.EQ, nb0, solver));
+            solver.post(IntConstraintFactory.count(0, cards, "=", nb0));
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];

@@ -30,8 +30,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.lex.Lex;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -79,7 +78,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("Social golfer "+g+"-"+w+"-"+s);
+        solver = new Solver("Social golfer " + g + "-" + w + "-" + s);
     }
 
     @Override
@@ -104,7 +103,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int j = 0; j < g; j++) {
                     player[j] = P[i][j][k];
                 }
-                solver.post(Sum.eq(player, 1, solver));
+                solver.post(IntConstraintFactory.sum(player, "=", 1));
             }
         }
 
@@ -115,7 +114,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int i = 0; i < p; i++) {
                     group[i] = P[i][j][k];
                 }
-                solver.post(Sum.eq(group, s, solver));
+                solver.post(IntConstraintFactory.sum(group, "=", s));
             }
         }
 
@@ -125,8 +124,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int k = 0; k < g; k++) {
                     for (int l = 0; l < w; l++) {
                         //P[i][k][l] + P[j][k][l] - M[i][j][l] <= 1;
-                        solver.post(Sum.leq(new IntVar[]{P[i][k][l], P[j][k][l], M[i][j][l]},
-                                new int[]{1, 1, -1}, 1, solver));
+                        solver.post(IntConstraintFactory.scalar(new IntVar[]{P[i][k][l], P[j][k][l], M[i][j][l]}, new int[]{1, 1, -1}, "<=", 1));
                     }
                 }
             }
@@ -135,13 +133,13 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(Sum.leq(M[i][j], 1, solver));
+                solver.post(IntConstraintFactory.sum(M[i][j], "<=", 1));
             }
         }
 
         // break symetries on first group
         for (int i = 1; i < p; i++) {
-            solver.post(new Lex(P[i][0], P[i - 1][0], false, solver));
+            solver.post(IntConstraintFactory.lex_less_eq(P[i][0], P[i - 1][0]));
         }
     }
 
