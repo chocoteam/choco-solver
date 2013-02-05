@@ -33,7 +33,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -56,7 +56,7 @@ public class NotEqualX_YCTest {
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
 
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 6, "nb sol incorrect");
@@ -74,7 +74,7 @@ public class NotEqualX_YCTest {
             vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -92,7 +92,7 @@ public class NotEqualX_YCTest {
             vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
         }
         s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
 
         try {
             s.propagate();

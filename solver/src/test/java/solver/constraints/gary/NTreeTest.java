@@ -32,7 +32,8 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,7 +62,7 @@ public class NTreeTest {
         }
         IntVar nTree = VariableFactory.bounded("NTREE ", tmin, tmax, s);
         Constraint gc = GraphConstraintFactory.nTrees(g, nTree, s);
-        AbstractStrategy strategy = StrategyFactory.graphRandom(g, seed);
+        AbstractStrategy strategy = GraphStrategyFactory.graphRandom(g, seed);
 
         s.post(gc);
         s.set(strategy);

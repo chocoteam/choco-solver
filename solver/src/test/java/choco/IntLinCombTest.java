@@ -39,7 +39,7 @@ import solver.constraints.Operator;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
@@ -71,7 +71,7 @@ public class IntLinCombTest {
         };
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
 
         s.findAllSolutions();
     }
@@ -118,7 +118,7 @@ public class IntLinCombTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         solver.post(cstrs);
-        solver.set(StrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins, solver.getEnvironment()));
         return solver;
     }
 
@@ -142,7 +142,7 @@ public class IntLinCombTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         solver.post(cstrs);
-        solver.set(StrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins, solver.getEnvironment()));
         return solver;
     }
 

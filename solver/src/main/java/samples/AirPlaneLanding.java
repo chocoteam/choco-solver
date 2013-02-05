@@ -41,7 +41,7 @@ import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -197,8 +197,8 @@ public class AirPlaneLanding extends AbstractProblem {
         });
 //        solver.set(StrategyFactory.domwdegMindom(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.random(bVars, solver.getEnvironment()),
-                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+                IntStrategyFactory.random(bVars, solver.getEnvironment()),
+                IntStrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
         ));
 
     }

@@ -11,7 +11,7 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.nary.automata.CostRegular;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.Seq;
@@ -43,17 +43,17 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.domwdegMindom(vars, s, System.currentTimeMillis());
+                return IntStrategyFactory.domwdegMindom(vars, s, System.currentTimeMillis());
             }
         },
         FORCE_INPUT {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.minDomMinVal(cast(s.getVars()), s.getEnvironment());
+                return IntStrategyFactory.minDomMinVal(cast(s.getVars()), s.getEnvironment());
             }
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.domwdegMindom(cast(s.getVars()), s, System.currentTimeMillis());
+                return IntStrategyFactory.domwdegMindom(cast(s.getVars()), s, System.currentTimeMillis());
             }
         },
         /*DOMWDEG {
@@ -63,7 +63,7 @@ public class NurseScheduling {
         },*/
         MIN_DOM {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.minDomMinVal(vars, s.getEnvironment());
+                return IntStrategyFactory.minDomMinVal(vars, s.getEnvironment());
             }
         },
 
@@ -74,7 +74,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.random(vars, s.getEnvironment(), 0);
+                return IntStrategyFactory.random(vars, s.getEnvironment(), 0);
             }
         };
 

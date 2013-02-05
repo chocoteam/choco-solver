@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Random;
 
@@ -72,7 +72,7 @@ public class MaxViewTest {
                 xs[2] = VariableFactory.bounded("z", domains[2][0], domains[2][1], ref);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
             {
@@ -82,7 +82,7 @@ public class MaxViewTest {
                 xs[2] = VariableFactory.bounded("z", domains[1][0], domains[2][1], solver);
                 max(solver, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -106,7 +106,7 @@ public class MaxViewTest {
                 xs[2] = VariableFactory.enumerated("z", domains[2], ref);
                 maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
             {
@@ -116,7 +116,7 @@ public class MaxViewTest {
                 xs[2] = VariableFactory.enumerated("z", domains[2], solver);
                 max(solver, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

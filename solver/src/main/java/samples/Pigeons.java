@@ -30,7 +30,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -65,7 +65,7 @@ public class Pigeons extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
     }
 
     @Override

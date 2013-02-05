@@ -47,7 +47,8 @@ import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -214,7 +215,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     @Override
     public void configureSearch() {
         AbstractStrategy strategy;
-        strategy = StrategyFactory.graphRandom(graph, seed);
+        strategy = GraphStrategyFactory.graphRandom(graph, seed);
         solver.set(strategy);
     }
 

@@ -34,7 +34,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
@@ -119,7 +119,7 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = StrategyFactory.domddegMinDom(objects);
+        AbstractStrategy strat = IntStrategyFactory.domddegMinDom(objects);
         // top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
         // dichotomic

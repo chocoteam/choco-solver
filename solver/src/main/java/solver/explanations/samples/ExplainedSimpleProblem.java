@@ -31,7 +31,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -63,7 +63,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
         boolean flatten = false;
         boolean trace = false;
         solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));

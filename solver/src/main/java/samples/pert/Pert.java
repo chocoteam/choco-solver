@@ -33,7 +33,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -109,7 +109,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -93,7 +93,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
         //SearchMonitorFactory.log(solver, true, true);
         /*IPropagationEngine engine = solver.getEngine();
                 engine.addGroup(Group.buildQueue(

@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -77,10 +77,10 @@ public class EqualXYCExplTest {
             indicess[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, sol);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(StrategyFactory.forceInputOrderMinVal(allvarsr, ref.getEnvironment()));
+        ref.set(IntStrategyFactory.forceInputOrderMinVal(allvarsr, ref.getEnvironment()));
 
         IntVar[] allvarss = ArrayUtils.flatten(ArrayUtils.toArray(varss, indicess));
-        sol.set(StrategyFactory.forceInputOrderMinVal(allvarss, sol.getEnvironment()));
+        sol.set(IntStrategyFactory.forceInputOrderMinVal(allvarss, sol.getEnvironment()));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {

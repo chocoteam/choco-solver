@@ -41,7 +41,7 @@ import parser.flatzinc.ast.searches.VarChoice;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.enumerations.sorters.ImpactBased;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -124,7 +124,7 @@ public class FGoal {
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,
-                                StrategyFactory.random(ivars, aSolver.getEnvironment(), gc.seed))
+                                IntStrategyFactory.random(ivars, aSolver.getEnvironment(), gc.seed))
                 );
 
                 System.out.println("% t:" + gc.seed);

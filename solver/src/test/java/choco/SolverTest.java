@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -78,7 +78,7 @@ public class SolverTest {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(objects, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(objects, env);
 
 
         s.post(cstrs);

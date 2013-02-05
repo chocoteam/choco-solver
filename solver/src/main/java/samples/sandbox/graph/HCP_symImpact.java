@@ -38,7 +38,8 @@ import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremen
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
@@ -135,7 +136,7 @@ public class HCP_symImpact {
         Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi, solver);
         solver.post(gc);
         // config
-        solver.set(StrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
+        solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
 //        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
@@ -189,7 +190,7 @@ public class HCP_symImpact {
         }
         solver.post(gc);
         // config
-        solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
+        solver.set(GraphStrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
 //        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);

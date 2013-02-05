@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -92,7 +92,7 @@ public class AmongTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
+            solver.set(IntStrategyFactory.random(allvars, solver.getEnvironment(), i));
             solver.post(IntConstraintFactory.among(occ, vars, value));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -109,7 +109,7 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
+            solver.set(IntStrategyFactory.random(allvars, solver.getEnvironment(), i));
             solver.post(IntConstraintFactory.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -174,7 +174,7 @@ public class AmongTest {
             }
             solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, solver.getEnvironment(), seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -227,7 +227,7 @@ public class AmongTest {
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, solver.getEnvironment(), seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();

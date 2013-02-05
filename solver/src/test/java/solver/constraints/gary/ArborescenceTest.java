@@ -34,7 +34,8 @@ import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import choco.kernel.memory.setDataStructures.SetType;
@@ -68,7 +69,7 @@ public class ArborescenceTest {
         } else {
             gc.addPropagators(new PropArborescence(g, 0, gc, s, simple));
         }
-        AbstractStrategy strategy = StrategyFactory.graphRandom(g, seed);
+        AbstractStrategy strategy = GraphStrategyFactory.graphRandom(g, seed);
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {

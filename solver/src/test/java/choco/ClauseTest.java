@@ -39,7 +39,7 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -82,7 +82,7 @@ public class ClauseTest {
                 Constraint[] cstrs = new Constraint[]{cons};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+                s.set(IntStrategyFactory.presetI(bs, s.getEnvironment()));
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
@@ -105,7 +105,7 @@ public class ClauseTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(bs, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 0);
@@ -126,7 +126,7 @@ public class ClauseTest {
         BoolVar[] bs = new BoolVar[]{b};
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(bs, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);
@@ -231,7 +231,7 @@ public class ClauseTest {
                         Literal.pos(bvars[0]));
                 solver.post(IntConstraintFactory.clauses(tree, solver));
 
-                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(bvars, solver.getEnvironment(), seed));
                 solver.findAllSolutions();
                 n1 = solver.getMeasures().getSolutionCount();
             }
@@ -240,7 +240,7 @@ public class ClauseTest {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
                 solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
 
-                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(bvars, solver.getEnvironment(), seed));
                 solver.findAllSolutions();
                 n2 = solver.getMeasures().getSolutionCount();
             }

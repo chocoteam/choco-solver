@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -146,7 +146,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
         Predicate inVARS = Predicates.member(vars);

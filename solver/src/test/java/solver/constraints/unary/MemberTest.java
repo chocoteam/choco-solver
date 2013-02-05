@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -91,7 +91,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+                s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
@@ -119,7 +119,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+                s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();

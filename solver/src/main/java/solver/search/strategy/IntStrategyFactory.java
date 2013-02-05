@@ -58,9 +58,9 @@ import solver.variables.graph.GraphVar;
  * @author Charles Prud'homme
  * @since 5 juil. 2010
  */
-public final class StrategyFactory {
+public final class IntStrategyFactory {
 
-    private StrategyFactory() {
+    private IntStrategyFactory() {
     }
 
     /**
@@ -271,21 +271,5 @@ public final class StrategyFactory {
 
     public static AbstractStrategy<IntVar> ABSrandom(IntVar[] vars, Solver solver, double g, double d, int a, double r, int samplingIterationForced, long seed) {
         return new ActivityBased(solver, vars, g, d, a, r, samplingIterationForced, seed);
-    }
-
-    public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
-        return new GraphStrategy(g, nodeStrat, arcStrat, priority);
-    }
-
-    public static <G extends GraphVar> AbstractStrategy graphLexico(G g) {
-        return new GraphStrategy(g);
-    }
-
-    public static <G extends GraphVar> AbstractStrategy graphRandom(G g, long seed) {
-        return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.ARCS);
-    }
-
-    public static SetSearchStrategy setLex(SetVar[] sets) {
-        return new SetSearchStrategy(sets);
     }
 }

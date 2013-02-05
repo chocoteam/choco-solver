@@ -29,7 +29,7 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -93,7 +93,7 @@ public class Alpha extends AbstractProblem {
     @Override
     public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
-        solver.set(StrategyFactory.minDomMinVal(letters, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(letters, solver.getEnvironment()));
     }
 
     @Override

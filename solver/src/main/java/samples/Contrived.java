@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -83,8 +83,8 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(v,
-                solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(v,
+				solver.getEnvironment()));
     }
 
     @Override

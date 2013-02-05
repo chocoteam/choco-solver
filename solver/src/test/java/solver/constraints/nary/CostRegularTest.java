@@ -35,7 +35,7 @@ import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.automata.FA.utils.Counter;
 import solver.constraints.nary.automata.FA.utils.CounterState;
 import solver.constraints.nary.automata.FA.utils.ICounter;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -81,7 +81,7 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
@@ -122,7 +122,7 @@ public class CostRegularTest {
         auto.addCounter(c);
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9280);
@@ -171,7 +171,7 @@ public class CostRegularTest {
         }
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
@@ -223,7 +223,7 @@ public class CostRegularTest {
         CostAutomaton cauto = new CostAutomaton(auto, c);
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, cauto));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 229376);
@@ -263,7 +263,7 @@ public class CostRegularTest {
         }
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 67584);
@@ -306,7 +306,7 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 10, 10));
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 67584);
@@ -345,7 +345,7 @@ public class CostRegularTest {
         }
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
@@ -385,7 +385,7 @@ public class CostRegularTest {
         auto.addCounter(new CounterState(costs, 4, 6));
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 149456);
@@ -416,7 +416,7 @@ public class CostRegularTest {
         IntVar cost = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
 
         solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, c2));
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 64008);

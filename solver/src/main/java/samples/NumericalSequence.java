@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -74,7 +74,7 @@ public class NumericalSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(U, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(U, solver.getEnvironment()));
     }
 
     @Override

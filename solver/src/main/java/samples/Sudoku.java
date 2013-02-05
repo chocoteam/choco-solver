@@ -32,7 +32,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -99,7 +99,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
 
     }
 

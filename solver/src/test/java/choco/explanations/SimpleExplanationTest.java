@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -67,7 +67,7 @@ public class SimpleExplanationTest {
         lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
         lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
         // configure Solver
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
         s.post(lcstrs);
         s.set(strategy);
         // solve

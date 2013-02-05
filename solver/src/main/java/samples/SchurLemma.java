@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -87,7 +87,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(M), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(ArrayUtils.flatten(M), solver.getEnvironment()));
     }
 
     @Override

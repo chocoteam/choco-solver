@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -84,7 +84,7 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
             engine.addGroup(Group.buildQueue(

@@ -58,6 +58,11 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
+	/**
+	 * Strategy for branching on set variables
+	 * Lexicographic element enforcing by default
+	 * @param variables
+	 */
     public SetSearchStrategy(SetVar[] variables) {
         super(variables);
         pool = new PoolManager<FastDecisionSet>();

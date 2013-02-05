@@ -34,7 +34,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -129,7 +129,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(scheds, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(scheds, solver.getEnvironment()));
     }
 
     @Override

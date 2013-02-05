@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.Propagator;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -97,8 +97,8 @@ public class PertReified extends Pert {
         solver.set(
                 new StrategiesSequencer(
                         solver.getEnvironment(),
-                        StrategyFactory.inputOrderMinVal(bvars, solver.getEnvironment()),
-                        StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment())
+                        IntStrategyFactory.inputOrderMinVal(bvars, solver.getEnvironment()),
+                        IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment())
                 )
         );
 

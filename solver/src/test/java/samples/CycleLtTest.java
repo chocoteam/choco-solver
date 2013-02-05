@@ -36,7 +36,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -67,7 +67,7 @@ public class CycleLtTest {
         cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
         return s;
     }
 

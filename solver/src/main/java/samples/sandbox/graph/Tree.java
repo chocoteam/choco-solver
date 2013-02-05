@@ -34,7 +34,8 @@ import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -103,7 +104,7 @@ public class Tree extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strategy = StrategyFactory.graphLexico(g);
+        AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
         solver.set(strategy);
     }
 

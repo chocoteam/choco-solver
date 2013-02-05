@@ -28,7 +28,7 @@
 package samples.nqueen;
 
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -60,7 +60,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
         /*IPropagationEngine engine = solver.getEngine();

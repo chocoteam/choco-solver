@@ -47,7 +47,8 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.graph.UndirectedGraphVar;
 
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class TutteGraphGenerator {
         }
 
         solver.post(c);
-        solver.set(StrategyFactory.graphLexico(g));
+        solver.set(GraphStrategyFactory.graphLexico(g));
         SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
         if (solver.getMeasures().getSolutionCount() == 0) {
@@ -128,7 +129,7 @@ public class TutteGraphGenerator {
             }
         }
         solver.post(c);
-        solver.set(StrategyFactory.graphLexico(g));
+        solver.set(GraphStrategyFactory.graphLexico(g));
         solver.getSearchLoop().getLimitsBox().setSolutionLimit(100);
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             public void onSolution() {

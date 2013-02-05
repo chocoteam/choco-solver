@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -70,7 +70,7 @@ public class SquareTests {
         IntVar B = Views.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
     }
 
@@ -87,7 +87,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
     }
 
@@ -112,7 +112,7 @@ public class SquareTests {
         IntVar B = Views.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
     }
 
@@ -127,7 +127,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
     }
 

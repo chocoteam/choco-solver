@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -102,7 +102,7 @@ public class CountTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
+            solver.set(IntStrategyFactory.random(allvars, solver.getEnvironment(), i));
             solver.post(IntConstraintFactory.count(value, vars, "=", occ));
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -152,7 +152,7 @@ public class CountTest {
 //            if (!gac) {
 //                SearchMonitorFactory.log(solver, true, true);
 //            }
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, solver.getEnvironment(), seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -178,7 +178,7 @@ public class CountTest {
         IntVar[] vars = VariableFactory.enumeratedArray("e", vs.length + 1, 0, ub, solver);
 
         List<int[]> tuples = new LinkedList<int[]>();
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
         solver.findSolution();
         do {
             int[] tuple = new int[vars.length];

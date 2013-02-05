@@ -5,7 +5,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -34,7 +34,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
     void configSearchStrategy() {
         //System.out.println("---------------------------");
         //SearchMonitorFactory.log(solver,true,true);
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
     }
 
     /*@Override

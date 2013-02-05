@@ -4,7 +4,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -31,7 +31,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
     }
 
     @Override

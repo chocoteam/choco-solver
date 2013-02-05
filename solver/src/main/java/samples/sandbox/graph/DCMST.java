@@ -50,7 +50,8 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -252,8 +253,8 @@ public class DCMST {
         });
 
         // config
-        AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi, null, new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
-        AbstractStrategy gs = StrategyFactory.graphStrategy(undi, null, new OneNodeOutMST(undi), GraphStrategy.NodeArcPriority.ARCS);
+        AbstractStrategy firstSol = GraphStrategyFactory.graphStrategy(undi, null, new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
+        AbstractStrategy gs = GraphStrategyFactory.graphStrategy(undi, null, new OneNodeOutMST(undi), GraphStrategy.NodeArcPriority.ARCS);
         AbstractStrategy strat = new Change(undi, firstSol, gs);
         switch (search) {
             //ANDINST : first (if fail<100) then strat 0 truetrick

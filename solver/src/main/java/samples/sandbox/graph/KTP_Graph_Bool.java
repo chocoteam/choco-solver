@@ -45,7 +45,8 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.ConstraintEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -125,7 +126,7 @@ public class KTP_Graph_Bool {
         Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi, solver);
         solver.post(gc);
         // config
-        solver.set(StrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
+        solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
 //        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
@@ -250,7 +251,7 @@ public class KTP_Graph_Bool {
         solver.post(gc);
         // config
 //			solver.set(new MinNeighBool(decisionVars,gl));
-        solver.set(StrategyFactory.minDomMinVal(graph, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(graph, solver.getEnvironment()));
 
 //        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));

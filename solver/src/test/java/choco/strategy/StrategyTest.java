@@ -32,7 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
@@ -62,7 +62,7 @@ public class StrategyTest {
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
         }
-        AbstractStrategy asg = StrategyFactory.inputOrderMinVal(variables, env);
+        AbstractStrategy asg = IntStrategyFactory.inputOrderMinVal(variables, env);
 
         s.set(asg);
 

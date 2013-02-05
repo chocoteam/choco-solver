@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -85,7 +85,7 @@ public class SumTests {
 //        System.out.printf("%s\n", solver);
 
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed + inc));
+        solver.set(IntStrategyFactory.random(x, solver.getEnvironment(), seed + inc));
         return solver;
     }
 

@@ -35,7 +35,8 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import choco.kernel.memory.setDataStructures.SetType;
@@ -77,7 +78,7 @@ public class PathTest {
         if (RG) {
             gc.addPropagators(new PropReducedGraphHamPath(g, gc, s));
         }
-        AbstractStrategy strategy = StrategyFactory.graphLexico(g);
+        AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {

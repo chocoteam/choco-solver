@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.view.Views;
 
@@ -61,7 +61,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "!=", 4)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -84,7 +84,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "!=", -2)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -106,7 +106,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -128,7 +128,7 @@ public class OffsetViewTest {
                 IntConstraintFactory.arithm(X, "=", Y, "+", coeff)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);

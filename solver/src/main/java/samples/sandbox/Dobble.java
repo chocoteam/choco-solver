@@ -49,7 +49,7 @@ import solver.constraints.propagators.gary.channeling.PropGraphRelation;
 import solver.constraints.propagators.gary.channeling.PropRelationGraph;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -122,7 +122,7 @@ public class Dobble {
             csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
         }
         // search strategy
-        solver.set(StrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
         // output
         SearchMonitorFactory.log(solver, true, false);
         // time limit

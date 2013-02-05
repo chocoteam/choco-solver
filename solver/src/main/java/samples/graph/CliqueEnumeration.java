@@ -39,7 +39,8 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.Views;
@@ -103,7 +104,7 @@ public class CliqueEnumeration extends AbstractProblem{
 	@Override
 	public void configureSearch() {
 		// search strategy (lexicographic)
-		solver.set(StrategyFactory.graphLexico(graphvar));
+		solver.set(GraphStrategyFactory.graphLexico(graphvar));
 		// log
 		SearchMonitorFactory.log(solver, true, false);
 		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {

@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -123,7 +123,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(

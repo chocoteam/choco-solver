@@ -38,7 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -90,7 +90,7 @@ public class AllDifferentTest {
             s.post(IntConstraintFactory.alldifferent(diag1, "BC"));
             s.post(IntConstraintFactory.alldifferent(diag2, "BC"));
         }
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
         s.set(strategy);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -140,7 +140,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
         //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -170,7 +170,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -256,7 +256,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
         return s;
     }
 

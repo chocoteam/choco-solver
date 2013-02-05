@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -135,7 +135,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
     }
 
     @Override
