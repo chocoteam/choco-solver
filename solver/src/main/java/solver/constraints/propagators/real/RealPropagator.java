@@ -57,7 +57,7 @@ public class RealPropagator extends Propagator<RealVar> {
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
      * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is avalaible in the documentation of IBEX.
+     * <br/> A complete list is available in the documentation of IBEX.
      * <p/>
      * <p/>
      * <blockquote><pre>
@@ -100,12 +100,9 @@ public class RealPropagator extends Propagator<RealVar> {
                 for (int i = 0; i < vars.length; i++) {
                     vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], aCause);
                 }
-                return;
             case Ibex.ENTAILED:
-                return;
-            case Ibex.NOTHING:
+            case Ibex.NOT_SIGNIFICANT:
             default:
-                return;
         }
     }
 
@@ -116,6 +113,6 @@ public class RealPropagator extends Propagator<RealVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.TRUE; //CPRU: we assume IBEX correctly contract domains
+        return ESat.TRUE; //we assume IBEX correctly contracts domains
     }
 }
