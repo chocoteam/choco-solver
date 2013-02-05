@@ -81,7 +81,7 @@ public class PropLex extends Propagator<IntVar> {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
         } else {
-            filter(alpha.get());
+            gacLexLeq(alpha.get());
         }
     }
 
@@ -89,9 +89,9 @@ public class PropLex extends Propagator<IntVar> {
     public void propagate(int vIdx, int mask) throws ContradictionException {
         entailed = false;
         if (vIdx < n) {
-            filter(vIdx);
+            gacLexLeq(vIdx);
         } else {
-            filter(vIdx - n);
+            gacLexLeq(vIdx - n);
         }
     }
 
@@ -161,15 +161,19 @@ public class PropLex extends Propagator<IntVar> {
             this.contradiction(null, "");
         }
         if (i == n) {
-            entailed = true;
-            setPassive();
-        } else {
-            if (!groundEq(x[i], y[i])) {
-                alpha.set(i);
-                filter(i);
+            if (strict) {
+                this.contradiction(null, "");
             } else {
-                updateAlpha(i + 1);
+                entailed = true;
+                setPassive();
+                return;
             }
+        }
+        if (!groundEq(x[i], y[i])) {
+            alpha.set(i);
+            gacLexLeq(i);
+        } else {
+            updateAlpha(i + 1);
         }
     }
 
@@ -180,7 +184,7 @@ public class PropLex extends Propagator<IntVar> {
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
             if (x[i].getUB() >= y[i].getLB()) {
-                filter(i);
+                gacLexLeq(i);
             }
         } else if (x[i].getLB() == y[i].getUB()) {
             updateBeta(i - 1);
@@ -194,6 +198,7 @@ public class PropLex extends Propagator<IntVar> {
      *          if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
+        entailed = false;
         int i = 0;
         int a, b;
         while (i < n && groundEq(x[i], y[i])) {
@@ -201,6 +206,7 @@ public class PropLex extends Propagator<IntVar> {
         }
         if (i == n) {
             if (!strict) {
+                entailed = true;
                 setPassive();
             } else {
                 this.contradiction(null, "");
@@ -223,8 +229,8 @@ public class PropLex extends Propagator<IntVar> {
                 i++;
             }
 
-            if (i == n && b == -1) {
-                b = strict ? n : Integer.MAX_VALUE;
+            if (!strict && i == n) {
+                b = Integer.MAX_VALUE;
             }
             if (b == -1) {
                 b = i;
@@ -234,34 +240,42 @@ public class PropLex extends Propagator<IntVar> {
             }
             alpha.set(a);
             beta.set(b);
-            filter(a);
+            gacLexLeq(a);
         }
     }
 
-    public void filter(int i) throws ContradictionException {
+    public void gacLexLeq(int i) throws ContradictionException {
         int a = alpha.get();
         int b = beta.get();
-        if (i < b && !entailed) {                             //Part A
-            if (i == a && (i + 1 == b)) {        //Part B
-                ACless(i);
-                if (checkLex(i)) {
-                    entailed = true;
-                    setPassive();
-                }
-            } else if (i == a && (i + 1 < b)) {  //Part C
-                ACleq(i);
-                if (checkLex(i)) {
-                    entailed = true;
-                    setPassive();
-                    return;
-                }
-                if (groundEq(x[i], y[i])) {
-                    updateAlpha(i + 1);
-                }
-            } else if (a < i && i < b) {         //Part D
-                if (((i == b - 1) && x[i].getLB() == y[i].getUB()) || greater(x[i], y[i])) {
-                    updateBeta(i - 1);
-                }
+        //Part A
+        if (i >= b || entailed) {
+            return;
+        }
+        //Part B
+        if (i == a && (i + 1) == b) {
+            ACless(i);
+            if (checkLex(i)) {
+                entailed = true;
+                setPassive();
+                return;
+            }
+        }
+        //Part C
+        if (i == a && (i + 1) < b) {
+            ACleq(i);
+            if (checkLex(i)) {
+                entailed = true;
+                setPassive();
+                return;
+            }
+            if (groundEq(x[i], y[i])) {
+                updateAlpha(i + 1);
+            }
+        }
+        //Part D
+        if (a < i && i < b) {
+            if ((i == (b - 1) && x[i].getLB() == y[i].getUB()) || greater(x[i], y[i])) {
+                updateBeta(i - 1);
             }
         }
     }

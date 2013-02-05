@@ -27,15 +27,18 @@
 
 package choco.kernel.memory.setDataStructures;
 
+import java.io.Serializable;
+
 /**
  * Class representing a set (of nodes)
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
  * Date: 9 fŽvr. 2011
  */
-public interface ISet {
+public interface ISet extends Serializable {
 
-    /**Add element to the set
+    /**
+     * Add element to the set
      * Does not guaranty there is no duplications
      *
      * @param element
@@ -43,13 +46,17 @@ public interface ISet {
      */
     boolean add(int element);
 
-    /**Remove the first occurence of element from the set
+    /**
+     * Remove the first occurence of element from the set
+     *
      * @param element
      * @return true iff element was in the set and has been removed
      */
     boolean remove(int element);
 
-    /**Test the existence of element in the set
+    /**
+     * Test the existence of element in the set
+     *
      * @param element
      * @return true iff the set contains element
      */
@@ -75,19 +82,20 @@ public interface ISet {
      */
     int getFirstElement();
 
-	/**enables to iterate over the set
-	 * 
-	 * should be used as follow :
-	 * 
-	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
-	 * 		...
-	 * }
-	 * 
-	 * The use of getFirstElement() is necessary to ensure a complete iteration
-	 *
-	 * WARNING cannot encapsulate two for loops (copy the set for that)
-	 * 
-	 * @return the next element of the set
-	 */
-	int getNextElement();
+    /**
+     * enables to iterate over the set
+     * <p/>
+     * should be used as follow :
+     * <p/>
+     * for(int i=getFirstElement(); i>=0; i = getNextElement()){
+     * ...
+     * }
+     * <p/>
+     * The use of getFirstElement() is necessary to ensure a complete iteration
+     * <p/>
+     * WARNING cannot encapsulate two for loops (copy the set for that)
+     *
+     * @return the next element of the set
+     */
+    int getNextElement();
 }

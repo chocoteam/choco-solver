@@ -222,7 +222,7 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testLEX2() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 50; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2 * n, seed, false);
