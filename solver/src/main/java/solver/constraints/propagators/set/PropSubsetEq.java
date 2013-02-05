@@ -48,100 +48,102 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * Ensures that X subseteq Y
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropSubsetEq extends Propagator<SetVar>{
+public class PropSubsetEq extends Propagator<SetVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private SetDeltaMonitor[] sdm;
-	private IntProcedure elementForced,elementRemoved;
+    private SetDeltaMonitor[] sdm;
+    private IntProcedure elementForced, elementRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that X subseteq Y
-	 *
-	 * @param X
-	 * @param Y
-	 * @param solver
-	 * @param c
-	 */
-	public PropSubsetEq(SetVar X, SetVar Y, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(new SetVar[]{X,Y}, solver, c, PropagatorPriority.LINEAR);
-		// delta monitors
-		sdm = new SetDeltaMonitor[2];
-		for(int i=0;i<2;i++){
-			sdm[i] = this.vars[i].monitorDelta(this);
-		}
-		elementForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				vars[1].addToKernel(element,aCause);
-			}
-		};
-		elementRemoved = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				vars[0].removeFromEnvelope(element,aCause);
-			}
-		};
-	}
+    /**
+     * Ensures that X subseteq Y
+     *
+     * @param X
+     * @param Y
+     * @param solver
+     * @param c
+     */
+    public PropSubsetEq(SetVar X, SetVar Y, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(new SetVar[]{X, Y}, solver, c, PropagatorPriority.LINEAR);
+        // delta monitors
+        sdm = new SetDeltaMonitor[2];
+        for (int i = 0; i < 2; i++) {
+            sdm[i] = this.vars[i].monitorDelta(this);
+        }
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[1].addToKernel(element, aCause);
+            }
+        };
+        elementRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[0].removeFromEnvelope(element, aCause);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0)
-			return EventType.ADD_TO_KER.mask;
-		else
-			return EventType.REMOVE_FROM_ENVELOPE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0)
+            return EventType.ADD_TO_KER.mask;
+        else
+            return EventType.REMOVE_FROM_ENVELOPE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		ISet tmp = vars[0].getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			vars[1].addToKernel(j,aCause);
-		}tmp = vars[0].getEnvelope();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(!vars[1].getEnvelope().contain(j))
-				vars[0].removeFromEnvelope(j,aCause);
-		}
-		sdm[0].unfreeze();
-		sdm[1].unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet tmp = vars[0].getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            vars[1].addToKernel(j, aCause);
+        }
+        tmp = vars[0].getEnvelope();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (!vars[1].getEnvelope().contain(j))
+                vars[0].removeFromEnvelope(j, aCause);
+        }
+        sdm[0].unfreeze();
+        sdm[1].unfreeze();
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		sdm[i].freeze();
-		if(i==0)
-			sdm[i].forEach(elementForced,EventType.ADD_TO_KER);
-		else
-			sdm[i].forEach(elementRemoved,EventType.REMOVE_FROM_ENVELOPE);
-		sdm[i].unfreeze();
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        sdm[i].freeze();
+        if (i == 0)
+            sdm[i].forEach(elementForced, EventType.ADD_TO_KER);
+        else
+            sdm[i].forEach(elementRemoved, EventType.REMOVE_FROM_ENVELOPE);
+        sdm[i].unfreeze();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet tmp = vars[0].getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(!vars[1].getEnvelope().contain(j)){
-				return ESat.FALSE;
-			}
-		}
-		tmp = vars[0].getEnvelope();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(!vars[1].getKernel().contain(j)){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        ISet tmp = vars[0].getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (!vars[1].getEnvelope().contain(j)) {
+                return ESat.FALSE;
+            }
+        }
+        tmp = vars[0].getEnvelope();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (!vars[1].getKernel().contain(j)) {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.TRUE;
+    }
 }

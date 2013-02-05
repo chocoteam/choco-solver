@@ -56,7 +56,7 @@ public class CorrectnessChecker {
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
         int loop = 0;
-		for (int ds = lowerB; ds <= upperB; ds++) {
+        for (int ds = lowerB; ds <= upperB; ds++) {
             for (int ide = 0; ide < densities.length; ide++) {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
@@ -119,13 +119,13 @@ public class CorrectnessChecker {
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-		Solver ref = modeler.model(nbVar, domains, map, parameters);
-		ref.getEnvironment().worldPush();
+        Solver ref = modeler.model(nbVar, domains, map, parameters);
+        ref.getEnvironment().worldPush();
         try {
             ref.propagate();
         } catch (ContradictionException e) {
-			LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
-			return null;
+            LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
+            return null;
         } catch (Exception e) {
             File f = new File("SOLVER_ERROR.ser");
             try {

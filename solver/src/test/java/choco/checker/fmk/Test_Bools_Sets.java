@@ -36,39 +36,40 @@ import solver.search.loop.SearchLoops;
  * @since 01/13
  */
 public class Test_Bools_Sets {
-	private SearchLoops slType; // search loop type default value
+    private SearchLoops slType; // search loop type default value
 
-	public Test_Bools_Sets() {
-		this.slType = SearchLoops.BINARY;
-	}
+    public Test_Bools_Sets() {
+        this.slType = SearchLoops.BINARY;
+    }
 
-	public Test_Bools_Sets(SearchLoops sl) {
-		this.slType = slType;
-	}
+    public Test_Bools_Sets(SearchLoops sl) {
+        this.slType = slType;
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	@Test(groups = "10s")
-	public void testBOOL_SUM() {
-		for (int i = 0; i < 10; i++) {
-			long seed = System.currentTimeMillis();
-			for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-				Correctness.checkCorrectness(Model.boolSum, n, -n / 2, 2 * n, seed, null);
-			}
-		}
-	}
-	@Test(groups = "1m")
-	public void testSETS() {
-		for (int i = 0; i < 10; i++) {
-			long seed = System.currentTimeMillis();
-			for (int n = 2; n < (1 << 5) + 1; n *= 2) {
-				Correctness.checkCorrectness(Model.setUnion, n, -n / 2, 2 * n, seed, null);
-				Correctness.checkCorrectness(Model.setInter, n, -n / 2, 2 * n, seed, null);
-				Correctness.checkCorrectness(Model.setDisj, n, -n / 2, 2 * n, seed, null);
-				Correctness.checkCorrectness(Model.setDiff, n, -n / 2, 2 * n, seed, null);
-				Correctness.checkCorrectness(Model.setSubSet, n, -n / 2, 2 * n, seed, null);
-				Correctness.checkCorrectness(Model.setAllEq, n, -n / 2, 2 * n, seed, null);
-			}
-		}
-	}
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Test(groups = "10s")
+    public void testBOOL_SUM() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+                Correctness.checkCorrectness(Model.boolSum, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testSETS() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+                Correctness.checkCorrectness(Model.setUnion, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(Model.setInter, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(Model.setDisj, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(Model.setDiff, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(Model.setSubSet, n, -n / 2, 2 * n, seed, null);
+                Correctness.checkCorrectness(Model.setAllEq, n, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
 }

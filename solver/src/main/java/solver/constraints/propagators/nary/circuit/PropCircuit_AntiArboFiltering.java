@@ -39,108 +39,109 @@ import solver.variables.IntVar;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
+
 import java.util.Random;
 
 public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	// flow graph
-	private DirectedGraph connectedGraph;
-	// number of nodes
-	private int n;
-	// dominators finder that contains the dominator tree
-	private AbstractLengauerTarjanDominatorsFinder domFinder;
-	// offset (usually 0 but 1 with MiniZinc)
-	private int offSet;
-	// random function
-	private Random rd = new Random();
+    // flow graph
+    private DirectedGraph connectedGraph;
+    // number of nodes
+    private int n;
+    // dominators finder that contains the dominator tree
+    private AbstractLengauerTarjanDominatorsFinder domFinder;
+    // offset (usually 0 but 1 with MiniZinc)
+    private int offSet;
+    // random function
+    private Random rd = new Random();
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, Constraint constraint, Solver solver) {
-		super(succs, solver, constraint, PropagatorPriority.QUADRATIC);
-		this.n = succs.length;
-		this.offSet = offSet;
-		this.connectedGraph = new DirectedGraph(n+1, SetType.LINKED_LIST,false);
-		domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-	}
+    public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, Constraint constraint, Solver solver) {
+        super(succs, solver, constraint, PropagatorPriority.QUADRATIC);
+        this.n = succs.length;
+        this.offSet = offSet;
+        this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
+        domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			for(int i=0;i<n;i++){
-				vars[i].updateLowerBound(offSet,aCause);
-				vars[i].updateUpperBound(n-1+offSet,aCause);
-				vars[i].removeValue(i+offSet,aCause);
-			}
-		}
-		if(rd.nextBoolean()){
-			for(int i=0;i<n;i++){
-				filterFromPostDom(i);
-			}
-		}else{
-			filterFromPostDom(rd.nextInt(n));
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < n; i++) {
+                vars[i].updateLowerBound(offSet, aCause);
+                vars[i].updateUpperBound(n - 1 + offSet, aCause);
+                vars[i].removeValue(i + offSet, aCause);
+            }
+        }
+        if (rd.nextBoolean()) {
+            for (int i = 0; i < n; i++) {
+                filterFromPostDom(i);
+            }
+        } else {
+            filterFromPostDom(rd.nextInt(n));
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		forcePropagate(EventType.FULL_PROPAGATION);
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        forcePropagate(EventType.FULL_PROPAGATION);
+    }
 
-	private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
-		for (int i = 0; i < n + 1; i++) {
-			connectedGraph.getSuccessorsOf(i).clear();
-			connectedGraph.getPredecessorsOf(i).clear();
-		}
-		for (int i = 0; i < n; i++) {
-			if(i==duplicatedNode){
-				connectedGraph.addArc(i, n);
-			}else{
-				int ub = vars[i].getUB();
-				for(int y = vars[i].getLB();y<=ub;y=vars[i].nextValue(y)){
-					connectedGraph.addArc(i, y-offSet);
-				}
-			}
-		}
-		if (domFinder.findPostDominators()) {
-			for (int x = 0; x < n; x++) {
-				if(x!=duplicatedNode){
-					int ub = vars[x].getUB();
-					for(int y = vars[x].getLB();y<=ub;y=vars[x].nextValue(y)){
-						if(x!=y){
-							if (domFinder.isDomminatedBy(y-offSet, x)) {
-								vars[x].removeValue(y, aCause);
-							}
-						}
-					}
-				}
-			}
-		} else {
-			contradiction(vars[0], "the source cannot reach all nodes");
-		}
-	}
+    private void filterFromPostDom(int duplicatedNode) throws ContradictionException {
+        for (int i = 0; i < n + 1; i++) {
+            connectedGraph.getSuccessorsOf(i).clear();
+            connectedGraph.getPredecessorsOf(i).clear();
+        }
+        for (int i = 0; i < n; i++) {
+            if (i == duplicatedNode) {
+                connectedGraph.addArc(i, n);
+            } else {
+                int ub = vars[i].getUB();
+                for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
+                    connectedGraph.addArc(i, y - offSet);
+                }
+            }
+        }
+        if (domFinder.findPostDominators()) {
+            for (int x = 0; x < n; x++) {
+                if (x != duplicatedNode) {
+                    int ub = vars[x].getUB();
+                    for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
+                        if (x != y) {
+                            if (domFinder.isDomminatedBy(y - offSet, x)) {
+                                vars[x].removeValue(y, aCause);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            contradiction(vars[0], "the source cannot reach all nodes");
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		// redundant filtering
-		if(!isCompletelyInstantiated()){
-			return ESat.UNDEFINED;
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        // redundant filtering
+        if (!isCompletelyInstantiated()) {
+            return ESat.UNDEFINED;
+        }
+        return ESat.TRUE;
+    }
 }

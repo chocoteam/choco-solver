@@ -103,35 +103,35 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         if (!envelope.contain(element)) {
             contradiction(cause, null, "");
-			return true;
+            return true;
         }
-		if (kernel.contain(element)) {
-        	return false;
-		}
-		kernel.add(element);
-		if (reactOnModification) {
-			delta.add(element, SetDelta.KERNEL, cause);
-		}
-		EventType e = EventType.ADD_TO_KER;
-		notifyPropagators(e, cause);
-		return true;
+        if (kernel.contain(element)) {
+            return false;
+        }
+        kernel.add(element);
+        if (reactOnModification) {
+            delta.add(element, SetDelta.KERNEL, cause);
+        }
+        EventType e = EventType.ADD_TO_KER;
+        notifyPropagators(e, cause);
+        return true;
     }
 
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         if (kernel.contain(element)) {
             contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
-			return true;
+            return true;
         }
         if (!envelope.remove(element)) {
             return false;
         }
-		if (reactOnModification) {
-			delta.add(element, SetDelta.ENVELOP, cause);
-		}
-		EventType e = EventType.REMOVE_FROM_ENVELOPE;
-		notifyPropagators(e, cause);
-		return true;
+        if (reactOnModification) {
+            delta.add(element, SetDelta.ENVELOP, cause);
+        }
+        EventType e = EventType.REMOVE_FROM_ENVELOPE;
+        notifyPropagators(e, cause);
+        return true;
     }
 
     @Override
@@ -146,7 +146,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
         if (envelope.getSize() != value.length) {
             for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
                 if (!kernel.contain(i)) {
-					removeFromEnvelope(i,cause);
+                    removeFromEnvelope(i, cause);
                 }
             }
         }
@@ -219,7 +219,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
         }
     }
 
-	@Override
+    @Override
     public SetDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new SetDeltaMonitor(delta, propagator);

@@ -48,83 +48,85 @@ import solver.variables.Variable;
 
 /**
  * A propagator ensuring that |set| = card
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropCardinality extends Propagator<Variable>{
+public class PropCardinality extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IntVar card;
-	private SetVar set;
+    private IntVar card;
+    private SetVar set;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Propagator ensuring that |setVar| = cardinality
-	 * @param setVar
-	 * @param cardinality
-	 * @param solver
-	 * @param c
-	 */
-	public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,cardinality}, solver, c, PropagatorPriority.BINARY);
-		this.card = cardinality;
-		this.set = setVar;
-	}
+    /**
+     * Propagator ensuring that |setVar| = cardinality
+     *
+     * @param setVar
+     * @param cardinality
+     * @param solver
+     * @param c
+     */
+    public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
+        super(new Variable[]{setVar, cardinality}, solver, c, PropagatorPriority.BINARY);
+        this.card = cardinality;
+        this.set = setVar;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0) return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-		else return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+        else return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int k = set.getKernel().getSize();
-		card.updateLowerBound(k,aCause);
-		int e = set.getEnvelope().getSize();
-		card.updateUpperBound(e,aCause);
-		if(card.instantiated()){
-			int c = card.getValue();
-			ISet env = set.getEnvelope();
-			if(c==k){
-				ISet ker = set.getEnvelope();
-				for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-					if(!ker.contain(j)){
-						set.removeFromEnvelope(j,aCause);
-					}
-				}
-			}else if(c==e){
-				for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-					set.addToKernel(j,aCause);
-				}
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int k = set.getKernel().getSize();
+        card.updateLowerBound(k, aCause);
+        int e = set.getEnvelope().getSize();
+        card.updateUpperBound(e, aCause);
+        if (card.instantiated()) {
+            int c = card.getValue();
+            ISet env = set.getEnvelope();
+            if (c == k) {
+                ISet ker = set.getEnvelope();
+                for (int j = env.getFirstElement(); j >= 0; j = env.getNextElement()) {
+                    if (!ker.contain(j)) {
+                        set.removeFromEnvelope(j, aCause);
+                    }
+                }
+            } else if (c == e) {
+                for (int j = env.getFirstElement(); j >= 0; j = env.getNextElement()) {
+                    set.addToKernel(j, aCause);
+                }
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		propagate(0);
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        propagate(0);
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int k = set.getKernel().getSize();
-		int e = set.getEnvelope().getSize();
-		if(k>card.getUB() || e<card.getLB()){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int k = set.getKernel().getSize();
+        int e = set.getEnvelope().getSize();
+        if (k > card.getUB() || e < card.getLB()) {
+            return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

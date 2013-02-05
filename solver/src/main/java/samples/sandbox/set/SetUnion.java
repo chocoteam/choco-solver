@@ -43,41 +43,41 @@ import solver.variables.SetVarImpl;
 
 public class SetUnion {
 
-	public static void main(String[] args){
-		Solver solver = new Solver();
-		SetVar x = new SetVarImpl("x",solver) ;
-		SetVar y = new SetVarImpl("y",solver) ;
-		SetVar z = new SetVarImpl("z",solver) ;
+    public static void main(String[] args) {
+        Solver solver = new Solver();
+        SetVar x = new SetVarImpl("x", solver);
+        SetVar y = new SetVarImpl("y", solver);
+        SetVar z = new SetVarImpl("z", solver);
 
-		x.getEnvelope().add(2);
-		x.getEnvelope().add(1);
-		x.getEnvelope().add(3);
+        x.getEnvelope().add(2);
+        x.getEnvelope().add(1);
+        x.getEnvelope().add(3);
 
-		y.getEnvelope().add(6);
-		y.getEnvelope().add(2);
-		y.getEnvelope().add(7);
+        y.getEnvelope().add(6);
+        y.getEnvelope().add(2);
+        y.getEnvelope().add(7);
 
-		z.getEnvelope().add(1);
-		z.getEnvelope().add(2);
-		z.getEnvelope().add(5);
-		z.getEnvelope().add(7);
-		z.getEnvelope().add(3);
+        z.getEnvelope().add(1);
+        z.getEnvelope().add(2);
+        z.getEnvelope().add(5);
+        z.getEnvelope().add(7);
+        z.getEnvelope().add(3);
 
 //		x.getKernel().add(3);
 //		z.getKernel().add(7);
 
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z, solver));
+        solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z, solver));
 //		solver.post(SetConstraintsFactory.intersection(new SetVar[]{x, y}, z, solver));
-		solver.set(StrategyFactory.setLex(new SetVar[]{x,y,z}));
-		SearchMonitorFactory.log(solver, true, false);
+        solver.set(StrategyFactory.setLex(new SetVar[]{x, y, z}));
+        SearchMonitorFactory.log(solver, true, false);
 
 
-		solver.findSolution();
+        solver.findSolution();
 //		solver.findAllSolutions();
-		do{
-			System.out.println(x.getEnvelope()+" "+x.instantiated());
-			System.out.println(y.getEnvelope()+" "+y.instantiated());
-			System.out.println(z.getEnvelope()+" "+z.instantiated());
-		}while (solver.nextSolution());
-	}
+        do {
+            System.out.println(x.getEnvelope() + " " + x.instantiated());
+            System.out.println(y.getEnvelope() + " " + y.instantiated());
+            System.out.println(z.getEnvelope() + " " + z.instantiated());
+        } while (solver.nextSolution());
+    }
 }

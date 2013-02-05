@@ -732,4 +732,101 @@ public interface Modeler {
             return s;
         }
     };
+
+    Modeler modelTree = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("tree_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+            IntVar[] succs = new IntVar[n - 1];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (i < n - 1) {
+                    succs[i] = vars[i];
+                }
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            IntVar nbRoots = vars[n - 1];
+            Constraint ctr = IntConstraintFactory.tree(succs, nbRoots, 0, (Boolean) parameters);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelCircuit = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("circuit_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = IntConstraintFactory.circuit(vars, 0);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelSubcircuit = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("subcircuit_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = IntConstraintFactory.subcircuit(vars, 0);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelDiffn = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("diffn_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            if (n % 4 != 0) {
+                throw new UnsupportedOperationException();
+            }
+            int k = n / 4;
+            IntVar[] x = new IntVar[k];
+            IntVar[] y = new IntVar[k];
+            IntVar[] dx = new IntVar[k];
+            IntVar[] dy = new IntVar[k];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            for (int i = 0; i < k; i++) {
+                x[i] = vars[i];
+                y[i] = vars[i + k];
+                dx[i] = vars[i + 2 * k];
+                dy[i] = vars[i + 3 * k];
+            }
+            Constraint ctr = IntConstraintFactory.diffn(x, y, dx, dy);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
 }

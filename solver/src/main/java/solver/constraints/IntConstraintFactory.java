@@ -26,6 +26,7 @@
  */
 package solver.constraints;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.common.util.tools.StringUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Solver;
@@ -55,11 +56,14 @@ import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
+import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.PropNoSubtour;
-import solver.constraints.propagators.nary.PropSubcircuit;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.circuit.PropNoSubtour;
+import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.sum.PropSumEq;
+import solver.constraints.propagators.nary.tree.PropAntiArborescences;
+import solver.constraints.propagators.nary.tree.PropKLoops;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
@@ -605,6 +609,24 @@ public enum IntConstraintFactory {
 
 
     /**
+     * Constrains each rectangle<sub>i</sub>, given by their origins X<sub>i</sub>,Y<sub>i</sub>
+     * and sizes WIDTH<sub>i</sub>,HEIGHT<sub>i</sub>, to be non-overlapping.
+     *
+     * @param X      collection of coordinates in first dimension
+     * @param Y      collection of coordinates in second dimension
+     * @param WIDTH  collection of width
+     * @param HEIGHT collection of height
+     * @return a non-overlapping constraint
+     */
+    public static Constraint diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT) {
+        Solver solver = X[0].getSolver();
+        Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
+        // (not idempotent, so requires two propagators)
+        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, c, solver), new PropDiffN(X, Y, WIDTH, HEIGHT, c, solver));
+        return c;
+    }
+
+    /**
      * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
      * <br/>
      * The level of consistency should be chosen among BC and AC.
@@ -1054,5 +1076,38 @@ public enum IntConstraintFactory {
      */
     public static LargeCSP table(IntVar[] VARS, LargeRelation RELATION, String ALGORITHM) {
         return new LargeCSP(VARS, RELATION, LargeCSP.Type.valueOf(ALGORITHM), VARS[0].getSolver());
+    }
+
+    /**
+     * Partition succs variables into nbArbo (anti) arborescences
+     * roots are represented by loops
+     * Note that the filtering over nbArbo is quite light
+     *
+     * @param succs  successors variables
+     * @param nbArbo number of arborescences (=number of loops)
+     * @return a tree constraint
+     */
+    public static Constraint tree(IntVar[] succs, IntVar nbArbo) {
+        return tree(succs, nbArbo, 0, false);
+    }
+
+    /**
+     * Partition succs variables into nbArbo (anti) arborescences
+     * roots are represented by loops
+     * Note that the filtering over nbArbo is quite light
+     *
+     * @param succs  successors variables
+     * @param nbArbo number of arborescences (=number of loops)
+     * @param offSet
+     * @param linear use a theoretically linear time algorithm (to consider for large scale problem)
+     *               Otherwise, use a n.log(n) algorithm (faster on medium size instances in practice)
+     * @return a tree constraint
+     */
+    public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet, boolean linear) {
+        Solver solver = nbArbo.getSolver();
+        Constraint c = makeEmptyConstraint(solver);
+        c.setPropagators(new PropAntiArborescences(succs, offSet, c, solver, linear),
+                new PropKLoops(succs, nbArbo, offSet, c, solver));
+        return c;
     }
 }

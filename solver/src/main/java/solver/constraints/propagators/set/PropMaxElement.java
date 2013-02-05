@@ -41,121 +41,127 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.*;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.SetVar;
+import solver.variables.Variable;
 
 /**
  * Retrieves the maximum element of the set
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropMaxElement extends Propagator<Variable>{
+public class PropMaxElement extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IntVar max;
-	private SetVar set;
-	private int offSet;
-	private int[] weights;
+    private IntVar max;
+    private SetVar set;
+    private int offSet;
+    private int[] weights;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Retrieves the maximum element of the set
-	 * MAX{i | i in setVar} = max
-	 * @param setVar
-	 * @param max
-	 * @param solver
-	 * @param c
-	 */
-	public PropMaxElement(SetVar setVar, IntVar max, Solver solver, Constraint c) {
-		this(setVar,null,0,max,solver,c);
-	}
+    /**
+     * Retrieves the maximum element of the set
+     * MAX{i | i in setVar} = max
+     *
+     * @param setVar
+     * @param max
+     * @param solver
+     * @param c
+     */
+    public PropMaxElement(SetVar setVar, IntVar max, Solver solver, Constraint c) {
+        this(setVar, null, 0, max, solver, c);
+    }
 
-	/**
-	 * Retrieves the maximum element induced by set
-	 * MAX{weight[i-offset] | i in setVar} = max
-	 * @param setVar
-	 * @param weights
-	 * @param offset
-	 * @param max
-	 * @param solver
-	 * @param c
-	 */
-	public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, Solver solver, Constraint c) {
-		super(new Variable[]{setVar,max}, solver, c, PropagatorPriority.BINARY);
-		this.max = max;
-		this.set = setVar;
-		this.weights = weights;
-		this.offSet = offset;
-	}
+    /**
+     * Retrieves the maximum element induced by set
+     * MAX{weight[i-offset] | i in setVar} = max
+     *
+     * @param setVar
+     * @param weights
+     * @param offset
+     * @param max
+     * @param solver
+     * @param c
+     */
+    public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, Solver solver, Constraint c) {
+        super(new Variable[]{setVar, max}, solver, c, PropagatorPriority.BINARY);
+        this.max = max;
+        this.set = setVar;
+        this.weights = weights;
+        this.offSet = offset;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx==0) return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-		else return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+        else return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			max.updateLowerBound(get(j),aCause);
-		}
-		tmp = set.getEnvelope();
-		int maxVal = get(tmp.getFirstElement());
-		int ub = max.getUB();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			int k = get(j);
-			if(k>ub){
-				set.removeFromEnvelope(j,aCause);
-			}else{
-				if(maxVal<k){
-					maxVal = k;
-				}
-			}
-		}
-		max.updateUpperBound(maxVal,aCause);
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            max.updateLowerBound(get(j), aCause);
+        }
+        tmp = set.getEnvelope();
+        int maxVal = get(tmp.getFirstElement());
+        int ub = max.getUB();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            int k = get(j);
+            if (k > ub) {
+                set.removeFromEnvelope(j, aCause);
+            } else {
+                if (maxVal < k) {
+                    maxVal = k;
+                }
+            }
+        }
+        max.updateUpperBound(maxVal, aCause);
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		propagate(0);
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        propagate(0);
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int lb = max.getLB();
-		int ub = max.getUB();
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(get(j)>ub){
-				return ESat.FALSE;
-			}
-		}
-		tmp = set.getEnvelope();
-		int maxVal = get(tmp.getFirstElement());
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(maxVal<get(j)){
-				maxVal = get(j);
-			}
-		}
-		if(maxVal<lb){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int lb = max.getLB();
+        int ub = max.getUB();
+        ISet tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (get(j) > ub) {
+                return ESat.FALSE;
+            }
+        }
+        tmp = set.getEnvelope();
+        int maxVal = get(tmp.getFirstElement());
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (maxVal < get(j)) {
+                maxVal = get(j);
+            }
+        }
+        if (maxVal < lb) {
+            return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	private int get(int j){
-		return (weights==null)?j:weights[j-offSet];
-	}
+    private int get(int j) {
+        return (weights == null) ? j : weights[j - offSet];
+    }
 }

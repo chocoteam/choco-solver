@@ -40,7 +40,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.nary.PropNoSubtour;
+import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
 import solver.propagation.hardcoded.ConstraintEngine;

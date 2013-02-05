@@ -44,127 +44,129 @@ import solver.variables.IntVar;
 /**
  * Incremental propagator which restricts the number of loops:
  * |{succs[i]=i+offSet}| = nbLoops
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropKLoops extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	// number of nodes
-	private int n;
-	// offset (usually 0 but 1 with MiniZinc)
-	private int offSet;
-	// uninstantiated variables that can be loops
-	private ISet possibleLoops;
-	private IStateInt nbMinLoops;
+    // number of nodes
+    private int n;
+    // offset (usually 0 but 1 with MiniZinc)
+    private int offSet;
+    // uninstantiated variables that can be loops
+    private ISet possibleLoops;
+    private IStateInt nbMinLoops;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Incremental propagator which restricts the number of loops:
-	 * |{succs[i]=i+offSet}| = nbLoops
-	 * @param succs
-	 * @param nbLoops
-	 * @param offSet
-	 * @param constraint
-	 * @param solver
-	 */
-	public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet, Constraint constraint, Solver solver) {
-		super(ArrayUtils.append(succs,new IntVar[]{nbLoops}), solver, constraint, PropagatorPriority.UNARY);
-		this.n = succs.length;
-		this.offSet = offSet;
-		this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY,n,environment);
-		this.nbMinLoops = environment.makeInt();
-	}
+    /**
+     * Incremental propagator which restricts the number of loops:
+     * |{succs[i]=i+offSet}| = nbLoops
+     *
+     * @param succs
+     * @param nbLoops
+     * @param offSet
+     * @param constraint
+     * @param solver
+     */
+    public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet, Constraint constraint, Solver solver) {
+        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), solver, constraint, PropagatorPriority.UNARY);
+        this.n = succs.length;
+        this.offSet = offSet;
+        this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+        this.nbMinLoops = environment.makeInt();
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			possibleLoops.clear();
-			nbMinLoops.set(0);
-			for(int i=0;i<n;i++){
-				if(vars[i].contains(i+offSet)){
-					if(vars[i].instantiated()){
-						nbMinLoops.add(1);
-					}else{
-						possibleLoops.add(i);
-					}
-				}
-			}
-		}
-		int nbMin = nbMinLoops.get();
-		int nbMax = nbMin + possibleLoops.getSize();
-		vars[n].updateLowerBound(nbMin,aCause);
-		vars[n].updateUpperBound(nbMax,aCause);
-		if(vars[n].instantiated() && nbMin!=nbMax){
-			if(vars[n].getValue()==nbMax){
-				for(int i=possibleLoops.getFirstElement();i>=0;i=possibleLoops.getNextElement()){
-					vars[i].instantiateTo(i+offSet,aCause);
-					nbMinLoops.add(1);
-				}
-				possibleLoops.clear();
-			}else if(vars[n].getValue()==nbMin){
-				for(int i=possibleLoops.getFirstElement();i>=0;i=possibleLoops.getNextElement()){
-					vars[i].removeValue(i+offSet,aCause);
-				}
-				possibleLoops.clear();
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            possibleLoops.clear();
+            nbMinLoops.set(0);
+            for (int i = 0; i < n; i++) {
+                if (vars[i].contains(i + offSet)) {
+                    if (vars[i].instantiated()) {
+                        nbMinLoops.add(1);
+                    } else {
+                        possibleLoops.add(i);
+                    }
+                }
+            }
+        }
+        int nbMin = nbMinLoops.get();
+        int nbMax = nbMin + possibleLoops.getSize();
+        vars[n].updateLowerBound(nbMin, aCause);
+        vars[n].updateUpperBound(nbMax, aCause);
+        if (vars[n].instantiated() && nbMin != nbMax) {
+            if (vars[n].getValue() == nbMax) {
+                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                    vars[i].instantiateTo(i + offSet, aCause);
+                    nbMinLoops.add(1);
+                }
+                possibleLoops.clear();
+            } else if (vars[n].getValue() == nbMin) {
+                for (int i = possibleLoops.getFirstElement(); i >= 0; i = possibleLoops.getNextElement()) {
+                    vars[i].removeValue(i + offSet, aCause);
+                }
+                possibleLoops.clear();
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp<n){
-			if(possibleLoops.contain(idxVarInProp)){
-				if(vars[idxVarInProp].contains(idxVarInProp+offSet)){
-					if(vars[idxVarInProp].instantiated()){
-						nbMinLoops.add(1);
-						possibleLoops.remove(idxVarInProp);
-						vars[n].updateLowerBound(nbMinLoops.get(),aCause);
-						forcePropagate(EventType.FULL_PROPAGATION);
-					}
-				}else{
-					possibleLoops.remove(idxVarInProp);
-					vars[n].updateUpperBound(possibleLoops.getSize()+nbMinLoops.get(),aCause);
-					forcePropagate(EventType.FULL_PROPAGATION);
-				}
-			}
-		}else{
-			forcePropagate(EventType.FULL_PROPAGATION);
-		}
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp < n) {
+            if (possibleLoops.contain(idxVarInProp)) {
+                if (vars[idxVarInProp].contains(idxVarInProp + offSet)) {
+                    if (vars[idxVarInProp].instantiated()) {
+                        nbMinLoops.add(1);
+                        possibleLoops.remove(idxVarInProp);
+                        vars[n].updateLowerBound(nbMinLoops.get(), aCause);
+                        forcePropagate(EventType.FULL_PROPAGATION);
+                    }
+                } else {
+                    possibleLoops.remove(idxVarInProp);
+                    vars[n].updateUpperBound(possibleLoops.getSize() + nbMinLoops.get(), aCause);
+                    forcePropagate(EventType.FULL_PROPAGATION);
+                }
+            }
+        } else {
+            forcePropagate(EventType.FULL_PROPAGATION);
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int nbMax = 0;
-		int nbMin = 0;
-		for(int i=0;i<n;i++){
-			if(vars[i].contains(i+offSet)){
-				nbMax++;
-				if(vars[i].instantiated()){
-					nbMin++;
-				}
-			}
-		}
-		if(vars[n].getLB()>nbMax || vars[n].getUB()<nbMin){
-			return ESat.FALSE;
-		}
-		if(nbMin == nbMax && vars[n].instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int nbMax = 0;
+        int nbMin = 0;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].contains(i + offSet)) {
+                nbMax++;
+                if (vars[i].instantiated()) {
+                    nbMin++;
+                }
+            }
+        }
+        if (vars[n].getLB() > nbMax || vars[n].getUB() < nbMin) {
+            return ESat.FALSE;
+        }
+        if (nbMin == nbMax && vars[n].instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }
