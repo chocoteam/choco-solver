@@ -29,8 +29,8 @@ package solver.constraints.gary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.basic.PropKCliques;
+import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
-import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
@@ -174,7 +174,7 @@ public class GraphConstraintFactory {
         Constraint tree = makeConstraint(solver);
         tree.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
         tree.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
-        tree.addPropagators(new PropNLoopsTree(graph, n, solver, tree));
+        tree.addPropagators(new PropKLoops(graph, solver, tree, n));
         tree.addPropagators(new PropNTree(graph, n, solver, tree));
         return tree;
     }

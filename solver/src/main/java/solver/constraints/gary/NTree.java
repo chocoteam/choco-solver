@@ -32,7 +32,7 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
+import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
@@ -79,14 +79,10 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>> {
      */
     public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver) {
         super((V[]) new Variable[]{graph, nTree}, solver);
-//		setPropagators(
-////			new PropNSuccs(graph, solver, this, 1),
-//				new PropNLoopsTree(graph, nTree, solver, this),
-//				new PropNTree(graph, nTree,solver,this));
         setPropagators(
                 (Propagator) new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
                 (Propagator) new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                new PropNLoopsTree(graph, nTree, solver, this),
+                new PropKLoops(graph, solver, this, nTree),
                 new PropNTree(graph, nTree, solver, this));
         this.g = graph;
         this.nTree = nTree;
@@ -219,9 +215,4 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>> {
 //		}
 //		return sinks.size();
 //	}
-
-//    @Override
-//    public HeuristicVal getIterator(String name, V var) {
-//        throw new UnsupportedOperationException("NTree does not provide such a service");
-//    }
 }
