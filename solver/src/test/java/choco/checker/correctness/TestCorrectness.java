@@ -126,7 +126,6 @@ public class TestCorrectness {
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
             }
-
         }
     }
 
@@ -135,7 +134,7 @@ public class TestCorrectness {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff, n, -n / 2, 2 * n, seed, false);
             }
 
         }

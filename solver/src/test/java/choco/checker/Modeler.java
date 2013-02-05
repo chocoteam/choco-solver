@@ -251,12 +251,10 @@ public interface Modeler {
     Modeler modelGCC = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("Gc_AC" + n);
+            Solver s = new Solver("GCC_" + n);
             IEnvironment env = s.getEnvironment();
 
-            boolean[] p = ((boolean[]) parameters);
-            boolean closed = p[0];
-            boolean consistency = p[1];
+            boolean closed = (Boolean) parameters;
             IntVar[] vars = new IntVar[n / 2];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
