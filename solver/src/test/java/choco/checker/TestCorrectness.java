@@ -118,6 +118,17 @@ public class TestCorrectness {
         }
     }
 
+    @Test(groups = "1m")
+    public void testGCCBC() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelGcBC, n, 0, n, seed, true);
+            }
+
+        }
+    }
+
     // INVERSE
     @Test(groups = "1m")
     public void testINVERSECHANNELING_AC() {

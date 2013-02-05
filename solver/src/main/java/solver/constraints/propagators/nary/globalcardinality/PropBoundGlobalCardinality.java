@@ -38,6 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -286,7 +287,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     /////////// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    static class Interval {
+    static class Interval implements Serializable {
         int minrank, maxrank;
         IntVar var;
         int idx;
@@ -297,7 +298,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
      * the filterLower{Min,Max} and filterUpper{Min,Max} functions.
      * Two elements before and after the element list will be added with a weight of 1
      */
-    static final class PartialSum {
+    static final class PartialSum implements Serializable {
         private int[] sum;
         private int[] ds;
         private int firstValue, lastValue, range;

@@ -249,6 +249,37 @@ public interface Modeler {
         }
     };
 
+    Modeler modelGcBC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("Gc_BC" + n);
+            IEnvironment env = s.getEnvironment();
+
+            boolean closed = (Boolean) parameters;
+            IntVar[] vars = new IntVar[n / 2];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0],
+                        domains[i][domains[i].length - 1], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            int[] values = new int[n / 2];
+            IntVar[] cards = new IntVar[n / 2];
+            for (int i = 0; i < cards.length; i++) {
+                values[i] = i;
+                cards[i] = VariableFactory.bounded("c_" + i, domains[i + n / 2][0],
+                        domains[i + n / 2][domains[i + n / 2].length - 1], s);
+                if (map != null) map.put(domains[i + n / 2], cards[i]);
+            }
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, closed, "BC");
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
     Modeler modelGcAC = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
