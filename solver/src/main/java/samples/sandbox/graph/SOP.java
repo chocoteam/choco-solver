@@ -25,21 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import samples.graph.input.SOP_Utils;
-import samples.graph.output.TextWriter;
+import samples.sandbox.graph.input.SOP_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -207,11 +206,11 @@ public class SOP {
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j && distanceMatrix[i][j] == -1) {
-                    solver.post(ConstraintFactory.lt(pos[j], pos[i], solver));
+                    solver.post(IntConstraintFactory.arithm(pos[j], "<", pos[i]));
                 }
             }
         }
-        solver.post(new AllDifferent(pos, solver, AllDifferent.Type.AC));
+        solver.post(IntConstraintFactory.alldifferent(pos, "AC"));
         gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
         if (config.get(rg)) {
             gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));

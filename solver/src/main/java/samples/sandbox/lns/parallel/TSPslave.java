@@ -25,9 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.lns.parallel;
+package samples.sandbox.lns.parallel;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import choco.kernel.parallelism.AbstractParallelMaster;
 import choco.kernel.parallelism.AbstractParallelSlave;
 import solver.Solver;
@@ -39,8 +41,6 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 
 public class TSPslave extends AbstractParallelSlave {
 
@@ -88,28 +88,28 @@ public class TSPslave extends AbstractParallelSlave {
     // METHODS
     //***********************************************************************************
 
-	@Override
-	public void work() {
-		final Solver solver = new Solver();
-		// variables
-		final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST,true);
-		for(int i=0;i<n;i++){
-			undi.getKernelGraph().activateNode(i);
-			for(int j=i+1;j<n-1;j++){
-				undi.getEnvelopGraph().addEdge(i,j);
-			}
-		}
-		undi.getEnvelopGraph().addEdge(0,n-1);
-		undi.getEnvelopGraph().addEdge(n-2,n-1);
-		undi.getKernelGraph().addEdge(0,n-1);
-		undi.getKernelGraph().addEdge(n-2,n-1);
-		// constraints
-		solver.post(GraphConstraintFactory.tsp(undi,totalCost,distMatrix,1,solver));
-		// config
-		GraphStrategies strategy = new GraphStrategies(undi,distMatrix,null);
-		strategy.configure(10,true,true,false);
-		solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost,OptimizationPolicy.BOTTOM_UP),strategy));
+    @Override
+    public void work() {
+        final Solver solver = new Solver();
+        // variables
+        final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
+        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        for (int i = 0; i < n; i++) {
+            undi.getKernelGraph().activateNode(i);
+            for (int j = i + 1; j < n - 1; j++) {
+                undi.getEnvelopGraph().addEdge(i, j);
+            }
+        }
+        undi.getEnvelopGraph().addEdge(0, n - 1);
+        undi.getEnvelopGraph().addEdge(n - 2, n - 1);
+        undi.getKernelGraph().addEdge(0, n - 1);
+        undi.getKernelGraph().addEdge(n - 2, n - 1);
+        // constraints
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1, solver));
+        // config
+        GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
+        strategy.configure(10, true, true, false);
+        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         //output
         if (solver.getMeasures().getSolutionCount() == 0 || !undi.instantiated()) {

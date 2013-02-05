@@ -25,19 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import samples.graph.input.ATSP_Utils;
-import samples.graph.output.TextWriter;
+import samples.sandbox.graph.input.ATSP_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -275,7 +275,7 @@ public class ATSP {
             } else {
                 gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
             }
-            solver.post(new AllDifferent(pos, solver, AllDifferent.Type.BC));
+            solver.post(IntConstraintFactory.alldifferent(pos, "BC"));
         }
         if (khun) {
 //			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);

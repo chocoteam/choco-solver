@@ -32,7 +32,7 @@
  * Time: 14:54
  */
 
-package samples.graph;
+package samples.sandbox.graph;
 
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;

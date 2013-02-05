@@ -38,7 +38,7 @@ import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.CombinedAttribute;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.ISchedulable;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
@@ -70,7 +70,7 @@ public class T_coll extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }

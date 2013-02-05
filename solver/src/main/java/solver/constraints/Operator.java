@@ -24,63 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints;
 
-package solver.constraints.nary;
-
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.circuit.PropNoSubtour;
-import solver.variables.IntVar;
-import solver.variables.Variable;
-import java.util.BitSet;
+import gnu.trove.map.hash.THashMap;
 
 /**
- * NoSubtour constraint (see Pesant or Caseau&Laburthe)
- * for making a hamiltonian circuit
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 21/01/13
  */
-public class NoSubTours extends IntConstraint<IntVar> {
+public enum Operator {
 
-    public NoSubTours(IntVar[] vars, Solver solver) {
-        super(vars, solver);
-		setPropagators(new PropNoSubtour(vars, solver, this));
+    NONE(-1), EQ(0), LT(1), GT(2), NQ(3), LE(4), GE(5), PL(6), MN(7);
+
+    int num;
+
+    private Operator(int num) {
+        this.num = num;
     }
 
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-		int n = vars.length;
-		BitSet visited = new BitSet(n);
-		int i = 0;
-		int size = 1;
-		while(size!=n){
-			size++;
-			i = tuple[i];
-			if(visited.get(i)){
-				return ESat.FALSE;
-			}
-			visited.set(i);
-		}
-		if(i==0){
-			return ESat.TRUE;
-		}else{
-			return ESat.FALSE;
-		}
+    static THashMap<String, Operator> operators = new THashMap<String, Operator>();
+
+    static {
+        operators.put("@", Operator.NONE);
+        operators.put("=", Operator.EQ);
+        operators.put(">", Operator.GT);
+        operators.put(">=", Operator.GE);
+        operators.put("<", Operator.LT);
+        operators.put("<=", Operator.LE);
+        operators.put("!=", Operator.NQ);
+        operators.put("+", Operator.PL);
+        operators.put("-", Operator.MN);
     }
 
-    @Override
-    public ESat isSatisfied() {
-        return isEntailed();
-    }
+    ;
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("NoSubTour({");
-        for (int i = 0; i < vars.length; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var);
-        }
-        sb.append("})");
-        return sb.toString();
+
+    public static Operator get(String name) {
+        return operators.get(name);
     }
 }

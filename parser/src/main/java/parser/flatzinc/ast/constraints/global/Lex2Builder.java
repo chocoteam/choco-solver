@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.lex.LexChain;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -53,6 +53,6 @@ public class Lex2Builder implements IBuilder {
         for (int i = 0; i < le; i++) {
             ys[i] = Arrays.copyOfRange(xs, le * i, le * (i + 1));
         }
-        return new LexChain(false, solver, ys);
+        return IntConstraintFactory.lex_chain_less_eq(ys);
     }
 }

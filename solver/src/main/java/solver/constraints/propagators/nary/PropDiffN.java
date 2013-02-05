@@ -230,5 +230,4 @@ public class PropDiffN extends Propagator<IntVar> {
 		sb.append(")");
 		return sb.toString();
 	}
-
 }

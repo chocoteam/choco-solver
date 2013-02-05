@@ -24,11 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples.graph;
+package samples.sandbox.graph;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.nary.AtMostNValues;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -78,8 +78,9 @@ public class NValues extends AbstractProblem {
         vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
         vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
         vars[3] = VariableFactory.enumerated("vars_3", new int[]{2, 3}, solver);
-        IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
-        solver.post(new AtMostNValues(vars, nVal, solver, AtMostNValues.Algo.Greedy));
+        IntVar nVal = VariableFactory.bounded("N_CC", 0, n, solver);
+        solver.post(IntConstraintFactory.nvalues(vars, nVal, "at_most_greedy"));
+        solver.post(IntConstraintFactory.arithm(nVal, "<=", k));
     }
 
     @Override

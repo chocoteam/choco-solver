@@ -37,7 +37,7 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.variables.IntVar;
@@ -68,7 +68,7 @@ public class T_struct_reg extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }
@@ -131,12 +131,12 @@ public class T_struct_reg extends GrammarExtTest {
     }
 
     @Test
-        public void test5() throws IOException, RecognitionException {
-            // A heap-based variable oriented propagation engine
-            FlatzincFullExtParser fp = parser("G1 as max heap(wone) of {each var as queue(one) key any.var.cardinality}");
-            PropagationStrategy scheds = struct_reg(fp);
-            Assert.assertNotNull(scheds);
-            Assert.assertTrue(scheds instanceof SortDyn);
-        }
+    public void test5() throws IOException, RecognitionException {
+        // A heap-based variable oriented propagation engine
+        FlatzincFullExtParser fp = parser("G1 as max heap(wone) of {each var as queue(one) key any.var.cardinality}");
+        PropagationStrategy scheds = struct_reg(fp);
+        Assert.assertNotNull(scheds);
+        Assert.assertTrue(scheds instanceof SortDyn);
+    }
 
 }

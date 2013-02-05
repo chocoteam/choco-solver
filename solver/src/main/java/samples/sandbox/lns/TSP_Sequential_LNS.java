@@ -25,11 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.lns;
+package samples.sandbox.lns;
 
 import choco.kernel.ResolutionPolicy;
-import samples.graph.input.TSP_Utils;
-import samples.graph.output.TextWriter;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import samples.sandbox.graph.input.TSP_Utils;
+import samples.sandbox.graph.output.TextWriter;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -39,8 +41,7 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.io.File;
 import java.util.Random;
 
@@ -64,11 +65,11 @@ public class TSP_Sequential_LNS {
     // METHODS
     //***********************************************************************************
 
-	public static void main(String[] args) {
-		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
-		String sol = dir+"/bestSols.csv";
-		benchmark(new String[]{"-dir",dir,"-optFile",sol});
-	}
+    public static void main(String[] args) {
+        String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+        String sol = dir + "/bestSols.csv";
+        benchmark(new String[]{"-dir", dir, "-optFile", sol});
+    }
 
     public static void benchmark(String[] args) {
         // set input
@@ -97,10 +98,10 @@ public class TSP_Sequential_LNS {
                         optimum = TSP_Utils.getOptimum(s.split("\\.")[0], optFile);
                         System.out.println("optimum : " + optimum);
                         int bestValue = run();
-						double gap = (double)(bestValue-optimum)*100/optimum;
-						gap = (int)(gap*100);
-						gap /= 100;
-						System.out.println("GAP "+gap+"%");
+                        double gap = (double) (bestValue - optimum) * 100 / optimum;
+                        gap = (int) (gap * 100);
+                        gap /= 100;
+                        System.out.println("GAP " + gap + "%");
                     }
                 } else {
                     System.out.println("CANNOT LOAD");
@@ -114,24 +115,24 @@ public class TSP_Sequential_LNS {
     // INITIALIZATION
     //***********************************************************************************
 
-	private static int run() {
-		Solver solver = new Solver();
-		// variables
-		int max = 100*optimum;
-		IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST,true);
-		for(int i=0;i<n;i++){
-			undi.getKernelGraph().activateNode(i);
-			for(int j=i+1;j<n;j++){
-				undi.getEnvelopGraph().addEdge(i,j);
-			}
-		}
-		// constraints
-		solver.post(GraphConstraintFactory.tsp(undi,totalCost,distMatrix,2,solver));
-		// config
-		GraphStrategies strategy = new GraphStrategies(undi,distMatrix,null);
-		strategy.configure(9,true,true,false);
-		solver.set(strategy);
+    private static int run() {
+        Solver solver = new Solver();
+        // variables
+        int max = 100 * optimum;
+        IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
+        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        for (int i = 0; i < n; i++) {
+            undi.getKernelGraph().activateNode(i);
+            for (int j = i + 1; j < n; j++) {
+                undi.getEnvelopGraph().addEdge(i, j);
+            }
+        }
+        // constraints
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 2, solver));
+        // config
+        GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
+        strategy.configure(9, true, true, false);
+        solver.set(strategy);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));
         // resolution
@@ -139,8 +140,8 @@ public class TSP_Sequential_LNS {
         System.out.println("start LNS...");
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         System.out.println("end LNS... duration = " + (System.currentTimeMillis() - timeInst) + " ms");
-    	return solver.getMeasures().getObjectiveValue();
-	}
+        return solver.getMeasures().getObjectiveValue();
+    }
 
     //***********************************************************************************
     // RESOLUTION

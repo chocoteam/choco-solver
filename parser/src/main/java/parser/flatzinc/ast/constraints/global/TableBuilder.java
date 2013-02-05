@@ -32,8 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.extension.BinCSP;
-import solver.constraints.extension.LargeCSP;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.extension.ExtensionalBinRelation;
 import solver.constraints.propagators.extension.binary.CouplesTable;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
@@ -88,7 +87,7 @@ public class TableBuilder implements IBuilder {
                             new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
                 }
             }
-            return new BinCSP(x[0], x[1], relation);
+            return IntConstraintFactory.table(x[0], x[1], relation, "AC2001");
         } else {
             int[] o = new int[x.length];
             int[] d = new int[x.length];
@@ -99,7 +98,7 @@ public class TableBuilder implements IBuilder {
 
 
             LargeRelation list_t = new IterTuplesTable(t, o, d);
-            return new LargeCSP(x, list_t, LargeCSP.Type.AC2001, solver);
+            return IntConstraintFactory.table(x, list_t, "AC2001");
         }
     }
 
