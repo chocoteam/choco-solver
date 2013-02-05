@@ -28,8 +28,7 @@ package samples;
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -60,27 +59,27 @@ public class Alpha extends AbstractProblem {
         for (int i = 0; i < 26; i++) {
             letters[i] = VariableFactory.bounded("" + (char) (97 + i), 1, 26, solver);
         }
-        solver.post(Sum.eq(extract("ballet"), 45, solver));
-        solver.post(Sum.eq(extract("cello"), 43, solver));
-        solver.post(Sum.eq(extract("concert"), 74, solver));
-        solver.post(Sum.eq(extract("flute"), 30, solver));
-        solver.post(Sum.eq(extract("fugue"), 50, solver));
-        solver.post(Sum.eq(extract("glee"), 66, solver));
-        solver.post(Sum.eq(extract("jazz"), 58, solver));
-        solver.post(Sum.eq(extract("lyre"), 47, solver));
-        solver.post(Sum.eq(extract("oboe"), 53, solver));
-        solver.post(Sum.eq(extract("opera"), 65, solver));
-        solver.post(Sum.eq(extract("polka"), 59, solver));
-        solver.post(Sum.eq(extract("quartet"), 50, solver));
-        solver.post(Sum.eq(extract("saxophone"), 134, solver));
-        solver.post(Sum.eq(extract("scale"), 51, solver));
-        solver.post(Sum.eq(extract("solo"), 37, solver));
-        solver.post(Sum.eq(extract("song"), 61, solver));
-        solver.post(Sum.eq(extract("soprano"), 82, solver));
-        solver.post(Sum.eq(extract("theme"), 72, solver));
-        solver.post(Sum.eq(extract("violin"), 100, solver));
-        solver.post(Sum.eq(extract("waltz"), 34, solver));
-        solver.post(new AllDifferent(letters, solver));
+        solver.post(IntConstraintFactory.sum(extract("ballet"), "=", 45));
+        solver.post(IntConstraintFactory.sum(extract("cello"), "=", 43));
+        solver.post(IntConstraintFactory.sum(extract("concert"), "=", 74));
+        solver.post(IntConstraintFactory.sum(extract("flute"), "=", 30));
+        solver.post(IntConstraintFactory.sum(extract("fugue"), "=", 50));
+        solver.post(IntConstraintFactory.sum(extract("glee"), "=", 66));
+        solver.post(IntConstraintFactory.sum(extract("jazz"), "=", 58));
+        solver.post(IntConstraintFactory.sum(extract("lyre"), "=", 47));
+        solver.post(IntConstraintFactory.sum(extract("oboe"), "=", 53));
+        solver.post(IntConstraintFactory.sum(extract("opera"), "=", 65));
+        solver.post(IntConstraintFactory.sum(extract("polka"), "=", 59));
+        solver.post(IntConstraintFactory.sum(extract("quartet"), "=", 50));
+        solver.post(IntConstraintFactory.sum(extract("saxophone"), "=", 134));
+        solver.post(IntConstraintFactory.sum(extract("scale"), "=", 51));
+        solver.post(IntConstraintFactory.sum(extract("solo"), "=", 37));
+        solver.post(IntConstraintFactory.sum(extract("song"), "=", 61));
+        solver.post(IntConstraintFactory.sum(extract("soprano"), "=", 82));
+        solver.post(IntConstraintFactory.sum(extract("theme"), "=", 72));
+        solver.post(IntConstraintFactory.sum(extract("violin"), "=", 100));
+        solver.post(IntConstraintFactory.sum(extract("waltz"), "=", 34));
+        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
     }
 
     private IntVar[] extract(String word) {

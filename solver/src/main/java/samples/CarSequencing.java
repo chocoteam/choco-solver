@@ -28,8 +28,7 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.nary.GCC_AC;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -97,13 +96,13 @@ public class CarSequencing extends AbstractProblem {
                     atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
                 }
 //				solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
-                solver.post(new GCC_AC(carSequence, options[optNum], atMost, solver));
+                solver.post(IntConstraintFactory.global_cardinality(carSequence, options[optNum], atMost, false, "AC"));
                 IntVar[] atLeast = VariableFactory.boundedArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, solver);
 //				solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
-                solver.post(new GCC_AC(carSequence, idleConfs[optNum], atLeast, solver));
+                solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false, "AC"));
 
                 // all others configurations may be chosen
-                solver.post(Sum.geq(atLeast, optfreq[optNum][1] - optfreq[optNum][0], solver));
+                solver.post(IntConstraintFactory.sum(atLeast, ">=", optfreq[optNum][1] - optfreq[optNum][0]));
             }
         }
 
@@ -113,7 +112,7 @@ public class CarSequencing extends AbstractProblem {
             values[i] = i;
         }
 //		solver.post(GlobalCardinality.make(cars, values, expArray, solver));
-        solver.post(new GCC_AC(cars, values, expArray, solver));
+        solver.post(IntConstraintFactory.global_cardinality(cars, values, expArray, false, "AC"));
     }
 
     private static IntVar[] extractor(IntVar[] cars, int initialNumber, int amount) {
