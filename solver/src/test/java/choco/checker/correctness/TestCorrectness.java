@@ -120,11 +120,22 @@ public class TestCorrectness {
     }
 
     @Test(groups = "1m")
-    public void testGCCBC() {
+    public void testGCC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGcBC, n, 0, n, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
+            }
+
+        }
+    }
+
+	@Test(groups = "1m")
+    public void testGCC2() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < 33; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff, n, -n / 2, 2 * n, seed, new int[]{2, 1});
             }
 
         }
@@ -329,40 +340,6 @@ public class TestCorrectness {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 33; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelNValues_simple, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    // GCC
-    @Test(groups = "1m")
-    public void testGCC_AD_CARDS() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Cards, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testGCC_AD_FAST() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Fast, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testGCC_AD_LOWUP() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_LowUp, n, -n / 2, 2 * n, seed, new int[]{2, 1});
             }
 
         }

@@ -137,7 +137,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 					}
 				} else {
 					for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-						if(map.containsKey(v.getValue())){
+						if(map.containsKey(k)){
 							int j = map.get(k);
 							possibles[j].add(i);
 						}
@@ -247,7 +247,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 				}
 			} else {
 				for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					if(map.containsKey(v.getValue())){
+					if(map.containsKey(k)){
 						j = map.get(k);
 						max[j]++;
 					}

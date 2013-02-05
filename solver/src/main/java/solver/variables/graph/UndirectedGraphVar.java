@@ -47,15 +47,15 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public UndirectedGraphVar(Solver solver, int nbNodes,
+	public UndirectedGraphVar(String name, Solver solver, int nbNodes,
 							  SetType typeEnv, SetType typeKer, boolean allNodes) {
-		super(solver);
+		super(name,solver);
     	envelop = new UndirectedGraph(environment, nbNodes, typeEnv,allNodes);
     	kernel = new UndirectedGraph(environment, nbNodes, typeKer,allNodes);
     }
 
-	public UndirectedGraphVar(Solver solver, int nbNodes,boolean allNodes) {
-		this(solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
+	public UndirectedGraphVar(String name, Solver solver, int nbNodes,boolean allNodes) {
+		this(name, solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
     }
 
     //***********************************************************************************

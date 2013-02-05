@@ -47,57 +47,48 @@ import java.util.BitSet;
 public class AtMostNValues extends IntConstraint<IntVar> {
 
     public static enum Algo {
-		BC {
-			@Override
-			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
-				cons.setPropagators(new PropAtMostNValues_BC(vars,nValues,cons,sol));
-			}
-		},
-		Greedy {
-			@Override
-			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
-				for(IntVar v:vars){
-					assert v.hasEnumeratedDomain();
-				}
-				cons.setPropagators(new PropAtMostNValues_Greedy(vars,nValues,cons,sol));
-			}
-		};
+        BC {
+            @Override
+            public void addPropagators(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver sol) {
+                cons.setPropagators(new PropAtMostNValues_BC(vars, nValues, cons, sol));
+            }
+        },
+        Greedy {
+            @Override
+            public void addPropagators(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver sol) {
+                for (IntVar v : vars) {
+                    assert v.hasEnumeratedDomain();
+                }
+                cons.setPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, sol));
+            }
+        };
 
-		public abstract void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol);
-	}
-
-	/**
-	 * AtMostNValues constraint
-	 * The number of distinct values in vars is at most nValues
-	 * Performs Bound Consistency in O(n+d) with
-	 * 		n = |vars|
-	 * 		d = maxValue - minValue (from initial domains)
-	 *
-	 * 	=> very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
-	 * 	=>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
-	 *
-	 * @param vars
-	 * @param nValues
-	 * @param solver
-	 */
-    public AtMostNValues(IntVar[] vars, IntVar nValues, Solver solver) {
-        this(vars, nValues, solver, Algo.BC);
+        public abstract void addPropagators(IntVar[] vars, IntVar nValues, IntConstraint cons, Solver sol);
     }
 
-	/**The number of distinct values in vars is at most nValues
-	 *
-	 * @param vars
-	 * @param nValues
-	 * @param solver
-	 * @param algos propagator(s) for the constraint
-	 * (BC, BC_wr and/or Greedy)
-	 *  Note that if domains are not enumerated, only the BC makes sense
-	 */
+    /**
+     * The number of distinct values in vars is at most nValues
+     * <p/>
+     * if Algo.BC:
+     * Performs Bound Consistency in O(n+d) with
+     * n = |vars|
+     * d = maxValue - minValue (from initial domains)
+     * <p/>
+     * => very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
+     * =>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+     *
+     * @param vars
+     * @param nValues
+     * @param solver
+     * @param algos   propagator(s) for the constraint
+     *                (BC, BC_wr and/or Greedy)
+     *                Note that if domains are not enumerated, only the BC makes sense
+     */
     public AtMostNValues(IntVar[] vars, IntVar nValues, Solver solver, Algo... algos) {
-        super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver);
-		for(Algo a:algos){
-			a.addPropagators(vars, nValues, this, solver);
-		}
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
+        for (Algo a : algos) {
+            a.addPropagators(vars, nValues, this, solver);
+        }
     }
 
     /**
@@ -108,30 +99,30 @@ public class AtMostNValues extends IntConstraint<IntVar> {
      */
     @Override
     public ESat isSatisfied(int[] tuple) {
-		int minval = tuple[0];
-		for (int i = 0; i < tuple.length-1; i++) {
-			if(minval>tuple[i])
-				minval = tuple[i];
-		}
-		BitSet values = new BitSet(tuple.length-1);
-        for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]-minval);
+        int minval = tuple[0];
+        for (int i = 0; i < tuple.length - 1; i++) {
+            if (minval > tuple[i])
+                minval = tuple[i];
         }
-		if(values.cardinality()<=tuple[tuple.length-1]){
-			return ESat.TRUE;
-		}
+        BitSet values = new BitSet(tuple.length - 1);
+        for (int i = 0; i < tuple.length - 1; i++) {
+            values.set(tuple[i] - minval);
+        }
+        if (values.cardinality() <= tuple[tuple.length - 1]) {
+            return ESat.TRUE;
+        }
         return ESat.FALSE;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
         sb.append("AtMostNValue({");
-        for (int i = 0; i < vars.length-1; i++) {
+        for (int i = 0; i < vars.length - 1; i++) {
             if (i > 0) sb.append(", ");
             Variable var = vars[i];
             sb.append(var);
         }
-		sb.append(" <= "+vars[vars.length-1]);
+        sb.append(" <= " + vars[vars.length - 1]);
         sb.append("})");
         return sb.toString();
     }

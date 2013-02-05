@@ -31,8 +31,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinaltyLowUp;
-import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_LowUp;
+import solver.constraints.propagators.nary.globalcardinality.unsafe.PropBoundGlobalCardinaltyLowUp;
+import solver.constraints.propagators.nary.globalcardinality.unsafe.PropGCC_AC_LowUp;
 import solver.exception.SolverException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -65,7 +65,76 @@ import java.util.List;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @since 16/06/11
  */
+@Deprecated
 public class GlobalCardinalityLowUp extends IntConstraint<IntVar> {
+
+	//	/**
+	//	 * Each values VALUES[i] should be taken by at least LOWS[i] and at most UPS[i] variables of VARS.
+	//	 * <br/>
+	//	 * The <code>CONSISTENCY</code> should be chosen among "BC" and "AC".
+	//	 * <p/>
+	//	 * <b>BC</b>:
+	//	 * Ensures Bound Consistency.
+	//	 * Based on:
+	//	 * C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
+	//	 * An efficient bounds consistency algorithm for the global cardinality constraint. CP-2003.
+	//	 * <p/>
+	//	 * <b>AC</b>: Ensures Arc-Consistency.
+	//	 *
+	//	 * @param VARS        collection of variables
+	//	 * @param VALUES      collection of constrained values
+	//	 * @param LOWS        minimum occurrences of each values of VALUES
+	//	 * @param UPS         maximum occurrences of each values of VALUES
+	//	 * @param CLOSED      restricts domains of VARS to VALUES if set to true
+	//	 * @param CONSISTENCY consistency level, among {"BC", "AC"}
+	//	 */
+	//	public static GlobalCardinalityLowUp global_cardinality_low_up(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
+	//																   boolean CLOSED, String CONSISTENCY) {
+	//		Solver solver = VARS[0].getSolver();
+	//
+	//		TIntObjectHashMap<int[]> map = new TIntObjectHashMap<int[]>(VALUES.length);
+	//		for (int i = 0; i < VALUES.length; i++) {
+	//			map.put(VALUES[i], new int[]{LOWS[i], UPS[i]});
+	//		}
+	//
+	//		int n = VARS.length;
+	//		Arrays.sort(VALUES);
+	//		int min = VALUES[0];
+	//		int max = VALUES[VALUES.length - 1];
+	//
+	//		for (int v = 0; v < VARS.length; v++) {
+	//			IntVar var = VARS[v];
+	//			if (min > var.getLB()) {
+	//				min = var.getLB();
+	//			}
+	//			if (max < var.getUB()) {
+	//				max = var.getUB();
+	//			}
+	//		}
+	//
+	//		int[] mOCC = new int[max - min + 1];
+	//		int[] MOCC = new int[max - min + 1];
+	//		int[] values = new int[max - min + 1];
+	//		for (int i = min; i <= max; i++) {
+	//			values[i - min] = i;
+	//			if (map.containsKey(i)) {
+	//				int[] lu = map.get(i);
+	//				mOCC[i - min] = lu[0];
+	//				MOCC[i - min] = lu[1];
+	//			} else {
+	//				if (CLOSED) {
+	//					mOCC[i - min] = 0;
+	//					MOCC[i - min] = 0;
+	//				} else {
+	//					mOCC[i - min] = 0;
+	//					MOCC[i - min] = n;
+	//				}
+	//			}
+	//		}
+	//		return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC,
+	//				GlobalCardinalityLowUp.Consistency.valueOf(CONSISTENCY), solver);
+	//
+	//	}
 
     private final int range;
     private final int[] lows, ups;
@@ -73,7 +142,7 @@ public class GlobalCardinalityLowUp extends IntConstraint<IntVar> {
     public static enum Consistency {AC, BC}
 
 
-    public GlobalCardinalityLowUp(IntVar[] vars, int[] values, int[] lows, int[] ups, Consistency cons, Solver solver) {
+    private GlobalCardinalityLowUp(IntVar[] vars, int[] values, int[] lows, int[] ups, Consistency cons, Solver solver) {
         super(vars, solver);
         checker(vars, lows, ups);
         this.range = lows.length;

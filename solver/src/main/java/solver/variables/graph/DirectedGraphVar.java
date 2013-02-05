@@ -47,15 +47,15 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public DirectedGraphVar(Solver solver, int nbNodes,
+	public DirectedGraphVar(String name, Solver solver, int nbNodes,
 							SetType typeEnv, SetType typeKer,boolean allNodes) {
-		super(solver);
+		super(name, solver);
 		envelop = new DirectedGraph(environment, nbNodes, typeEnv,allNodes);
 		kernel = new DirectedGraph(environment, nbNodes, typeKer,allNodes);
 	}
 
-	public DirectedGraphVar(Solver solver, int nbNodes,boolean allNodes) {
-		this(solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
+	public DirectedGraphVar(String name, Solver solver, int nbNodes,boolean allNodes) {
+		this(name, solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
     }
 	
     //***********************************************************************************

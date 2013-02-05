@@ -35,7 +35,9 @@
 package choco.checker.fmk;
 
 import gnu.trove.list.array.TIntArrayList;
+
 import java.util.Random;
+
 import static choco.checker.DomainBuilder.buildFullDomains;
 
 /**
@@ -43,48 +45,57 @@ import static choco.checker.DomainBuilder.buildFullDomains;
  * @since 01/13
  */
 public class Domain {
-	int[] valsEnv;
-	int[] valsKer;
-	public Domain(int[] valsInDom){
-		this(valsInDom,null);
-	}
-	public Domain(int[] valsInEnv, int[] valsInKer){
-		valsEnv = valsInEnv;
-		valsKer = valsInKer;
-	}
-	public int[] getIntDom(){
-		return valsEnv;
-	}
-	public int[] getSetEnv(){
-		return valsEnv;
-	}
-	public int[] getSetKer(){
-		return valsKer;
-	}
+    int[] valsEnv;
+    int[] valsKer;
 
-	public static Domain buildBoolDomain(Random r) {
-		int d = r.nextInt(3);
-		switch (d){
-			case 0:return new Domain(new int[]{0});
-			case 1:return new Domain(new int[]{1});
-			case 2:return new Domain(new int[]{0,1});
-			default:throw new UnsupportedOperationException();
-		}
-	}
+    public Domain(int[] valsInDom) {
+        this(valsInDom, null);
+    }
 
-	public static Domain buildIntDomain(int lowerB, int ds, Random r, double density, boolean homogeneou) {
-		return new Domain(buildFullDomains(1, lowerB, ds, r, density, homogeneou)[0]);
-	}
+    public Domain(int[] valsInEnv, int[] valsInKer) {
+        valsEnv = valsInEnv;
+        valsKer = valsInKer;
+    }
 
-	public static Domain buildSetDomain(int ds, Random r, double density, boolean homogeneou) {
-		int[] env = buildFullDomains(1, 0, ds, r, density, homogeneou)[0];
-		int nbK = r.nextInt(env.length);
-		TIntArrayList l = new TIntArrayList(env);
-		l.shuffle(r);
-		int[] ker = new int[nbK];
-		for(int i=0;i<nbK;i++){
-			ker[i] = l.get(i);
-		}
-		return new Domain(env,ker);
-	}
+    public int[] getIntDom() {
+        return valsEnv;
+    }
+
+    public int[] getSetEnv() {
+        return valsEnv;
+    }
+
+    public int[] getSetKer() {
+        return valsKer;
+    }
+
+    public static Domain buildBoolDomain(Random r) {
+        int d = r.nextInt(3);
+        switch (d) {
+            case 0:
+                return new Domain(new int[]{0});
+            case 1:
+                return new Domain(new int[]{1});
+            case 2:
+                return new Domain(new int[]{0, 1});
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    public static Domain buildIntDomain(int lowerB, int ds, Random r, double density, boolean homogeneou) {
+        return new Domain(buildFullDomains(1, lowerB, ds, r, density, homogeneou)[0]);
+    }
+
+    public static Domain buildSetDomain(int ds, Random r, double density, boolean homogeneou) {
+        int[] env = buildFullDomains(1, 0, ds, r, density, homogeneou)[0];
+        int nbK = r.nextInt(env.length);
+        TIntArrayList l = new TIntArrayList(env);
+        l.shuffle(r);
+        int[] ker = new int[nbK];
+        for (int i = 0; i < nbK; i++) {
+            ker[i] = l.get(i);
+        }
+        return new Domain(env, ker);
+    }
 }

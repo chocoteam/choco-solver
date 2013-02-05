@@ -30,6 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
@@ -118,7 +119,7 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.bounded("x", 1, 5, ref);
                 xs[1] = VariableFactory.bounded("y", 1, 5, ref);
                 xs[2] = VariableFactory.bounded("z", 2, 10, ref);
-                ref.post(Sum.eq(xs, new int[]{1, 1, -1}, 0, ref));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
@@ -132,7 +133,7 @@ public class ViewSumXYTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -148,7 +149,7 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 5, ref);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
                 xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
-                ref.post(Sum.eq(xs, new int[]{1, 1, -1}, 0, ref));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
                 ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
@@ -162,7 +163,7 @@ public class ViewSumXYTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }

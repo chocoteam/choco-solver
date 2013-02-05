@@ -27,9 +27,10 @@
 
 package solver.recorder;
 
+import choco.kernel.memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.graph.input.GraphGenerator;
+import samples.sandbox.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -41,7 +42,6 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 /**

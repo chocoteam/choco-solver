@@ -50,135 +50,136 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 /**
  * Inverse set propagator
  * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropInverse extends Propagator<SetVar>{
+public class PropInverse extends Propagator<SetVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n, n2, idx;
-	private SetVar[] sets,invsets,toFilter;
-	private int offSet1,offSet2,offSet;
-	private SetDeltaMonitor[] sdm;
-	private IntProcedure elementForced,elementRemoved;
+    private int n, n2, idx;
+    private SetVar[] sets, invsets, toFilter;
+    private int offSet1, offSet2, offSet;
+    private SetDeltaMonitor[] sdm;
+    private IntProcedure elementForced, elementRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Inverse set propagator
-	 * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
-	 */
-	public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(ArrayUtils.append(sets,invsets), solver, c, PropagatorPriority.LINEAR);
-		n = sets.length;
-		n2 = invsets.length;
-		this.offSet1 = offSet1;
-		this.offSet2 = offSet2;
-		this.sets = sets;
-		this.invsets = invsets;
-		// delta monitors
-		sdm = new SetDeltaMonitor[n+n2];
-		for(int i=0;i<n+n2;i++){
-			sdm[i] = this.vars[i].monitorDelta(this);
-		}
-		elementForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				toFilter[element-offSet].addToKernel(idx,aCause);
-			}
-		};
-		elementRemoved = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				toFilter[element-offSet].removeFromEnvelope(idx,aCause);
-			}
-		};
-	}
+    /**
+     * Inverse set propagator
+     * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
+     */
+    public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(ArrayUtils.append(sets, invsets), solver, c, PropagatorPriority.LINEAR);
+        n = sets.length;
+        n2 = invsets.length;
+        this.offSet1 = offSet1;
+        this.offSet2 = offSet2;
+        this.sets = sets;
+        this.invsets = invsets;
+        // delta monitors
+        sdm = new SetDeltaMonitor[n + n2];
+        for (int i = 0; i < n + n2; i++) {
+            sdm[i] = this.vars[i].monitorDelta(this);
+        }
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                toFilter[element - offSet].addToKernel(idx, aCause);
+            }
+        };
+        elementRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                toFilter[element - offSet].removeFromEnvelope(idx, aCause);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		for(int i=0;i<n;i++){
-			ISet tmp = sets[i].getEnvelope();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<offSet1||j>=n2+offSet1 || !invsets[j-offSet2].getEnvelope().contain(i+offSet1)){
-					sets[i].removeFromEnvelope(j,aCause);
-				}
-			}
-			tmp = sets[i].getKernel();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				invsets[j-offSet2].addToKernel(i+offSet1,aCause);
-			}
-		}
-		for(int i=0;i<n2;i++){
-			ISet tmp = invsets[i].getEnvelope();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(j<offSet2||j>=n+offSet2 || !sets[j-offSet1].getEnvelope().contain(i+offSet2)){
-					invsets[i].removeFromEnvelope(j,aCause);
-				}
-			}
-			tmp = invsets[i].getKernel();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				sets[j-offSet1].addToKernel(i+offSet2,aCause);
-			}
-		}
-		for(int i=0;i<n+n2;i++){
-			sdm[i].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            ISet tmp = sets[i].getEnvelope();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].getEnvelope().contain(i + offSet1)) {
+                    sets[i].removeFromEnvelope(j, aCause);
+                }
+            }
+            tmp = sets[i].getKernel();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                invsets[j - offSet2].addToKernel(i + offSet1, aCause);
+            }
+        }
+        for (int i = 0; i < n2; i++) {
+            ISet tmp = invsets[i].getEnvelope();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].getEnvelope().contain(i + offSet2)) {
+                    invsets[i].removeFromEnvelope(j, aCause);
+                }
+            }
+            tmp = invsets[i].getKernel();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                sets[j - offSet1].addToKernel(i + offSet2, aCause);
+            }
+        }
+        for (int i = 0; i < n + n2; i++) {
+            sdm[i].unfreeze();
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		idx = idxVarInProp;
-		toFilter = invsets;
-		if(idx>=n){
-			idx-=n;
-			toFilter = sets;
-			idx += offSet2;
-			offSet = offSet1;
-		}else{
-			idx += offSet1;
-			offSet = offSet2;
-		}
-		sdm[idxVarInProp].freeze();
-		sdm[idxVarInProp].forEach(elementForced,EventType.ADD_TO_KER);
-		sdm[idxVarInProp].forEach(elementRemoved,EventType.REMOVE_FROM_ENVELOPE);
-		sdm[idxVarInProp].unfreeze();
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        idx = idxVarInProp;
+        toFilter = invsets;
+        if (idx >= n) {
+            idx -= n;
+            toFilter = sets;
+            idx += offSet2;
+            offSet = offSet1;
+        } else {
+            idx += offSet1;
+            offSet = offSet2;
+        }
+        sdm[idxVarInProp].freeze();
+        sdm[idxVarInProp].forEach(elementForced, EventType.ADD_TO_KER);
+        sdm[idxVarInProp].forEach(elementRemoved, EventType.REMOVE_FROM_ENVELOPE);
+        sdm[idxVarInProp].unfreeze();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<n;i++){
-			ISet tmp = sets[i].getKernel();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(!invsets[j-offSet2].getEnvelope().contain(i+offSet1)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		for(int i=0;i<n2;i++){
-			ISet tmp = invsets[i].getKernel();
-			for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-				if(!sets[j-offSet1].getEnvelope().contain(i+offSet2)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        for (int i = 0; i < n; i++) {
+            ISet tmp = sets[i].getKernel();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                if (!invsets[j - offSet2].getEnvelope().contain(i + offSet1)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        for (int i = 0; i < n2; i++) {
+            ISet tmp = invsets[i].getKernel();
+            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+                if (!sets[j - offSet1].getEnvelope().contain(i + offSet2)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

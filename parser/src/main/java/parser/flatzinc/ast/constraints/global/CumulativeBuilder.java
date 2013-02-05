@@ -32,7 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.*;
 import java.util.List;
 
@@ -59,6 +59,6 @@ public class CumulativeBuilder implements IBuilder {
 					solver);
 			tasks[i] = new Task(starts[i],durations[i],ends[i]);
 		}
-		return ConstraintFactory.cumulative(tasks,resources,limit,solver);
+		return IntConstraintFactory.cumulative(tasks, resources, limit);
 	}
 }

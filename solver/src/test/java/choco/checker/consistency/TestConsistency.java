@@ -29,7 +29,14 @@ package choco.checker.consistency;
 
 import choco.checker.Modeler;
 import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.search.loop.SearchLoops;
+import solver.variables.EventType;
+
+import java.io.IOException;
 
 import static choco.checker.consistency.ConsistencyChecker.checkConsistency;
 
@@ -175,6 +182,7 @@ public class TestConsistency {
         for (int i = 0; i < 20; i++)
             checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, null, seed + i, "bc");
     }
+
 //    NO CONSISTENCY ON TIMES CONSTRAINT
 //    @Test(groups = "10s")
 //    public void testTIMES1() {
@@ -287,7 +295,7 @@ public class TestConsistency {
     @Test(groups = "1m")
     public void testELEMENTBC1() {
         long seed = 0;//System.currentTimeMillis();
-        for (int i = 0; i < 999; i++)  {
+        for (int i = 0; i < 999; i++) {
             checkConsistency(Modeler.modelNthBC, 2, -10, 10, null, seed + i, "bc");
         }
     }
@@ -296,31 +304,31 @@ public class TestConsistency {
     public void testAMONGBC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAmongBC, 2, 2, 50, new int[]{0,1}, seed + i, "bc");
+            checkConsistency(Modeler.modelAmongBC, 2, 2, 50, new int[]{0, 1}, seed + i, "bc");
     }
 
     @Test(groups = "1m")
     public void testAMONGAC1() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAmongAC, 2, 2, 50, new int[]{0,1}, seed + i, "ac");
+            checkConsistency(Modeler.modelAmongAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
     @Test(groups = "1m")
     public void testAMONGBC2() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAmongBC, 5, -10, 10, new int[]{0,1}, seed + i, "bc");
+            checkConsistency(Modeler.modelAmongBC, 5, -10, 10, new int[]{0, 1}, seed + i, "bc");
     }
 
     @Test(groups = "1m")
     public void testAMONGAC2() {
         long seed = 0;
         for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0,1}, seed + i, "ac");
+            checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
-    /*@Test
+    @Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Galak/SOLVER_ERROR.ser");
         s.getEnvironment().worldPopUntil(0);
@@ -333,6 +341,6 @@ public class TestConsistency {
             }
         }
         s.propagate();
-    }*/
+    }
 }
 

@@ -48,51 +48,52 @@ import solver.variables.SetVar;
  */
 public class SetSearchStrategy extends AbstractStrategy<SetVar> {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	protected PoolManager<FastDecisionSet> pool;
+    protected PoolManager<FastDecisionSet> pool;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public SetSearchStrategy(SetVar[] variables) {
-		super(variables);
-		pool = new PoolManager<FastDecisionSet>();
-	}
+    public SetSearchStrategy(SetVar[] variables) {
+        super(variables);
+        pool = new PoolManager<FastDecisionSet>();
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void init() throws ContradictionException {}
+    @Override
+    public void init() throws ContradictionException {
+    }
 
-	@Override
-	public Decision<SetVar> getDecision() {
-		for(SetVar s:vars){
-			Decision<SetVar> d = computeDecision(s);
-			if(d!=null)return d;
-		}
-		return null;
-	}
+    @Override
+    public Decision<SetVar> getDecision() {
+        for (SetVar s : vars) {
+            Decision<SetVar> d = computeDecision(s);
+            if (d != null) return d;
+        }
+        return null;
+    }
 
-	@Override
-	public Decision<SetVar> computeDecision(SetVar s) {
-		if(!s.instantiated()){
-			for(int i=s.getEnvelope().getFirstElement();i>=0;i=s.getEnvelope().getNextElement()){
-				if(!s.getKernel().contain(i)){
-					FastDecisionSet d = pool.getE();
-					if(d==null){
-						d = new FastDecisionSet(pool);
-					}
-					d.set(s,i,DecisionOperator.set_force);
-					return d;
-				}
-			}
-		}
-		return null;
-	}
+    @Override
+    public Decision<SetVar> computeDecision(SetVar s) {
+        if (!s.instantiated()) {
+            for (int i = s.getEnvelope().getFirstElement(); i >= 0; i = s.getEnvelope().getNextElement()) {
+                if (!s.getKernel().contain(i)) {
+                    FastDecisionSet d = pool.getE();
+                    if (d == null) {
+                        d = new FastDecisionSet(pool);
+                    }
+                    d.set(s, i, DecisionOperator.set_force);
+                    return d;
+                }
+            }
+        }
+        return null;
+    }
 }

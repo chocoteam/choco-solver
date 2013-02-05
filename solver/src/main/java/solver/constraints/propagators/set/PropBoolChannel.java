@@ -51,124 +51,126 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
  * Channeling between a set variable and boolean variables
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropBoolChannel extends Propagator<Variable>{
+public class PropBoolChannel extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n;
-	private int offSet;
-	private BoolVar[] bools;
-	private SetVar set;
-	private SetDeltaMonitor sdm;
-	private IntProcedure setForced, setRemoved;
+    private int n;
+    private int offSet;
+    private BoolVar[] bools;
+    private SetVar set;
+    private SetDeltaMonitor sdm;
+    private IntProcedure setForced, setRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Channeling between a set variable and boolean variables
-	 * i in setVar <=> boolVars[i-offSet] = TRUE
-	 * @param setVar
-	 * @param boolVars
-	 * @param solver
-	 * @param c
-	 */
-	public PropBoolChannel(SetVar setVar, BoolVar[] boolVars,final int offSet, Solver solver, Constraint c) {
-		super(ArrayUtils.append(boolVars, new Variable[]{setVar}), solver, c, PropagatorPriority.UNARY);
-		this.n = bools.length;
-		this.bools = boolVars;
-		this.set = setVar;
-		this.sdm = this.set.monitorDelta(this);
-		this.offSet = offSet;
-		// PROCEDURES
-		setForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				bools[element-offSet].setToTrue(aCause);
-			}
-		};
-		setRemoved = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				bools[element-offSet].setToFalse(aCause);
-			}
-		};
-	}
+    /**
+     * Channeling between a set variable and boolean variables
+     * i in setVar <=> boolVars[i-offSet] = TRUE
+     *
+     * @param setVar
+     * @param boolVars
+     * @param solver
+     * @param c
+     */
+    public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, final int offSet, Solver solver, Constraint c) {
+        super(ArrayUtils.append(boolVars, new Variable[]{setVar}), solver, c, PropagatorPriority.UNARY);
+        this.n = bools.length;
+        this.bools = boolVars;
+        this.set = setVar;
+        this.sdm = this.set.monitorDelta(this);
+        this.offSet = offSet;
+        // PROCEDURES
+        setForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                bools[element - offSet].setToTrue(aCause);
+            }
+        };
+        setRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                bools[element - offSet].setToFalse(aCause);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask+EventType.INSTANTIATE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INSTANTIATE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			if(bools[i].instantiated()){
-				if(bools[i].getValue()==0){
-					set.removeFromEnvelope(i+offSet,aCause);
-				}else{
-					set.addToKernel(i+offSet,aCause);
-				}
-			}else if(!set.getEnvelope().contain(i+offSet)){
-				bools[i].setToFalse(aCause);
-			}
-		}
-		ISet tmp = set.getEnvelope();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(j<offSet || j>=n+offSet){
-				set.removeFromEnvelope(j,aCause);
-			}
-		}
-		tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			bools[j-offSet].setToTrue(aCause);
-		}
-		sdm.unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            if (bools[i].instantiated()) {
+                if (bools[i].getValue() == 0) {
+                    set.removeFromEnvelope(i + offSet, aCause);
+                } else {
+                    set.addToKernel(i + offSet, aCause);
+                }
+            } else if (!set.getEnvelope().contain(i + offSet)) {
+                bools[i].setToFalse(aCause);
+            }
+        }
+        ISet tmp = set.getEnvelope();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (j < offSet || j >= n + offSet) {
+                set.removeFromEnvelope(j, aCause);
+            }
+        }
+        tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            bools[j - offSet].setToTrue(aCause);
+        }
+        sdm.unfreeze();
+    }
 
-	@Override
-	public void propagate(int i, int mask) throws ContradictionException {
-		if(i<n){
-			if(bools[i].getValue()==0){
-				set.removeFromEnvelope(i+offSet,aCause);
-			}else{
-				set.addToKernel(i+offSet,aCause);
-			}
-		}else{
-			sdm.freeze();
-			sdm.forEach(setForced,EventType.ADD_TO_KER);
-			sdm.forEach(setRemoved,EventType.REMOVE_FROM_ENVELOPE);
-			sdm.unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int i, int mask) throws ContradictionException {
+        if (i < n) {
+            if (bools[i].getValue() == 0) {
+                set.removeFromEnvelope(i + offSet, aCause);
+            } else {
+                set.addToKernel(i + offSet, aCause);
+            }
+        } else {
+            sdm.freeze();
+            sdm.forEach(setForced, EventType.ADD_TO_KER);
+            sdm.forEach(setRemoved, EventType.REMOVE_FROM_ENVELOPE);
+            sdm.unfreeze();
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet tmp = set.getKernel();
-		for(int j=tmp.getFirstElement();j>=0;j=tmp.getNextElement()){
-			if(bools[j-offSet].instantiatedTo(0)){
-				return ESat.FALSE;
-			}
-		}
-		for(int i=0;i<n;i++){
-			if(bools[i].instantiatedTo(1)){
-				if(!set.getEnvelope().contain(i+offSet)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        ISet tmp = set.getKernel();
+        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            if (bools[j - offSet].instantiatedTo(0)) {
+                return ESat.FALSE;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (bools[i].instantiatedTo(1)) {
+                if (!set.getEnvelope().contain(i + offSet)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

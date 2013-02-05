@@ -72,8 +72,8 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      *
      * @param solver
      */
-    public GraphVar(Solver solver) {
-        super("G", solver);
+    public GraphVar(String name, Solver solver) {
+        super(name, solver);
         solver.associates(this);
         this.environment = solver.getEnvironment();
     }
@@ -112,11 +112,11 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         } else if (!envelop.getActiveNodes().contain(x)) {
             return false;
         }
-		ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
-		for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-			removeArc(x, i, cause);
-			removeArc(i, x, cause);
-		}
+        ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+        for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+            removeArc(x, i, cause);
+            removeArc(i, x, cause);
+        }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
                 delta.add(x, IGraphDelta.NR, cause);

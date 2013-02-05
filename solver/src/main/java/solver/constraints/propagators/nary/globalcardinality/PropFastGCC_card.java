@@ -152,7 +152,7 @@ public class PropFastGCC_card extends Propagator<IntVar> {
 				}
 			} else {
 				for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					if(map.containsKey(v.getValue())){
+					if(map.containsKey(k)){
 						j = map.get(k);
 						max[j].add(1);
 					}
@@ -207,7 +207,7 @@ public class PropFastGCC_card extends Propagator<IntVar> {
 				}
 			} else {
 				for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					if(map.containsKey(v.getValue())){
+					if(map.containsKey(k)){
 						j = map.get(k);
 						max[j]++;
 					}

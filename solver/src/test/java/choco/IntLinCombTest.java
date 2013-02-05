@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.Operator;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationStrategies;
@@ -53,7 +55,7 @@ import java.util.Random;
 public class IntLinCombTest {
 
 
-    public static void testOp(int n, int min, int max, int cMax, int seed, Sum.Type operator) {
+    public static void testOp(int n, int min, int max, int cMax, int seed, Operator operator) {
         Random random = new Random(seed);
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
@@ -65,7 +67,7 @@ public class IntLinCombTest {
         int constant = -random.nextInt(cMax);
 
         Constraint[] cstrs = new Constraint[]{
-                Sum.build(vars, coeffs, constant, operator, s)
+                Sum.build(vars, coeffs, operator, constant, s)
         };
 
         s.post(cstrs);
@@ -76,22 +78,22 @@ public class IntLinCombTest {
 
     @Test(groups = "1s")
     public void testEq() {
-        testOp(2, 0, 5, 5, 29091982, Sum.Type.EQ);
+        testOp(2, 0, 5, 5, 29091982, Operator.EQ);
     }
 
     @Test(groups = "1s")
     public void testGeq() {
-        testOp(2, 0, 5, 5, 29091981, Sum.Type.GEQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.GE);
     }
 
     @Test(groups = "1s")
     public void testLeq() {
-        testOp(2, 0, 5, 5, 29091981, Sum.Type.LEQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.LE);
     }
 
     @Test(groups = "1s")
     public void testNeq() {
-        testOp(2, 0, 5, 5, 29091981, Sum.Type.NQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.NQ);
     }
 
 
@@ -105,11 +107,11 @@ public class IntLinCombTest {
 
         Constraint cons;
         if (op == 0) {
-            cons = Sum.eq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, "=", b);
         } else if (op > 0) {
-            cons = Sum.geq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, ">=", b);
         } else {
-            cons = Sum.leq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, "<=", b);
         }
 
 
@@ -130,11 +132,11 @@ public class IntLinCombTest {
 
         Constraint cons;
         if (op == 0) {
-            cons = Sum.eq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, "=", b);
         } else if (op > 0) {
-            cons = Sum.geq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, ">=", b);
         } else {
-            cons = Sum.leq(bins, coeffs, b, solver);
+            cons = IntConstraintFactory.scalar(bins, coeffs, "<=", b);
         }
 
         Constraint[] cstrs = new Constraint[]{cons};

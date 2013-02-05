@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.nary.graphBasedCumulative;
+package solver.constraints.propagators.nary.cumulative;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
@@ -39,7 +39,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.UndirectedGraph;
-import java.util.BitSet;
 
 /**
  * Graph based cumulative
@@ -48,7 +47,7 @@ import java.util.BitSet;
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
-public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
+public class PropIncrementalCumulative extends Propagator<IntVar> {
 
 	private int n;
 	private IntVar[] s,d,e,h;
@@ -56,7 +55,7 @@ public class PropLocalCumulGraphSweep extends Propagator<IntVar> {
 	private UndirectedGraph g;
 	private ISet toCompute, tasks;
 
-	public PropLocalCumulGraphSweep(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Constraint constraint, Solver solver) {
+	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(s,d,e,h,new IntVar[]{capa}), solver, constraint, PropagatorPriority.LINEAR, false);
 		this.n = s.length;
 		if(!(n==d.length && n==e.length && n==h.length)){

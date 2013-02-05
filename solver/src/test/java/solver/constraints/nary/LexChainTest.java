@@ -41,14 +41,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -80,16 +78,12 @@ public class LexChainTest {
 
     private ALogicTree reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
-        solver.post(new ReifiedConstraint(b1,
-                new Arithmetic(Y[i], ">", X[i], solver),
-                new Arithmetic(Y[i], "<=", X[i], solver), solver));
+        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
         if (i == X.length - 1) {
             return Literal.pos(b1);
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
-            solver.post(new ReifiedConstraint(b2,
-                    new Arithmetic(Y[i], "=", X[i], solver),
-                    new Arithmetic(X[i], "!=", Y[i], solver), solver));
+            solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
             return Node.or(Literal.pos(b1), Node.and(Literal.pos(b2), reformulate(i + 1, X, Y, solver)));
         }
     }
@@ -108,7 +102,7 @@ public class LexChainTest {
             //refor.post(new ConjunctiveNormalForm(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        solver.post(new ConjunctiveNormalForm(Node.and(trees), solver));
+        solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         return solver;
     }

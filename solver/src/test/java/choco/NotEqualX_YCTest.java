@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -45,16 +45,16 @@ import solver.variables.VariableFactory;
  */
 public class NotEqualX_YCTest {
     @Test(groups = "1s")
-    public void test1(){
+    public void test1() {
         int n = 2;
 
         Solver s = new Solver();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("v_"+i,0,n, s);
+            vars[i] = VariableFactory.enumerated("v_" + i, 0, n, s);
         }
-        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
+        s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
 
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
@@ -64,16 +64,16 @@ public class NotEqualX_YCTest {
     }
 
     @Test(groups = "1s")
-    public void test2(){
+    public void test2() {
         int n = 2;
 
         Solver s = new Solver();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.bounded("v_"+i,0,n, s);
+            vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
         }
-        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
+        s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
@@ -82,16 +82,16 @@ public class NotEqualX_YCTest {
     }
 
     @Test(groups = "1s")
-    public void test3(){
+    public void test3() {
         int n = 2;
 
         Solver s = new Solver();
 
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.bounded("v_"+i,0,n, s);
+            vars[i] = VariableFactory.bounded("v_" + i, 0, n, s);
         }
-        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
+        s.post(IntConstraintFactory.arithm(vars[0], "!=", vars[1]));
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 
         try {

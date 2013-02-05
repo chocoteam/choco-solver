@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.nary.globalcardinality;
+package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -38,11 +38,12 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinalities, the constraint ensures that the number of occurences
+ * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinality variables, the constraint ensures that the number of occurrences
  * of the value i among the variables is equal to card[i].
  * this constraint enforces :
  * - Bound Consistency over vars regarding the lower and upper bounds of cards
@@ -71,7 +72,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     int offset = 0;
 
     private int nbBounds;
-    final int nbVars;  //number of variables (without the cardinalities variables)
+    final int nbVars;  //number of variables (without the cardinality variables)
     final IntVar[] card;
 
     final Interval[] minsorted;
@@ -286,7 +287,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     /////////// ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    static class Interval {
+    static class Interval implements Serializable {
         int minrank, maxrank;
         IntVar var;
         int idx;
@@ -297,7 +298,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
      * the filterLower{Min,Max} and filterUpper{Min,Max} functions.
      * Two elements before and after the element list will be added with a weight of 1
      */
-    static final class PartialSum {
+    static final class PartialSum implements Serializable {
         private int[] sum;
         private int[] ds;
         private int firstValue, lastValue, range;

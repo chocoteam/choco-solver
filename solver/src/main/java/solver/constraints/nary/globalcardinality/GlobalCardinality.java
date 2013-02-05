@@ -32,9 +32,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.globalcardinality.PropBoundGlobalCardinality;
-import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_Cards_AC;
-import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_Cards_Fast;
+import solver.constraints.propagators.nary.globalcardinality.unsafe.PropBoundGlobalCardinality;
+import solver.constraints.propagators.nary.globalcardinality.unsafe.PropGCC_AC_Cards_AC;
+import solver.constraints.propagators.nary.globalcardinality.unsafe.PropGCC_AC_Cards_Fast;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -49,7 +49,64 @@ import java.util.List;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @since 16/06/11
  */
+@Deprecated
 public class GlobalCardinality extends IntConstraint<IntVar> {
+
+	//	/**
+		//	 * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
+		//	 * <br/>
+		//	 * The level of consistency should be chosen among BC and AC.
+		//	 * <p/>
+		//	 * <b>BC</b>: ensures Bound Consistency,
+		//	 * <br/><b>AC</b>: ensures Arc Consistency.
+		//	 *
+		//	 * @param VARS        collection of variables
+		//	 * @param VALUES      collection of constrained values
+		//	 * @param OCCURRENCES collection of cardinality variables
+		//	 * @param CLOSED      restricts domains of VARS to VALUES if set to true
+		//	 * @param CONSISTENCY consistency level, among {"BC", "AC"}
+		//	 */
+		//	public static GlobalCardinality global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED,
+		//													   String CONSISTENCY) {
+		//		Solver solver = VARS[0].getSolver();
+		//
+		//		TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
+		//		for (int i = 0; i < VALUES.length; i++) {
+		//			map.put(VALUES[i], OCCURRENCES[i]);
+		//		}
+		//
+		//		int n = VARS.length;
+		//		Arrays.sort(VALUES);
+		//		int min = VALUES[0];
+		//		int max = VALUES[VALUES.length - 1];
+		//
+		//		for (int v = 0; v < VARS.length; v++) {
+		//			IntVar var = VARS[v];
+		//			if (min > var.getLB()) {
+		//				min = var.getLB();
+		//			}
+		//			if (max < var.getUB()) {
+		//				max = var.getUB();
+		//			}
+		//		}
+		//
+		//		IntVar[] cards = new IntVar[max - min + 1];
+		//		int[] values = new int[max - min + 1];
+		//		for (int i = min; i <= max; i++) {
+		//			values[i - min] = i;
+		//			if (map.containsKey(i)) {
+		//				cards[i - min] = map.get(i);
+		//			} else {
+		//				if (CLOSED) {
+		//					cards[i - min] = Views.fixed(0, solver);
+		//				} else {
+		//					cards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
+		//				}
+		//			}
+		//		}
+		//		return new GlobalCardinality(VARS, values, cards, GlobalCardinality.Consistency.valueOf(CONSISTENCY), solver);
+		//
+		//	}
 
     private final int range, nbvars;
 
@@ -57,7 +114,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
         AC, AC_ON_CARDS, BC
     }
 
-    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards, Consistency consistency, Solver solver) {
+    private GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards, Consistency consistency, Solver solver) {
         super(ArrayUtils.append(vars, cards), solver);
         this.nbvars = vars.length;
         this.range = cards.length;

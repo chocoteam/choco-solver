@@ -46,161 +46,163 @@ import solver.variables.Variable;
 /**
  * Restricts the number of empty sets
  * |{s in sets such that |s|=0}| = nbEmpty
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropNbEmpty extends Propagator<Variable>{
+public class PropNbEmpty extends Propagator<Variable> {
 
-	private SetVar[] sets;
-	private IntVar nbEmpty;
-	private int n;
-	private ISet canBeEmpty, isEmpty;
-	private IStateInt nbAlreadyEmpty, nbMaybeEmpty;
+    private SetVar[] sets;
+    private IntVar nbEmpty;
+    private int n;
+    private ISet canBeEmpty, isEmpty;
+    private IStateInt nbAlreadyEmpty, nbMaybeEmpty;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Restricts the number of empty sets
-	 * |{s in sets such that |s|=0}| = nbEmpty
-	 * @param sets
-	 * @param nbEmpty
-	 * @param solver
-	 * @param c
-	 */
-	public PropNbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver, Constraint c) {
-		super(ArrayUtils.append(sets,new Variable[]{nbEmpty}), solver, c, PropagatorPriority.UNARY);
-		this.nbEmpty = nbEmpty;
-		this.sets = sets;
-		this.n = sets.length;
-		this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY,n,environment);
-		this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY,n,environment);
-		this.nbAlreadyEmpty = environment.makeInt();
-		this.nbMaybeEmpty   = environment.makeInt();
-	}
+    /**
+     * Restricts the number of empty sets
+     * |{s in sets such that |s|=0}| = nbEmpty
+     *
+     * @param sets
+     * @param nbEmpty
+     * @param solver
+     * @param c
+     */
+    public PropNbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver, Constraint c) {
+        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), solver, c, PropagatorPriority.UNARY);
+        this.nbEmpty = nbEmpty;
+        this.sets = sets;
+        this.n = sets.length;
+        this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+        this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
+        this.nbAlreadyEmpty = environment.makeInt();
+        this.nbMaybeEmpty = environment.makeInt();
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(vIdx<n){
-			if(isEmpty.contain(vIdx)){
-				throw new UnsupportedOperationException("The variable's domain is already empty, how can it be modified?");
-			}
-			if(canBeEmpty.contain(vIdx)){
-				return EventType.REMOVE_FROM_ENVELOPE.mask+EventType.ADD_TO_KER.mask;
-			}else{
-				return EventType.VOID.mask;
-			}
-		}else{
-			return EventType.INSTANTIATE.mask;
-		}
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx < n) {
+            if (isEmpty.contain(vIdx)) {
+                throw new UnsupportedOperationException("The variable's domain is already empty, how can it be modified?");
+            }
+            if (canBeEmpty.contain(vIdx)) {
+                return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
+            } else {
+                return EventType.VOID.mask;
+            }
+        } else {
+            return EventType.INSTANTIATE.mask;
+        }
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			int nbMin = 0;
-			int nbMax = 0;
-			canBeEmpty.clear();
-			isEmpty.clear();
-			for(int i=0;i<n;i++){
-				if(sets[i].getKernel().getSize()==0){
-					nbMax++;
-					if(sets[i].getEnvelope().getSize()==0){
-						nbMin++;
-						isEmpty.add(i);
-					}else{
-						canBeEmpty.add(i);
-					}
-				}
-			}
-			nbAlreadyEmpty.set(nbMin);
-			nbMaybeEmpty.set(nbMax-nbMin);
-		}
-		filter();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            int nbMin = 0;
+            int nbMax = 0;
+            canBeEmpty.clear();
+            isEmpty.clear();
+            for (int i = 0; i < n; i++) {
+                if (sets[i].getKernel().getSize() == 0) {
+                    nbMax++;
+                    if (sets[i].getEnvelope().getSize() == 0) {
+                        nbMin++;
+                        isEmpty.add(i);
+                    } else {
+                        canBeEmpty.add(i);
+                    }
+                }
+            }
+            nbAlreadyEmpty.set(nbMin);
+            nbMaybeEmpty.set(nbMax - nbMin);
+        }
+        filter();
+    }
 
-	@Override
-	public void propagate(int v, int mask) throws ContradictionException {
-		if(v<n){
-			if(!canBeEmpty.contain(v)){
-				throw new UnsupportedOperationException();
-			}
-			if(sets[v].getKernel().getSize()>0){
-				canBeEmpty.remove(v);
-				nbMaybeEmpty.add(-1);
-			}else{
-				if(sets[v].getEnvelope().getSize()==0){
-					isEmpty.add(v);
-					canBeEmpty.remove(v);
-					nbMaybeEmpty.add(-1);
-					nbAlreadyEmpty.add(1);
-				}
-			}
-		}
-		filter();
-	}
+    @Override
+    public void propagate(int v, int mask) throws ContradictionException {
+        if (v < n) {
+            if (!canBeEmpty.contain(v)) {
+                throw new UnsupportedOperationException();
+            }
+            if (sets[v].getKernel().getSize() > 0) {
+                canBeEmpty.remove(v);
+                nbMaybeEmpty.add(-1);
+            } else {
+                if (sets[v].getEnvelope().getSize() == 0) {
+                    isEmpty.add(v);
+                    canBeEmpty.remove(v);
+                    nbMaybeEmpty.add(-1);
+                    nbAlreadyEmpty.add(1);
+                }
+            }
+        }
+        filter();
+    }
 
-	public void filter() throws ContradictionException{
-		int nbMin = nbAlreadyEmpty.get();
-		int nbMax = nbMin+nbMaybeEmpty.get();
-		nbEmpty.updateLowerBound(nbMin,aCause);
-		nbEmpty.updateUpperBound(nbMax,aCause);
-		///////////////////////////////////////
-		if(nbEmpty.instantiated() && nbMin<nbMax){
-			if(nbEmpty.getValue()==nbMax){
-				for(int i=canBeEmpty.getFirstElement();i>=0;i=canBeEmpty.getNextElement()){
-					ISet s = sets[i].getEnvelope();
-					for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-						sets[i].removeFromEnvelope(j,aCause);
-					}
-					canBeEmpty.remove(i);
-					isEmpty.add(i);
-				}
-				setPassive();
-			}
-			if(nbEmpty.getValue()==nbMin){
-				boolean allFixed = true;
-				for(int i=canBeEmpty.getFirstElement();i>=0;i=canBeEmpty.getNextElement()){
-					ISet s = sets[i].getEnvelope();
-					ISet k = sets[i].getKernel();
-					if(s.getSize()==k.getSize()+1){
-						for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-							sets[i].addToKernel(j,aCause);
-						}
-						canBeEmpty.remove(i);
-					}else {
-						allFixed = false;
-					}
-				}
-				if(allFixed){
-					setPassive();
-				}
-			}
-		}
-	}
+    public void filter() throws ContradictionException {
+        int nbMin = nbAlreadyEmpty.get();
+        int nbMax = nbMin + nbMaybeEmpty.get();
+        nbEmpty.updateLowerBound(nbMin, aCause);
+        nbEmpty.updateUpperBound(nbMax, aCause);
+        ///////////////////////////////////////
+        if (nbEmpty.instantiated() && nbMin < nbMax) {
+            if (nbEmpty.getValue() == nbMax) {
+                for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
+                    ISet s = sets[i].getEnvelope();
+                    for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+                        sets[i].removeFromEnvelope(j, aCause);
+                    }
+                    canBeEmpty.remove(i);
+                    isEmpty.add(i);
+                }
+                setPassive();
+            }
+            if (nbEmpty.getValue() == nbMin) {
+                boolean allFixed = true;
+                for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
+                    ISet s = sets[i].getEnvelope();
+                    ISet k = sets[i].getKernel();
+                    if (s.getSize() == k.getSize() + 1) {
+                        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+                            sets[i].addToKernel(j, aCause);
+                        }
+                        canBeEmpty.remove(i);
+                    } else {
+                        allFixed = false;
+                    }
+                }
+                if (allFixed) {
+                    setPassive();
+                }
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int nbMin = 0;
-		int nbMax = 0;
-		for(int i=0;i<n;i++){
-			if(sets[i].getKernel().getSize()==0){
-				nbMax++;
-				if(sets[i].getEnvelope().getSize()==0){
-					nbMin++;
-				}
-			}
-		}
-		if(nbEmpty.getLB()>nbMax || nbEmpty.getUB()<nbMin){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int nbMin = 0;
+        int nbMax = 0;
+        for (int i = 0; i < n; i++) {
+            if (sets[i].getKernel().getSize() == 0) {
+                nbMax++;
+                if (sets[i].getEnvelope().getSize() == 0) {
+                    nbMin++;
+                }
+            }
+        }
+        if (nbEmpty.getLB() > nbMax || nbEmpty.getUB() < nbMin) {
+            return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

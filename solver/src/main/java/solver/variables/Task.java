@@ -34,6 +34,7 @@
 
 package solver.variables;
 
+import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 
@@ -58,11 +59,12 @@ public class Task {
 	/**
 	 * Container representing a task:
 	 * It ensures that: start + duration = end
+	 * The initial update may rise a ContradictionException
 	 * @param s start variable
 	 * @param d duration variable
 	 * @param e end variable
 	 */
-	public Task(IntVar s, IntVar d, IntVar e){
+	public Task(IntVar s, IntVar d, IntVar e) throws ContradictionException {
 		start = s;
 		duration = d;
 		end = e;
@@ -104,6 +106,8 @@ public class Task {
 		start.addMonitor(update);
 		duration.addMonitor(update);
 		end.addMonitor(update);
+		// initial update:
+		update.onUpdate(null,null, Cause.Null);
 	}
 
 	//***********************************************************************************

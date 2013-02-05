@@ -63,7 +63,7 @@ public class ConsistencyChecker {
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};
         int loop = 0;
-        for (int ds = nbVar; ds < upperB; ds++) {
+        for (int ds = lowerB; ds < upperB; ds++) {
             for (int ide = 0; ide < densities.length; ide++) {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
@@ -110,6 +110,7 @@ public class ConsistencyChecker {
                 }
             }
         }
+        System.out.printf("loop: %d\n", loop);
     }
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {

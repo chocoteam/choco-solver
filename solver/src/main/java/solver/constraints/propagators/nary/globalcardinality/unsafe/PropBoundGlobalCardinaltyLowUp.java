@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.nary.globalcardinality;
+package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;

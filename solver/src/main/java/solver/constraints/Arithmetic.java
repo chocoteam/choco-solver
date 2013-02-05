@@ -45,80 +45,96 @@ import solver.variables.IntVar;
  * <ul>VAR op VAR,</ul>
  * <ul>VAR op VAR op CSTE</ul>
  * </li>
- * where VAR is a variable, CSTE a constante and op is an operator among {"==", "=/=","<", ">", "<=, ">="} or{"+", "-"}.
+ * where VAR is a variable, CSTE a constant and op is an operator among {"==", "=/=","<", ">", "<=, ">="} or{"+", "-"}.
  *
  * @author Charles Prud'homme
  * @since 21/06/12
  */
 public class Arithmetic extends IntConstraint<IntVar> {
-    public static final String
-            eq = "=",
-            nq = "!=",
-            gq = ">=",
-            gt = ">",
-            lq = "<=",
-            lt = "<",
-            plus = "+",
-            minus = "-";
 
-    private static final String none = "#";
-
-    protected final String op1, op2; // operators.
+    protected final Operator op1, op2; // operators.
     protected final int cste;
     protected final boolean isBinary; // to distinct unary and binary formula
 
-    private static boolean isOperation(String operator) {
-        return operator.equals(plus) || operator.equals(minus);
+    private static boolean isOperation(Operator operator) {
+        return operator.equals(Operator.PL) || operator.equals(Operator.MN);
     }
 
 
-    public Arithmetic(IntVar var, String op, int cste, Solver solver) {
+    public Arithmetic(IntVar var, Operator op, int cste, Solver solver) {
         super(new IntVar[]{var}, solver);
         this.op1 = op;
-        this.op2 = none;
+        this.op2 = Operator.NONE;
         this.cste = cste;
         this.isBinary = false;
-        if (op1.equals(eq)) {   // X = C
-            setPropagators(new PropEqualXC(var, cste, solver, this));
-        } else if (op1.equals(nq)) {    // X =/= C
-            setPropagators(new PropNotEqualXC(var, cste, solver, this));
-        } else if (op1.equals(gq)) {    // X >= C
-            setPropagators(new PropGreaterOrEqualXC(var, cste, solver, this));
-        } else if (op1.equals(gt)) {    // X > C -->  X >= C + 1
-            setPropagators(new PropGreaterOrEqualXC(var, cste + 1, solver, this));
-        } else if (op1.equals(lq)) {    // X <= C
-            setPropagators(new PropLessOrEqualXC(var, cste, solver, this));
-        } else if (op1.equals(lt)) {    // X < C --> X <= C - 1
-            setPropagators(new PropLessOrEqualXC(var, cste - 1, solver, this));
-        } else {
-            throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
+        switch (op1) {
+            case EQ:
+                // X = C
+                setPropagators(new PropEqualXC(var, cste, solver, this));
+                break;
+            case NQ:
+                // X =/= C
+                setPropagators(new PropNotEqualXC(var, cste, solver, this));
+                break;
+            case GE:
+                // X >= C
+                setPropagators(new PropGreaterOrEqualXC(var, cste, solver, this));
+                break;
+            case GT:
+                // X > C -->  X >= C + 1
+                setPropagators(new PropGreaterOrEqualXC(var, cste + 1, solver, this));
+                break;
+            case LE:
+                // X <= C
+                setPropagators(new PropLessOrEqualXC(var, cste, solver, this));
+                break;
+            case LT:
+                // X < C --> X <= C - 1
+                setPropagators(new PropLessOrEqualXC(var, cste - 1, solver, this));
+                break;
+            default:
+                throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
+
         }
     }
 
-    public Arithmetic(IntVar var1, String op, IntVar var2, Solver solver) {
+    public Arithmetic(IntVar var1, Operator op, IntVar var2, Solver solver) {
         super(new IntVar[]{var1, var2}, solver);
         this.op1 = op;
-        this.op2 = plus;
+        this.op2 = Operator.PL;
         this.cste = 0;
         this.isBinary = true;
-        if (op1.equals(eq)) {   // X = Y
-            setPropagators(new PropEqualX_Y(var1, var2, solver, this));
-        } else if (op1.equals(nq)) {    // X =/= Y
-            setPropagators(new PropNotEqualX_Y(var1, var2, solver, this));
-        } else if (op1.equals(gq)) {    //  X >= Y
-            setPropagators(new PropGreaterOrEqualX_Y(vars, solver, this));
-        } else if (op1.equals(gt)) {    //  X > Y --> X >= Y + 1
-            setPropagators(new PropGreaterOrEqualX_YC(vars, 1, solver, this));
-        } else if (op1.equals(lq)) {    //  X <= Y --> Y >= X
-            setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}, solver, this));
-        } else if (op1.equals(lt)) {    //  X < Y --> Y >= X + 1
-            setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1, solver, this));
-        } else {
-            throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
+        switch (op1) {
+            case EQ:
+                // X = Y
+                setPropagators(new PropEqualX_Y(var1, var2, solver, this));
+                break;
+            case NQ:
+                // X =/= Y
+                setPropagators(new PropNotEqualX_Y(var1, var2, solver, this));
+                break;
+            case GE:
+                //  X >= Y
+                setPropagators(new PropGreaterOrEqualX_Y(vars, solver, this));
+                break;
+            case GT:
+                //  X > Y --> X >= Y + 1
+                setPropagators(new PropGreaterOrEqualX_YC(vars, 1, solver, this));
+                break;
+            case LE:
+                //  X <= Y --> Y >= X
+                setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}, solver, this));
+                break;
+            case LT:
+                //  X < Y --> Y >= X + 1
+                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1, solver, this));
+                break;
+            default:
+                throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
         }
     }
 
-    public Arithmetic(IntVar var1, String op1, IntVar var2, String op2, int cste, Solver solver) {
+    public Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste, Solver solver) {
         super(new IntVar[]{var1, var2}, solver);
         this.op1 = op1;
         this.op2 = op2;
@@ -127,55 +143,98 @@ public class Arithmetic extends IntConstraint<IntVar> {
         }
         this.cste = cste;
         this.isBinary = true;
-        if (op1.equals(plus)) {
-            if (op2.equals(eq)) {   // X + Y = C
+        if (op1 == Operator.PL) {
+            switch (op2) {
+                case EQ:
+                    break;
+                case NQ:
+                    break;
+                case GE:
+                    break;
+                case GT:
+                    break;
+                case LE:
+                    break;
+                case LT:
+                    break;
+                default:
+
+            }
+            if (op2 == Operator.EQ) {   // X + Y = C
                 setPropagators(new PropEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(nq)) {   // X + Y =/= C
+            } else if (op2 == Operator.NQ) {   // X + Y =/= C
                 setPropagators(new PropNotEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(gq)) {   // X + Y >= C
+            } else if (op2 == Operator.GE) {   // X + Y >= C
                 setPropagators(new PropGreaterOrEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(gt)) {   // X + Y > C --> X + Y >= C + 1
+            } else if (op2 == Operator.GT) {   // X + Y > C --> X + Y >= C + 1
                 setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1, solver, this));
-            } else if (op2.equals(lq)) {   // X + Y <= C
+            } else if (op2 == Operator.LE) {   // X + Y <= C
                 setPropagators(new PropLessOrEqualXY_C(vars, cste, solver, this));
-            } else if (op2.equals(lt)) {   // X + Y < C --> X +Y <= C - 1
+            } else if (op2 == Operator.LT) {   // X + Y < C --> X +Y <= C - 1
                 setPropagators(new PropLessOrEqualXY_C(vars, cste - 1, solver, this));
             } else {
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
-        } else if (op1.equals(minus)) {
-            if (op2.equals(eq)) {   // X - Y = C --> X = Y + C
-                setPropagators(new PropEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(nq)) {   // X - Y =/= C --> X =/= Y + C
-                setPropagators(new PropNotEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(gq)) {   // X - Y >= C --> X >= Y + C
-                setPropagators(new PropGreaterOrEqualX_YC(vars, cste, solver, this));
-            } else if (op2.equals(gt)) {   // X - Y > C --> X >= Y + C + 1
-                setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1, solver, this));
-            } else if (op2.equals(lq)) {   // X - Y <= C --> Y >= X - C
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste, solver, this));
-            } else if (op2.equals(lt)) {   // X - Y < C --> Y >= X - C + 1
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1, solver, this));
-            } else {
-                throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
+        } else if (op1 == Operator.MN) {
+            switch (op2) {
+                case EQ:
+                    // X - Y = C --> X = Y + C
+                    setPropagators(new PropEqualX_YC(vars, cste, solver, this));
+                    break;
+                case NQ:
+                    // X - Y =/= C --> X =/= Y + C
+                    setPropagators(new PropNotEqualX_YC(vars, cste, solver, this));
+                    break;
+                case GE:
+                    // X - Y >= C --> X >= Y + C
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste, solver, this));
+                    break;
+                case GT:
+                    // X - Y > C --> X >= Y + C + 1
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1, solver, this));
+                    break;
+                case LE:
+                    // X - Y <= C --> Y >= X - C
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste, solver, this));
+                    break;
+                case LT:
+                    // X - Y < C --> Y >= X - C + 1
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1, solver, this));
+                    break;
+                default:
+                    throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
         } else {
-            int _cste = cste * (op2.equals(plus) ? 1 : -1);
-            if (op1.equals(eq)) {   // X = Y + C
-                setPropagators(new PropEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(nq)) {    // X =/= Y + C
-                setPropagators(new PropNotEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(gq)) {    // X >= Y + C
-                setPropagators(new PropGreaterOrEqualX_YC(vars, _cste, solver, this));
-            } else if (op1.equals(gt)) {    // X > Y + C --> X >= Y + C + 1
-                setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1, solver, this));
-            } else if (op1.equals(lq)) {    // X <= Y + C --> Y >= X - C
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste, solver, this));
-            } else if (op1.equals(lt)) {    // X < Y + C --> Y > X - C + 1
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1, solver, this));
-            } else {
-                throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
+            int _cste = cste * (op2 == Operator.PL ? 1 : -1);
+            switch (op1) {
+                case EQ:
+                    // X = Y + C
+                    setPropagators(new PropEqualX_YC(vars, _cste, solver, this));
+                    break;
+                case NQ:
+                    // X =/= Y + C
+                    setPropagators(new PropNotEqualX_YC(vars, _cste, solver, this));
+                    break;
+                case GE:
+                    // X >= Y + C
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste, solver, this));
+                    break;
+                case GT:
+                    // X > Y + C --> X >= Y + C + 1
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1, solver, this));
+                    break;
+                case LE:
+                    // X <= Y + C --> Y >= X - C
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste, solver, this));
+                    break;
+                case LT:
+                    // X < Y + C --> Y > X - C + 1
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1, solver, this));
+                    break;
+                default:
+                    throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
+
         }
     }
 
@@ -183,67 +242,91 @@ public class Arithmetic extends IntConstraint<IntVar> {
     @Override
     public ESat isSatisfied(int[] tuple) {
         if (!isBinary) {
-            if (op1.equals(eq)) {
+            switch (op1) {
+                case EQ:
+                    break;
+                case NQ:
+                    break;
+                case GE:
+                    break;
+                case GT:
+                    break;
+                case LE:
+                    break;
+                case LT:
+                    break;
+                default:
+
+            }
+            if (op1 == Operator.EQ) {
                 return ESat.eval(tuple[0] == cste);
-            } else if (op1.equals(nq)) {
+            } else if (op1 == Operator.NQ) {
                 return ESat.eval(tuple[0] != cste);
-            } else if (op1.equals(gq)) {
+            } else if (op1 == Operator.GE) {
                 return ESat.eval(tuple[0] >= cste);
-            } else if (op1.equals(gt)) {
+            } else if (op1 == Operator.GT) {
                 return ESat.eval(tuple[0] > cste);
-            } else if (op1.equals(lq)) {
+            } else if (op1 == Operator.LE) {
                 return ESat.eval(tuple[0] <= cste);
-            } else if (op1.equals(lt)) {
+            } else if (op1 == Operator.LT) {
                 return ESat.eval(tuple[0] < cste);
             }
             return ESat.UNDEFINED;
         } else {
-            if (op1.equals(plus)) {
-                if (op2.equals(eq)) {
-                    return ESat.eval(tuple[0] + tuple[1] == cste);
-                } else if (op2.equals(nq)) {
-                    return ESat.eval(tuple[0] + tuple[1] != cste);
-                } else if (op2.equals(gq)) {
-                    return ESat.eval(tuple[0] + tuple[1] >= cste);
-                } else if (op2.equals(gt)) {
-                    return ESat.eval(tuple[0] + tuple[1] > cste);
-                } else if (op2.equals(lq)) {
-                    return ESat.eval(tuple[0] + tuple[1] <= cste);
-                } else if (op2.equals(lt)) {
-                    return ESat.eval(tuple[0] + tuple[1] < cste);
+            if (op1 == Operator.PL) {
+                switch (op2) {
+                    case EQ:
+                        return ESat.eval(tuple[0] + tuple[1] == cste);
+                    case NQ:
+                        return ESat.eval(tuple[0] + tuple[1] != cste);
+                    case GE:
+                        return ESat.eval(tuple[0] + tuple[1] >= cste);
+                    case GT:
+                        return ESat.eval(tuple[0] + tuple[1] > cste);
+                    case LE:
+                        return ESat.eval(tuple[0] + tuple[1] <= cste);
+                    case LT:
+                        return ESat.eval(tuple[0] + tuple[1] < cste);
+                    default:
+                        return ESat.UNDEFINED;
                 }
-                return ESat.UNDEFINED;
-            } else if (op1.equals(minus)) {
-                if (op2.equals(eq)) {
-                    return ESat.eval(tuple[0] == tuple[1] + cste);
-                } else if (op2.equals(nq)) {
-                    return ESat.eval(tuple[0] != tuple[1] + cste);
-                } else if (op2.equals(gq)) {
-                    return ESat.eval(tuple[0] >= tuple[1] + cste);
-                } else if (op2.equals(gt)) {
-                    return ESat.eval(tuple[0] > tuple[1] + cste);
-                } else if (op2.equals(lq)) {
-                    return ESat.eval(tuple[0] <= tuple[1] + cste);
-                } else if (op2.equals(lt)) {
-                    return ESat.eval(tuple[0] < tuple[1] + cste);
+
+            } else if (op1 == Operator.MN) {
+                switch (op2) {
+                    case EQ:
+                        return ESat.eval(tuple[0] == tuple[1] + cste);
+                    case NQ:
+                        return ESat.eval(tuple[0] != tuple[1] + cste);
+                    case GE:
+                        return ESat.eval(tuple[0] >= tuple[1] + cste);
+                    case GT:
+                        return ESat.eval(tuple[0] > tuple[1] + cste);
+                    case LE:
+                        return ESat.eval(tuple[0] <= tuple[1] + cste);
+                    case LT:
+                        return ESat.eval(tuple[0] < tuple[1] + cste);
+                    default:
+                        return ESat.UNDEFINED;
+
                 }
-                return ESat.UNDEFINED;
             } else {
-                int _cste = cste * (op2.equals(plus) ? 1 : -1);
-                if (op1.equals(eq)) {
-                    return ESat.eval(tuple[0] == tuple[1] + _cste);
-                } else if (op1.equals(nq)) {
-                    return ESat.eval(tuple[0] != tuple[1] + _cste);
-                } else if (op1.equals(gq)) {
-                    return ESat.eval(tuple[0] >= tuple[1] + _cste);
-                } else if (op1.equals(gt)) {
-                    return ESat.eval(tuple[0] > tuple[1] + _cste);
-                } else if (op1.equals(lq)) {
-                    return ESat.eval(tuple[0] <= tuple[1] + _cste);
-                } else if (op1.equals(lt)) {
-                    return ESat.eval(tuple[0] < tuple[1] + _cste);
+                int _cste = cste * (op2 == Operator.PL ? 1 : -1);
+                switch (op1) {
+                    case EQ:
+                        return ESat.eval(tuple[0] == tuple[1] + _cste);
+                    case NQ:
+                        return ESat.eval(tuple[0] != tuple[1] + _cste);
+                    case GE:
+                        return ESat.eval(tuple[0] >= tuple[1] + _cste);
+                    case GT:
+                        return ESat.eval(tuple[0] > tuple[1] + _cste);
+                    case LE:
+                        return ESat.eval(tuple[0] <= tuple[1] + _cste);
+                    case LT:
+                        return ESat.eval(tuple[0] < tuple[1] + _cste);
+                    default:
+                        return ESat.UNDEFINED;
                 }
-                return ESat.UNDEFINED;
             }
         }
     }

@@ -29,7 +29,7 @@ package solver.explanations.samples;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -57,7 +57,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
         for (int i = 0; i < vars.length - 1; i++) {
-            solver.post(new Arithmetic(vars[i], ">", vars[i + 1], solver));
+            solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
         }
     }
 

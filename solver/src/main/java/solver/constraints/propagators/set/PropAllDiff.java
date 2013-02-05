@@ -46,110 +46,113 @@ import solver.variables.SetVar;
 
 /**
  * Ensures that all sets are different
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropAllDiff extends Propagator<SetVar>{
+public class PropAllDiff extends Propagator<SetVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n;
+    private int n;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that all sets are different
-	 * @param sets
-	 * @param solver
-	 * @param c
-	 */
-	public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(sets, solver, c, PropagatorPriority.LINEAR);
-		n = sets.length;
-	}
+    /**
+     * Ensures that all sets are different
+     *
+     * @param sets
+     * @param solver
+     * @param c
+     */
+    public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(sets, solver, c, PropagatorPriority.LINEAR);
+        n = sets.length;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		for(int i=0;i<n;i++){
-			if(vars[i].instantiated()){
-				propagate(i,0);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            if (vars[i].instantiated()) {
+                propagate(i, 0);
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idx, int mask) throws ContradictionException {
-		if(vars[idx].instantiated()){
-			int s = vars[idx].getEnvelope().getSize();
-			ISet value = vars[idx].getKernel();
-			for(int i=0;i<n;i++){
-				if(i!=idx){
-					int sei = vars[i].getEnvelope().getSize();
-					int ski = vars[i].getKernel().getSize();
-					if(ski>=s-1 && sei<=s+1){
-						int nbSameInKer = 0;
-						int diff = -1;
-						for(int j=value.getFirstElement();j>=0;j=value.getNextElement())
-							if(!vars[i].contains(j))
-								nbSameInKer++;
-							else
-								diff = j;
-						if(nbSameInKer==s){
-							if(sei==s){ // check diff
-								contradiction(vars[i],"");
-							}else if(sei==s+1 && ski<sei){ // force other (if same elements in ker)
-								for(int j=vars[i].getEnvelope().getFirstElement();j>=0;j=vars[i].getEnvelope().getNextElement())
-									vars[i].addToKernel(j,aCause);
-							}
-						}else if(sei==s && nbSameInKer==s-1){ // remove other (if same elements in ker)
-							if(vars[i].getEnvelope().contain(diff)){
-								vars[i].removeFromEnvelope(diff,aCause);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public void propagate(int idx, int mask) throws ContradictionException {
+        if (vars[idx].instantiated()) {
+            int s = vars[idx].getEnvelope().getSize();
+            ISet value = vars[idx].getKernel();
+            for (int i = 0; i < n; i++) {
+                if (i != idx) {
+                    int sei = vars[i].getEnvelope().getSize();
+                    int ski = vars[i].getKernel().getSize();
+                    if (ski >= s - 1 && sei <= s + 1) {
+                        int nbSameInKer = 0;
+                        int diff = -1;
+                        for (int j = value.getFirstElement(); j >= 0; j = value.getNextElement())
+                            if (!vars[i].contains(j))
+                                nbSameInKer++;
+                            else
+                                diff = j;
+                        if (nbSameInKer == s) {
+                            if (sei == s) { // check diff
+                                contradiction(vars[i], "");
+                            } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
+                                for (int j = vars[i].getEnvelope().getFirstElement(); j >= 0; j = vars[i].getEnvelope().getNextElement())
+                                    vars[i].addToKernel(j, aCause);
+                            }
+                        } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
+                            if (vars[i].getEnvelope().contain(diff)) {
+                                vars[i].removeFromEnvelope(diff, aCause);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<n;i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-			for(int i2=i+1;i2<n;i2++){
-				if(same(i,i2)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		return ESat.TRUE;
-	}
+    @Override
+    public ESat isEntailed() {
+        for (int i = 0; i < n; i++) {
+            if (!vars[i].instantiated()) {
+                return ESat.UNDEFINED;
+            }
+            for (int i2 = i + 1; i2 < n; i2++) {
+                if (same(i, i2)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        return ESat.TRUE;
+    }
 
-	private boolean same(int i, int i2) {
-		if(vars[i].getEnvelope().getSize()<vars[i2].getKernel().getSize())return false;
-		if(vars[i2].getEnvelope().getSize()<vars[i].getKernel().getSize())return false;
-		if(vars[i].instantiated() && vars[i2].instantiated()){
-			ISet value = vars[i].getKernel();
-			for(int j=value.getFirstElement();j>=0;j=value.getNextElement()){
-				if(!vars[i2].getEnvelope().contain(j)){
-					return false;
-				}
-			}return true;
-		}
-		return false;
-	}
+    private boolean same(int i, int i2) {
+        if (vars[i].getEnvelope().getSize() < vars[i2].getKernel().getSize()) return false;
+        if (vars[i2].getEnvelope().getSize() < vars[i].getKernel().getSize()) return false;
+        if (vars[i].instantiated() && vars[i2].instantiated()) {
+            ISet value = vars[i].getKernel();
+            for (int j = value.getFirstElement(); j >= 0; j = value.getNextElement()) {
+                if (!vars[i2].getEnvelope().contain(j)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

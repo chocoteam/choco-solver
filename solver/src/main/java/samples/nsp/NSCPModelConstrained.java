@@ -210,25 +210,23 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality(vars[t], values, cards[t], false, "BC"));
+            solver.post(IntConstraintFactory.global_cardinality(vars[t], values, cards[t], false));
         }
     }
 
     private void makeCoverWithGCCFix(Solver solver) {
         description += "cover[gccFix] ";
-        int[] coverLB = new int[data.nbActivities()];
-        int[] coverUB = new int[data.nbActivities()];
+		IntVar[] cover = new IntVar[data.nbActivities()];
         for (int a = 0; a < data.nbActivities(); a++) {
-            coverLB[a] = data.getCoverLB(a);
-            coverUB[a] = data.getCoverUB(a);
+			cover[a] = VariableFactory.bounded("cover_"+a,data.getCoverLB(a),data.getCoverUB(a),solver);
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
-            int[] values = new int[coverLB.length];
+            int[] values = new int[cover.length];
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality_low_up(var, values, coverLB, coverUB, false, "BC"));
+            solver.post(IntConstraintFactory.global_cardinality(var, values, cover, false));
         }
     }
 
@@ -308,7 +306,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality(shifts[e], values, occurrences[e], false, "BC"));
+            solver.post(IntConstraintFactory.global_cardinality(shifts[e], values, occurrences[e], false));
         }
 
     }
@@ -368,19 +366,17 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         description += "countW[gcc] ";
         IntVar[] vars = new IntVar[7];
         for (int e = 0; e < data.nbEmployees(); e++) {
-            int[] lb = new int[data.nbActivities()];
-            int[] ub = new int[data.nbActivities()];
+			IntVar[] cards = new IntVar[data.nbActivities()];
             for (int a = 0; a < data.nbActivities(); a++) {
-                lb[a] = data.getWeekCounterLB(e, a);
-                ub[a] = data.getWeekCounterLB(e, a);
+                cards[a] = VariableFactory.bounded("card_"+a,data.getWeekCounterLB(e, a),data.getWeekCounterLB(e, a),solver);
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                int[] values = new int[lb.length];
+                int[] values = new int[cards.length];
                 for (int i = 0; i < values.length; i++) {
                     values[i] = i;
                 }
-                solver.post(IntConstraintFactory.global_cardinality_low_up(vars, values, lb, ub, false, "BC"));
+                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
             }
         }
 

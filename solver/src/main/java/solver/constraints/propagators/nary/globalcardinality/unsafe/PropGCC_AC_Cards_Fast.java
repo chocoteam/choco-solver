@@ -24,11 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.nary.globalcardinality;
+package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -38,28 +39,26 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
  * Propagator for Global Cardinality Constraint (GCC) AC for integer variables
- * foreach i, low[i]<=|{v = value[i] | for any v in vars}|<=up[i]
+ * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
  * <p/>
  * Uses Regin algorithm
- * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
- * per arc removed from the support
- * Has a good average behavior in practice
+ * Runs in O(m.n) worst case time per propagation
+ * also filter cardinality variables
+ * AC for vars but not for card !!!
  * <p/>
- * Runs incrementally for maintaining a matching
+ * Not incremental
  * <p/>
  *
  * @author Jean-Guillaume Fages
  */
-public class PropGCC_AC_LowUp extends Propagator<IntVar> {
+public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -69,17 +68,15 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     private DirectedGraph digraph;
     private int[] nodeSCC;
     //	private BitSet free;
-    private DirectedRemProc remProc;
-    protected final IIntDeltaMonitor[] idms;
     private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
-    private int[] father;
+    private int[] father, values, lb, ub;
     private BitSet in;
     private TIntIntHashMap map;
     int[] fifo;
-    private int[] lb, ub;
-    private IStateInt[] flow;
-    private TIntArrayList boundedVariables, valuesToCompute;
+    private IntVar[] cards;
+    private int[] flow;
+    private TIntArrayList boundedVariables;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -87,27 +84,28 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
     /**
      * Global Cardinality Constraint (GCC) for integer variables
-     * foreach i, low[i]<=|{v = value[i] | for any v in vars}|<=up[i]
+     * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
+     * <p/>
+     * AC for vars but not for cards
      *
      * @param vars
      * @param value
-     * @param low
-     * @param up
+     * @param cards
      * @param constraint
      * @param sol
      */
-    public PropGCC_AC_LowUp(IntVar[] vars, int[] value, int[] low, int[] up, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.QUADRATIC, false);
-        this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++) {
-            idms[i] = this.vars[i].monitorDelta(this);
+    public PropGCC_AC_Cards_Fast(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
+        super(ArrayUtils.append(vars, cards), sol, constraint, PropagatorPriority.QUADRATIC, false);
+        if (value.length != cards.length) {
+            throw new UnsupportedOperationException();
         }
+        values = value;
         n = vars.length;
+        this.cards = cards;
         map = new TIntIntHashMap();
         IntVar v;
         int ubtmp;
         int idx = n;
-        valuesToCompute = new TIntArrayList();
         boundedVariables = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             v = vars[i];
@@ -122,34 +120,39 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
                 }
             }
         }
+        for (int i = 0; i < value.length; i++) {
+            if (!map.containsKey(value[i])) {
+                map.put(value[i], idx);
+                idx++;
+            }
+        }
+
         n2 = idx;
         fifo = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, SetType.LINKED_LIST, false);
-        remProc = new DirectedRemProc();
+        digraph = new DirectedGraph(n2 + 1, SetType.LINKED_LIST, false);
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
         //
         this.lb = new int[n2];
         this.ub = new int[n2];
-        this.flow = new IStateInt[n2];
+        this.flow = new int[n2];
         for (int i = 0; i < n; i++) {
             ub[i] = lb[i] = 1; // 1 unit of flow per variable
-            flow[i] = environment.makeInt(0);
         }
         for (int i = n; i < n2; i++) {
             ub[i] = n; // [0,n] units of flow per value (default)
-            flow[i] = environment.makeInt(0);
         }
         for (int i = 0; i < value.length; i++) {
             idx = map.get(value[i]);
-            if (lb[idx] != 0 && lb[idx] != low[i]
-                    || ub[idx] != n && ub[idx] != up[i]) {
+            int low = cards[i].getLB();
+            int up = cards[i].getUB();
+            if ((lb[idx] != 0 && lb[idx] != low) || (ub[idx] != n && ub[idx] != up)) {
                 throw new UnsupportedOperationException("error in the use of GCC: duplication of value " + value[i]);
             }
-            lb[idx] = low[i];
-            ub[idx] = up[i];
-            if (low[i] > up[i]) {
+            lb[idx] = low;
+            ub[idx] = up;
+            if (low > up) {
                 throw new UnsupportedOperationException("GCC error: low[i]>up[i]");
             }
         }
@@ -158,7 +161,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append("PropGCC_LowUp_AC(");
+        st.append("PropGCC_AC(");
         int i = 0;
         for (; i < Math.min(4, vars.length); i++) {
             st.append(vars[i].getName()).append(", ");
@@ -177,26 +180,26 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     private void buildDigraph() throws ContradictionException {
         digraph.desactivateNode(n2);
         for (int i = 0; i < n2; i++) {
-            flow[i].set(0);
+            flow[i] = 0;
             digraph.getSuccessorsOf(i).clear();
             digraph.getPredecessorsOf(i).clear();
         }
-        int j, ub;
+        int j, k, ub;
         IntVar v;
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                j = map.get(ub);
-                if (flow[j].get() < this.ub[j]) {
+                j = map.get(v.getValue());
+                if (flow[j] < this.ub[j]) {
                     digraph.addArc(j, i);
-                    flow[i].add(1);
-                    flow[j].add(1);
+                    flow[i]++;
+                    flow[j]++;
                 } else {
                     contradiction(v, "");
                 }
             } else {
-                for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                     j = map.get(k);
                     digraph.addArc(i, j);
                 }
@@ -210,12 +213,12 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
     private void repairMatching() throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            if (flow[i].get() == 0) {
+            if (flow[i] == 0) {
                 assignVariable(i);
             }
         }
         for (int i = n; i < n2; i++) {
-            while (flow[i].get() < lb[i]) {
+            while (flow[i] < lb[i]) {
                 useValue(i);
             }
         }
@@ -224,8 +227,8 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     private void assignVariable(int i) throws ContradictionException {
         int mate = augmentPath_BFS(i);
         if (mate != -1) {
-            flow[mate].add(1);
-            flow[i].add(1);
+            flow[mate]++;
+            flow[i]++;
             int tmp = mate;
             while (tmp != i) {
                 digraph.removeArc(father[tmp], tmp);
@@ -241,7 +244,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
@@ -252,7 +255,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
                     father[y] = x;
                     fifo[indexLast++] = y;
                     in.set(y);
-                    if (flow[y].get() < this.ub[y]) {
+                    if (flow[y] < this.ub[y]) {
                         if (y < n) {
                             throw new UnsupportedOperationException();
                         }
@@ -267,8 +270,8 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     private void useValue(int i) throws ContradictionException {
         int mate = swapValue_BFS(i);
         if (mate != -1) {
-            flow[mate].add(-1);
-            flow[i].add(1);
+            flow[mate]--;
+            flow[i]++;
             int tmp = mate;
             while (tmp != i) {
                 digraph.removeArc(tmp, father[tmp]);
@@ -280,11 +283,28 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         }
     }
 
+    private boolean canUseValue(int i) {
+        int mate = swapValue_BFS(i);
+        if (mate != -1) {
+            flow[mate]--;
+            flow[i]++;
+            int tmp = mate;
+            while (tmp != i) {
+                digraph.removeArc(tmp, father[tmp]);
+                digraph.addArc(father[tmp], tmp);
+                tmp = father[tmp];
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private int swapValue_BFS(int root) {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
@@ -296,8 +316,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
                     father[y] = x;
                     fifo[indexLast++] = y;
                     in.set(y);
-                    if (flow[y].get() > this.lb[y]) {
-//					if (flow[y].get()<this.ub[y]){
+                    if (flow[y] > this.lb[y]) {
                         return y;
                     }
                 }
@@ -314,10 +333,10 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         digraph.desactivateNode(n2);
         digraph.activateNode(n2);
         for (int i = n; i < n2; i++) {
-            if (flow[i].get() < ub[i]) {
+            if (flow[i] < ub[i]) {
                 digraph.addArc(i, n2);
             }
-            if (flow[i].get() > lb[i]) {
+            if (flow[i] > lb[i]) {
                 digraph.addArc(n2, i);
             }
         }
@@ -369,6 +388,22 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
                 }
             }
         }
+        // filter cardinality variables
+        int idx;
+        ISet nei;
+        for (int i = 0; i < values.length; i++) {
+            idx = map.get(values[i]);
+            nei = digraph.getSuccessorsOf(idx);
+            ub = nei.getSize() + digraph.getPredecessorsOf(idx).getSize();
+            cards[i].updateUpperBound(ub, aCause);
+            int min = 0;
+            for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (vars[j].instantiated()) {
+                    min++;
+                }
+            }
+            cards[i].updateLowerBound(min, aCause);
+        }
     }
 
     //***********************************************************************************
@@ -377,34 +412,20 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            buildDigraph();
-            repairMatching();
+        int idx;
+        for (int i = 0; i < values.length; i++) {
+            idx = map.get(values[i]);
+            lb[idx] = cards[i].getLB();
+            ub[idx] = cards[i].getUB();
         }
+        buildDigraph();
+        repairMatching();
         filter();
-        for (int i = 0; i < n; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        valuesToCompute.clear();
-        idms[varIdx].freeze();
-        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-        idms[varIdx].unfreeze();
-        if (flow[varIdx].get() == 0) {
-            assignVariable(varIdx);
-        }
-        int val;
-        for (int i = valuesToCompute.size() - 1; i >= 0; i--) {
-            val = valuesToCompute.get(i);
-            if (flow[val].get() < lb[val]) {
-                useValue(val);
-            }
-        }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
-//		propagate(EventType.FULL_PROPAGATION.mask);
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     //***********************************************************************************
@@ -419,6 +440,12 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         int[] f = new int[n2];
+        int idx;
+        for (int i = 0; i < values.length; i++) {
+            idx = map.get(values[i]);
+            lb[idx] = cards[i].getLB();
+            ub[idx] = cards[i].getUB();
+        }
         if (isCompletelyInstantiated()) {
             for (int i = 0; i < n; i++) {
                 f[map.get(vars[i].getValue())]++;
@@ -431,29 +458,5 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
-        int idx;
-
-        public void execute(int i) throws ContradictionException {
-            i = map.get(i);
-            if (digraph.arcExists(idx, i)) {
-                digraph.removeArc(idx, i);
-            } else if (digraph.arcExists(i, idx)) {
-                digraph.removeArc(i, idx);
-                flow[idx].add(-1);
-                flow[i].add(-1);
-                if (flow[i].get() < lb[i]) {
-                    valuesToCompute.add(i);
-                }
-            }
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idx) {
-            this.idx = idx;
-            return this;
-        }
     }
 }

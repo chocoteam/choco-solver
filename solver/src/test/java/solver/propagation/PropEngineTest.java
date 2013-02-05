@@ -28,7 +28,7 @@ package solver.propagation;
 
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -41,12 +41,12 @@ import solver.variables.VariableFactory;
 public class PropEngineTest {
 
     @Test
-    public void test1(){
+    public void test1() {
         Solver solver = new Solver("t1");
         IntVar x = VariableFactory.bounded("X", 1, 3, solver);
         IntVar y = VariableFactory.bounded("Y", 1, 3, solver);
-        solver.post(ConstraintFactory.geq(x, y, solver));
-        solver.post(ConstraintFactory.leq(x, 2, solver));
+        solver.post(IntConstraintFactory.arithm(x, ">=", y));
+        solver.post(IntConstraintFactory.arithm(x, "<=", 2));
 
         solver.findSolution();
 

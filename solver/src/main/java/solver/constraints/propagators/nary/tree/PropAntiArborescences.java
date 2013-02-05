@@ -48,6 +48,7 @@ import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
  * loops (i.e., variables such that x[i]=i) are considered as roots
  * Can use the simple LT algorithm which runs in O(m.log(n)) worst case time
  * Or a slightly more sophisticated one, linear in theory but not necessarily faster in practice
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropAntiArborescences extends Propagator<IntVar> {
@@ -62,32 +63,33 @@ public class PropAntiArborescences extends Propagator<IntVar> {
     private int n;
     // dominators finder that contains the dominator tree
     private AbstractLengauerTarjanDominatorsFinder domFinder;
-	// offset (usually 0 but 1 with MiniZinc)
-	private int offSet;
+    // offset (usually 0 but 1 with MiniZinc)
+    private int offSet;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * AntiArborescences propagation (simplification from tree constraint) based on dominators
-	 * @param succs
-	 * @param offSet
-	 * @param constraint
-	 * @param solver
-	 * @param linear
-	 */
-	public PropAntiArborescences(IntVar[] succs, int offSet, Constraint constraint, Solver solver, boolean linear) {
-		super(succs, solver, constraint, PropagatorPriority.LINEAR);
-		this.n = succs.length;
-		this.offSet = offSet;
-		this.connectedGraph = new DirectedGraph(n+1, SetType.LINKED_LIST,false);
-		if(linear){
-			domFinder = new AlphaDominatorsFinder(n, connectedGraph);
-		}else{
-			domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-		}
-	}
+    /**
+     * AntiArborescences propagation (simplification from tree constraint) based on dominators
+     *
+     * @param succs
+     * @param offSet
+     * @param constraint
+     * @param solver
+     * @param linear
+     */
+    public PropAntiArborescences(IntVar[] succs, int offSet, Constraint constraint, Solver solver, boolean linear) {
+        super(succs, solver, constraint, PropagatorPriority.LINEAR);
+        this.n = succs.length;
+        this.offSet = offSet;
+        this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
+        if (linear) {
+            domFinder = new AlphaDominatorsFinder(n, connectedGraph);
+        } else {
+            domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -95,12 +97,12 @@ public class PropAntiArborescences extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			for(int i=0;i<n;i++){
-				vars[i].updateLowerBound(offSet,aCause);
-				vars[i].updateUpperBound(n+offSet,aCause);
-			}
-		}
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < n; i++) {
+                vars[i].updateLowerBound(offSet, aCause);
+                vars[i].updateUpperBound(n + offSet, aCause);
+            }
+        }
         structuralPruning();
     }
 
@@ -115,25 +117,25 @@ public class PropAntiArborescences extends Propagator<IntVar> {
             connectedGraph.getPredecessorsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
-			int ub = vars[i].getUB();
-			for(int y = vars[i].getLB();y<=ub;y=vars[i].nextValue(y)){
-				if(i==y){ // can be a root node
-					connectedGraph.addArc(i, n);
-				}else{
-					connectedGraph.addArc(i, y-offSet);
-				}
-			}
+            int ub = vars[i].getUB();
+            for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
+                if (i == y) { // can be a root node
+                    connectedGraph.addArc(i, n);
+                } else {
+                    connectedGraph.addArc(i, y - offSet);
+                }
+            }
         }
         if (domFinder.findPostDominators()) {
             for (int x = 0; x < n; x++) {
-				int ub = vars[x].getUB();
-				for(int y = vars[x].getLB();y<=ub;y=vars[x].nextValue(y)){
-					if(x!=y){
-						if (domFinder.isDomminatedBy(y-offSet, x)) {
-							vars[x].removeValue(y, aCause);
-						}
-					}
-				}
+                int ub = vars[x].getUB();
+                for (int y = vars[x].getLB(); y <= ub; y = vars[x].nextValue(y)) {
+                    if (x != y) {
+                        if (domFinder.isDomminatedBy(y - offSet, x)) {
+                            vars[x].removeValue(y, aCause);
+                        }
+                    }
+                }
             }
         } else {
             contradiction(vars[0], "the source cannot reach all nodes");
@@ -147,31 +149,31 @@ public class PropAntiArborescences extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		if(!isCompletelyInstantiated()){
-			return ESat.UNDEFINED;
-		}
-		ISet tmp = SetFactory.makeSwap(n,false);
-		for(int i=0;i<n;i++){
-			if(circuit(tmp,i)){
-				return ESat.FALSE;
-			}
-		}
-		return ESat.TRUE;
+        if (!isCompletelyInstantiated()) {
+            return ESat.UNDEFINED;
+        }
+        ISet tmp = SetFactory.makeSwap(n, false);
+        for (int i = 0; i < n; i++) {
+            if (circuit(tmp, i)) {
+                return ESat.FALSE;
+            }
+        }
+        return ESat.TRUE;
     }
 
-	private boolean circuit(ISet tmp, int i) {
-		tmp.clear();
-		int x = i;
-		tmp.add(x);
-		int y = vars[x].getValue();
-		while(x!=y){
-			x = y;
-			if(tmp.contain(x)){
-				return true;
-			}
-			tmp.add(x);
-			y = vars[x].getValue();
-		}
-		return false;
-	}
+    private boolean circuit(ISet tmp, int i) {
+        tmp.clear();
+        int x = i;
+        tmp.add(x);
+        int y = vars[x].getValue();
+        while (x != y) {
+            x = y;
+            if (tmp.contain(x)) {
+                return true;
+            }
+            tmp.add(x);
+            y = vars[x].getValue();
+        }
+        return false;
+    }
 }

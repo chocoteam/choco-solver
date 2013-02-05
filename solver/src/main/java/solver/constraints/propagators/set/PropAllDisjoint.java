@@ -49,104 +49,106 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
 /**
  * Ensures that all non-empty sets are disjoint
  * In order to forbid multiple empty set, use propagator PropAtMost1Empty in addition
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropAllDisjoint extends Propagator<SetVar>{
+public class PropAllDisjoint extends Propagator<SetVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n, currentSet;
-	private SetDeltaMonitor[] sdm;
-	private IntProcedure elementForced;
+    private int n, currentSet;
+    private SetDeltaMonitor[] sdm;
+    private IntProcedure elementForced;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that all non-empty sets are disjoint
-	 * In order to forbid multiple empty set, use propagator PropAtMost1Empty in addition
-	 * @param sets
-	 * @param solver
-	 * @param c
-	 */
-	public PropAllDisjoint(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(sets, solver, c, PropagatorPriority.LINEAR);
-		n = sets.length;
-		// delta monitors
-		sdm = new SetDeltaMonitor[n];
-		for(int i=0;i<n;i++){
-			sdm[i] = this.vars[i].monitorDelta(this);
-		}
-		elementForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				for(int i=0;i<n;i++){
-					if(i!=currentSet){
-						vars[i].removeFromEnvelope(element,aCause);
-					}
-				}
-			}
-		};
-	}
+    /**
+     * Ensures that all non-empty sets are disjoint
+     * In order to forbid multiple empty set, use propagator PropAtMost1Empty in addition
+     *
+     * @param sets
+     * @param solver
+     * @param c
+     */
+    public PropAllDisjoint(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(sets, solver, c, PropagatorPriority.LINEAR);
+        n = sets.length;
+        // delta monitors
+        sdm = new SetDeltaMonitor[n];
+        for (int i = 0; i < n; i++) {
+            sdm[i] = this.vars[i].monitorDelta(this);
+        }
+        elementForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < n; i++) {
+                    if (i != currentSet) {
+                        vars[i].removeFromEnvelope(element, aCause);
+                    }
+                }
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ADD_TO_KER.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException{
-		if((evtmask & EventType.FULL_PROPAGATION.mask) != 0){
-			for(int i=0;i<n;i++){
-				ISet s = vars[i].getKernel();
-				for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-					for(int i2=0;i2<n;i2++){
-						if(i2!=i){
-							vars[i2].removeFromEnvelope(j,aCause);
-						}
-					}
-				}
-			}
-		}
-		for(int i=0;i<n;i++){
-			sdm[i].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < n; i++) {
+                ISet s = vars[i].getKernel();
+                for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+                    for (int i2 = 0; i2 < n; i2++) {
+                        if (i2 != i) {
+                            vars[i2].removeFromEnvelope(j, aCause);
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            sdm[i].unfreeze();
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		currentSet = idxVarInProp;
-		sdm[currentSet].freeze();
-		sdm[currentSet].forEach(elementForced,EventType.ADD_TO_KER);
-		sdm[currentSet].unfreeze();
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        currentSet = idxVarInProp;
+        sdm[currentSet].freeze();
+        sdm[currentSet].forEach(elementForced, EventType.ADD_TO_KER);
+        sdm[currentSet].unfreeze();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		boolean allInstantiated = true;
-		for(int i=0;i<n;i++){
-			if(!vars[i].instantiated()){
-				allInstantiated = false;
-			}
-			ISet s = vars[i].getKernel();
-			for(int j=s.getFirstElement();j>=0;j=s.getNextElement()){
-				for(int i2=0;i2<n;i2++){
-					if(i2!=i && vars[i2].getKernel().contain(j)){
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if(allInstantiated){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        boolean allInstantiated = true;
+        for (int i = 0; i < n; i++) {
+            if (!vars[i].instantiated()) {
+                allInstantiated = false;
+            }
+            ISet s = vars[i].getKernel();
+            for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+                for (int i2 = 0; i2 < n; i2++) {
+                    if (i2 != i && vars[i2].getKernel().contain(j)) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (allInstantiated) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

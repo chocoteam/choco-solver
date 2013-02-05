@@ -53,8 +53,8 @@ public class PropMemberBound extends Propagator<IntVar> {
 
     public PropMemberBound(IntVar var, int lb, int ub, Solver solver,
                            Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint,
-                           PropagatorPriority priority, boolean reactOnPromotion) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, priority, reactOnPromotion);
+                           boolean reactOnPromotion) {
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, reactOnPromotion);
         this.lb = lb;
         this.ub = ub;
     }

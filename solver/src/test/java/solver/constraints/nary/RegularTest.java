@@ -29,8 +29,8 @@ package solver.constraints.nary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.Regular;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -70,7 +70,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(new Regular(vars, auto, solver));
+        solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -112,7 +112,7 @@ public class RegularTest {
         auto.minimize();
         Assert.assertEquals(auto.getNbStates(), 54);
 
-        solver.post(new Regular(vars, auto, solver));
+        solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -142,7 +142,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(new Regular(vars, auto, solver));
+        solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -173,7 +173,7 @@ public class RegularTest {
         auto.addTransition(end, start, 2);
         auto.addTransition(end, start, 0, 1);
 
-        solver.post(new Regular(vars, auto, solver));
+        solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
@@ -190,7 +190,7 @@ public class RegularTest {
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
-        solver.post(new Regular(vars, auto, solver));
+        solver.post(IntConstraintFactory.regular(vars, auto));
         solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
