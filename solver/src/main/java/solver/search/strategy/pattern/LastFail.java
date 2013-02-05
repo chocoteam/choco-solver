@@ -37,11 +37,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
 /**
- * Last Fail pattern :
- * After a backtrack, the next decision to be computed should involve
- * the variable of the la decision (left branch, refutations are not considered)
- *
- * @author Jean-Guillaume Fages
+ * @author anonymous
  */
 public class LastFail extends AbstractStrategy<Variable> implements IMonitorRestart, IMonitorSolution, IMonitorDownBranch {
 
