@@ -1,12 +1,10 @@
 package choco.proba;
 
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -24,8 +22,8 @@ import java.util.Collection;
 public class GolombRulerBenchProbas extends AbstractBenchProbas {
 
     // TODO : size 26 max
-    public final static int[] length = new int[] {
-        0,1,3,6,11,17,25,34,44,55,72,85,106,127,151,177,199,216,246,283,333,356,372,425,480,492
+    public final static int[] length = new int[]{
+            0, 1, 3, 6, 11, 17, 25, 34, 44, 55, 72, 85, 106, 127, 151, 177, 199, 216, 246, 283, 333, 356, 372, 425, 480, 492
     };
 
     public GolombRulerBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
@@ -58,23 +56,23 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
             allVars.add(ticks[i]);
         }
 
-        allCstrs.add(ConstraintFactory.eq(ticks[0], 0, solver));
-        allCstrs.add(new LexChain(true, solver, ticks));
+        allCstrs.add(IntConstraintFactory.arithm(ticks[0], "=", 0));
+        allCstrs.add(IntConstraintFactory.lex_chain_less(ticks));
 
         diffs = new IntVar[(size * size - size) / 2];
         for (int k = 0, i = 0; i < size - 1; i++) {
             for (int j = i + 1; j < size; j++, k++) {
                 diffs[k] = Sum.var(ticks[j], Views.minus(ticks[i]));
                 allVars.add(diffs[k]);
-                allCstrs.add(new Arithmetic(diffs[k], ">=", (j - i) * (j - i + 1) / 2, solver));
-                allCstrs.add(Sum.leq(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, -((size - 1 - j + i) * (size - j + i)) / 2, solver));
+                allCstrs.add(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
+                allCstrs.add(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, "<=", -((size - 1 - j + i) * (size - j + i)) / 2));
             }
         }
         allCstrs.add(new AllDifferent(diffs, solver, type));
 
         // break symetries
         if (size > 2) {
-            allCstrs.add(ConstraintFactory.lt(diffs[0], diffs[diffs.length - 1], solver));
+            allCstrs.add(IntConstraintFactory.arithm(diffs[0], "<", diffs[diffs.length - 1]));
         }
 
         this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);

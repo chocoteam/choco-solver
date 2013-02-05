@@ -31,8 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.Count;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -59,15 +58,15 @@ public class CountEqBuilder implements IBuilder {
 
             IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
             for (int i = ylb; i <= yub; i++) {
-                solver.post(new Count(i, x, Count.Relop.EQ, cs[i - ylb], solver));
+                solver.post(IntConstraintFactory.count(i, x, "=", cs[i - ylb]));
             }
-            return new Element(c, cs, y, ylb, solver);
+            return IntConstraintFactory.element(c, cs, y, ylb);
         } else {
             IntVar[] x = exps.get(0).toIntVarArray(solver);
             int y = exps.get(1).intValue();
             IntVar c = exps.get(2).intVarValue(solver);
 
-            return new Count(y, x, Count.Relop.EQ, c, solver);
+            return IntConstraintFactory.count(y, x, "=", c);
         }
     }
 }

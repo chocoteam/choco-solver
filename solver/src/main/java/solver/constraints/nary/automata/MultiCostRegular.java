@@ -33,8 +33,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.nary.automata.FA.CostAutomaton;
-import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.nary.automaton.PropMultiCostRegular;
@@ -78,31 +76,9 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
      *
      * @param vars   decision variables
      * @param CR     cost variables
-     * @param auto   finite automaton
-     * @param costs  assignment cost arrays
+     * @param pi     finite automaton
      * @param solver solver
      */
-    public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][] costs, Solver solver) {
-        this(vars, CR, solver);
-        this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
-    }
-
-    /**
-     * Constructs a multi-cost-regular constraint propagator
-     *
-     * @param vars   decision variables
-     * @param CR     cost variables
-     * @param auto   finite automaton
-     * @param costs  assignment cost arrays
-     * @param solver solver
-     */
-    public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][][] costs, final Solver solver) {
-        this(vars, CR, solver);
-        this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
-    }
-
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
         this(vars, CR, solver);
         this.pi = pi;

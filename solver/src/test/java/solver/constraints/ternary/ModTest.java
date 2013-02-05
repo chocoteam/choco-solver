@@ -28,6 +28,7 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 /**
@@ -45,6 +46,6 @@ public class ModTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Solver s) {
-        return new ModXYZ(vars[0], vars[1], vars[2], s);
+        return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
     }
 }

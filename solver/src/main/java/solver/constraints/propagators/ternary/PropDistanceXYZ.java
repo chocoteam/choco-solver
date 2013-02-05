@@ -30,6 +30,7 @@ package solver.constraints.propagators.ternary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,13 +48,7 @@ import solver.variables.IntVar;
  */
 public final class PropDistanceXYZ extends Propagator<IntVar> {
 
-    protected int operator;
-
-    public final static int EQ = 0;
-
-    public final static int LT = 1;
-
-    public final static int GT = 2;
+    protected Operator operator;
 
     /**
      * Enforces |x0 - x1| op x2
@@ -62,7 +57,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
      * @param vars variable
      * @param op   the operator to be chosen among {0,1,2} standing for (eq,lt,gt)
      */
-    public PropDistanceXYZ(IntVar[] vars, int op, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropDistanceXYZ(IntVar[] vars, Operator op, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.TERNARY, false);
         this.operator = op;
     }
@@ -91,16 +86,16 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
     public void filterFixPoint() throws ContradictionException {
         boolean change = true;
         while (change) {
-            if (operator == EQ) {
+            if (operator == Operator.EQ) {
                 change = filterFromXYtoLBZ();
                 change |= filterFromXYtoUBZ();
                 change |= filterEQFromXZToY();
                 change |= filterEQFromYZToX();
-            } else if (operator == LT) {
+            } else if (operator == Operator.LT) {
                 change = filterFromXYtoLBZ();
                 change |= filterLTFromXZtoY();
                 change |= filterLTFromYZtoX();
-            } else { //GT
+            } else if (operator == Operator.GT) {
                 change = filterFromXYtoUBZ();
                 change |= filterGTFromXZtoY();
                 change |= filterGTFromYZtoX();
@@ -226,11 +221,11 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            if (operator == EQ) {
+            if (operator == Operator.EQ) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) == vars[2].getValue());
-            } else if (operator == LT) {
+            } else if (operator == Operator.LT) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) < vars[2].getValue());
-            } else if (operator == GT) {
+            } else if (operator == Operator.GT) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) > vars[2].getValue());
             }
         }
@@ -240,11 +235,11 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
     @Override
     public String toString() {
         String op;
-        if (operator == EQ) {
+        if (operator == Operator.EQ) {
             op = "=";
-        } else if (operator == GT) {
+        } else if (operator == Operator.GT) {
             op = ">";
-        } else if (operator == LT) {
+        } else if (operator == Operator.LT) {
             op = "<";
         } else {
             throw new SolverException("unknown operator");

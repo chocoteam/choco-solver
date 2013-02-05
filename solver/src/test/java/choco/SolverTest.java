@@ -32,7 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -63,7 +63,7 @@ public class SolverTest {
         Solver s = new Solver();
         choco.kernel.memory.IEnvironment env = s.getEnvironment();
 
-		IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
+        IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
 
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -72,9 +72,9 @@ public class SolverTest {
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(3);
 
-        lcstrs.add(Sum.geq(objects, volumes, capacites[0], s));
-        lcstrs.add(Sum.leq(objects, volumes, capacites[1], s));
-        lcstrs.add(Sum.eq(objects, energies, power, 1, s));
+        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, ">=", capacites[0]));
+        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, "<=", capacites[1]));
+        lcstrs.add(IntConstraintFactory.scalar(objects, energies, "=", power, 1));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
@@ -84,9 +84,9 @@ public class SolverTest {
         s.post(cstrs);
         s.set(strategy);
 
-		if(s.getVar(0)!=power){
-			throw new UnsupportedOperationException();
-		}
+        if (s.getVar(0) != power) {
+            throw new UnsupportedOperationException();
+        }
 
         return s;
     }
@@ -108,7 +108,7 @@ public class SolverTest {
                     s.findAllSolutions();
                     break;
                 case OPT:
-                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar)s.getVar(0));
+                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar) s.getVar(0));
                     break;
                 default:
                     Assert.fail("unknonw case");

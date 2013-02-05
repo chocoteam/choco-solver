@@ -55,19 +55,6 @@ public class Element extends IntConstraint<IntVar> {
      * @param values TABLE
      * @param index  INDEX
      * @param offset offset matching INDEX.LB and TABLE[0]
-     * @param solver the attached solver
-     */
-    public Element(IntVar value, int[] values, IntVar index, int offset, Solver solver) {
-        this(value, values, index, offset, "none", solver);
-    }
-
-    /**
-     * Build ELMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param value  VALUE
-     * @param values TABLE
-     * @param index  INDEX
-     * @param offset offset matching INDEX.LB and TABLE[0]
      * @param sort   "asc","desc", detect" : values are sorted wrt <code>sort</code>
      * @param solver the attached solver
      */
@@ -76,31 +63,6 @@ public class Element extends IntConstraint<IntVar> {
         this.values = values;
         this.offset = offset;
         setPropagators(new PropElement(vars[0], values, vars[1], offset, PropElement.Sort.valueOf(sort), solver, this));
-    }
-
-    /**
-     * Build ELMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param value  VALUE
-     * @param values TABLE
-     * @param index  INDEX
-     * @param solver the attached solver
-     */
-    public Element(IntVar value, int[] values, IntVar index, Solver solver) {
-        this(value, values, index, 0, "none", solver);
-    }
-
-    /**
-     * Build ELMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param value  VALUE
-     * @param values TABLE
-     * @param index  INDEX
-     * @param sort   "asc","desc", detect" : values are sorted wrt <code>sort</code>
-     * @param solver the attached solver
-     */
-    public Element(IntVar value, int[] values, IntVar index, String sort, Solver solver) {
-        this(value, values, index, 0, sort, solver);
     }
 
     public Element(IntVar value, IntVar[] values, IntVar index, int offset, Solver solver) {

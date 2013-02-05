@@ -27,12 +27,13 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import solver.variables.graph.DirectedGraph;
 import choco.kernel.memory.setDataStructures.ISet;
+import solver.variables.graph.DirectedGraph;
 
+import java.io.Serializable;
 import java.util.BitSet;
 
-public class StrongConnectivityFinder {
+public class StrongConnectivityFinder implements Serializable {
 
     // input
     private DirectedGraph graph;

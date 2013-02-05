@@ -28,8 +28,8 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -52,32 +52,32 @@ import solver.variables.view.Views;
  */
 public class CostasArrays extends AbstractProblem {
 
-	@Option(name = "-o", usage = "Costas array size.", required = false)
-	private static int n = 14;  // should be <15 to be solved quickly
+    @Option(name = "-o", usage = "Costas array size.", required = false)
+    private static int n = 14;  // should be <15 to be solved quickly
 
-	IntVar[] vars,vectors;
+    IntVar[] vars, vectors;
 
     @Override
     public void createSolver() {
         solver = new Solver("CostasArrays");
     }
 
-	@Override
-	public void buildModel() {
-		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
-		vectors = new IntVar[n*n-n];
-		int idx = 0;
-		for (int i = 0; i < n; i++) {
-			for(int j=0;j<n;j++){
-				if(i!=j){
-					vectors[idx] = Views.offset(Sum.var(vars[j], Views.minus(vars[i])),2*n*(j-i));
-					idx++;
-				}
-			}
-		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.AC));
-		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.AC));
-	}
+    @Override
+    public void buildModel() {
+        vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+        vectors = new IntVar[n * n - n];
+        int idx = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    vectors[idx] = Views.offset(Sum.var(vars[j], Views.minus(vars[i])), 2 * n * (j - i));
+                    idx++;
+                }
+            }
+        }
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        solver.post(IntConstraintFactory.alldifferent(vectors, "AC"));
+    }
 
     @Override
     public void configureSearch() {
@@ -89,28 +89,29 @@ public class CostasArrays extends AbstractProblem {
     }
 
 
-	@Override
-	public void solve() {
-		solver.findSolution();
-	}
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
 
-	@Override
-	public void prettyOut() {
-		String s = "";
-		for(int i=0;i<n;i++){
-			s+="|";
-			for(int j=0;j<n;j++){
-				if(j==vars[i].getValue()){
-					s+="x|";
-				}else{
-					s+="-|";
-				}
-			}s+="\n";
-		}
-		System.out.println(s);
-	}
+    @Override
+    public void prettyOut() {
+        String s = "";
+        for (int i = 0; i < n; i++) {
+            s += "|";
+            for (int j = 0; j < n; j++) {
+                if (j == vars[i].getValue()) {
+                    s += "x|";
+                } else {
+                    s += "-|";
+                }
+            }
+            s += "\n";
+        }
+        System.out.println(s);
+    }
 
-	public static void main(String[] args) {
-		new CostasArrays().execute(args);
-	}
+    public static void main(String[] args) {
+        new CostasArrays().execute(args);
+    }
 }

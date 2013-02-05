@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.view.Views;
@@ -110,7 +110,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, ref);
                 xs[1] = VariableFactory.bounded("y", -15, -1, ref);
-                ref.post(Sum.eq(xs, 0, ref));
+                ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
@@ -118,8 +118,8 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, solver);
                 xs[1] = Views.minus(xs[0]);
-                solver.post(Sum.eq(xs, 0, solver));
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(),seed));
+                solver.post(IntConstraintFactory.sum(xs, "=", 0));
+                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -138,7 +138,7 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, ref);
                 xs[1] = VariableFactory.enumerated("y", -15, -1, ref);
-                ref.post(Sum.eq(xs, 0, ref));
+                ref.post(IntConstraintFactory.sum(xs, "=", 0));
                 ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
@@ -146,8 +146,8 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, solver);
                 xs[1] = Views.minus(xs[0]);
-                solver.post(Sum.eq(xs, 0, solver));
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(),seed));
+                solver.post(IntConstraintFactory.sum(xs, "=", 0));
+                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

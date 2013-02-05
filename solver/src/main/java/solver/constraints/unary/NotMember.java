@@ -28,9 +28,9 @@
 package solver.constraints.unary;
 
 import choco.kernel.ESat;
-import gnu.trove.set.hash.TIntHashSet;import solver.Solver;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.unary.PropNotMemberBound;
 import solver.constraints.propagators.unary.PropNotMemberEnum;
 import solver.variables.IntVar;
@@ -49,27 +49,19 @@ public class NotMember extends IntConstraint<IntVar> {
     final int lb, ub;
 
     public NotMember(IntVar var, int[] values, Solver solver) {
-        this(var, values, solver, PropagatorPriority.UNARY);
-    }
-
-    public NotMember(IntVar var, int[] values, Solver solver, PropagatorPriority storeThreshold) {
         super(new IntVar[]{var}, solver);
         this.values = new TIntHashSet(values);
         lb = 0;
         ub = 0;
-        setPropagators(new PropNotMemberEnum(var, this.values, solver, this, storeThreshold, false));
+        setPropagators(new PropNotMemberEnum(var, this.values, solver, this, false));
     }
 
     public NotMember(IntVar var, int lowerbound, int upperbound, Solver solver) {
-        this(var, lowerbound, upperbound, solver, PropagatorPriority.UNARY);
-    }
-
-    public NotMember(IntVar var, int lowerbound, int upperbound, Solver solver, PropagatorPriority storeThreshold) {
         super(new IntVar[]{var}, solver);
         this.values = null;
         this.lb = lowerbound;
         this.ub = upperbound;
-        setPropagators(new PropNotMemberBound(var, lowerbound, upperbound, solver, this, storeThreshold, false));
+        setPropagators(new PropNotMemberBound(var, lowerbound, upperbound, solver, this, false));
     }
 
     @Override
@@ -84,6 +76,6 @@ public class NotMember extends IntConstraint<IntVar> {
 
     @Override
     public String toString() {
-        return vars[0].toString() +" not in "+ (values == null?"["+lb+","+ub+"]": Arrays.toString(values.toArray()));
+        return vars[0].toString() + " not in " + (values == null ? "[" + lb + "," + ub + "]" : Arrays.toString(values.toArray()));
     }
 }

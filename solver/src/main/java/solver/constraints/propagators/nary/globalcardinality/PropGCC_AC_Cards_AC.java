@@ -28,6 +28,8 @@ package solver.constraints.propagators.nary.globalcardinality;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -38,9 +40,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -115,6 +116,12 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
                 }
             }
         }
+        for (int i = 0; i < value.length; i++) {
+            if (!map.containsKey(value[i])) {
+                map.put(value[i], idx);
+                idx++;
+            }
+        }
         n2 = idx;
         fifo = new int[n2];
         digraph = new DirectedGraph(n2 + 1, SetType.LINKED_LIST, false);
@@ -135,8 +142,8 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
             idx = map.get(value[i]);
             int low = cards[i].getLB();
             int up = cards[i].getUB();
-            if (lb[idx] != 0 && lb[idx] != low
-                    || ub[idx] != n && ub[idx] != up) {
+            if ((lb[idx] != 0 && lb[idx] != low)
+                    || (ub[idx] != n && ub[idx] != up)) {
                 throw new UnsupportedOperationException("error in the use of GCC: duplication of value " + value[i]);
             }
             lb[idx] = low;
@@ -233,7 +240,7 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
@@ -293,7 +300,7 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {

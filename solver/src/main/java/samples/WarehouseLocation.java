@@ -31,9 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -105,25 +103,25 @@ public class WarehouseLocation extends AbstractProblem {
         // A warehouse is open, if it supplies to a store
         IntVar ONE = Views.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
-            solver.post(new Element(ONE, open, suppliers[s], 0, solver));
+            solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(new Element(costPerStore[s], c_supply[s], suppliers[s], solver));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
         }
         for (int w = 0; w < nWH; w++) {
-            solver.post(new Count(w, suppliers, Count.Relop.GEQ, open[w], solver));
+            solver.post(IntConstraintFactory.count(w, suppliers, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
             IntVar counter = Views.fixed(capacity[w], solver);
-            solver.post(new Count(w, suppliers, Count.Relop.LEQ, counter, solver));
+            solver.post(IntConstraintFactory.count(w, suppliers, "<=", counter));
         }
 
         int[] coeffs = new int[nWH + nS];
         Arrays.fill(coeffs, 0, nWH, cost);
         Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(Sum.eq(ArrayUtils.append(open, costPerStore), coeffs, totCost, 1, solver));
+        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost, 1));
     }
 
     @Override

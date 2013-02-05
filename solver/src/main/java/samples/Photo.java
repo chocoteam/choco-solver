@@ -30,10 +30,8 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -77,15 +75,11 @@ public class Photo extends AbstractProblem {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
             dist[i] = Views.abs(Sum.var(positions[pa], Views.minus(positions[pb])));
-            solver.post(new ReifiedConstraint(
-                    viols[i],
-                    Sum.geq(new IntVar[]{dist[i]}, 2, solver),
-                    Sum.leq(new IntVar[]{dist[i]}, 1, solver),
-                    solver));
+            solver.post(IntConstraintFactory.reified(viols[i], IntConstraintFactory.sum(new IntVar[]{dist[i]}, ">=", 2), IntConstraintFactory.sum(new IntVar[]{dist[i]}, "<=", 1)));
         }
-        solver.post(Sum.eq(viols, violations, solver));
-        solver.post(new AllDifferent(positions, solver));
-        solver.post(new Arithmetic(positions[1], ">", positions[0], solver));
+        solver.post(IntConstraintFactory.sum(viols, "=", violations));
+        solver.post(IntConstraintFactory.alldifferent(positions, "BC"));
+        solver.post(IntConstraintFactory.arithm(positions[1], ">", positions[0]));
     }
 
     @Override

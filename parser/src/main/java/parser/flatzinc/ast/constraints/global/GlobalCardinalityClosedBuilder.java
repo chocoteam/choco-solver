@@ -32,9 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.GCC_AC;
-import solver.constraints.nary.GlobalCardinality;
-import solver.constraints.unary.Member;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -53,15 +51,15 @@ public class GlobalCardinalityClosedBuilder implements IBuilder {
         int[] values = exps.get(1).toIntArray();
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
 
-        for(int i = 0; i< vars.length; i++){
-            solver.post(new Member(vars[i], values, solver));
+        for (int i = 0; i < vars.length; i++) {
+            solver.post(IntConstraintFactory.member(vars[i], values));
         }
         // si nbVAL > 2*NBVAR => BC
         boolean ac = values.length <= 2 * vars.length;
         if (ac) {
-            return new GCC_AC(vars, values, cards, solver);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, true, "AC_ON_CARDS");
         } else {
-            return GlobalCardinality.make(vars, values, cards, solver);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, true, "BC");
         }
     }
 }

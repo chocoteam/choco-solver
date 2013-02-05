@@ -49,178 +49,180 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 
-public class PropUnion extends Propagator<SetVar>{
+public class PropUnion extends Propagator<SetVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int k;
-	private SetDeltaMonitor[] sdm;
-	private IntProcedure unionForced, unionRemoved, setForced, setRemoved;
-	private ISet unionAddToTreat, setRemToTreat;
+    private int k;
+    private SetDeltaMonitor[] sdm;
+    private IntProcedure unionForced, unionRemoved, setForced, setRemoved;
+    private ISet unionAddToTreat, setRemToTreat;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * The union of sets is equal to union
-	 * @param sets
-	 * @param union
-	 * @param solver
-	 * @param c
-	 */
-	public PropUnion(SetVar[] sets, SetVar union, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-		super(ArrayUtils.append(sets, new SetVar[]{union}), solver, c, PropagatorPriority.LINEAR);
-		k = sets.length;
-		sdm = new SetDeltaMonitor[k+1];
-		for(int i=0;i<=k;i++){
-			sdm[i] = this.vars[i].monitorDelta(this);
-		}
-		unionAddToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST,0,environment);
-		setRemToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST,0,environment);
-		// PROCEDURES
-		unionForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				unionAddToTreat.add(element);
-			}
-		};
-		unionRemoved = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				for(int i=0;i<k;i++){
-					vars[i].removeFromEnvelope(element,aCause);
-				}
-			}
-		};
-		setForced = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				vars[k].addToKernel(element,aCause);
-			}
-		};
-		setRemoved = new IntProcedure() {
-			@Override
-			public void execute(int element) throws ContradictionException {
-				if(!setRemToTreat.contain(element)){
-					setRemToTreat.add(element);
-				}
-			}
-		};
-	}
+    /**
+     * The union of sets is equal to union
+     *
+     * @param sets
+     * @param union
+     * @param solver
+     * @param c
+     */
+    public PropUnion(SetVar[] sets, SetVar union, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+        super(ArrayUtils.append(sets, new SetVar[]{union}), solver, c, PropagatorPriority.LINEAR);
+        k = sets.length;
+        sdm = new SetDeltaMonitor[k + 1];
+        for (int i = 0; i <= k; i++) {
+            sdm[i] = this.vars[i].monitorDelta(this);
+        }
+        unionAddToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, environment);
+        setRemToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, environment);
+        // PROCEDURES
+        unionForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                unionAddToTreat.add(element);
+            }
+        };
+        unionRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                for (int i = 0; i < k; i++) {
+                    vars[i].removeFromEnvelope(element, aCause);
+                }
+            }
+        };
+        setForced = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                vars[k].addToKernel(element, aCause);
+            }
+        };
+        setRemoved = new IntProcedure() {
+            @Override
+            public void execute(int element) throws ContradictionException {
+                if (!setRemToTreat.contain(element)) {
+                    setRemToTreat.add(element);
+                }
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ADD_TO_KER.mask+EventType.REMOVE_FROM_ENVELOPE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ADD_TO_KER.mask + EventType.REMOVE_FROM_ENVELOPE.mask;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet set;
-		SetVar union = vars[k];
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			for(int i=0;i<k;i++){
-				set = vars[i].getKernel();
-				for(int j=set.getFirstElement(); j>=0; j=set.getNextElement())
-					union.addToKernel(j,aCause);
-				set = vars[i].getEnvelope();
-				for(int j=set.getFirstElement(); j>=0; j=set.getNextElement())
-					if(!union.getEnvelope().contain(j))
-						vars[i].removeFromEnvelope(j,aCause);
-			}
-			set = union.getEnvelope();
-			for(int j=set.getFirstElement(); j>=0; j=set.getNextElement()){
-				if(union.getKernel().contain(j)){
-					unionAddToTreat.add(j);
-				}else{
-					int mate = -1;
-					for(int i=0;i<k;i++){
-						if(vars[i].getEnvelope().contain(j)){
-							mate = i;break;
-						}
-					}
-					if(mate==-1)union.removeFromEnvelope(j,aCause);
-				}
-			}
-		}
-		set = unionAddToTreat;
-		for(int j=set.getFirstElement();j>=0;j=set.getNextElement()){
-			int mate = -1;
-			for(int i=0;i<k;i++)
-				if(vars[i].getEnvelope().contain(j))
-					if(mate==-1){
-						mate = i;
-					}else{
-						mate = -2;
-						break;
-					}
-			if(mate==-1){
-				contradiction(vars[k],"");
-			}else if(mate!=-2){
-				vars[mate].addToKernel(j,aCause);
-				unionAddToTreat.remove(j);
-			}
-		}
-		set = setRemToTreat;
-		for(int j=set.getFirstElement();j>=0;j=set.getNextElement()){
-			if(union.getEnvelope().contain(j) && !union.getKernel().contain(j)){
-				int mate = -1;
-				for(int i=0;i<k;i++)
-					if(vars[i].getEnvelope().contain(j)){
-						mate = i;
-						break;
-					}
-				if(mate==-1)
-					vars[k].removeFromEnvelope(j,aCause);
-			}
-			setRemToTreat.remove(j);
-		}
-		// ------------------
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0)
-			for(int i=0;i<=k;i++)
-				sdm[i].unfreeze();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet set;
+        SetVar union = vars[k];
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < k; i++) {
+                set = vars[i].getKernel();
+                for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
+                    union.addToKernel(j, aCause);
+                set = vars[i].getEnvelope();
+                for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
+                    if (!union.getEnvelope().contain(j))
+                        vars[i].removeFromEnvelope(j, aCause);
+            }
+            set = union.getEnvelope();
+            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+                if (union.getKernel().contain(j)) {
+                    unionAddToTreat.add(j);
+                } else {
+                    int mate = -1;
+                    for (int i = 0; i < k; i++) {
+                        if (vars[i].getEnvelope().contain(j)) {
+                            mate = i;
+                            break;
+                        }
+                    }
+                    if (mate == -1) union.removeFromEnvelope(j, aCause);
+                }
+            }
+        }
+        set = unionAddToTreat;
+        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+            int mate = -1;
+            for (int i = 0; i < k; i++)
+                if (vars[i].getEnvelope().contain(j))
+                    if (mate == -1) {
+                        mate = i;
+                    } else {
+                        mate = -2;
+                        break;
+                    }
+            if (mate == -1) {
+                contradiction(vars[k], "");
+            } else if (mate != -2) {
+                vars[mate].addToKernel(j, aCause);
+                unionAddToTreat.remove(j);
+            }
+        }
+        set = setRemToTreat;
+        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+            if (union.getEnvelope().contain(j) && !union.getKernel().contain(j)) {
+                int mate = -1;
+                for (int i = 0; i < k; i++)
+                    if (vars[i].getEnvelope().contain(j)) {
+                        mate = i;
+                        break;
+                    }
+                if (mate == -1)
+                    vars[k].removeFromEnvelope(j, aCause);
+            }
+            setRemToTreat.remove(j);
+        }
+        // ------------------
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0)
+            for (int i = 0; i <= k; i++)
+                sdm[i].unfreeze();
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		sdm[idxVarInProp].freeze();
-		if(idxVarInProp<k){
-			sdm[idxVarInProp].forEach(setForced,EventType.ADD_TO_KER);
-			sdm[idxVarInProp].forEach(setRemoved,EventType.REMOVE_FROM_ENVELOPE);
-		}else{
-			sdm[idxVarInProp].forEach(unionForced,EventType.ADD_TO_KER);
-			sdm[idxVarInProp].forEach(unionRemoved,EventType.REMOVE_FROM_ENVELOPE);
-		}
-		sdm[idxVarInProp].unfreeze();
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        sdm[idxVarInProp].freeze();
+        if (idxVarInProp < k) {
+            sdm[idxVarInProp].forEach(setForced, EventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(setRemoved, EventType.REMOVE_FROM_ENVELOPE);
+        } else {
+            sdm[idxVarInProp].forEach(unionForced, EventType.ADD_TO_KER);
+            sdm[idxVarInProp].forEach(unionRemoved, EventType.REMOVE_FROM_ENVELOPE);
+        }
+        sdm[idxVarInProp].unfreeze();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet set;
-		for(int i=0;i<k;i++){
-			set = vars[i].getKernel();
-			for(int j=set.getFirstElement();j>=0;j=set.getNextElement())
-				if(!vars[k].getEnvelope().contain(j))
-					return ESat.FALSE;
-		}
-		set = vars[k].getKernel();
-		for(int j=set.getFirstElement();j>=0;j=set.getNextElement()){
-			int mate = -1;
-			for(int i=0;i<k;i++)
-				if(vars[i].getEnvelope().contain(j)){
-					mate=i;
-					break;
-				}
-			if(mate==-1)return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated())return ESat.TRUE;
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        ISet set;
+        for (int i = 0; i < k; i++) {
+            set = vars[i].getKernel();
+            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
+                if (!vars[k].getEnvelope().contain(j))
+                    return ESat.FALSE;
+        }
+        set = vars[k].getKernel();
+        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+            int mate = -1;
+            for (int i = 0; i < k; i++)
+                if (vars[i].getEnvelope().contain(j)) {
+                    mate = i;
+                    break;
+                }
+            if (mate == -1) return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) return ESat.TRUE;
+        return ESat.UNDEFINED;
+    }
 }

@@ -32,6 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -87,7 +88,7 @@ public class MemberTest {
                 int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
                 vars[0] = VariableFactory.enumerated("v", values[0], s);
 
-                Constraint[] cstrs = new Constraint[]{new Member(vars[0], values[1], s)};
+                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
@@ -96,7 +97,7 @@ public class MemberTest {
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 Assert.assertEquals(sol, unionSize(values[0], values[1]), "nb sol incorrect");
-                Assert.assertEquals(nod, sol == 0?0:sol * 2 - 1, "nb sol incorrect");
+                Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb sol incorrect");
             }
         }
     }
@@ -111,11 +112,11 @@ public class MemberTest {
                 IntVar[] vars = new IntVar[1];
                 int[][] values = DomainBuilder.buildFullDomains(2, 0, i, r, d, false);
                 int lb = values[0][0];
-                int ub = values[0][values[0].length-1];
+                int ub = values[0][values[0].length - 1];
 
                 vars[0] = VariableFactory.bounded("v", lb, ub, s);
 
-                Constraint[] cstrs = new Constraint[]{new Member(vars[0], values[1], s)};
+                Constraint[] cstrs = new Constraint[]{IntConstraintFactory.member(vars[0], values[1])};
 
                 s.post(cstrs);
                 s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
@@ -124,7 +125,7 @@ public class MemberTest {
                 long sol = s.getMeasures().getSolutionCount();
                 long nod = s.getMeasures().getNodeCount();
                 Assert.assertEquals(sol, unionSize(lb, ub, values[1]), "nb sol incorrect");
-                Assert.assertEquals(nod, sol == 0?0:sol * 2 - 1, "nb nod incorrect");
+                Assert.assertEquals(nod, sol == 0 ? 0 : sol * 2 - 1, "nb nod incorrect");
             }
         }
     }

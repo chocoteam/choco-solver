@@ -28,9 +28,7 @@ package samples;
 
 import choco.kernel.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.nary.Sum;
-import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -102,23 +100,19 @@ public class BACP extends AbstractProblem {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
-                        new ReifiedConstraint(x[i][j],
-                                new Arithmetic(course_period[j], "=", i, solver),
-                                new Arithmetic(course_period[j], "!=", i, solver),
-                                solver
-                        )
+                        IntConstraintFactory.reified(x[i][j], IntConstraintFactory.arithm(course_period[j], "=", i), IntConstraintFactory.arithm(course_period[j], "!=", i))
                 );
             }
 //            sum(i in courses) (x[p, i])>=courses_per_period_lb /\
-            solver.post(Sum.geq(x[i], courses_per_period_lb, solver));
+            solver.post(IntConstraintFactory.sum(x[i], ">=", courses_per_period_lb));
 //            sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            solver.post(Sum.leq(x[i], courses_per_period_ub, solver));
+            solver.post(IntConstraintFactory.sum(x[i], "<=", courses_per_period_ub));
 //            load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
-            solver.post(Sum.eq(x[i], course_load, load[i], 1, solver));
+            solver.post(IntConstraintFactory.scalar(x[i], course_load, "=", load[i], 1));
 //            load[p] >= load_per_period_lb /\
-            solver.post(new Arithmetic(load[i], ">=", load_per_period_lb, solver));
+            solver.post(IntConstraintFactory.arithm(load[i], ">=", load_per_period_lb));
 //            load[p] <= objective
-            solver.post(new Arithmetic(load[i], "<=", objective, solver));
+            solver.post(IntConstraintFactory.arithm(load[i], "<=", objective));
         }
 
         prerequisite(3, 1);
@@ -191,7 +185,7 @@ public class BACP extends AbstractProblem {
     }
 
     private void prerequisite(int a, int b) {
-        solver.post(new Arithmetic(course_period[b - 1], "<", course_period[a - 1], solver));
+        solver.post(IntConstraintFactory.arithm(course_period[b - 1], "<", course_period[a - 1]));
     }
 
 

@@ -32,7 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -46,30 +46,31 @@ import solver.variables.VariableFactory;
  */
 public class SimpleExplanationTest {
 
-	/**
-	 * Refactored by JG to have no static fields (for parallel execution)
-	 * @param enumerated
-	 */
+    /**
+     * Refactored by JG to have no static fields (for parallel execution)
+     *
+     * @param enumerated
+     */
     public static void test(boolean enumerated) {
-		// initialize
+        // initialize
         Solver s = new Solver();
         IEnvironment env = s.getEnvironment();
-		// set varriables
+        // set varriables
         IntVar[] vars = new IntVar[3];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = enumerated ? VariableFactory.enumerated("x" + i, 1, vars.length, s)
                     : VariableFactory.bounded("x" + i, 1, vars.length + 1, s);
         }
-		// post constraints
+        // post constraints
         Constraint[] lcstrs = new Constraint[3];
-        lcstrs[0] = ConstraintFactory.lt(vars[0], vars[1], s);
-        lcstrs[1] = ConstraintFactory.lt(vars[1], vars[2], s);
-        lcstrs[2] = ConstraintFactory.neq(vars[0], vars[1], s);
-		// configure Solver
+        lcstrs[0] = IntConstraintFactory.arithm(vars[0], "<", vars[1]);
+        lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
+        lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
+        // configure Solver
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
         s.post(lcstrs);
         s.set(strategy);
-		// solve
+        // solve
         s.findSolution();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 1, "nb sol incorrect");

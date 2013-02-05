@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import samples.nqueen.NQueenBinary;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.variables.IntVar;
@@ -142,7 +142,7 @@ public class SerializableTest {
     public void testConstraint() {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("v", 1, 10, s);
-        Constraint c = ConstraintFactory.eq(var, 0, s);
+        Constraint c = IntConstraintFactory.arithm(var, "=", 0);
         File file = null;
         try {
             file = write(c);
