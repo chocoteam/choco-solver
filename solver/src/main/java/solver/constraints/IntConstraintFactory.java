@@ -861,6 +861,23 @@ public enum IntConstraintFactory {
 
 
     /**
+     * Ensures that :
+     * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; CAPA
+     * <br/>- OCCURRENCES[i] * ENERGY[i] = POWER
+     * <br/>and maximizing the value of POWER.
+     *
+     * @param OCCURRENCES number of occurrences of an item
+     * @param CAPA        capacity of the knapsack
+     * @param POWER       variable to maximize
+     * @param WEIGHT      weight of each item
+     * @param ENERGY      energy of each item
+     */
+    public static Knapsack knapsack(IntVar[] OCCURRENCES, IntVar CAPA, IntVar POWER,
+                                    int[] WEIGHT, int[] ENERGY) {
+        return new Knapsack(OCCURRENCES, CAPA, POWER, WEIGHT, ENERGY, CAPA.getSolver());
+    }
+
+    /**
      * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection
      * VARS<sub>i</sub> is lexicographically strictly less than than VARS<sub>i+1</sub>
      *

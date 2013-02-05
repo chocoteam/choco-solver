@@ -114,7 +114,7 @@ public class Knapsack extends AbstractProblem {
 
         solver.post(c_size);
         solver.post(c_energy);
-        solver.post(new solver.constraints.nary.Knapsack(objects, scalar, power, volumes, energies, solver));
+        solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 
     @Override
