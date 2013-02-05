@@ -53,9 +53,9 @@ public class NQueenGlobal extends AbstractNQueen {
             diag2[i] = Views.offset(vars[i], -i);
         }
 
-        solver.post(IntConstraintFactory.alldifferent_bc(vars));
-        solver.post(IntConstraintFactory.alldifferent_bc(diag1));
-        solver.post(IntConstraintFactory.alldifferent_bc(diag2));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
     }
 
     @Override

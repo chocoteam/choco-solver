@@ -180,7 +180,7 @@ public class CPVizTest {
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
         solver.post(IntConstraintFactory.arithm(S, "!=", 0));
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
-        solver.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{S, E, N, D, M, O, R, Y}));
+        solver.post(IntConstraintFactory.alldifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
 
 
         IntVar[] ALL = new IntVar[]{
@@ -259,7 +259,7 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(IntConstraintFactory.alldifferent_bc(ArrayUtils.flatten(vars)));
+        s.post(IntConstraintFactory.alldifferent(ArrayUtils.flatten(vars), "BC"));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -302,7 +302,7 @@ public class CPVizTest {
         final int ms = n * (n * n + 1) / 2;
         IntVar[][] vars = VariableFactory.enumeratedMatrix("v", n, n, 1, ub, s);
         // All cells of the matrix must be different
-        s.post(IntConstraintFactory.alldifferent_bc(ArrayUtils.flatten(vars)));
+        s.post(IntConstraintFactory.alldifferent(ArrayUtils.flatten(vars), "BC"));
         final IntVar[] varDiag1 = new IntVar[n];
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
@@ -348,7 +348,7 @@ public class CPVizTest {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
             solver.post(IntConstraintFactory.channeling(bool[i], var[i]));
         }
-        solver.post(IntConstraintFactory.alldifferent_bc(var));
+        solver.post(IntConstraintFactory.alldifferent(var, "BC"));
 
         Visualization visu = new Visualization("BinaryMatrix", solver, dir + "/out");
 
@@ -463,7 +463,7 @@ public class CPVizTest {
         int[] low = new int[]{0, 1, 0};
         int[] up = new int[]{1, 2, 1};
 
-        s.post(IntConstraintFactory.global_cardinality_low_up_bc(X, values, low, up, false));
+        s.post(IntConstraintFactory.global_cardinality_low_up(X, values, low, up, false, "BC"));
 
         Visualization visu = new Visualization("Gcc", s, dir + "/out");
         visu.createTree();

@@ -51,6 +51,6 @@ public class GlobalCardinalityLowUpBuilder implements IBuilder {
         int[] values = exps.get(1).toIntArray();
         int[] low = exps.get(2).toIntArray();
         int[] up = exps.get(3).toIntArray();
-        return IntConstraintFactory.global_cardinality_low_up_ac(vars, values, low, up, false);
+        return IntConstraintFactory.global_cardinality_low_up(vars, values, low, up, false, "AC");
     }
 }

@@ -85,7 +85,7 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(IntConstraintFactory.alldifferent_bc(vars));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
 
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);

@@ -78,7 +78,7 @@ public class Photo extends AbstractProblem {
             solver.post(IntConstraintFactory.reified(viols[i], IntConstraintFactory.sum(new IntVar[]{dist[i]}, ">=", 2), IntConstraintFactory.sum(new IntVar[]{dist[i]}, "<=", 1)));
         }
         solver.post(IntConstraintFactory.sum(viols, "=", violations));
-        solver.post(IntConstraintFactory.alldifferent_bc(positions));
+        solver.post(IntConstraintFactory.alldifferent(positions, "BC"));
         solver.post(IntConstraintFactory.arithm(positions[1], ">", positions[0]));
     }
 

@@ -32,6 +32,8 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.globalcardinality.GlobalCardinality;
+import solver.constraints.nary.globalcardinality.GlobalCardinalityLowUp;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -59,7 +61,7 @@ public class BoundGlobalCardinlityTest {
         for (int i = 0; i < values.length; i++) {
             values[i] = i;
         }
-        solver.post(IntConstraintFactory.global_cardinality_bc(vars, values, card, false));
+        solver.post(IntConstraintFactory.global_cardinality(vars, values, card, false, "BC"));
 
         vars[0].instantiateTo(0, Cause.Null);
         vars[1].instantiateTo(1, Cause.Null);
@@ -91,7 +93,7 @@ public class BoundGlobalCardinlityTest {
             {
                 IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
                 IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
-                solver.post(IntConstraintFactory.global_cardinality_bc(vars, values, cards, false));
+                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false, "BC"));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(StrategyFactory.presetI(ArrayUtils.append(vars, cards), solver.getEnvironment()));
             }
@@ -131,7 +133,7 @@ public class BoundGlobalCardinlityTest {
             }
             {
                 IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
-                solver.post(IntConstraintFactory.global_cardinality_low_up_bc(vars, values, min, max, false));
+                solver.post(IntConstraintFactory.global_cardinality_low_up(vars, values, min, max, false, "BC"));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
             }

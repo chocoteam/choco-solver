@@ -210,7 +210,7 @@ public class SOP {
                 }
             }
         }
-        solver.post(IntConstraintFactory.alldifferent_ac(pos));
+        solver.post(IntConstraintFactory.alldifferent(pos, "AC"));
         gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
         if (config.get(rg)) {
             gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));

@@ -91,7 +91,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = IntConstraintFactory.alldifferent_bc(vars);
+                cstrs[i] = IntConstraintFactory.alldifferent(vars, "BC");
             }
 
             s.post(cstrs);

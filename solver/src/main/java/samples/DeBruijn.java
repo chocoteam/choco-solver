@@ -152,7 +152,7 @@ public class DeBruijn {
 
 
         // All values in x should be different
-        s.post(IntConstraintFactory.alldifferent_bc(x));
+        s.post(IntConstraintFactory.alldifferent(x, "BC"));
 
         // Symmetry breaking: the minimum value in x should be the
         // first element.

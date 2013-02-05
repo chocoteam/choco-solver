@@ -34,7 +34,6 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.NValues;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -177,7 +176,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -198,7 +197,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.alldifferent_bc(vars);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "BC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -219,7 +218,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -240,7 +239,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -271,7 +270,7 @@ public interface Modeler {
                 cards[i] = VariableFactory.enumerated("c_" + i, domains[i + n / 2], s);
                 if (map != null) map.put(domains[i + n / 2], cards[i]);
             }
-            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, closed, oncards);
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, closed, oncards ? "AC_ON_CARDS" : "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -500,7 +499,7 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s);
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC", "at_least_AC", "at_most_greedy");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -525,7 +524,7 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtMost_BC);
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -550,7 +549,7 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtLeast_AC);
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_least_AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -575,7 +574,7 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtMost_GreedyGraph);
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_greedy");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -600,7 +599,7 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, new NValues.Type[]{});
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -630,7 +629,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
 
-            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, false, true);
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, false, "AC_ON_CARDS");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -660,7 +659,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
 
-            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, false, false);
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, false, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -693,7 +692,7 @@ public interface Modeler {
             for (int i = 0; i < values.length; i++) {
                 up[i] = 1;
             }
-            Constraint ctr = IntConstraintFactory.global_cardinality_low_up_ac(vars, values, low, up, false);
+            Constraint ctr = IntConstraintFactory.global_cardinality_low_up(vars, values, low, up, false, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

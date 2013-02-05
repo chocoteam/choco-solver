@@ -189,7 +189,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         }
         gc.addPropagators(new PropIntVarChanneling(integers, graph, gc, solver));
         if (bc) {
-            return IntConstraintFactory.alldifferent_bc(integers);
+            return IntConstraintFactory.alldifferent(integers, "BC");
         } else {
             return new AllDifferent(integers, solver, AllDifferent.Type.NEQS);
         }

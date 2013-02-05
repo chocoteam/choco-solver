@@ -377,14 +377,14 @@ public class ViewsTest {
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
                 ref.post(IntConstraintFactory.absolute(az, z));
-                ref.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{x, y, az}));
+                ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = Views.abs(Sum.var(x, Views.minus(y)));
-                solver.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{x, y, z}));
+                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
             }
             check(ref, solver, seed, true, true);
@@ -406,8 +406,8 @@ public class ViewsTest {
                     ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, "=", 0));
                     ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
-                ref.post(IntConstraintFactory.alldifferent_bc(x));
-                ref.post(IntConstraintFactory.alldifferent_bc(t));
+                ref.post(IntConstraintFactory.alldifferent(x, "BC"));
+                ref.post(IntConstraintFactory.alldifferent(t, "BC"));
                 ref.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
                 ref.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
                 ref.set(StrategyFactory.random(x, ref.getEnvironment(), seed));
@@ -418,8 +418,8 @@ public class ViewsTest {
                 for (int i = 0; i < k - 1; i++) {
                     t[i] = Views.abs(Sum.var(x[i + 1], Views.minus(x[i])));
                 }
-                solver.post(IntConstraintFactory.alldifferent_bc(x));
-                solver.post(IntConstraintFactory.alldifferent_bc(t));
+                solver.post(IntConstraintFactory.alldifferent(x, "BC"));
+                solver.post(IntConstraintFactory.alldifferent(t, "BC"));
                 solver.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
                 solver.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
                 solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));

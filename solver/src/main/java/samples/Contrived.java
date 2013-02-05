@@ -71,8 +71,8 @@ public class Contrived extends AbstractProblem {
         v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
         w = VariableFactory.boundedArray("v", l, 1, d, solver);
 
-        solver.post(IntConstraintFactory.alldifferent_bc(v));
-        solver.post(IntConstraintFactory.alldifferent_bc(w));
+        solver.post(IntConstraintFactory.alldifferent(v, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(w, "BC"));
         solver.post(IntConstraintFactory.arithm(v[3], "=", v[4]));
         solver.post(IntConstraintFactory.arithm(v[0], "=", w[0]));
         solver.post(IntConstraintFactory.arithm(v[1], "=", w[1]));

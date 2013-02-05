@@ -86,8 +86,8 @@ public class LatinSquare extends AbstractProblem {
             }
 //            solver.post(GlobalCardinality.make(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
 //            solver.post(GlobalCardinality.make(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
-            solver.post(IntConstraintFactory.global_cardinality_low_up_ac(row, values, low, up, false));
-            solver.post(IntConstraintFactory.global_cardinality_low_up_ac(col, values, low, up, false));
+            solver.post(IntConstraintFactory.global_cardinality_low_up(row, values, low, up, false, "AC"));
+            solver.post(IntConstraintFactory.global_cardinality_low_up(col, values, low, up, false, "AC"));
 //			check.addPropagators(new PropDomSize(row, check, solver));
 //			check.addPropagators(new PropDomSize(col,check,solver));
         }

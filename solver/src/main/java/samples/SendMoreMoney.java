@@ -64,7 +64,7 @@ public class SendMoreMoney extends AbstractProblem {
 
         solver.post(IntConstraintFactory.arithm(S, "!=", 0));
         solver.post(IntConstraintFactory.arithm(M, "!=", 0));
-        solver.post(IntConstraintFactory.alldifferent_bc(new IntVar[]{S, E, N, D, M, O, R, Y}));
+        solver.post(IntConstraintFactory.alldifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
 
 
         ALL = new IntVar[]{

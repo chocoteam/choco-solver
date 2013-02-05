@@ -78,8 +78,9 @@ public class NValues extends AbstractProblem {
         vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
         vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
         vars[3] = VariableFactory.enumerated("vars_3", new int[]{2, 3}, solver);
-        IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
-        solver.post(IntConstraintFactory.atmost_nvalues_greedy(nVal, vars));
+        IntVar nVal = VariableFactory.bounded("N_CC", 0, n, solver);
+        solver.post(IntConstraintFactory.nvalues(vars, nVal, "at_most_greedy"));
+        solver.post(IntConstraintFactory.arithm(nVal, "<=", k));
     }
 
     @Override

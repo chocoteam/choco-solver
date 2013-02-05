@@ -244,7 +244,7 @@ public class KTP_Graph_Bool {
         }
         // constraints
         Constraint gc = new Constraint(solver);
-        solver.post(IntConstraintFactory.alldifferent_ac(graph));
+        solver.post(IntConstraintFactory.alldifferent(graph, "AC"));
         gc.addPropagators(new PropNoSubtour(graph, solver, gc));
 //			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
         solver.post(gc);

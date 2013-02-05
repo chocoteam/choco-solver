@@ -210,7 +210,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality_bc(vars[t], values, cards[t], false));
+            solver.post(IntConstraintFactory.global_cardinality(vars[t], values, cards[t], false, "BC"));
         }
     }
 
@@ -228,7 +228,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality_low_up_bc(var, values, coverLB, coverUB, false));
+            solver.post(IntConstraintFactory.global_cardinality_low_up(var, values, coverLB, coverUB, false, "BC"));
         }
     }
 
@@ -308,7 +308,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
             }
-            solver.post(IntConstraintFactory.global_cardinality_bc(shifts[e], values, occurrences[e], false));
+            solver.post(IntConstraintFactory.global_cardinality(shifts[e], values, occurrences[e], false, "BC"));
         }
 
     }
@@ -380,7 +380,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 for (int i = 0; i < values.length; i++) {
                     values[i] = i;
                 }
-                solver.post(IntConstraintFactory.global_cardinality_low_up_bc(vars, values, lb, ub, false));
+                solver.post(IntConstraintFactory.global_cardinality_low_up(vars, values, lb, ub, false, "BC"));
             }
         }
 

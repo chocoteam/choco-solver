@@ -66,10 +66,10 @@ public class NQueenDualGlobal extends AbstractNQueen {
             solver.post(IntConstraintFactory.arithm(dualdiag1[i], "=", dualvars[i], "+", i));
             solver.post(IntConstraintFactory.arithm(dualdiag2[i], "=", dualvars[i], "-", i));
         }
-        solver.post(IntConstraintFactory.alldifferent_bc(diag1));
-        solver.post(IntConstraintFactory.alldifferent_bc(diag2));
-        solver.post(IntConstraintFactory.alldifferent_bc(dualdiag1));
-        solver.post(IntConstraintFactory.alldifferent_bc(dualdiag2));
+        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(dualdiag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(dualdiag2, "BC"));
 
         solver.post(IntConstraintFactory.channeling(vars, 1, dualvars, 1));
     }

@@ -52,9 +52,9 @@ public class GlobalCardinalityBuilder implements IBuilder {
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
         boolean ac = values.length <= 2 * vars.length;
         if (ac) {
-            return IntConstraintFactory.global_cardinality_ac(vars, values, cards, false, true);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, false, "AC_ON_CARDS");
         } else {
-            return IntConstraintFactory.global_cardinality_bc(vars, values, cards, false);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, false, "BC");
         }
     }
 }

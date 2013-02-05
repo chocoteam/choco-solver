@@ -57,9 +57,9 @@ public class GlobalCardinalityClosedBuilder implements IBuilder {
         // si nbVAL > 2*NBVAR => BC
         boolean ac = values.length <= 2 * vars.length;
         if (ac) {
-            return IntConstraintFactory.global_cardinality_ac(vars, values, cards, true, true);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, true, "AC_ON_CARDS");
         } else {
-            return IntConstraintFactory.global_cardinality_bc(vars, values, cards, true);
+            return IntConstraintFactory.global_cardinality(vars, values, cards, true, "BC");
         }
     }
 }

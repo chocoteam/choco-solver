@@ -206,7 +206,7 @@ public class CountTest {
             offsets[i] = newvs[i].getLB();
         }
         LargeRelation relation = new IterTuplesTable(tuples, offsets, sizes);
-        return IntConstraintFactory.table_ac32(newvs, relation);
+        return IntConstraintFactory.table(newvs, relation, "AC32");
     }
 
     /**

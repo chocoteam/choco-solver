@@ -75,8 +75,8 @@ public class CostasArrays extends AbstractProblem {
                 }
             }
         }
-        solver.post(IntConstraintFactory.alldifferent_ac(vars));
-        solver.post(IntConstraintFactory.alldifferent_ac(vectors));
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        solver.post(IntConstraintFactory.alldifferent(vectors, "AC"));
     }
 
     @Override

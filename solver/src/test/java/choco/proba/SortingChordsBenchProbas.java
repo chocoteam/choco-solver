@@ -119,7 +119,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
                 offsets[j] = vars[j].getLB();
             }
             LargeRelation relation = new IterTuplesTable(tuples_i, offsets, sizes);
-            this.cstrs[nbCstrs++] = IntConstraintFactory.table_ac32(vars, relation);
+            this.cstrs[nbCstrs++] = IntConstraintFactory.table(vars, relation, "AC32");
             this.tuples.add(tuples_i);
             //m.addConstraint(Choco.feasTupleAC(tuples, vars[0], vars[1], vars[2]));
         }

@@ -93,7 +93,7 @@ public class OpenStacks extends AbstractProblem {
     public void buildModel() {
         setUp();
         scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
-        solver.post(IntConstraintFactory.alldifferent_bc(scheds));
+        solver.post(IntConstraintFactory.alldifferent(scheds, "BC"));
         o = new IntVar[nc][np + 1];
         for (int i = 0; i < nc; i++) {
             o[i] = VariableFactory.enumeratedArray("o_" + i, np + 1, 0, norders[i], solver);

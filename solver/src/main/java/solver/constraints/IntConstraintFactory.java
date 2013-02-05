@@ -49,6 +49,8 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.globalcardinality.GlobalCardinality;
+import solver.constraints.nary.globalcardinality.GlobalCardinalityLowUp;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.propagators.extension.binary.BinRelation;
@@ -362,31 +364,36 @@ public enum IntConstraintFactory {
     //##################################################################################################################
 
     /**
-     * Ensures that all variables from VARS take a different value (Arc Consistency algorithm).
+     * Ensures that all variables from VARS take a different value.
+     * The consistency level should be chosen among "BC" and "AC".
+     * <p/>
+     * <b>BC</b>:
+     * <br/>
+     * Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
+     * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
+     * <p/>
+     * <b>AC</b>:
      * <br/>
      * Uses Regin algorithm
      * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      * per arc removed from the support.
      * Has a good average behavior in practice
      *
-     * @param VARS list of variables
+     * @param VARS        list of variables
+     * @param CONSISTENCY consistency level, among {"BC", "AC"}
+     *                    <p/>
+     *                    <b>BC</b>:
+     *                    Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
+     *                    A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
+     *                    <br/>
+     *                    <b>AC</b>:
+     *                    Uses Regin algorithm
+     *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
+     *                    per arc removed from the support.
+     *                    Has a good average behavior in practice
      */
-    public static AllDifferent alldifferent_ac(IntVar[] VARS) {
-        return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.AC);
-    }
-
-    /**
-     * Ensures that all variables from VARS take a different value (Bound Consistency algorithm).
-     * <br/>
-     * Based on: </br>
-     * "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
-     * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
-     * <br/>
-     *
-     * @param VARS list of variables
-     */
-    public static AllDifferent alldifferent_bc(IntVar[] VARS) {
-        return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.BC);
+    public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
+        return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
     }
 
     /**
@@ -409,49 +416,6 @@ public enum IntConstraintFactory {
      */
     public static Among among(IntVar NVAR, IntVar[] VARS, int[] VALUES) {
         return new Among(NVAR, VARS, VALUES, NVAR.getSolver());
-    }
-
-    /**
-     * The number of distinct values taken by the variables of the collection VARS is greater than or equal to NVAL.
-     * Performs Generalized Arc Consistency based on Maximum Bipartite Matching.
-     * The worst case time complexity is O(nm) but this is very pessimistic.
-     * In practice it is more like O(m) where m is the number of variable-value pairs.
-     *
-     * @param NVAL a variable
-     * @param VARS a vector of variables
-     */
-    public static AtLeastNValues atleast_nvalues(IntVar NVAL, IntVar[] VARS) {
-        return new AtLeastNValues(NVAL, VARS, NVAL.getSolver());
-    }
-
-    /**
-     * The number of distinct values taken by the variables of the collection VARS is less than or equal to NVAL.
-     * <br/>
-     * Performs Bound Consistency in O(n+d) with
-     * n = |VARS|
-     * d = maxValue - minValue (from initial domains)
-     * <p/>
-     * => very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
-     * =>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
-     *
-     * @param NVAL a variable
-     * @param VARS a vector of variables
-     */
-    public static AtMostNValues atmost_nvalues(IntVar NVAL, IntVar[] VARS) {
-        return new AtMostNValues(VARS, NVAL, NVAL.getSolver(), AtMostNValues.Algo.BC);
-    }
-
-    /**
-     * The number of distinct values taken by the variables of the collection VARS is less than or equal to NVAL.
-     * <br/>
-     * Performs Greedy algorithm.
-     * No level of consistency but better than BC in general (for enumerated domains with holes)
-     *
-     * @param NVAL a variable
-     * @param VARS a vector of variables
-     */
-    public static AtMostNValues atmost_nvalues_greedy(IntVar NVAL, IntVar[] VARS) {
-        return new AtMostNValues(VARS, NVAL, NVAL.getSolver(), AtMostNValues.Algo.Greedy);
     }
 
     /**
@@ -643,14 +607,19 @@ public enum IntConstraintFactory {
     /**
      * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
      * <br/>
-     * Ensures Bound Consistency.
+     * The level of consistency should be chosen among BC and AC.
+     * <p/>
+     * <b>BC</b>: ensures Bound Consistency,
+     * <br/><b>AC</b>: ensures Arc Consistency.
      *
      * @param VARS        collection of variables
      * @param VALUES      collection of constrained values
      * @param OCCURRENCES collection of cardinality variables
      * @param CLOSED      restricts domains of VARS to VALUES if set to true
+     * @param CONSISTENCY consistency level, among {"BC", "AC"}
      */
-    public static GlobalCardinality global_cardinality_bc(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
+    public static GlobalCardinality global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED,
+                                                       String CONSISTENCY) {
         Solver solver = VARS[0].getSolver();
 
         TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
@@ -687,23 +656,32 @@ public enum IntConstraintFactory {
                 }
             }
         }
-        return new GlobalCardinality(VARS, values, cards, GlobalCardinality.Consistency.BC, solver);
+        return new GlobalCardinality(VARS, values, cards, GlobalCardinality.Consistency.valueOf(CONSISTENCY), solver);
 
     }
 
     /**
      * Each values VALUES[i] should be taken by at least LOWS[i] and at most UPS[i] variables of VARS.
      * <br/>
+     * The <code>CONSISTENCY</code> should be chosen among "BC" and "AC".
+     * <p/>
+     * <b>BC</b>:
      * Ensures Bound Consistency.
+     * Based on:
+     * C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
+     * An efficient bounds consistency algorithm for the global cardinality constraint. CP-2003.
+     * <p/>
+     * <b>AC</b>: Ensures Arc-Consistency.
      *
-     * @param VARS   collection of variables
-     * @param VALUES collection of constrained values
-     * @param LOWS   minimum occurrences of each values of VALUES
-     * @param UPS    maximum occurrences of each values of VALUES
-     * @param CLOSED restricts domains of VARS to VALUES if set to true
+     * @param VARS        collection of variables
+     * @param VALUES      collection of constrained values
+     * @param LOWS        minimum occurrences of each values of VALUES
+     * @param UPS         maximum occurrences of each values of VALUES
+     * @param CLOSED      restricts domains of VARS to VALUES if set to true
+     * @param CONSISTENCY consistency level, among {"BC", "AC"}
      */
-    public static GlobalCardinalityLowUp global_cardinality_low_up_bc(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
-                                                                      boolean CLOSED) {
+    public static GlobalCardinalityLowUp global_cardinality_low_up(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
+                                                                   boolean CLOSED, String CONSISTENCY) {
         Solver solver = VARS[0].getSolver();
 
         TIntObjectHashMap<int[]> map = new TIntObjectHashMap<int[]>(VALUES.length);
@@ -745,120 +723,10 @@ public enum IntConstraintFactory {
                 }
             }
         }
-        return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC, GlobalCardinalityLowUp.Consistency.BC, solver);
+        return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC,
+                GlobalCardinalityLowUp.Consistency.valueOf(CONSISTENCY), solver);
 
     }
-
-    /**
-     * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
-     * <br/>
-     * Ensures Arc Consistency.
-     *
-     * @param VARS        collection of variables
-     * @param VALUES      collection of constrained values
-     * @param OCCURRENCES collection of cardinality variables
-     * @param CLOSED      restricts domains of VARS to VALUES if set to true
-     * @param AC_ON_CARDS ensures AC on cards too, usually faster if false
-     */
-    public static GlobalCardinality global_cardinality_ac(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED, boolean AC_ON_CARDS) {
-        Solver solver = VARS[0].getSolver();
-
-        TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
-        for (int i = 0; i < VALUES.length; i++) {
-            map.put(VALUES[i], OCCURRENCES[i]);
-        }
-
-        int n = VARS.length;
-        Arrays.sort(VALUES);
-        int min = VALUES[0];
-        int max = VALUES[VALUES.length - 1];
-
-        for (int v = 0; v < VARS.length; v++) {
-            IntVar var = VARS[v];
-            if (min > var.getLB()) {
-                min = var.getLB();
-            }
-            if (max < var.getUB()) {
-                max = var.getUB();
-            }
-        }
-
-        IntVar[] cards = new IntVar[max - min + 1];
-        int[] values = new int[max - min + 1];
-        for (int i = min; i <= max; i++) {
-            values[i - min] = i;
-            if (map.containsKey(i)) {
-                cards[i - min] = map.get(i);
-            } else {
-                if (CLOSED) {
-                    cards[i - min] = Views.fixed(0, solver);
-                } else {
-                    cards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
-                }
-            }
-        }
-        return new GlobalCardinality(VARS, values, cards,
-                AC_ON_CARDS ? GlobalCardinality.Consistency.AC_ON_CARDS : GlobalCardinality.Consistency.AC, solver);
-
-    }
-
-    /**
-     * Each values VALUES[i] should be taken by at least LOWS[i] and at most UPS[i] variables of VARS.
-     * <br/>
-     * Ensures Arc Consistency.
-     *
-     * @param VARS   collection of variables
-     * @param VALUES collection of constrained values
-     * @param LOWS   minimum occurrences of each values of VALUES
-     * @param UPS    maximum occurrences of each values of VALUES
-     * @param CLOSED restricts domains of VARS to VALUES if set to true
-     */
-    public static GlobalCardinalityLowUp global_cardinality_low_up_ac(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
-                                                                      boolean CLOSED) {
-        Solver solver = VARS[0].getSolver();
-
-        TIntObjectHashMap<int[]> map = new TIntObjectHashMap<int[]>(VALUES.length);
-        for (int i = 0; i < VALUES.length; i++) {
-            map.put(VALUES[i], new int[]{LOWS[i], UPS[i]});
-        }
-
-        int n = VARS.length;
-        Arrays.sort(VALUES);
-        int min = VALUES[0];
-        int max = VALUES[VALUES.length - 1];
-
-        for (int v = 0; v < VARS.length; v++) {
-            IntVar var = VARS[v];
-            if (min > var.getLB()) {
-                min = var.getLB();
-            }
-            if (max < var.getUB()) {
-                max = var.getUB();
-            }
-        }
-
-        int[] mOCC = new int[max - min + 1];
-        int[] MOCC = new int[max - min + 1];
-        int[] values = new int[max - min + 1];
-        for (int i = min; i <= max; i++) {
-            values[i - min] = i;
-            if (map.containsKey(i)) {
-                int[] lu = map.get(i);
-                mOCC[i - min] = lu[0];
-                MOCC[i - min] = lu[1];
-            } else {
-                if (CLOSED) {
-                    mOCC[i - min] = 0;
-                    MOCC[i - min] = 0;
-                } else {
-                    mOCC[i - min] = 0;
-                    MOCC[i - min] = n;
-                }
-            }
-        }
-        return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC, GlobalCardinalityLowUp.Consistency.AC, solver);
-    }
-
 
     /**
      * Ensures that :
@@ -991,6 +859,27 @@ public enum IntConstraintFactory {
      */
     public static NoSubTours no_sub_tours(IntVar[] VARS) {
         return new NoSubTours(VARS, VARS[0].getSolver());
+    }
+
+    /**
+     * Let N be the number of distinct values assigned to the variables of the VARS collection.
+     * Enforce condition N = NVALUES to hold.
+     * <p/>
+     * This embeds a light propagator by default.
+     * Additional filtering algorithms can be added.
+     *
+     * @param VARS    collection of variables
+     * @param NVALUES limit variable
+     * @param ALGOS   additional filtering algorithms, among {"at_most_BC","at_least_AC","at_most_greedy"}
+     */
+    public static NValues nvalues(IntVar[] VARS, IntVar NVALUES, String... ALGOS) {
+
+        NValues.Type[] types = new NValues.Type[ALGOS.length];
+        for (int i = 0; i < ALGOS.length; i++) {
+            types[i] = NValues.Type.valueOf(ALGOS[i]);
+        }
+
+        return new NValues(VARS, NVALUES, NVALUES.getSolver(), types);
     }
 
     /**
@@ -1142,46 +1031,37 @@ public enum IntConstraintFactory {
         return Sum.build(VARS, COEFFS, SUM, COEFF, Operator.get(OP), VARS[0].getSolver());
     }
 
+
     /**
-     * Create a table constraint (AC2001: Arc Consistency version 2001) over a couple of variables VAR1 and VAR2, .
+     * Create a table constraint over a couple of variables VAR1 and VAR2, .
+     * <p/>
+     * The <code>ALGORITHM</code> should be chosen among {"AC2201"}.
+     * <p/>
+     * <b>AC2001</b>: Arc Consistency version 2001.
      *
-     * @param VAR1     first variable
-     * @param VAR2     second variable
-     * @param relation the relation between the two variables
+     * @param VAR1      first variable
+     * @param VAR2      second variable
+     * @param RELATION  the relation between the two variables
+     * @param ALGORITHM to choose among {"AC2001"}
      */
-    public static BinCSP table_ac2001(IntVar VAR1, IntVar VAR2, BinRelation relation) {
-        return new BinCSP(VAR1, VAR2, relation);
+    public static BinCSP table(IntVar VAR1, IntVar VAR2, BinRelation RELATION, String ALGORITHM) {
+        return new BinCSP(VAR1, VAR2, RELATION, BinCSP.Algorithm.valueOf(ALGORITHM));
     }
 
     /**
-     * Create a table constraint (AC2001: Arc Consistency version 2001) over a list of variables VARS.
+     * Create a table constraint, with the specified algorithm defined ALGORITHM
+     * <p/>
+     * <b>AC2001</b>: Arc Consistency version 2001,
+     * <br/>
+     * <b>AC32</b>: Arc Consistency version 32,
+     * <br/>
+     * <b>FC</b>: Forward Checking.
      *
-     * @param VARS     first variable
-     * @param relation the relation between the two variables
+     * @param VARS      first variable
+     * @param RELATION  the relation between the two variables
+     * @param ALGORITHM to choose among {"AC2001", "AC32", "FC"}
      */
-    public static LargeCSP table_ac2001(IntVar[] VARS, LargeRelation relation) {
-        return new LargeCSP(VARS, relation, LargeCSP.Type.AC2001, VARS[0].getSolver());
+    public static LargeCSP table(IntVar[] VARS, LargeRelation RELATION, String ALGORITHM) {
+        return new LargeCSP(VARS, RELATION, LargeCSP.Type.valueOf(ALGORITHM), VARS[0].getSolver());
     }
-
-    /**
-     * Create a table constraint (AC32: Arc Consistency version 32) over a list of variables VARS.
-     *
-     * @param VARS     first variable
-     * @param relation the relation between the two variables
-     */
-    public static LargeCSP table_ac32(IntVar[] VARS, LargeRelation relation) {
-        return new LargeCSP(VARS, relation, LargeCSP.Type.AC32, VARS[0].getSolver());
-    }
-
-    /**
-     * Create a table constraint (FC: Forward Checking) over a list of variables VARS.
-     *
-     * @param VARS     first variable
-     * @param relation the relation between the two variables
-     */
-    public static LargeCSP table_fc(IntVar[] VARS, LargeRelation relation) {
-        return new LargeCSP(VARS, relation, LargeCSP.Type.FC, VARS[0].getSolver());
-    }
-
-
 }

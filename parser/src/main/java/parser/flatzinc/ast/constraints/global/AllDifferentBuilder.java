@@ -51,6 +51,6 @@ public class AllDifferentBuilder implements IBuilder {
         if (vars.length == 1) {
             return null;
         }
-        return IntConstraintFactory.alldifferent_bc(vars);
+        return IntConstraintFactory.alldifferent(vars, "BC");
     }
 }

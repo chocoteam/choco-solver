@@ -70,7 +70,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
         List<Constraint> ADS = new ArrayList<Constraint>();
 
-        Constraint cc = IntConstraintFactory.alldifferent_bc(vars);
+        Constraint cc = IntConstraintFactory.alldifferent(vars, "BC");
         solver.post(cc);
         ADS.add(cc);
 
@@ -93,12 +93,12 @@ public class OrthoLatinSquare extends AbstractProblem {
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             System.arraycopy(square1, i * m, ry, 0, m);
-            cc = IntConstraintFactory.alldifferent_bc(ry);
+            cc = IntConstraintFactory.alldifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
             ry = new IntVar[m];
             System.arraycopy(square2, i * m, ry, 0, m);
-            cc = IntConstraintFactory.alldifferent_bc(ry);
+            cc = IntConstraintFactory.alldifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
         }
@@ -107,14 +107,14 @@ public class OrthoLatinSquare extends AbstractProblem {
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            cc = IntConstraintFactory.alldifferent_bc(cy);
+            cc = IntConstraintFactory.alldifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            cc = IntConstraintFactory.alldifferent_bc(cy);
+            cc = IntConstraintFactory.alldifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
         }

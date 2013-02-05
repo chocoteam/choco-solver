@@ -160,7 +160,7 @@ public class ReifiedTest {
             vars1[j] = VariableFactory.enumerated("v_" + j, values[j], s1);
         }
 
-        s1.post(IntConstraintFactory.alldifferent_ac(vars1));
+        s1.post(IntConstraintFactory.alldifferent(vars1, "AC"));
 
         s1.set(StrategyFactory.presetI(vars1, s1.getEnvironment()));
         return s1;

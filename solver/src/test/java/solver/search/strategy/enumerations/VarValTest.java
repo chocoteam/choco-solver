@@ -476,7 +476,7 @@ public class VarValTest {
         }
         IntVar[][] tvars = ArrayUtils.transpose(vars);
         for (int j = 0; j < r; j++) {
-            solver.post(IntConstraintFactory.alldifferent_bc(tvars[j]));
+            solver.post(IntConstraintFactory.alldifferent(tvars[j], "BC"));
         }
 
 //        solver.set(StrategyFactory.presetI(ArrayUtils.flatten(vars), solver.getEnvironment()));

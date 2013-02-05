@@ -180,7 +180,7 @@ public class AirPlaneLanding extends AbstractProblem {
         solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t, 1));
         solver.post(IntConstraintFactory.scalar(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, "=", 0));
 
-        solver.post(IntConstraintFactory.alldifferent_bc(planes));
+        solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {

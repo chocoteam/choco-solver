@@ -127,7 +127,7 @@ public class Partition extends AbstractProblem {
         solver.post(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
         solver.post(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
 
-        heavy[2] = IntConstraintFactory.alldifferent_bc(xy);
+        heavy[2] = IntConstraintFactory.alldifferent(xy, "BC");
         solver.post(heavy[2]);
 
         vars = xy;

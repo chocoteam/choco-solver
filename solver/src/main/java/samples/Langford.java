@@ -90,7 +90,7 @@ public class Langford extends AbstractProblem {
         }
         lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
         solver.post(lights);
-        alldiff = IntConstraintFactory.alldifferent_bc(position);
+        alldiff = IntConstraintFactory.alldifferent(position, "BC");
         solver.post(alldiff);
     }
 

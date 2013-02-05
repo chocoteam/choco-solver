@@ -99,7 +99,7 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.post(IntConstraintFactory.alldifferent_bc(tvars));
+            solver.post(IntConstraintFactory.alldifferent(tvars, "BC"));
         }
     }
 

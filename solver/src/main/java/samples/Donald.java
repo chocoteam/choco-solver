@@ -70,7 +70,7 @@ public class Donald extends AbstractProblem {
         t = VariableFactory.bounded("t", 0, 9, solver);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(IntConstraintFactory.alldifferent_bc(letters));
+        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
         solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
                 g, e, r, a, l, d,
                 r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,

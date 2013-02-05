@@ -58,7 +58,7 @@ public class BigLeq extends AbstractProblem {
         for (int i = 0; i < m - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }
-        solver.post(IntConstraintFactory.alldifferent_bc(vars));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }
 
     @Override

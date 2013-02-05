@@ -69,7 +69,7 @@ public class NumericalSequence extends AbstractProblem {
             // U[n + 1 - i] = n+ 1 - U[i]
             solver.post(IntConstraintFactory.arithm(U[n - 1 - i], "+", U[i], "=", n + 1));
         }
-        solver.post(IntConstraintFactory.alldifferent_bc(U));
+        solver.post(IntConstraintFactory.alldifferent(U, "BC"));
     }
 
     @Override

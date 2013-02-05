@@ -60,10 +60,7 @@ public class GlobalCardinalityTest {
 
         IntVar[] vars = new IntVar[]{peter, paul, mary, john, bob, mike, julia};
 
-        Constraint gcc = IntConstraintFactory.global_cardinality_low_up_bc(vars,
-                new int[]{0, 1, 2, 3, 4},
-                new int[]{1, 1, 1, 0, 0},
-                new int[]{2, 2, 1, 2, 2}, false);
+        Constraint gcc = IntConstraintFactory.global_cardinality_low_up(vars, new int[]{0, 1, 2, 3, 4}, new int[]{1, 1, 1, 0, 0}, new int[]{2, 2, 1, 2, 2}, false, "BC");
 
         solver.post(gcc);
         try {
@@ -92,11 +89,7 @@ public class GlobalCardinalityTest {
 
         IntVar[] vars = new IntVar[]{peter, paul, mary, john, bob, mike, julia};
 
-        Constraint gcc = IntConstraintFactory.global_cardinality_low_up_ac(vars,
-                new int[]{0, 1, 2, 3, 4},
-                new int[]{1, 1, 1, 0, 0},
-                new int[]{2, 2, 1, 2, 2},
-                false);
+        Constraint gcc = IntConstraintFactory.global_cardinality_low_up(vars, new int[]{0, 1, 2, 3, 4}, new int[]{1, 1, 1, 0, 0}, new int[]{2, 2, 1, 2, 2}, false, "AC");
         solver.post(gcc);
 
         try {
@@ -132,10 +125,7 @@ public class GlobalCardinalityTest {
                 VariableFactory.bounded("card3", 0, 2, solver),
                 VariableFactory.bounded("card4", 0, 2, solver)};
 
-        Constraint gcc = IntConstraintFactory.global_cardinality_ac(vars,
-                new int[]{0, 1, 2, 3, 4},
-                cards,
-                false, false);
+        Constraint gcc = IntConstraintFactory.global_cardinality(vars, new int[]{0, 1, 2, 3, 4}, cards, false, "AC");
         solver.post(gcc);
 
         try {

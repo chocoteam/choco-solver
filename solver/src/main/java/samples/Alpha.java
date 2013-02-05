@@ -79,7 +79,7 @@ public class Alpha extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(extract("theme"), "=", 72));
         solver.post(IntConstraintFactory.sum(extract("violin"), "=", 100));
         solver.post(IntConstraintFactory.sum(extract("waltz"), "=", 34));
-        solver.post(IntConstraintFactory.alldifferent_bc(letters));
+        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
     }
 
     private IntVar[] extract(String word) {

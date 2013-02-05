@@ -275,7 +275,7 @@ public class ATSP {
             } else {
                 gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
             }
-            solver.post(IntConstraintFactory.alldifferent_bc(pos));
+            solver.post(IntConstraintFactory.alldifferent(pos, "BC"));
         }
         if (khun) {
 //			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);

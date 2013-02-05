@@ -47,7 +47,7 @@ public class NQueenBinaryGlobal extends AbstractNQueen {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
         }
 
-        solver.post(IntConstraintFactory.alldifferent_bc(vars));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;

@@ -78,7 +78,7 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.post(IntConstraintFactory.alldifferent_bc(kid_gift));
+        solver.post(IntConstraintFactory.alldifferent(kid_gift, "BC"));
         for (int i = 0; i < n_kids; i++) {
             solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0));
         }

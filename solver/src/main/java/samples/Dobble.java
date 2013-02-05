@@ -43,7 +43,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.nary.MaxOfAList;
-import solver.constraints.nary.NValues;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.channeling.PropGraphRelation;
@@ -74,7 +73,7 @@ public class Dobble {
         boolean useGraphs = true;
         boolean useGlobalNValue = false;
         // NValue constraint parameters
-        NValues.Type[] types = new NValues.Type[]{NValues.Type.AtLeast_AC};//,NValues.Type.AtMost_BC};
+        String[] types = new String[]{"at_least_AC"};//,"at_most_BC"};
         long timeLimit = 60 * 1000;// (in ms)
         // model and solve the Dobble problem
         solverDobble(nbCards, nbSymbols, nbSymbolsPerCard, useGraphs, useGlobalNValue, types, timeLimit);
@@ -82,7 +81,7 @@ public class Dobble {
 
     public static void solverDobble(int nbCards, int nbSymbols, int nbSymbolsPerCard,
                                     boolean useGraphs, boolean useGlobalNValue,
-                                    NValues.Type[] types, long timeLimit) {
+                                    String[] types, long timeLimit) {
         // solver
         Solver solver = new Solver();
         // variables
@@ -96,14 +95,14 @@ public class Dobble {
         // constraints
         for (int i = 0; i < nbCards; i++) {
             // Symbols on the same card are different
-            solver.post(IntConstraintFactory.alldifferent_ac(cardSymbols[i]));
+            solver.post(IntConstraintFactory.alldifferent(cardSymbols[i], "AC"));
             for (int j = 0; j < nbSymbolsPerCard - 1; j++) { // symmetry breaking
                 solver.post(IntConstraintFactory.arithm(cardSymbols[i][j], "<", cardSymbols[i][j + 1]));
             }
             for (int j = i + 1; j < nbCards; j++) {// for each card pair
                 // there should be exactly one symbol in common
                 IntVar[] flatIJ = ArrayUtils.append(cardSymbols[i], cardSymbols[j]);
-                solver.post(new NValues(flatIJ, nbSymbolsPerCardPair, solver, types));
+                solver.post(IntConstraintFactory.nvalues(flatIJ, nbSymbolsPerCardPair, types));
                 if (useGraphs) {// graph-based implied filtering
                     addCardsPairGraphNValues(solver, flatIJ, nbSymbolsPerCardPair);
                 }
@@ -113,7 +112,7 @@ public class Dobble {
             solver.post(IntConstraintFactory.arithm(cardSymbols[i][0], "<=", cardSymbols[i + 1][0]));
         }
         if (useGlobalNValue) { // nbUsedSymbols symbols are used in total
-            solver.post(new NValues(flatVars, nbUsedSymbols, solver, types));
+            solver.post(IntConstraintFactory.nvalues(flatVars, nbUsedSymbols, types));
             if (useGraphs) {// graph-based implied filtering
                 addGlobalGraphNValues(solver, flatVars, nbUsedSymbols, nbSymbolsPerCard);
             }
