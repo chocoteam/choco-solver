@@ -26,6 +26,8 @@
  */
 package solver.constraints;
 
+import choco.kernel.common.util.tools.StringUtils;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Solver;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.DistanceXYC;
@@ -63,6 +65,9 @@ import solver.constraints.unary.NotMember;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
+
+import java.util.Arrays;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -633,6 +638,227 @@ public enum IntConstraintFactory {
     public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
         return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
     }
+
+
+    /**
+     * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
+     * <br/>
+     * Ensures Bound Consistency.
+     *
+     * @param VARS        collection of variables
+     * @param VALUES      collection of constrained values
+     * @param OCCURRENCES collection of cardinality variables
+     * @param CLOSED      restricts domains of VARS to VALUES if set to true
+     */
+    public static GlobalCardinality global_cardinality_bc(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
+        Solver solver = VARS[0].getSolver();
+
+        TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
+        for (int i = 0; i < VALUES.length; i++) {
+            map.put(VALUES[i], OCCURRENCES[i]);
+        }
+
+        int n = VARS.length;
+        Arrays.sort(VALUES);
+        int min = VALUES[0];
+        int max = VALUES[VALUES.length - 1];
+
+        for (int v = 0; v < VARS.length; v++) {
+            IntVar var = VARS[v];
+            if (min > var.getLB()) {
+                min = var.getLB();
+            }
+            if (max < var.getUB()) {
+                max = var.getUB();
+            }
+        }
+
+        IntVar[] cards = new IntVar[max - min + 1];
+        int[] values = new int[max - min + 1];
+        for (int i = min; i <= max; i++) {
+            values[i - min] = i;
+            if (map.containsKey(i)) {
+                cards[i - min] = map.get(i);
+            } else {
+                if (CLOSED) {
+                    cards[i - min] = Views.fixed(0, solver);
+                } else {
+                    cards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
+                }
+            }
+        }
+        return new GlobalCardinality(VARS, values, cards, GlobalCardinality.Consistency.BC, solver);
+
+    }
+
+    /**
+     * Each values VALUES[i] should be taken by at least LOWS[i] and at most UPS[i] variables of VARS.
+     * <br/>
+     * Ensures Bound Consistency.
+     *
+     * @param VARS   collection of variables
+     * @param VALUES collection of constrained values
+     * @param LOWS   minimum occurrences of each values of VALUES
+     * @param UPS    maximum occurrences of each values of VALUES
+     * @param CLOSED restricts domains of VARS to VALUES if set to true
+     */
+    public static GlobalCardinalityLowUp global_cardinality_low_up_bc(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
+                                                                      boolean CLOSED) {
+        Solver solver = VARS[0].getSolver();
+
+        TIntObjectHashMap<int[]> map = new TIntObjectHashMap<int[]>(VALUES.length);
+        for (int i = 0; i < VALUES.length; i++) {
+            map.put(VALUES[i], new int[]{LOWS[i], UPS[i]});
+        }
+
+        int n = VARS.length;
+        Arrays.sort(VALUES);
+        int min = VALUES[0];
+        int max = VALUES[VALUES.length - 1];
+
+        for (int v = 0; v < VARS.length; v++) {
+            IntVar var = VARS[v];
+            if (min > var.getLB()) {
+                min = var.getLB();
+            }
+            if (max < var.getUB()) {
+                max = var.getUB();
+            }
+        }
+
+        int[] mOCC = new int[max - min + 1];
+        int[] MOCC = new int[max - min + 1];
+        int[] values = new int[max - min + 1];
+        for (int i = min; i <= max; i++) {
+            values[i - min] = i;
+            if (map.containsKey(i)) {
+                int[] lu = map.get(i);
+                mOCC[i - min] = lu[0];
+                MOCC[i - min] = lu[1];
+            } else {
+                if (CLOSED) {
+                    mOCC[i - min] = 0;
+                    MOCC[i - min] = 0;
+                } else {
+                    mOCC[i - min] = 0;
+                    MOCC[i - min] = n;
+                }
+            }
+        }
+        return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC, GlobalCardinalityLowUp.Consistency.BC, solver);
+
+    }
+
+    /**
+     * Each values VALUES[i] should be taken exactly OCCURRENCES[i] variables of VARS.
+     * <br/>
+     * Ensures Arc Consistency.
+     *
+     * @param VARS        collection of variables
+     * @param VALUES      collection of constrained values
+     * @param OCCURRENCES collection of cardinality variables
+     * @param CLOSED      restricts domains of VARS to VALUES if set to true
+     * @param AC_ON_CARDS ensures AC on cards too, usually faster if false
+     */
+    public static GlobalCardinality global_cardinality_ac(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED, boolean AC_ON_CARDS) {
+        Solver solver = VARS[0].getSolver();
+
+        TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
+        for (int i = 0; i < VALUES.length; i++) {
+            map.put(VALUES[i], OCCURRENCES[i]);
+        }
+
+        int n = VARS.length;
+        Arrays.sort(VALUES);
+        int min = VALUES[0];
+        int max = VALUES[VALUES.length - 1];
+
+        for (int v = 0; v < VARS.length; v++) {
+            IntVar var = VARS[v];
+            if (min > var.getLB()) {
+                min = var.getLB();
+            }
+            if (max < var.getUB()) {
+                max = var.getUB();
+            }
+        }
+
+        IntVar[] cards = new IntVar[max - min + 1];
+        int[] values = new int[max - min + 1];
+        for (int i = min; i <= max; i++) {
+            values[i - min] = i;
+            if (map.containsKey(i)) {
+                cards[i - min] = map.get(i);
+            } else {
+                if (CLOSED) {
+                    cards[i - min] = Views.fixed(0, solver);
+                } else {
+                    cards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
+                }
+            }
+        }
+        return new GlobalCardinality(VARS, values, cards,
+                AC_ON_CARDS ? GlobalCardinality.Consistency.AC_ON_CARDS : GlobalCardinality.Consistency.AC, solver);
+
+    }
+
+    /**
+     * Each values VALUES[i] should be taken by at least LOWS[i] and at most UPS[i] variables of VARS.
+     * <br/>
+     * Ensures Arc Consistency.
+     *
+     * @param VARS   collection of variables
+     * @param VALUES collection of constrained values
+     * @param LOWS   minimum occurrences of each values of VALUES
+     * @param UPS    maximum occurrences of each values of VALUES
+     * @param CLOSED restricts domains of VARS to VALUES if set to true
+     */
+    public static GlobalCardinalityLowUp global_cardinality_low_up_ac(IntVar[] VARS, int[] VALUES, int[] LOWS, int[] UPS,
+                                                                      boolean CLOSED) {
+        Solver solver = VARS[0].getSolver();
+
+        TIntObjectHashMap<int[]> map = new TIntObjectHashMap<int[]>(VALUES.length);
+        for (int i = 0; i < VALUES.length; i++) {
+            map.put(VALUES[i], new int[]{LOWS[i], UPS[i]});
+        }
+
+        int n = VARS.length;
+        Arrays.sort(VALUES);
+        int min = VALUES[0];
+        int max = VALUES[VALUES.length - 1];
+
+        for (int v = 0; v < VARS.length; v++) {
+            IntVar var = VARS[v];
+            if (min > var.getLB()) {
+                min = var.getLB();
+            }
+            if (max < var.getUB()) {
+                max = var.getUB();
+            }
+        }
+
+        int[] mOCC = new int[max - min + 1];
+        int[] MOCC = new int[max - min + 1];
+        int[] values = new int[max - min + 1];
+        for (int i = min; i <= max; i++) {
+            values[i - min] = i;
+            if (map.containsKey(i)) {
+                int[] lu = map.get(i);
+                mOCC[i - min] = lu[0];
+                MOCC[i - min] = lu[1];
+            } else {
+                if (CLOSED) {
+                    mOCC[i - min] = 0;
+                    MOCC[i - min] = 0;
+                } else {
+                    mOCC[i - min] = 0;
+                    MOCC[i - min] = n;
+                }
+            }
+        }
+        return new GlobalCardinalityLowUp(VARS, values, mOCC, MOCC, GlobalCardinalityLowUp.Consistency.AC, solver);
+    }
+
 
     /**
      * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection

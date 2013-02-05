@@ -34,7 +34,6 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.GCC_AC;
 import solver.constraints.nary.NValues;
 import solver.constraints.nary.lex.Lex;
 import solver.search.strategy.StrategyFactory;
@@ -242,6 +241,37 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             Constraint ctr = IntConstraintFactory.alldifferent_ac(vars);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelGcAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("Gc_AC" + n);
+            IEnvironment env = s.getEnvironment();
+
+            boolean[] p = ((boolean[]) parameters);
+            boolean closed = p[0];
+            boolean oncards = p[1];
+            IntVar[] vars = new IntVar[n / 2];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            int[] values = new int[n / 2];
+            IntVar[] cards = new IntVar[n / 2];
+            for (int i = 0; i < cards.length; i++) {
+                values[i] = i;
+                cards[i] = VariableFactory.enumerated("c_" + i, domains[i + n / 2], s);
+                if (map != null) map.put(domains[i + n / 2], cards[i]);
+            }
+            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, closed, oncards);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -600,7 +630,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
 
-            Constraint ctr = new GCC_AC(vars, values, cards, true, s);
+            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, false, true);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -630,7 +660,7 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
 
-            Constraint ctr = new GCC_AC(vars, values, cards, false, s);
+            Constraint ctr = IntConstraintFactory.global_cardinality_ac(vars, values, cards, false, false);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -663,7 +693,7 @@ public interface Modeler {
             for (int i = 0; i < values.length; i++) {
                 up[i] = 1;
             }
-            Constraint ctr = new GCC_AC(vars, values, low, up, s);
+            Constraint ctr = IntConstraintFactory.global_cardinality_low_up_ac(vars, values, low, up, false);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

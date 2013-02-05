@@ -29,7 +29,6 @@ package samples.nsp;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.cnf.ALogicTree;
@@ -207,7 +206,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         IntVar[][] cards = ArrayUtils.transpose(covers);
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (int t = 0; t < vars.length; t++) {
-            solver.post(GlobalCardinality.make(vars[t], cards[t], 0, solver));
+            int[] values = new int[cards[t].length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality_bc(vars[t], values, cards[t], false));
         }
     }
 
@@ -221,7 +224,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
-            solver.post(GlobalCardinality.make(var, coverLB, coverUB, 0, GlobalCardinality.Consistency.BC, solver));
+            int[] values = new int[coverLB.length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality_low_up_bc(var, values, coverLB, coverUB, false));
         }
     }
 
@@ -297,7 +304,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCountersWithGCC(Solver solver) {
         description += "countM[gcc] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(GlobalCardinality.make(shifts[e], occurrences[e], 0, solver));
+            int[] values = new int[occurrences[e].length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality_bc(shifts[e], values, occurrences[e], false));
         }
 
     }
@@ -365,7 +376,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                solver.post(GlobalCardinality.make(vars, lb, ub, 0, GlobalCardinality.Consistency.BC, solver));
+                int[] values = new int[lb.length];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = i;
+                }
+                solver.post(IntConstraintFactory.global_cardinality_low_up_bc(vars, values, lb, ub, false));
             }
         }
 

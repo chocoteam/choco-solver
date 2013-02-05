@@ -42,7 +42,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinalities, the constraint ensures that the number of occurences
+ * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinality variables, the constraint ensures that the number of occurrences
  * of the value i among the variables is equal to card[i].
  * this constraint enforces :
  * - Bound Consistency over vars regarding the lower and upper bounds of cards
@@ -71,7 +71,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     int offset = 0;
 
     private int nbBounds;
-    final int nbVars;  //number of variables (without the cardinalities variables)
+    final int nbVars;  //number of variables (without the cardinality variables)
     final IntVar[] card;
 
     final Interval[] minsorted;

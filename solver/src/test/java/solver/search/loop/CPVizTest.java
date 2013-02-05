@@ -30,7 +30,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.GlobalCardinality;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.*;
 import solver.variables.BoolVar;
@@ -464,7 +463,7 @@ public class CPVizTest {
         int[] low = new int[]{0, 1, 0};
         int[] up = new int[]{1, 2, 1};
 
-        s.post(GlobalCardinality.make(X, low, up, -1, GlobalCardinality.Consistency.BC, s));
+        s.post(IntConstraintFactory.global_cardinality_low_up_bc(X, values, low, up, false));
 
         Visualization visu = new Visualization("Gcc", s, dir + "/out");
         visu.createTree();

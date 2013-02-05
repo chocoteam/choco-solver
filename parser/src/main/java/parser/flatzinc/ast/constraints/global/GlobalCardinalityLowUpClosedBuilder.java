@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.GCC_AC;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -52,9 +51,6 @@ public class GlobalCardinalityLowUpClosedBuilder implements IBuilder {
         int[] values = exps.get(1).toIntArray();
         int[] low = exps.get(2).toIntArray();
         int[] up = exps.get(3).toIntArray();
-        for (int i = 0; i < vars.length; i++) {
-            solver.post(IntConstraintFactory.member(vars[i], values));
-        }
-        return new GCC_AC(vars, values, low, up, solver);
+        return IntConstraintFactory.global_cardinality_low_up_ac(vars, values, low, up, true);
     }
 }

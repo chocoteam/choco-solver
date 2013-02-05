@@ -33,8 +33,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.GCC_AC;
-import solver.constraints.nary.GlobalCardinality;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -59,9 +57,9 @@ public class GlobalCardinalityClosedBuilder implements IBuilder {
         // si nbVAL > 2*NBVAR => BC
         boolean ac = values.length <= 2 * vars.length;
         if (ac) {
-            return new GCC_AC(vars, values, cards, solver);
+            return IntConstraintFactory.global_cardinality_ac(vars, values, cards, true, true);
         } else {
-            return GlobalCardinality.make(vars, values, cards, solver);
+            return IntConstraintFactory.global_cardinality_bc(vars, values, cards, true);
         }
     }
 }
