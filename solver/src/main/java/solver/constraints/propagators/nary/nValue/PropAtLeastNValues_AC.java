@@ -42,7 +42,6 @@ import solver.variables.graph.DirectedGraph;
 import choco.kernel.memory.setDataStructures.SetType;
 import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**
@@ -144,13 +143,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             ub = v.getUB();
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
-                if (free.get(i) && free.get(j)) {
-                    digraph.addArc(j, i);
-                    free.clear(i);
-                    free.clear(j);
-                } else {
-                    digraph.addArc(i, j);
-                }
+				digraph.addArc(i, j);
             }
         }
     }
@@ -252,7 +245,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     if (digraph.getPredecessorsOf(i).getFirstElement()==j) {
                         v.instantiateTo(k, aCause);
                     } else {
-                        v.removeValue(k, aCause); 
+                        v.removeValue(k, aCause);
                         digraph.removeArc(i, j);
                     }
                 }
@@ -286,15 +279,30 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (n2 < n + nValues.getLB()) {
-            contradiction(nValues, "");
-        }
-        buildDigraph();
-        int card = repairMatching();
-        nValues.updateUpperBound(card, aCause);
-        if (nValues.getLB() == card) {
-            filter();
-        }
+		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){
+			if (n2 < n + nValues.getLB()) {
+				contradiction(nValues, "");
+			}
+			buildDigraph();
+		}
+		digraph.desactivateNode(n2);
+		digraph.desactivateNode(n2+1);
+		free.clear();
+		for (int i = 0; i < n; i++) {
+			if (digraph.getPredecessorsOf(i).getSize() == 0) {
+				free.set(i);
+			}
+		}
+		for (int i = n; i < n2; i++) {
+			if (digraph.getSuccessorsOf(i).getSize() == 0) {
+				free.set(i);
+			}
+		}
+		int card = repairMatching();
+		nValues.updateUpperBound(card, aCause);
+		if (nValues.getLB() == card) {
+			filter();
+		}
         for (int i = 0; i < idms.length; i++) {
             idms[i].unfreeze();
         }
@@ -302,27 +310,12 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
-        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-        idms[varIdx].unfreeze();
-        if (nbPendingEvt == 0) {
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).getSize() == 0) {
-                    free.set(i);
-                }
-            }
-            int card = repairMatching();
-            nValues.updateUpperBound(card, aCause);
-            if (nValues.getLB() == card) {
-                filter();
-            }
-        }
+		if(varIdx<n){
+			idms[varIdx].freeze();
+			idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+			idms[varIdx].unfreeze();
+		}
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     //***********************************************************************************
@@ -365,6 +358,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
         public void execute(int i) throws ContradictionException {
             digraph.removeEdge(idx, map.get(i));
+			if(digraph.arcExists(idx,map.get(i))||digraph.arcExists(map.get(i),idx)){
+				throw new UnsupportedOperationException();
+			}
         }
 
         @Override
