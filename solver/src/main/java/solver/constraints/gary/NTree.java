@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.basic.PropKLoops;
-import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
+import solver.constraints.propagators.gary.arborescences.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
