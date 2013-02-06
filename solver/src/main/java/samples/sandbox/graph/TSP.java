@@ -123,7 +123,7 @@ public class TSP {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0, solver);
+        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0);
         mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
         mst.waitFirstSolution(search != 0);
         gc.addPropagators(mst);

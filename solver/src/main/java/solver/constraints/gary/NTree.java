@@ -78,7 +78,7 @@ public class NTree extends Constraint {
         setPropagators(
                 new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
                 new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                new PropKLoops(graph, solver, this, nTree),
+				new PropKLoops(graph, solver, this, nTree),
                 new PropNTree(graph, nTree, solver, this));
         this.g = graph;
         this.nTree = nTree;

@@ -95,7 +95,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
             }
         }
         // constraints
-        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 0, solver));
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 0));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
         strategy.configure(9, true);

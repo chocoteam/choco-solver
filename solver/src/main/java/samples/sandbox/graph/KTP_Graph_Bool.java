@@ -123,7 +123,7 @@ public class KTP_Graph_Bool {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi, solver);
+        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi);
         solver.post(gc);
         // config
         solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));

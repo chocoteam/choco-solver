@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -101,7 +102,7 @@ public class PropNTree extends Propagator {
     }
 
     private void structuralPruning() throws ContradictionException {
-		for(int i=0;i<n;i++){
+		for(int i=0;i<=n;i++){
 			Grs.getPredecessorsOf(i).clear();
 			Grs.getSuccessorsOf(i).clear();
 		}

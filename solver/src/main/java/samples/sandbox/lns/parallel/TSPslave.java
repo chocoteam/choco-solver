@@ -105,7 +105,7 @@ public class TSPslave extends AbstractParallelSlave {
         undi.getKernelGraph().addEdge(0, n - 1);
         undi.getKernelGraph().addEdge(n - 2, n - 1);
         // constraints
-        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1, solver));
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
         strategy.configure(10, true);

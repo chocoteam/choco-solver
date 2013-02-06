@@ -99,7 +99,7 @@ public class Tree extends AbstractProblem {
             }
         } catch (Exception e) {
         }
-        solver.post(GraphConstraintFactory.nTrees(g, nTree, solver));
+        solver.post(GraphConstraintFactory.nTrees(g, nTree));
     }
 
     @Override

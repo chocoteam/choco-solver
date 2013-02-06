@@ -61,7 +61,7 @@ public class NTreeTest {
             }
         }
         IntVar nTree = VariableFactory.bounded("NTREE ", tmin, tmax, s);
-        Constraint gc = GraphConstraintFactory.nTrees(g, nTree, s);
+        Constraint gc = GraphConstraintFactory.nTrees(g, nTree);
         AbstractStrategy strategy = GraphStrategyFactory.graphRandom(g, seed);
 
         s.post(gc);

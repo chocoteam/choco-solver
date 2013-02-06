@@ -169,7 +169,7 @@ public class SOP {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
+        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1);
     }
 
     public static void addPropagators() {

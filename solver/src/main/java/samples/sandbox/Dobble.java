@@ -144,7 +144,7 @@ public class Dobble {
                 }
             }
         }
-        Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal, solver);
+        Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal);
         gc.addPropagators(new PropRelationGraph(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
         gc.addPropagators(new PropGraphRelation(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
         solver.post(gc);
@@ -165,7 +165,7 @@ public class Dobble {
                 gpair.getEnvelopGraph().addEdge(k1, k2);
             }
         }
-        Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues, solver);
+        Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues);
         gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
         gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
         solver.post(gcpair);

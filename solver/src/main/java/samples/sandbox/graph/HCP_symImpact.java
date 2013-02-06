@@ -133,7 +133,7 @@ public class HCP_symImpact {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi, solver);
+        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi);
         solver.post(gc);
         // config
         solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
@@ -184,7 +184,7 @@ public class HCP_symImpact {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.hamiltonianPath(dir, 0, n - 1, solver);
+        Constraint gc = GraphConstraintFactory.hamiltonianPath(dir, 0, n - 1);
         if (alldifferentAC) {
             gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
         }

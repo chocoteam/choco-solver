@@ -98,7 +98,7 @@ public class CliqueEnumeration extends AbstractProblem{
 		graphvar.getEnvelopGraph().addEdge(2, 2);		// mandatory loop
 		graphvar.getKernelGraph().addEdge(1, 2);		// mandatory edge
 		// constraint : the graph must be a clique
-		solver.post(GraphConstraintFactory.nCliques(graphvar, Views.fixed(1, solver), solver));
+		solver.post(GraphConstraintFactory.nCliques(graphvar, Views.fixed(1, solver)));
 	}
 
 	@Override
