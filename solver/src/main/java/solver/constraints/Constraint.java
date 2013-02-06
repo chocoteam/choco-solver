@@ -99,8 +99,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
         this.solver = solver;
     }
 
-
-    //BEWARE : ONLY FOR GRAPH CONSTRAINTS
     public Constraint(Solver solver) {
         this.solver = solver;
         this.vars = (V[]) new Variable[0];

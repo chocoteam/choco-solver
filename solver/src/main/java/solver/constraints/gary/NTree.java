@@ -29,7 +29,6 @@ package solver.constraints.gary;
 
 import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
@@ -73,10 +72,9 @@ public class NTree extends Constraint {
      *
      * @param graph  the graph variable (directed)
      * @param nTree  the expected number of trees (IntVar)
-     * @param solver
      */
-    public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver) {
-        super(new Variable[]{graph, nTree}, solver);
+    public NTree(DirectedGraphVar graph, IntVar nTree) {
+        super(new Variable[]{graph, nTree}, graph.getSolver());
         setPropagators(
                 new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
                 new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
