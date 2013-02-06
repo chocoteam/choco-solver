@@ -34,6 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -51,6 +52,10 @@ public class GlobalCardinalityLowUpBuilder implements IBuilder {
         int[] values = exps.get(1).toIntArray();
         int[] low = exps.get(2).toIntArray();
         int[] up = exps.get(3).toIntArray();
-        return IntConstraintFactory.global_cardinality_low_up(vars, values, low, up, false, "AC");
+		IntVar[] cards = new IntVar[low.length];
+		for(int i=0;i<low.length;i++){
+			cards[i] = VariableFactory.bounded("card of val "+values[i],low[i],up[i],solver);
+		}
+        return IntConstraintFactory.global_cardinality(vars, values, cards, false);
     }
 }

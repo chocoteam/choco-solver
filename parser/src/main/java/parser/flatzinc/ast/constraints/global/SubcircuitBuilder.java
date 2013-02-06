@@ -33,6 +33,8 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -46,6 +48,7 @@ public class SubcircuitBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        return IntConstraintFactory.subcircuit(exps.get(0).toIntVarArray(solver), 1);
+		IntVar[] vars = exps.get(0).toIntVarArray(solver);
+        return IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length",0,vars.length,solver));
     }
 }
