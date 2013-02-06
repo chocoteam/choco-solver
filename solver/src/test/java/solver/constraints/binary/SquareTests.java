@@ -49,7 +49,7 @@ import java.util.Random;
  */
 public class SquareTests {
 
-    @Test
+    @Test(groups = "1s")
     public void testEnum() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -91,7 +91,7 @@ public class SquareTests {
         return solver;
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBound() {
         Random random = new Random();
         for (int seed = 2; seed < 2000; seed++) {

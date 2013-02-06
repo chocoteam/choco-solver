@@ -315,7 +315,7 @@ public class ReifiedTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_wellaweg1() {
         Solver s = new Solver();
 
@@ -351,7 +351,7 @@ public class ReifiedTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_wellaweg3() {
         Solver s = new Solver();
 
@@ -387,7 +387,7 @@ public class ReifiedTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_wellaweg4() {
         Solver s = new Solver();
 
@@ -424,7 +424,7 @@ public class ReifiedTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_wellaweg5() {
         Solver s = new Solver();
 

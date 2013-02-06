@@ -45,27 +45,27 @@ import solver.variables.VariableFactory;
 
 public class SubcircuitTest {
 
-    @Test
+    @Test(groups = "1s")
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
-        solver.post(IntConstraintFactory.subcircuit(x,0,VariableFactory.bounded("length",0,x.length-1,solver)));
+        solver.post(IntConstraintFactory.subcircuit(x, 0, VariableFactory.bounded("length", 0, x.length - 1, solver)));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
 
-    @Test
+    @Test(groups = "1s")
     public static void test2() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
         IntVar[] y = VariableFactory.boundedArray("y", 5, 5, 9, solver);
         IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(IntConstraintFactory.subcircuit(vars,0,VariableFactory.bounded("length",0,vars.length-1,solver)));
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, solver)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public static void test3() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.enumeratedArray("x", 5, 0, 4, solver);
@@ -78,12 +78,12 @@ public class SubcircuitTest {
             e.printStackTrace();
             System.exit(0);
         }
-        solver.post(IntConstraintFactory.subcircuit(vars,0,VariableFactory.bounded("length",0,vars.length-1,solver)));
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, solver)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public static void test4() {
         Solver solver = new Solver();
         int n = 6;
@@ -91,7 +91,7 @@ public class SubcircuitTest {
         int max = 4;
         IntVar[] vars = VariableFactory.boundedArray("x", n, 0, n, solver);
         IntVar nb = VariableFactory.bounded("size", min, max, solver);
-        solver.post(IntConstraintFactory.subcircuit(vars,0, nb));
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, nb));
         solver.findAllSolutions();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {

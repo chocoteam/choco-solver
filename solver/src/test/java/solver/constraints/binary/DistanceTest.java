@@ -50,7 +50,7 @@ import solver.variables.view.Views;
  */
 public class DistanceTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         for (int i = 0; i < 100; i++) {
             long nbSol, nbNod;
@@ -78,7 +78,7 @@ public class DistanceTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         for (int k = 4; k < 400; k *= 2) {
             Solver s1 = new Solver(), s2 = new Solver();
@@ -132,7 +132,7 @@ public class DistanceTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() {
         Solver solver = new Solver();
         IntVar X = VariableFactory.bounded("X", -5, 5, solver);
