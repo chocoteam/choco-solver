@@ -27,33 +27,19 @@
 
 package samples.graph;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.sandbox.graph.input.HCP_Utils;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.variables.*;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
-
-import java.util.ArrayList;
 
 /**
  * Solves the Knight's Tour Problem
@@ -61,116 +47,118 @@ import java.util.ArrayList;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class KnightTourProblem extends AbstractProblem{
+public class KnightTourProblem extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	@Option(name = "-tl", usage = "time limit.", required = false)
-	private long limit = 60000;
-	@Option(name = "-l", usage = "Board length.", required = false)
-	private int boardLength = 50;
-	@Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
-	private boolean closedTour = false;
+    @Option(name = "-tl", usage = "time limit.", required = false)
+    private long limit = 60000;
+    @Option(name = "-l", usage = "Board length.", required = false)
+    private int boardLength = 50;
+    @Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
+    private boolean closedTour = false;
 
-	private UndirectedGraphVar graph;
+    private UndirectedGraphVar graph;
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		new KnightTourProblem().execute(args);
-	}
+    public static void main(String[] args) {
+        new KnightTourProblem().execute(args);
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("solving the knight's tour problem with graph variables");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("solving the knight's tour problem with graph variables");
+    }
 
-	@Override
-	public void buildModel() {
-		boolean[][] matrix;
-		if(closedTour){
-			matrix = HCP_Utils.generateKingTourInstance(boardLength);
-		}else{
-			matrix = HCP_Utils.generateOpenKingTourInstance(boardLength);
-		}
-		int n = matrix.length;
-		// variables
-		graph = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				if (matrix[i][j]) {
-					graph.getEnvelopGraph().addEdge(i, j);
-				}
-			}
-		}
-		// constraints
-		solver.post(GraphConstraintFactory.hamiltonianCycle(graph));
-	}
+    @Override
+    public void buildModel() {
+        boolean[][] matrix;
+        if (closedTour) {
+            matrix = HCP_Utils.generateKingTourInstance(boardLength);
+        } else {
+            matrix = HCP_Utils.generateOpenKingTourInstance(boardLength);
+        }
+        int n = matrix.length;
+        // variables
+        graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (matrix[i][j]) {
+                    graph.getEnvelopGraph().addEdge(i, j);
+                }
+            }
+        }
+        // constraints
+        solver.post(GraphConstraintFactory.hamiltonianCycle(graph));
+    }
 
-	@Override
-	public void configureSearch() {
-		solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
+    @Override
+    public void configureSearch() {
+        solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
-		SearchMonitorFactory.log(solver, true, false);
-	}
+        SearchMonitorFactory.log(solver, true, false);
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void configureEngine() {
+    }
 
-	@Override
-	public void solve() {
-		solver.findSolution();
-	}
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
 
-	@Override
-	public void prettyOut() {}
+    @Override
+    public void prettyOut() {
+    }
 
-	//***********************************************************************************
-	// HEURISTICS
-	//***********************************************************************************
+    //***********************************************************************************
+    // HEURISTICS
+    //***********************************************************************************
 
-	private static class MinNeigh extends ArcStrategy {
-		int n;
+    private static class MinNeigh extends ArcStrategy {
+        int n;
 
-		public MinNeigh(GraphVar graphVar) {
-			super(graphVar);
-			n = graphVar.getEnvelopGraph().getNbNodes();
-		}
+        public MinNeigh(GraphVar graphVar) {
+            super(graphVar);
+            n = graphVar.getEnvelopGraph().getNbNodes();
+        }
 
-		@Override
-		public boolean computeNextArc() {
-			ISet suc;
-			int from = -1;
-			int size = n + 1;
-			int sizi;
-			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize() - g.getKernelGraph().getSuccessorsOf(i).getSize();
-				if (sizi < size && sizi > 0) {
-					from = i;
-					size = sizi;
-				}
-			}
-			if (from == -1) {
-				return false;
-			}
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			this.from = from;
-			to = 2 * n;
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if (!g.getKernelGraph().arcExists(from, j)) {
-					if (j < to) {
-						to = j;
-					}
-				}
-			}
-			if (to == 2 * n) {
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
-	}
+        @Override
+        public boolean computeNextArc() {
+            ISet suc;
+            int from = -1;
+            int size = n + 1;
+            int sizi;
+            for (int i = 0; i < n; i++) {
+                sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize() - g.getKernelGraph().getSuccessorsOf(i).getSize();
+                if (sizi < size && sizi > 0) {
+                    from = i;
+                    size = sizi;
+                }
+            }
+            if (from == -1) {
+                return false;
+            }
+            suc = g.getEnvelopGraph().getSuccessorsOf(from);
+            this.from = from;
+            to = 2 * n;
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (!g.getKernelGraph().arcExists(from, j)) {
+                    if (j < to) {
+                        to = j;
+                    }
+                }
+            }
+            if (to == 2 * n) {
+                throw new UnsupportedOperationException();
+            }
+            return true;
+        }
+    }
 }

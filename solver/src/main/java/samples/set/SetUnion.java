@@ -46,69 +46,72 @@ import solver.variables.SetVarImpl;
 /**
  * Small problem to illustrate how to use set variables
  * enumerates sets such that z = union(x,y)
+ *
  * @author Jean-Guillaume Fages
  */
-public class SetUnion extends AbstractProblem{
+public class SetUnion extends AbstractProblem {
 
-	private SetVar x,y,z;
+    private SetVar x, y, z;
 
-	public static void main(String[] args) {
-		new SetUnion().execute(args);
-	}
+    public static void main(String[] args) {
+        new SetUnion().execute(args);
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("set union sample");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("set union sample");
+    }
 
-	@Override
-	public void buildModel() {
-		x = new SetVarImpl("x", solver);
-		y = new SetVarImpl("y", solver);
-		z = new SetVarImpl("z", solver);
-		// x initial domain
-		x.getEnvelope().add(2);
-		x.getEnvelope().add(1);
-		x.getKernel().add(1);
-		x.getEnvelope().add(3);
-		// y initial domain
-		y.getEnvelope().add(6);
-		y.getEnvelope().add(2);
-		y.getEnvelope().add(7);
-		// z initial domain
-		z.getEnvelope().add(1);
-		z.getEnvelope().add(2);
-		z.getKernel().add(2);
-		z.getEnvelope().add(5);
-		z.getEnvelope().add(7);
-		z.getEnvelope().add(3);
-		// set-union constraint
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
-	}
+    @Override
+    public void buildModel() {
+        x = new SetVarImpl("x", solver);
+        y = new SetVarImpl("y", solver);
+        z = new SetVarImpl("z", solver);
+        // x initial domain
+        x.getEnvelope().add(2);
+        x.getEnvelope().add(1);
+        x.getKernel().add(1);
+        x.getEnvelope().add(3);
+        // y initial domain
+        y.getEnvelope().add(6);
+        y.getEnvelope().add(2);
+        y.getEnvelope().add(7);
+        // z initial domain
+        z.getEnvelope().add(1);
+        z.getEnvelope().add(2);
+        z.getKernel().add(2);
+        z.getEnvelope().add(5);
+        z.getEnvelope().add(7);
+        z.getEnvelope().add(3);
+        // set-union constraint
+        solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
+    }
 
-	@Override
-	public void configureSearch() {
-		solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
-		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-			@Override
-			public void onSolution() {
-				System.out.println("solution found");
-				System.out.println("x : {"+x.getEnvelope()+"}");
-				System.out.println("y : {"+y.getEnvelope()+"}");
-				System.out.println("z : {"+z.getEnvelope()+"}");
-			}
-		});
-	}
+    @Override
+    public void configureSearch() {
+        solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
+        SearchMonitorFactory.log(solver, true, false);
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                System.out.println("solution found");
+                System.out.println("x : {" + x.getEnvelope() + "}");
+                System.out.println("y : {" + y.getEnvelope() + "}");
+                System.out.println("z : {" + z.getEnvelope() + "}");
+            }
+        });
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void configureEngine() {
+    }
 
-	@Override
-	public void solve() {
-		solver.findAllSolutions();
-	}
+    @Override
+    public void solve() {
+        solver.findAllSolutions();
+    }
 
-	@Override
-	public void prettyOut() {}
+    @Override
+    public void prettyOut() {
+    }
 }
