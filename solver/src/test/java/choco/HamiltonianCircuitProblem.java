@@ -40,20 +40,15 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
 
 /**
  * Parse and solve a Hamiltonian Cycle Problem instance of the TSPLIB
@@ -79,9 +74,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
-
-    public HamiltonianCircuitProblem() {
-    }
 
     private void set(boolean[][] matrix, long s) {
         seed = s;
@@ -149,18 +141,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = new Constraint(solver);
-        int[] succs = new int[n];
-        int[] preds = new int[n];
-        for (int i = 0; i < n; i++) {
-            succs[i] = preds[i] = 1;
-        }
-        succs[n - 1] = preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
+        gc = GraphConstraintFactory.hamiltonianPath(graph,0,n-1);
     }
 
     private Constraint integerAllDiff(boolean bc) {

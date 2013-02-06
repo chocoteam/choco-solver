@@ -29,14 +29,10 @@
 package solver.constraints.set;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.set.*;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.SetVar;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 
@@ -55,90 +51,85 @@ public final class SetConstraintsFactory {
 	//***********************************************************************************
 
 	/**
-	 * The union of sets is equal to union
+	 * Constraint which ensures that the union of sets in SET_VARS is equal to the set SET_UNION
 	 *
-	 * @param sets
-	 * @param union
-	 * @param solver
-	 * @return A constraint ensuring that the union of sets is equal to set union
+	 * @param SETS	set variables
+	 * @param UNION	set variable representing the union of SET_VARS
+	 * @return A constraint ensuring that the union of SET_VARS is equal to SET_UNION
 	 */
-	public static Constraint union(SetVar[] sets, SetVar union, Solver solver) {
-		Constraint c = new Constraint(ArrayUtils.append(sets, new SetVar[]{union}), solver);
-		c.setPropagators(new PropUnion(sets, union, solver, c));
+	public static Constraint union(SetVar[] SETS, SetVar UNION) {
+		Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{UNION}), UNION.getSolver());
+		c.setPropagators(new PropUnion(SETS, UNION, UNION.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * The intersection of sets is equal to intersection
+	 * Constraint which ensures that the intersection of sets in SET_VAR is equal to the set SET_INTER
 	 *
-	 * @param sets
-	 * @param intersection
-	 * @param solver
+	 * @param SETS	set variables
+	 * @param INTERSECTION	set variable representing the intersection of SET_VARS
 	 * @return A constraint ensuring that the intersection of sets is equal to set intersection
 	 */
-	public static Constraint intersection(SetVar[] sets, SetVar intersection, Solver solver) {
-		Constraint c = new Constraint(ArrayUtils.append(sets, new SetVar[]{intersection}), solver);
-		c.setPropagators(new PropIntersection(sets, intersection, solver, c));
+	public static Constraint intersection(SetVar[] SETS, SetVar INTERSECTION) {
+		Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{INTERSECTION}), INTERSECTION.getSolver());
+		c.setPropagators(new PropIntersection(SETS, INTERSECTION, INTERSECTION.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Constraint which ensures that i<j <=> sets[i] subseteq sets[j]
+	 * Constraint which ensures that i<j <=> SET_VARS[i] subseteq SET_VARS[j]
 	 *
-	 * @param sets
-	 * @param solver
-	 * @return A constraint which ensures that i<j <=> sets[i] subseteq sets[j]
+	 * @param SETS	set variables
+	 * @return A constraint which ensures that i<j <=> SET_VARS[i] subseteq SET_VARS[j]
 	 */
-	public static Constraint subsetEq(SetVar[] sets, Solver solver) {
-		Constraint c = new Constraint(sets, solver);
-		for (int i = 0; i < sets.length - 1; i++) {
-			c.addPropagators(new PropSubsetEq(sets[i], sets[i + 1], solver, c));
+	public static Constraint subsetEq(SetVar[] SETS) {
+		Constraint c = new Constraint(SETS, SETS[0].getSolver());
+		for (int i = 0; i < SETS.length - 1; i++) {
+			c.addPropagators(new PropSubsetEq(SETS[i], SETS[i + 1], SETS[0].getSolver(), c));
 		}
 		return c;
 	}
 
 	/**
-	 * Cardinality constraint: |set| = card
+	 * Cardinality constraint: |SET_VAR| = CARD
 	 *
-	 * @param set
-	 * @param card
-	 * @param solver
-	 * @return A constraint ensuring that |set| = card
+	 * @param SET		a set variable
+	 * @param CARD		an integer variable representing SET_VAR's cardinality
+	 *                  (i.e. the number of elements in it)
+	 * @return A constraint ensuring that |SET_VAR| = CARD
 	 */
-	public static Constraint cardinality(SetVar set, IntVar card, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropCardinality(set, card, solver, c));
+	public static Constraint cardinality(SetVar SET, IntVar CARD) {
+		Constraint c = new Constraint(new Variable[]{SET,CARD},CARD.getSolver());
+		c.setPropagators(new PropCardinality(SET, CARD, CARD.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Restricts the number of empty sets
-	 * |{s in sets such that |s|=0}| = nbEmpty
+	 * Restricts the number of empty sets in SETS
+	 * |{s in SETS such that |s|=0}| = NB_EMPTY_SETS
 	 *
-	 * @param sets
-	 * @param nbEmpty
-	 * @param solver
-	 * @return A constraint ensuring that |{s in sets such that |s|=0}| = nbEmpty
+	 * @param SETS			set variables
+	 * @param NB_EMPTY_SETS	integer variable restricting the number of empty sets in SETS
+	 * @return A constraint ensuring that |{s in SETS such that |s|=0}| = NB_EMPTY_SETS
 	 */
-	public static Constraint nbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropNbEmpty(sets, nbEmpty, solver, c));
+	public static Constraint nbEmpty(SetVar[] SETS, IntVar NB_EMPTY_SETS) {
+		Constraint c = new Constraint(ArrayUtils.append(SETS,new Variable[]{NB_EMPTY_SETS}),NB_EMPTY_SETS.getSolver());
+		c.setPropagators(new PropNbEmpty(SETS, NB_EMPTY_SETS, NB_EMPTY_SETS.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * set2 is an offSet view of set1
-	 * x in set1 <=> x+offSet in set2
+	 * links SET_1 and SET_2 with OFFSET
+	 * x in SET_1 <=> x+offSet in SET_2
 	 *
-	 * @param set1
-	 * @param set2
-	 * @param offSet
-	 * @param solver
-	 * @return a constraint ensuring that set2 is an offSet view of set1
+	 * @param SET_1	a set variable
+	 * @param SET_2	a set variable
+	 * @param OFFSET offset index
+	 * @return a constraint ensuring that x in SET_1 <=> x+offSet in SET_2
 	 */
-	public static Constraint offSet(SetVar set1, SetVar set2, int offSet, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropOffSet(set1, set2, offSet, solver, c));
+	public static Constraint offSet(SetVar SET_1, SetVar SET_2, int OFFSET) {
+		Constraint c = new Constraint(new SetVar[]{SET_1,SET_2},SET_1.getSolver());
+		c.setPropagators(new PropOffSet(SET_1, SET_2, OFFSET, SET_1.getSolver(), c));
 		return c;
 	}
 
@@ -147,92 +138,92 @@ public final class SetConstraintsFactory {
 	//***********************************************************************************
 
 	/**
-	 * Sums elements of a set
-	 * SUM{i | i in set} = sum
+	 * Sums elements of a SET
+	 * sum{i | i in set} = SUM
 	 *
-	 * @param set
-	 * @param sum
-	 * @param solver
-	 * @return
+	 * @param SET	a set variable
+	 * @param SUM	an integer variable representing sum{i | i in SET}
+	 * @return a constraint ensuring that sum{i | i in set} = SUM
 	 */
-	public static Constraint sum(SetVar set, IntVar sum, Solver solver) {
-		return sum(set, null, 0, sum, solver);
+	public static Constraint sum(SetVar SET, IntVar SUM) {
+		return sum(SET, null, 0, SUM);
 	}
 
 	/**
-	 * Sums weights given by a set of indexes
-	 * SUM(weights[i-offset] | i in indexes) = sum
+	 * Sums weights given by a set of indexes INDEXES:
+	 * sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
 	 *
-	 * @param indexes
-	 * @param weights
-	 * @param offset  (0 by default but generally 1 with MiniZinc API)
-	 * @param sum
-	 * @param solver
-	 * @return
+	 * @param INDEXES	set variables
+	 * @param WEIGHTS	integers
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param SUM	an integer variable representing sum{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @return a constraint ensuring that sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
 	 */
-	public static Constraint sum(SetVar indexes, int[] weights, int offset, IntVar sum, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropSumOfElements(indexes, weights, offset, sum, solver, c));
+	public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM) {
+		Constraint c = new Constraint(new Variable[]{INDEXES,SUM},SUM.getSolver());
+		c.setPropagators(new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, SUM.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Retrieves the maximum element of the set
-	 * MAX{i | i in set} = maxElement
+	 * Retrieves the maximum element MAX_ELEMENT_VALUE of SET
+	 * max{i | i in set} = MAX_ELEMENT_VALUE
 	 *
-	 * @param set
-	 * @param maxElement
-	 * @param solver
-	 * @return
+	 * @param SET				a set variable
+	 * @param MAX_ELEMENT_VALUE	an integer variable representing max{i | i in SET}
+	 * @return a constraint ensuring that max{i | i in set} = MAX_ELEMENT_VALUE
 	 */
-	public static Constraint max(SetVar set, IntVar maxElement, Solver solver) {
-		return max(set, null, 0, maxElement, solver);
+	public static Constraint max(SetVar SET, IntVar MAX_ELEMENT_VALUE) {
+		return max(SET, null, 0, MAX_ELEMENT_VALUE);
 	}
 
 	/**
-	 * Retrieves the maximum element induced by a set
-	 * MAX{weights[i-offSet] |Êi in set} = maxElement
+	 * Retrieves the maximum element MAX_ELEMENT_VALUE induced by INDEXES
+	 * max{WEIGHTS[i-OFFSET] | i in INDEXES} = MAX_ELEMENT_VALUE
 	 *
-	 * @param set
-	 * @param weights
-	 * @param offSet     (0 by default but generally 1 with MiniZinc API)
-	 * @param maxElement
-	 * @param solver
-	 * @return
+	 * @param INDEXES	a set variable containing elements in range [OFFSET,WEIGHTS.length-1+OFFSET]
+	 * @param WEIGHTS	integers
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param MAX_ELEMENT_VALUE an integer variable representing max{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @return a constraint ensuring that max{WEIGHTS[i-OFFSET] | i in INDEXES} = MAX_ELEMENT_VALUE
 	 */
-	public static Constraint max(SetVar set, int[] weights, int offSet, IntVar maxElement, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMaxElement(set, weights, offSet, maxElement, solver, c));
+	public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE) {
+		Constraint c = new Constraint(new Variable[]{INDEXES,MAX_ELEMENT_VALUE},INDEXES.getSolver());
+		c.setPropagators(new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, INDEXES.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Retrieves the minimum element of the set
-	 * MIN{i | i in set} = minElement
+	 * Retrieves the minimum element MIN_ELEMENT_VALUE of SET:
+	 * min{i | i in SET} = MIN_ELEMENT_VALUE
 	 *
-	 * @param set
-	 * @param minElement
-	 * @param solver
-	 * @return
+	 * @param SET	a set variable
+	 * @param MIN_ELEMENT_VALUE an integer variable representing min{i | i in SET}
+	 * @return a constraint ensuring that min{i | i in SET} = MIN_ELEMENT_VALUE
 	 */
-	public static Constraint min(SetVar set, IntVar minElement, Solver solver) {
-		return min(set, null, 0, minElement, solver);
+	public static Constraint min(SetVar SET, IntVar MIN_ELEMENT_VALUE) {
+		return min(SET, null, 0, MIN_ELEMENT_VALUE);
 	}
 
 	/**
-	 * Retrieves the minimum element induced by set
-	 * MIN{weights[i-offSet] | i in set} = minElement
+	 * Retrieves the minimum element MIN_ELEMENT_VALUE induced by INDEXES
+	 * min{WEIGHTS[i-OFFSET] | i in INDEXES} = MIN_ELEMENT_VALUE
 	 *
-	 * @param set
-	 * @param weights
-	 * @param offSet     (0 by default but generally 1 with MiniZinc API)
-	 * @param minElement
-	 * @param solver
-	 * @return
+	 * @param INDEXES	a set variable containing elements in range [OFFSET,WEIGHTS.length-1+OFFSET]
+	 * @param WEIGHTS	integers
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param MIN_ELEMENT_VALUE integer variable representing min{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @return a constraint ensuring that min{WEIGHTS[i-OFFSET] | i in INDEXES} = MIN_ELEMENT_VALUE
 	 */
-	public static Constraint min(SetVar set, int[] weights, int offSet, IntVar minElement, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropMinElement(set, weights, offSet, minElement, solver, c));
+	public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE) {
+		Constraint c = new Constraint(new Variable[]{INDEXES,MIN_ELEMENT_VALUE},INDEXES.getSolver());
+		c.setPropagators(new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, INDEXES.getSolver(), c));
 		return c;
 	}
 
@@ -241,69 +232,73 @@ public final class SetConstraintsFactory {
 	//***********************************************************************************
 
 	/**
-	 * Channeling between a set variable and boolean variables
-	 * i in set <=> bools[i-offSet] = TRUE
+	 * Channeling between a set variable SET and boolean variables BOOLEANS
+	 * i in SET <=> BOOLEANS[i-OFFSET] = TRUE
 	 *
-	 * @param set
-	 * @param bools
-	 * @param offSet (0 by default but generally 1 with MiniZinc API)
-	 * @param solver
-	 * @return
+	 * @param BOOLEANS	boolean variables
+	 * @param SET		set variables
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @return a constraint ensuring that i in SET <=> BOOLEANS[i-OFFSET] = TRUE
 	 */
-	public static Constraint bool_channel(SetVar set, BoolVar[] bools, int offSet, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropBoolChannel(set, bools, offSet, solver, c));
+	public static Constraint bool_channel(BoolVar[] BOOLEANS, SetVar SET, int OFFSET) {
+		Constraint c = new Constraint(ArrayUtils.append(BOOLEANS,new Variable[]{SET}),SET.getSolver());
+		c.setPropagators(new PropBoolChannel(SET, BOOLEANS, OFFSET, SET.getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Channeling between set variables and integer variables
-	 * x in sets[y-offSet1] <=> ints[x-offSet2] = y
+	 * Channeling between set variables SETS and integer variables INTEGERS
+	 * x in SETS[y-OFFSET_1] <=> INTEGERS[x-OFFSET_2] = y
 	 *
-	 * @param sets
-	 * @param ints
-	 * @param offSet1 (0 by default but generally 1 with MiniZinc API)
-	 * @param offSet2 (0 by default but generally 1 with MiniZinc API)
-	 * @param solver
-	 * @return
+	 * @param SETS		set variables
+	 * @param INTEGERS	integer variables
+	 * @param OFFSET_1	offset index : should be 0 by default
+	 *               	but generally 1 with MiniZinc API
+	 *               	which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param OFFSET_2	offset index : should be 0 by default
+	 *               	but generally 1 with MiniZinc API
+	 *               	which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> INTEGERS[x-OFFSET_2] = y
 	 */
-	public static Constraint int_channel(SetVar[] sets, IntVar[] ints, int offSet1, int offSet2, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropIntChannel(sets, ints, offSet1, offSet2, solver, c));
+	public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
+		Constraint c = new Constraint(ArrayUtils.append(SETS,INTEGERS),SETS[0].getSolver());
+		c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2, SETS[0].getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Channeling between a graph variable and set variables
+	 * Channeling between a graph variable GRAPH and set variables SETS
 	 * representing either node neighbors or node successors
+	 * <p/> arc (i,j) in GRAPH <=> j in SETS[i]
 	 *
-	 * @param sets
-	 * @param g
-	 * @param solver
-	 * @return
+	 * @param SETS	set variables representing nodes neighbors (or successors if directed) in GRAPH
+	 * @param GRAPH	a graph variable
+	 * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SETS[i]
 	 */
-	public static Constraint graph_channel(SetVar[] sets, GraphVar g, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropGraphChannel(sets, g, solver, c));
-		if (!g.isDirected()) {
-			c.addPropagators(new PropSymmetric(sets, 0, solver, c));
+	public static Constraint graph_channel(SetVar[] SETS, GraphVar GRAPH) {
+		Constraint c = new Constraint(ArrayUtils.append(SETS,new Variable[]{GRAPH}),GRAPH.getSolver());
+		c.setPropagators(new PropGraphChannel(SETS, GRAPH, GRAPH.getSolver(), c));
+		if (!GRAPH.isDirected()) {
+			c.addPropagators(new PropSymmetric(SETS, 0, GRAPH.getSolver(), c));
 		}
 		return c;
 	}
 
 	/**
-	 * Channeling between a directed graph variable and set variables
-	 * representing node successors and predecessors
+	 * Channeling between a directed graph variable GRAPH and set variables SUCCESSORS and PREDECESSORS
+	 * representing node successors and predecessors:
+	 * <p/> arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
 	 *
-	 * @param succs
-	 * @param preds
-	 * @param g
-	 * @param solver
-	 * @return
+	 * @param SUCCESSORS	set variables representing nodes' successors in GRAPH
+	 * @param PREDECESSORS	set variables representing nodes' predecessors in GRAPH
+	 * @param GRAPH			a graph variable
+	 * @return a constraint ensuring that arc (i,j) in GRAPH <=> j in SUCCESSORS[i] and i in PREDECESSORS[j]
 	 */
-	public static Constraint graph_channel(SetVar[] succs, SetVar[] preds, DirectedGraphVar g, Solver solver) {
-		Constraint c = graph_channel(succs, g, solver);
-		c.addPropagators(new PropInverse(succs, preds, 0, 0, solver, c));
+	public static Constraint graph_channel(SetVar[] SUCCESSORS, SetVar[] PREDECESSORS, DirectedGraphVar GRAPH) {
+		Constraint c = graph_channel(SUCCESSORS, GRAPH);
+		c.addPropagators(new PropInverse(SUCCESSORS, PREDECESSORS, 0, 0, GRAPH.getSolver(), c));
 		return c;
 	}
 
@@ -312,149 +307,153 @@ public final class SetConstraintsFactory {
 	//***********************************************************************************
 
 	/**
-	 * set1 and set2 are disjoint, they cannot contain the same element
+	 * SET_1 and SET_2 are disjoint, i.e. they cannot contain the same element.
+	 * Note that they can be both empty
 	 *
-	 * @param set1
-	 * @param set2
-	 * @param solver
+	 * @param SET_1	a set variable
+	 * @param SET_2	a set variable
 	 * @return a constraint ensuring that set1 and set2 are disjoint
 	 */
-	public static Constraint disjoint(SetVar set1, SetVar set2, Solver solver) {
-		return all_disjoint(new SetVar[]{set1, set2}, solver);
+	public static Constraint disjoint(SetVar SET_1, SetVar SET_2) {
+		return all_disjoint(new SetVar[]{SET_1, SET_2});
 	}
 
 	/**
-	 * Sets are all disjoints
+	 * Sets in SETS are all disjoints
 	 * Note that there can be multiple empty sets
 	 *
-	 * @param sets
-	 * @param solver
+	 * @param SETS	disjoint set variables
 	 * @return a constraint ensuring that non-empty sets are all disjoint
 	 */
-	public static Constraint all_disjoint(SetVar[] sets, Solver solver) {
-		Constraint c = new Constraint(sets, solver);
-		c.setPropagators(new PropAllDisjoint(sets, solver, c));
+	public static Constraint all_disjoint(SetVar[] SETS) {
+		Constraint c = new Constraint(SETS, SETS[0].getSolver());
+		c.setPropagators(new PropAllDisjoint(SETS, SETS[0].getSolver(), c));
 		return c;
 	}
 
 	/**
-	 * Sets are all different (not necessarily disjoint)
-	 * there cannot be more than two empty sets
+	 * Sets in SETS are all different (not necessarily disjoint)
+	 * Note that there cannot be more than two empty sets
 	 *
-	 * @param sets
-	 * @param solver
-	 * @return a constraint ensuring that sets are all different
+	 * @param SETS	different set variables
+	 * @return a constraint ensuring that SETS are all different
 	 */
-	public static Constraint all_different(SetVar[] sets, Solver solver) {
-		Constraint c = new Constraint(sets, solver);
-		c.setPropagators(new PropAllDiff(sets, solver, c),
-				new PropAtMost1Empty(sets, solver, c));
+	public static Constraint all_different(SetVar[] SETS) {
+		Solver solver = SETS[0].getSolver();
+		Constraint c = new Constraint(SETS, solver);
+		c.setPropagators(new PropAllDiff(SETS, solver, c),
+				new PropAtMost1Empty(SETS, solver, c));
 		return c;
 	}
 
 	/**
-	 * Sets are all equal
+	 * SETS are all equal
 	 *
-	 * @param sets
-	 * @param solver
-	 * @return a constraint ensuring that sets are all equal
+	 * @param SETS	set variables to be equals
+	 * @return a constraint ensuring that all sets in SETS are equal
 	 */
-	public static Constraint all_equal(SetVar[] sets, Solver solver) {
-		Constraint c = new Constraint(sets, solver);
-		c.setPropagators(new PropAllEqual(sets, solver, c));
+	public static Constraint all_equal(SetVar[] SETS) {
+		Solver solver = SETS[0].getSolver();
+		Constraint c = new Constraint(SETS, solver);
+		c.setPropagators(new PropAllEqual(SETS, solver, c));
 		return c;
 	}
 
 	/**
-	 * Partition universe into disjoint sets
+	 * Partitions UNIVERSE into disjoint sets, SETS
 	 *
-	 * @param sets
-	 * @param universe
-	 * @param solver
-	 * @return a constraint which ensures that sets form a partition of universe
+	 * @param SETS		set variables whose values are subsets of UNIVERSE
+	 * @param UNIVERSE	a set variable representing union(SETS)
+	 * @return a constraint which ensures that SETS form a partition of UNIVERSE
 	 */
-	public static Constraint partition(SetVar[] sets, ISet universe, Solver solver) {
-		SetVar union = VariableFactory.set("union", universe, universe, solver);
-		Constraint c = all_disjoint(sets, solver);
-		c.setPropagators(new PropUnion(sets, union, solver, c));
+	public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
+		Solver solver = SETS[0].getSolver();
+		Constraint c = all_disjoint(SETS);
+		c.setPropagators(new PropUnion(SETS, UNIVERSE, solver, c));
 		return c;
 	}
 
 	/**
 	 * Inverse set constraint
-	 * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
+	 * x in SETS[y-OFFSET_1] <=> y in INVERSE_SETS[x-OFFSET_2]
 	 *
-	 * @param sets
-	 * @param inverses
-	 * @param offSet1  (0 by default but generally 1 with MiniZinc API)
-	 * @param offSet2  (0 by default but generally 1 with MiniZinc API)
-	 * @param solver
-	 * @return
+	 * @param SETS			set variables
+	 * @param INVERSE_SETS	set variables
+	 * @param OFFSET_1	offset index : should be 0 by default
+	 *               	but generally 1 with MiniZinc API
+	 *               	which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param OFFSET_2	offset index : should be 0 by default
+	 *               	but generally 1 with MiniZinc API
+	 *              	which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @return a constraint ensuring that x in SETS[y-OFFSET_1] <=> y in INVERSE_SETS[x-OFFSET_2]
 	 */
-	public static Constraint inverse_set(SetVar[] sets, SetVar[] inverses, int offSet1, int offSet2, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropInverse(sets, inverses, offSet1, offSet2, solver, c));
+	public static Constraint inverse_set(SetVar[] SETS, SetVar[] INVERSE_SETS, int OFFSET_1, int OFFSET_2) {
+		Solver solver = SETS[0].getSolver();
+		Constraint c = new Constraint(ArrayUtils.append(SETS,INVERSE_SETS), solver);
+		c.setPropagators(new PropInverse(SETS, INVERSE_SETS, OFFSET_1, OFFSET_2, solver, c));
 		return c;
 	}
 
 	/**
 	 * Symmetric sets constraint
-	 * x in sets[y-offSet] <=> y in sets[x-offSet]
+	 * x in SETS[y-OFFSET] <=> y in SETS[x-OFFSET]
 	 *
-	 * @param sets
-	 * @param offSet (0 by default but generally 1 with MiniZinc API)
-	 * @param solver
-	 * @return
+	 * @param SETS	 set variables
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @return a constraint ensuring that x in SETS[y-OFFSET] <=> y in SETS[x-OFFSET]
 	 */
-	public static Constraint symmetric(SetVar[] sets, int offSet, Solver solver) {
+	public static Constraint symmetric(SetVar[] SETS, int OFFSET) {
+		Solver solver = SETS[0].getSolver();
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropSymmetric(sets, offSet, solver, c));
+		c.setPropagators(new PropSymmetric(SETS, OFFSET, solver, c));
 		return c;
 	}
 
 	/**
 	 * Element constraint over sets
-	 * states that array[index-offSet] = set
+	 * states that SETS[INDEX-OFFSET] = SET
 	 *
-	 * @param index
-	 * @param array
-	 * @param offSet (0 by default but generally 1 with MiniZinc API)
-	 * @param set
-	 * @param solver
-	 * @return
+	 * @param INDEX	an integer variable pointing to SET's index into array SETS
+	 * @param SETS	set variables representing possible values for SET
+	 * @param OFFSET offset index : should be 0 by default
+	 *               but generally 1 with MiniZinc API
+	 *               which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
+	 * @param SET	a set variable which takes its value in SETS
+	 * @return a constraint ensuring that SETS[INDEX-OFFSET] = SET
 	 */
-	public static Constraint element(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver) {
+	public static Constraint element(IntVar INDEX, SetVar[] SETS, int OFFSET, SetVar SET) {
+		Solver solver = INDEX.getSolver();
 		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropElement(index, array, offSet, set, solver, c));
+		c.setPropagators(new PropElement(INDEX, SETS, OFFSET, SET, solver, c));
 		return c;
 	}
 
 	/**
 	 * Member constraint over sets
-	 * states that set belongs to array
+	 * states that SET belongs to SETS
 	 *
-	 * @param array
-	 * @param set
-	 * @param solver
-	 * @return
+	 * @param SETS	set variables representing possible values for SET
+	 * @param SET	a set variable which takes its value in SETS
+	 * @return a constraint ensuring that SET belongs to SETS
 	 */
-	public static Constraint member(SetVar[] array, SetVar set, Solver solver) {
-		IntVar index = VariableFactory.enumerated("idx_tmp", 0, array.length - 1, solver);
-		return element(index, array, 0, set, solver);
+	public static Constraint member(SetVar[] SETS, SetVar SET) {
+		IntVar index = VariableFactory.enumerated("idx_tmp", 0, SETS.length - 1, SET.getSolver());
+		return element(index, SETS, 0, SET);
 	}
 
 	/**
 	 * Member constraint over an IntVar and a SetVar
-	 * states that intVar is in SetVar
+	 * states that INTEGER is included in SET
 	 *
-	 * @param setVar
-	 * @param intVar
-	 * @param solver
-	 * @return
+	 * @param INTEGER	an integer variables which takes its values in SET
+	 * @param SET		a set variables representing possible values of INTEGER
+	 * @return a constraint ensuring that INTEGER belongs to SET
 	 */
-	public static Constraint member(SetVar setVar, IntVar intVar, Solver solver) {
-		Constraint c = new Constraint(solver);
-		c.setPropagators(new PropIntMemberSet(setVar, intVar, solver, c));
+	public static Constraint member(IntVar INTEGER, SetVar SET) {
+		Constraint c = new Constraint(new Variable[]{SET,INTEGER},INTEGER.getSolver());
+		c.setPropagators(new PropIntMemberSet(SET, INTEGER, INTEGER.getSolver(), c));
 		return c;
 	}
 }
