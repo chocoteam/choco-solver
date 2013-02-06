@@ -73,7 +73,7 @@ public interface Model {
             }
             SetVar[] sets = new SetVar[n - 1];
             System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = SetConstraintsFactory.union(sets, vars[n - 1], s);
+            Constraint ctr = SetConstraintsFactory.union(sets, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
@@ -104,7 +104,7 @@ public interface Model {
             }
             SetVar[] sets = new SetVar[n - 1];
             System.arraycopy(vars, 0, sets, 0, n - 1);
-            Constraint ctr = SetConstraintsFactory.intersection(sets, vars[n - 1], s);
+            Constraint ctr = SetConstraintsFactory.intersection(sets, vars[n - 1]);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
@@ -133,7 +133,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_disjoint(vars, s);
+            Constraint ctr = SetConstraintsFactory.all_disjoint(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
@@ -162,7 +162,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_different(vars, s);
+            Constraint ctr = SetConstraintsFactory.all_different(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
@@ -191,7 +191,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.subsetEq(vars, s);
+            Constraint ctr = SetConstraintsFactory.subsetEq(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
@@ -220,7 +220,7 @@ public interface Model {
                 }
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
-            Constraint ctr = SetConstraintsFactory.all_equal(vars, s);
+            Constraint ctr = SetConstraintsFactory.all_equal(vars);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);

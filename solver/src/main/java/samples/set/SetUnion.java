@@ -83,7 +83,7 @@ public class SetUnion extends AbstractProblem{
 		z.getEnvelope().add(7);
 		z.getEnvelope().add(3);
 		// set-union constraint
-		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z, solver));
+		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
 	}
 
 	@Override

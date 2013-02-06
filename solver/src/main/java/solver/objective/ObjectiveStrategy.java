@@ -118,7 +118,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             case DICHOTOMIC:
                 return new int[]{1, 1};
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("unknown OptimizationPolicy "+policy);
         }
     }
 
@@ -136,9 +136,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
                         return incLB;
                 }
             default:
-                System.out.println(optPolicy);
-                System.out.println(resoPolicy);
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("unknown OptimizationPolicy "+optPolicy+" or ResolutionPolicy "+resoPolicy);
         }
     }
 
@@ -174,7 +172,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-        System.out.println(globalLB + " : " + globalUB + " -> " + target);
+		System.out.println("new objective bounds ["+globalLB+","+globalUB+"]");
         FastDecision dec = pool.getE();
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);
@@ -189,7 +187,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            System.out.println("unapply objective decision");
             globalLB = value + 1;
             solver.getSearchLoop().getObjectivemanager().updateLB(globalLB);
             var.updateLowerBound(globalLB, cause);
@@ -219,7 +216,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            System.out.println("unapply objective decision");
             globalUB = value - 1;
             solver.getSearchLoop().getObjectivemanager().updateUB(globalUB);
             var.updateUpperBound(globalUB, cause);
