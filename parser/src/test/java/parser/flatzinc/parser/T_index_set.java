@@ -55,7 +55,7 @@ public class T_index_set extends GrammarTest {
         return walker.index_set();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("1..3");
         Declaration d = index_set(fp);
@@ -64,7 +64,7 @@ public class T_index_set extends GrammarTest {
         Assert.assertEquals(3, ((DInt2) d).getUpp());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("int");
         Declaration d = index_set(fp);

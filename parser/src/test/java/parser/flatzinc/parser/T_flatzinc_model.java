@@ -87,7 +87,7 @@ public class T_flatzinc_model extends GrammarTest {
         mSolver.findSolution();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRegularKO() {
         st.append(
                 "array [1..25] of int: tiles = [63, 6, 1, 2, 0, 9, 6, 1, 2, 378, 54, 6, 1, 2, 432, 4, 6, 1, 2, 756, 14, 6, 1, 2, 780];\n" +
@@ -120,7 +120,7 @@ public class T_flatzinc_model extends GrammarTest {
                         "solve  :: int_search(board, input_order, indomain_min, complete) satisfy;\n");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRegularOK() {
         st.append(
                 "array [1..25] of int: tiles = [63, 6, 1, 2, 0, 9, 6, 1, 2, 378, 54, 6, 1, 2, 432, 4, 6, 1, 2, 756, 14, 6, 1, 2, 780];\n" +
@@ -153,13 +153,13 @@ public class T_flatzinc_model extends GrammarTest {
                         "solve  :: int_search(board, input_order, indomain_min, complete) satisfy;\n");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testSatisfy5() {
         st.append("constraint array_bool_and([], true);");
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testSatisfy6() {
         st.append("var bool: x1 :: output_var;");
         st.append("var bool: x2 :: output_var;");
@@ -167,7 +167,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_bool_and() {
 
         st.append("array[1 .. 3] of var bool : as;");
@@ -176,7 +176,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_bool_element() {
 
         st.append("var 1 .. 3: b;");
@@ -185,7 +185,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_bool_or() {
 
         st.append("array[1 .. 3] of var bool : as;");
@@ -194,7 +194,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_int_element() {
 
         st.append("var 1 .. 3: b;");
@@ -203,7 +203,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_var_bool_element() {
 
         st.append("var 1 .. 3: b;");
@@ -213,7 +213,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_array_var_int_element() {
 
         st.append("var 1 .. 3: b;");
@@ -223,7 +223,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool2int() {
 
         st.append("var bool : a;");
@@ -232,7 +232,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_and() {
 
         st.append("var bool : a;");
@@ -242,7 +242,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_clause() {
 
         st.append("array [1 .. 3] of var bool : as;");
@@ -251,7 +251,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_eq() {
 
         st.append("var bool : a;");
@@ -260,7 +260,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_eq_reif() {
 
         st.append("var bool : a;");
@@ -270,7 +270,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_le() {
 
         st.append("var bool : a;");
@@ -279,7 +279,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_le_reif() {
 
         st.append("var bool : a;");
@@ -289,7 +289,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_lt() {
 
         st.append("var bool : a;");
@@ -298,7 +298,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_lt_reif() {
 
         st.append("var bool : a;");
@@ -308,7 +308,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_not() {
 
         st.append("var bool : a;");
@@ -317,7 +317,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_or() {
 
         st.append("var bool : a;");
@@ -327,7 +327,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_bool_xor() {
 
         st.append("var bool : a;");
@@ -337,7 +337,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_abs() {
 
         st.append("var 1 .. 3 : a;");
@@ -346,7 +346,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_div() {
 
         st.append("var 1 .. 3 : a;");
@@ -356,7 +356,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_eq() {
 
         st.append("var 1 .. 3 : a;");
@@ -365,7 +365,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_eq_reif() {
 
         st.append("var 1 .. 3 : a;");
@@ -375,7 +375,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_le() {
 
         st.append("var 1 .. 3 : a;");
@@ -384,7 +384,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_le_reif() {
 
         st.append("var 1 .. 3 : a;");
@@ -394,7 +394,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_eq() {
 
         st.append("array [1 .. 3] of var 1 .. 3 : bs;");
@@ -402,7 +402,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_eq_reif() {
 
         st.append("array [1 ..3] of var 1 .. 3 : bs;");
@@ -411,7 +411,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_le() {
 
         st.append("array [1 ..3] of var 1 .. 3 : bs;");
@@ -419,7 +419,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_le_reif() {
 
         st.append("array [1 ..3] of var 1 .. 3 : bs;");
@@ -428,7 +428,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_ne() {
 
         st.append("array [1 ..3] of var 1 .. 3 : bs;");
@@ -436,7 +436,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lin_ne_reif() {
 
         st.append("array [1 ..3] of var 1 .. 3 : bs;");
@@ -445,7 +445,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lt() {
 
         st.append("var 1 .. 3 : a;");
@@ -454,7 +454,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_lt_reif() {
 
         st.append("var 1 .. 3 : a;");
@@ -464,7 +464,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_max() {
 
         st.append("var 1 .. 3 : a;");
@@ -474,7 +474,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_min() {
 
         st.append("var 1 .. 3 : a;");
@@ -484,7 +484,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_mod() {
 
         st.append("var 1 .. 3 : a;");
@@ -494,7 +494,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_ne() {
 
         st.append("var 1 .. 3 : a;");
@@ -503,7 +503,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_ne_reif() {
 
         st.append("var 1 .. 3 : a;");
@@ -513,7 +513,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_plus() {
 
         st.append("var 1 .. 3 : a;");
@@ -523,7 +523,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_int_times() {
 
         st.append("var 1 .. 3 : a;");
@@ -533,7 +533,7 @@ public class T_flatzinc_model extends GrammarTest {
         st.append("solve satisfy;");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test_regular() {
 
         st.append("predicate regularChoco(array [int] of var int: x, int: Q, int: S, array [int, int] of int: d, int: q0, set of int: F);");

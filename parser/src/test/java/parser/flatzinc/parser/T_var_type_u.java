@@ -53,7 +53,7 @@ public class T_var_type_u extends GrammarTest {
         return walker.var_type_u();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("bool");
         Declaration d = var_type_u(fp);
@@ -61,7 +61,7 @@ public class T_var_type_u extends GrammarTest {
         Assert.assertEquals(DBool.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("float");
         Declaration d = var_type_u(fp);
@@ -69,7 +69,7 @@ public class T_var_type_u extends GrammarTest {
         Assert.assertEquals(DFloat.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincParser fp = parser("int");
         Declaration d = var_type_u(fp);
@@ -77,14 +77,14 @@ public class T_var_type_u extends GrammarTest {
         Assert.assertEquals(DInt.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincParser fp = parser("1..4");
         Declaration d = var_type_u(fp);
         Assert.assertTrue(d instanceof DInt2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincParser fp = parser("{1,2,3}");
         Declaration d = var_type_u(fp);
@@ -92,7 +92,7 @@ public class T_var_type_u extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincParser fp = parser("set of 1..4");
         Declaration d = var_type_u(fp);
@@ -100,7 +100,7 @@ public class T_var_type_u extends GrammarTest {
         Assert.assertTrue(((DSet) d).getWhat() instanceof DInt2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincParser fp = parser("set of {1,2,3}");
         Declaration d = var_type_u(fp);

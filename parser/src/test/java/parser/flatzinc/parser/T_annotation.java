@@ -54,7 +54,7 @@ public class T_annotation extends GrammarTest {
         return walker.annotation();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("anAnnotation");
         EAnnotation d = annotation(fp);
@@ -62,7 +62,7 @@ public class T_annotation extends GrammarTest {
         Assert.assertEquals(0, d.exps.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("anAnnotation(true)");
         EAnnotation d = annotation(fp);
@@ -70,7 +70,7 @@ public class T_annotation extends GrammarTest {
         Assert.assertEquals(1, d.exps.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincParser fp = parser("anAnnotation(true, false)");
         EAnnotation d = annotation(fp);

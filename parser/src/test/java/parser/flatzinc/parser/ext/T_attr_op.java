@@ -53,28 +53,28 @@ public class T_attr_op extends GrammarExtTest {
         return walker.attr_op();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("any");
         AttributeOperator o = attr_op(fp);
         Assert.assertTrue(o == AttributeOperator.ANY);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("min");
         AttributeOperator o = attr_op(fp);
         Assert.assertTrue(o == AttributeOperator.MIN);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("max");
         AttributeOperator o = attr_op(fp);
         Assert.assertTrue(o == AttributeOperator.MAX);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("sum");
         AttributeOperator o = attr_op(fp);

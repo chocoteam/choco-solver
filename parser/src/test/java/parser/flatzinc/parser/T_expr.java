@@ -56,7 +56,7 @@ public class T_expr extends GrammarTest {
         return walker.expr();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("true");
         Expression d = expr(fp);
@@ -64,7 +64,7 @@ public class T_expr extends GrammarTest {
         Assert.assertEquals(true, ((EBool) d).value);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("false");
         Expression d = expr(fp);
@@ -72,7 +72,7 @@ public class T_expr extends GrammarTest {
         Assert.assertEquals(false, ((EBool) d).value);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincParser fp = parser("12");
         Expression d = expr(fp);
@@ -80,7 +80,7 @@ public class T_expr extends GrammarTest {
         Assert.assertEquals(12, ((EInt) d).value);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincParser fp = parser("-12");
         Expression d = expr(fp);
@@ -88,35 +88,35 @@ public class T_expr extends GrammarTest {
         Assert.assertEquals(-12, ((EInt) d).value);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincParser fp = parser("1..3");
         Expression d = expr(fp);
         Assert.assertTrue(d instanceof ESetBounds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincParser fp = parser("{1,2,3}");
         Expression d = expr(fp);
         Assert.assertTrue(d instanceof ESetList);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincParser fp = parser("a");
         Expression d = expr(fp);
         Assert.assertTrue(d instanceof EIdentifier);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
         FlatzincParser fp = parser("a[1]");
         Expression d = expr(fp);
         Assert.assertTrue(d instanceof EIdArray);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test9() throws IOException, RecognitionException {
         FlatzincParser fp = parser("[]");
         Expression d = expr(fp);
@@ -124,14 +124,14 @@ public class T_expr extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test10() throws IOException, RecognitionException {
         FlatzincParser fp = parser("[a,b]");
         Expression d = expr(fp);
         Assert.assertTrue(d instanceof EArray);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test11() throws IOException, RecognitionException {
         FlatzincParser fp = parser("\"toto\"");
         Expression d = expr(fp);

@@ -94,7 +94,7 @@ public class T_struct_reg extends GrammarExtTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         // Simple constraint oriented engine
         FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each cstr as list(wfor)}");
@@ -103,7 +103,7 @@ public class T_struct_reg extends GrammarExtTest {
         Assert.assertTrue(scheds instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         // Simple variable oriented engine
         FlatzincFullExtParser fp = parser("G1 as queue(wone) of {each var as list(wfor)}");
@@ -112,7 +112,7 @@ public class T_struct_reg extends GrammarExtTest {
         Assert.assertTrue(scheds instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         // A Gecode-like propagation engine
         FlatzincFullExtParser fp = parser("G1 as list(wone) of {each prop.prioDyn as queue(one)}");
@@ -121,7 +121,7 @@ public class T_struct_reg extends GrammarExtTest {
         Assert.assertTrue(scheds instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         // A heap-based variable oriented propagation engine
         FlatzincFullExtParser fp = parser("G1 as heap(wone) of {each var as queue(one) key any.var.cardinality}");
@@ -130,7 +130,7 @@ public class T_struct_reg extends GrammarExtTest {
         Assert.assertTrue(scheds instanceof SortDyn);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         // A heap-based variable oriented propagation engine
         FlatzincFullExtParser fp = parser("G1 as max heap(wone) of {each var as queue(one) key any.var.cardinality}");

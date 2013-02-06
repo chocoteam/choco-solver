@@ -53,42 +53,42 @@ public class T_op extends GrammarExtTest {
         return walker.op();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("==");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.EQ);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("!=");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.NQ);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser(">");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.GT);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("<");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.LT);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser(">=");
         Operator o = par_type(fp);
         Assert.assertTrue(o == Operator.GQ);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("<=");
         Operator o = par_type(fp);

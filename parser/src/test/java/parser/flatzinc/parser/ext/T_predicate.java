@@ -70,21 +70,21 @@ public class T_predicate extends GrammarExtTest {
         return walker.predicate();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test0() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("true");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof TruePredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("prop.priority == 1");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof IntPredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         IntVar[] vars = VariableFactory.boundedArray("x", 2, 1, 3, mSolver);
         map.put("x", vars[0]);
@@ -95,7 +95,7 @@ public class T_predicate extends GrammarExtTest {
         Assert.assertTrue(p instanceof ExtPredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("!prop.priority == 1)");
         Predicate p = predicate(fp);

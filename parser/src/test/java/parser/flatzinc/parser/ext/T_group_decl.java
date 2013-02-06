@@ -85,7 +85,7 @@ public class T_group_decl extends GrammarExtTest {
         walker.group_decl(before);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: true;");
@@ -94,7 +94,7 @@ public class T_group_decl extends GrammarExtTest {
         Assert.assertEquals(8, elmts.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: prop.priority <= 2;");
@@ -103,7 +103,7 @@ public class T_group_decl extends GrammarExtTest {
         Assert.assertEquals(8, elmts.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: (in(v_0,c_0) || in(v_1,c_1) || in(v_2,c_2) || in(v_3,c_3));");

@@ -94,7 +94,7 @@ public class T_many extends GrammarExtTest {
         return walker.many(in);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each var as queue(wone)");
         FlatzincFullExtWalker.many_return _many = many(fp, arcs);
@@ -105,7 +105,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each cstr as queue(wone) of { each var as list(wfor)}");
 
@@ -117,7 +117,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each cstr as list(for) of { each var as list(wfor) key any.var.name }");
         FlatzincFullExtWalker.many_return _many = many(fp, arcs);
@@ -128,7 +128,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each prop.prioDyn as queue(wone) of { each prop as list(wfor)}");
 
@@ -140,7 +140,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each prop as queue(wone) key any.prop.priority");
 
@@ -156,7 +156,7 @@ public class T_many extends GrammarExtTest {
 //                                    "       each prop as queue(wone) key any.prop.priority" +
 //                                    "   } key any.any.var.cardinality
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincFullExtParser fp =
                 parser("each var as list(wone) key any.var.cardinality");
@@ -169,7 +169,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincFullExtParser fp =
                 parser("each var as list(wone) of {each prop as queue(one) key any.prop.priority} key any.any.var.cardinality");

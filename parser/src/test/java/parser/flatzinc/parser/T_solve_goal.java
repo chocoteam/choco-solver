@@ -67,7 +67,7 @@ public class T_solve_goal extends GrammarTest {
         walker.solve_goal();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testSatisfy() throws IOException {
         FlatzincParser fp = parser("solve satisfy;");
         try {
@@ -77,7 +77,7 @@ public class T_solve_goal extends GrammarTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testMaximize() throws IOException {
         map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve maximize a;");
@@ -88,7 +88,7 @@ public class T_solve_goal extends GrammarTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testMinimize() throws IOException {
         map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve minimize a;");
@@ -99,7 +99,7 @@ public class T_solve_goal extends GrammarTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testSatisfy2() throws IOException {
         map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve ::int_search([a],input_order,indomain_min, complete) satisfy;");
@@ -111,7 +111,7 @@ public class T_solve_goal extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void testSatisfy3() throws IOException {
         map.put("r", VariableFactory.boundedArray("r", 5, 0, 10, mSolver));
         map.put("s", VariableFactory.boundedArray("s", 5, 0, 10, mSolver));

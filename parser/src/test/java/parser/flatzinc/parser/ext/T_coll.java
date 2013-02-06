@@ -95,7 +95,7 @@ public class T_coll extends GrammarExtTest {
         return walker.coll(elements, ca);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one)");
 
@@ -107,7 +107,7 @@ public class T_coll extends GrammarExtTest {
         Assert.assertTrue(ps instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("list(for)");
 
@@ -119,7 +119,7 @@ public class T_coll extends GrammarExtTest {
         Assert.assertTrue(ps instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("rev list(for)");
 
@@ -131,7 +131,7 @@ public class T_coll extends GrammarExtTest {
         Assert.assertTrue(ps instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("min heap(one)");
 
@@ -143,7 +143,7 @@ public class T_coll extends GrammarExtTest {
         Assert.assertTrue(ps instanceof SortDyn);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("max heap(one)");
 

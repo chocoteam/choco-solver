@@ -53,28 +53,28 @@ public class T_iterator extends GrammarExtTest {
         return walker.liter();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("one");
         Iterator o = liter(fp);
         Assert.assertTrue(o == Iterator.ONE);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("wone");
         Iterator o = liter(fp);
         Assert.assertTrue(o == Iterator.WONE);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("for");
         Iterator o = liter(fp);
         Assert.assertTrue(o == Iterator.FOR);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("wfor");
         Iterator o = liter(fp);
