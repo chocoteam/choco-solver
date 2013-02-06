@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,7 +40,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**
@@ -59,23 +60,23 @@ public class PropKCliques extends Propagator {
     private BitSet in;
     private BitSet inMIS;
     private int[] nbNeighbors;
-	private TIntArrayList list;
-	private ConnectivityFinder connectivityFinder;
+    private TIntArrayList list;
+    private ConnectivityFinder connectivityFinder;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public PropKCliques(UndirectedGraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-        super(new Variable[]{graph, k}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         g = graph;
         this.k = k;
         n = g.getEnvelopGraph().getNbNodes();
         in = new BitSet(n);
         inMIS = new BitSet(n);
         nbNeighbors = new int[n];
-		list = new TIntArrayList();
-		connectivityFinder = new ConnectivityFinder(g.getKernelGraph());
+        list = new TIntArrayList();
+        connectivityFinder = new ConnectivityFinder(g.getKernelGraph());
     }
 
     //***********************************************************************************
@@ -84,27 +85,27 @@ public class PropKCliques extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		connectivityFinder.findAllCC();
-		int max = connectivityFinder.getNBCC();
-		max += g.getEnvelopOrder()-g.getKernelOrder();
-		k.updateUpperBound(max,aCause);
-		if(max == k.getLB()){
-			ISet nodes = g.getKernelGraph().getActiveNodes();
-			for (int i=0;i<n;i++) {
-				if(!nodes.contain(i)){
-					ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
-					for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-						g.removeArc(i,j,aCause);
-					}
-				}
-			}
-		}else{
-			int min = findMIS();
-			k.updateLowerBound(min, aCause);
-			if (min == k.getUB()) {
-				filter();
-			}
-		}
+        connectivityFinder.findAllCC();
+        int max = connectivityFinder.getNBCC();
+        max += g.getEnvelopOrder() - g.getKernelOrder();
+        k.updateUpperBound(max, aCause);
+        if (max == k.getLB()) {
+            ISet nodes = g.getKernelGraph().getActiveNodes();
+            for (int i = 0; i < n; i++) {
+                if (!nodes.contain(i)) {
+                    ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
+                    for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                        g.removeArc(i, j, aCause);
+                    }
+                }
+            }
+        } else {
+            int min = findMIS();
+            k.updateLowerBound(min, aCause);
+            if (min == k.getUB()) {
+                filter();
+            }
+        }
     }
 
     @Override
@@ -112,57 +113,57 @@ public class PropKCliques extends Propagator {
         propagate(0);
     }
 
-	private int findMIS() {
+    private int findMIS() {
         // prepare data structures
         in.clear();
         inMIS.clear();
-		ISet nodes = g.getKernelGraph().getActiveNodes();
+        ISet nodes = g.getKernelGraph().getActiveNodes();
         int min = 0;
         for (int i = 0; i < n; i++) {
             nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).getSize();
-			if(!nodes.contain(i)){
-				in.set(i);
-			}
+            if (!nodes.contain(i)) {
+                in.set(i);
+            }
         }
         // find MIS
         int idx = in.nextClearBit(0);
-        while (idx >= 0 && idx<n) {
-            for (int i = in.nextClearBit(idx + 1); i>=0 && i<n ; i = in.nextClearBit(i + 1)) {
+        while (idx >= 0 && idx < n) {
+            for (int i = in.nextClearBit(idx + 1); i >= 0 && i < n; i = in.nextClearBit(i + 1)) {
                 if (nbNeighbors[i] < nbNeighbors[idx]) {
                     idx = i;
                 }
             }
-			addToMIS(idx);
+            addToMIS(idx);
             min++;
             idx = in.nextClearBit(0);
         }
         return min;
     }
 
-	private void addToMIS(int node){
-		ISet nei = g.getEnvelopGraph().getNeighborsOf(node);
-		inMIS.set(node);
-		in.set(node);
-		list.clear();
-		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-			if (!in.get(j)) {
-				in.set(j);
-				list.add(j);
-			}
-		}
-		for (int i = list.size() - 1; i >= 0; i--) {
-			nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
-			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-				nbNeighbors[j]--;
-			}
-		}
-	}
+    private void addToMIS(int node) {
+        ISet nei = g.getEnvelopGraph().getNeighborsOf(node);
+        inMIS.set(node);
+        in.set(node);
+        list.clear();
+        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            if (!in.get(j)) {
+                in.set(j);
+                list.add(j);
+            }
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                nbNeighbors[j]--;
+            }
+        }
+    }
 
     private void filter() throws ContradictionException {
         ISet nei;
         in.clear();
         int mate;
-		ISet nodes = g.getKernelGraph().getActiveNodes();
+        ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             if (!inMIS.get(i)) {
                 mate = -1;
@@ -178,7 +179,7 @@ public class PropKCliques extends Propagator {
                     }
                 }
                 if (mate >= 0) {
-					g.enforceArc(i,mate,aCause);
+                    g.enforceArc(i, mate, aCause);
                 }
             }
         }
@@ -196,16 +197,16 @@ public class PropKCliques extends Propagator {
 
     @Override
     public ESat isEntailed() {
-        if(findMIS()>k.getUB()){
-			return ESat.FALSE;
-		}
-		if(g.instantiated()){
-			ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
-			cf.findAllCC();
-			if(cf.getNBCC()<=k.getLB()){
-				return ESat.TRUE;// sous reserve que le graphe soit transitif (autre propagateur)
-			}
-		}
+        if (findMIS() > k.getUB()) {
+            return ESat.FALSE;
+        }
+        if (g.instantiated()) {
+            ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
+            cf.findAllCC();
+            if (cf.getNBCC() <= k.getLB()) {
+                return ESat.TRUE;// sous reserve que le graphe soit transitif (autre propagateur)
+            }
+        }
         return ESat.UNDEFINED;
     }
 }

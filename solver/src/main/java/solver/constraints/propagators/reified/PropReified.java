@@ -76,7 +76,7 @@ public class PropReified extends Propagator<Variable> {
                        Propagator[] oppCons,
                        Solver solver,
                        Constraint<Variable, Propagator<Variable>> owner) {
-        super(vars, solver, owner, extractPriority(cons, oppCons), false);
+        super(vars, extractPriority(cons, oppCons), false);
         this.bVar = (BoolVar) vars[0];
         left = cons;
         right = oppCons;

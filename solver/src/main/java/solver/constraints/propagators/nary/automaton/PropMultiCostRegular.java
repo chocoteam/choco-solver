@@ -221,7 +221,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto,
                                 Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.<IntVar>append(vars, counterVars), solver, constraint, PropagatorPriority.CUBIC, false);
+        super(ArrayUtils.<IntVar>append(vars, counterVars), PropagatorPriority.CUBIC, false);
         this.solver = solver;
         this.vs = vars;
         this.idms = new IIntDeltaMonitor[this.vars.length];

@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -40,7 +41,6 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.GraphVar.IncidentNodes;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that a node has at most N successors/predecessors/neighbors
@@ -68,7 +68,7 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtMost(DirectedGraphVar graph, IncidentNodes setType, int[] degrees, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         target = setType;
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -106,7 +106,7 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtMost(UndirectedGraphVar graph, int[] degrees, Constraint constraint, Solver solver) {
-        super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         target = IncidentNodes.NEIGHBORS;
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

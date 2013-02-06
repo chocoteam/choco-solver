@@ -60,7 +60,7 @@ public class PropTransitiveClosureFastMaintenance extends Propagator<DirectedGra
     //***********************************************************************************
 
     public PropTransitiveClosureFastMaintenance(DirectedGraphVar graph, DirectedGraphVar transitiveClosure, Solver solver, Constraint constraint) {
-        super(new DirectedGraphVar[]{graph, transitiveClosure}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph, transitiveClosure}, PropagatorPriority.LINEAR);
         g = graph;
         gdmG = (GraphDeltaMonitor) g.monitorDelta(this);
         tc = transitiveClosure;

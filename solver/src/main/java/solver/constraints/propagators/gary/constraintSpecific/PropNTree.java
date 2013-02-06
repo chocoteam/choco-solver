@@ -28,7 +28,7 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,7 +40,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
@@ -56,9 +55,9 @@ public class PropNTree extends Propagator {
     private int minTree = 0;
     private TIntArrayList nonSinks;
     private StrongConnectivityFinder SCCfinder;
-	private DirectedGraph Grs;
-	private int n;
-	private AbstractLengauerTarjanDominatorsFinder dominatorsFinder;
+    private DirectedGraph Grs;
+    private int n;
+    private AbstractLengauerTarjanDominatorsFinder dominatorsFinder;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,14 +65,14 @@ public class PropNTree extends Propagator {
 
     public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
                      Constraint constraint) {
-        super(new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
+        super(new Variable[]{graph, nT}, PropagatorPriority.QUADRATIC);
         g = graph;
         nTree = nT;
         SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
         nonSinks = new TIntArrayList();
-		n = g.getEnvelopGraph().getNbNodes();
-		Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
-		dominatorsFinder = new AlphaDominatorsFinder(n, Grs);
+        n = g.getEnvelopGraph().getNbNodes();
+        Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType(), false);
+        dominatorsFinder = new AlphaDominatorsFinder(n, Grs);
     }
 
     //***********************************************************************************
@@ -90,9 +89,9 @@ public class PropNTree extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			g.enforceNode(i,aCause);
-		}
+        for (int i = 0; i < n; i++) {
+            g.enforceNode(i, aCause);
+        }
         filtering();
     }
 
@@ -102,11 +101,11 @@ public class PropNTree extends Propagator {
     }
 
     private void structuralPruning() throws ContradictionException {
-		for(int i=0;i<=n;i++){
-			Grs.getPredecessorsOf(i).clear();
-			Grs.getSuccessorsOf(i).clear();
-		}
-		Grs.getActiveNodes().clear();
+        for (int i = 0; i <= n; i++) {
+            Grs.getPredecessorsOf(i).clear();
+            Grs.getSuccessorsOf(i).clear();
+        }
+        Grs.getActiveNodes().clear();
         ISet nei;
         for (int node = 0; node < n; node++) {
             nei = g.getEnvelopGraph().getSuccessorsOf(node);

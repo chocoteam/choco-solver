@@ -35,6 +35,7 @@
 package solver.constraints.propagators.gary.tsp.directed.position;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -43,7 +44,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * @PropAnn(tested = {BENCHMARK})
@@ -63,7 +63,7 @@ public class PropPosInTour extends Propagator {
     //***********************************************************************************
 
     public PropPosInTour(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(intVars, solver, constraint, PropagatorPriority.LINEAR);
+        super(intVars, PropagatorPriority.LINEAR);
         g = graph;
         this.intVars = intVars;
         this.n = g.getEnvelopGraph().getNbNodes();

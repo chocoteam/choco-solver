@@ -30,6 +30,7 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -38,7 +39,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that each node of the given subset of nodes has a loop
@@ -62,7 +62,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropEachNodeHasLoop(GraphVar graph, ISet concernedNodes, Solver sol, Constraint constraint) {
-        super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
+        super(new GraphVar[]{graph}, PropagatorPriority.UNARY);
         this.g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.enfNode = new NodeEnf();

@@ -28,6 +28,8 @@
 package solver.constraints.propagators.gary.arborescences;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -36,8 +38,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
@@ -66,17 +66,17 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		n = g.getEnvelopGraph().getNbNodes();
-		connectedGraph = new DirectedGraph(n+1, SetType.LINKED_LIST,false);
-		if(simple){
-			domFinder = new SimpleDominatorsFinder(n, connectedGraph);
-		}else{
-			domFinder = new AlphaDominatorsFinder(n, connectedGraph);
-		}
-	}
+    public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        g = graph;
+        n = g.getEnvelopGraph().getNbNodes();
+        connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
+        if (simple) {
+            domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+        } else {
+            domFinder = new AlphaDominatorsFinder(n, connectedGraph);
+        }
+    }
 
     //***********************************************************************************
     // METHODS

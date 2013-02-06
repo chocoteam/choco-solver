@@ -83,7 +83,7 @@ public class PropElement extends Propagator<Variable> {
      * @param c
      */
     public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver, Constraint c) {
-        super(ArrayUtils.append(array, new Variable[]{set, index}), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR);
         this.index = index;
         this.array = array;
         this.set = set;

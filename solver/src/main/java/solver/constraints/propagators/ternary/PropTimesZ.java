@@ -44,163 +44,161 @@ import solver.variables.IntVar;
  */
 public class PropTimesZ extends Propagator<IntVar> {
 
-	IntVar X, Y, Z;
+    IntVar X, Y, Z;
 
-	public PropTimesZ(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
-			Propagator<IntVar>> intVarPropagatorConstraint) {
-		super(new IntVar[]{z}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
-		this.X = x;
-		this.Y = y;
-		this.Z = z;
-	}
+    public PropTimesZ(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
+            Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(new IntVar[]{z}, PropagatorPriority.UNARY, false);
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
+    }
 
-	@Override
-	public final int getPropagationConditions(int vIdx) {
-		return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-	}
+    @Override
+    public final int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+    }
 
-	@Override
-	public final void propagate(int evtmask) throws ContradictionException {
-		// sign reasoning
-		if(Z.getLB()>=0){
-			positiveOrNul();
-			if(Z.getUB()==0){
-				nul();
-			}else if(Z.getLB()>0){
-				positiveStrict();
-			}
-		}else if(Z.getUB()<0){
-			negativeStrict();
-		}
-		// instantiation reasoning
-		if(Z.instantiated()){
-			instantiated(X,Y);
-			instantiated(Y,X);
-		}
-	}
+    @Override
+    public final void propagate(int evtmask) throws ContradictionException {
+        // sign reasoning
+        if (Z.getLB() >= 0) {
+            positiveOrNul();
+            if (Z.getUB() == 0) {
+                nul();
+            } else if (Z.getLB() > 0) {
+                positiveStrict();
+            }
+        } else if (Z.getUB() < 0) {
+            negativeStrict();
+        }
+        // instantiation reasoning
+        if (Z.instantiated()) {
+            instantiated(X, Y);
+            instantiated(Y, X);
+        }
+    }
 
-	@Override
-	public final void propagate(int varIdx, int mask) throws ContradictionException {
-		propagate(0);
-	}
+    @Override
+    public final void propagate(int varIdx, int mask) throws ContradictionException {
+        propagate(0);
+    }
 
-	@Override
-	public final ESat isEntailed() {
-		if(X.instantiated() && Y.instantiated() && Z.instantiated()){
-			return ESat.eval(X.getValue()* Y.getValue()== Z.getValue());
-		} // TODO can be improved
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public final ESat isEntailed() {
+        if (X.instantiated() && Y.instantiated() && Z.instantiated()) {
+            return ESat.eval(X.getValue() * Y.getValue() == Z.getValue());
+        } // TODO can be improved
+        return ESat.UNDEFINED;
+    }
 
-	//****************************************************************************************************************//
-	//******* 	SIGN	   	 *****************************************************************************************//
-	//****************************************************************************************************************//
+    //****************************************************************************************************************//
+    //******* 	SIGN	   	 *****************************************************************************************//
+    //****************************************************************************************************************//
 
-	private void positiveOrNul() throws ContradictionException {
-		if(X.getUB()<0){
-			Y.updateUpperBound(0,aCause);
-		}else {
-			if(Y.getUB()<0){
-				X.updateUpperBound(0,aCause);
-			}
-		}
-	}
+    private void positiveOrNul() throws ContradictionException {
+        if (X.getUB() < 0) {
+            Y.updateUpperBound(0, aCause);
+        } else {
+            if (Y.getUB() < 0) {
+                X.updateUpperBound(0, aCause);
+            }
+        }
+    }
 
-	private void positiveStrict() throws ContradictionException {
-		if(X.getUB()<0){
-			Y.updateUpperBound(-1,aCause);
-		}else {
-			if(X.getLB()>=0){
-				X.updateLowerBound(1,aCause);
-				Y.updateLowerBound(1,aCause);
-			}else{
-				if(Y.getUB()<0){
-					X.updateUpperBound(-1,aCause);
-				}else if(Y.getLB()>=0){
-					X.updateLowerBound(1,aCause);
-					Y.updateLowerBound(1,aCause);
-				}
-			}
-		}
-	}
+    private void positiveStrict() throws ContradictionException {
+        if (X.getUB() < 0) {
+            Y.updateUpperBound(-1, aCause);
+        } else {
+            if (X.getLB() >= 0) {
+                X.updateLowerBound(1, aCause);
+                Y.updateLowerBound(1, aCause);
+            } else {
+                if (Y.getUB() < 0) {
+                    X.updateUpperBound(-1, aCause);
+                } else if (Y.getLB() >= 0) {
+                    X.updateLowerBound(1, aCause);
+                    Y.updateLowerBound(1, aCause);
+                }
+            }
+        }
+    }
 
-	private void negativeStrict() throws ContradictionException {
-		if(X.getUB()<0){
-			Y.updateLowerBound(1, aCause);
-		}else {
-			if(X.getLB()>=0){
-				X.updateLowerBound(1,aCause);
-				Y.updateUpperBound(-1, aCause);
-			}else{
-				if(Y.getUB()<0){
-					X.updateLowerBound(1, aCause);
-				}else if(Y.getLB()>=0){
-					X.updateUpperBound(-1, aCause);
-					Y.updateLowerBound(1,aCause);
-				}
-			}
-		}
-	}
+    private void negativeStrict() throws ContradictionException {
+        if (X.getUB() < 0) {
+            Y.updateLowerBound(1, aCause);
+        } else {
+            if (X.getLB() >= 0) {
+                X.updateLowerBound(1, aCause);
+                Y.updateUpperBound(-1, aCause);
+            } else {
+                if (Y.getUB() < 0) {
+                    X.updateLowerBound(1, aCause);
+                } else if (Y.getLB() >= 0) {
+                    X.updateUpperBound(-1, aCause);
+                    Y.updateLowerBound(1, aCause);
+                }
+            }
+        }
+    }
 
-	private void nul() throws ContradictionException {
-		if(!X.contains(0)){
-			Y.instantiateTo(0,aCause);
-		}
-		else if(!Y.contains(0)){
-			X.instantiateTo(0,aCause);
-		}
-		else if(X == Y){
-			Y.instantiateTo(0,aCause);
-		}
-	}
+    private void nul() throws ContradictionException {
+        if (!X.contains(0)) {
+            Y.instantiateTo(0, aCause);
+        } else if (!Y.contains(0)) {
+            X.instantiateTo(0, aCause);
+        } else if (X == Y) {
+            Y.instantiateTo(0, aCause);
+        }
+    }
 
-	//****************************************************************************************************************//
-	//******* INSTANTIATION  *****************************************************************************************//
-	//****************************************************************************************************************//
+    //****************************************************************************************************************//
+    //******* INSTANTIATION  *****************************************************************************************//
+    //****************************************************************************************************************//
 
-	private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
-		if(X.instantiated() && Y.instantiated()){
-			if(X.getValue()* Y.getValue()!= Z.getValue()){
-				contradiction(Z,""); 							// checker
-			}
-		}else if(X.instantiated()){
-			if(X.getValue()!=0){
-				double a = (double) Z.getValue()/(double) X.getValue();
-				if(Math.abs(a-Math.round(a))>0.001){
-					contradiction(Z,"");						// not integer
-				}
-				Y.instantiateTo((int)Math.round(a),aCause);		// fix v1
-				setPassive();
-			}
-		} else{
-			double z = Z.getValue();
-			if(z>=0){
-				if(X.getLB()>0){
-					double a = z/(double)X.getLB();
-					double b = z/(double)X.getUB();
-					Y.updateUpperBound((int)a,aCause);
-					Y.updateLowerBound((int)Math.ceil(b),aCause);
-				}
-				if(X.getUB()<0){
-					double a = z/(double)X.getLB();
-					double b = z/(double)X.getUB();
-					Y.updateUpperBound((int)a,aCause);
-					Y.updateLowerBound((int)b,aCause);
-				}
-			}else{
-				if(X.getLB()>0){
-					double a = z/(double)X.getLB();
-					double b = z/(double)X.getUB();
-					Y.updateLowerBound((int)a,aCause);
-					Y.updateUpperBound((int)b,aCause);
-				}
-				if(X.getUB()<0){
-					double a = z/(double)X.getLB();
-					double b = z/(double)X.getUB();
-					Y.updateLowerBound((int)a,aCause);
-					Y.updateUpperBound((int)b,aCause);
-				}
-			}
-		}
-	}
+    private void instantiated(IntVar X, IntVar Y) throws ContradictionException {
+        if (X.instantiated() && Y.instantiated()) {
+            if (X.getValue() * Y.getValue() != Z.getValue()) {
+                contradiction(Z, "");                             // checker
+            }
+        } else if (X.instantiated()) {
+            if (X.getValue() != 0) {
+                double a = (double) Z.getValue() / (double) X.getValue();
+                if (Math.abs(a - Math.round(a)) > 0.001) {
+                    contradiction(Z, "");                        // not integer
+                }
+                Y.instantiateTo((int) Math.round(a), aCause);        // fix v1
+                setPassive();
+            }
+        } else {
+            double z = Z.getValue();
+            if (z >= 0) {
+                if (X.getLB() > 0) {
+                    double a = z / (double) X.getLB();
+                    double b = z / (double) X.getUB();
+                    Y.updateUpperBound((int) a, aCause);
+                    Y.updateLowerBound((int) Math.ceil(b), aCause);
+                }
+                if (X.getUB() < 0) {
+                    double a = z / (double) X.getLB();
+                    double b = z / (double) X.getUB();
+                    Y.updateUpperBound((int) a, aCause);
+                    Y.updateLowerBound((int) b, aCause);
+                }
+            } else {
+                if (X.getLB() > 0) {
+                    double a = z / (double) X.getLB();
+                    double b = z / (double) X.getUB();
+                    Y.updateLowerBound((int) a, aCause);
+                    Y.updateUpperBound((int) b, aCause);
+                }
+                if (X.getUB() < 0) {
+                    double a = z / (double) X.getLB();
+                    double b = z / (double) X.getUB();
+                    Y.updateLowerBound((int) a, aCause);
+                    Y.updateUpperBound((int) b, aCause);
+                }
+            }
+        }
+    }
 }

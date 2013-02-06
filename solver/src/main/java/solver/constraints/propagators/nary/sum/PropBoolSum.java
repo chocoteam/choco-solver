@@ -74,7 +74,7 @@ public class PropBoolSum extends Propagator<IntVar> {
      * @param intVarPropagatorConstraint
      */
     public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.append(vars, new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        super(ArrayUtils.append(vars, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
         this.sum = sum;
         n = vars.length;
         min = environment.makeInt();

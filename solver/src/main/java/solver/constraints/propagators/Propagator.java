@@ -124,7 +124,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Declaring constraint
      */
-    protected Constraint constraint;
+    protected Constraint<V, Propagator<V>> constraint;
 
     protected final PropagatorPriority priority;
 
@@ -158,14 +158,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
 
     @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
         checkVariable(vars);
         this.vars = vars.clone();
+        this.solver = vars[0].getSolver();
         this.vindices = new int[vars.length];
-        this.solver = solver;
         this.environment = solver.getEnvironment();
         this.state = NEW;
-        this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
         this.aCause = this;
@@ -193,8 +192,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         };
     }
 
-    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
-        this(vars, solver, constraint, priority, true);
+    protected Propagator(V[] vars, PropagatorPriority priority) {
+        this(vars, priority, true);
     }
 
     @Override
@@ -206,13 +205,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return solver;
     }
 
+    public void defineIn(Constraint c) {
+        this.constraint = c;
+    }
+
     /**
      * Overrides the default cause of this.
      * This is commonly used when this is declared
      *
      * @param nCause the new cause.
      */
-    public void overrideCause(Propagator nCause) {
+    public void overrideCause(Propagator<Variable> nCause) {
         this.aCause = nCause;
     }
 

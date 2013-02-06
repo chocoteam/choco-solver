@@ -78,7 +78,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
      * @param c
      */
     public PropIntMemberSet(SetVar setVar, IntVar intVar, Solver solver, Constraint c) {
-        super(new Variable[]{setVar, intVar}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY);
         this.iv = intVar;
         this.set = setVar;
         this.sdm = setVar.monitorDelta(this);

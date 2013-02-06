@@ -29,6 +29,8 @@ package solver.constraints.propagators.nary.nValue;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,9 +41,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -50,7 +51,7 @@ import java.util.BitSet;
  * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
  * The worst case time complexity is O(nm) but this is very pessimistic
  * In practice it is more like O(m) where m is the number of variable-value pairs
- *
+ * <p/>
  * BEWARE UNSAFE : BUG DETECTED THROUGH DOOBLE(3,4,6)
  *
  * @author Jean-Guillaume Fages
@@ -92,7 +93,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param solver
      */
     public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
@@ -135,7 +136,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         free.set(0, n2);
         int j, k, ub;
         IntVar v;
-        for (int i = 0; i < n2+2; i++) {
+        for (int i = 0; i < n2 + 2; i++) {
             digraph.desactivateNode(i);
         }
         for (int i = 0; i < n; i++) {
@@ -143,7 +144,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             ub = v.getUB();
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
-				digraph.addArc(i, j);
+                digraph.addArc(i, j);
             }
         }
     }
@@ -208,28 +209,28 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     private void buildSCC() {
         digraph.desactivateNode(n2);
-        digraph.desactivateNode(n2+1);
+        digraph.desactivateNode(n2 + 1);
         digraph.activateNode(n2);
-        digraph.activateNode(n2+1);
-		//TODO CHECK THIS PART
-		for (int i = 0; i < n; i++) {
+        digraph.activateNode(n2 + 1);
+        //TODO CHECK THIS PART
+        for (int i = 0; i < n; i++) {
             if (free.get(i)) {
                 digraph.addArc(n2, i);
-            }else{
-				digraph.addArc(i, n2);
-			}
+            } else {
+                digraph.addArc(i, n2);
+            }
         }
-		for (int i = n; i < n2; i++) {
+        for (int i = n; i < n2; i++) {
             if (free.get(i)) {
-                digraph.addArc(i, n2+1);
-            }else{
-				digraph.addArc(n2+1, i);
-			}
+                digraph.addArc(i, n2 + 1);
+            } else {
+                digraph.addArc(n2 + 1, i);
+            }
         }
         SCCfinder.findAllSCC();
         nodeSCC = SCCfinder.getNodesSCC();
         digraph.desactivateNode(n2);
-        digraph.desactivateNode(n2+1);
+        digraph.desactivateNode(n2 + 1);
     }
 
     private void filter() throws ContradictionException {
@@ -242,7 +243,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (digraph.getPredecessorsOf(i).getFirstElement()==j) {
+                    if (digraph.getPredecessorsOf(i).getFirstElement() == j) {
                         v.instantiateTo(k, aCause);
                     } else {
                         v.removeValue(k, aCause);
@@ -250,26 +251,26 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                     }
                 }
             }
-			if(!v.hasEnumeratedDomain()){
-				ub = v.getUB();
-				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-					j = map.get(k);
-					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
-						break;
-					}else{
-						v.removeValue(k, aCause);
-					}
-				}
-				int lb = v.getLB();
-				for (int k = ub; k>=lb; k = v.previousValue(k)) {
-					j = map.get(k);
-					if(digraph.arcExists(i,j) || digraph.arcExists(j,i)){
-						break;
-					}else{
-						v.removeValue(k, aCause);
-					}
-				}
-			}
+            if (!v.hasEnumeratedDomain()) {
+                ub = v.getUB();
+                for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                    j = map.get(k);
+                    if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
+                        break;
+                    } else {
+                        v.removeValue(k, aCause);
+                    }
+                }
+                int lb = v.getLB();
+                for (int k = ub; k >= lb; k = v.previousValue(k)) {
+                    j = map.get(k);
+                    if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
+                        break;
+                    } else {
+                        v.removeValue(k, aCause);
+                    }
+                }
+            }
         }
     }
 
@@ -279,30 +280,30 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){
-			if (n2 < n + nValues.getLB()) {
-				contradiction(nValues, "");
-			}
-			buildDigraph();
-		}
-		digraph.desactivateNode(n2);
-		digraph.desactivateNode(n2+1);
-		free.clear();
-		for (int i = 0; i < n; i++) {
-			if (digraph.getPredecessorsOf(i).getSize() == 0) {
-				free.set(i);
-			}
-		}
-		for (int i = n; i < n2; i++) {
-			if (digraph.getSuccessorsOf(i).getSize() == 0) {
-				free.set(i);
-			}
-		}
-		int card = repairMatching();
-		nValues.updateUpperBound(card, aCause);
-		if (nValues.getLB() == card) {
-			filter();
-		}
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n + nValues.getLB()) {
+                contradiction(nValues, "");
+            }
+            buildDigraph();
+        }
+        digraph.desactivateNode(n2);
+        digraph.desactivateNode(n2 + 1);
+        free.clear();
+        for (int i = 0; i < n; i++) {
+            if (digraph.getPredecessorsOf(i).getSize() == 0) {
+                free.set(i);
+            }
+        }
+        for (int i = n; i < n2; i++) {
+            if (digraph.getSuccessorsOf(i).getSize() == 0) {
+                free.set(i);
+            }
+        }
+        int card = repairMatching();
+        nValues.updateUpperBound(card, aCause);
+        if (nValues.getLB() == card) {
+            filter();
+        }
         for (int i = 0; i < idms.length; i++) {
             idms[i].unfreeze();
         }
@@ -310,11 +311,11 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-		if(varIdx<n){
-			idms[varIdx].freeze();
-			idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
-			idms[varIdx].unfreeze();
-		}
+        if (varIdx < n) {
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
+        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
@@ -358,9 +359,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
         public void execute(int i) throws ContradictionException {
             digraph.removeEdge(idx, map.get(i));
-			if(digraph.arcExists(idx,map.get(i))||digraph.arcExists(map.get(i),idx)){
-				throw new UnsupportedOperationException();
-			}
+            if (digraph.arcExists(idx, map.get(i)) || digraph.arcExists(map.get(i), idx)) {
+                throw new UnsupportedOperationException();
+            }
         }
 
         @Override

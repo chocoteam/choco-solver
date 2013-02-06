@@ -167,6 +167,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      */
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].defineIn(this);
+        }
     }
 
     /**
@@ -184,6 +187,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
             this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
             System.arraycopy(tmp, 0, propagators, 0, tmp.length);
             System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
+            for (int i = tmp.length; i < tmp.length + mPropagators.length; i++) {
+                propagators[i].defineIn(this);
+            }
         }
     }
 

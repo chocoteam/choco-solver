@@ -73,7 +73,7 @@ public class PropAllEqual extends Propagator<SetVar> {
      * @param c
      */
     public PropAllEqual(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
         // delta monitors
         sdm = new SetDeltaMonitor[n];

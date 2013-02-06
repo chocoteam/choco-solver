@@ -61,7 +61,7 @@ public class PropOffSet extends Propagator<SetVar> {
      * x in set1 <=> x+offSet in set2
      */
     public PropOffSet(SetVar set1, SetVar set2, int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(new SetVar[]{set1, set2}, solver, c, PropagatorPriority.UNARY);
+        super(new SetVar[]{set1, set2}, PropagatorPriority.UNARY);
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[2];
         sdm[0] = set1.monitorDelta(this);

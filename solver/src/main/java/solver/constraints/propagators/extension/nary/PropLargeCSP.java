@@ -48,7 +48,7 @@ public class PropLargeCSP extends Propagator<IntVar> {
     protected final int[] currentTuple;
 
     public PropLargeCSP(IntVar[] vars, LargeRelation relation, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.QUADRATIC, false);
+        super(vars, PropagatorPriority.QUADRATIC, false);
         this.relation = relation;
         this.currentTuple = new int[vars.length];
     }

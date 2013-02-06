@@ -68,7 +68,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y, Solver solver, Constraint constraint) {
-        super(ArrayUtils.toArray(x, y), solver, constraint, PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
         this.x = x;
         this.y = y;
     }

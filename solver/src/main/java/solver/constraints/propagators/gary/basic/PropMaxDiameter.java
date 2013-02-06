@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,7 +37,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -57,7 +57,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropMaxDiameter(GraphVar graph, int maxDiam, Constraint constraint, Solver solver) {
-        super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.maxDiam = maxDiam;
         n = g.getEnvelopGraph().getNbNodes();
@@ -74,11 +74,11 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
     public void propagate(int evtmask) throws ContradictionException {
         ISet nodes = g.getKernelGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-			if (BFS(i) >= maxDiam) {
-				for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
-					g.removeNode(i, aCause);
-				}
-			}
+            if (BFS(i) >= maxDiam) {
+                for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
+                    g.removeNode(i, aCause);
+                }
+            }
         }
     }
 
@@ -125,20 +125,20 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
 
     @Override
     public ESat isEntailed() {
-		ISet nodes = g.getKernelGraph().getActiveNodes();
-		for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-			int k = BFS(i);
-			if (k >= maxDiam) {
-				for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
-					if(nodes.contain(i)){
-						return ESat.FALSE;
-					}
-				}
-			}
+        ISet nodes = g.getKernelGraph().getActiveNodes();
+        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
+            int k = BFS(i);
+            if (k >= maxDiam) {
+                for (i = visited.nextClearBit(0); i < n; i = visited.nextClearBit(i + 1)) {
+                    if (nodes.contain(i)) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
         }
-		if (g.instantiated()) {
+        if (g.instantiated()) {
             return ESat.TRUE;
         }
-		return ESat.UNDEFINED;
+        return ESat.UNDEFINED;
     }
 }

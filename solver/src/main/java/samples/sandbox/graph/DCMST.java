@@ -567,7 +567,7 @@ public class DCMST {
         int[] counter;
 
         protected PropOneNodes(UndirectedGraphVar vars, Solver solver, Constraint constraint) {
-            super(new UndirectedGraphVar[]{vars}, solver, constraint, PropagatorPriority.LINEAR, true);
+            super(new UndirectedGraphVar[]{vars}, PropagatorPriority.LINEAR, true);
             oneNode = new BitSet(n);
             counter = new int[n];
         }

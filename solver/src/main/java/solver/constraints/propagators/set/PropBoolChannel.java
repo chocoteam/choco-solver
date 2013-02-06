@@ -81,7 +81,7 @@ public class PropBoolChannel extends Propagator<Variable> {
      * @param c
      */
     public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, final int offSet, Solver solver, Constraint c) {
-        super(ArrayUtils.append(boolVars, new Variable[]{setVar}), solver, c, PropagatorPriority.UNARY);
+        super(ArrayUtils.append(boolVars, new Variable[]{setVar}), PropagatorPriority.UNARY);
         this.n = bools.length;
         this.bools = boolVars;
         this.set = setVar;

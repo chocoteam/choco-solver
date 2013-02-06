@@ -73,7 +73,7 @@ public class PropCardinality extends Propagator<Variable> {
      * @param c
      */
     public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
-        super(new Variable[]{setVar, cardinality}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, cardinality}, PropagatorPriority.BINARY);
         this.card = cardinality;
         this.set = setVar;
     }

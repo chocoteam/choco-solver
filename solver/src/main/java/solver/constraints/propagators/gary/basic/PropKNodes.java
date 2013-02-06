@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,7 +38,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K nodes belong to the final graph
@@ -58,7 +58,7 @@ public class PropKNodes extends Propagator {
     //***********************************************************************************
 
     public PropKNodes(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
-        super(new Variable[]{graph, k}, sol, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;
     }

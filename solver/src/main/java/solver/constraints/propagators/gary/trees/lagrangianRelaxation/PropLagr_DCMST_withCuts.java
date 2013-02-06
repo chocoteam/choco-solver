@@ -86,7 +86,7 @@ public class PropLagr_DCMST_withCuts extends Propagator implements GraphLagrangi
      * MST based HK
      */
     protected PropLagr_DCMST_withCuts(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, cost}, solver, constraint, PropagatorPriority.CUBIC);
+        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         obj = cost;

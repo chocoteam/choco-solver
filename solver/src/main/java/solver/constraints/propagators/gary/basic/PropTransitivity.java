@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -38,7 +39,6 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IGraph;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)
@@ -61,7 +61,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
     //***********************************************************************************
 
     public PropTransitivity(V graph, Solver solver, Constraint constraint) {
-        super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+        super((V[]) new GraphVar[]{graph}, PropagatorPriority.LINEAR, false);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         arcEnforced = new PairProcedure() {
@@ -120,22 +120,22 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 
     @Override
     public ESat isEntailed() {
-		IGraph env = g.getEnvelopGraph();
-		IGraph ker = g.getKernelGraph();
-		int n = env.getNbNodes();
-		for(int i=0;i<n;i++){
-			ISet succ = ker.getSuccessorsOf(i);
-			for(int j=succ.getFirstElement();j>=0;j=succ.getNextElement()){
-				for(int k=i+1;k<n;k++){
-					if(ker.arcExists(j,k) && !ker.arcExists(i,k)){
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if(g.instantiated()){
-			return ESat.TRUE;
-		}
+        IGraph env = g.getEnvelopGraph();
+        IGraph ker = g.getKernelGraph();
+        int n = env.getNbNodes();
+        for (int i = 0; i < n; i++) {
+            ISet succ = ker.getSuccessorsOf(i);
+            for (int j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
+                for (int k = i + 1; k < n; k++) {
+                    if (ker.arcExists(j, k) && !ker.arcExists(i, k)) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (g.instantiated()) {
+            return ESat.TRUE;
+        }
         return ESat.UNDEFINED;
     }
 

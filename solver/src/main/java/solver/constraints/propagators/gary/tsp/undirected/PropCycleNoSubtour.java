@@ -38,6 +38,7 @@ import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -47,7 +48,6 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case
@@ -63,7 +63,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
     private GraphDeltaMonitor gdm;
     private int n;
     private PairProcedure arcEnforced;
-	private IStateInt[] e1, e2, size;
+    private IStateInt[] e1, e2, size;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -78,13 +78,13 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
      * @param solver
      */
     public PropCycleNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();
         arcEnforced = new EnfArc();
         e1 = new IStateInt[n];
-		e2 = new IStateInt[n];
+        e2 = new IStateInt[n];
         size = new IStateInt[n];
         for (int i = 0; i < n; i++) {
             e1[i] = environment.makeInt(i);
@@ -107,11 +107,11 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         ISet nei;
         for (int i = 0; i < n; i++) {
             nei = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-				if(i<j){
-					enforce(i,j);
-				}
-			}
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (i < j) {
+                    enforce(i, j);
+                }
+            }
         }
         gdm.unfreeze();
     }
@@ -130,49 +130,49 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-		ISet nodes = g.getKernelGraph().getActiveNodes();
-		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-			if(g.getKernelGraph().getNeighborsOf(i).getSize()>2 || g.getEnvelopGraph().getNeighborsOf(i).getSize()<2){
-				return ESat.FALSE;
-			}
-		}
-		ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
-		if(!cf.isBiconnected()){
-			return ESat.FALSE;
-		}
-		if(g.instantiated()){
-			return ESat.TRUE;
-		}
+        ISet nodes = g.getKernelGraph().getActiveNodes();
+        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
+            if (g.getKernelGraph().getNeighborsOf(i).getSize() > 2 || g.getEnvelopGraph().getNeighborsOf(i).getSize() < 2) {
+                return ESat.FALSE;
+            }
+        }
+        ConnectivityFinder cf = new ConnectivityFinder(g.getEnvelopGraph());
+        if (!cf.isBiconnected()) {
+            return ESat.FALSE;
+        }
+        if (g.instantiated()) {
+            return ESat.TRUE;
+        }
         return ESat.UNDEFINED;
     }
 
     private void enforce(int i, int j) throws ContradictionException {
         int ext1 = getExt(i);
-		int ext2 = getExt(j);
-		int t = size[ext1].get()+size[ext2].get();
-		setExt(ext1,ext2);
-		setExt(ext2,ext1);
-		size[ext1].set(t);
-		size[ext2].set(t);
-		if(t>2 && t<=n)
-		if(t<n){
-			g.removeArc(ext1,ext2,aCause);
-		}else if(t==n){
-			g.enforceArc(ext1,ext2,aCause);
-		}
+        int ext2 = getExt(j);
+        int t = size[ext1].get() + size[ext2].get();
+        setExt(ext1, ext2);
+        setExt(ext2, ext1);
+        size[ext1].set(t);
+        size[ext2].set(t);
+        if (t > 2 && t <= n)
+            if (t < n) {
+                g.removeArc(ext1, ext2, aCause);
+            } else if (t == n) {
+                g.enforceArc(ext1, ext2, aCause);
+            }
     }
 
-	private int getExt(int i) {
-		return (e1[i].get()==i) ? e2[i].get() : e1[i].get();
-	}
+    private int getExt(int i) {
+        return (e1[i].get() == i) ? e2[i].get() : e1[i].get();
+    }
 
-	private void setExt(int i, int ext) {
-		if(e1[i].get()==i) {
-			e2[i].set(ext);
-		}else{
-			e1[i].set(ext);
-		}
-	}
+    private void setExt(int i, int ext) {
+        if (e1[i].get() == i) {
+            e2[i].set(ext);
+        } else {
+            e1[i].set(ext);
+        }
+    }
 
     //***********************************************************************************
     // PROCEDURES

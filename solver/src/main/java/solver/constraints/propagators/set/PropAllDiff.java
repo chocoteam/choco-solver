@@ -69,7 +69,7 @@ public class PropAllDiff extends Propagator<SetVar> {
      * @param c
      */
     public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
     }
 

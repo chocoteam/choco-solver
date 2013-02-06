@@ -64,7 +64,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropEqualX_Y(IntVar x, IntVar y, Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.toArray(x, y), solver, constraint, PropagatorPriority.BINARY, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
         this.x = x;
         this.y = y;
         idms = new IIntDeltaMonitor[2];

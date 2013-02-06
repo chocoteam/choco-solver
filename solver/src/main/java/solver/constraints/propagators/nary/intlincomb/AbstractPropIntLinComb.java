@@ -83,7 +83,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
     @SuppressWarnings({"unchecked"})
     public AbstractPropIntLinComb(int[] coeffs, int nbPosVars, int cste, IntVar[] vars,
                                   Constraint constraint, Solver solver) {
-        super(vars, solver, constraint, computePriority(vars.length), false);
+        super(vars, computePriority(vars.length), false);
         this.coeffs = coeffs;
         this.nbPosVars = nbPosVars;
         this.cste = cste;

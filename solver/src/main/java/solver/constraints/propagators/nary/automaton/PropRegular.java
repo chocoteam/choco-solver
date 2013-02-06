@@ -68,7 +68,7 @@ public class PropRegular extends Propagator<IntVar> {
     protected final IIntDeltaMonitor[] idms;
 
     public PropRegular(IntVar[] vars, IAutomaton automaton, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false);
         _num = num++;
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

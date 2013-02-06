@@ -58,7 +58,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     //***********************************************************************************
 
     public PropBoolGraph(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
-        super(ArrayUtils.flatten(rel), solver, cstr, PropagatorPriority.QUADRATIC);
+        super(ArrayUtils.flatten(rel), PropagatorPriority.QUADRATIC);
         this.graph = graph;
         relations = rel;
         n = rel.length;

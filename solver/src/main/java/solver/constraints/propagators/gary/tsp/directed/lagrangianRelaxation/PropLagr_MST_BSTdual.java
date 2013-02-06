@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -41,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianRelaxation {
 
@@ -74,7 +74,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
      * MST based HK
      */
     protected PropLagr_MST_BSTdual(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, cost}, solver, constraint, PropagatorPriority.CUBIC);
+        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         obj = cost;
@@ -362,7 +362,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
 
     @Override
     public ESat isEntailed() {
-    	return ESat.TRUE; //not implemented
+        return ESat.TRUE; //not implemented
     }
 
     public double getMinArcVal() {

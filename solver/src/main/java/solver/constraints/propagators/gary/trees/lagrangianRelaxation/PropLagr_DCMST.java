@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,7 +41,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.Random;
 
@@ -80,7 +80,7 @@ public class PropLagr_DCMST extends Propagator implements GraphLagrangianRelaxat
      * MST based HK
      */
     protected PropLagr_DCMST(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, cost}, solver, constraint, PropagatorPriority.CUBIC);
+        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         obj = cost;

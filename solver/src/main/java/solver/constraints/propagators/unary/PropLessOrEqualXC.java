@@ -52,7 +52,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
 
     public PropLessOrEqualXC(IntVar var, int cste, Solver solver,
                              Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 

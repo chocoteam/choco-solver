@@ -44,7 +44,7 @@ public class MetaVarPropagator extends Propagator {
     MetaVariable meta;
 
     public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-        super(vars, solver, constraint, PropagatorPriority.UNARY, true);
+        super(vars, PropagatorPriority.UNARY, true);
         this.meta = meta;
     }
 

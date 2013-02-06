@@ -38,6 +38,7 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -50,7 +51,6 @@ import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -84,7 +84,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     //***********************************************************************************
 
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(new Variable[]{graph}, intVars), solver, constraint, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(new Variable[]{graph}, intVars), PropagatorPriority.LINEAR);
         g = graph;
         gdm = g.monitorDelta(this);
         this.intVars = intVars;

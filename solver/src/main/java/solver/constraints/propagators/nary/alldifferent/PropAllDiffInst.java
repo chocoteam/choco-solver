@@ -59,7 +59,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * @param sol
      */
     public PropAllDiffInst(IntVar[] vars, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.UNARY, true);
+        super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
     }
 

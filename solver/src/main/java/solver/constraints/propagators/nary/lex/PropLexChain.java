@@ -66,7 +66,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public IntVar[][] x;
 
     public PropLexChain(IntVar[][] vars, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.flatten(vars), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.flatten(vars), PropagatorPriority.LINEAR, false);
         this.x = vars.clone();
         this.strict = strict;
         this.N = vars[0].length;

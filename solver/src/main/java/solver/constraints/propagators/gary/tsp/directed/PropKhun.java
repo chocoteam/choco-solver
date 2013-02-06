@@ -27,6 +27,8 @@
 package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -38,9 +40,8 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.IGraph;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**
@@ -67,7 +68,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
     //***********************************************************************************
 
     public PropKhun(DirectedGraphVar graph, IntVar objective, int[][] costsMatrix, Solver sol, Constraint constraint) {
-        super(new Variable[]{graph, objective}, sol, constraint, PropagatorPriority.CUBIC);
+        super(new Variable[]{graph, objective}, PropagatorPriority.CUBIC);
         g = graph;
         obj = objective;
         originalCosts = costsMatrix;

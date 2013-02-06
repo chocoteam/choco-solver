@@ -37,6 +37,9 @@ package solver.constraints.propagators.gary.tsp.directed;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
+import choco.kernel.memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -46,10 +49,8 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import choco.kernel.memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
+
 import java.util.BitSet;
 
 /**
@@ -93,27 +94,27 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
      * @param solver
      */
     public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
-		n = G.getEnvelopGraph().getNbNodes();
-		n_R = environment.makeInt(0);
-		G_R = new DirectedGraph(environment, n, SetType.DOUBLE_LINKED_LIST,false);
-		sccOf = new IStateInt[n];
-		sccFirst = new IStateInt[n];
-		sccNext  = new IStateInt[n];
-		mates = new ISet[n];
-		for (int i = 0; i < n; i++) {
-			sccOf[i] = environment.makeInt(0);
-			sccFirst[i] = environment.makeInt(-1);
-			sccNext[i]  = environment.makeInt(-1);
-			G_R.getActiveNodes().remove(i);
-			mates[i] = new Set_Std_2LinkedList(environment);
-		}
-		arcRemoved = new RemArc();
-		sccComputed = new BitSet(n);
-		SCCfinder = new StrongConnectivityFinder(G.getEnvelopGraph());
-	}
+        n = G.getEnvelopGraph().getNbNodes();
+        n_R = environment.makeInt(0);
+        G_R = new DirectedGraph(environment, n, SetType.DOUBLE_LINKED_LIST, false);
+        sccOf = new IStateInt[n];
+        sccFirst = new IStateInt[n];
+        sccNext = new IStateInt[n];
+        mates = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            sccOf[i] = environment.makeInt(0);
+            sccFirst[i] = environment.makeInt(-1);
+            sccNext[i] = environment.makeInt(-1);
+            G_R.getActiveNodes().remove(i);
+            mates[i] = new Set_Std_2LinkedList(environment);
+        }
+        arcRemoved = new RemArc();
+        sccComputed = new BitSet(n);
+        SCCfinder = new StrongConnectivityFinder(G.getEnvelopGraph());
+    }
 
     //***********************************************************************************
     // METHODS
@@ -302,9 +303,11 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 
     private class RemArc implements PairProcedure {
         private BitSet restriction;
+
         private RemArc() {
             this.restriction = new BitSet(n);
         }
+
         @Override
         public void execute(int from, int to) throws ContradictionException {
             int x = sccOf[from].get();

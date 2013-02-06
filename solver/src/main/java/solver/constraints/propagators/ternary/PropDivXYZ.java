@@ -52,7 +52,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{x, y, z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = x;
         this.Y = y;
         this.Z = z;

@@ -38,6 +38,7 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -49,7 +50,6 @@ import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 public class PropIntVarChanneling extends Propagator {
 
@@ -81,7 +81,7 @@ public class PropIntVarChanneling extends Propagator {
      * @param solver
      */
     public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(intVars, new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(intVars, new Variable[]{graph}), PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.intVars = intVars;

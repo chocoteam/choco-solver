@@ -73,7 +73,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
      * @param solver    the solver
      */
     public RealReifiedPropagator(Ibex ibex, int cIdx, String functions, BoolVar bvar, RealVar[] vars, int options, Solver solver, RealConstraint rconstraint) {
-        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, vars), solver, rconstraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, vars), PropagatorPriority.LINEAR, false);
         this.contractorIdx = cIdx;
         this.ibex = ibex;
         this.functions = functions;

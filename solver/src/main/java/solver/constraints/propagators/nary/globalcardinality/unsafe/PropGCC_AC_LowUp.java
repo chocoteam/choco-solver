@@ -29,6 +29,8 @@ package solver.constraints.propagators.nary.globalcardinality.unsafe;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.memory.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -40,9 +42,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -97,7 +98,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
      * @param sol
      */
     public PropGCC_AC_LowUp(IntVar[] vars, int[] value, int[] low, int[] up, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.QUADRATIC, false);
+        super(vars, PropagatorPriority.QUADRATIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
@@ -241,7 +242,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {
@@ -284,7 +285,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
         in.clear();
         int indexFirst = 0, indexLast = 0;
         fifo[indexLast++] = root;
-		in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
+        in.set(root);//TODO CORRECTION JG 15/11/12 to test on minizinc instance
         int x, y;
         ISet succs;
         while (indexFirst != indexLast) {

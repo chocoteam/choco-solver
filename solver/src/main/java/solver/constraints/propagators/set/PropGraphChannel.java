@@ -85,7 +85,7 @@ public class PropGraphChannel extends Propagator<Variable> {
      * @param c
      */
     public PropGraphChannel(SetVar[] setsV, GraphVar gV, Solver solver, Constraint c) {
-        super(ArrayUtils.append(setsV, new Variable[]{gV}), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(setsV, new Variable[]{gV}), PropagatorPriority.LINEAR);
         this.sets = setsV;
         this.g = gV;
         n = sets.length;

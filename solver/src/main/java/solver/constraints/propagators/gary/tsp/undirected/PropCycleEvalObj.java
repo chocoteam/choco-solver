@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.tsp.undirected;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,7 +38,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing edge costs
@@ -61,7 +61,7 @@ public class PropCycleEvalObj extends Propagator {
     //***********************************************************************************
 
     public PropCycleEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();
@@ -85,29 +85,29 @@ public class PropCycleEvalObj extends Propagator {
 
     @Override
     public ESat isEntailed() {
-		int minSum = 0;
+        int minSum = 0;
         int maxSum = 0;
         for (int i = 0; i < n; i++) {
-			ISet env = g.getEnvelopGraph().getNeighborsOf(i);
-			ISet ker = g.getKernelGraph().getNeighborsOf(i);
-            for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-				if(i<=j){
-					maxSum += distMatrix[i][j];
-					if(ker.contain(j)){
-						minSum += distMatrix[i][j];
-					}
-				}
-			}
+            ISet env = g.getEnvelopGraph().getNeighborsOf(i);
+            ISet ker = g.getKernelGraph().getNeighborsOf(i);
+            for (int j = env.getFirstElement(); j >= 0; j = env.getNextElement()) {
+                if (i <= j) {
+                    maxSum += distMatrix[i][j];
+                    if (ker.contain(j)) {
+                        minSum += distMatrix[i][j];
+                    }
+                }
+            }
         }
         if (maxSum < 0) {
             maxSum = Integer.MAX_VALUE;
         }
-		if(minSum>sum.getUB() || maxSum<sum.getLB()){
-			return ESat.FALSE;
-		}
-		if(maxSum == minSum && sum.instantiated()){
-			return ESat.TRUE;
-		}
+        if (minSum > sum.getUB() || maxSum < sum.getLB()) {
+            return ESat.FALSE;
+        }
+        if (maxSum == minSum && sum.instantiated()) {
+            return ESat.TRUE;
+        }
         return ESat.UNDEFINED;
     }
 
@@ -131,7 +131,7 @@ public class PropCycleEvalObj extends Propagator {
             maxSum = Integer.MAX_VALUE;
         }
         sum.updateLowerBound(minSum, aCause);
-		sum.updateUpperBound(maxSum, aCause);
+        sum.updateUpperBound(maxSum, aCause);
         filter(minSum);
     }
 

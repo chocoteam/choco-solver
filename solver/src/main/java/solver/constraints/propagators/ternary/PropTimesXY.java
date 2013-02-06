@@ -48,7 +48,7 @@ public class PropTimesXY extends Propagator<IntVar> {
 
     public PropTimesXY(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{x, y}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{x, y}, PropagatorPriority.UNARY, false);
         this.X = x;
         this.Y = y;
         this.Z = z;

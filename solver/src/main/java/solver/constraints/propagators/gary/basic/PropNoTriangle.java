@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -62,7 +62,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropNoTriangle(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         gdm = g.monitorDelta(this);

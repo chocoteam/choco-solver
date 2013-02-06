@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.channeling;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
@@ -37,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator channeling a graph and an array of variables through a Relation object
@@ -61,7 +61,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
     //***********************************************************************************
 
     public PropGraphRelation(Variable[] vars, G graph, Solver solver, Constraint cons, GraphRelation relation) {
-        super((G[]) new GraphVar[]{graph}, solver, cons, PropagatorPriority.QUADRATIC);
+        super((G[]) new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         this.g = graph;
         this.nodeVars = vars;
         this.n = nodeVars.length;
@@ -116,7 +116,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
 
     private void checkVar(int i) throws ContradictionException {
         ISet ker = g.getKernelGraph().getActiveNodes();
-        for (int j = ker.getFirstElement(); j>=0; j=ker.getNextElement()) {
+        for (int j = ker.getFirstElement(); j >= 0; j = ker.getNextElement()) {
             if (g.getKernelGraph().arcExists(i, j)) {
                 relation.applyTrue(i, j, solver, aCause);
             } else {

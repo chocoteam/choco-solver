@@ -64,7 +64,7 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropCircuit_AntiArboFiltering(IntVar[] succs, int offSet, Constraint constraint, Solver solver) {
-        super(succs, solver, constraint, PropagatorPriority.QUADRATIC);
+        super(succs, PropagatorPriority.QUADRATIC);
         this.n = succs.length;
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);

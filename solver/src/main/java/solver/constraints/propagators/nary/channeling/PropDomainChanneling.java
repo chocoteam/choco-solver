@@ -75,7 +75,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     public PropDomainChanneling(BoolVar[] bs, IntVar x, Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.append(bs, new IntVar[]{x}), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(bs, new IntVar[]{x}), PropagatorPriority.LINEAR, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

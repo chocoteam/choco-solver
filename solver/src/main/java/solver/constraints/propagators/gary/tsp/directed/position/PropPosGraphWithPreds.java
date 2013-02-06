@@ -37,6 +37,7 @@ package solver.constraints.propagators.gary.tsp.directed.position;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -49,7 +50,7 @@ import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**
@@ -84,7 +85,7 @@ public class PropPosGraphWithPreds extends Propagator {
     //***********************************************************************************
 
     public PropPosGraphWithPreds(IntVar[] intVars, DirectedGraphVar graph, int[][] dist, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(new Variable[]{graph}, intVars), solver, constraint, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(new Variable[]{graph}, intVars), PropagatorPriority.LINEAR);
         g = graph;
         gdm = g.monitorDelta(this);
         this.intVars = intVars;

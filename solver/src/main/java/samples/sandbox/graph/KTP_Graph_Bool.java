@@ -419,7 +419,7 @@ public class KTP_Graph_Bool {
          * @param solver
          */
         public PropBoolNoSubtour(int[] mapping, BoolVar[] decVars, BoolVar[][] graph, Constraint constraint, Solver solver) {
-            super(decVars, solver, constraint, PropagatorPriority.UNARY, true);
+            super(decVars, PropagatorPriority.UNARY, true);
             g = graph;
             this.mapping = mapping;
             this.n = graph.length;

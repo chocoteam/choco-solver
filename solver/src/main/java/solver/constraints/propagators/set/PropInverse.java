@@ -74,7 +74,7 @@ public class PropInverse extends Propagator<SetVar> {
      * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
      */
     public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(ArrayUtils.append(sets, invsets), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(sets, invsets), PropagatorPriority.LINEAR);
         n = sets.length;
         n2 = invsets.length;
         this.offSet1 = offSet1;

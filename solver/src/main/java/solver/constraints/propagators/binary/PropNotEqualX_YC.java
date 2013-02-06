@@ -67,7 +67,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_YC(IntVar[] vars, int c, Solver solver, Constraint constraint) {
-        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, false);
+        super(vars.clone(), PropagatorPriority.BINARY, false);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;

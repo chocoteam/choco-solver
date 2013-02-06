@@ -71,7 +71,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * @param solver
      */
     public PropNValues_Light(IntVar[] vars, TIntArrayList concernedValues, IntVar nValues, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = vars.length;
         concernedValues.sort();
         this.concernedValues = concernedValues;
@@ -86,8 +86,8 @@ public class PropNValues_Light extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		nValues.updateLowerBound(0,aCause);
-		nValues.updateUpperBound(n,aCause);
+        nValues.updateLowerBound(0, aCause);
+        nValues.updateUpperBound(n, aCause);
         filter();
     }
 
@@ -195,9 +195,9 @@ public class PropNValues_Light extends Propagator<IntVar> {
         if (countMax < nValues.getLB()) {
             return ESat.FALSE;
         }
-		if(count==countMax && nValues.instantiated()){
-			return ESat.TRUE;
-		}
+        if (count == countMax && nValues.instantiated()) {
+            return ESat.TRUE;
+        }
         return ESat.UNDEFINED;
     }
 }

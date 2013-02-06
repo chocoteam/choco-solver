@@ -87,7 +87,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * @param solver
      */
     public PropNoSubtour(V[] vars, int offset, Solver solver, Constraint constraint) {
-        super(vars, solver, constraint, PropagatorPriority.UNARY, true);
+        super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];
         end = new IStateInt[n];

@@ -37,6 +37,7 @@ package solver.constraints.propagators.gary.tsp.directed;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -47,7 +48,6 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -81,7 +81,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

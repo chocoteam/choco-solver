@@ -76,7 +76,7 @@ public class PropKLoops extends Propagator<IntVar> {
      * @param solver
      */
     public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), solver, constraint, PropagatorPriority.UNARY);
+        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY);
         this.n = succs.length;
         this.offSet = offSet;
         this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);

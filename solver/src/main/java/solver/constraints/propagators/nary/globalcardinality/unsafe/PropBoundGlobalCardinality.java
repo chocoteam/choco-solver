@@ -107,7 +107,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     public PropBoundGlobalCardinality(IntVar[] vars, IntVar[] card, int firstCardValue, int lastCardValue, Solver solver,
                                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(makeVarTable(vars, card), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(makeVarTable(vars, card), PropagatorPriority.LINEAR, false);
         this.card = card;
         this.range = lastCardValue - firstCardValue + 1;
         int n = vars.length;

@@ -62,7 +62,7 @@ public class PropElementV extends Propagator<IntVar> {
     public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset,
                         Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
-                solver, constraint, PropagatorPriority.QUADRATIC, true);
+                PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

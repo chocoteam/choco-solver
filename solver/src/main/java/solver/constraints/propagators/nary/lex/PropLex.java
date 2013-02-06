@@ -60,7 +60,7 @@ public class PropLex extends Propagator<IntVar> {
 
 
     public PropLex(IntVar[] X, IntVar[] Y, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.x = X.clone();
         this.y = Y.clone();
 

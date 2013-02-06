@@ -58,7 +58,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     public PropNotMemberEnum(IntVar var, TIntHashSet values, Solver solver,
                              Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint,
                              boolean reactOnPromotion) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, reactOnPromotion);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion);
         this.values = values;
     }
 

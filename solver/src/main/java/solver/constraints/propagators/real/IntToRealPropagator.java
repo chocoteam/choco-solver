@@ -57,7 +57,7 @@ public class IntToRealPropagator extends Propagator<IntVar> {
      * @param rconstraint real constraint
      */
     public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> rconstraint) {
-        super(vars, solver, rconstraint, PropagatorPriority.LINEAR);
+        super(vars, PropagatorPriority.LINEAR);
         this.ibex = ibex;
         this.contractorIdx = cIdx;
         this.ibex.add_int_ctr(vars.length);

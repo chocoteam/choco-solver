@@ -71,7 +71,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     public PropCostRegular(IntVar[] vars, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph,
                            Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.CUBIC, false);
+        super(vars, PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

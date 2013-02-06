@@ -76,7 +76,7 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
      * @param solver
      */
     public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

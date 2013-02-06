@@ -76,7 +76,7 @@ public class PropSumEqIncr extends Propagator<IntVar> {
 
     public PropSumEqIncr(IntVar[] vars, int b,
                          Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
+        super(vars, computePriority(vars.length), false);
         this.x = vars.clone();
         l = x.length;
         this.b = b;

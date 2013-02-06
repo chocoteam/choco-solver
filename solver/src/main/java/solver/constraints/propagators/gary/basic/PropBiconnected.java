@@ -59,7 +59,7 @@ public class PropBiconnected extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropBiconnected(GraphVar graph, Constraint constraint, Solver solver) {
-        super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
     }

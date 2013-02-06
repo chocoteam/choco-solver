@@ -95,7 +95,7 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
      * @param sol
      */
     public PropGCC_AC_Cards_Fast(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
-        super(ArrayUtils.append(vars, cards), sol, constraint, PropagatorPriority.QUADRATIC, false);
+        super(ArrayUtils.append(vars, cards), PropagatorPriority.QUADRATIC, false);
         if (value.length != cards.length) {
             throw new UnsupportedOperationException();
         }

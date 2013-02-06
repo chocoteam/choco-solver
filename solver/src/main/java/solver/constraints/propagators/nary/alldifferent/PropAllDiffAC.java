@@ -92,7 +92,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      * @param sol
      */
     public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver sol) {
-        super(vars, sol, constraint, PropagatorPriority.QUADRATIC, true);
+        super(vars, PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

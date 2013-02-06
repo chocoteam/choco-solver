@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.arborescences;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -35,7 +36,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
@@ -75,7 +75,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
      * Ensures that graph is an arborescence rooted in node source
      */
     public PropArborescence(DirectedGraphVar graph, int source, Constraint constraint, Solver solver, boolean simple) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         this.source = source;
