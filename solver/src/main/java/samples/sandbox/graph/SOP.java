@@ -152,7 +152,7 @@ public class SOP {
         solver = new Solver();
         initialUB = optimum;
         System.out.println("initial UB : " + optimum);
-        graph = new DirectedGraphVar("G",solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G", solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
         try {
             for (int i = 0; i < n - 1; i++) {
@@ -244,7 +244,7 @@ public class SOP {
     }
 
     public static void addTransitionGraph() {
-        transGraph = new DirectedGraphVar("G",solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY, true);
+        transGraph = new DirectedGraphVar("G", solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY, true);
         for (int j = 1; j < n; j++) {
             transGraph.getEnvelopGraph().addArc(0, j);
             transGraph.getKernelGraph().addArc(0, j);
@@ -281,7 +281,7 @@ public class SOP {
             default:
                 throw new UnsupportedOperationException();
         }
-//        PropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        DSLEngine pengine = new DSLEngine(solver.getEnvironment());
 //        PArc allArcs = new PArc(pengine, gc);
 //        solver.set(pengine.set(new Sort(allArcs).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);

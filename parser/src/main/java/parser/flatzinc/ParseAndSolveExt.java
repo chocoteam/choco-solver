@@ -36,11 +36,11 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
-import solver.propagation.PropagationEngine;
+import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.hardcoded.ConstraintEngine;
-import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 
 import java.io.ByteArrayInputStream;
@@ -96,18 +96,18 @@ public class ParseAndSolveExt extends ParseAndSolve {
                 // let the default propagation strategy,
                 break;
             case 1:
-                solver.set(new ConstraintEngine(solver));
+                solver.set(new PropagatorEngine(solver));
                 break;
             case 2:
                 solver.set(new VariableEngine(solver));
                 break;
             case 3:
-                solver.set(new SevenQueuesConstraintEngine(solver));
+                solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
             case 4:
             case 5:
             case 6:
-                PropagationEngine pe = new PropagationEngine(solver);
+                DSLEngine pe = new DSLEngine(solver);
                 ArrayList<Arc> pairs = Arc.populate(solver);
                 THashMap<String, ArrayList> groups = new THashMap<String, ArrayList>(1);
                 groups.put("All", pairs);
@@ -162,7 +162,7 @@ public class ParseAndSolveExt extends ParseAndSolve {
                 if (solver.getNbCstrs() > solver.getNbVars()) {
                     solver.set(new VariableEngine(solver));
                 } else {
-                    solver.set(new ConstraintEngine(solver));
+                    solver.set(new PropagatorEngine(solver));
                 }
         }
     }

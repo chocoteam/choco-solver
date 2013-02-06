@@ -33,8 +33,8 @@ import samples.nqueen.NQueenBinary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.propagation.DSLEngine;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -98,7 +98,7 @@ public class SerializableTest {
 
     @Test(groups = {"1s"})
     public void testEngine() {
-        IPropagationEngine eng = new PropagationEngine(new Solver());
+        IPropagationEngine eng = new DSLEngine(new Solver());
         File file = null;
         try {
             file = write(eng);

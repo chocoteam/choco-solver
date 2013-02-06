@@ -52,7 +52,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public class PropagationEngine implements IPropagationEngine {
+public class DSLEngine implements IPropagationEngine {
 
     protected final ContradictionException exception;
 
@@ -73,7 +73,7 @@ public class PropagationEngine implements IPropagationEngine {
     private boolean init;
 
 
-    public PropagationEngine(Solver solver) {
+    public DSLEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
 

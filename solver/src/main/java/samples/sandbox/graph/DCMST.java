@@ -34,7 +34,6 @@ import samples.sandbox.graph.input.DCMST_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.basic.PropKCC;
@@ -51,7 +50,6 @@ import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -195,7 +193,7 @@ public class DCMST {
     private static void solveDCMST(String instanceName) {
         solver = new Solver();
         totalCost = VariableFactory.bounded("obj", lb, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G", solver, n, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -271,7 +269,7 @@ public class DCMST {
             default:
                 throw new UnsupportedOperationException();
         }
-//        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        DSLEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);

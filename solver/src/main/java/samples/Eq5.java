@@ -97,8 +97,8 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-//        solver.set(new ConstraintEngine(solver));
-//        IPropagationEngine engine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(new PropagatorEngine(solver));
+//        IPropagationEngine engine = new DSLEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_PROPS.make(solver, engine);
 //        solver.set(engine);
     }

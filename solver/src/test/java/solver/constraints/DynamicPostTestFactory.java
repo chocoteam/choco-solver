@@ -27,7 +27,7 @@
 package solver.constraints;
 
 import org.testng.annotations.Factory;
-import solver.propagation.PropagationEngines;
+import solver.propagation.PropagationEngineFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +40,17 @@ import java.util.List;
  */
 public class DynamicPostTestFactory {
 
-    PropagationEngines[] engines = new PropagationEngines[]{
-            PropagationEngines.CONSTRAINTDRIVEN,
-            PropagationEngines.VARIABLEDRIVEN,
-            PropagationEngines.CONSTRAINTDRIVEN_7QD};
+    PropagationEngineFactory[] engines = new PropagationEngineFactory[]{
+            PropagationEngineFactory.PROPAGATORDRIVEN,
+            PropagationEngineFactory.VARIABLEDRIVEN,
+            PropagationEngineFactory.PROPAGATORDRIVEN_7QD};
 
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
 
         for (int e = 0; e < engines.length; e++) {
-            PropagationEngines engine = engines[e];
+            PropagationEngineFactory engine = engines[e];
             lresult.add(new DynamicPostTest(engine));
         }
         return lresult.toArray();

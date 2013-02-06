@@ -27,15 +27,14 @@
 package solver.propagation;
 
 import solver.Solver;
-import solver.propagation.hardcoded.ArcEngine;
-import solver.propagation.hardcoded.ConstraintEngine;
-import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 
 /**
  * A factory to build a propagation engine.
  * There are two types of engines:
- * <br/>- hard coded ones ({@code VARIABLEDRIVEN}, {@code CONSTRAINTDRIVEN}, ...),
+ * <br/>- hard coded ones ({@code VARIABLEDRIVEN}, {@code PROPAGATORDRIVEN}, ...),
  * <br/>- DSL based one ({@code DSLDRIVEN})
  * <br/>
  * The second type enable to declare a specific behavior: a propagation strategy
@@ -44,41 +43,52 @@ import solver.propagation.hardcoded.VariableEngine;
  * @see PropagationStrategies
  * @since 05/07/12
  */
-public enum PropagationEngines {
+public enum PropagationEngineFactory {
+
+    /**
+     * Create a variable oriented propagation engine
+     */
     VARIABLEDRIVEN() {
         @Override
         public IPropagationEngine make(Solver solver) {
             return new VariableEngine(solver);
         }
     },
-    CONSTRAINTDRIVEN() {
+
+    /**
+     * Create a propagator-oriented propagation engine
+     */
+    PROPAGATORDRIVEN() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return new ConstraintEngine(solver);
+            return new PropagatorEngine(solver);
         }
     },
-    ARCDRIVEN() {
+
+    /**
+     * Create a seven queue dynamic propagator-oriented propagation engine
+     */
+    PROPAGATORDRIVEN_7QD() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return new ArcEngine(solver);
+            return new SevenQueuesPropagatorEngine(solver);
         }
     },
-    CONSTRAINTDRIVEN_7QD() {
-        @Override
-        public IPropagationEngine make(Solver solver) {
-            return new SevenQueuesConstraintEngine(solver);
-        }
-    },
+
+    /**
+     * Create a DSL driven propagation engine.
+     */
     DSLDRIVEN() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return new PropagationEngine(solver);
+            return new DSLEngine(solver);
         }
     },
+
     DEFAULT() {
         @Override
         public IPropagationEngine make(Solver solver) {
-            return DSLDRIVEN.make(solver);
+            return PROPAGATORDRIVEN.make(solver);
         }
     };
 

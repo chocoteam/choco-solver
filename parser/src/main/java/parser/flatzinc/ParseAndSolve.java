@@ -43,8 +43,8 @@ import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.ConstraintEngine;
-import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.AverageCSV;
 import solver.search.strategy.pattern.SearchPattern;
@@ -202,20 +202,20 @@ public class ParseAndSolve {
                 // let the default propagation strategy,
                 break;
             case 1:
-                solver.set(new ConstraintEngine(solver));
+                solver.set(new PropagatorEngine(solver));
                 break;
             case 2:
                 solver.set(new VariableEngine(solver));
                 break;
             case 3:
-                solver.set(new SevenQueuesConstraintEngine(solver));
+                solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
             case -1:
             default:
                 if (solver.getNbCstrs() > solver.getNbVars()) {
                     solver.set(new VariableEngine(solver));
                 } else {
-                    solver.set(new ConstraintEngine(solver));
+                    solver.set(new PropagatorEngine(solver));
                 }
 
         }

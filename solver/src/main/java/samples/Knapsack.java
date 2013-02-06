@@ -146,7 +146,7 @@ public class Knapsack extends AbstractProblem {
     @Override
     public void configureEngine() {
         // not usefull
-//        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine pengine = new DSLEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
 //        solver.set(pengine);
     }

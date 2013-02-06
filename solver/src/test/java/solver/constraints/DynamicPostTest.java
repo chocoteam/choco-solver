@@ -29,7 +29,7 @@ package solver.constraints;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.propagation.PropagationEngines;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -42,14 +42,14 @@ import solver.variables.VariableFactory;
  */
 public class DynamicPostTest {
 
-    PropagationEngines engine;
+    PropagationEngineFactory engine;
 
-    public DynamicPostTest(PropagationEngines engine) {
+    public DynamicPostTest(PropagationEngineFactory engine) {
         this.engine = engine;
     }
 
     public DynamicPostTest() {
-        this(PropagationEngines.CONSTRAINTDRIVEN);
+        this(PropagationEngineFactory.PROPAGATORDRIVEN);
     }
 
     @Test(groups = "1s")

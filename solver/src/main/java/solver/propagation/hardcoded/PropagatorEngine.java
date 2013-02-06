@@ -59,7 +59,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 05/07/12
  */
-public class ConstraintEngine implements IPropagationEngine {
+public class PropagatorEngine implements IPropagationEngine {
 
     protected final ContradictionException exception; // the exception in case of contradiction
     protected final IEnvironment environment; // environment of backtrackable objects
@@ -77,7 +77,7 @@ public class ConstraintEngine implements IPropagationEngine {
 
     final PropagationTrigger trigger; // an object that starts the propagation
 
-    public ConstraintEngine(Solver solver) {
+    public PropagatorEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
