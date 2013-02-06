@@ -29,7 +29,6 @@
 
 package parser.flatzinc;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.antlr.runtime.*;
@@ -43,6 +42,7 @@ import parser.flatzinc.ast.*;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.ast.ext.*;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.propagation.DSLEngine;
 import solver.propagation.ISchedulable;

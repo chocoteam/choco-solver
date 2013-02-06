@@ -26,12 +26,12 @@
  */
 package solver.constraints.propagators.nary.automaton;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
+import memory.IEnvironment;
+import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.Constraint;

@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.extension.binary;
 
-import choco.kernel.memory.IStateInt;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

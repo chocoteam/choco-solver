@@ -26,15 +26,15 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
+import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 
 public abstract class GraphRelation<V extends Variable> {
 
@@ -83,47 +83,51 @@ public abstract class GraphRelation<V extends Variable> {
      */
     public abstract boolean isDirected();
 
-	/**create the initial graph representing the relation between input variables
-	 * @param solver
-	 * @return the initial relational graph 
-	 */
-	public GraphVar generateInitialGraph(Solver solver){
-		return generateInitialGraph(SetType.LINKED_LIST,solver);
-	}
+    /**
+     * create the initial graph representing the relation between input variables
+     *
+     * @param solver
+     * @return the initial relational graph
+     */
+    public GraphVar generateInitialGraph(Solver solver) {
+        return generateInitialGraph(SetType.LINKED_LIST, solver);
+    }
 
-	/**create the initial graph representing the relation between input variables
-	 * @param envelopeGraphType
-	 * @param solver
-	 * @return the initial relational graph
-	 */
-	public GraphVar generateInitialGraph(SetType envelopeGraphType, Solver solver){
-		int n = vars.length;
-		if (isDirected()){
-			DirectedGraphVar g = new DirectedGraphVar("G",solver, n, envelopeGraphType, SetType.LINKED_LIST,false);
-			for(int i=0;i<n;i++){
-				for(int j=0;j<n;j++){
-					if(isEntail(i,j) != ESat.FALSE){
-						g.getEnvelopGraph().addArc(i, j);
-						if(isEntail(i,j) == ESat.TRUE){
-							g.getKernelGraph().addArc(i, j);
-						}
-					}
-				}
-			}
-			return g;
-		}else{
-			UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, envelopeGraphType, SetType.LINKED_LIST,false);
-			for(int i=0;i<n;i++){
-				for(int j=i;j<n;j++){
-					if(isEntail(i,j) != ESat.FALSE){
-						g.getEnvelopGraph().addEdge(i, j);
-						if(isEntail(i,j) == ESat.TRUE){
-							g.getKernelGraph().addEdge(i, j);
-						}
-					}
-				}
-			}
-			return g;
-		}
-	}
+    /**
+     * create the initial graph representing the relation between input variables
+     *
+     * @param envelopeGraphType
+     * @param solver
+     * @return the initial relational graph
+     */
+    public GraphVar generateInitialGraph(SetType envelopeGraphType, Solver solver) {
+        int n = vars.length;
+        if (isDirected()) {
+            DirectedGraphVar g = new DirectedGraphVar("G", solver, n, envelopeGraphType, SetType.LINKED_LIST, false);
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (isEntail(i, j) != ESat.FALSE) {
+                        g.getEnvelopGraph().addArc(i, j);
+                        if (isEntail(i, j) == ESat.TRUE) {
+                            g.getKernelGraph().addArc(i, j);
+                        }
+                    }
+                }
+            }
+            return g;
+        } else {
+            UndirectedGraphVar g = new UndirectedGraphVar("G", solver, n, envelopeGraphType, SetType.LINKED_LIST, false);
+            for (int i = 0; i < n; i++) {
+                for (int j = i; j < n; j++) {
+                    if (isEntail(i, j) != ESat.FALSE) {
+                        g.getEnvelopGraph().addEdge(i, j);
+                        if (isEntail(i, j) == ESat.TRUE) {
+                            g.getKernelGraph().addEdge(i, j);
+                        }
+                    }
+                }
+            }
+            return g;
+        }
+    }
 }

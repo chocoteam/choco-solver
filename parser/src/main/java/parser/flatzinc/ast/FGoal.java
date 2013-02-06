@@ -27,8 +27,7 @@
 
 package parser.flatzinc.ast;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -38,6 +37,7 @@ import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.ast.searches.IntSearch;
 import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;

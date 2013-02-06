@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.nary.intlincomb;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.MathUtils;
+import common.ESat;
+import common.util.tools.MathUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -26,10 +26,10 @@
  */
 package solver.search.strategy.enumerations.sorters;
 
-import choco.kernel.memory.IStateInt;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;

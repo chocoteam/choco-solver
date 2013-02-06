@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

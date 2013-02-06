@@ -27,12 +27,11 @@
 
 package solver;
 
-import choco.kernel.ESat;
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.Environments;
-import choco.kernel.memory.IEnvironment;
+import common.ESat;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.THashSet;
+import memory.Environments;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -70,7 +69,7 @@ import java.util.Properties;
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
  * @see solver.propagation.DSLEngine
- * @see choco.kernel.memory.IEnvironment
+ * @see memory.IEnvironment
  * @see solver.search.loop.AbstractSearchLoop
  * @since 0.01
  */

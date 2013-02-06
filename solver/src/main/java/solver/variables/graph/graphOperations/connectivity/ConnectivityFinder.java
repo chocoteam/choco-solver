@@ -29,8 +29,8 @@ package solver.variables.graph.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
 import solver.variables.graph.IGraph;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
@@ -103,7 +103,7 @@ public class ConnectivityFinder {
         ISet act = graph.getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             p[i] = -1;
-			neighbors[i] = graph.getSuccessorsOf(i);
+            neighbors[i] = graph.getSuccessorsOf(i);
         }
         int first = act.getFirstElement();
         int cc = 0;

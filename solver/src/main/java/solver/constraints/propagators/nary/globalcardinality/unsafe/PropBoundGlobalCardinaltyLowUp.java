@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import choco.kernel.common.util.procedure.IntProcedure;
+import common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

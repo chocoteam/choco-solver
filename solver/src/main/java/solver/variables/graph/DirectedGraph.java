@@ -27,11 +27,11 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.variables.graph.graphOperations.GraphTools;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,60 +47,62 @@ public class DirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-	ISet[] successors;
-	ISet[] predecessors;
-	/** activeIdx represents the nodes available in the graph */
-	ISet nodes;
-	int n;
-	SetType type;
+    ISet[] successors;
+    ISet[] predecessors;
+    /**
+     * activeIdx represents the nodes available in the graph
+     */
+    ISet nodes;
+    int n;
+    SetType type;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public DirectedGraph(int nbits, SetType type, boolean allNodes) {
-		this.type = type;
-		this.n = nbits;
-		predecessors = new ISet[nbits];
-		successors = new ISet[nbits];
-		for(int i=0;i<n;i++){
-			predecessors[i] = SetFactory.makeSet(type, nbits);
-			successors[i] = SetFactory.makeSet(type, nbits);
-		}
-		if(allNodes){
-			this.nodes = SetFactory.makeFullSet(nbits);
-		}else{
-			this.nodes = SetFactory.makeBitSet(nbits);
-		}
-	}
+    public DirectedGraph(int nbits, SetType type, boolean allNodes) {
+        this.type = type;
+        this.n = nbits;
+        predecessors = new ISet[nbits];
+        successors = new ISet[nbits];
+        for (int i = 0; i < n; i++) {
+            predecessors[i] = SetFactory.makeSet(type, nbits);
+            successors[i] = SetFactory.makeSet(type, nbits);
+        }
+        if (allNodes) {
+            this.nodes = SetFactory.makeFullSet(nbits);
+        } else {
+            this.nodes = SetFactory.makeBitSet(nbits);
+        }
+    }
 
-	public DirectedGraph(int order, boolean[][] matrix, SetType type, boolean allNodes) {
-		this(order,type,allNodes);
-		for (int i = 0; i < order; i++) {
-			for (int j = 0; j < order; j++) {
-				if (matrix[i][j]) {
-					this.successors[i].add(j);
-					this.predecessors[j].add(i);
-				}
-			}
-		}
-	}
+    public DirectedGraph(int order, boolean[][] matrix, SetType type, boolean allNodes) {
+        this(order, type, allNodes);
+        for (int i = 0; i < order; i++) {
+            for (int j = 0; j < order; j++) {
+                if (matrix[i][j]) {
+                    this.successors[i].add(j);
+                    this.predecessors[j].add(i);
+                }
+            }
+        }
+    }
 
-	public DirectedGraph(IEnvironment env, int nb, SetType type, boolean allNodes) {
-		this.n = nb;
-		this.type = type;
-		predecessors = new ISet[nb];
-		successors = new ISet[nb];
-		for(int i=0;i<n;i++){
-			predecessors[i] = SetFactory.makeStoredSet(type, nb, env);
-			successors[i] = SetFactory.makeStoredSet(type, nb, env);
-		}
-		if(allNodes){
-			this.nodes = SetFactory.makeFullSet(nb);
-		}else{
-			this.nodes = SetFactory.makeStoredSet(SetType.BITSET,nb,env);
-		}
-	}
+    public DirectedGraph(IEnvironment env, int nb, SetType type, boolean allNodes) {
+        this.n = nb;
+        this.type = type;
+        predecessors = new ISet[nb];
+        successors = new ISet[nb];
+        for (int i = 0; i < n; i++) {
+            predecessors[i] = SetFactory.makeStoredSet(type, nb, env);
+            successors[i] = SetFactory.makeStoredSet(type, nb, env);
+        }
+        if (allNodes) {
+            this.nodes = SetFactory.makeFullSet(nb);
+        } else {
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, nb, env);
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -150,33 +152,34 @@ public class DirectedGraph implements IGraph {
         return nodes;
     }
 
-	@Override
-	/**
-	 * @inheritedDoc
-	 */
-	public SetType getType() {
-		return type;
-	}
+    @Override
+    /**
+     * @inheritedDoc
+     */
+    public SetType getType() {
+        return type;
+    }
 
-	@Override
-	public boolean activateNode(int x) {
-		return nodes.add(x);
-	}
+    @Override
+    public boolean activateNode(int x) {
+        return nodes.add(x);
+    }
 
-	@Override
-	public boolean desactivateNode(int x) {
-		if(nodes.remove(x)){
-			for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
-				predecessors[j].remove(x);
-			}
-			successors[x].clear();
-			for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
-				successors[j].remove(x);
-			}
-			predecessors[x].clear();
-			return true;
-		}return false;
-	}
+    @Override
+    public boolean desactivateNode(int x) {
+        if (nodes.remove(x)) {
+            for (int j = successors[x].getFirstElement(); j >= 0; j = successors[x].getNextElement()) {
+                predecessors[j].remove(x);
+            }
+            successors[x].clear();
+            for (int j = predecessors[x].getFirstElement(); j >= 0; j = predecessors[x].getNextElement()) {
+                successors[j].remove(x);
+            }
+            predecessors[x].clear();
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean addEdge(int x, int y) {
@@ -255,14 +258,14 @@ public class DirectedGraph implements IGraph {
         return false;
     }
 
-	@Override
-	/**
-	 * @inheritedDoc
-	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-	 */
-	public ISet getNeighborsOf(int x) {
-		return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
-	}
+    @Override
+    /**
+     * @inheritedDoc
+     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
+     */
+    public ISet getNeighborsOf(int x) {
+        return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
+    }
 
     @Override
     public ISet getSuccessorsOf(int x) {

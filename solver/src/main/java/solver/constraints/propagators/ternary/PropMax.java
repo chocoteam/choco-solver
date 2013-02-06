@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

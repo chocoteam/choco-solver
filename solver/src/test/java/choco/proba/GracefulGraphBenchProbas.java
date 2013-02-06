@@ -1,6 +1,6 @@
 package choco.proba;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

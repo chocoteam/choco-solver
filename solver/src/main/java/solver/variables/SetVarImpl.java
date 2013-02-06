@@ -27,11 +27,11 @@
 
 package solver.variables;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
 import com.sun.istack.internal.NotNull;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

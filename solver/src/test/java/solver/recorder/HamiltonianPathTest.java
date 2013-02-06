@@ -27,19 +27,17 @@
 
 package solver.recorder;
 
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.sandbox.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
@@ -79,7 +77,7 @@ public class HamiltonianPathTest {
         Solver solver = new Solver();
         int n = matrix.length;
         // build model
-        DirectedGraphVar graph = new DirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
+        DirectedGraphVar graph = new DirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {

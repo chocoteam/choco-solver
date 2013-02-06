@@ -27,11 +27,11 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.PoolManager;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.HCP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;

@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;

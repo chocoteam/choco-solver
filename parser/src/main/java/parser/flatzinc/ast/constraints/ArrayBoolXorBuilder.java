@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;

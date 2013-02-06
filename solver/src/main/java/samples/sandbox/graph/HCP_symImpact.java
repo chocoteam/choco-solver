@@ -27,8 +27,8 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.HCP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;

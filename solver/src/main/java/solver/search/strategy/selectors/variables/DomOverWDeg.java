@@ -26,9 +26,9 @@
  */
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;

@@ -27,7 +27,7 @@
 
 package choco.explanations;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;

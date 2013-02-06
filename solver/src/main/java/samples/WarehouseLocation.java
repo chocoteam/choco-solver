@@ -26,10 +26,10 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;

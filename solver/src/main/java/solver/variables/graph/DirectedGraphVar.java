@@ -27,12 +27,12 @@
 
 package solver.variables.graph;
 
+import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
-import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,17 +47,17 @@ public class DirectedGraphVar extends GraphVar<DirectedGraph> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public DirectedGraphVar(String name, Solver solver, int nbNodes,
-							SetType typeEnv, SetType typeKer,boolean allNodes) {
-		super(name, solver);
-		envelop = new DirectedGraph(environment, nbNodes, typeEnv,allNodes);
-		kernel = new DirectedGraph(environment, nbNodes, typeKer,allNodes);
-	}
-
-	public DirectedGraphVar(String name, Solver solver, int nbNodes,boolean allNodes) {
-		this(name, solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
+    public DirectedGraphVar(String name, Solver solver, int nbNodes,
+                            SetType typeEnv, SetType typeKer, boolean allNodes) {
+        super(name, solver);
+        envelop = new DirectedGraph(environment, nbNodes, typeEnv, allNodes);
+        kernel = new DirectedGraph(environment, nbNodes, typeKer, allNodes);
     }
-	
+
+    public DirectedGraphVar(String name, Solver solver, int nbNodes, boolean allNodes) {
+        this(name, solver, nbNodes, SetType.ENVELOPE_BEST, SetType.KERNEL_BEST, allNodes);
+    }
+
     //***********************************************************************************
     // METHODS
     //***********************************************************************************

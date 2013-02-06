@@ -28,7 +28,7 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;

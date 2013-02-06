@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.alldifferent;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;

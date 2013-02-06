@@ -27,12 +27,13 @@
 
 package solver.variables.graph.graphOperations;
 
-import java.util.BitSet;
-import java.util.HashMap;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.matrix.Set_BitSet;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.IGraph;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.matrix.Set_BitSet;
+
+import java.util.BitSet;
+import java.util.HashMap;
 
 /**
  * Class containing some static methods to manipulate graphs

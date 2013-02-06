@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.nary.intlincomb;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;

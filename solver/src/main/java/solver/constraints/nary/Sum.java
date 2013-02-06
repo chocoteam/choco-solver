@@ -27,11 +27,11 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.tools.StringUtils;
-import choco.kernel.memory.IStateBitSet;
+import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;

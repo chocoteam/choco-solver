@@ -27,7 +27,7 @@
 
 package samples;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;

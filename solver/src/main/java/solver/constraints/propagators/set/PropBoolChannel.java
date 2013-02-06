@@ -34,10 +34,10 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -27,8 +27,8 @@
 
 package solver.constraints.nary.cnf;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.VariableUtilities;
+import common.ESat;
+import common.util.VariableUtilities;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.cnf.PropClause;

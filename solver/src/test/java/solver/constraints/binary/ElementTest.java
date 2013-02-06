@@ -27,8 +27,8 @@
 
 package solver.constraints.binary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -67,7 +67,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", -3, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
@@ -77,7 +77,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", 2, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);

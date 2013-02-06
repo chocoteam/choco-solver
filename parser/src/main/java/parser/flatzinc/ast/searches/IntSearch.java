@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.searches;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.strategy.assignments.DecisionOperator;

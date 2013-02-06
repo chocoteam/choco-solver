@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

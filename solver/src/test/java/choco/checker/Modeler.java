@@ -27,10 +27,10 @@
 
 package choco.checker;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

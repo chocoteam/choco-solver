@@ -27,11 +27,11 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.Environments;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.Environments;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.TSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.SolverProperties;
 import solver.constraints.Constraint;

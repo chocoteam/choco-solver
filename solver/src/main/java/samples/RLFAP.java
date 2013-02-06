@@ -26,13 +26,13 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.limits.LimitBox;

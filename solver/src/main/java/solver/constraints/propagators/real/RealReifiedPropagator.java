@@ -26,8 +26,8 @@
  */
 package solver.constraints.propagators.real;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;

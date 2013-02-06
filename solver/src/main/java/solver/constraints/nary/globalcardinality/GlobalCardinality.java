@@ -26,8 +26,8 @@
  */
 package solver.constraints.nary.globalcardinality;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;

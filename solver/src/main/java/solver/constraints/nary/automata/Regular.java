@@ -26,7 +26,7 @@
  */
 package solver.constraints.nary.automata;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.nary.automata.FA.IAutomaton;

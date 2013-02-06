@@ -26,9 +26,9 @@
  */
 package solver.constraints.nary.automata;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;

@@ -26,7 +26,7 @@
  */
 package solver.constraints;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.propagators.binary.*;
 import solver.constraints.propagators.unary.PropEqualXC;

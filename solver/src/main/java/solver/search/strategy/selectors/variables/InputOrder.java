@@ -27,7 +27,7 @@
 
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IStateInt;
+import memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 

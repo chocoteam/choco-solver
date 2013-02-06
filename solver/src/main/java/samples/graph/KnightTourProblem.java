@@ -27,8 +27,8 @@
 
 package samples.graph;
 
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.sandbox.graph.input.HCP_Utils;

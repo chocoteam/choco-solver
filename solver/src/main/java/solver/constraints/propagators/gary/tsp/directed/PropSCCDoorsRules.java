@@ -34,11 +34,11 @@
 
 package solver.constraints.propagators.gary.tsp.directed;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

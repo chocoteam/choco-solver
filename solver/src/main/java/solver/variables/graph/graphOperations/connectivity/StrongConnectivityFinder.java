@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import choco.kernel.memory.setDataStructures.ISet;
+import memory.setDataStructures.ISet;
 import solver.variables.graph.DirectedGraph;
 
 import java.io.Serializable;

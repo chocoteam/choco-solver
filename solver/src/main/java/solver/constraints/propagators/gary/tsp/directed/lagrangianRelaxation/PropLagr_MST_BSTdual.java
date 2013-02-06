@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

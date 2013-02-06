@@ -28,7 +28,7 @@
 package solver.constraints.propagators.unary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
+import common.ESat;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;

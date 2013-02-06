@@ -34,7 +34,7 @@
 
 package solver.search.strategy.strategy.set;
 
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
@@ -58,11 +58,12 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Strategy for branching on set variables
-	 * Lexicographic element enforcing by default
-	 * @param variables
-	 */
+    /**
+     * Strategy for branching on set variables
+     * Lexicographic element enforcing by default
+     *
+     * @param variables
+     */
     public SetSearchStrategy(SetVar[] variables) {
         super(variables);
         pool = new PoolManager<FastDecisionSet>();

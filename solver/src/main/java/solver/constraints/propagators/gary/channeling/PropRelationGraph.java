@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;

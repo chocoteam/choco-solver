@@ -26,7 +26,7 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.MagicSeries;

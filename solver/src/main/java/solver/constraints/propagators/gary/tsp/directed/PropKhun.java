@@ -26,9 +26,9 @@
  */
 package solver.constraints.propagators.gary.tsp.directed;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

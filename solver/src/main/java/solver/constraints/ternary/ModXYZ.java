@@ -27,8 +27,8 @@
 
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.sum.PropSumEq;

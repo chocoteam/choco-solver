@@ -27,8 +27,8 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 
 import java.io.Serializable;
 

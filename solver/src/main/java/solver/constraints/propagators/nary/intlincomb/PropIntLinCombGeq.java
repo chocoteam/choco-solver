@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.nary.intlincomb;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -42,7 +42,7 @@ import solver.variables.IntVar;
 public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
 
     public PropIntLinCombGeq(int[] coeffs, int nbPosVars, int cste, IntVar[] vars,
-                            Constraint constraint, Solver solver) {
+                             Constraint constraint, Solver solver) {
         super(coeffs, nbPosVars, cste, vars, constraint, solver);
     }
 
@@ -66,9 +66,8 @@ public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
      * Checks a new lower bound.
      *
      * @return true if filtering has been infered
-     * @throws ContradictionException
-     *          if a domain empties or a contradiction is
-     *          infered
+     * @throws ContradictionException if a domain empties or a contradiction is
+     *                                infered
      */
     public boolean filterOnImprovedLowerBound()
             throws ContradictionException {
@@ -80,7 +79,8 @@ public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
      *
      * @return true if filtering has been infered
      * @throws ContradictionException if a domain empties or a contradiction is
-     *                                infered  */
+     *                                infered
+     */
     public boolean filterOnImprovedUpperBound()
             throws ContradictionException {
         int myub = coeffPolicy.computeUpperBound();
@@ -105,6 +105,7 @@ public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
     protected String getOperator() {
         return " >= ";
     }
+
     @Override
     protected ESat check(int value) {
         return ESat.eval(value >= 0);
@@ -113,7 +114,7 @@ public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
     @Override
     protected void checkEntailment() {
         int lb = this.coeffPolicy.computeLowerBound();
-        if (lb >= 0){
+        if (lb >= 0) {
             this.setPassive();
         }
     }

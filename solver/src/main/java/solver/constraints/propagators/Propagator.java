@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
+import common.ESat;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import memory.IEnvironment;
+import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;

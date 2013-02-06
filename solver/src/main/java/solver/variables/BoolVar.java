@@ -27,8 +27,8 @@
 
 package solver.variables;
 
-import choco.kernel.ESat;
 import com.sun.istack.internal.NotNull;
+import common.ESat;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IntDelta;

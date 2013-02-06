@@ -27,10 +27,10 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;

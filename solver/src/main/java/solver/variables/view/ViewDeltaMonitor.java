@@ -26,8 +26,8 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.SafeIntProcedure;
+import common.util.procedure.IntProcedure;
+import common.util.procedure.SafeIntProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.exception.ContradictionException;

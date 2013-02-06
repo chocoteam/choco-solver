@@ -26,9 +26,9 @@
  */
 package solver.propagation.hardcoded.dyn;
 
-import choco.kernel.memory.IEnvironment;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;

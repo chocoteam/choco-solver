@@ -26,7 +26,7 @@
  */
 package samples.nsp;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.CostRegular;
@@ -216,9 +216,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverWithGCCFix(Solver solver) {
         description += "cover[gccFix] ";
-		IntVar[] cover = new IntVar[data.nbActivities()];
+        IntVar[] cover = new IntVar[data.nbActivities()];
         for (int a = 0; a < data.nbActivities(); a++) {
-			cover[a] = VariableFactory.bounded("cover_"+a,data.getCoverLB(a),data.getCoverUB(a),solver);
+            cover[a] = VariableFactory.bounded("cover_" + a, data.getCoverLB(a), data.getCoverUB(a), solver);
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
@@ -366,9 +366,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         description += "countW[gcc] ";
         IntVar[] vars = new IntVar[7];
         for (int e = 0; e < data.nbEmployees(); e++) {
-			IntVar[] cards = new IntVar[data.nbActivities()];
+            IntVar[] cards = new IntVar[data.nbActivities()];
             for (int a = 0; a < data.nbActivities(); a++) {
-                cards[a] = VariableFactory.bounded("card_"+a,data.getWeekCounterLB(e, a),data.getWeekCounterLB(e, a),solver);
+                cards[a] = VariableFactory.bounded("card_" + a, data.getWeekCounterLB(e, a), data.getWeekCounterLB(e, a), solver);
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);

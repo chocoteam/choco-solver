@@ -26,8 +26,8 @@
  */
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateBitSet;
+import common.ESat;
+import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

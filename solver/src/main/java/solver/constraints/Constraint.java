@@ -27,8 +27,8 @@
 
 package solver.constraints;
 
-import choco.kernel.ESat;
 import com.sun.istack.internal.Nullable;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;

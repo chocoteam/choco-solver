@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.nary.intlincomb.policy;
 
-import choco.kernel.common.util.tools.MathUtils;
+import common.util.tools.MathUtils;
 import solver.variables.IntVar;
 
 /**

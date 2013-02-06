@@ -27,13 +27,13 @@
 
 package solver.variables.fast;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeBoundIterator;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
+import common.ESat;
+import common.util.iterators.DisposableRangeBoundIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueBoundIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;

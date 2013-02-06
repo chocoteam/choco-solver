@@ -26,8 +26,8 @@
  */
 package solver.constraints.binary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;

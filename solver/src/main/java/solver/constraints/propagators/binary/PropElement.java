@@ -28,9 +28,9 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.iterators.DisposableValueIterator;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;

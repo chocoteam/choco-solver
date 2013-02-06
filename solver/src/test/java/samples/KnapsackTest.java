@@ -27,10 +27,10 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.list.array.TFloatArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.variables.IntVar;
 

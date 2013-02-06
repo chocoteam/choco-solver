@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;

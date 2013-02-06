@@ -27,7 +27,7 @@
 
 package solver.variables;
 
-import choco.kernel.memory.setDataStructures.ISet;
+import memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;

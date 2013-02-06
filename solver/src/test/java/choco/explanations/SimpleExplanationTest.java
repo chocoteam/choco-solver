@@ -27,7 +27,7 @@
 
 package choco.explanations;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;

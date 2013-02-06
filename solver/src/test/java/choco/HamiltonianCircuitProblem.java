@@ -27,7 +27,7 @@
 
 package choco;
 
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;

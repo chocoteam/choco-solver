@@ -27,9 +27,9 @@
 
 package solver.propagation.hardcoded;
 
-import choco.kernel.common.util.objects.BitsetFactory;
-import choco.kernel.common.util.objects.IBitset;
-import choco.kernel.memory.IEnvironment;
+import common.util.objects.BitsetFactory;
+import common.util.objects.IBitset;
+import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;

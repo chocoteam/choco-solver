@@ -27,9 +27,9 @@
 
 package choco.checker.fmk;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.Nullable;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;

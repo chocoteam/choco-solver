@@ -28,10 +28,10 @@
 package solver.constraints.nary.automata.structure.multicostregular;
 
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.memory.IStateIntVector;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.util.iterators.DisposableIntIterator;
 import gnu.trove.stack.TIntStack;
+import memory.IStateIntVector;
+import memory.structure.StoredIndexedBipartiteSet;
 import solver.Constant;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;

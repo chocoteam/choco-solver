@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;

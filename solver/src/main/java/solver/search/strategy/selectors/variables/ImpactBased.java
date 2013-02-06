@@ -26,11 +26,11 @@
  */
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateDouble;
+import common.util.PoolManager;
+import common.util.iterators.DisposableValueIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateDouble;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;

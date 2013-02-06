@@ -27,10 +27,10 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBool;
+import common.util.PoolManager;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import memory.IEnvironment;
+import memory.IStateBool;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;

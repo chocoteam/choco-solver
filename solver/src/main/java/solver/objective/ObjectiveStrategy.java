@@ -34,9 +34,9 @@
 
 package solver.objective;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.ICause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;

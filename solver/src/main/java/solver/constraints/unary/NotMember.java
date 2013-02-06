@@ -27,7 +27,7 @@
 
 package solver.constraints.unary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;

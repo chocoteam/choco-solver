@@ -28,7 +28,7 @@
 package choco;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;

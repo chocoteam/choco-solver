@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -26,8 +26,8 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropMinOfAList;
@@ -37,6 +37,7 @@ import solver.variables.IntVar;
  * VAL = MIN(VARS)
  * <br/>
  * CPRU: not tested yet
+ *
  * @author Charles Prud'homme
  * @since 26/07/12
  */

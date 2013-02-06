@@ -34,12 +34,12 @@
 
 package solver.constraints.propagators.gary.tsp.directed;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
+import memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

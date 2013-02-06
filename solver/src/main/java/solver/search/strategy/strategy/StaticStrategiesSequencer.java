@@ -27,7 +27,7 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
@@ -69,32 +69,32 @@ public class StaticStrategiesSequencer extends AbstractStrategy<Variable> {
         }
     }
 
-	@Override
-	public Decision<Variable> computeDecision(Variable variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		int idx = 0;
+    @Override
+    public Decision<Variable> computeDecision(Variable variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        int idx = 0;
         Decision decision = null;
         while (decision == null && idx < strategies.length) {
-			if(contains(strategies[idx].vars,variable)){
-				decision = strategies[idx].computeDecision(variable);
-			}
-			idx++;
+            if (contains(strategies[idx].vars, variable)) {
+                decision = strategies[idx].computeDecision(variable);
+            }
+            idx++;
         }
-		return decision;
-	}
+        return decision;
+    }
 
-	private static boolean contains(Variable[] vars, Variable variable) {
-		for(Variable v:vars){
-			if(v.equals(variable)){
-				return true;
-			}
-		}
-		return false;
-	}
+    private static boolean contains(Variable[] vars, Variable variable) {
+        for (Variable v : vars) {
+            if (v.equals(variable)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	/**
+    /**
      * {@inheritDoc}
      * Iterates over the declared sub-strategies and gets the overall current decision.
      */

@@ -26,8 +26,8 @@
  */
 package solver.explanations.antidom;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.structure.IndexedBipartiteSet;
+import common.util.iterators.DisposableValueIterator;
+import memory.structure.IndexedBipartiteSet;
 import solver.variables.fast.BooleanBoolVarImpl;
 
 /**

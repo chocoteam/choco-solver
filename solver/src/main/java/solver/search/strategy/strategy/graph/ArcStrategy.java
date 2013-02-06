@@ -26,8 +26,8 @@
  */
 package solver.search.strategy.strategy.graph;
 
+import memory.setDataStructures.ISet;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 public abstract class ArcStrategy<G extends GraphVar> {
 

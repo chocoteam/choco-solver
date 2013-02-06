@@ -26,9 +26,9 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.Environments;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
+import memory.Environments;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -85,20 +85,20 @@ public class AllTest {
 
     @Test(groups = "1m")
     public void mainTest() {
-		if(Configuration.PLUG_EXPLANATION){
-			LoggerFactory.getLogger("test").info(this.toString());
-			prob.readArgs(args);
-			prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
-			prob.buildModel();
-			prob.configureSearch();
-			prob.configureEngine();
-			//  prob.overrideExplanation();
-			SearchMonitorFactory.log(prob.solver, true, true);
-			prob.solver.findAllSolutions();
+        if (Configuration.PLUG_EXPLANATION) {
+            LoggerFactory.getLogger("test").info(this.toString());
+            prob.readArgs(args);
+            prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
+            prob.buildModel();
+            prob.configureSearch();
+            prob.configureEngine();
+            //  prob.overrideExplanation();
+            SearchMonitorFactory.log(prob.solver, true, true);
+            prob.solver.findAllSolutions();
 
-			Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
-		}
-	}
+            Assert.assertEquals(nbSol, prob.getSolver().getMeasures().getSolutionCount(), "incorrect nb solutions");
+        }
+    }
 
     @Override
     public String toString() {

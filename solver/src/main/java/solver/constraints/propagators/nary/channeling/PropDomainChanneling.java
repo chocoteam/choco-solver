@@ -26,10 +26,10 @@
  */
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

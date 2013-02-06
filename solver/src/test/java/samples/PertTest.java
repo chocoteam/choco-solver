@@ -27,10 +27,10 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

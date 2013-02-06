@@ -26,8 +26,8 @@
  */
 package solver.variables;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;

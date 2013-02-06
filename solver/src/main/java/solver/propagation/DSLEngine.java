@@ -27,7 +27,7 @@
 package solver.propagation;
 
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;

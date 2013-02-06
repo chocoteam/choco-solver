@@ -27,7 +27,7 @@
 
 package solver.thread;
 
-import choco.kernel.ResolutionPolicy;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.variables.IntVar;

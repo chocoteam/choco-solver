@@ -27,16 +27,16 @@
 
 package solver.constraints.propagators.nary.automaton;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Constant;

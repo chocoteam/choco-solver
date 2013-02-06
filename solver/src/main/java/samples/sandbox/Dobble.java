@@ -34,9 +34,9 @@
 
 package samples.sandbox;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

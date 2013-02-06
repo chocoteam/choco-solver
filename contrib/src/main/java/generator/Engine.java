@@ -26,7 +26,7 @@
  */
 package generator;
 
-import choco.kernel.common.util.objects.IntCircularQueue;
+import common.util.objects.IntCircularQueue;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 

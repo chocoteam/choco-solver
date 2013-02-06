@@ -28,8 +28,8 @@
 package solver.constraints.nary;
 
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;

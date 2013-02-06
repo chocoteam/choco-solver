@@ -27,7 +27,7 @@
 
 package solver.variables;
 
-import choco.kernel.memory.setDataStructures.ISet;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetIntVarImpl;

@@ -27,11 +27,11 @@
 
 package samples.sandbox.lns.parallel;
 
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
-import samples.sandbox.parallelism.AbstractParallelMaster;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.TSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
+import samples.sandbox.parallelism.AbstractParallelMaster;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.strategy.strategy.graph.GraphStrategies;
@@ -87,7 +87,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
         // variables
         int max = 100 * optimum;
         IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G", solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {

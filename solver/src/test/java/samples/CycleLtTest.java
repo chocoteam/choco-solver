@@ -27,7 +27,7 @@
 
 package samples;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -40,7 +40,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import static choco.kernel.common.util.tools.StatisticUtils.*;
+import static common.util.tools.StatisticUtils.*;
 
 /**
  * <br/>

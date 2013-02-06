@@ -27,8 +27,8 @@
 
 package solver.explanations.antidom;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateBitSet;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateBitSet;
 import solver.variables.IntVar;
 
 /**

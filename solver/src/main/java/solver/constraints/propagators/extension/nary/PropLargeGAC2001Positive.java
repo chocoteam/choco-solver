@@ -26,9 +26,9 @@
  */
 package solver.constraints.propagators.extension.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

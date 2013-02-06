@@ -26,7 +26,7 @@
  */
 package solver.constraints;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;

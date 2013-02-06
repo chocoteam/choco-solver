@@ -27,8 +27,8 @@
 
 package solver.search.strategy.enumerations;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.validators.IValid;
 

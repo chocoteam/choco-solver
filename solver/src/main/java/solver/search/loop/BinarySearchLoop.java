@@ -27,7 +27,7 @@
 
 package solver.search.loop;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;

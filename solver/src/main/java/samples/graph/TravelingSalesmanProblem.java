@@ -27,11 +27,11 @@
 
 package samples.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.sandbox.graph.input.TSP_Utils;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;

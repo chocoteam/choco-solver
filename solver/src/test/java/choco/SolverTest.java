@@ -27,9 +27,9 @@
 
 package choco;
 
-import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -61,7 +61,7 @@ public class SolverTest {
 
     public static Solver knapsack() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
 
         IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
 

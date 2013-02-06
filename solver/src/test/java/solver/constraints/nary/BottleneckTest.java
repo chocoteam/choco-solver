@@ -27,9 +27,9 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

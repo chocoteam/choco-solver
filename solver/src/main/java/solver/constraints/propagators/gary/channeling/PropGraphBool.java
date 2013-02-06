@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
+import common.ESat;
+import common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

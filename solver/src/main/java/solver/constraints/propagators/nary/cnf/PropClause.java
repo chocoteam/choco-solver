@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.ALogicTree;

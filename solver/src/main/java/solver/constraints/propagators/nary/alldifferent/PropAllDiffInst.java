@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.nary.alldifferent;
 
-import choco.kernel.ESat;
+import common.ESat;
 import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;

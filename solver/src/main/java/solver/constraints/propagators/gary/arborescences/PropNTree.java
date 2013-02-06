@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.gary.arborescences;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
+import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.UndirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
 
 public abstract class AbstractTreeFinder {
 
@@ -52,11 +52,11 @@ public abstract class AbstractTreeFinder {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public AbstractTreeFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
-		n = nbNodes;
-		Tree = new UndirectedGraph(n, SetType.LINKED_LIST,false);
-		propHK = propagator;
-	}
+    public AbstractTreeFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+        n = nbNodes;
+        Tree = new UndirectedGraph(n, SetType.LINKED_LIST, false);
+        propHK = propagator;
+    }
 
     //***********************************************************************************
     // METHODS

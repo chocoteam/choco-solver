@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary.automaton;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateBool;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IStateBool;
+import memory.structure.StoredIndexedBipartiteSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;

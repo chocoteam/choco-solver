@@ -27,12 +27,12 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.ATSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;

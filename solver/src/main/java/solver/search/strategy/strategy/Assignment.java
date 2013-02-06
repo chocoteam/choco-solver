@@ -27,7 +27,7 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;

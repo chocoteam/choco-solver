@@ -26,7 +26,7 @@
  */
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;

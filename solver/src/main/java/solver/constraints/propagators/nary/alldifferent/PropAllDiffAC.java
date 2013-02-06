@@ -26,12 +26,12 @@
  */
 package solver.constraints.propagators.nary.alldifferent;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnarySafeIntProcedure;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -27,8 +27,8 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;

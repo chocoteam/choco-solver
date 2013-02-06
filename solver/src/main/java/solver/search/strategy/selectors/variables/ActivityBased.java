@@ -27,8 +27,8 @@
 package solver.search.strategy.selectors.variables;
 
 
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.PoolManager;
+import common.util.iterators.DisposableValueIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;

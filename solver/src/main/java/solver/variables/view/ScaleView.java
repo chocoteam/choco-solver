@@ -27,9 +27,9 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.tools.MathUtils;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import common.util.tools.MathUtils;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;

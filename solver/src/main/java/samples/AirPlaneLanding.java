@@ -27,11 +27,11 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Cause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;

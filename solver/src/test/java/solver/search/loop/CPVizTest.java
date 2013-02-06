@@ -26,7 +26,7 @@
  */
 package solver.search.loop;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
