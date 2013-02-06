@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.sandbox.set;
+package samples.sandbox.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.setDataStructures.SetType;
