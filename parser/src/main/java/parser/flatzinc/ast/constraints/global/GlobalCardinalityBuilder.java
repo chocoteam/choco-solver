@@ -50,6 +50,6 @@ public class GlobalCardinalityBuilder implements IBuilder {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
-		return IntConstraintFactory.global_cardinality(vars, values, cards, false);
+        return IntConstraintFactory.global_cardinality(vars, values, cards, false);
     }
 }

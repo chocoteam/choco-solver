@@ -45,68 +45,69 @@ import solver.variables.graph.GraphVar;
  */
 public final class GraphStrategyFactory {
 
-	private GraphStrategyFactory() {
-	}
+    private GraphStrategyFactory() {
+    }
 
-	/**
-	 * Lexicographic graph branching strategy.
-	 * Branch on nodes then arcs/edges.
-	 *
-	 * <p/> node branching:
-	 * Let i be the first node such that
-	 * i in envelope(GRAPHVAR) and i not in kernel(GRAPHVAR).
-	 * The decision adds i to the kernel of GRAPHVAR.
-	 * It is fails, then i is removed from the envelope of GRAPHVAR.
-	 *
-	 * arc/edge branching:
-	 * <p/> node branching:
-	 * Let (i,j) be the first arc/edge such that
-	 * (i,j) in envelope(GRAPHVAR) and (i,j) not in kernel(GRAPHVAR).
-	 * The decision adds (i,j) to the kernel of GRAPHVAR.
-	 * It is fails, then (i,j) is removed from the envelope of GRAPHVAR
-	 *
-	 * @param GRAPHVAR a graph variable to branch on
-	 * @return a lexicographic strategy to instantiate g
-	 */
-	public static <G extends GraphVar> AbstractStrategy graphLexico(G GRAPHVAR) {
-		return new GraphStrategy(GRAPHVAR);
-	}
+    /**
+     * Lexicographic graph branching strategy.
+     * Branch on nodes then arcs/edges.
+     * <p/>
+     * <p/> node branching:
+     * Let i be the first node such that
+     * i in envelope(GRAPHVAR) and i not in kernel(GRAPHVAR).
+     * The decision adds i to the kernel of GRAPHVAR.
+     * It is fails, then i is removed from the envelope of GRAPHVAR.
+     * <p/>
+     * arc/edge branching:
+     * <p/> node branching:
+     * Let (i,j) be the first arc/edge such that
+     * (i,j) in envelope(GRAPHVAR) and (i,j) not in kernel(GRAPHVAR).
+     * The decision adds (i,j) to the kernel of GRAPHVAR.
+     * It is fails, then (i,j) is removed from the envelope of GRAPHVAR
+     *
+     * @param GRAPHVAR a graph variable to branch on
+     * @return a lexicographic strategy to instantiate g
+     */
+    public static <G extends GraphVar> AbstractStrategy graphLexico(G GRAPHVAR) {
+        return new GraphStrategy(GRAPHVAR);
+    }
 
-	/**
-	 * Lexicographic graph branching strategy.
-	 * Alternate randomly node and arc/edge decisions.
-	 *
-	 * <p/> node branching:
-	 * Let i be a randomly selected node such that
-	 * i in envelope(GRAPHVAR) and i not in kernel(GRAPHVAR).
-	 * The decision adds i to the kernel of GRAPHVAR.
-	 * It is fails, then i is removed from the envelope of GRAPHVAR.
-	 *
-	 * arc/edge branching:
-	 * <p/> node branching:
-	 * Let (i,j) be a randomly selected arc/edge arc/edge such that
-	 * (i,j) in envelope(GRAPHVAR) and (i,j) not in kernel(GRAPHVAR).
-	 * The decision adds (i,j) to the kernel of GRAPHVAR.
-	 * It is fails, then (i,j) is removed from the envelope of GRAPHVAR
-	 *
-	 * @param GRAPHVAR a graph variable to branch on
-	 * @param SEED randomness seed
-	 * @return a random strategy to instantiate g
-	 */
-	public static <G extends GraphVar> AbstractStrategy graphRandom(G GRAPHVAR, long SEED) {
-		return graphStrategy(GRAPHVAR, new RandomNode(GRAPHVAR, SEED), new RandomArc(GRAPHVAR, SEED), GraphStrategy.NodeArcPriority.ARCS);
-	}
+    /**
+     * Lexicographic graph branching strategy.
+     * Alternate randomly node and arc/edge decisions.
+     * <p/>
+     * <p/> node branching:
+     * Let i be a randomly selected node such that
+     * i in envelope(GRAPHVAR) and i not in kernel(GRAPHVAR).
+     * The decision adds i to the kernel of GRAPHVAR.
+     * It is fails, then i is removed from the envelope of GRAPHVAR.
+     * <p/>
+     * arc/edge branching:
+     * <p/> node branching:
+     * Let (i,j) be a randomly selected arc/edge arc/edge such that
+     * (i,j) in envelope(GRAPHVAR) and (i,j) not in kernel(GRAPHVAR).
+     * The decision adds (i,j) to the kernel of GRAPHVAR.
+     * It is fails, then (i,j) is removed from the envelope of GRAPHVAR
+     *
+     * @param GRAPHVAR a graph variable to branch on
+     * @param SEED     randomness seed
+     * @return a random strategy to instantiate g
+     */
+    public static <G extends GraphVar> AbstractStrategy graphRandom(G GRAPHVAR, long SEED) {
+        return graphStrategy(GRAPHVAR, new RandomNode(GRAPHVAR, SEED), new RandomArc(GRAPHVAR, SEED), GraphStrategy.NodeArcPriority.ARCS);
+    }
 
-	/**
-	 * Dedicated graph branching strategy.
-	 * @param GRAPHVAR a graph variable to branch on
-	 * @param NODE_STRAT strategy over nodes
-	 * @param ARC_STRAT strategy over arcs/edges
-	 * @param PRIORITY enables to mention if it should first branch on nodes
-	 * @param <G> either directed or undirected graph variable
-	 * @return a dedicated strategy to instantiate GRAPHVAR
-	 */
-	public static <G extends GraphVar> AbstractStrategy graphStrategy(G GRAPHVAR, NodeStrategy NODE_STRAT, ArcStrategy ARC_STRAT, GraphStrategy.NodeArcPriority PRIORITY) {
-		return new GraphStrategy(GRAPHVAR, NODE_STRAT, ARC_STRAT, PRIORITY);
-	}
+    /**
+     * Dedicated graph branching strategy.
+     *
+     * @param GRAPHVAR   a graph variable to branch on
+     * @param NODE_STRAT strategy over nodes
+     * @param ARC_STRAT  strategy over arcs/edges
+     * @param PRIORITY   enables to mention if it should first branch on nodes
+     * @param <G>        either directed or undirected graph variable
+     * @return a dedicated strategy to instantiate GRAPHVAR
+     */
+    public static <G extends GraphVar> AbstractStrategy graphStrategy(G GRAPHVAR, NodeStrategy NODE_STRAT, ArcStrategy ARC_STRAT, GraphStrategy.NodeArcPriority PRIORITY) {
+        return new GraphStrategy(GRAPHVAR, NODE_STRAT, ARC_STRAT, PRIORITY);
+    }
 }

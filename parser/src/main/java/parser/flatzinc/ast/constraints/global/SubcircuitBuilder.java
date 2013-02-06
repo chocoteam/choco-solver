@@ -48,7 +48,7 @@ public class SubcircuitBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-		IntVar[] vars = exps.get(0).toIntVarArray(solver);
-        return IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length",0,vars.length,solver));
+        IntVar[] vars = exps.get(0).toIntVarArray(solver);
+        return IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length", 0, vars.length, solver));
     }
 }

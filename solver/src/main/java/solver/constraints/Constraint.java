@@ -28,14 +28,11 @@
 package solver.constraints;
 
 import com.sun.istack.internal.Nullable;
-import org.slf4j.LoggerFactory;
 import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.explanations.RecorderExplanationEngine;
 import solver.propagation.IPriority;
 import solver.variables.Variable;
 

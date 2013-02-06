@@ -53,13 +53,13 @@ public class GraphConstraintFactory {
     /**
      * partition a graph variable into nCliques cliques
      *
-     * @param GRAPHVAR		graph variable partitioned into cliques
-     * @param NB_CLIQUES	expected number of cliques
+     * @param GRAPHVAR   graph variable partitioned into cliques
+     * @param NB_CLIQUES expected number of cliques
      * @return a constraint which partitions GRAPHVAR into NB_CLIQUES cliques
      */
     public static Constraint nCliques(UndirectedGraphVar GRAPHVAR, IntVar NB_CLIQUES) {
-		Solver solver = GRAPHVAR.getSolver();
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR,NB_CLIQUES},solver);
+        Solver solver = GRAPHVAR.getSolver();
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR, NB_CLIQUES}, solver);
         gc.addPropagators(new PropTransitivity(GRAPHVAR, solver, gc));
         gc.addPropagators(new PropKCliques(GRAPHVAR, solver, gc, NB_CLIQUES));
         return gc;
@@ -68,12 +68,12 @@ public class GraphConstraintFactory {
     /**
      * Constraint modeling the Traveling Salesman Problem
      *
-     * @param GRAPHVAR		graph variable representing a Hamiltonian cycle
-     * @param COSTVAR		variable representing the cost of the cycle
-     * @param EDGE_COSTS	cost matrix (should be symmetric)
-     * @param HELD_KARP		use the Lagrangian relaxation of the tsp
-     *               described by Held and Karp
-     *               {0:noHK,1:HK,2:HK but wait a first solution before running it}
+     * @param GRAPHVAR   graph variable representing a Hamiltonian cycle
+     * @param COSTVAR    variable representing the cost of the cycle
+     * @param EDGE_COSTS cost matrix (should be symmetric)
+     * @param HELD_KARP  use the Lagrangian relaxation of the tsp
+     *                   described by Held and Karp
+     *                   {0:noHK,1:HK,2:HK but wait a first solution before running it}
      * @return a tsp constraint
      */
     public static Constraint tsp(UndirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] EDGE_COSTS, int HELD_KARP) {
@@ -91,11 +91,11 @@ public class GraphConstraintFactory {
      * Constraint modeling the Asymmetric Traveling Salesman Problem
      * turned as the Minimum Cost Hamiltonian PATH Problem
      *
-	 * @param GRAPHVAR	variable representing a Hamiltonian path
-     * @param COSTVAR	variable representing the cost of the path
-     * @param ARC_COSTS	cost matrix
-     * @param ORIGIN		origin of the path
-     * @param DESTINATION	end of the path
+     * @param GRAPHVAR    variable representing a Hamiltonian path
+     * @param COSTVAR     variable representing the cost of the path
+     * @param ARC_COSTS   cost matrix
+     * @param ORIGIN      origin of the path
+     * @param DESTINATION end of the path
      * @return an ATSP constraint
      */
     public static Constraint atsp(DirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] ARC_COSTS, int ORIGIN, int DESTINATION) {
@@ -111,8 +111,8 @@ public class GraphConstraintFactory {
      * @return a hamiltonian cycle constraint
      */
     public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
-		Solver solver = GRAPHVAR.getSolver();
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR},solver);
+        Solver solver = GRAPHVAR.getSolver();
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, 2, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, 2, gc, solver));
         gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR, gc, solver));
@@ -122,21 +122,21 @@ public class GraphConstraintFactory {
     /**
      * GRAPHVAR must form a Hamiltonian cycle from ORIGIN to DESTINATION
      *
-     * @param GRAPHVAR		variable representing a path
-     * @param ORIGIN		first node of the path
-     * @param DESTINATION	last node of the path
+     * @param GRAPHVAR    variable representing a path
+     * @param ORIGIN      first node of the path
+     * @param DESTINATION last node of the path
      * @return a hamiltonian path constraint
      */
     public static Constraint hamiltonianPath(DirectedGraphVar GRAPHVAR, int ORIGIN, int DESTINATION) {
-		Solver solver = GRAPHVAR.getSolver();
-		int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
+        Solver solver = GRAPHVAR.getSolver();
+        int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
             succs[i] = preds[i] = 1;
         }
         succs[DESTINATION] = preds[ORIGIN] = 0;
-        Constraint gc = new Constraint(new Variable[]{GRAPHVAR},solver);
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
@@ -150,14 +150,14 @@ public class GraphConstraintFactory {
      * also known as tree constraint (CP'11)
      * GAC in (almost) linear time : O(alpha.m)
      * roots are identified by loops
-	 * <p/>
-	 * BEWARE this implementation supposes that every node is part of the solution graph
-	 *
+     * <p/>
+     * BEWARE this implementation supposes that every node is part of the solution graph
+     *
      * @param GRAPHVAR
-     * @param NB_TREE      number of anti arborescences
+     * @param NB_TREE  number of anti arborescences
      * @return tree constraint
      */
     public static Constraint nTrees(DirectedGraphVar GRAPHVAR, IntVar NB_TREE) {
-        return new NTree(GRAPHVAR,NB_TREE);
+        return new NTree(GRAPHVAR, NB_TREE);
     }
 }

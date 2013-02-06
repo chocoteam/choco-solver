@@ -29,62 +29,63 @@ package samples.sandbox.parallelism;
 
 /**
  * Master a set of slaves which will work in parallel
+ *
  * @param <S>
  */
 public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected S[] slaves;
-	private int nbWorkingSlaves;
-	private Thread mainThread;
-	private boolean wait;
+    protected S[] slaves;
+    private int nbWorkingSlaves;
+    private Thread mainThread;
+    private boolean wait;
 
-	public AbstractParallelMaster(){
-		mainThread = Thread.currentThread();
-	}
+    public AbstractParallelMaster() {
+        mainThread = Thread.currentThread();
+    }
 
-	//***********************************************************************************
-	// DISTRIBUTED METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // DISTRIBUTED METHODS
+    //***********************************************************************************
 
-	/**
-	 * Make the slaves work in parallel
-	 */
-	public void distributedSlavery() {
-		nbWorkingSlaves = slaves.length;
-		for(int i=0;i<slaves.length;i++){
-			slaves[i].workInParallel();
-		}
-		wait = true;
-		try {
-			while(wait)
-				mainThread.sleep(20);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
+    /**
+     * Make the slaves work in parallel
+     */
+    public void distributedSlavery() {
+        nbWorkingSlaves = slaves.length;
+        for (int i = 0; i < slaves.length; i++) {
+            slaves[i].workInParallel();
+        }
+        wait = true;
+        try {
+            while (wait)
+                mainThread.sleep(20);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
 
-	/**
-	 * Make the slaves work in sequence
-	 */
-	public void sequentialSlavery() {
-		nbWorkingSlaves = slaves.length;
-		for(int i=0;i<slaves.length;i++){
-			slaves[i].work();
-		}
-	}
+    /**
+     * Make the slaves work in sequence
+     */
+    public void sequentialSlavery() {
+        nbWorkingSlaves = slaves.length;
+        for (int i = 0; i < slaves.length; i++) {
+            slaves[i].work();
+        }
+    }
 
-	/**
-	 * A slave notify the master that he fulfilled his task
-	 */
-	public synchronized void wishGranted() {
-		nbWorkingSlaves--;
-		if(nbWorkingSlaves == 0){
-			wait = false;
-		}
-	}
+    /**
+     * A slave notify the master that he fulfilled his task
+     */
+    public synchronized void wishGranted() {
+        nbWorkingSlaves--;
+        if (nbWorkingSlaves == 0) {
+            wait = false;
+        }
+    }
 }

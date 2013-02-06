@@ -26,21 +26,10 @@
  */
 package solver.constraints.nary;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import solver.Cause;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-
-import static org.testng.Assert.assertEquals;
-
 /**
  * <br/>
  * CONSISTENCY TEST (not relevant yet)
+ *
  * @author Charles Prud'homme
  * @since 15/06/11
  */
