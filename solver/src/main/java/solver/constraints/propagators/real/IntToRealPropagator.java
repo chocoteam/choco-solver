@@ -88,7 +88,7 @@ public class IntToRealPropagator extends Propagator<IntVar> {
                 return;
             case Ibex.ENTAILED:
                 return;
-            case Ibex.NOTHING:
+            case Ibex.NOT_SIGNIFICANT:
             default:
                 return;
         }
