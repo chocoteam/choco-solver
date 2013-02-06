@@ -58,8 +58,9 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 	private int[] values;
 	private IntVar[] cards;
 	private ISet[] possibles,mandatories;
+	private ISet valueToCompute;
 	private TIntIntHashMap map;
-	private TIntArrayList boundToCompute;
+	private TIntArrayList boundVar;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -68,35 +69,35 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 	/**
 	 * Propagator for Global Cardinality Constraint (GCC) for integer variables
 	 * Incremental checker and basic filter: no particular consistency
-	 * Filter vars only
+	 * Filter vars decvars
 	 * @param decvars
 	 * @param restrictedValues
+	 * @param map
 	 * @param valueCardinalities
 	 * @param constraint
 	 * @param sol
 	 */
-	public PropFastGCC_decvars(IntVar[] decvars, int[] restrictedValues, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
+	public PropFastGCC_decvars(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
 		super(ArrayUtils.append(decvars,valueCardinalities), sol, constraint, PropagatorPriority.LINEAR, false);
 		if (restrictedValues.length != valueCardinalities.length) {
 			throw new UnsupportedOperationException();
 		}
-		this.boundToCompute = new TIntArrayList();
 		this.values = restrictedValues;
 		this.cards = valueCardinalities;
 		this.n = decvars.length;
 		this.n2 = values.length;
-		this.map = new TIntIntHashMap();
 		this.possibles = new ISet[n2];
 		this.mandatories = new ISet[n2];
-		int idx = 0;
-		for (int v:values) {
-			if (!map.containsKey(v)) {
-				mandatories[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
-				possibles[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
-				map.put(v, idx);
-				idx++;
-			}else{
-				throw new UnsupportedOperationException("multiple occurrence of value: "+v);
+		this.map = map;
+		for (int idx=0;idx<n2;idx++) {
+			mandatories[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
+			possibles[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
+		}
+		this.valueToCompute = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n2, environment);
+		this.boundVar = new TIntArrayList();
+		for(int i=0;i<decvars.length;i++){
+			if(!decvars[i].hasEnumeratedDomain()){
+				boundVar.add(i);
 			}
 		}
 	}
@@ -122,10 +123,13 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		// initialization
 		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){
+			valueToCompute.clear();
 			for(int i=0;i<n2;i++){
 				mandatories[i].clear();
 				possibles[i].clear();
+				valueToCompute.add(i);
 			}
 			for (int i = 0; i < n; i++) {
 				IntVar v = vars[i];
@@ -144,8 +148,8 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 					}
 				}
 			}
-		}else{
-			for(int i=0;i<n2;i++){
+		}else{//lazy update
+			for(int i=valueToCompute.getFirstElement();i>=0;i=valueToCompute.getNextElement()){
 				for(int var=possibles[i].getFirstElement();var>=0;var=possibles[i].getNextElement()){
 					if(!vars[var].contains(values[i])){
 						possibles[i].remove(var);
@@ -156,28 +160,8 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 				}
 			}
 		}
-		boundToCompute.clear();
-		for(int i=0;i<n2;i++){
-			if(mandatories[i].getSize()==cards[i].getUB()){
-				for(int j=possibles[i].getFirstElement();j>=0;j=possibles[i].getNextElement()){
-					if(!vars[j].removeValue(values[i],aCause)){
-						assert (!vars[j].hasEnumeratedDomain());
-						boundToCompute.add(j);
-					}
-					possibles[i].remove(j);
-				}
-			}
-			if(possibles[i].getSize()+mandatories[i].getSize()==cards[i].getLB()){
-				for(int j=possibles[i].getFirstElement();j>=0;j=possibles[i].getNextElement()){
-					mandatories[i].add(j);
-					vars[j].instantiateTo(values[i],aCause);
-				}
-				possibles[i].clear();
-			}
-		}
-		if(boundToCompute.size()>0){
-			filterBounds();
-		}
+		// filtering
+		fixPoint();
 	}
 
 	@Override
@@ -185,40 +169,87 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
-	private void filterBounds() throws ContradictionException {
-		for(int i=0;i<boundToCompute.size();i++){
-			int var = boundToCompute.get(i);
-			int lb = vars[var].getLB();
-			int index = -1;
-			if(map.containsKey(lb)){
-				index = map.get(lb);
+	private void fixPoint() throws ContradictionException {
+		boolean again = true;
+		while(again){
+			again = false;
+			for(int i=valueToCompute.getFirstElement();i>=0;i=valueToCompute.getNextElement()){
+				if(possibles[i].getSize()+mandatories[i].getSize()==cards[i].getLB()){
+					for(int j=possibles[i].getFirstElement();j>=0;j=possibles[i].getNextElement()){
+						mandatories[i].add(j);
+						if(vars[j].instantiateTo(values[i],aCause)){
+							again = true;
+						}
+					}
+					possibles[i].clear();
+					valueToCompute.remove(i);//value[i] restriction entailed
+				} else if(mandatories[i].getSize()==cards[i].getUB()){
+					for(int var=possibles[i].getFirstElement();var>=0;var=possibles[i].getNextElement()){
+						if(vars[var].removeValue(values[i],aCause)){
+							again = true;
+						}
+						possibles[i].remove(var);
+					}
+					valueToCompute.remove(i);//value[i] restriction entailed
+				}
 			}
-			boolean b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
-			while(b){
-				vars[var].removeValue(lb,aCause);
-				lb = vars[var].getLB();
-				index = -1;
+			// manage holes in bounded variables
+			if(boundVar.size()>0){
+				if(filterBounds()){
+					again = true;
+				}
+			}
+		}
+	}
+
+	private boolean filterBounds() throws ContradictionException {
+		boolean useful = false;
+		for(int i=0;i<boundVar.size();i++){
+			int var = boundVar.get(i);
+			if(!vars[var].instantiated()){
+				int lb = vars[var].getLB();
+				int index = -1;
 				if(map.containsKey(lb)){
 					index = map.get(lb);
 				}
-				b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
-			}
-			int ub = vars[var].getUB();
-			index = -1;
-			if(map.containsKey(ub)){
-				index = map.get(ub);
-			}
-			b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
-			while(b){
-				vars[var].removeValue(ub,aCause);
-				ub = vars[var].getUB();
+				boolean b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
+				while(b){
+					useful = true;
+					vars[var].removeValue(lb,aCause);
+					lb = vars[var].getLB();
+					index = -1;
+					if(map.containsKey(lb)){
+						index = map.get(lb);
+					}
+					b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
+				}
+				int ub = vars[var].getUB();
 				index = -1;
 				if(map.containsKey(ub)){
 					index = map.get(ub);
 				}
 				b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
+				while(b){
+					useful = true;
+					vars[var].removeValue(ub,aCause);
+					ub = vars[var].getUB();
+					index = -1;
+					if(map.containsKey(ub)){
+						index = map.get(ub);
+					}
+					b = index!=-1&&!(possibles[index].contain(var)||mandatories[index].contain(var));
+				}
+			}else{
+				int val = vars[var].getValue();
+				if(map.containsKey(val)){
+					int index = map.get(val);
+					if(!(possibles[index].contain(var)||mandatories[index].contain(var))){
+						contradiction(vars[var],"");
+					}
+				}
 			}
 		}
+		return useful;
 	}
 
 	//***********************************************************************************

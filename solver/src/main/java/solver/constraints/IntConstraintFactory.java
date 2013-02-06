@@ -27,9 +27,7 @@
 package solver.constraints;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.common.util.tools.StringUtils;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
@@ -54,7 +52,6 @@ import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
-import solver.constraints.nary.globalcardinality.GlobalCardinalityLowUp;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.propagators.extension.binary.BinRelation;
@@ -67,8 +64,6 @@ import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
-import solver.constraints.propagators.nary.globalcardinality.PropFastGCC_card;
-import solver.constraints.propagators.nary.globalcardinality.PropFastGCC_decvars;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
@@ -81,8 +76,6 @@ import solver.variables.IntVar;
 import solver.variables.Task;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
-
-import java.util.Arrays;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -666,17 +659,14 @@ public enum IntConstraintFactory {
 	 * @param OCCURRENCES collection of cardinality variables
 	 * @param CLOSED      restricts domains of VARS to VALUES if set to true
 	 */
-	public static Constraint global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
+	public static GlobalCardinality global_cardinality(IntVar[] VARS, int[] VALUES, IntVar[] OCCURRENCES, boolean CLOSED) {
 		Solver solver = VARS[0].getSolver();
-		Constraint c = new Constraint(ArrayUtils.append(VARS,OCCURRENCES),solver);
 		assert VALUES.length==OCCURRENCES.length;
 		if(!CLOSED){
-			c.setPropagators(new PropFastGCC_decvars(VARS,VALUES,OCCURRENCES,c,solver),
-					new PropFastGCC_card(VARS,VALUES,OCCURRENCES,c,solver));
+			return new GlobalCardinality(VARS,VALUES,OCCURRENCES,solver);
 		}else{
 			TIntArrayList toAdd = new TIntArrayList();
 			TIntSet givenValues = new TIntHashSet();
-			TIntObjectHashMap<IntVar> map = new TIntObjectHashMap<IntVar>(VALUES.length);
 			for (int i:VALUES) {
 				assert !givenValues.contains(i);
 				givenValues.add(i);
@@ -684,26 +674,28 @@ public enum IntConstraintFactory {
 			for (IntVar var:VARS) {
 				int ub = var.getUB();
 				for(int k=var.getLB();k<=ub;k=var.nextValue(k)){
-					if(!map.contains(k)){
+					if(!givenValues.contains(k)){
 						if(!toAdd.contains(k)){
 							toAdd.add(k);
 						}
 					}
 				}
 			}
-			int n2 = VALUES.length+toAdd.size();
-			int[] values = new int[n2];
-			IntVar[] cards = new IntVar[n2];
-			System.arraycopy(values,0,VALUES,0,VALUES.length);
-			System.arraycopy(cards,0,OCCURRENCES,0,VALUES.length);
-			for (int i=VALUES.length; i<n2; i++) {
-				values[i] = toAdd.get(i-VALUES.length);
-				cards[i]  = Views.fixed(0, solver);
+			if(toAdd.size()>0){
+				int n2 = VALUES.length+toAdd.size();
+				int[] values = new int[n2];
+				IntVar[] cards = new IntVar[n2];
+				System.arraycopy(VALUES,0,values,0,VALUES.length);
+				System.arraycopy(OCCURRENCES,0,cards,0,VALUES.length);
+				for (int i=VALUES.length; i<n2; i++) {
+					values[i] = toAdd.get(i-VALUES.length);
+					cards[i]  = Views.fixed(0, solver);
+				}
+				return new GlobalCardinality(VARS,values,cards,solver);
+			}else{
+				return new GlobalCardinality(VARS,VALUES,OCCURRENCES,solver);
 			}
-			c.setPropagators(new PropFastGCC_decvars(VARS,values,cards,c,solver),
-								new PropFastGCC_card(VARS,values,cards,c,solver));
 		}
-		return c;
 	}
 
 	/**

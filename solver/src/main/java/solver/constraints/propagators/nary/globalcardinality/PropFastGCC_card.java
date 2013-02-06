@@ -70,11 +70,12 @@ public class PropFastGCC_card extends Propagator<IntVar> {
 	 * Filter cardinality variables only
 	 * @param vars
 	 * @param restrictedValues
+	 * @param mapping
 	 * @param valueCardinalities
 	 * @param constraint
 	 * @param sol
 	 */
-	public PropFastGCC_card(IntVar[] vars, int[] restrictedValues, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
+	public PropFastGCC_card(IntVar[] vars, int[] restrictedValues,TIntIntHashMap mapping, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
 		super(vars, sol, constraint, PropagatorPriority.LINEAR, false);
 		if (restrictedValues.length != valueCardinalities.length) {
 			throw new UnsupportedOperationException();
@@ -83,20 +84,13 @@ public class PropFastGCC_card extends Propagator<IntVar> {
 		this.cards = valueCardinalities;
 		this.n = vars.length;
 		this.n2 = values.length;
-		this.map = new TIntIntHashMap();
+		this.map = mapping;
 		this.idms = new IIntDeltaMonitor[n];
 		this.min = new IStateInt[n2];
 		this.max = new IStateInt[n2];
-		int idx = 0;
-		for (int v:values) {
-			if (!map.containsKey(v)) {
-				min[idx] = environment.makeInt();
-				max[idx] = environment.makeInt();
-				map.put(v, idx);
-				idx++;
-			}else{
-				throw new UnsupportedOperationException("multiple occurrence of value: "+v);
-			}
+		for (int idx=0;idx<n2;idx++) {
+			min[idx] = environment.makeInt();
+			max[idx] = environment.makeInt();
 		}
 		for(int i=0;i<n;i++){
 			idms[i] = vars[i].monitorDelta(this);
