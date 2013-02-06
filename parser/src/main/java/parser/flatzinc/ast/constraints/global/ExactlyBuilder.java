@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -50,6 +50,6 @@ public class ExactlyBuilder implements IBuilder {
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
-        return IntConstraintFactory.among(Views.fixed(n, solver), x, v);
+        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, v);
     }
 }

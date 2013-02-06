@@ -462,11 +462,11 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 3};
         int[] low = new int[]{0, 1, 0};
         int[] up = new int[]{1, 2, 1};
-		IntVar[] cards = new IntVar[]{
-				VariableFactory.bounded("card 0",0,1,s),
-				VariableFactory.bounded("card 1",1,2,s),
-				VariableFactory.bounded("card 2",0,1,s)
-		};
+        IntVar[] cards = new IntVar[]{
+                VariableFactory.bounded("card 0", 0, 1, s),
+                VariableFactory.bounded("card 1", 1, 2, s),
+                VariableFactory.bounded("card 2", 0, 1, s)
+        };
 
         s.post(IntConstraintFactory.global_cardinality(X, values, cards, false));
 
@@ -494,7 +494,7 @@ public class CPVizTest {
 //        IntVar[] duration = new IntVar[n];
 //        IntVar[] height = new IntVar[n];
 //        for (int i = 0; i < height.length; i++) {
-//            duration[i] = Views.fixed(durations_data[i], s);
+//            duration[i] = VariableFactory.fixed(durations_data[i], s);
 //            height[i] = VariableFactory.enumerated("height " + i, new int[]{0, heights_data[i]}, s);
 //        }
 //        IntVar[] bool = VariableFactory.boolArray("taskIn?", n, s);

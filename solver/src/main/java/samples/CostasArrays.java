@@ -33,7 +33,6 @@ import solver.constraints.nary.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * Costas Arrays
@@ -70,7 +69,7 @@ public class CostasArrays extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i != j) {
-                    vectors[idx] = Views.offset(Sum.var(vars[j], Views.minus(vars[i])), 2 * n * (j - i));
+                    vectors[idx] = VariableFactory.offset(Sum.var(vars[j], VariableFactory.minus(vars[i])), 2 * n * (j - i));
                     idx++;
                 }
             }

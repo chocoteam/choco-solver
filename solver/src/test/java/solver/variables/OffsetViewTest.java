@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -53,7 +52,7 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = Views.offset(X, 2);
+        IntVar Y = VariableFactory.offset(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -76,7 +75,7 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = Views.offset(X, 3);
+        IntVar Y = VariableFactory.offset(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -97,7 +96,7 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = Views.offset(X, coeff);
+        IntVar Y = VariableFactory.offset(X, coeff);
 
         IntVar[] vars = {X, Y};
 

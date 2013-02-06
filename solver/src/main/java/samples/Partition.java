@@ -35,7 +35,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -110,9 +109,9 @@ public class Partition extends AbstractProblem {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = Views.sqr(x[i]);
+            sx[i] = VariableFactory.sqr(x[i]);
             sxy[i] = sx[i];
-            sy[i] = Views.sqr(y[i]);
+            sy[i] = VariableFactory.sqr(y[i]);
             sxy[size + i] = sy[i];
             solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
             solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));

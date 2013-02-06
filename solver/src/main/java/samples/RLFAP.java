@@ -41,7 +41,6 @@ import solver.search.restart.RestartFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -104,12 +103,12 @@ public class RLFAP extends AbstractProblem {
             int vidx = _var[i][0] - 1;
             if (vidx > prev) {
                 for (; prev < vidx; ) {
-                    vars[prev++] = Views.fixed(0, solver);
+                    vars[prev++] = VariableFactory.fixed(0, solver);
                 }
             }
             int didx = _var[i][1];
             if (_var[i].length > 2) {
-                vars[vidx] = Views.fixed(_var[i][2], solver);
+                vars[vidx] = VariableFactory.fixed(_var[i][2], solver);
             } else {
                 vars[vidx] = VariableFactory.enumerated("v_" + vidx, _dom[didx], solver);
                 values.addAll(_dom[didx]);

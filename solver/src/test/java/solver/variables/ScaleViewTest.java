@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -53,7 +52,7 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = Views.scale(X, 2);
+        IntVar Y = VariableFactory.scale(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -76,7 +75,7 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = Views.scale(X, 3);
+        IntVar Y = VariableFactory.scale(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -97,7 +96,7 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = Views.scale(X, coeff);
+        IntVar Y = VariableFactory.scale(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -118,7 +117,7 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = Views.fixed("C", coeff, s);
+        IntVar C = VariableFactory.fixed("C", coeff, s);
         IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
 
         IntVar[] vars = {X, Y};

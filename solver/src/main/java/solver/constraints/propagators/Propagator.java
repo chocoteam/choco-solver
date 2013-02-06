@@ -48,7 +48,7 @@ import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 import java.io.Serializable;
 
@@ -145,7 +145,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
                     if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                        vars[i] = (V) Views.eq((IntVar) v);
+                        vars[i] = (V) VariableFactory.eq((IntVar) v);
                     } else {
                         throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
                                 "This is forbidden; you must consider using a View or a EQ constraint.");

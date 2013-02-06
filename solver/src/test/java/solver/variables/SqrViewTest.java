@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -47,7 +46,7 @@ public class SqrViewTest {
         Solver solver = new Solver();
 
         IntVar X = VariableFactory.enumerated("X", -4, 12, solver);
-        IntVar Z = Views.sqr(X);
+        IntVar Z = VariableFactory.sqr(X);
 
         try {
 //            solver.propagate();

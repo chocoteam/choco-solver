@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.constraints.ternary.Max;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -207,7 +206,7 @@ public class IteratorTest {
     @Test
     public void testCste1() {
         Solver solver = new Solver();
-        IntVar var = Views.fixed(8, solver);
+        IntVar var = VariableFactory.fixed(8, solver);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.next());
@@ -217,7 +216,7 @@ public class IteratorTest {
     @Test
     public void testCste2() {
         Solver solver = new Solver();
-        IntVar var = Views.fixed(8, solver);
+        IntVar var = VariableFactory.fixed(8, solver);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.previous());
@@ -227,7 +226,7 @@ public class IteratorTest {
     @Test
     public void testCste3() {
         Solver solver = new Solver();
-        IntVar var = Views.fixed(8, solver);
+        IntVar var = VariableFactory.fixed(8, solver);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(8, vit.min());
@@ -239,7 +238,7 @@ public class IteratorTest {
     @Test
     public void testCste4() {
         Solver solver = new Solver();
-        IntVar var = Views.fixed(8, solver);
+        IntVar var = VariableFactory.fixed(8, solver);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.min());
@@ -251,7 +250,7 @@ public class IteratorTest {
     @Test
     public void testOffset1() {
         Solver solver = new Solver();
-        IntVar var = Views.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.next());
@@ -265,7 +264,7 @@ public class IteratorTest {
     @Test
     public void testOffset2() {
         Solver solver = new Solver();
-        IntVar var = Views.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(6, vit.previous());
@@ -279,7 +278,7 @@ public class IteratorTest {
     @Test
     public void testOffset3() {
         Solver solver = new Solver();
-        IntVar var = Views.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.min());
@@ -295,7 +294,7 @@ public class IteratorTest {
     @Test
     public void testOffset4() {
         Solver solver = new Solver();
-        IntVar var = Views.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.offset(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(6, vit.min());
@@ -311,7 +310,7 @@ public class IteratorTest {
     @Test
     public void testScale1() {
         Solver solver = new Solver();
-        IntVar var = Views.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(2, vit.next());
@@ -325,7 +324,7 @@ public class IteratorTest {
     @Test
     public void testScale2() {
         Solver solver = new Solver();
-        IntVar var = Views.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.previous());
@@ -339,7 +338,7 @@ public class IteratorTest {
     @Test
     public void testScale3() {
         Solver solver = new Solver();
-        IntVar var = Views.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(2, vit.min());
@@ -359,7 +358,7 @@ public class IteratorTest {
     @Test
     public void testScale4() {
         Solver solver = new Solver();
-        IntVar var = Views.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
+        IntVar var = VariableFactory.scale(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver), 2);
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(8, vit.min());
@@ -379,7 +378,7 @@ public class IteratorTest {
     @Test
     public void testMinus1() {
         Solver solver = new Solver();
-        IntVar var = Views.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(-4, vit.next());
@@ -393,7 +392,7 @@ public class IteratorTest {
     @Test
     public void testMinus2() {
         Solver solver = new Solver();
-        IntVar var = Views.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(-1, vit.previous());
@@ -407,7 +406,7 @@ public class IteratorTest {
     @Test
     public void testMinus3() {
         Solver solver = new Solver();
-        IntVar var = Views.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(-4, vit.min());
@@ -423,7 +422,7 @@ public class IteratorTest {
     @Test
     public void testMinus4() {
         Solver solver = new Solver();
-        IntVar var = Views.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
+        IntVar var = VariableFactory.minus(VariableFactory.enumerated("b", new int[]{1, 2, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(-2, vit.min());
@@ -439,7 +438,7 @@ public class IteratorTest {
     @Test
     public void testAbs1() {
         Solver solver = new Solver();
-        IntVar var = Views.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -453,7 +452,7 @@ public class IteratorTest {
     @Test
     public void testAbs2() {
         Solver solver = new Solver();
-        IntVar var = Views.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -467,7 +466,7 @@ public class IteratorTest {
     @Test
     public void testAbs3() {
         Solver solver = new Solver();
-        IntVar var = Views.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -483,7 +482,7 @@ public class IteratorTest {
     @Test
     public void testAbs4() {
         Solver solver = new Solver();
-        IntVar var = Views.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
@@ -627,7 +626,7 @@ public class IteratorTest {
     @Test
     public void testSqr1() {
         Solver solver = new Solver();
-        IntVar var = Views.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
@@ -641,7 +640,7 @@ public class IteratorTest {
     @Test
     public void testSqr2() {
         Solver solver = new Solver();
-        IntVar var = Views.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(16, vit.previous());
@@ -655,7 +654,7 @@ public class IteratorTest {
     @Test
     public void testSqr3() {
         Solver solver = new Solver();
-        IntVar var = Views.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -675,7 +674,7 @@ public class IteratorTest {
     @Test
     public void testSqr4() {
         Solver solver = new Solver();
-        IntVar var = Views.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(16, vit.min());

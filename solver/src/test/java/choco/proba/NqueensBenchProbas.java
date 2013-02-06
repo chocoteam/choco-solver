@@ -5,7 +5,6 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.IOException;
 
@@ -34,8 +33,8 @@ public class NqueensBenchProbas extends AbstractBenchProbas {
         int k = 0;
         for (int i = 0; i < size; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, size, solver);
-            diag1[i] = Views.offset(vars[i], i);
-            diag2[i] = Views.offset(vars[i], -i);
+            diag1[i] = VariableFactory.offset(vars[i], i);
+            diag2[i] = VariableFactory.offset(vars[i], -i);
             allVars[k++] = vars[i];
             allVars[k++] = diag1[i];
             allVars[k++] = diag2[i];

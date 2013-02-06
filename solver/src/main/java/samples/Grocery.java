@@ -36,7 +36,6 @@ import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -71,7 +70,7 @@ public class Grocery extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(vars, "=", 711));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
-        IntVar _711 = Views.fixed(711 * 100 * 100 * 100, solver);
+        IntVar _711 = VariableFactory.fixed(711 * 100 * 100 * 100, solver);
 
         TMP = new Constraint[3];
         TMP[0] = (IntConstraintFactory.times(vars[0], vars[1], tmp[0]));

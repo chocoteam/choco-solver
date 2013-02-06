@@ -34,7 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /**
  * X/Y = Z
@@ -56,9 +56,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
         this.X = x;
         this.Y = y;
         this.Z = z;
-        this.absX = Views.abs(X);
-        this.absY = Views.abs(Y);
-        this.absZ = Views.abs(Z);
+        this.absX = VariableFactory.abs(X);
+        this.absY = VariableFactory.abs(Y);
+        this.absZ = VariableFactory.abs(Z);
     }
 
     @Override

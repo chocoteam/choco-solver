@@ -42,7 +42,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,8 +155,8 @@ public class AllDifferentTest {
 
         int n = 5;
         IntVar[] vars = new IntVar[n];
-        vars[0] = Views.fixed("v_0", 5, s);
-        vars[1] = Views.fixed("v_1", 3, s);
+        vars[0] = VariableFactory.fixed("v_0", 5, s);
+        vars[1] = VariableFactory.fixed("v_1", 3, s);
         vars[2] = VariableFactory.bounded("v_2", 3, 4, s);
         vars[3] = VariableFactory.bounded("v_3", 2, 6, s);
         vars[4] = VariableFactory.bounded("v_4", 2, 6, s);

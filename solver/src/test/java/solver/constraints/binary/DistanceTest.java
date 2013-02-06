@@ -40,7 +40,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -58,7 +57,7 @@ public class DistanceTest {
                 Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                IntVar Z = Views.abs(Sum.var(X, Views.minus(Y)));
+                IntVar Z = VariableFactory.abs(Sum.var(X, VariableFactory.minus(Y)));
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
                 solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
                 solver.findAllSolutions();

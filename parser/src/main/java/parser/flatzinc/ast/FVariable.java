@@ -36,7 +36,6 @@ import parser.flatzinc.ast.expression.*;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.*;
-import solver.variables.view.Views;
 
 import java.util.List;
 
@@ -235,10 +234,10 @@ public final class FVariable {
                 iv = expression.boolVarValue(solver);
                 break;
             case INT:
-                iv = Views.fixed(name, expression.intValue(), solver);
+                iv = VariableFactory.fixed(name, expression.intValue(), solver);
                 break;
             case IDE:
-                iv = Views.eq((IntVar) map.get(expression.toString()));
+                iv = VariableFactory.eq((IntVar) map.get(expression.toString()));
                 break;
             case IDA:
                 EIdArray eida = (EIdArray) expression;

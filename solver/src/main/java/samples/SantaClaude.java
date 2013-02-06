@@ -36,7 +36,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -92,7 +91,7 @@ public class SantaClaude extends AbstractProblem {
         }
         function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(Views.real(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
 
         ave_cons.addFunction(function.toString(), all_vars);
         ave_cons.addFunction("{0} = [10.5,12.5]", average);

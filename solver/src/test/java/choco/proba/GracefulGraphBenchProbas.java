@@ -8,7 +8,6 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,7 +52,7 @@ public class GracefulGraphBenchProbas extends AbstractBenchProbas {
         for (int i = 0; i < size; i++) {
             for (int j = i + 1; j < size; j++) {
                 if (graph[i][j]) {
-                    IntVar tmp = Sum.var(nodeLabel[i], Views.minus(nodeLabel[j]));
+                    IntVar tmp = Sum.var(nodeLabel[i], VariableFactory.minus(nodeLabel[j]));
                     this.cstrs[c++] = IntConstraintFactory.absolute(edgeLabel[e++], tmp);
                 }
             }

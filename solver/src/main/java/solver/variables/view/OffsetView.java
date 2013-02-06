@@ -56,7 +56,7 @@ import solver.variables.delta.NoDelta;
  */
 public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
 
-    final int cste;
+    public final int cste;
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
 

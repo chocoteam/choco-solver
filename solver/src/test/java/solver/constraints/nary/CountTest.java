@@ -39,7 +39,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -219,7 +218,7 @@ public class CountTest {
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
-        IntVar vval = Views.fixed(val, solver);
+        IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }

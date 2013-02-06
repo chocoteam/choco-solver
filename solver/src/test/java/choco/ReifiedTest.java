@@ -42,7 +42,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -299,7 +298,7 @@ public class ReifiedTest {
 
         BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
         for (int i = 1; i <= 10; i++) {
-            solver.post(IntConstraintFactory.reified(bv2[i - 1], IntConstraintFactory.arithm(Views.fixed(i, solver), "<", cp), IntConstraintFactory.arithm(Views.fixed(i, solver), ">=", cp)));
+            solver.post(IntConstraintFactory.reified(bv2[i - 1], IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), "<", cp), IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
         }
 
         solver.set(new VariableEngine(solver));
@@ -320,12 +319,12 @@ public class ReifiedTest {
         Solver s = new Solver();
 
         IntVar row[] = new IntVar[3];
-        row[0] = Views.fixed(2, s);
+        row[0] = VariableFactory.fixed(2, s);
         row[1] = VariableFactory.bounded("R", 0, 100, s);
-        row[2] = Views.fixed(16, s);
+        row[2] = VariableFactory.fixed(16, s);
 
         IntVar calc[] = new IntVar[2];
-        calc[0] = Views.offset(row[0], 2);
+        calc[0] = VariableFactory.offset(row[0], 2);
         calc[1] = VariableFactory.bounded("C", 0, 80, s);
         s.post(IntConstraintFactory.scalar(new IntVar[]{row[0], row[1], calc[1]}, new int[]{1, 1, -1}, "=", 0));
 
@@ -356,12 +355,12 @@ public class ReifiedTest {
         Solver s = new Solver();
 
         IntVar row[] = new IntVar[3];
-        row[0] = Views.fixed(2, s);
+        row[0] = VariableFactory.fixed(2, s);
         row[1] = VariableFactory.bounded("R", 0, 100, s);
-        row[2] = Views.fixed(16, s);
+        row[2] = VariableFactory.fixed(16, s);
 
         IntVar calc[] = new IntVar[2];
-        calc[0] = Views.scale(row[0], 2);
+        calc[0] = VariableFactory.scale(row[0], 2);
         calc[1] = VariableFactory.bounded("C", 0, 1600, s);
         s.post(IntConstraintFactory.times(row[0], row[1], calc[1]));
 
@@ -392,13 +391,13 @@ public class ReifiedTest {
         Solver s = new Solver();
 
         IntVar row[] = new IntVar[3];
-        row[0] = Views.fixed(20, s);
+        row[0] = VariableFactory.fixed(20, s);
         row[1] = VariableFactory.bounded("R", 0, 100, s);
-        row[2] = Views.fixed(5, s);
+        row[2] = VariableFactory.fixed(5, s);
 
         IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
 
-        s.post(IntConstraintFactory.eucl_div(row[0], Views.fixed(2, s), calc[0]));
+        s.post(IntConstraintFactory.eucl_div(row[0], VariableFactory.fixed(2, s), calc[0]));
         s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];
@@ -429,13 +428,13 @@ public class ReifiedTest {
         Solver s = new Solver();
 
         IntVar row[] = new IntVar[3];
-        row[0] = Views.fixed(100, s);
+        row[0] = VariableFactory.fixed(100, s);
         row[1] = VariableFactory.bounded("R1", 0, 100, s);
-        row[2] = Views.fixed(5, s);
+        row[2] = VariableFactory.fixed(5, s);
 
         IntVar calc[] = VariableFactory.boundedArray("C", 2, 0, 100, s);
 
-        s.post(IntConstraintFactory.eucl_div(row[0], Views.fixed(25, s), calc[0]));
+        s.post(IntConstraintFactory.eucl_div(row[0], VariableFactory.fixed(25, s), calc[0]));
         s.post(IntConstraintFactory.eucl_div(row[0], row[1], calc[1]));
 
         Constraint[] constraints = new Constraint[4];

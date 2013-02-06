@@ -34,7 +34,7 @@ import solver.constraints.Operator;
 import solver.constraints.propagators.nary.PropCount;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /**
  * count(VALUE,VARIABLES,RELOP,LIMIT)
@@ -76,7 +76,7 @@ public class Count extends IntConstraint<IntVar> {
     }
 
     public Count(int value, IntVar[] vars, Operator relop, int limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{Views.fixed(limit, solver)}), solver);
+        super(ArrayUtils.append(vars, new IntVar[]{VariableFactory.fixed(limit, solver)}), solver);
         this.occval = value;
         switch (relop) {
             case GE:

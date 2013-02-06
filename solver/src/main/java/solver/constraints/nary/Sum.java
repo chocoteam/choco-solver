@@ -48,9 +48,9 @@ import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -171,12 +171,12 @@ public class Sum extends IntConstraint<IntVar> {
     public static IntVar var(IntVar a, IntVar b) {
         if (a.instantiated()) {
             if (b.instantiated()) {
-                return Views.fixed(a.getValue() + b.getValue(), a.getSolver());
+                return VariableFactory.fixed(a.getValue() + b.getValue(), a.getSolver());
             } else {
-                return Views.offset(b, a.getValue());
+                return VariableFactory.offset(b, a.getValue());
             }
         } else if (b.instantiated()) {
-            return Views.offset(a, b.getValue());
+            return VariableFactory.offset(a, b.getValue());
         } else {
             Solver solver = a.getSolver();
             IntVar z;

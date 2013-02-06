@@ -35,7 +35,6 @@ import solver.constraints.nary.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * CSPLib prob007:<br/>
@@ -83,7 +82,7 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
+                dist[i] = VariableFactory.abs(Sum.var(vars[i + 1], VariableFactory.minus(vars[i])));
                 solver.post(IntConstraintFactory.member(dist[i], 1, m - 1));
             }
         }
