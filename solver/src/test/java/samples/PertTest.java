@@ -81,8 +81,8 @@ public class PertTest {
         solver.post(precedence(garden, 1, objective, solver));
         solver.post(precedence(painting, 2, objective, solver));
 
-        solver.set(IntStrategyFactory.minDomMinVal(new IntVar[]{masonry, carpentry, plumbing, ceiling,
-                roofing, painting, windows, facade, garden, objective}, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+                roofing, painting, windows, facade, garden, objective}));
         return solver;
 
     }

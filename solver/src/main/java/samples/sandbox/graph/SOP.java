@@ -266,7 +266,7 @@ public class SOP {
         mainStrat.configure(policy, true);
 //		GraphStrategies mainStrat = new GraphStrategies(transGraph,distanceMatrix,relax);
 //		mainStrat.configure(GraphStrategies.MAX_DELTA_DEGREE,true,true,false);
-//		AbstractStrategy mainStrat = StrategyFactory.ABSrandom(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);
+//		AbstractStrategy mainStrat = StrategyFactory.ActivityBased(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);
 //		AbstractStrategy mainStrat = new MySearch(positions,solver);
         switch (main_search) {
             case 0:

@@ -126,8 +126,8 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(cars, solver.getEnvironment()));
-//		solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(cars));
+//		solver.set(StrategyFactory.firstFail_InDomainMin(cars, solver.getEnvironment()));
         solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
             int c = 0;
 

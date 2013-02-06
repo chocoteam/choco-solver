@@ -33,7 +33,6 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
@@ -302,20 +301,6 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @return a disposable iterator over ranges of <code>this</code>.
      */
     DisposableRangeIterator getRangeIterator(boolean bottomUp);
-
-    /**
-     * Defines the value iterator, ie the way to iterate over the domain's values, for <code>this</code>
-     *
-     * @param heuristicVal
-     */
-    void setHeuristicVal(HeuristicVal heuristicVal);
-
-    /**
-     * Returns the value iterator of <code>this</code>
-     *
-     * @return value iterator
-     */
-    HeuristicVal getHeuristicVal();
 
     /**
      * Indicates wether (or not) <code>this</code> has an enumerated domain (represented in extension)

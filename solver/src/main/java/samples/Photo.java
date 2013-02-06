@@ -83,7 +83,7 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(positions));
         /*IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
             engine.addGroup(Group.buildQueue(

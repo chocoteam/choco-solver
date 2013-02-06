@@ -109,7 +109,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

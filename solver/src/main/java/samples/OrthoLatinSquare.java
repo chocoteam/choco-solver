@@ -31,10 +31,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -135,11 +132,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        HeuristicValFactory.indomainMiddle(vars);
-        solver.set(StrategyVarValAssign.dyn(vars,
-                SorterFactory.minDomain(),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
     }
 
     @Override

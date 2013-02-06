@@ -33,7 +33,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
     void configSearchStrategy() {
         //System.out.println("---------------------------");
         //SearchMonitorFactory.log(solver,true,true);
-        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
     /*@Override

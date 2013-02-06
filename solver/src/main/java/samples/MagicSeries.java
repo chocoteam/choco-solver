@@ -82,7 +82,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
         // default group
     }
 

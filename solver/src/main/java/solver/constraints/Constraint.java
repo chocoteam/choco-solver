@@ -33,12 +33,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.propagation.IPriority;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.metrics.Belong;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -213,30 +208,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      */
     public int getPriority() {
         return staticPropagationPriority;
-    }
-
-    /**
-     * Returns an <code>this</code>-adapted comparator.
-     *
-     * @param name name of comparator (if overrides the default one)
-     * @return a comparator
-     */
-    @SuppressWarnings({"unchecked"})
-    public AbstractSorter<V> getComparator(String name) {
-        if (name.equals(VAR_DEFAULT)) {
-            return new Incr<V>(Belong.build(this));
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-//	public abstract HeuristicVal getIterator(String name, V var);
-
-    @SuppressWarnings({"unchecked"})
-    public IMetric<V> getMetric(String name) {
-        if (name.equals(METRIC_DEFAULT)) {
-            return Belong.build(this);
-        }
-        throw new SolverException("Unknown metric name :" + name);
     }
 
     /**

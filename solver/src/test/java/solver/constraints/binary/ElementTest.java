@@ -58,7 +58,7 @@ public class ElementTest {
         s.post(IntConstraintFactory.element(var, values, index, offset));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
-        s.set(IntStrategyFactory.random(allvars, env));
+        s.set(IntStrategyFactory.random(allvars, System.currentTimeMillis()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -163,7 +163,7 @@ public class ElementTest {
             indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.random(allvarsr, ref.getEnvironment(), seed));
+        ref.set(IntStrategyFactory.random(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));

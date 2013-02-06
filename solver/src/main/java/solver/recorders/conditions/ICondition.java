@@ -35,7 +35,9 @@ import java.io.Serializable;
  *
  * @author Charles Prud'homme
  * @since 17/11/11
+ * @deprecated
  */
+@Deprecated
 public interface ICondition<R extends IEventRecorder> extends Serializable {
 
     void activate();

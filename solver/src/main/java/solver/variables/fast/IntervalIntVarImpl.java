@@ -43,7 +43,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -69,8 +68,6 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
     IIntervalDelta delta = NoDelta.singleton;
 
-    protected HeuristicVal heuristicVal;
-
     private DisposableValueIterator _viterator;
 
     private DisposableRangeIterator _riterator;
@@ -88,16 +85,6 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.

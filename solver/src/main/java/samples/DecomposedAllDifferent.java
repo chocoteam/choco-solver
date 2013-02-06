@@ -123,7 +123,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(X));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(

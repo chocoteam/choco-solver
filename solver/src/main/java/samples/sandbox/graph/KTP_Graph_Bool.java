@@ -251,7 +251,7 @@ public class KTP_Graph_Bool {
         solver.post(gc);
         // config
 //			solver.set(new MinNeighBool(decisionVars,gl));
-        solver.set(IntStrategyFactory.minDomMinVal(graph, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(graph));
 
 //        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));

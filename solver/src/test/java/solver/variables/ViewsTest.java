@@ -84,14 +84,14 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, "=", 0));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = Sum.var(x, y);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -110,14 +110,14 @@ public class ViewsTest {
                 IntVar y = VariableFactory.bounded("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 4, ref);
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, "=", 0));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, solver);
                 IntVar y = VariableFactory.bounded("y", 0, 2, solver);
                 IntVar z = Sum.var(x, y);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -135,14 +135,14 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 2, ref);
                 ref.post(IntConstraintFactory.maximum(z, x, y));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = Max.var(x, y);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -160,12 +160,12 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", 0, 2, ref);
 
                 ref.post(IntConstraintFactory.absolute(z, x));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
                 IntVar z = VariableFactory.abs(x);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -183,12 +183,12 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -1, 3, ref);
 
                 ref.post(IntConstraintFactory.arithm(z, "=", x, "+", 1));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
                 IntVar z = VariableFactory.offset(x, 1);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -206,12 +206,12 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -4, 4, ref);
 
                 ref.post(IntConstraintFactory.times(x, VariableFactory.fixed(2, ref), z));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
                 IntVar z = VariableFactory.scale(x, 2);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -229,12 +229,12 @@ public class ViewsTest {
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
                 ref.post(IntConstraintFactory.arithm(z, "+", x, "=", 0));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar z = VariableFactory.minus(x);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -251,7 +251,7 @@ public class ViewsTest {
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
                 ref.post(IntConstraintFactory.sum(x, "=", n));
-                ref.set(IntStrategyFactory.minDomMinVal(x, ref.getEnvironment()));
+                ref.set(IntStrategyFactory.firstFail_InDomainMin(x));
             }
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
@@ -261,7 +261,7 @@ public class ViewsTest {
                 }
                 solver.post(IntConstraintFactory.sum(y, "=", n));
 
-                solver.set(IntStrategyFactory.minDomMinVal(x, solver.getEnvironment()));
+                solver.set(IntStrategyFactory.firstFail_InDomainMin(x));
 
             }
             check(ref, solver, seed, true, true);
@@ -279,12 +279,12 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
                 ref.post(IntConstraintFactory.times(x, x, z));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
                 IntVar x = VariableFactory.sqr(z);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             check(ref, solver, seed, false, true);
         }
@@ -324,14 +324,14 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = Sum.var(x, VariableFactory.minus(y));
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -351,13 +351,13 @@ public class ViewsTest {
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
                 ref.post(IntConstraintFactory.absolute(az, z));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.abs(Sum.var(x, VariableFactory.minus(y)));
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -377,14 +377,14 @@ public class ViewsTest {
                 ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
                 IntVar z = VariableFactory.abs(Sum.var(x, VariableFactory.minus(y)));
                 solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -409,7 +409,7 @@ public class ViewsTest {
                 ref.post(IntConstraintFactory.alldifferent(t, "BC"));
                 ref.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
                 ref.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
-                ref.set(IntStrategyFactory.random(x, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(x, seed));
             }
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", k, 0, k - 1, solver);
@@ -421,7 +421,7 @@ public class ViewsTest {
                 solver.post(IntConstraintFactory.alldifferent(t, "BC"));
                 solver.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
                 solver.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
-                solver.set(IntStrategyFactory.random(x, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(x, seed));
             }
             check(ref, solver, k, true, true);
         }

@@ -91,7 +91,7 @@ public class StressTest2 extends AbstractProblem {
     @Override
     public void configureSearch() {
         IntVar[] vars = ArrayUtils.append(y, x);
-        solver.set(new Assignment(vars, new InputOrder(vars, solver.getEnvironment()), new InDomainMin()));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMin()));
     }
 
     @Override

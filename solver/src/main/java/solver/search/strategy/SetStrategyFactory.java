@@ -27,28 +27,8 @@
 
 package solver.search.strategy;
 
-import choco.kernel.memory.IEnvironment;
-import solver.Solver;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.sorters.metrics.LowerBound;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.selectors.graph.arcs.RandomArc;
-import solver.search.strategy.selectors.graph.nodes.RandomNode;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategyVarValAssign;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
-import solver.search.strategy.strategy.graph.NodeStrategy;
 import solver.search.strategy.strategy.set.SetSearchStrategy;
-import solver.variables.IntVar;
 import solver.variables.SetVar;
-import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
 
 /**
  * Strategies over set variables
@@ -63,17 +43,17 @@ public final class SetStrategyFactory {
     private SetStrategyFactory() {
     }
 
-	/**
-	 * Lexicographic branching strategy:
-	 * <p/> selected variable x : first uninstantiated variable
-	 * <p/> decision : let e be the first (integer) element such that
-	 * e in envelope(x) and e not in kernel(x).
-	 * The decision adds e to the kernel of x
-	 * It is fails, then e is removed from the envelope of x
-	 *
-	 * @param sets set variables to branch on
-	 * @return a strategy to instantiate sets
-	 */
+    /**
+     * Lexicographic branching strategy:
+     * <p/> selected variable x : first uninstantiated variable
+     * <p/> decision : let e be the first (integer) element such that
+     * e in envelope(x) and e not in kernel(x).
+     * The decision adds e to the kernel of x
+     * It is fails, then e is removed from the envelope of x
+     *
+     * @param sets set variables to branch on
+     * @return a strategy to instantiate sets
+     */
     public static SetSearchStrategy setLex(SetVar[] sets) {
         return new SetSearchStrategy(sets);
     }

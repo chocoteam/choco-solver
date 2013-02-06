@@ -146,7 +146,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(IntStrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
         /*IPropagationEngine engine = solver.getEngine();
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
         Predicate inVARS = Predicates.member(vars);

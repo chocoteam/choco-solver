@@ -27,7 +27,6 @@
 
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
@@ -46,24 +45,29 @@ public class InputOrder implements VariableSelector<IntVar> {
 
     IStateInt index;
 
-    public InputOrder(IntVar[] variables, IEnvironment environment) {
+    public InputOrder(IntVar[] variables) {
         this.variables = variables.clone();
-        index = environment.makeInt(0);
+        this.index = variables[0].getSolver().getEnvironment().makeInt();
+    }
 
+    @Override
+    public IntVar[] getScope() {
+        return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = index.get();
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
     @Override
     public void advance() {
         int idx = index.get();
-        for(; idx < variables.length; idx++){
-            if(variables[idx].getDomainSize() > 1){
+        for (; idx < variables.length; idx++) {
+            if (variables[idx].getDomainSize() > 1) {
                 return;
             }
             index.add(1);

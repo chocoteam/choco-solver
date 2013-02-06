@@ -119,7 +119,7 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = IntStrategyFactory.domddegMinDom(objects);
+        AbstractStrategy strat = IntStrategyFactory.domOverWDeg_InDomainMin(objects, seed);
         // top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
         // dichotomic

@@ -134,7 +134,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(Ovars));
     }
 
     @Override

@@ -194,10 +194,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
+//        solver.set(StrategyFactory.domOverWDeg_InDomainMin(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.random(bVars, solver.getEnvironment()),
-                IntStrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+                IntStrategyFactory.random(bVars, seed),
+                IntStrategyFactory.inputOrder_InDomainMin(planes)
         ));
 
     }

@@ -159,15 +159,15 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.firstFail_InDomainMin(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
         if (true) {
-            solver.set(IntStrategyFactory.domwdegMindom(vars, seed));
-//            solver.set(new Assignment(vars, new DomOverWDegVS(vars, solver, seed),
+            solver.set(IntStrategyFactory.domOverWDeg_InDomainMin(vars, seed));
+//            solver.set(new Assignment(vars, new DomOverWDeg(vars, solver, seed),
 //                    new InDomainMin()));
         } else {
             IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
-            solver.set(IntStrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
+            solver.set(IntStrategyFactory.ActivityBased(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
                 LimitBox.failLimit(solver, 2), 25000);

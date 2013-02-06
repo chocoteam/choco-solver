@@ -32,12 +32,6 @@ import gnu.trove.list.array.TFloatArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 
 import java.io.IOException;
@@ -57,22 +51,12 @@ public class KnapsackTest {
         pb.createSolver();
         pb.buildModel();
 //		pb.configureSearch();
-        AbstractSorter<IntVar> s1 = pb.c_energy.getComparator(Sum.VAR_DECRCOEFFS);
-        AbstractSorter<IntVar> s2 = pb.c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
 
-        AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
-
-		for(IntVar v:pb.objects){
-			if(v==null){
-				throw new UnsupportedOperationException();
-			}
-		}
-
-		HeuristicValFactory.indomainMin(pb.objects);
-        pb.solver.set(StrategyVarValAssign.dyn(pb.objects,
-                seq,
-                ValidatorFactory.instanciated,
-                pb.solver.getEnvironment()));
+        for (IntVar v : pb.objects) {
+            if (v == null) {
+                throw new UnsupportedOperationException();
+            }
+        }
         return pb.getSolver();
     }
 

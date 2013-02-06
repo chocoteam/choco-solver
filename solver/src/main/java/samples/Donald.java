@@ -83,7 +83,7 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMaxVal(letters, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMax(letters));
     }
 
     @Override

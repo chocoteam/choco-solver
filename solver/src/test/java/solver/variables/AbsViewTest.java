@@ -86,7 +86,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -96,7 +96,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.bounded("Y", lby, uby, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -242,7 +242,7 @@ public class AbsViewTest {
 
         solver.post(IntConstraintFactory.member(X, minX, maxX));
 //        SearchMonitorFactory.log(solver, true, false);
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));
@@ -283,7 +283,7 @@ public class AbsViewTest {
         IntVar X = VariableFactory.abs(Y);
         solver.post(IntConstraintFactory.member(X, domains[0]));
         //SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));

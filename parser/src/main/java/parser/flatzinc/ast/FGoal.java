@@ -42,11 +42,11 @@ import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.enumerations.sorters.ImpactBased;
 import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.DomOverWDegVS;
+import solver.search.strategy.selectors.variables.ActivityBased;
+import solver.search.strategy.selectors.variables.DomOverWDeg;
 import solver.search.strategy.selectors.variables.FirstFail;
+import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -124,7 +124,7 @@ public class FGoal {
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,
-                                IntStrategyFactory.random(ivars, aSolver.getEnvironment(), gc.seed))
+                                IntStrategyFactory.random(ivars, gc.seed))
                 );
 
                 System.out.println("% t:" + gc.seed);
@@ -153,7 +153,7 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
+                aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
@@ -165,12 +165,12 @@ public class FGoal {
                         break;
                     case 3:
                         description.append("wdeg");
-                        DomOverWDegVS dwd = new DomOverWDegVS(ivars, aSolver, gc.seed);
-                        aSolver.set(new Assignment(ivars, dwd, new InDomainMin()));
+                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed);
+                        aSolver.set(new Assignment(dwd, new InDomainMin()));
                         break;
                     case 4:
                         description.append("first_fail");
-                        aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
+                        aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
                         break;
                     case 1:
                     default:

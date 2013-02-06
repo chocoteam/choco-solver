@@ -71,7 +71,7 @@ public class IntLinCombTest {
         };
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
 
         s.findAllSolutions();
     }
@@ -118,7 +118,7 @@ public class IntLinCombTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         solver.post(cstrs);
-        solver.set(IntStrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins));
         return solver;
     }
 
@@ -142,7 +142,7 @@ public class IntLinCombTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         solver.post(cstrs);
-        solver.set(IntStrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins));
         return solver;
     }
 

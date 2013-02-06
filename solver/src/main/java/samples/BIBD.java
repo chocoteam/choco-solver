@@ -136,7 +136,7 @@ public class BIBD extends AbstractProblem {
     @Override
     public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
-        solver.set(IntStrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.flatten(vars)));
     }
 
     @Override

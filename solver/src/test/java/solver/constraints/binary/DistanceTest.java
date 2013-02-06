@@ -37,7 +37,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
+import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -59,7 +59,7 @@ public class DistanceTest {
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
                 IntVar Z = VariableFactory.abs(Sum.var(X, VariableFactory.minus(Y)));
                 solver.post(IntConstraintFactory.arithm(Z, "=", 5));
-                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
+                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
                 solver.findAllSolutions();
                 nbSol = solver.getMeasures().getSolutionCount();
                 nbNod = solver.getMeasures().getNodeCount();
@@ -69,7 +69,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
                 solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
-                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
+                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
                 solver.findAllSolutions();
                 Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
                 Assert.assertTrue(solver.getMeasures().getNodeCount() <= nbNod);
@@ -110,8 +110,8 @@ public class DistanceTest {
                     s1.getEnvironment().worldPush();
                     s2.getEnvironment().worldPush();
 
-                    Random r = new Random(vs1[0], j);
-                    int val = r.next();
+                    InDomainRandom r = new InDomainRandom(j);
+                    int val = r.selectValue(vs1[0]);
                     vs1[0].removeValue(val, Cause.Null);
                     vs2[0].removeValue(val, Cause.Null);
 
@@ -138,7 +138,7 @@ public class DistanceTest {
         IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
         solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
-        solver.set(IntStrategyFactory.inputOrderMinVal(new IntVar[]{Z, X, Y, Z}, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{Z, X, Y, Z}));
         SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         System.out.printf("end\n");

@@ -71,7 +71,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         solver.post(IntConstraintFactory.regular(vars, auto));
-        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 59049);
@@ -113,7 +113,7 @@ public class RegularTest {
         Assert.assertEquals(auto.getNbStates(), 54);
 
         solver.post(IntConstraintFactory.regular(vars, auto));
-        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 25980);
@@ -143,7 +143,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         solver.post(IntConstraintFactory.regular(vars, auto));
-        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 531441);
@@ -174,7 +174,7 @@ public class RegularTest {
         auto.addTransition(end, start, 0, 1);
 
         solver.post(IntConstraintFactory.regular(vars, auto));
-        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1594323);
@@ -191,7 +191,7 @@ public class RegularTest {
             vars[i] = VariableFactory.enumerated("x_" + i, 0, 2, solver);
         }
         solver.post(IntConstraintFactory.regular(vars, auto));
-        solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4371696);

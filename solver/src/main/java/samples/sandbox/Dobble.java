@@ -121,7 +121,7 @@ public class Dobble {
             csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
         }
         // search strategy
-        solver.set(IntStrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
         // output
         SearchMonitorFactory.log(solver, true, false);
         // time limit

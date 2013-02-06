@@ -101,7 +101,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.random(kid_gift, solver.getEnvironment(), 29091981));
+        solver.set(IntStrategyFactory.random(kid_gift, 29091981));
     }
 
     @Override

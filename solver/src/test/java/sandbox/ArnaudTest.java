@@ -69,7 +69,7 @@ public class ArnaudTest {
             s.post(IntConstraintFactory.element(vars[2 * i + 1], values[i % 5], vars[2 * i]));
         }
         long t2 = System.currentTimeMillis();
-        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         System.out.println("build solver: " + (t2 - t1) + " ms");
         t1 = System.currentTimeMillis();
         s.propagate();

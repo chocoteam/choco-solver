@@ -26,7 +26,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
     }
 
     @Override

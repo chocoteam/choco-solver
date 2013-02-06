@@ -109,7 +109,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ticks));
     }
 
     @Override

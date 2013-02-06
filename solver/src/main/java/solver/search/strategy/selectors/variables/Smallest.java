@@ -53,9 +53,15 @@ public class Smallest implements VariableSelector<IntVar> {
     }
 
     @Override
+    public IntVar[] getScope() {
+        return variables;
+    }
+
+    @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
@@ -63,12 +69,12 @@ public class Smallest implements VariableSelector<IntVar> {
     public void advance() {
         int small_idx = 0;
         int small_value = Integer.MAX_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             int lower = variables[idx].getLB();
-            if(dsize > 1 &&  lower < small_value){
-               small_value = lower;
-               small_idx = idx;
+            if (dsize > 1 && lower < small_value) {
+                small_value = lower;
+                small_idx = idx;
             }
         }
         this.small_idx = small_idx;

@@ -85,7 +85,7 @@ public class SumTests {
 //        System.out.printf("%s\n", solver);
 
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(x, solver.getEnvironment(), seed + inc));
+        solver.set(IntStrategyFactory.random(x, seed + inc));
         return solver;
     }
 

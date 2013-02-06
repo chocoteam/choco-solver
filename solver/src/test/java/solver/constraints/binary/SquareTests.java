@@ -69,7 +69,7 @@ public class SquareTests {
         IntVar B = VariableFactory.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -86,7 +86,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -111,7 +111,7 @@ public class SquareTests {
         IntVar B = VariableFactory.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -126,7 +126,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 

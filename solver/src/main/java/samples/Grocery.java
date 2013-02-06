@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.selectors.values.InDomainMax;
+import solver.search.strategy.selectors.variables.InputOrder;
+import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -89,38 +89,11 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        //AVOID dom/wdeg: it can change the tree search
-        //solver.set(StrategyFactory.domwdegMindom(vars, solver));
-        HeuristicValFactory.indomainSplitMax(vars);
-        solver.set(StrategyVarValAssign.sta(vars,
-                SorterFactory.inputOrder(vars),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment()));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMax(), DecisionOperator.int_split));
     }
 
     @Override
     public void configureEngine() {
-        //FIRST propagators on tmp, natural order
-        /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.but(ALL, inVARS),
-                        new IncrOrderC(TMP),
-                        Policy.FIXPOINT
-                ));
-        // THEN, LEQ constraints
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.member(LEQ),
-                        new IncrOrderV(vars),
-                        Policy.ITERATE
-                )
-        );
-        // AND, constraints on VARS, oldest first
-        solver.getEngine().addGroup(
-                Group.buildQueue(
-                        inVARS, Policy.FIXPOINT
-                )
-        );*/
     }
 
     @Override

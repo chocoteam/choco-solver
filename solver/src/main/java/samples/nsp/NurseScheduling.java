@@ -7,19 +7,10 @@
 package samples.nsp;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.map.hash.THashMap;
 import solver.Solver;
-import solver.constraints.nary.automata.CostRegular;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.sorters.metrics.Map;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -43,17 +34,17 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.domwdegMindom(vars, s, System.currentTimeMillis());
+                return IntStrategyFactory.domOverWDeg_InDomainMin(vars, System.currentTimeMillis());
             }
         },
         FORCE_INPUT {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.minDomMinVal(cast(s.getVars()), s.getEnvironment());
+                return IntStrategyFactory.firstFail_InDomainMin(cast(s.getVars()));
             }
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.domwdegMindom(cast(s.getVars()), s, System.currentTimeMillis());
+                return IntStrategyFactory.domOverWDeg_InDomainMin(cast(s.getVars()), System.currentTimeMillis());
             }
         },
         /*DOMWDEG {
@@ -63,7 +54,7 @@ public class NurseScheduling {
         },*/
         MIN_DOM {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.minDomMinVal(vars, s.getEnvironment());
+                return IntStrategyFactory.firstFail_InDomainMin(vars);
             }
         },
 
@@ -74,7 +65,7 @@ public class NurseScheduling {
         },*/
         RAND {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return IntStrategyFactory.random(vars, s.getEnvironment(), 0);
+                return IntStrategyFactory.random(vars, 0);
             }
         };
 
@@ -93,39 +84,39 @@ public class NurseScheduling {
         }
     }
 
-    private AbstractStrategy<IntVar> buildStrategy(Solver solver, IntVar[][] shifts, CostRegular[][] cregs) {
-        int[] days = new int[shifts.length * shifts[0].length];
-        IntVar[] flatten = new IntVar[shifts.length * shifts[0].length];
-        for (int e = 0, k = 0; e < shifts.length; e++) {
-            for (int d = 0; d < shifts[e].length; d++, k++) {
-                days[k] = d;
-                flatten[k] = shifts[e][d];
-            }
-        }
-        IMetric<IntVar> shift2day = new Map<IntVar>(flatten, days);
-
-        final THashMap<IntVar, CostRegular> regmap = new THashMap<IntVar, CostRegular>();
-        int act = 0; //  day
-        for (int e = 0; e < shifts.length; e++) {
-            for (int d = 0; d < shifts[e].length; d++) {
-                regmap.put(shifts[e][d], cregs[e][act]);
-            }
-        }
-
-        IMetric<IntVar> shift2reg = new IMetric<IntVar>() {
-            @Override
-            public int eval(IntVar var) {
-                return regmap.get(var).getMetric("CR_COST").eval(var);
-            }
-        };
-
-        AbstractSorter<IntVar> seq = new Seq<IntVar>(
-                new Incr<IntVar>(shift2day),
-                new Incr<IntVar>(shift2reg)
-        );
-        return StrategyVarValAssign.dyn(flatten, seq,
-                ValidatorFactory.instanciated, solver.getEnvironment());
-    }
+//    private AbstractStrategy<IntVar> buildStrategy(Solver solver, IntVar[][] shifts, CostRegular[][] cregs) {
+//        int[] days = new int[shifts.length * shifts[0].length];
+//        IntVar[] flatten = new IntVar[shifts.length * shifts[0].length];
+//        for (int e = 0, k = 0; e < shifts.length; e++) {
+//            for (int d = 0; d < shifts[e].length; d++, k++) {
+//                days[k] = d;
+//                flatten[k] = shifts[e][d];
+//            }
+//        }
+//        IMetric<IntVar> shift2day = new Map<IntVar>(flatten, days);
+//
+//        final THashMap<IntVar, CostRegular> regmap = new THashMap<IntVar, CostRegular>();
+//        int act = 0; //  day
+//        for (int e = 0; e < shifts.length; e++) {
+//            for (int d = 0; d < shifts[e].length; d++) {
+//                regmap.put(shifts[e][d], cregs[e][act]);
+//            }
+//        }
+//
+//        IMetric<IntVar> shift2reg = new IMetric<IntVar>() {
+//            @Override
+//            public int eval(IntVar var) {
+//                return regmap.get(var).getMetric("CR_COST").eval(var);
+//            }
+//        };
+//
+//        AbstractSorter<IntVar> seq = new Seq<IntVar>(
+//                new Incr<IntVar>(shift2day),
+//                new Incr<IntVar>(shift2reg)
+//        );
+//        return StrategyVarValAssign.dyn(flatten, seq,
+//                ValidatorFactory.instanciated, solver.getEnvironment());
+//    }
 
 
     public static void runOne(NSData data) {

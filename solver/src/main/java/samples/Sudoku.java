@@ -98,7 +98,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(ArrayUtils.append(rows)));
 
     }
 

@@ -53,6 +53,11 @@ public class Largest implements VariableSelector<IntVar> {
     }
 
     @Override
+    public IntVar[] getScope() {
+        return variables;
+    }
+
+    @Override
     public boolean hasNext() {
         int idx = 0;
         for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {

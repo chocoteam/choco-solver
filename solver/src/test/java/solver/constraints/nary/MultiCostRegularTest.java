@@ -116,7 +116,7 @@ public class MultiCostRegularTest {
 
         solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, auto, costMatrix));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        solver.set(IntStrategyFactory.random(ArrayUtils.append(sequence, bounds), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.append(sequence, bounds), seed));
         return solver;
     }
 

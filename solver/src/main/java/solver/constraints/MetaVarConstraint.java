@@ -29,38 +29,42 @@ package solver.constraints;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.propagators.*;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.constraints.propagators.MetaVarPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
 
-/**Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified 
+/**
+ * Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified
+ *
  * @author Jean-Guillaume Fages
  */
-public class MetaVarConstraint<V extends Variable> extends Constraint<V, Propagator<V>>{
+public class MetaVarConstraint<V extends Variable> extends Constraint<V, Propagator<V>> {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**create a Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified 
-	 * @param vars components of the metavariable
-	 * @param meta metavariable that encapsulates vars
-	 * @param solver
-	 */
-	public MetaVarConstraint(V[] vars, MetaVariable meta, Solver solver) {
-		super(solver);
-		setPropagators(new Propagator[]{new MetaVarPropagator(vars, meta, solver, this)});
-	}
-	
-	//***********************************************************************************
-	// CONSTRAINT METHODS
-	//***********************************************************************************
+    /**
+     * create a Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified
+     *
+     * @param vars   components of the metavariable
+     * @param meta   metavariable that encapsulates vars
+     * @param solver
+     */
+    public MetaVarConstraint(V[] vars, MetaVariable meta, Solver solver) {
+        super(solver);
+        setPropagators(new Propagator[]{new MetaVarPropagator(vars, meta, solver, this)});
+    }
 
-	@Override
-	public ESat isSatisfied() {
-		return isEntailed();
-	}
+    //***********************************************************************************
+    // CONSTRAINT METHODS
+    //***********************************************************************************
+
+    @Override
+    public ESat isSatisfied() {
+        return isEntailed();
+    }
 
 //	@Override
 //	public HeuristicVal getIterator(String name, V var) {

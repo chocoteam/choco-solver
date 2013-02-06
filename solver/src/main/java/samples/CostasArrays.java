@@ -80,7 +80,7 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.forceInputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(vars));
     }
 
     @Override

@@ -38,15 +38,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.Operator;
 import solver.constraints.propagators.nary.sum.*;
 import solver.exception.SolverException;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Decr;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.metrics.DomSize;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.fast.BitsetIntVarImpl;
@@ -252,59 +243,5 @@ public class Sum extends IntConstraint<IntVar> {
         }
         linComb.append(b);
         return linComb.toString();
-    }
-
-    @Override
-    public AbstractSorter<IntVar> getComparator(String name) {
-        if (name.equals(VAR_DECRCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Decr<IntVar>(new Coeffs(this)));
-        } else if (name.equals(VAR_DOMOVERCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Incr<IntVar>(
-                            Div.<IntVar>build(DomSize.build(), new Coeffs(this)))
-            );
-        }
-        return super.getComparator(name);
-    }
-
-    @Override
-    public HeuristicVal getIterator(String name, IntVar var) {
-        if (name.equals(VAL_TOTO)) {
-            return HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB());
-        }
-        return super.getIterator(name, var);
-    }
-
-
-    @Override
-    public IMetric<IntVar> getMetric(String name) {
-        if (name.equals(METRIC_COEFFS)) {
-            //TODO: must be composed with BELONG
-            return new Coeffs(this);//Belong.build(this);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-    static class Coeffs implements IMetric<IntVar> {
-
-        TObjectIntHashMap<IntVar> map;
-
-        public Coeffs(Sum sum) {
-            if (sum.shared_map == null) {
-                sum.shared_map = new TObjectIntHashMap<IntVar>(sum.coeffs.length);
-                for (int i = 0; i < sum.vars.length; i++) {
-                    sum.shared_map.put(sum.vars[i], sum.coeffs[i]);
-                }
-            }
-            map = sum.shared_map;
-        }
-
-        @Override
-        public int eval(IntVar var) {
-            return map.get(var);
-        }
     }
 }

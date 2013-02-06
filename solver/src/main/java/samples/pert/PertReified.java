@@ -97,8 +97,8 @@ public class PertReified extends Pert {
         solver.set(
                 new StrategiesSequencer(
                         solver.getEnvironment(),
-                        IntStrategyFactory.inputOrderMinVal(bvars, solver.getEnvironment()),
-                        IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment())
+                        IntStrategyFactory.inputOrder_InDomainMin(bvars),
+                        IntStrategyFactory.inputOrder_InDomainMin(vars)
                 )
         );
 

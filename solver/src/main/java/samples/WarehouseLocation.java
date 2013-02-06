@@ -126,8 +126,8 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void configureSearch() {
         StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-                IntStrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+                IntStrategyFactory.inputOrder_InDomainMin(suppliers),
+                IntStrategyFactory.maxReg_InDomainMin(costPerStore)
         );
         solver.set(strat);
 

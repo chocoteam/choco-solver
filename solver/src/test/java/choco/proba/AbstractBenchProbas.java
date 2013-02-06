@@ -111,8 +111,8 @@ public abstract class AbstractBenchProbas {
 
     void configSearchStrategy() {
         //this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
-        //this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver));
-        this.solver.set(IntStrategyFactory.minDomMinVal(this.vars, this.solver.getEnvironment()));
+        //this.solver.set(StrategyFactory.domOverWDeg_InDomainMin(this.vars, this.solver));
+        this.solver.set(IntStrategyFactory.firstFail_InDomainMin(this.vars));
     }
 
     private void configPropStrategy() {

@@ -83,8 +83,8 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(v,
-				solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(v
+        ));
     }
 
     @Override

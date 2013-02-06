@@ -31,7 +31,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(position));
     }
 
     @Override

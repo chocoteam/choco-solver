@@ -103,7 +103,7 @@ public class LexChainTest {
         }
 
         solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 
@@ -117,7 +117,7 @@ public class LexChainTest {
         }
 
         solver.post(new LexChain(X, true, solver));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 
