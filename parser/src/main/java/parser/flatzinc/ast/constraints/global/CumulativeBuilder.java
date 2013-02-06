@@ -33,7 +33,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.variables.*;
+import solver.variables.IntVar;
+import solver.variables.Task;
+import solver.variables.VariableFactory;
+
 import java.util.List;
 
 /**
@@ -44,21 +47,21 @@ import java.util.List;
  */
 public class CumulativeBuilder implements IBuilder {
 
-	@Override
-	public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-		final IntVar[] starts = exps.get(0).toIntVarArray(solver);
-		final IntVar[] durations = exps.get(1).toIntVarArray(solver);
-		final IntVar[] resources = exps.get(2).toIntVarArray(solver);
-		final IntVar[] ends = new IntVar[starts.length];
-		Task[] tasks = new Task[starts.length];
-		final IntVar limit = exps.get(3).intVarValue(solver);
-		for (int i = 0; i < starts.length; i++) {
-			ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
-					starts[i].getLB() + durations[i].getLB(),
-					starts[i].getUB() + durations[i].getUB(),
-					solver);
-			tasks[i] = new Task(starts[i],durations[i],ends[i]);
-		}
-		return IntConstraintFactory.cumulative(tasks, resources, limit);
-	}
+    @Override
+    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        final IntVar[] starts = exps.get(0).toIntVarArray(solver);
+        final IntVar[] durations = exps.get(1).toIntVarArray(solver);
+        final IntVar[] resources = exps.get(2).toIntVarArray(solver);
+        final IntVar[] ends = new IntVar[starts.length];
+        Task[] tasks = new Task[starts.length];
+        final IntVar limit = exps.get(3).intVarValue(solver);
+        for (int i = 0; i < starts.length; i++) {
+            ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
+                    starts[i].getLB() + durations[i].getLB(),
+                    starts[i].getUB() + durations[i].getUB(),
+                    solver);
+            tasks[i] = new Task(starts[i], durations[i], ends[i]);
+        }
+        return IntConstraintFactory.cumulative(tasks, resources, limit);
+    }
 }

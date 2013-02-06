@@ -129,7 +129,7 @@ public class TestCorrectness {
         }
     }
 
-	@Test(groups = "1m")
+    @Test(groups = "1m")
     public void testGCC2() {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
@@ -290,20 +290,20 @@ public class TestCorrectness {
 
     @Test(groups = "5m")
     public void testNVALUES() {
-		String[][] filters = new String[][]{
-				{"at_most_BC"},
-				{"at_least_AC"},
-				{"at_most_greedy"},
-				{"at_most_BC","at_least_AC"},
-				{"at_least_AC","at_most_greedy"},
-				{"at_most_BC","at_most_greedy"},
-				{"at_most_BC","at_least_AC","at_most_greedy"},
-		};
+        String[][] filters = new String[][]{
+                {"at_most_BC"},
+                {"at_least_AC"},
+                {"at_most_greedy"},
+                {"at_most_BC", "at_least_AC"},
+                {"at_least_AC", "at_most_greedy"},
+                {"at_most_BC", "at_most_greedy"},
+                {"at_most_BC", "at_least_AC", "at_most_greedy"},
+        };
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 33; n *= 2) {
-				for(String[] f:filters)
-					CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, f);
+                for (String[] f : filters)
+                    CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, f);
             }
 
         }
@@ -345,18 +345,18 @@ public class TestCorrectness {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 100; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4 * n, 1, n*2, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4 * n, 1, n * 2, seed, true);
             }
         }
     }
 
-	@Test(groups = "1m")
-	public void testCumulative() {
-		for (int i = 0; i < 20; i++) {
-			long seed = System.currentTimeMillis();
-			for (int n = 2; n < 60; n *= 2) {
-				CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4*n + 1, 1, n, seed, true);
-			}
-		}
-	}
+    @Test(groups = "1m")
+    public void testCumulative() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < 60; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
+            }
+        }
+    }
 }

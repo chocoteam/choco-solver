@@ -41,104 +41,112 @@ import solver.exception.ContradictionException;
 /**
  * Container representing a task:
  * It ensures that: start + duration = end
+ *
  * @author Jean-Guillaume Fages
  * @since 04/02/2013
  */
 public class Task {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IntVar start, duration, end;
-	private IVariableMonitor update;
+    private IntVar start, duration, end;
+    private IVariableMonitor update;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Container representing a task:
-	 * It ensures that: start + duration = end
-	 * @param s start variable
-	 * @param d duration variable
-	 * @param e end variable
-	 */
-	public Task(IntVar s, IntVar d, IntVar e) {
-		start = s;
-		duration = d;
-		end = e;
-		if(s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()){
-			update = new IVariableMonitor() {
-				@Override
-				public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
-					boolean fixpoint = true;
-					while (fixpoint) {
-						// start
-						fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-						fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), cause);
-						// end
-						fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-						fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), cause);
-						// duration
-						fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-						fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), cause);
-					}
-				}
-			};
-		}else{
-			update = new IVariableMonitor() {
-				@Override
-				public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
-					// start
-					start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-					start.updateUpperBound(end.getUB() - duration.getLB(), cause);
-					// end
-					end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-					end.updateUpperBound(start.getUB() + duration.getUB(), cause);
-					// duration
-					duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-					duration.updateUpperBound(end.getUB() - start.getLB(), cause);
-				}
-			};
-		}
-		start.addMonitor(update);
-		duration.addMonitor(update);
-		end.addMonitor(update);
-	}
+    /**
+     * Container representing a task:
+     * It ensures that: start + duration = end
+     *
+     * @param s start variable
+     * @param d duration variable
+     * @param e end variable
+     */
+    public Task(IntVar s, IntVar d, IntVar e) {
+        start = s;
+        duration = d;
+        end = e;
+        if (s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()) {
+            update = new IVariableMonitor() {
+                @Override
+                public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                    boolean fixpoint = true;
+                    while (fixpoint) {
+                        // start
+                        fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+                        fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                        // end
+                        fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+                        fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                        // duration
+                        fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+                        fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+                    }
+                }
+            };
+        } else {
+            update = new IVariableMonitor() {
+                @Override
+                public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                    // start
+                    start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+                    start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                    // end
+                    end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+                    end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                    // duration
+                    duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+                    duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+                }
+            };
+        }
+        start.addMonitor(update);
+        duration.addMonitor(update);
+        end.addMonitor(update);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	/**
-	 * Applies BC-filtering so that start + duration = end
-	 * @throws ContradictionException
-	 */
-	public void ensureBoundConsistency() throws ContradictionException {
-		update.onUpdate(start,EventType.REMOVE, Cause.Null);
-	}
+    /**
+     * Applies BC-filtering so that start + duration = end
+     *
+     * @throws ContradictionException
+     */
+    public void ensureBoundConsistency() throws ContradictionException {
+        update.onUpdate(start, EventType.REMOVE, Cause.Null);
+    }
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
 
-	public IntVar getStart() {
-		return start;
-	}
-	public void setStart(IntVar start) {
-		this.start = start;
-	}
-	public IntVar getDuration() {
-		return duration;
-	}
-	public void setDuration(IntVar duration) {
-		this.duration = duration;
-	}
-	public IntVar getEnd() {
-		return end;
-	}
-	public void setEnd(IntVar end) {
-		this.end = end;
-	}
+    public IntVar getStart() {
+        return start;
+    }
+
+    public void setStart(IntVar start) {
+        this.start = start;
+    }
+
+    public IntVar getDuration() {
+        return duration;
+    }
+
+    public void setDuration(IntVar duration) {
+        this.duration = duration;
+    }
+
+    public IntVar getEnd() {
+        return end;
+    }
+
+    public void setEnd(IntVar end) {
+        this.end = end;
+    }
 }

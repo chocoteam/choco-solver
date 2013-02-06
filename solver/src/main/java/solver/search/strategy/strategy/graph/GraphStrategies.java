@@ -92,9 +92,9 @@ public class GraphStrategies extends GraphStrategy {
     /**
      * Configure the search
      *
-     * @param policy    way to select arcs
-     * @param enforce   true if a decision is an arc enforcing
-     *                  false if a decision is an arc removal
+     * @param policy  way to select arcs
+     * @param enforce true if a decision is an arc enforcing
+     *                false if a decision is an arc removal
      */
     public void configure(int policy, boolean enforce) {
         if (enforce) {

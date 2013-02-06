@@ -27,51 +27,54 @@
 
 package samples.sandbox.parallelism;
 
-/**Slave born to be mastered and work in parallel
+/**
+ * Slave born to be mastered and work in parallel
+ *
  * @author Jean-Guillaume Fages
  */
 public abstract class AbstractParallelSlave {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private AbstractParallelMaster master;
-	public final int id;
+    private AbstractParallelMaster master;
+    public final int id;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Create a slave born to be mastered and work in parallel
-	 * @param master
-	 * @param id slave unique name
-	 */
-	public AbstractParallelSlave(AbstractParallelMaster master, int id){
-		this.master = master;
-		this.id = id;
-	}
+    /**
+     * Create a slave born to be mastered and work in parallel
+     *
+     * @param master
+     * @param id     slave unique name
+     */
+    public AbstractParallelSlave(AbstractParallelMaster master, int id) {
+        this.master = master;
+        this.id = id;
+    }
 
-	//***********************************************************************************
-	// SUB-PROBLEM SOLVING
-	//***********************************************************************************
+    //***********************************************************************************
+    // SUB-PROBLEM SOLVING
+    //***********************************************************************************
 
-	/**
-	 * Creates a new thread to work in parallel
-	 */
-	public void workInParallel() {
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				work();
-				master.wishGranted();
-			}
-		});
-		t.start();
-	}
+    /**
+     * Creates a new thread to work in parallel
+     */
+    public void workInParallel() {
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                work();
+                master.wishGranted();
+            }
+        });
+        t.start();
+    }
 
-	/**
-	 * do something
-	 */
-	public abstract void work();
+    /**
+     * do something
+     */
+    public abstract void work();
 }
