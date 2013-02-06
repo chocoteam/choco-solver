@@ -28,8 +28,8 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -77,7 +77,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     public boolean supBoundModified = true;
 
     public PropAllDiffBC(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
+        super(vars, PropagatorPriority.CUBIC, true);
         int n = vars.length;
 
         t = new int[2 * n + 2];

@@ -27,13 +27,14 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
+import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
@@ -108,17 +109,17 @@ public class Knapsack extends AbstractProblem {
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
 
 
-        c_size = Sum.eq(objects, volumes, scalar, 1, solver);
-        c_energy = Sum.eq(objects, energies, power, 1, solver);
+        c_size = IntConstraintFactory.scalar(objects, volumes, "=", scalar, 1);
+        c_energy = IntConstraintFactory.scalar(objects, energies, "=", power, 1);
 
         solver.post(c_size);
         solver.post(c_energy);
-        solver.post(new solver.constraints.nary.Knapsack(objects, scalar, power, volumes, energies, solver));
+        solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = StrategyFactory.domddegMinDom(objects);
+        AbstractStrategy strat = IntStrategyFactory.domOverWDeg_InDomainMin(objects, seed);
         // top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
         // dichotomic
@@ -145,7 +146,7 @@ public class Knapsack extends AbstractProblem {
     @Override
     public void configureEngine() {
         // not usefull
-//        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine pengine = new DSLEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
 //        solver.set(pengine);
     }

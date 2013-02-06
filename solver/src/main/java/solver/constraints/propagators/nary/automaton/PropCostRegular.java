@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary.automaton;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateBool;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IStateBool;
+import memory.structure.StoredIndexedBipartiteSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -71,7 +71,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     public PropCostRegular(IntVar[] vars, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph,
                            Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.CUBIC, false);
+        super(vars, PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

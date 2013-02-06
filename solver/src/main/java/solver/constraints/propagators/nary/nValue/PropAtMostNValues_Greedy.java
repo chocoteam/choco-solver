@@ -26,9 +26,11 @@
  */
 package solver.constraints.propagators.nary.nValue;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,8 +39,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.UndirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 /**
@@ -78,7 +79,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
      * @param solver
      */
     public PropAtMostNValues_Greedy(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = vars.length;
         this.nValues = nValues;
         cliques = new UndirectedGraph(solver.getEnvironment(), n, SetType.LINKED_LIST, false);
@@ -129,45 +130,45 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
             nbNeighbors[i] = cliques.getNeighborsOf(i).getSize();
         }
         int min = 0;
-		for (int i = 0; i < n; i++) {
-			if(vars[i].instantiated() && !in.get(i)){
-				addToMIS(i);
-				min++;
-			}
-		}
+        for (int i = 0; i < n; i++) {
+            if (vars[i].instantiated() && !in.get(i)) {
+                addToMIS(i);
+                min++;
+            }
+        }
         // find MIS
         int idx = in.nextClearBit(0);
-        while (idx >= 0 && idx<n) {
-            for (int i = in.nextClearBit(idx + 1); i>=0 && i<n ; i = in.nextClearBit(i + 1)) {
+        while (idx >= 0 && idx < n) {
+            for (int i = in.nextClearBit(idx + 1); i >= 0 && i < n; i = in.nextClearBit(i + 1)) {
                 if (nbNeighbors[i] < nbNeighbors[idx]) {
                     idx = i;
                 }
             }
-			addToMIS(idx);
+            addToMIS(idx);
             min++;
             idx = in.nextClearBit(0);
         }
         return min;
     }
 
-	private void addToMIS(int node){
-		ISet nei = cliques.getNeighborsOf(node);
-		inMIS.set(node);
-		in.set(node);
-		list.clear();
-		for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-			if (!in.get(j)) {
-				in.set(j);
-				list.add(j);
-			}
-		}
-		for (int i = list.size() - 1; i >= 0; i--) {
-			nei = cliques.getNeighborsOf(list.get(i));
-			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-				nbNeighbors[j]--;
-			}
-		}
-	}
+    private void addToMIS(int node) {
+        ISet nei = cliques.getNeighborsOf(node);
+        inMIS.set(node);
+        in.set(node);
+        list.clear();
+        for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+            if (!in.get(j)) {
+                in.set(j);
+                list.add(j);
+            }
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            nei = cliques.getNeighborsOf(list.get(i));
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                nbNeighbors[j]--;
+            }
+        }
+    }
 
     private void filter() throws ContradictionException {
         ISet nei;
@@ -209,20 +210,20 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
             bx |= x.updateUpperBound(y.getUB(), aCause);
             by |= y.updateLowerBound(x.getLB(), aCause);
             by |= y.updateUpperBound(x.getUB(), aCause);
-			if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()){
-				int ub = x.getUB();
-				for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-					if (!y.contains(val)) {
-						bx |= x.removeValue(val, aCause);
-					}
-				}
-				ub = y.getUB();
-				for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
-					if (!x.contains(val)) {
-						by |= y.removeValue(val, aCause);
-					}
-				}
-			}
+            if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+                int ub = x.getUB();
+                for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                    if (!y.contains(val)) {
+                        bx |= x.removeValue(val, aCause);
+                    }
+                }
+                ub = y.getUB();
+                for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                    if (!x.contains(val)) {
+                        by |= y.removeValue(val, aCause);
+                    }
+                }
+            }
             if (bx) {
                 in.set(i);
             }
@@ -272,28 +273,28 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		int minVal = 0;
-		int maxVal = 0;
-		for (int i = 0; i < n; i++) {
-			if(minVal>vars[i].getLB()){
-				minVal = vars[i].getLB();
-			}
-			if(maxVal<vars[i].getUB()){
-				maxVal = vars[i].getUB();
-			}
-		}
-		BitSet values = new BitSet(maxVal-minVal);
-        BitSet mandatoryValues = new BitSet(maxVal-minVal);
+        int minVal = 0;
+        int maxVal = 0;
+        for (int i = 0; i < n; i++) {
+            if (minVal > vars[i].getLB()) {
+                minVal = vars[i].getLB();
+            }
+            if (maxVal < vars[i].getUB()) {
+                maxVal = vars[i].getUB();
+            }
+        }
+        BitSet values = new BitSet(maxVal - minVal);
+        BitSet mandatoryValues = new BitSet(maxVal - minVal);
         IntVar v;
         int ub;
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
             if (v.instantiated()) {
-                mandatoryValues.set(ub-minVal);
+                mandatoryValues.set(ub - minVal);
             }
             for (int j = v.getLB(); j <= ub; j++) {
-                values.set(j-minVal);
+                values.set(j - minVal);
             }
         }
         if (values.cardinality() <= vars[n].getLB()) {

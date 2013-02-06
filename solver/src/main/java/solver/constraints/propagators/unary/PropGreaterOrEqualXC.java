@@ -27,7 +27,7 @@
 package solver.constraints.propagators.unary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -52,7 +52,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     public PropGreaterOrEqualXC(IntVar var, int cste, Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }
 

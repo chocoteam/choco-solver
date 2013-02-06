@@ -37,8 +37,8 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.propagation.PropagationEngine;
+import solver.constraints.IntConstraintFactory;
+import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
@@ -59,7 +59,7 @@ public class T_struct extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    PropagationEngine pe;
+    DSLEngine pe;
 
     @BeforeMethod
     public void before() {
@@ -69,14 +69,14 @@ public class T_struct extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver);
+        pe = new DSLEngine(mSolver);
 
         ArrayList<Arc> arcs = Arc.populate(mSolver);
         ArrayList<Arc> g1 = new ArrayList<Arc>(arcs.subList(0, 3));
@@ -97,7 +97,7 @@ public class T_struct extends GrammarExtTest {
         return walker.struct(pe);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1,G2}");
         PropagationStrategy scheds = struct(fp);
@@ -106,7 +106,7 @@ public class T_struct extends GrammarExtTest {
     }
 
     //queue(wone) of {queue(wone) of{G1}, list of {list(for) of {G2} key var.name,rev list of {G3} key var.name}};
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser(
                 "queue(wone) of {" +

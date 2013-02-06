@@ -27,12 +27,12 @@
 
 package solver.variables.fast;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IEnvironment;
+import memory.IStateBitSet;
+import memory.IStateInt;
 import solver.Cause;
 import solver.Configuration;
 import solver.ICause;
@@ -42,15 +42,14 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.EnumDelta;
+import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
+import solver.variables.delta.monitor.EnumDeltaMonitor;
 
 /**
  * <br/>
@@ -58,7 +57,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<IEnumDelta>> implements IntVar<IEnumDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -75,9 +74,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     private final int OFFSET;
     private final int LENGTH;
 
-    private IntDelta delta = NoDelta.singleton;
-
-    protected HeuristicVal heuristicVal;
+    private IEnumDelta delta = NoDelta.singleton;
 
     private DisposableValueIterator _viterator;
     private DisposableRangeIterator _riterator;
@@ -131,16 +128,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -469,7 +456,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IEnumDelta getDelta() {
         return delta;
     }
 
@@ -506,9 +493,9 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         }
     }
 
-    public IntDeltaMonitor monitorDelta(ICause propagator) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new IntDeltaMonitor(delta, propagator);
+        return new EnumDeltaMonitor(delta, propagator);
     }
 
 

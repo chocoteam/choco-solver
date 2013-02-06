@@ -32,8 +32,8 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.Regular;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -57,21 +57,21 @@ public class RegularBuilder implements IBuilder {
         int q0 = exps.get(4).intValue();
         int[] F = exps.get(5).toIntArray();
         FiniteAutomaton auto = new FiniteAutomaton();
-        for(int q = 0; q <= Q; q++)auto.addState();
+        for (int q = 0; q <= Q; q++) auto.addState();
         auto.setInitialState(q0);
         auto.setFinal(F);
 
-        for (int i = 0, k = 0; i < Q ; i++) {
+        for (int i = 0, k = 0; i < Q; i++) {
             for (int j = 0; j < S; j++, k++) {
                 // 0 is the fail state;
                 if (d[k] > 0) {
-                    auto.addTransition(i+1, d[k], j+1);
+                    auto.addTransition(i + 1, d[k], j + 1);
                 }
             }
         }
 //        auto.removeDeadTransitions();
 //        auto.minimize();
 
-        return new Regular(vars, auto, solver);
+        return IntConstraintFactory.regular(vars, auto);
     }
 }

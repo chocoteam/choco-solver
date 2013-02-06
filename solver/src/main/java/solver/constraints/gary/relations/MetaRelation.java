@@ -26,67 +26,67 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.MetaVariable;
 
 public abstract class MetaRelation extends GraphRelation<MetaVariable> {
-	
 
-	protected int dim;
-	protected GraphRelation[] unidimRelation;
-	
-	protected MetaRelation(MetaVariable[] vars) {
-		super(vars);
-		dim = vars[0].getComponents().length;
-		unidimRelation = new GraphRelation[dim];
-	}
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		ESat entail = ESat.TRUE;
-		for(int i=0; i<dim; i++){
-			entail = and(entail, unidimRelation[i].isEntail(var1, var2));
-			if(entail == ESat.FALSE){
-				return entail;
-			}
-		}
-		return entail;
-	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, cause);
-		}
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, cause);
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		for(int i=0; i<dim; i++){
-			if(unidimRelation[i].isDirected()){
-				return true;
-			}
-		}
-		return false;
-	}
+    protected int dim;
+    protected GraphRelation[] unidimRelation;
 
-	protected ESat and(ESat e1, ESat e2){
-		if(e1 == ESat.FALSE || e2 == ESat.FALSE){
-			return ESat.FALSE;
-		}
-		if(e1 == ESat.TRUE && e2 == ESat.TRUE){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    protected MetaRelation(MetaVariable[] vars) {
+        super(vars);
+        dim = vars[0].getComponents().length;
+        unidimRelation = new GraphRelation[dim];
+    }
+
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        ESat entail = ESat.TRUE;
+        for (int i = 0; i < dim; i++) {
+            entail = and(entail, unidimRelation[i].isEntail(var1, var2));
+            if (entail == ESat.FALSE) {
+                return entail;
+            }
+        }
+        return entail;
+    }
+
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        for (int i = 0; i < dim; i++) {
+            unidimRelation[i].applyTrue(var1, var2, solver, cause);
+        }
+    }
+
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        for (int i = 0; i < dim; i++) {
+            unidimRelation[i].applyFalse(var1, var2, solver, cause);
+        }
+    }
+
+    @Override
+    public boolean isDirected() {
+        for (int i = 0; i < dim; i++) {
+            if (unidimRelation[i].isDirected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected ESat and(ESat e1, ESat e2) {
+        if (e1 == ESat.FALSE || e2 == ESat.FALSE) {
+            return ESat.FALSE;
+        }
+        if (e1 == ESat.TRUE && e2 == ESat.TRUE) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

@@ -27,10 +27,11 @@
 
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.ternary.PropMinBC;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
@@ -63,7 +64,7 @@ public class Min extends IntConstraint<IntVar> {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.min(a.getLB(), b.getLB()), Math.min(a.getUB(), b.getUB()), solver);
-            solver.post(new Min(z, a, b, solver));
+            solver.post(IntConstraintFactory.minimum(z, a, b));
             return z;
         }
     }

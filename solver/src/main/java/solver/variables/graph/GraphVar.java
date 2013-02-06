@@ -27,9 +27,9 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.setDataStructures.ISet;
 import com.sun.istack.internal.NotNull;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -49,8 +49,8 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
-        implements Variable<IGraphDelta, IGraphDeltaMonitor> {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
+        implements Variable<IGraphDelta> {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -72,8 +72,8 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      *
      * @param solver
      */
-    public GraphVar(Solver solver) {
-        super("G", solver);
+    public GraphVar(String name, Solver solver) {
+        super(name, solver);
         solver.associates(this);
         this.environment = solver.getEnvironment();
     }
@@ -112,12 +112,10 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         } else if (!envelop.getActiveNodes().contain(x)) {
             return false;
         }
-        if (reactOnModification) {
-            ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
-            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause);
-                removeArc(i, x, cause);
-            }
+        ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+        for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+            removeArc(x, i, cause);
+            removeArc(i, x, cause);
         }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
@@ -302,7 +300,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         }
     }
 
-    @Override
     public IGraphDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new GraphDeltaMonitor(delta, propagator);

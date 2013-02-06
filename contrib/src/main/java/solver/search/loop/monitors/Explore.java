@@ -26,7 +26,7 @@
  */
 package solver.search.loop.monitors;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;

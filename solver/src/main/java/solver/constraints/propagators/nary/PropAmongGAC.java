@@ -26,12 +26,12 @@
  */
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.iterators.DisposableValueIterator;
+import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
+import memory.IStateBitSet;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -76,11 +76,11 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected boolean needFilter;
 
     public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            idms[i] = vars[i].monitorDelta(this);
+            idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
@@ -101,6 +101,38 @@ public class PropAmongGAC extends Propagator<IntVar> {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         }
         return EventType.INSTANTIATE.mask + +EventType.BOUND.mask + EventType.REMOVE.mask;
+    }
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            if (varIdx == nb_vars) {
+                return true;
+            } else {
+                needFilter = false;
+                if (EventType.isInstantiate(mask)) {
+                    if (both.get(varIdx)) {
+                        IntVar var = vars[varIdx];
+                        int val = var.getValue();
+                        if (setValues.contains(val)) {
+                            LB.add(1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        } else {
+                            UB.add(-1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        }
+                    }
+                } else {
+                    idms[varIdx].freeze();
+                    idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                    idms[varIdx].unfreeze();
+                }
+                return needFilter;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -125,11 +157,11 @@ public class PropAmongGAC extends Propagator<IntVar> {
             }
             LB.set(lb);
             UB.set(ub);
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
         }
         filter();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     protected void filter() throws ContradictionException {
@@ -154,33 +186,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (varIdx == nb_vars) {
-            filter();
-        } else {
-            needFilter = false;
-            if (EventType.isInstantiate(mask)) {
-                if (both.get(varIdx)) {
-                    IntVar var = vars[varIdx];
-                    int val = var.getValue();
-                    if (setValues.contains(val)) {
-                        LB.add(1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    } else {
-                        UB.add(-1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    }
-                }
-            } else {
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-            }
-            if (needFilter) {
-                filter();
-            }
-        }
+        filter();
     }
 
     /**
@@ -189,7 +195,6 @@ public class PropAmongGAC extends Propagator<IntVar> {
      * @throws ContradictionException if contradiction occurs.
      */
     private void removeOnlyValues() throws ContradictionException {
-        int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
@@ -267,7 +272,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    protected static class RemProc implements UnaryIntProcedure<Integer> {
+    protected static class RemProc implements UnarySafeIntProcedure<Integer> {
 
         final PropAmongGAC p;
         int varIdx;
@@ -277,13 +282,13 @@ public class PropAmongGAC extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer integer) {
+        public UnarySafeIntProcedure set(Integer integer) {
             varIdx = integer;
             return this;
         }
 
         @Override
-        public void execute(int val) throws ContradictionException {
+        public void execute(int val) {
             if (p.both.get(varIdx)) {
                 if (p.setValues.contains(val)) {
                     p.occs[varIdx].add(-1);

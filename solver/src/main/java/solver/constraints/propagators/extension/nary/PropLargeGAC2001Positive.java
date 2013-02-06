@@ -26,9 +26,9 @@
  */
 package solver.constraints.propagators.extension.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -72,7 +72,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     protected ValidityChecker valcheck;
 
     public PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation, Solver solver, Constraint constraint) {
-        super(vs, solver, constraint, PropagatorPriority.LINEAR, false);
+        super(vs, PropagatorPriority.LINEAR, false);
         this.relation = relation;
         this.arity = vs.length;
         this.blocks = new int[arity];

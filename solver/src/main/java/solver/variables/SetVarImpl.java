@@ -27,11 +27,11 @@
 
 package solver.variables;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
 import com.sun.istack.internal.NotNull;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -46,7 +46,7 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
  * @author Jean-Guillaume Fages
  * @since Oct 2012
  */
-public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMonitor, SetVar> implements SetVar {
+public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements SetVar {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -100,27 +100,38 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
     }
 
     @Override
-    public boolean addToKernel(int value, ICause cause) throws ContradictionException {
-        if (!envelope.contain(value)) {
+    public boolean addToKernel(int element, ICause cause) throws ContradictionException {
+        if (!envelope.contain(element)) {
             contradiction(cause, null, "");
-        }
-        if (!kernel.contain(value)) {
-            kernel.add(value);
             return true;
         }
-        return false;
+        if (kernel.contain(element)) {
+            return false;
+        }
+        kernel.add(element);
+        if (reactOnModification) {
+            delta.add(element, SetDelta.KERNEL, cause);
+        }
+        EventType e = EventType.ADD_TO_KER;
+        notifyPropagators(e, cause);
+        return true;
     }
 
     @Override
-    public boolean removeFromEnvelope(int value, ICause cause) throws ContradictionException {
-        if (kernel.contain(value)) {
-            contradiction(cause, null, "");
-        }
-        if (envelope.contain(value)) {
-            envelope.remove(value);
+    public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
+        if (kernel.contain(element)) {
+            contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
             return true;
         }
-        return false;
+        if (!envelope.remove(element)) {
+            return false;
+        }
+        if (reactOnModification) {
+            delta.add(element, SetDelta.ENVELOP, cause);
+        }
+        EventType e = EventType.REMOVE_FROM_ENVELOPE;
+        notifyPropagators(e, cause);
+        return true;
     }
 
     @Override
@@ -135,7 +146,7 @@ public abstract class SetVarImpl extends AbstractVariable<SetDelta, SetDeltaMoni
         if (envelope.getSize() != value.length) {
             for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
                 if (!kernel.contain(i)) {
-                    envelope.remove(i);
+                    removeFromEnvelope(i, cause);
                 }
             }
         }

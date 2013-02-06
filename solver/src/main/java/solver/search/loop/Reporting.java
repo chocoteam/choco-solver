@@ -26,8 +26,8 @@
  */
 package solver.search.loop;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.search.strategy.decision.Decision;

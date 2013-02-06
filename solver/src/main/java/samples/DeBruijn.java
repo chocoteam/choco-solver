@@ -34,11 +34,9 @@
 
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -67,10 +65,10 @@ public class DeBruijn {
     IntVar[] bin_code; // the de Bruijn sequence (first number in binary)
 
 
-   // integer power method
-    static int pow( int x, int y) {
+    // integer power method
+    static int pow(int x, int y) {
         int z = x;
-        for( int i = 1; i < y; i++ ) z *= x;
+        for (int i = 1; i < y; i++) z *= x;
         return z;
     } // end pow
 
@@ -82,7 +80,7 @@ public class DeBruijn {
         s = new Solver();
         base = in_base;
         n = in_n;
-        int pow_base_n = pow(base,n); // base^n, the range of integers
+        int pow_base_n = pow(base, n); // base^n, the range of integers
         m = pow_base_n;
         if (in_m > 0) {
             if (in_m > m) {
@@ -95,7 +93,7 @@ public class DeBruijn {
         System.out.println("Using base: " + base + " n: " + n + " m: " + m);
 
         // decimal representation, ranges from 0..base^n-1
-		System.out.println(s);
+        System.out.println(s);
         x = VariableFactory.boundedArray("x", m, 0, pow_base_n - 1, s);
 
 
@@ -108,21 +106,21 @@ public class DeBruijn {
 
         // calculate the weights array
         int[] weights = new int[n];
-        int[] coefs = new int[n+1];
+        int[] coefs = new int[n + 1];
         int w = 1;
-        for(int i = 0; i < n; i++) {
-            weights[n-i-1] = w;
-            coefs[n-i-1] = w;
+        for (int i = 0; i < n; i++) {
+            weights[n - i - 1] = w;
+            coefs[n - i - 1] = w;
             w *= base;
         }
-		coefs[n] = -1;
+        coefs[n] = -1;
 
         // connect binary <-> x
         binary = new BoolVar[m][n];
-        for(int i = 0; i < m; i++) {
+        for (int i = 0; i < m; i++) {
             binary[i] = VariableFactory.boolArray("binary" + i, n, s);
-			IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
-            s.post(Sum.build(sum, coefs, 0, Sum.Type.EQ, s));
+            IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
+            s.post(IntConstraintFactory.scalar(sum, coefs, "=", 0));
 //            s.post(ConstraintFactory.eq(x[i], Sum.build(binary[i], weights)));
         }
 
@@ -130,17 +128,16 @@ public class DeBruijn {
         // assert the the deBruijn property:  element i in binary starts
         // with the end of element i-1
         //
-        for(int i = 1; i < m; i++) {
-            for(int j = 1; j < n; j++) {
-                s.post(ConstraintFactory.eq(binary[i - 1][j], binary[i][j - 1], s));
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                s.post(IntConstraintFactory.arithm(binary[i - 1][j], "=", binary[i][j - 1]));
             }
         }
 
         // ... "around the corner": last element is connected to the first
-        for(int j = 1; j < n; j++) {
-            s.post(ConstraintFactory.eq(binary[m - 1][j], binary[0][j - 1], s));
+        for (int j = 1; j < n; j++) {
+            s.post(IntConstraintFactory.arithm(binary[m - 1][j], "=", binary[0][j - 1]));
         }
-
 
 
         //
@@ -148,18 +145,18 @@ public class DeBruijn {
         // the first element of of each row in binary[i]
         //
         bin_code = new IntVar[m];
-        for(int i = 0; i < m; i++) {
-            bin_code[i] = VariableFactory.bounded("bin_code_" + i, 0, base-1, s);
-            s.post(ConstraintFactory.eq(bin_code[i], binary[i][0], s));
+        for (int i = 0; i < m; i++) {
+            bin_code[i] = VariableFactory.bounded("bin_code_" + i, 0, base - 1, s);
+            s.post(IntConstraintFactory.arithm(bin_code[i], "=", binary[i][0]));
         }
 
 
         // All values in x should be different
-		s.post(new AllDifferent(x,s));
+        s.post(IntConstraintFactory.alldifferent(x, "BC"));
 
-		// Symmetry breaking: the minimum value in x should be the
-		// first element.
-		//TODO model.addConstraint(min(x, x[0]));
+        // Symmetry breaking: the minimum value in x should be the
+        // first element.
+        //TODO model.addConstraint(min(x, x[0]));
 
     } // end model
 
@@ -168,7 +165,7 @@ public class DeBruijn {
     // Search
     //
     public void search() {
-		s.findSolution();
+        s.findSolution();
 
         // System.out.println(s.pretty());
         if (s.isFeasible()) {
@@ -185,7 +182,7 @@ public class DeBruijn {
                 }
 
                 System.out.print("\nde Bruijn sequence: ");
-                for(int i = 0; i < m; i++) {
+                for (int i = 0; i < m; i++) {
                     System.out.print(bin_code[i].getValue() + " ");
 //                    System.out.print(s.getVar(bin_code[i]).getVal() + " ");
                 }
@@ -193,8 +190,8 @@ public class DeBruijn {
 
                 System.out.println("\nbinary:");
 
-                for(int i = 0; i < m; i++) {
-                    for(int j = 0; j < n; j++) {
+                for (int i = 0; i < m; i++) {
+                    for (int j = 0; j < n; j++) {
                         System.out.print(binary[i][j].getValue() + " ");
 //                        System.out.print(s.getVar(binary[i][j]).getVal() + " ");
                     }

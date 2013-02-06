@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -47,7 +47,7 @@ public class PropMod extends Propagator<IntVar> {
 
     public PropMod(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
     }
 
     @Override

@@ -27,7 +27,7 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -51,16 +51,16 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     DecisionOperator assgnt = DecisionOperator.int_eq;
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
-        super(vars);
+    public Assignment(VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
+        super(varselector.getScope());
         this.varselector = varselector;
         this.valueIterator = valueIterator;
         decisionPool = new PoolManager<FastDecision>();
     }
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, InValueIterator valueIterator,
+    public Assignment(VariableSelector<IntVar> varselector, InValueIterator valueIterator,
                       DecisionOperator assgnt) {
-        super(vars);
+        super(varselector.getScope());
         this.varselector = varselector;
         this.valueIterator = valueIterator;
         decisionPool = new PoolManager<FastDecision>();
@@ -71,27 +71,27 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-	@Override
-	public Decision<IntVar> computeDecision(IntVar variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		int value = valueIterator.selectValue(variable);
-		FastDecision d = decisionPool.getE();
-		if (d == null) {
-			d = new FastDecision(decisionPool);
-		}
-		d.set(variable, value, assgnt);
-		return d;
-	}
+    @Override
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        int value = valueIterator.selectValue(variable);
+        FastDecision d = decisionPool.getE();
+        if (d == null) {
+            d = new FastDecision(decisionPool);
+        }
+        d.set(variable, value, assgnt);
+        return d;
+    }
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-		IntVar variable = null;
+        IntVar variable = null;
         if (varselector.hasNext()) {
-			varselector.advance();
-			variable = varselector.getVariable();
+            varselector.advance();
+            variable = varselector.getVariable();
         }
         return computeDecision(variable);
     }

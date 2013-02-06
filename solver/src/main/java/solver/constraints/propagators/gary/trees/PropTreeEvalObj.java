@@ -27,7 +27,8 @@
 
 package solver.constraints.propagators.gary.trees;
 
-import choco.kernel.ESat;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,7 +38,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing edge costs
@@ -60,7 +60,7 @@ public class PropTreeEvalObj extends Propagator {
     //***********************************************************************************
 
     public PropTreeEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();

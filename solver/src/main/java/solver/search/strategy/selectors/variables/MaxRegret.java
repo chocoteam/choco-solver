@@ -54,9 +54,15 @@ public class MaxRegret implements VariableSelector<IntVar> {
     }
 
     @Override
+    public IntVar[] getScope() {
+        return variables;
+    }
+
+    @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
@@ -64,13 +70,13 @@ public class MaxRegret implements VariableSelector<IntVar> {
     public void advance() {
         int small_idx = 0;
         int small_value = Integer.MIN_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             int lower = variables[idx].getLB();
             int value = variables[idx].nextValue(lower) - lower;
-            if(dsize > 1 &&  value > small_value){
-               small_value = value;
-               small_idx = idx;
+            if (dsize > 1 && value > small_value) {
+                small_value = value;
+                small_idx = idx;
             }
         }
         this.small_idx = small_idx;

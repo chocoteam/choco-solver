@@ -27,8 +27,8 @@
 
 package solver.search.loop;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;

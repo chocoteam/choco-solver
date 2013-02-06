@@ -37,27 +37,28 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public interface IDeltaMonitor<D extends IDelta> extends Serializable {
+public interface IDeltaMonitor extends Serializable {
 
-	void freeze();
+    void freeze();
 
-	void unfreeze();
+    void unfreeze();
 
-	void clear();
+    void clear();
 
-	public static enum Default implements IDeltaMonitor<IDelta> {
-		NONE() {
+    public static enum Default implements IDeltaMonitor {
+        NONE() {
+            @Override
+            public void freeze() {
+            }
 
-			@Override
-			public void freeze() {}
+            @Override
+            public void unfreeze() {
+            }
 
-			@Override
-			public void unfreeze() {
-			}
-			@Override
-			public void clear() {
-			}
-		}
-	}
+            @Override
+            public void clear() {
+            }
+        }
+    }
 
 }

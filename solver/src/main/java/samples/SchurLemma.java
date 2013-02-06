@@ -26,12 +26,12 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -70,7 +70,7 @@ public class SchurLemma extends AbstractProblem {
         M = VariableFactory.boolMatrix("b", n, k, solver); // M_ij is true iff ball i is in box j
 
         for (int i = 0; i < n; i++) {
-            solver.post(Sum.eq(M[i], 1, solver));
+            solver.post(IntConstraintFactory.sum(M[i], "=", 1));
         }
 
         for (int i = 0; i < k; i++) {
@@ -78,7 +78,7 @@ public class SchurLemma extends AbstractProblem {
                 for (int y = 1; y <= n; y++) {
                     for (int z = 1; z <= n; z++) {
                         if (x + y == z)
-                            solver.post(Sum.leq(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, 2, solver));
+                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, "<=", 2));
                     }
                 }
             }
@@ -87,7 +87,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(M), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.flatten(M)));
     }
 
     @Override

@@ -27,12 +27,13 @@
 
 package solver.variables.view;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.Variable;
+import solver.variables.delta.IntDelta;
 
 /**
  * A constant view specific to boolean variable
@@ -43,9 +44,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class BoolConstantView extends ConstantView implements BoolVar {
+public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
 
-    protected BoolConstantView(String name, int constante, Solver solver) {
+    public BoolConstantView(String name, int constante, Solver solver) {
         super(name, constante, solver);
     }
 

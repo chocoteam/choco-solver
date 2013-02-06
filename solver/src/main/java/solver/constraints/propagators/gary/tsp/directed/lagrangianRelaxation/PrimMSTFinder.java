@@ -27,12 +27,13 @@
 
 package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
+import memory.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 
 public class PrimMSTFinder extends AbstractMSTFinder {
@@ -47,7 +48,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
     int tSize;
     double minVal;
     double maxTArc;
-	int[] mate;
+    int[] mate;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -57,7 +58,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
         super(nbNodes, propagator);
         heap = new FastSimpleHeap(nbNodes);
         inTree = new BitSet(n);
-		mate = new int[n*2];
+        mate = new int[n * 2];
     }
 
     //***********************************************************************************
@@ -131,12 +132,12 @@ public class PrimMSTFinder extends AbstractMSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(i, j)) {
-						heap.addOrUpdateElement(j, Integer.MIN_VALUE);
-						mate[j] = i;
+                        heap.addOrUpdateElement(j, Integer.MIN_VALUE);
+                        mate[j] = i;
                     } else {
-						if(heap.addOrUpdateElement(j, costs[i][j])){
-							mate[j] = i;
-						}
+                        if (heap.addOrUpdateElement(j, costs[i][j])) {
+                            mate[j] = i;
+                        }
                     }
                 }
             }
@@ -144,13 +145,13 @@ public class PrimMSTFinder extends AbstractMSTFinder {
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(j, i)) {
-						if(heap.addOrUpdateElement(j, Integer.MIN_VALUE)){
-							mate[j] = i+n;
-						}
+                        if (heap.addOrUpdateElement(j, Integer.MIN_VALUE)) {
+                            mate[j] = i + n;
+                        }
                     } else {
-						if(heap.addOrUpdateElement(j, costs[j][i])){
-							mate[j] = i+n;
-						}
+                        if (heap.addOrUpdateElement(j, costs[j][i])) {
+                            mate[j] = i + n;
+                        }
                     }
                 }
             }

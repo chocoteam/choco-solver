@@ -27,25 +27,18 @@
 
 package choco.checker;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+import memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.Absolute;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.*;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.lex.Lex;
-import solver.constraints.ternary.Times;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.InputOrder;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
+import solver.variables.Task;
 import solver.variables.VariableFactory;
 
 /**
@@ -74,10 +67,10 @@ public interface Modeler {
             } catch (ArrayIndexOutOfBoundsException ce) {
                 System.out.printf("");
             }
-            Constraint ctr = ConstraintFactory.eq(vars[0], vars[1], s);
+            Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -101,10 +94,10 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = new InverseChanneling(X, Y, s);
+            Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -137,10 +130,10 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = new InverseChanneling(X, Y, s);
+            Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -159,10 +152,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = ConstraintFactory.neq(vars[0], vars[1], s);
+            Constraint ctr = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
 
@@ -181,10 +174,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -202,10 +195,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.BC);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "BC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -223,10 +216,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -244,10 +237,39 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
+            Constraint ctr = IntConstraintFactory.alldifferent(vars, "AC");
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelGCC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("GCC_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            boolean closed = (Boolean) parameters;
+            IntVar[] vars = new IntVar[n / 2];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            int[] values = new int[n / 2];
+            IntVar[] cards = new IntVar[n / 2];
+            for (int i = 0; i < cards.length; i++) {
+                values[i] = i;
+                cards[i] = VariableFactory.enumerated("c_" + i, domains[i + n / 2], s);
+                if (map != null) map.put(domains[i + n / 2], cards[i]);
+            }
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, closed);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -265,10 +287,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new Times(vars[0], vars[1], vars[2], s);
+            Constraint ctr = IntConstraintFactory.times(vars[0], vars[1], vars[2]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -286,10 +308,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new Absolute(vars[0], vars[1], s);
+            Constraint ctr = IntConstraintFactory.absolute(vars[0], vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -310,22 +332,19 @@ public interface Modeler {
             IntVar occVar = VariableFactory.bounded("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Count.Relop ro = null;
+            String ro = "=";
             switch (params[0]) {
-                case 0:
-                    ro = Count.Relop.EQ;
-                    break;
                 case 1:
-                    ro = Count.Relop.LEQ;
+                    ro = "<=";
                     break;
                 case 2:
-                    ro = Count.Relop.GEQ;
+                    ro = ">=";
                     break;
             }
-            Constraint ctr = new Count(params[1], vars, ro, occVar, s);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -346,22 +365,19 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Count.Relop ro = null;
+            String ro = "=";
             switch (params[0]) {
-                case 0:
-                    ro = Count.Relop.EQ;
-                    break;
                 case 1:
-                    ro = Count.Relop.LEQ;
+                    ro = "<=";
                     break;
                 case 2:
-                    ro = Count.Relop.GEQ;
+                    ro = ">=";
                     break;
             }
-            Constraint ctr = new Count(params[1], vars, ro, occVar, s);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -387,7 +403,7 @@ public interface Modeler {
             Constraint ctr = new Lex(X, Y, (Boolean) parameters, s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(ArrayUtils.append(X, Y), env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y));
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -405,10 +421,10 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new Element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, s);
+            Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -429,10 +445,10 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Constraint ctr = new Among(params, vars, occVar, s);
+            Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -453,11 +469,10 @@ public interface Modeler {
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
             if (map != null) map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
-            Constraint ctr = new Among(params, vars, occVar, s);
+            Constraint ctr = IntConstraintFactory.among(occVar, vars, params);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = new Assignment(vars, new InputOrder(vars, s.getEnvironment()),
-                    new InDomainMin());//StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -479,147 +494,17 @@ public interface Modeler {
                     decvars[i] = vars[i];
                 }
             }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s);
+            Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], (String[]) parameters);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
         }
     };
 
-    Modeler modelNValues_AtMostBC = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelNValues_AtMostBC_" + n);
-            IEnvironment env = s.getEnvironment();
-
-            IntVar[] vars = new IntVar[n];
-            IntVar[] decvars = new IntVar[n - 1];
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                if (map != null) map.put(domains[i], vars[i]);
-                if (i < n - 1) {
-                    decvars[i] = vars[i];
-                }
-            }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtMost_BC);
-            Constraint[] ctrs = new Constraint[]{ctr};
-
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
-    };
-
-    Modeler modelNValues_AtLeastAC = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelNValues_AtLeastAC_" + n);
-            IEnvironment env = s.getEnvironment();
-
-            IntVar[] vars = new IntVar[n];
-            IntVar[] decvars = new IntVar[n - 1];
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                if (map != null) map.put(domains[i], vars[i]);
-                if (i < n - 1) {
-                    decvars[i] = vars[i];
-                }
-            }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtLeast_AC);
-            Constraint[] ctrs = new Constraint[]{ctr};
-
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
-    };
-
-    Modeler modelNValues_AtMostGreedy = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelNValues_AtMostGreedy_" + n);
-            IEnvironment env = s.getEnvironment();
-
-            IntVar[] vars = new IntVar[n];
-            IntVar[] decvars = new IntVar[n - 1];
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                if (map != null) map.put(domains[i], vars[i]);
-                if (i < n - 1) {
-                    decvars[i] = vars[i];
-                }
-            }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, NValues.Type.AtMost_GreedyGraph);
-            Constraint[] ctrs = new Constraint[]{ctr};
-
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
-    };
-
-    Modeler modelNValues_simple = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelNValues_simple_" + n);
-            IEnvironment env = s.getEnvironment();
-
-            IntVar[] vars = new IntVar[n];
-            IntVar[] decvars = new IntVar[n - 1];
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                if (map != null) map.put(domains[i], vars[i]);
-                if (i < n - 1) {
-                    decvars[i] = vars[i];
-                }
-            }
-            Constraint ctr = new NValues(decvars, vars[n - 1], s, new NValues.Type[]{});
-            Constraint[] ctrs = new Constraint[]{ctr};
-
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
-    };
-
-    Modeler modelGCC_alldiff_Cards = new Modeler() {
-        @Override
-        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelGCC_Cards_" + n);
-            IEnvironment env = s.getEnvironment();
-
-            IntVar[] vars = new IntVar[n];
-            TIntArrayList vals = new TIntArrayList();
-            for (int i = 0; i < n; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                for (int j : domains[i]) {
-                    if (!vals.contains(j)) {
-                        vals.add(j);
-                    }
-                }
-                if (map != null) map.put(domains[i], vars[i]);
-            }
-            int[] values = vals.toArray();
-            IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
-
-            Constraint ctr = new GCC_AC(vars, values, cards, true, s);
-            Constraint[] ctrs = new Constraint[]{ctr};
-
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-            s.post(ctrs);
-            s.set(strategy);
-            return s;
-        }
-    };
-
-    Modeler modelGCC_alldiff_Fast = new Modeler() {
+    Modeler modelGCC_alldiff = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
             Solver s = new Solver("modelGCC_Fast_" + n);
@@ -639,46 +524,140 @@ public interface Modeler {
             int[] values = vals.toArray();
             IntVar[] cards = VariableFactory.boolArray("cards", values.length, s);
 
-            Constraint ctr = new GCC_AC(vars, values, cards, false, s);
+            Constraint ctr = IntConstraintFactory.global_cardinality(vars, values, cards, false);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
         }
     };
 
-    Modeler modelGCC_alldiff_LowUp = new Modeler() {
+    Modeler modelTree = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Solver s = new Solver("modelGCC_LowUp_" + n);
+            Solver s = new Solver("tree_" + n);
             IEnvironment env = s.getEnvironment();
 
             IntVar[] vars = new IntVar[n];
-            TIntArrayList vals = new TIntArrayList();
+            IntVar[] succs = new IntVar[n - 1];
             for (int i = 0; i < n; i++) {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-                for (int j : domains[i]) {
-                    if (!vals.contains(j)) {
-                        vals.add(j);
-                    }
+                if (i < n - 1) {
+                    succs[i] = vars[i];
                 }
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            int[] values = vals.toArray();
-            int[] low = new int[values.length];
-            int[] up = new int[values.length];
-            for (int i = 0; i < values.length; i++) {
-                up[i] = 1;
-            }
-            Constraint ctr = new GCC_AC(vars, values, low, up, s);
+            IntVar nbRoots = vars[n - 1];
+            Constraint ctr = IntConstraintFactory.tree(succs, nbRoots, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+    };
+
+    Modeler modelCircuit = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("circuit_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = IntConstraintFactory.circuit(vars, 0);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelSubcircuit = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("subcircuit_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, s));
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelDiffn = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("diffn_" + n);
+            IEnvironment env = s.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            if (n % 4 != 0) {
+                throw new UnsupportedOperationException();
+            }
+            int k = n / 4;
+            IntVar[] x = new IntVar[k];
+            IntVar[] y = new IntVar[k];
+            IntVar[] dx = new IntVar[k];
+            IntVar[] dy = new IntVar[k];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            for (int i = 0; i < k; i++) {
+                x[i] = vars[i];
+                y[i] = vars[i + k];
+                dx[i] = vars[i + 2 * k];
+                dy[i] = vars[i + 3 * k];
+            }
+            Constraint ctr = IntConstraintFactory.diffn(x, y, dx, dy);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelCumulative = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver solver = new Solver("Cumulative_" + n);
+            IEnvironment env = solver.getEnvironment();
+            IntVar[] vars = new IntVar[n];
+            if (n % 4 != 1) {
+                throw new UnsupportedOperationException();
+            }
+            int k = n / 4;
+            IntVar[] h = new IntVar[k];
+            Task[] tasks = new Task[k];
+            for (int i = 0; i < n; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], solver);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            for (int i = 0; i < k; i++) {
+                tasks[i] = VariableFactory.task(vars[i], vars[i + k], vars[i + 2 * k]);
+                h[i] = vars[i + 3 * k];
+            }
+            IntVar capa = vars[vars.length - 1];
+            Constraint ctr = IntConstraintFactory.cumulative(tasks, h, capa);
+            Constraint[] ctrs = new Constraint[]{ctr};
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
+            solver.post(ctrs);
+            solver.set(strategy);
+            return solver;
         }
     };
 }

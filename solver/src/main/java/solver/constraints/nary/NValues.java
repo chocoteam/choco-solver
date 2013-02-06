@@ -27,12 +27,11 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.constraints.propagators.nary.nValue.PropAtLeastNValues_AC;
 import solver.constraints.propagators.nary.nValue.PropAtMostNValues_BC;
 import solver.constraints.propagators.nary.nValue.PropAtMostNValues_Greedy;
@@ -50,92 +49,83 @@ import java.util.BitSet;
  */
 public class NValues extends IntConstraint<IntVar> {
 
-	public enum Type{
-		AtMost_BC {
-			@Override
-			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
-				boolean enumDom = false;
-				for(IntVar v:vars){
-					if(v.hasEnumeratedDomain()){
-						enumDom = true;
-						break;
-					}
-				}
-				if(enumDom)// added twice to perform fixpoint
-				cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
-			}
-		},
-		AtMost_GreedyGraph {
-			@Override
-			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-				cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, solver));
-			}
-		},
-		AtLeast_AC {
-			@Override
-			public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-				cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues, cons, solver));
-			}
-		};
+    public enum Type {
+        at_most_BC {
+            @Override
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+                cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+                boolean enumDom = false;
+                for (IntVar v : vars) {
+                    if (v.hasEnumeratedDomain()) {
+                        enumDom = true;
+                        break;
+                    }
+                }
+                if (enumDom)// added twice to perform fixpoint
+                    cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+            }
+        },
+        at_most_greedy {
+            @Override
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+                cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, solver));
+            }
+        },
+        at_least_AC {
+            @Override
+            public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
+                cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues, cons, solver));
+            }
+        };
 
-		public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
-	}
-	/**
-	 * NValues constraint
-	 * The number of distinct values in vars is exactly nValues
-	 * private because the case were all values are not restricted is not tested (i.e. unsafe)
-	 * @param vars
-	 * @param nValues
-	 * @param concernedValues
-	 * @param solver
-	 */
+        public abstract void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver);
+    }
+
+    /**
+     * NValues constraint
+     * The number of distinct values in vars is exactly nValues
+     * private because the case were all values are not restricted is not tested (i.e. unsafe)
+     *
+     * @param vars
+     * @param nValues
+     * @param concernedValues
+     * @param solver
+     */
     private NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
-		addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
+        addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
     }
 
-	/**
-	 * NValues constraint
-	 * The number of distinct values in vars is exactly nValues
-	 * @param vars
-	 * @param nValues
-	 * @param solver
-	 * @param types additional filtering algorithms to consider
-	 */
+    /**
+     * NValues constraint
+     * The number of distinct values in vars is exactly nValues
+     *
+     * @param vars
+     * @param nValues
+     * @param solver
+     * @param types   additional filtering algorithms to consider
+     */
     public NValues(IntVar[] vars, IntVar nValues, Solver solver, Type... types) {
         this(vars, nValues, getDomainUnion(vars), solver);
-		for(Type t:types){
-			t.addProp(vars, nValues, this, solver);
-		}
+        for (Type t : types) {
+            t.addProp(vars, nValues, this, solver);
+        }
     }
 
-	/**
-	 * NValues constraint
-	 * The number of distinct values in vars is exactly nValues
-	 * Uses all filtering algorithms in enum Type
-	 * @param vars
-	 * @param nValues
-	 * @param solver
-	 */
-	public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
-        this(vars, nValues, solver, Type.values());
+    private static TIntArrayList getDomainUnion(IntVar[] vars) {
+        TIntArrayList values = new TIntArrayList();
+        for (IntVar v : vars) {
+            int ub = v.getUB();
+            for (int i = v.getLB(); i <= ub; i = v.nextValue(i)) {
+                if (!values.contains(i)) {
+                    values.add(i);
+                }
+            }
+        }
+        return values;
     }
 
-	private static TIntArrayList getDomainUnion(IntVar[] vars) {
-		TIntArrayList values = new TIntArrayList();
-		for(IntVar v:vars){
-			int ub = v.getUB();
-			for(int i=v.getLB();i<=ub;i=v.nextValue(i)){
-				if(!values.contains(i)){
-					values.add(i);
-				}
-			}
-		}
-		return values;
-	}
-
-	/**
+    /**
      * Checks if the constraint is satisfied when all variables are instantiated.
      *
      * @param tuple an complete instantiation
@@ -143,30 +133,30 @@ public class NValues extends IntConstraint<IntVar> {
      */
     @Override
     public ESat isSatisfied(int[] tuple) {
-		int minval = tuple[0];
-		for (int i = 0; i < tuple.length-1; i++) {
-			if(minval>tuple[i])
-				minval = tuple[i];
-		}
-		BitSet values = new BitSet(tuple.length-1);
-        for (int i = 0; i < tuple.length-1; i++) {
-			values.set(tuple[i]-minval);
+        int minval = tuple[0];
+        for (int i = 0; i < tuple.length - 1; i++) {
+            if (minval > tuple[i])
+                minval = tuple[i];
         }
-		if(values.cardinality()==tuple[tuple.length-1]){
-			return ESat.TRUE;
-		}
+        BitSet values = new BitSet(tuple.length - 1);
+        for (int i = 0; i < tuple.length - 1; i++) {
+            values.set(tuple[i] - minval);
+        }
+        if (values.cardinality() == tuple[tuple.length - 1]) {
+            return ESat.TRUE;
+        }
         return ESat.FALSE;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
         sb.append("NValue({");
-        for (int i = 0; i < vars.length-1; i++) {
+        for (int i = 0; i < vars.length - 1; i++) {
             if (i > 0) sb.append(", ");
             Variable var = vars[i];
             sb.append(var);
         }
-        sb.append("}, "+vars[vars.length-1]);
+        sb.append("}, " + vars[vars.length - 1]);
         sb.append(")");
         return sb.toString();
     }

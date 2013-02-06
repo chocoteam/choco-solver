@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -34,7 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /**
  * X/Y = Z
@@ -52,13 +52,13 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{x, y, z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = x;
         this.Y = y;
         this.Z = z;
-        this.absX = Views.abs(X);
-        this.absY = Views.abs(Y);
-        this.absZ = Views.abs(Z);
+        this.absX = VariableFactory.abs(X);
+        this.absY = VariableFactory.abs(Y);
+        this.absZ = VariableFactory.abs(Z);
     }
 
     @Override

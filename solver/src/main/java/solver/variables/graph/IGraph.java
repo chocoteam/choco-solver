@@ -27,15 +27,17 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
+
+import java.io.Serializable;
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
  *         <p/>
  *         Provide an interface for the graph manipulation
  */
-public interface IGraph {
+public interface IGraph extends Serializable {
 
 
     /**

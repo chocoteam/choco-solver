@@ -27,13 +27,13 @@
 
 package solver.variables.fast;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeBoundIterator;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
+import common.ESat;
+import common.util.iterators.DisposableRangeBoundIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueBoundIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -42,15 +42,14 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
-import solver.variables.delta.monitor.OneIntDeltaMonitor;
+import solver.variables.delta.monitor.OneValueDeltaMonitor;
 
 /**
  * <br/>
@@ -58,7 +57,7 @@ import solver.variables.delta.monitor.OneIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -81,11 +80,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     protected final IndexedBipartiteSet notInstanciated;
 
-    IntDelta delta = NoDelta.singleton;
+    IEnumDelta delta = NoDelta.singleton;
 
     protected boolean reactOnRemoval = false;
-
-    protected HeuristicVal heuristicVal;
 
     private DisposableValueIterator _viterator;
 
@@ -103,16 +100,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -348,7 +335,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IEnumDelta getDelta() {
         return delta;
     }
 
@@ -373,9 +360,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new OneIntDeltaMonitor(delta, propagator);
+        return new OneValueDeltaMonitor(delta, propagator);
     }
 
 

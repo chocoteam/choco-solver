@@ -27,41 +27,94 @@
 
 package solver.explanations.antidom;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateInt;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateInt;
 import solver.variables.IntVar;
 
 /**
  * Created by IntelliJ IDEA.
- * User: njussien
+ * User: cprudhom
  * Date: 20/10/11
  * Time: 16:52
+ *
+ * @Deprecated
  */
+@Deprecated
 public class AntiDomBipartiteSet implements AntiDomain {
     int offset;
-    IStateInt firstOut;
+    IStateInt firstIn;
     int[] values;
     int[] pos;
+//    AntiDomBitset bu;
 
     private DisposableValueIterator _viterator;
 
     public AntiDomBipartiteSet(IntVar A) {
         offset = A.getLB();
-        firstOut = A.getSolver().getEnvironment().makeInt();
+        firstIn = A.getSolver().getEnvironment().makeInt();
         values = new int[A.getDomainSize()];
         pos = new int[A.getDomainSize()];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = i + offset;
+            pos[i] = i;
+        }
+//        bu = new AntiDomBitset(A);
     }
 
 
     public void set(int outsideval) {
-        int fout = firstOut.add(1);
-        values[fout - 1] = outsideval;
-        pos[outsideval - offset] = fout - 1;
+//        assert compare(outsideval);
+//        System.out.println("------------------------");
+//        System.out.println(this.toString());
+//        System.out.println("val:" + outsideval);
+//        System.out.println(Arrays.toString(values));
+//        System.out.println(Arrays.toString(pos));
+//        System.out.println("in:" + firstIn.get());
+
+        int idxVal = outsideval - offset;
+        int in = firstIn.add(1) - 1;
+
+        int p = pos[in];
+        pos[in] = pos[idxVal];
+        pos[idxVal] = p;
+
+
+        int i = values[pos[in]];
+        int j = values[pos[idxVal]];
+        values[pos[in]] = j;
+        values[pos[idxVal]] = i;
+
+//        bu.set(outsideval);
+
+//        System.out.println(this.toString());
+//        System.out.println("val:" + outsideval);
+//        System.out.println(Arrays.toString(values));
+//        System.out.println(Arrays.toString(pos));
+//        System.out.println("in:" + firstIn.get());
+
+//        assert compare(outsideval);
     }
+
+
+    /*public boolean compare(int val) {
+        TIntHashSet vlaues = new TIntHashSet();
+        DisposableValueIterator it1 = this.getValueIterator();
+        while (it1.hasNext()) {
+            vlaues.add(it1.next());
+        }
+        DisposableValueIterator it2 = bu.getValueIterator();
+        while (it2.hasNext()) {
+            assert vlaues.contains(it2.next()) : val + ":" + this.toString() + "\n" + bu.toString();
+        }
+        it1.dispose();
+        it2.dispose();
+        return true;
+    }  */
+
 
     public boolean get(int outsideval) {
         int inside = outsideval - offset;
-        return pos[inside] < firstOut.get();
+        return pos[inside] < firstIn.get();
     }
 
     public DisposableValueIterator getValueIterator() {
@@ -76,13 +129,13 @@ public class AntiDomBipartiteSet implements AntiDomain {
                 public void bottomUpInit() {
                     super.bottomUpInit();
                     this.from = 0;
-                    this.to = firstOut.get();
+                    this.to = firstIn.get();
                 }
 
                 @Override
                 public void topDownInit() {
                     this.from = 0;
-                    this.to = firstOut.get();
+                    this.to = firstIn.get();
                 }
 
                 @Override
@@ -97,12 +150,12 @@ public class AntiDomBipartiteSet implements AntiDomain {
 
                 @Override
                 public int next() {
-                    return values[from++] + offset;
+                    return values[from++];
                 }
 
                 @Override
                 public int previous() {
-                    return values[--to] + offset;
+                    return values[--to];
                 }
             };
         }

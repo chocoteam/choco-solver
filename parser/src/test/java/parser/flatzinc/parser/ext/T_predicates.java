@@ -68,7 +68,7 @@ public class T_predicates extends GrammarExtTest {
         return walker.predicates();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("(prop.priority == 1 && prop.priority == 2)");
         Predicate p = predicates(fp);
@@ -77,7 +77,7 @@ public class T_predicates extends GrammarExtTest {
         Assert.assertEquals(2, ((BoolPredicate) p).predicates.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("(prop.priority == 1 || prop.priority == 2)");
         Predicate p = predicates(fp);

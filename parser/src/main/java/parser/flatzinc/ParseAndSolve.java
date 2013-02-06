@@ -43,8 +43,8 @@ import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.hardcoded.ConstraintEngine;
-import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.AverageCSV;
 import solver.search.strategy.pattern.SearchPattern;
@@ -109,6 +109,8 @@ public class ParseAndSolve {
     @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
     protected long l = 1;
 
+    private boolean userinterruption = true;
+
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
     }
@@ -157,12 +159,20 @@ public class ParseAndSolve {
 
 
     protected void parseandsolve() throws IOException {
-        for (String instance : instances) {
+        for (final String instance : instances) {
             AverageCSV acsv = null;
             if (!csv.equals("")) {
                 acsv = new AverageCSV(csv, l);
+                final AverageCSV finalAcsv = acsv;
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        if (isUserinterruption()) {
+                            finalAcsv.record(instance, ";**ERROR**;");
+                        }
+                    }
+                });
             }
-            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp);
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp, tl);
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
@@ -174,18 +184,16 @@ public class ParseAndSolve {
                     acsv.setSolver(solver);
                 }
                 expeng.make(solver);
-                if (tl > -1) {
-                    solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
-                }
 
                 LOGGER.info("% solve instance...");
                 solver.solve();
             }
             if (!csv.equals("")) {
                 assert acsv != null;
-                acsv.record(instance, "");
+                acsv.record(instance, gc.getDescription());
             }
         }
+        userinterruption = false;
     }
 
     protected void makeEngine(Solver solver) {
@@ -194,23 +202,26 @@ public class ParseAndSolve {
                 // let the default propagation strategy,
                 break;
             case 1:
-                solver.set(new ConstraintEngine(solver));
+                solver.set(new PropagatorEngine(solver));
                 break;
             case 2:
                 solver.set(new VariableEngine(solver));
                 break;
             case 3:
-                solver.set(new SevenQueuesConstraintEngine(solver));
+                solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;
             case -1:
             default:
                 if (solver.getNbCstrs() > solver.getNbVars()) {
                     solver.set(new VariableEngine(solver));
                 } else {
-                    solver.set(new ConstraintEngine(solver));
+                    solver.set(new PropagatorEngine(solver));
                 }
 
         }
     }
 
+    private boolean isUserinterruption() {
+        return userinterruption;
+    }
 }

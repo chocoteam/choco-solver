@@ -26,7 +26,7 @@
  */
 package solver.explanations.antidom;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

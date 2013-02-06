@@ -27,11 +27,10 @@
 
 package parser.flatzinc.ast.searches;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.search.strategy.selectors.values.*;
@@ -64,7 +63,7 @@ public class IntSearch {
         IEnvironment environment = solver.getEnvironment();
         switch (varChoice) {
             case input_order:
-                return new InputOrder(variables, environment);
+                return new InputOrder(variables);
             case first_fail:
                 return new FirstFail(variables);
             case anti_first_fail:
@@ -119,7 +118,7 @@ public class IntSearch {
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
                 valSelector = new InDomainMin();
         }
-        return new solver.search.strategy.strategy.Assignment(variables, variableSelector, valSelector, assgnt);
+        return new solver.search.strategy.strategy.Assignment(variableSelector, valSelector, assgnt);
     }
 
 

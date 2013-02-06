@@ -31,7 +31,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -45,7 +46,7 @@ import java.util.Random;
  */
 public class SumTests {
 
-    @Test
+    @Test(groups = "1s")
     public void testBound() {
         Random random = new Random();
         int m = 6;
@@ -79,12 +80,12 @@ public class SumTests {
             x[i - 1] = VariableFactory.bounded("x_" + i, dom[i][0], dom[i][n - 1], solver);
             coeffs[i - 1] = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
         }
-        Constraint c = Sum.eq(x, coeffs, r, (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n), solver);
+        Constraint c = IntConstraintFactory.scalar(x, coeffs, "=", r, (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n));
         solver.post(c);
 //        System.out.printf("%s\n", solver);
 
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed + inc));
+        solver.set(IntStrategyFactory.random(x, seed + inc));
         return solver;
     }
 

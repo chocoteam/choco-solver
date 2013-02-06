@@ -29,9 +29,8 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -72,20 +71,20 @@ public class Contrived extends AbstractProblem {
         v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
         w = VariableFactory.boundedArray("v", l, 1, d, solver);
 
-        solver.post(new AllDifferent(v, solver));
-        solver.post(new AllDifferent(w, solver));
-        solver.post(new Arithmetic(v[3], "=", v[4], solver));
-        solver.post(new Arithmetic(v[0], "=", w[0], solver));
-        solver.post(new Arithmetic(v[1], "=", w[1], solver));
-        solver.post(new Arithmetic(v[2], "=", w[2], solver));
-        solver.post(new Arithmetic(v[3], "=", w[3], solver));
+        solver.post(IntConstraintFactory.alldifferent(v, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(w, "BC"));
+        solver.post(IntConstraintFactory.arithm(v[3], "=", v[4]));
+        solver.post(IntConstraintFactory.arithm(v[0], "=", w[0]));
+        solver.post(IntConstraintFactory.arithm(v[1], "=", w[1]));
+        solver.post(IntConstraintFactory.arithm(v[2], "=", w[2]));
+        solver.post(IntConstraintFactory.arithm(v[3], "=", w[3]));
 
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(v,
-                solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(v
+        ));
     }
 
     @Override

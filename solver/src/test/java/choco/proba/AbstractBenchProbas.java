@@ -33,7 +33,7 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.recorders.conditions.ICondition;
 import solver.search.loop.monitors.IMonitorInitialize;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -111,8 +111,8 @@ public abstract class AbstractBenchProbas {
 
     void configSearchStrategy() {
         //this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
-        //this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver));
-        this.solver.set(StrategyFactory.minDomMinVal(this.vars, this.solver.getEnvironment()));
+        //this.solver.set(StrategyFactory.domOverWDeg_InDomainMin(this.vars, this.solver));
+        this.solver.set(IntStrategyFactory.firstFail_InDomainMin(this.vars));
     }
 
     private void configPropStrategy() {

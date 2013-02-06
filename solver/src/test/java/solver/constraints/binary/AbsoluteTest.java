@@ -27,21 +27,18 @@
 package solver.constraints.binary;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -51,6 +48,7 @@ import java.util.Random;
 
 /**
  * <br/>
+ *
  * @author Charles Prud'homme
  * @since 18/05/11
  */
@@ -61,8 +59,8 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.bounded("X", xl, xu, solver);
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
 
-        solver.post(new Absolute(X, Y, solver));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.absolute(X, Y));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));
 
         solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
@@ -73,8 +71,8 @@ public class AbsoluteTest {
         IntVar X = VariableFactory.enumerated("X", x, solver);
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
-        solver.post(new Absolute(X, Y, solver));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.absolute(X, Y));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));
 
         solver.propagate();
 
@@ -102,16 +100,12 @@ public class AbsoluteTest {
         BoolVar b1 = VariableFactory.bool("b1", solver);
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
-        solver.post(ConstraintFactory.geq(X, 0, solver));
-        solver.post(new ReifiedConstraint(b1,
-                Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
-                Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));
-        solver.post(new ReifiedConstraint(b2,
-                Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver),
-                Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), solver));
+        solver.post(IntConstraintFactory.arithm(X, ">=", 0));
+        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "!=", 0)));
+        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
-        solver.post(new ConjunctiveNormalForm(root, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.clauses(root, solver));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
@@ -123,16 +117,12 @@ public class AbsoluteTest {
         BoolVar b1 = VariableFactory.bool("b1", solver);
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
-        solver.post(ConstraintFactory.geq(X, 0, solver));
-        solver.post(new ReifiedConstraint(b1,
-                Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
-                Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));
-        solver.post(new ReifiedConstraint(b2,
-                Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver),
-                Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), solver));
+        solver.post(IntConstraintFactory.arithm(X, ">=", 0));
+        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, "!=", 0)));
+        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
-        solver.post(new ConjunctiveNormalForm(root, solver));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.clauses(root, solver));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
@@ -225,22 +215,22 @@ public class AbsoluteTest {
 
     @Test(groups = "1s")
     public void testBUG1() throws ContradictionException {
-        int[][] r = enumerated(new int[]{-21,3,5,9}, new int[]{-23,3,5,7});
-        Assert.assertEquals(r[0], new int[]{3,5});
-        Assert.assertEquals(r[1], new int[]{3,5});
+        int[][] r = enumerated(new int[]{-21, 3, 5, 9}, new int[]{-23, 3, 5, 7});
+        Assert.assertEquals(r[0], new int[]{3, 5});
+        Assert.assertEquals(r[1], new int[]{3, 5});
     }
 
     @Test(groups = "1s")
     public void testBUG2() throws ContradictionException {
-        int[][] r = enumerated(new int[]{-25,-24,-23,-22,-21,-20,-18,-17,-16,-15,-13,-11,-10,-9,-7,-6,-1,0,1,2,3,5,6,7},
-                new int[]{-25,-23,-22,-21,-20,-19,-16,-14,-12,-11,-9,-8,-7,-5,-4,-3,-1,0,1,2,4,5,6,7});
-		String s = "";
-		for(int k:r[0]){
-			s+=k+",";
-		}
-		System.out.println(s);
-        Assert.assertEquals(r[0], new int[]{0,1,2,3,5,6,7});
-        Assert.assertEquals(r[1], new int[]{-7,-5,-3,-1,0,1,2,5,6,7});
+        int[][] r = enumerated(new int[]{-25, -24, -23, -22, -21, -20, -18, -17, -16, -15, -13, -11, -10, -9, -7, -6, -1, 0, 1, 2, 3, 5, 6, 7},
+                new int[]{-25, -23, -22, -21, -20, -19, -16, -14, -12, -11, -9, -8, -7, -5, -4, -3, -1, 0, 1, 2, 4, 5, 6, 7});
+        String s = "";
+        for (int k : r[0]) {
+            s += k + ",";
+        }
+        System.out.println(s);
+        Assert.assertEquals(r[0], new int[]{0, 1, 2, 3, 5, 6, 7});
+        Assert.assertEquals(r[1], new int[]{-7, -5, -3, -1, 0, 1, 2, 5, 6, 7});
     }
 
     @Test(groups = "10s")
@@ -262,9 +252,9 @@ public class AbsoluteTest {
             IntVar X = VariableFactory.bounded("X", minX, maxX, solver);
             IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
 
-            Constraint abs = new Absolute(X, Y, solver);
+            Constraint abs = IntConstraintFactory.absolute(X, Y);
             solver.post(abs);
-            solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+            solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
             IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
             if (Boolean.TRUE == solver.findSolution()) {
                 do {
@@ -276,7 +266,7 @@ public class AbsoluteTest {
             String message = String.format("[%d,%d] - [%d,%d]", minX, maxX, minY, maxY);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(),
                     message);
-            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),message);
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), message);
             Assert.assertTrue(solver.getMeasures().getFailCount() == 0);
         }
     }
@@ -301,9 +291,9 @@ public class AbsoluteTest {
                         IntVar X = VariableFactory.enumerated("X", domains[0], solver);
                         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
 
-                        Constraint abs = new Absolute(X, Y, solver);
+                        Constraint abs = IntConstraintFactory.absolute(X, Y);
                         solver.post(abs);
-                        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+                        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
                         IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
                         if (Boolean.TRUE == solver.findSolution()) {
                             do {

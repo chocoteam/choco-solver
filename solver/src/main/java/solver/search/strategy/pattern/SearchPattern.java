@@ -29,73 +29,26 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
 
 /**
  * Search Patterns: generic patterns to manage search
+ *
  * @author Jean-Guillaume Fages
  */
 public enum SearchPattern {
-	NONE {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return strategies;
-		}
-	},
-	LAST_FAIL_DEC {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_decisiondeduction(solver,strategies),strategies);
-		}
-	},
-	LAST_FAIL {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail(solver,strategies),strategies);
-		}
-	},
-	LAST_FAIL_LIMITED_DEPTH {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies),strategies);
-		}
-	},
-	LAST_FAIL_LIMITED_DEPTH_1 {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,1),strategies);
-		}
-	},
-	LAST_FAIL_LIMITED_DEPTH_3 {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,3),strategies);
-		}
-	},
-	LAST_FAIL_LIMITED_DEPTH_6 {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_LimitedDepth(solver,strategies,6),strategies);
-		}
-	},
-	LAST_FAIL_DELAYED {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_Delayed(solver,strategies),strategies);
-		}
-	},
-	LAST_FAIL_PAIR {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail_Pair(solver,strategies),strategies);
-		}
-	};
+    NONE {
+        @Override
+        public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+            return strategies;
+        }
+    };
 
-	/**
-	 * Build a search strategy which integrates strategies and the given search pattern
-	 * @param solver
-	 * @param strategies
-	 * @return a search strategy which integrates strategies and the given search pattern
-	 */
-	public abstract AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
+    /**
+     * Build a search strategy which integrates strategies and the given search pattern
+     *
+     * @param solver
+     * @param strategies
+     * @return a search strategy which integrates strategies and the given search pattern
+     */
+    public abstract AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
 }

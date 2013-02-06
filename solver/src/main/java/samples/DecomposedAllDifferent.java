@@ -30,11 +30,8 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -90,10 +87,10 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = new Member(X[j], p, q, solver);
-                    Constraint ocA = new NotMember(X[j], p, q, solver);
+                    Constraint cA = IntConstraintFactory.member(X[j], p, q);
+                    Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(new ReifiedConstraint(a, cA, ocA, solver));
+                    solver.post(IntConstraintFactory.reified(a, cA, ocA));
                 }
             }
         }
@@ -118,7 +115,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(Sum.leq(ai, q - p + 1, solver));
+                solver.post(IntConstraintFactory.sum(ai, "<=", q - p + 1));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);
@@ -126,7 +123,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(X));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(

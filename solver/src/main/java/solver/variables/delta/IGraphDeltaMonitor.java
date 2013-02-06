@@ -26,8 +26,8 @@
  */
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.PairProcedure;
+import common.util.procedure.IntProcedure;
+import common.util.procedure.PairProcedure;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 
@@ -37,14 +37,14 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 25/05/12
  */
-public interface IGraphDeltaMonitor extends IDeltaMonitor<IGraphDelta>{
+public interface IGraphDeltaMonitor extends IDeltaMonitor {
 
     void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException;
 
     void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException;
 
     public static enum Default implements IGraphDeltaMonitor {
-		NONE() {
+        NONE() {
             @Override
             public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {
             }
@@ -54,14 +54,16 @@ public interface IGraphDeltaMonitor extends IDeltaMonitor<IGraphDelta>{
             }
 
             @Override
-			public void freeze() {}
+            public void freeze() {
+            }
 
-			@Override
-			public void unfreeze() {
-			}
-			@Override
-			public void clear() {
-			}
-		}
-	}
+            @Override
+            public void unfreeze() {
+            }
+
+            @Override
+            public void clear() {
+            }
+        }
+    }
 }

@@ -26,8 +26,8 @@
  */
 package solver.propagation;
 
-import choco.kernel.memory.IEnvironment;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;
@@ -35,6 +35,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -45,7 +46,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 15/12/12
  */
-public class PropagationTrigger {
+public class PropagationTrigger implements Serializable {
 
     IPropagationEngine engine; // wrapped engine
     IEnvironment environment;

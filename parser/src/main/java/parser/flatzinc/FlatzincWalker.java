@@ -29,7 +29,6 @@
 
 package parser.flatzinc;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.CommonTree;
@@ -41,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.*;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
+import solver.ResolutionPolicy;
 import solver.Solver;
 
 import java.util.ArrayList;

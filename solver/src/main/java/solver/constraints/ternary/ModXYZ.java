@@ -27,13 +27,13 @@
 
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.ternary.PropDivXYZ;
-import solver.constraints.propagators.ternary.PropTimes;
+import solver.constraints.propagators.ternary.PropTimesXY;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -55,7 +55,7 @@ public class ModXYZ extends IntConstraint<IntVar> {
         IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         setPropagators(
                 new PropDivXYZ(X, Y, t1, solver, this),
-                new PropTimes(t1, Y, t2, solver, this),
+                new PropTimesXY(t1, Y, t2, solver, this),
                 new PropSumEq(new IntVar[]{Z, t2, X}, new int[]{1, 1, -1}, 2, 0, solver, this)
         );
     }

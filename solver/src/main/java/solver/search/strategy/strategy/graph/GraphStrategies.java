@@ -71,7 +71,6 @@ public class GraphStrategies extends GraphStrategy {
     private int mode;
     private int[][] costs;
     private IGraphRelaxation relax;
-    private boolean usetrick, constructive;
     private GraphAssignment decisionType;
     private int from, to;
     private int value;
@@ -96,15 +95,8 @@ public class GraphStrategies extends GraphStrategy {
      * @param policy    way to select arcs
      * @param enforce   true if a decision is an arc enforcing
      *                  false if a decision is an arc removal
-     * @param useTrick
-     * @param construct use a constructive heuristic (for paths)
      */
-    public void configure(int policy, boolean enforce, boolean useTrick, boolean construct) {
-        this.usetrick = useTrick;
-        this.constructive = construct;
-        if (construct && !useTrick) {
-            throw new UnsupportedOperationException();
-        }
+    public void configure(int policy, boolean enforce) {
         if (enforce) {
             decisionType = GraphAssignment.graph_enforcer;
         } else {
@@ -128,13 +120,6 @@ public class GraphStrategies extends GraphStrategy {
     }
 
     private void computeNextArc() {
-        if (constructive) {
-            constructivePath();
-        }
-        if (usetrick)
-            if (computeTrickyNextArc()) {
-                return;
-            }
         from = to = -1;
         value = -1;
         for (int i = 0; i < n; i++) {
@@ -145,32 +130,6 @@ public class GraphStrategies extends GraphStrategy {
         if (to == -1) {
             throw new UnsupportedOperationException();
         }
-    }
-
-    private boolean computeTrickyNextArc() {
-        if (from == -1
-                || g.getKernelGraph().edgeExists(from, to)//TODO remettre
-                || g.getEnvelopGraph().getSuccessorsOf(from).getSize() == g.getKernelGraph().getSuccessorsOf(from).getSize()
-                ) {
-            return false;
-        }
-        to = -1;
-        value = -1;
-        evaluateNeighbors(from);
-        return to != -1;
-    }
-
-    private void constructivePath() {
-        int x = 0;
-        int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-        while (y != -1) {
-            x = y;
-            y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-            if (y == -1) {
-                y = g.getKernelGraph().getSuccessorsOf(x).getNextElement();
-            }
-        }
-        from = x;
     }
 
     private boolean evaluateNeighbors(int i) {

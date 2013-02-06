@@ -27,14 +27,14 @@
 
 package solver.constraints.nary.automata.structure.regular;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSetWithOffset;
+import common.util.iterators.DisposableIntIterator;
+import common.util.iterators.DisposableRangeIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.IEnvironment;
+import memory.structure.StoredIndexedBipartiteSet;
+import memory.structure.StoredIndexedBipartiteSetWithOffset;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.propagators.Propagator;

@@ -26,22 +26,19 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.MagicSeries;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.extension.LargeCSP;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -56,7 +53,7 @@ import java.util.Random;
  */
 public class CountTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testMS4() {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(4));
@@ -68,7 +65,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testMS6() {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(8));
@@ -80,7 +77,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -95,7 +92,7 @@ public class CountTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         int n = 2;
         for (int i = 0; i < 200; i++) {
@@ -104,8 +101,8 @@ public class CountTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Count(value, vars, Count.Relop.EQ, occ, solver));
+            solver.set(IntStrategyFactory.random(allvars, i));
+            solver.post(IntConstraintFactory.count(value, vars, "=", occ));
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -144,17 +141,17 @@ public class CountTest {
                 if (gac) {
                     solver.post(getTableForOccurence(solver, vs, ivc, val, sizeDom));
                 } else {
-                    solver.post(new Count(val, vs, Count.Relop.EQ, ivc, solver));
+                    solver.post(IntConstraintFactory.count(val, vs, "=", ivc));
                 }
             }
-            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
 //            if (!gac) {
 //                SearchMonitorFactory.log(solver, true, true);
 //            }
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -180,7 +177,7 @@ public class CountTest {
         IntVar[] vars = VariableFactory.enumeratedArray("e", vs.length + 1, 0, ub, solver);
 
         List<int[]> tuples = new LinkedList<int[]>();
-        solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(vars));
         solver.findSolution();
         do {
             int[] tuple = new int[vars.length];
@@ -208,7 +205,7 @@ public class CountTest {
             offsets[i] = newvs[i].getLB();
         }
         LargeRelation relation = new IterTuplesTable(tuples, offsets, sizes);
-        return new LargeCSP(newvs, relation, LargeCSP.Type.AC32, solverO);
+        return IntConstraintFactory.table(newvs, relation, "AC32");
     }
 
     /**
@@ -221,12 +218,11 @@ public class CountTest {
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
-        IntVar vval = Views.fixed(val, solver);
+        IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new Arithmetic(vs[i], "=", vval, solver),
-                    new Arithmetic(vs[i], "!=", vval, solver), solver));
+            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
-        return Sum.eq(bs, occ, solver);
+        return IntConstraintFactory.sum(bs, "=", occ);
     }
 
 }

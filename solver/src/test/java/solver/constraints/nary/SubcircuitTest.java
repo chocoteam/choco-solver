@@ -34,81 +34,81 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 public class SubcircuitTest {
 
-	@Test
-	public static void test1(){
-		Solver solver = new Solver();
-		IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
-		solver.post(ConstraintFactory.subcircuit(x, solver));
-		solver.findSolution();
-		Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
-	}
+    @Test(groups = "1s")
+    public static void test1() {
+        Solver solver = new Solver();
+        IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
+        solver.post(IntConstraintFactory.subcircuit(x, 0, VariableFactory.bounded("length", 0, x.length - 1, solver)));
+        solver.findSolution();
+        Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
+    }
 
-	@Test
-	public static void test2(){
-		Solver solver = new Solver();
-		IntVar[] x = VariableFactory.boundedArray("x",5,0,4,solver);
-		IntVar[] y = VariableFactory.boundedArray("y",5,5,9,solver);
-		IntVar[] vars = ArrayUtils.append(x,y);
-		solver.post(ConstraintFactory.subcircuit(vars,solver));
-		solver.findSolution();
-		Assert.assertTrue(solver.getMeasures().getSolutionCount()>0);
-	}
+    @Test(groups = "1s")
+    public static void test2() {
+        Solver solver = new Solver();
+        IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
+        IntVar[] y = VariableFactory.boundedArray("y", 5, 5, 9, solver);
+        IntVar[] vars = ArrayUtils.append(x, y);
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, solver)));
+        solver.findSolution();
+        Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
+    }
 
-	@Test
-	public static void test3(){
-		Solver solver = new Solver();
-		IntVar[] x = VariableFactory.enumeratedArray("x",5,0,4,solver);
-		IntVar[] y = VariableFactory.enumeratedArray("y",5,5,9,solver);
-		final IntVar[] vars = ArrayUtils.append(x,y);
-		try{
-			vars[1].removeValue(1,Cause.Null);
-			vars[6].removeValue(6,Cause.Null);
-		}catch (Exception e){
-			e.printStackTrace();
-			System.exit(0);
-		}
-		solver.post(ConstraintFactory.subcircuit(vars, solver));
-		solver.findSolution();
-		Assert.assertTrue(solver.getMeasures().getSolutionCount()==0);
-	}
+    @Test(groups = "1s")
+    public static void test3() {
+        Solver solver = new Solver();
+        IntVar[] x = VariableFactory.enumeratedArray("x", 5, 0, 4, solver);
+        IntVar[] y = VariableFactory.enumeratedArray("y", 5, 5, 9, solver);
+        final IntVar[] vars = ArrayUtils.append(x, y);
+        try {
+            vars[1].removeValue(1, Cause.Null);
+            vars[6].removeValue(6, Cause.Null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, VariableFactory.bounded("length", 0, vars.length - 1, solver)));
+        solver.findSolution();
+        Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
+    }
 
-	@Test
-	public static void test4(){
-		Solver solver = new Solver();
-		int n = 6;
-		int min = 2;
-		int max = 4;
-		IntVar[] vars = VariableFactory.boundedArray("x", n, 0, n, solver);
-		IntVar nb = VariableFactory.bounded("size",min,max,solver);
-		solver.post(ConstraintFactory.subcircuit(vars,nb,solver));
-		solver.findAllSolutions();
-		int nbSol = 0;
-		for(int i=min;i<=max;i++){
-			nbSol += parmi(i,n)*factorial(i-1);
-		}
-		Assert.assertEquals(solver.getMeasures().getSolutionCount(),nbSol);
-	}
+    @Test(groups = "1s")
+    public static void test4() {
+        Solver solver = new Solver();
+        int n = 6;
+        int min = 2;
+        int max = 4;
+        IntVar[] vars = VariableFactory.boundedArray("x", n, 0, n, solver);
+        IntVar nb = VariableFactory.bounded("size", min, max, solver);
+        solver.post(IntConstraintFactory.subcircuit(vars, 0, nb));
+        solver.findAllSolutions();
+        int nbSol = 0;
+        for (int i = min; i <= max; i++) {
+            nbSol += parmi(i, n) * factorial(i - 1);
+        }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
+    }
 
-	private static int factorial(int n) {
-		if(n<=1){
-			return 1;
-		}else{
-			return n*factorial(n-1);
-		}
-	}
+    private static int factorial(int n) {
+        if (n <= 1) {
+            return 1;
+        } else {
+            return n * factorial(n - 1);
+        }
+    }
 
-	private static int parmi(int k, int n){
-		return factorial(n)/(factorial(k)*factorial(n-k));
-	}
+    private static int parmi(int k, int n) {
+        return factorial(n) / (factorial(k) * factorial(n - k));
+    }
 }

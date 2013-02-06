@@ -30,8 +30,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.basic.PropKCliques;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
-import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
-import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
@@ -40,6 +38,7 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
@@ -52,49 +51,37 @@ import solver.variables.graph.UndirectedGraphVar;
 public class GraphConstraintFactory {
 
     /**
-     * Create a generic empty constraint
-     *
-     * @param solver
-     * @return a generic empty constraint
-     */
-    public static Constraint makeConstraint(Solver solver) {
-        return new Constraint(solver);
-    }
-
-    /**
      * partition a graph variable into nCliques cliques
-     * BEWARE unsafe
      *
-     * @param graph
-     * @param nCliques expected number of cliques
-     * @param solver
-     * @return
+     * @param GRAPHVAR		graph variable partitioned into cliques
+     * @param NB_CLIQUES	expected number of cliques
+     * @return a constraint which partitions GRAPHVAR into NB_CLIQUES cliques
      */
-    public static Constraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
-        Constraint gc = makeConstraint(solver);
-        gc.addPropagators(new PropTransitivity(graph, solver, gc));
-        gc.addPropagators(new PropKCliques(graph, solver, gc, nCliques));
+    public static Constraint nCliques(UndirectedGraphVar GRAPHVAR, IntVar NB_CLIQUES) {
+		Solver solver = GRAPHVAR.getSolver();
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR,NB_CLIQUES},solver);
+        gc.addPropagators(new PropTransitivity(GRAPHVAR, solver, gc));
+        gc.addPropagators(new PropKCliques(GRAPHVAR, solver, gc, NB_CLIQUES));
         return gc;
     }
 
     /**
      * Constraint modeling the Traveling Salesman Problem
      *
-     * @param graph
-     * @param cost   variable
-     * @param costs  matrix (should be symmetric)
-     * @param hkMode use the Lagrangian relaxation of the tsp
+     * @param GRAPHVAR		graph variable representing a Hamiltonian cycle
+     * @param COSTVAR		variable representing the cost of the cycle
+     * @param EDGE_COSTS	cost matrix (should be symmetric)
+     * @param HELD_KARP		use the Lagrangian relaxation of the tsp
      *               described by Held and Karp
-     *               {0:noHK,1:HK,2:HK but wait a first solution before running HK}
-     * @param solver
-     * @return
+     *               {0:noHK,1:HK,2:HK but wait a first solution before running it}
+     * @return a tsp constraint
      */
-    public static Constraint tsp(UndirectedGraphVar graph, IntVar cost, int[][] costs, int hkMode, Solver solver) {
-        Constraint gc = hamiltonianCycle(graph, solver);
-        gc.addPropagators(new PropCycleEvalObj(graph, cost, costs, gc, solver));
-        if (hkMode > 0) {
-            PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(graph, cost, costs, gc, solver);
-            hk.waitFirstSolution(hkMode == 2);
+    public static Constraint tsp(UndirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] EDGE_COSTS, int HELD_KARP) {
+        Constraint gc = hamiltonianCycle(GRAPHVAR);
+        gc.addPropagators(new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS, gc, GRAPHVAR.getSolver()));
+        if (HELD_KARP > 0) {
+            PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(GRAPHVAR, COSTVAR, EDGE_COSTS, gc, GRAPHVAR.getSolver());
+            hk.waitFirstSolution(HELD_KARP == 2);
             gc.addPropagators(hk);
         }
         return gc;
@@ -104,78 +91,73 @@ public class GraphConstraintFactory {
      * Constraint modeling the Asymmetric Traveling Salesman Problem
      * turned as the Minimum Cost Hamiltonian PATH Problem
      *
-     * @param graph
-     * @param cost   variable
-     * @param costs  matrix
-     * @param from   origin of the path
-     * @param to     end of the path
-     * @param solver
-     * @return
+	 * @param GRAPHVAR	variable representing a Hamiltonian path
+     * @param COSTVAR	variable representing the cost of the path
+     * @param ARC_COSTS	cost matrix
+     * @param ORIGIN		origin of the path
+     * @param DESTINATION	end of the path
+     * @return an ATSP constraint
      */
-    public static Constraint atsp(DirectedGraphVar graph, IntVar cost, int[][] costs, int from, int to, Solver solver) {
-        Constraint gc = hamiltonianPath(graph, from, to, solver);
-        gc.addPropagators(new PropPathOrCircuitEvalObj(graph, cost, costs, gc, solver));
+    public static Constraint atsp(DirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] ARC_COSTS, int ORIGIN, int DESTINATION) {
+        Constraint gc = hamiltonianPath(GRAPHVAR, ORIGIN, DESTINATION);
+        gc.addPropagators(new PropPathOrCircuitEvalObj(GRAPHVAR, COSTVAR, ARC_COSTS, gc, GRAPHVAR.getSolver()));
         return gc;
     }
 
     /**
-     * graph must form a Hamiltonian cycle
+     * GRAPHVAR must form a Hamiltonian cycle
      *
-     * @param graph
-     * @param solver
-     * @return
+     * @param GRAPHVAR
+     * @return a hamiltonian cycle constraint
      */
-    public static Constraint hamiltonianCycle(UndirectedGraphVar graph, Solver solver) {
-        Constraint gc = makeConstraint(solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, 2, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, 2, gc, solver));
-        gc.addPropagators(new PropCycleNoSubtour(graph, gc, solver));
+    public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
+		Solver solver = GRAPHVAR.getSolver();
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR},solver);
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, 2, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, 2, gc, solver));
+        gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR, gc, solver));
         return gc;
     }
 
     /**
-     * graph must form a Hamiltonian cycle from origin to end
+     * GRAPHVAR must form a Hamiltonian cycle from ORIGIN to DESTINATION
      *
-     * @param graph
-     * @param origin
-     * @param end
-     * @param solver
-     * @return
+     * @param GRAPHVAR		variable representing a path
+     * @param ORIGIN		first node of the path
+     * @param DESTINATION	last node of the path
+     * @return a hamiltonian path constraint
      */
-    public static Constraint hamiltonianPath(DirectedGraphVar graph, int origin, int end, Solver solver) {
-        int n = graph.getEnvelopGraph().getNbNodes();
+    public static Constraint hamiltonianPath(DirectedGraphVar GRAPHVAR, int ORIGIN, int DESTINATION) {
+		Solver solver = GRAPHVAR.getSolver();
+		int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
             succs[i] = preds[i] = 1;
         }
-        succs[end] = preds[origin] = 0;
-        Constraint gc = makeConstraint(solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropPathNoCycle(graph, origin, end, gc, solver));
+        succs[DESTINATION] = preds[ORIGIN] = 0;
+        Constraint gc = new Constraint(new Variable[]{GRAPHVAR},solver);
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
+        gc.addPropagators(new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION, gc, solver));
         return gc;
     }
 
     /**
-     * Anti arborescence partitioning constraint (CP'11)
-     * also known as tree constraint
+     * Anti arborescence partitioning constraint
+     * also known as tree constraint (CP'11)
      * GAC in (almost) linear time : O(alpha.m)
-     * roots are loops
-     *
-     * @param graph
-     * @param n      number of anti arborescences
-     * @param solver
+     * roots are identified by loops
+	 * <p/>
+	 * BEWARE this implementation supposes that every node is part of the solution graph
+	 *
+     * @param GRAPHVAR
+     * @param NB_TREE      number of anti arborescences
      * @return tree constraint
      */
-    public static Constraint nTrees(DirectedGraphVar graph, IntVar n, Solver solver) {
-        Constraint tree = makeConstraint(solver);
-        tree.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
-        tree.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
-        tree.addPropagators(new PropNLoopsTree(graph, n, solver, tree));
-        tree.addPropagators(new PropNTree(graph, n, solver, tree));
-        return tree;
+    public static Constraint nTrees(DirectedGraphVar GRAPHVAR, IntVar NB_TREE) {
+        return new NTree(GRAPHVAR,NB_TREE);
     }
 }

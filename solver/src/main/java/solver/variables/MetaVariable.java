@@ -33,11 +33,10 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, MetaVariable<V>>
-        implements Variable<NoDelta, IDeltaMonitor<NoDelta>> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, MetaVariable<V>>
+        implements Variable<NoDelta> {
 
     protected V[] components;
     protected int dim;
@@ -77,11 +76,6 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
     @Override
     public void createDelta() {
         throw new SolverException("No delta available");
-    }
-
-    @Override
-    public IDeltaMonitor monitorDelta(ICause propagator) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

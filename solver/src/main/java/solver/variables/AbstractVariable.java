@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IDelta;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -49,7 +48,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, V extends Variable<D, DM>>
+public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -68,16 +67,16 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected final Solver solver; // Reference to the solver containing this variable.
 
     protected Constraint[] constraints = new Constraint[8];
-    protected int cLast = 0;
+    private int cLast = 0;
 
     protected final String name;
 
-    protected Propagator[] propagators; // list of propagators of the variable
-    protected int[] pindices;    // index of the variable in the i^th propagator
-    protected int pIdx;
+    private Propagator[] propagators; // list of propagators of the variable
+    private int[] pindices;    // index of the variable in the i^th propagator
+    private int pIdx;
 
-    protected IView[] views; // views to inform of domain modification
-    protected int vIdx; // index of the last view not null in views -- not backtrable
+    private IView[] views; // views to inform of domain modification
+    private int vIdx; // index of the last view not null in views -- not backtrable
 
     protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
     protected int mIdx; // index of the last view not null in views -- not backtrable

@@ -28,15 +28,12 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -58,25 +55,25 @@ public class NumericalSequence extends AbstractProblem {
     @Override
     public void buildModel() {
         U = new IntVar[n];
-        U[0] = Views.fixed("U_0", n, solver);
-        U[n - 1] = Views.fixed("U_" + (n - 1), 1, solver);
+        U[0] = VariableFactory.fixed("U_0", n, solver);
+        U[n - 1] = VariableFactory.fixed("U_" + (n - 1), 1, solver);
         for (int i = 1; i < n - 1; i++) {
             U[i] = VariableFactory.enumerated("U_" + i, 1, n + 1, solver);
         }
         for (int i = 1; i < n - 1; i++) {
             // U[i+1] = U[U[i]-1]-1
-            solver.post(new Element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
+            solver.post(IntConstraintFactory.element(VariableFactory.offset(U[i], 1), U, VariableFactory.offset(U[i - 1], -1), 1));
         }
         for (int i = 1; i < n / 2; i++) {
             // U[n + 1 - i] = n+ 1 - U[i]
-            solver.post(new Arithmetic(U[n - 1 - i], "+", U[i], "=", n + 1, solver));
+            solver.post(IntConstraintFactory.arithm(U[n - 1 - i], "+", U[i], "=", n + 1));
         }
-        solver.post(new AllDifferent(U, solver));
+        solver.post(IntConstraintFactory.alldifferent(U, "BC"));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(U, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(U));
     }
 
     @Override

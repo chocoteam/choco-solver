@@ -34,13 +34,12 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.ternary.Times;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -78,12 +77,12 @@ public class ClauseTest {
                 ALogicTree or = Node.or(lits);
 
                 log.info(or.toString());
-                Constraint cons = new ConjunctiveNormalForm(or, s);
+                Constraint cons = IntConstraintFactory.clauses(or, s);
 
                 Constraint[] cstrs = new Constraint[]{cons};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+                s.set(IntStrategyFactory.presetI(bs));
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
@@ -101,12 +100,12 @@ public class ClauseTest {
 
         ALogicTree and = Node.and(Literal.pos(bs[0]), Literal.neg(bs[0]));
 
-        Constraint cons = new ConjunctiveNormalForm(and, s);
+        Constraint cons = IntConstraintFactory.clauses(and, s);
         System.out.printf("%s\n", cons.toString());
         Constraint[] cstrs = new Constraint[]{cons};
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(bs));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 0);
@@ -120,26 +119,26 @@ public class ClauseTest {
 
         ALogicTree or = Node.or(Literal.pos(b), Literal.neg(b));
 
-        Constraint cons = new ConjunctiveNormalForm(or, s);
+        Constraint cons = IntConstraintFactory.clauses(or, s);
 
         Constraint[] cstrs = new Constraint[]{cons};
 
         BoolVar[] bs = new BoolVar[]{b};
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(bs));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
         ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-        solver.post(new ConjunctiveNormalForm(tree, solver));
+        solver.post(IntConstraintFactory.clauses(tree, solver));
 
         try {
             solver.propagate();
@@ -151,12 +150,12 @@ public class ClauseTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test30() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
         ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-        solver.post(new ConjunctiveNormalForm(tree, solver));
+        solver.post(IntConstraintFactory.clauses(tree, solver));
 
         try {
             solver.propagate();
@@ -168,12 +167,12 @@ public class ClauseTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test31() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
         ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
-        solver.post(new ConjunctiveNormalForm(tree, solver));
+        solver.post(IntConstraintFactory.clauses(tree, solver));
 
         try {
             solver.propagate();
@@ -185,12 +184,12 @@ public class ClauseTest {
         Assert.assertTrue(bvars[1].instantiatedTo(0));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test32() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
         ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
-        solver.post(new ConjunctiveNormalForm(tree, solver));
+        solver.post(IntConstraintFactory.clauses(tree, solver));
 
         try {
             solver.propagate();
@@ -202,12 +201,12 @@ public class ClauseTest {
         Assert.assertTrue(bvars[0].instantiatedTo(1));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test33() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
         ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]), Literal.neg(bvars[2]));
-        solver.post(new ConjunctiveNormalForm(tree, solver));
+        solver.post(IntConstraintFactory.clauses(tree, solver));
 
         try {
             solver.propagate();
@@ -230,18 +229,18 @@ public class ClauseTest {
                 ALogicTree tree = Node.ifOnlyIf(
                         Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
                         Literal.pos(bvars[0]));
-                solver.post(new ConjunctiveNormalForm(tree, solver));
+                solver.post(IntConstraintFactory.clauses(tree, solver));
 
-                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(bvars, seed));
                 solver.findAllSolutions();
                 n1 = solver.getMeasures().getSolutionCount();
             }
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
 
-                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(bvars, seed));
                 solver.findAllSolutions();
                 n2 = solver.getMeasures().getSolutionCount();
             }
@@ -269,7 +268,7 @@ public class ClauseTest {
                 ALogicTree tree = Node.ifOnlyIf(
                         Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
                         Literal.pos(bvars[0]));
-                solver.post(new ConjunctiveNormalForm(tree, solver));
+                solver.post(IntConstraintFactory.clauses(tree, solver));
                 try {
                     solver.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
@@ -282,7 +281,7 @@ public class ClauseTest {
             {
                 Solver solver = new Solver();
                 BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
-                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+                solver.post(IntConstraintFactory.times(bvars[1], bvars[2], bvars[0]));
                 try {
                     solver.propagate();
                     bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);

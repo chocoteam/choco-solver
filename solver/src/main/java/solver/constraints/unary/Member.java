@@ -27,10 +27,10 @@
 
 package solver.constraints.unary;
 
-import choco.kernel.ESat;
-import gnu.trove.set.hash.TIntHashSet;import solver.Solver;
+import common.ESat;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.unary.PropMemberBound;
 import solver.constraints.propagators.unary.PropMemberEnum;
 import solver.variables.IntVar;
@@ -49,27 +49,19 @@ public class Member extends IntConstraint<IntVar> {
     final int lb, ub;
 
     public Member(IntVar var, int[] values, Solver solver) {
-        this(var, values, solver, PropagatorPriority.UNARY);
-    }
-
-    public Member(IntVar var, int[] values, Solver solver, PropagatorPriority storeThreshold) {
         super(new IntVar[]{var}, solver);
         this.values = new TIntHashSet(values);
         lb = 0;
         ub = 0;
-        setPropagators(new PropMemberEnum(var, this.values, solver, this, storeThreshold, false));
+        setPropagators(new PropMemberEnum(var, this.values, solver, this, false));
     }
 
     public Member(IntVar var, int lowerbound, int upperbound, Solver solver) {
-        this(var, lowerbound, upperbound, solver, PropagatorPriority.UNARY);
-    }
-
-    public Member(IntVar var, int lowerbound, int upperbound, Solver solver, PropagatorPriority storeThreshold) {
         super(new IntVar[]{var}, solver);
         this.values = null;
         this.lb = lowerbound;
         this.ub = upperbound;
-        setPropagators(new PropMemberBound(var, lowerbound, upperbound, solver, this, storeThreshold, false));
+        setPropagators(new PropMemberBound(var, lowerbound, upperbound, solver, this, false));
     }
 
     @Override

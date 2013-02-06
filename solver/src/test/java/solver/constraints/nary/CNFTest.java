@@ -28,11 +28,9 @@ package solver.constraints.nary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -45,7 +43,7 @@ import solver.variables.VariableFactory;
  */
 public class CNFTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testJGF() {
         for (int i = 0; i < 2; i++) {
 
@@ -55,28 +53,18 @@ public class CNFTest {
             IntVar x = VariableFactory.bounded("x", 0, 24, solver);
             IntVar y = VariableFactory.bounded("y", 0, 24, solver);
 
-            if (i==0) {
-                solver.post(new ConjunctiveNormalForm(
-                        Node.implies(
-                                Literal.pos(a),
-                                Literal.pos(b)
-                        ),
-                        solver
-                ));
+            if (i == 0) {
+                solver.post(IntConstraintFactory.clauses(Node.implies(
+                        Literal.pos(a),
+                        Literal.pos(b)
+                ), solver));
             } else {
-                solver.post(new ConjunctiveNormalForm(
-                        Node.implies(
-                                Literal.neg(b),
-                                Literal.neg(a)
-                        ),
-                        solver
-                ));
+                solver.post(IntConstraintFactory.clauses(Node.implies(
+                        Literal.neg(b),
+                        Literal.neg(a)
+                ), solver));
             }
-//        IntVar view = Views.offset(y, 11);
-            solver.post(new ReifiedConstraint(b,
-                    ConstraintFactory.geq(x, y, solver),
-                    ConstraintFactory.lt(x, y, solver),
-                    solver));
+            solver.post(IntConstraintFactory.reified(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             System.out.printf("%d\n", solver.getMeasures().getSolutionCount());

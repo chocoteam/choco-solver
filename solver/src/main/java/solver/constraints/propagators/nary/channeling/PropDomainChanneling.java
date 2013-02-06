@@ -26,10 +26,10 @@
  */
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -75,7 +75,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     public PropDomainChanneling(BoolVar[] bs, IntVar x, Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.append(bs, new IntVar[]{x}), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(bs, new IntVar[]{x}), PropagatorPriority.LINEAR, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

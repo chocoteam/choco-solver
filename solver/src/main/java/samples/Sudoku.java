@@ -27,15 +27,14 @@
 
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <a href="">wikipedia</a>:<br/>
@@ -70,7 +69,7 @@ public class Sudoku extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (data.grid(i, j) > 0) {
-                    rows[i][j] = Views.fixed(data.grid(i, j), solver);
+                    rows[i][j] = VariableFactory.fixed(data.grid(i, j), solver);
                 } else {
                     rows[i][j] = VariableFactory.enumerated("c_" + i + "_" + j, 1, n, solver);
                 }
@@ -89,9 +88,9 @@ public class Sudoku extends AbstractProblem {
         }
 
         for (int i = 0; i < n; i++) {
-            solver.post(new AllDifferent(rows[i], solver, AllDifferent.Type.AC));
-            solver.post(new AllDifferent(cols[i], solver, AllDifferent.Type.AC));
-            solver.post(new AllDifferent(carres[i], solver, AllDifferent.Type.AC));
+            solver.post(IntConstraintFactory.alldifferent(rows[i], "AC"));
+            solver.post(IntConstraintFactory.alldifferent(cols[i], "AC"));
+            solver.post(IntConstraintFactory.alldifferent(carres[i], "AC"));
         }
 
 
@@ -99,7 +98,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(ArrayUtils.append(rows)));
 
     }
 

@@ -31,12 +31,11 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -49,7 +48,7 @@ import java.util.Random;
  */
 public class SquareTests {
 
-    @Test
+    @Test(groups = "1s")
     public void testEnum() {
         Random random = new Random();
         for (int seed = 0; seed < 2000; seed++) {
@@ -67,10 +66,10 @@ public class SquareTests {
     private Solver viewE(int[][] dom, int seed) {
         Solver solver = new Solver();
         IntVar A = VariableFactory.enumerated("A", dom[0], solver);
-        IntVar B = Views.sqr(A);
-        solver.post(new Arithmetic(B, ">", 0, solver));
+        IntVar B = VariableFactory.sqr(A);
+        solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -84,14 +83,14 @@ public class SquareTests {
         int[] dom2 = values.toArray();
         Arrays.sort(dom2);
         IntVar B = VariableFactory.enumerated("X", dom2, solver);
-        solver.post(new Square(B, A, solver));
-        solver.post(new Arithmetic(B, ">", 0, solver));
+        solver.post(IntConstraintFactory.square(B, A));
+        solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBound() {
         Random random = new Random();
         for (int seed = 2; seed < 2000; seed++) {
@@ -107,27 +106,27 @@ public class SquareTests {
 
     private Solver viewB(int[][] dom, int seed) {
         Solver solver = new Solver();
-        int n = dom[0].length-1;
+        int n = dom[0].length - 1;
         IntVar A = VariableFactory.bounded("A", dom[0][0], dom[0][n], solver);
-        IntVar B = Views.sqr(A);
-        solver.post(new Arithmetic(B, ">", 0, solver));
+        IntVar B = VariableFactory.sqr(A);
+        solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
     private Solver consB(int[][] dom, int seed) {
         Solver solver = new Solver();
-        int n = dom[0].length-1;
+        int n = dom[0].length - 1;
         IntVar A = VariableFactory.bounded("A", dom[0][0], dom[0][n], solver);
         int[] dom2 = new int[2];
         dom2[0] = dom[0][n] < 0 ? dom[0][n] * dom[0][n] : 0;
         dom2[1] = Math.max(dom[0][0] * dom[0][0], dom[0][n] * dom[0][1]);
         IntVar B = VariableFactory.bounded("B", dom2[0], dom2[1], solver);
-        solver.post(new Square(B, A, solver));
-        solver.post(new Arithmetic(B, ">", 0, solver));
+        solver.post(IntConstraintFactory.square(B, A));
+        solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 

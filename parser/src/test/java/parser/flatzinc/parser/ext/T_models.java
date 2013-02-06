@@ -74,7 +74,7 @@ public class T_models {
         solver.solve();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         before();
         st.append("All: true;All as queue(wone) of {each var.name as list(wfor)};");
@@ -82,7 +82,7 @@ public class T_models {
         execute(st.toString());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         before();
         st.append("All: true;queue(wone) of {All};");

@@ -34,9 +34,8 @@ import parser.flatzinc.FZNLayout;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import solver.Solver;
-import solver.constraints.unary.Member;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.*;
-import solver.variables.view.Views;
 
 import java.util.List;
 
@@ -64,7 +63,8 @@ public final class FVariable {
         output_array,
         is_defined_var,
         var_is_introduced,
-        viz
+        viz,
+        none
     }
 
     public static void make_variable(THashMap<String, Object> map, Declaration type, String identifier, List<EAnnotation> annotations,
@@ -104,39 +104,33 @@ public final class FVariable {
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
-            Annotation varanno;
+            Annotation varanno = Annotation.none;
             switch (etype) {
                 case IDE:
                     EIdentifier identifier = (EIdentifier) expression;
                     varanno = Annotation.valueOf((identifier).value);
-                    switch (varanno) {
-                        case output_var:
-                            IntVar var = (IntVar) map.get(name);
-                            layout.addOutputVar(name, var, type);
-                            break;
-                        default:
-                            //LOGGER.warn("% Unknown annotation :" + varanno.toString());
-                    }
                     break;
                 case ANN:
                     EAnnotation eanno = (EAnnotation) expression;
-                    try {
-                        varanno = Annotation.valueOf(eanno.id.value);
-                        switch (varanno) {
-                            case output_array:
-                                IntVar[] vars = (IntVar[]) map.get(name);
-                                layout.addOutputArrays(name, vars, eanno.exps, type);
-                                break;
-                            default:
-//                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
-                        }
-                    } catch (IllegalArgumentException ignored) {
-//                        LOGGER.warn("% Unknown annotation :" + eanno.toString());
-                    }
+                    varanno = Annotation.valueOf(eanno.id.value);
                     break;
                 default:
 //                    LOGGER.warn("% Unknown annotation :" + type.toString());
             }
+            switch (varanno) {
+                case output_var:
+                    IntVar var = (IntVar) map.get(name);
+                    layout.addOutputVar(name, var, type);
+                    break;
+                case output_array:
+                    EAnnotation eanno = (EAnnotation) expression;
+                    IntVar[] vars = (IntVar[]) map.get(name);
+                    layout.addOutputArrays(name, vars, eanno.exps, type);
+                    break;
+                default:
+                    //LOGGER.warn("% Unknown annotation :" + varanno.toString());
+            }
+            break;
         }
     }
 
@@ -195,7 +189,7 @@ public final class FVariable {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
             int lb = type.getLow();
             int ub = type.getUpp();
-            solver.post(new Member(iv, lb, ub, solver));
+            solver.post(IntConstraintFactory.member(iv, lb, ub));
         } else {
             int size = type.getUpp() - type.getLow() + 1;
             if (size < 256) {
@@ -224,7 +218,7 @@ public final class FVariable {
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
             int[] values = type.getValues();
-            solver.post(new Member(iv, values, solver));
+            solver.post(IntConstraintFactory.member(iv, values));
         } else {
             iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getValues(), solver);
         }
@@ -240,10 +234,10 @@ public final class FVariable {
                 iv = expression.boolVarValue(solver);
                 break;
             case INT:
-                iv = Views.fixed(name, expression.intValue(), solver);
+                iv = VariableFactory.fixed(name, expression.intValue(), solver);
                 break;
             case IDE:
-                iv = Views.eq((IntVar) map.get(expression.toString()));
+                iv = VariableFactory.eq((IntVar) map.get(expression.toString()));
                 break;
             case IDA:
                 EIdArray eida = (EIdArray) expression;

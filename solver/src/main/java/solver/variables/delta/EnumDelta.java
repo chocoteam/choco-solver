@@ -37,7 +37,7 @@ import solver.search.loop.AbstractSearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class EnumDelta implements IntDelta {
+public final class EnumDelta implements IEnumDelta {
     private static final int SIZE = 32;
 
     int[] rem;
@@ -75,6 +75,7 @@ public final class EnumDelta implements IntDelta {
      * @param value value to add
      * @param cause of the removal
      */
+    @Override
     public void add(int value, ICause cause) {
         if (Configuration.LAZY_UPDATE) {
             lazyClear();

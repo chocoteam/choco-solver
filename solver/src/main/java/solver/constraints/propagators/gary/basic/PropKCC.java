@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -61,7 +61,7 @@ public class PropKCC extends Propagator {
     //***********************************************************************************
 
     public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-        super(new Variable[]{graph, k}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());

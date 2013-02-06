@@ -37,7 +37,7 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.generator.Arc;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -66,7 +66,7 @@ public class T_group_decl extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }
@@ -85,7 +85,7 @@ public class T_group_decl extends GrammarExtTest {
         walker.group_decl(before);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: true;");
@@ -94,7 +94,7 @@ public class T_group_decl extends GrammarExtTest {
         Assert.assertEquals(8, elmts.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: prop.priority <= 2;");
@@ -103,7 +103,7 @@ public class T_group_decl extends GrammarExtTest {
         Assert.assertEquals(8, elmts.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         ArrayList<Arc> before = Arc.populate(mSolver);
         FlatzincFullExtParser fp = parser("G1: (in(v_0,c_0) || in(v_1,c_1) || in(v_2,c_2) || in(v_3,c_3));");

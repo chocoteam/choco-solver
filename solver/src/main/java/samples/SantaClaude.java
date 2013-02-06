@@ -26,19 +26,16 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -80,11 +77,11 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_gifts; i++) {
             gift_price[i] = rand.nextInt(max_price) + 1;
         }
-        solver.post(new AllDifferent(kid_gift, solver));
+        solver.post(IntConstraintFactory.alldifferent(kid_gift, "BC"));
         for (int i = 0; i < n_kids; i++) {
-            solver.post(new Element(kid_price[i], gift_price, kid_gift[i], 0, solver));
+            solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i], 0));
         }
-        solver.post(Sum.eq(kid_price, total_cost, solver));
+        solver.post(IntConstraintFactory.sum(kid_price, "=", total_cost));
 
         RealConstraint ave_cons = new RealConstraint(solver);
         StringBuilder function = new StringBuilder("(");
@@ -94,7 +91,7 @@ public class SantaClaude extends AbstractProblem {
         }
         function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
 
-        RealVar[] all_vars = ArrayUtils.append(Views.real(kid_price, precision), new RealVar[]{average});
+        RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
 
         ave_cons.addFunction(function.toString(), all_vars);
         ave_cons.addFunction("{0} = [10.5,12.5]", average);
@@ -104,7 +101,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.random(kid_gift, solver.getEnvironment(), 29091981));
+        solver.set(IntStrategyFactory.random(kid_gift, 29091981));
     }
 
     @Override

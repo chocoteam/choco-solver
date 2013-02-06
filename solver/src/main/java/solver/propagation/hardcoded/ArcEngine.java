@@ -26,8 +26,8 @@
  */
 package solver.propagation.hardcoded;
 
-import choco.kernel.memory.IEnvironment;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;

@@ -27,10 +27,10 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.trailing.EnvironmentTrailing;
+import memory.setDataStructures.linkedlist.Set_Std_LinkedList;
+import memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import choco.kernel.memory.setDataStructures.linkedlist.Set_Std_LinkedList;
 
 /**
  * <br/>

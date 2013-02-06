@@ -26,10 +26,10 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.Assignment;
@@ -69,29 +69,29 @@ public class StressTest2 extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        y = VariableFactory.boundedArray("y", n+1, 0, k * n, solver);
-        x = VariableFactory.boundedArray("x", m+1, 0, k * n, solver);
+        y = VariableFactory.boundedArray("y", n + 1, 0, k * n, solver);
+        x = VariableFactory.boundedArray("x", m + 1, 0, k * n, solver);
 
         for (int i = 2; i <= n; i++) {
-            solver.post(new Arithmetic(y[i - 1], "-", y[i], "<=", 0, solver));
+            solver.post(IntConstraintFactory.arithm(y[i - 1], "-", y[i], "<=", 0));
         }
         for (int i = 1; i <= n; i++) {
-            solver.post(new Arithmetic(y[0], "-", y[i], "<=", n - i + 1, solver));
+            solver.post(IntConstraintFactory.arithm(y[0], "-", y[i], "<=", n - i + 1));
         }
-        solver.post(new Arithmetic(y[n], "-", x[0], "<=", 0, solver));
+        solver.post(IntConstraintFactory.arithm(y[n], "-", x[0], "<=", 0));
 
         for (int i = 0; i < m; i++) {
             for (int j = i + 1; j <= m; j++) {
-                solver.post(new Arithmetic(x[i], "-", x[j], "<=", 0, solver));
+                solver.post(IntConstraintFactory.arithm(x[i], "-", x[j], "<=", 0));
             }
         }
-        solver.post(new Arithmetic(x[m], "-", y[0], "<=", -2, solver));
+        solver.post(IntConstraintFactory.arithm(x[m], "-", y[0], "<=", -2));
     }
 
     @Override
     public void configureSearch() {
         IntVar[] vars = ArrayUtils.append(y, x);
-        solver.set(new Assignment(vars, new InputOrder(vars, solver.getEnvironment()), new InDomainMin()));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMin()));
     }
 
     @Override

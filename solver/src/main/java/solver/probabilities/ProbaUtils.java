@@ -32,12 +32,13 @@ import java.util.BitSet;
 /**
  * Created by IntelliJ IDEA.
  * User: xlorca
- *
- * TODO duplicate with {@code choco.kernel.common.util.tools.StatisticUtils}
+ * <p/>
+ * TODO duplicate with {@code common.util.tools.StatisticUtils}
  */
 public class ProbaUtils {
 
-    protected ProbaUtils() {}
+    protected ProbaUtils() {
+    }
 
     public static int sum(int[] data) {
         int sum = 0;

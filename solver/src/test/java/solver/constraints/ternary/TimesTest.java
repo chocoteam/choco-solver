@@ -29,6 +29,7 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 /**
@@ -37,16 +38,16 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 07/02/11
  */
-public class TimesTest extends AbstractTernaryTest{
+public class TimesTest extends AbstractTernaryTest {
 
     @Override
     protected int validTuple(int vx, int vy, int vz) {
-        return vx * vy == vz?1:0;
+        return vx * vy == vz ? 1 : 0;
     }
 
     @Override
     protected Constraint make(IntVar[] vars, Solver solver) {
-        return new Times(vars[0], vars[1], vars[2], solver);
+        return IntConstraintFactory.times(vars[0], vars[1], vars[2]);
     }
 
 }

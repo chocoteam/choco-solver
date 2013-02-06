@@ -27,7 +27,7 @@
 
 package parser.flatzinc;
 
-import choco.kernel.ESat;
+import common.ESat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
@@ -70,6 +70,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     boolean wrongSolution;
     int nbSolution;
+    boolean userinterruption = true;
 
     public FZNLayout() {
         super();
@@ -79,6 +80,15 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
         output_arrays_names = new ArrayList<String>();
         output_arrays_vars = new ArrayList<IntVar[]>();
         output_arrays_types = new ArrayList<Declaration.DType>();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (isUserinterruption()) {
+                    LOGGER.info("% User interruption...");
+                    beforeClose();
+                }
+            }
+        });
     }
 
     @Override
@@ -162,6 +172,9 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("% - Search statistics");
                 LOGGER.info("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
+                if (searchLoop.getMeasures().hasObjective()) {
+                    LOGGER.info("% \t Objective : {}", searchLoop.getMeasures().getObjectiveValue());
+                }
                 LOGGER.info("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
                 LOGGER.info("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
                 LOGGER.info("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
@@ -176,6 +189,11 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                         searchLoop.getMeasures().getPropagationsCount());
             }
         }
+        userinterruption = false;
+    }
+
+    public boolean isUserinterruption() {
+        return userinterruption;
     }
 
     @Override

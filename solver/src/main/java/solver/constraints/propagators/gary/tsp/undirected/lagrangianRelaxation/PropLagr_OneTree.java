@@ -27,8 +27,9 @@
 
 package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
-import choco.kernel.ESat;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -41,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * TSP Lagrangian relaxation
@@ -74,7 +74,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
      * MST based HK
      */
     protected PropLagr_OneTree(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, cost}, solver, constraint, PropagatorPriority.CUBIC);
+        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
         obj = cost;

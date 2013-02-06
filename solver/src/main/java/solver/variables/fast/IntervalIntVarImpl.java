@@ -27,13 +27,13 @@
 
 package solver.variables.fast;
 
-import choco.kernel.common.util.iterators.DisposableRangeBoundIterator;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeBoundIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueBoundIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.Cause;
 import solver.Configuration;
 import solver.ICause;
@@ -41,17 +41,16 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.explanations.antidom.AntiDomBipartiteSet;
+import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntervalDelta;
+import solver.variables.delta.IntervalDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
+import solver.variables.delta.monitor.IntervalDeltaMonitor;
 
 /**
  * <br/>
@@ -59,7 +58,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntVar> implements IntVar {
+public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, IntVar<IIntervalDelta>> implements IntVar<IIntervalDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -67,9 +66,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     private final IStateInt LB, UB, SIZE;
 
-    IntDelta delta = NoDelta.singleton;
-
-    protected HeuristicVal heuristicVal;
+    IIntervalDelta delta = NoDelta.singleton;
 
     private DisposableValueIterator _viterator;
 
@@ -88,16 +85,6 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -128,7 +115,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
             EventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
-                    delta.add(value, cause);
+                    delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 LB.set(value + 1);
@@ -138,7 +125,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
             } else {
                 if (reactOnRemoval) {
-                    delta.add(value, cause);
+                    delta.add(value, value, cause);
                 }
                 SIZE.add(-1);
                 UB.set(value - 1);
@@ -204,15 +191,10 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
             EventType e = EventType.INSTANTIATE;
 
             if (reactOnRemoval) {
+                int lb = this.LB.get();
                 int ub = this.UB.get();
-                int i = this.LB.get();
-                for (; i < value; i++) {
-                    delta.add(i, cause);
-                }
-                i = value + 1;
-                for (; i <= ub; i++) {
-                    delta.add(i, cause);
-                }
+                if (lb <= value - 1) delta.add(lb, value - 1, cause);
+                if (value + 1 <= ub) delta.add(value + 1, ub, cause);
             }
             this.LB.set(value);
             this.UB.set(value);
@@ -254,10 +236,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 EventType e = EventType.INCLOW;
 
                 if (reactOnRemoval) {
-                    for (int i = old; i < value; i++) {
-                        //BEWARE: this line significantly decreases performances
-                        delta.add(i, antipromo);
-                    }
+                    if (old <= value - 1) delta.add(old, value - 1, antipromo);
                 }
                 SIZE.add(old - value);
                 LB.set(value);
@@ -305,10 +284,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 EventType e = EventType.DECUPP;
 
                 if (reactOnRemoval) {
-                    for (int i = old; i > value; i--) {
-                        //BEWARE: this line significantly decreases performances
-                        delta.add(i, antipromo);
-                    }
+                    if (value + 1 <= old) delta.add(value + 1, old, cause);
                 }
                 SIZE.add(value - old);
                 UB.set(value);
@@ -407,7 +383,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IIntervalDelta getDelta() {
         return delta;
     }
 
@@ -426,15 +402,15 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new EnumDelta(solver.getSearchLoop());
+            delta = new IntervalDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
 
     @Override
-    public IntDeltaMonitor monitorDelta(ICause propagator) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
-        return new IntDeltaMonitor(delta, propagator);
+        return new IntervalDeltaMonitor(delta, propagator);
     }
 
     public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
@@ -456,7 +432,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     @Override
     public AntiDomain antiDomain() {
-        return new AntiDomBipartiteSet(this);
+//        return new AntiDomBipartiteSet(this);
+        return new AntiDomBitset(this);
     }
 
     public void explain(VariableState what, Explanation to) {

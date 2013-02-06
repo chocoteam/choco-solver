@@ -27,9 +27,9 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -58,10 +58,10 @@ public class PropSquare extends Propagator<IntVar> {
 
     public PropSquare(IntVar X, IntVar Y, Solver solver,
                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false);
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            idms[i] = vars[i].monitorDelta(this);
+            idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
         rem_proc = new RemProc(this);
     }

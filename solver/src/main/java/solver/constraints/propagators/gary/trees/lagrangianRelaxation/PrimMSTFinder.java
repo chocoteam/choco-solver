@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
+import memory.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.UndirectedGraph;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -45,7 +45,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
     protected double[][] costs;
     protected ISimpleHeap heap;
     protected BitSet inTree;
-	protected int[] mate;
+    protected int[] mate;
     protected int tSize;
     protected double minVal;
     protected double maxTArc;
@@ -56,10 +56,10 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 
     public PrimMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
         super(nbNodes, propagator);
-		heap = new FastSimpleHeap(nbNodes);
+        heap = new FastSimpleHeap(nbNodes);
 //		heap = new FastArrayHeap(nbNodes);
         inTree = new BitSet(n);
-		mate = new int[n];
+        mate = new int[n];
     }
 
     //***********************************************************************************
@@ -119,11 +119,11 @@ public class PrimMSTFinder extends AbstractTreeFinder {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(i, j)) {
                         heap.addOrUpdateElement(j, Integer.MIN_VALUE);
-						mate[j] = i;
+                        mate[j] = i;
                     } else {
-                        if(heap.addOrUpdateElement(j, costs[i][j])){
-							mate[j] = i;
-						}
+                        if (heap.addOrUpdateElement(j, costs[i][j])) {
+                            mate[j] = i;
+                        }
                     }
                 }
             }

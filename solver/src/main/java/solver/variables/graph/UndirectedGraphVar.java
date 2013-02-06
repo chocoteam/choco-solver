@@ -27,12 +27,12 @@
 
 package solver.variables.graph;
 
+import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
-import choco.kernel.memory.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,15 +47,15 @@ public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public UndirectedGraphVar(Solver solver, int nbNodes,
-							  SetType typeEnv, SetType typeKer, boolean allNodes) {
-		super(solver);
-    	envelop = new UndirectedGraph(environment, nbNodes, typeEnv,allNodes);
-    	kernel = new UndirectedGraph(environment, nbNodes, typeKer,allNodes);
+    public UndirectedGraphVar(String name, Solver solver, int nbNodes,
+                              SetType typeEnv, SetType typeKer, boolean allNodes) {
+        super(name, solver);
+        envelop = new UndirectedGraph(environment, nbNodes, typeEnv, allNodes);
+        kernel = new UndirectedGraph(environment, nbNodes, typeKer, allNodes);
     }
 
-	public UndirectedGraphVar(Solver solver, int nbNodes,boolean allNodes) {
-		this(solver,nbNodes,SetType.ENVELOPE_BEST,SetType.KERNEL_BEST,allNodes);
+    public UndirectedGraphVar(String name, Solver solver, int nbNodes, boolean allNodes) {
+        this(name, solver, nbNodes, SetType.ENVELOPE_BEST, SetType.KERNEL_BEST, allNodes);
     }
 
     //***********************************************************************************

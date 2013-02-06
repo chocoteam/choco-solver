@@ -27,12 +27,12 @@
 
 package samples.nqueen;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 
 import java.text.MessageFormat;
@@ -58,7 +58,7 @@ public abstract class AbstractNQueen extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
 
         IntVar[] orderedVars = orederIt2();
         /*IPropagationEngine engine = solver.getEngine();

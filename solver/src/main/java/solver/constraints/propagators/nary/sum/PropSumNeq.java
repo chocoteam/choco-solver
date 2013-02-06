@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -70,7 +70,7 @@ public class PropSumNeq extends Propagator<IntVar> {
 
     public PropSumNeq(IntVar[] vars, int[] coeffs, int pos, int b,
                       Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
+        super(vars, computePriority(vars.length), false);
         this.c = coeffs;
         this.pos = pos;
         l = vars.length;

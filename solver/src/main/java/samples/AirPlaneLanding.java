@@ -27,28 +27,25 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Cause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -129,7 +126,7 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = Views.fixed(0, solver);
+        IntVar ZERO = VariableFactory.fixed(0, solver);
         for (int i = 0; i < n; i++) {
             planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
 
@@ -140,8 +137,8 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Max.var(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
-            tardiness[i] = Max.var(ZERO, Views.offset(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, VariableFactory.offset(VariableFactory.minus(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();
@@ -153,7 +150,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j], solver);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i], solver);
-                Constraint cr = new ReifiedConstraint(boolVar, c1, c2, solver);
+                Constraint cr = IntConstraintFactory.reified(boolVar, c1, c2);
                 solver.post(cr);
                 ranking.put(cr,
                         Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
@@ -176,17 +173,17 @@ public class AirPlaneLanding extends AbstractProblem {
 
 //        solver.post(Sum.eq(ArrayUtils.append(earliness, tardiness), costLAT, objective, 1, solver));
         IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
-        solver.post(Sum.eq(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e, 1, solver));
+        solver.post(IntConstraintFactory.scalar(earliness, Arrays.copyOfRange(costLAT, 0, n), "=", obj_e, 1));
 
         IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
-        solver.post(Sum.eq(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t, 1, solver));
-        solver.post(Sum.eq(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, 0, solver));
+        solver.post(IntConstraintFactory.scalar(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), "=", obj_t, 1));
+        solver.post(IntConstraintFactory.scalar(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, "=", 0));
 
-        solver.post(new AllDifferent(planes, solver));
+        solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, "<=", -duration);
     }
 
     @Override
@@ -197,10 +194,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
+//        solver.set(StrategyFactory.domOverWDeg_InDomainMin(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.random(bVars, solver.getEnvironment()),
-                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+                IntStrategyFactory.random(bVars, seed),
+                IntStrategyFactory.inputOrder_InDomainMin(planes)
         ));
 
     }

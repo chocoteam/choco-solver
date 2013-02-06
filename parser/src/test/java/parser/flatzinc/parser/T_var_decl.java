@@ -70,7 +70,7 @@ public class T_var_decl extends GrammarTest {
         walker.var_decl();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException {
         FlatzincParser fp = parser("var 0..9: digit;");
 
@@ -88,7 +88,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(9, var.getUB());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException {
         FlatzincParser fp = parser("var bool: b::var_is_introduced::is_defined_var;");
 
@@ -106,7 +106,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(1, var.getUB());
     }
 
-    @Test(expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
     public void test3() throws IOException {
         FlatzincParser fp = parser("var set of 1..3: s;");
 
@@ -117,7 +117,7 @@ public class T_var_decl extends GrammarTest {
         }
     }
 
-    @Test(expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
     public void test4() throws IOException {
         FlatzincParser fp = parser("var 0.1..1.0: f;");
 
@@ -128,7 +128,7 @@ public class T_var_decl extends GrammarTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException {
         FlatzincParser fp = parser("var int : y :: mip; % 'mip' annotation\n");
 
@@ -144,7 +144,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals("y", var.getName());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException {
         FlatzincParser fp = parser("array [1..3] of var 1..10:a;");
 
@@ -175,7 +175,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(a[0], b[2]);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException {
         FlatzincParser fp = parser("var {0,3,18}: B::var_is_introduced;");
 
@@ -194,7 +194,7 @@ public class T_var_decl extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test8() throws IOException {
         FlatzincParser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;");
 
@@ -223,7 +223,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertTrue(o instanceof IntView);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test9() throws IOException {
         FlatzincParser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);");
 
@@ -240,7 +240,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(oi[0].getDomainSize(), 10);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test10() throws IOException {
         FlatzincParser fp = parser("var 1 .. 5: a ::output_var;");
         try {
@@ -277,7 +277,7 @@ public class T_var_decl extends GrammarTest {
         Assert.assertEquals(oi[0].getDomainSize(), 5);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test11() throws IOException {
         FlatzincParser fp = parser("array [1..8] of var 1..8: queens " +
                 ":: output_array([1..8]) " +

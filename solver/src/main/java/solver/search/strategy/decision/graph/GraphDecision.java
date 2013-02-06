@@ -27,7 +27,7 @@
 
 package solver.search.strategy.decision.graph;
 
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;

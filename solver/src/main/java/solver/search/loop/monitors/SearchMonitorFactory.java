@@ -30,6 +30,7 @@ import solver.Solver;
 import solver.search.limits.ILimit;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.restart.IRestartStrategy;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -39,6 +40,55 @@ import solver.search.restart.IRestartStrategy;
  */
 public enum SearchMonitorFactory {
     ;
+
+    private static class DefaultSolutionMessage implements IMessage {
+
+        private Solver solver;
+
+        private DefaultSolutionMessage(Solver solver) {
+            this.solver = solver;
+        }
+
+        @Override
+        public String print() {
+            return String.format("- Solution #%s found. %s \n\t%s.",
+                    new Object[]{solver.getSearchLoop().getMeasures().getSolutionCount(),
+                            solver.getSearchLoop().getMeasures().toOneShortLineString(),
+                            print(solver.getSearchLoop().getStrategy().vars)
+                    });
+        }
+
+        private String print(Variable[] vars) {
+            StringBuilder s = new StringBuilder(32);
+            for (Variable v : vars) {
+                s.append(v).append(' ');
+            }
+            return s.toString();
+
+        }
+    }
+
+    private static class DefaultDecisionMessage implements IMessage {
+
+        private Solver solver;
+
+        private DefaultDecisionMessage(Solver solver) {
+            this.solver = solver;
+        }
+
+        @Override
+        public String print() {
+            Variable[] vars = solver.getSearchLoop().getStrategy().vars;
+            StringBuilder s = new StringBuilder(32);
+            for (int i = 0; i < vars.length && s.length() < 120; i++) {
+                s.append(vars[i]).append(' ');
+            }
+            if (s.length() >= 120) {
+                s.append("...");
+            }
+            return s.toString();
+        }
+    }
 
     /**
      * Print statistics
@@ -51,35 +101,79 @@ public enum SearchMonitorFactory {
         AbstractSearchLoop sl = solver.getSearchLoop();
         sl.plugSearchMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl));
+            sl.plugSearchMonitor(new LogSolutions(sl, new DefaultSolutionMessage(solver)));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver));
+            sl.plugSearchMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
         }
     }
 
     /**
      * Print statistics
      *
-     * @param solver         solver to observe
-     * @param solution       print solutions
-     * @param choices        print choices
-     * @param solutionFormat ptint the solution wrt the format given
+     * @param solver          solver to observe
+     * @param solution        print solutions
+     * @param solutionMessage print the message on solutions
+     * @param choices         print choices
      */
-    public static void log(Solver solver, boolean solution, boolean choices, ISolutionFormat solutionFormat) {
+    public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices) {
         AbstractSearchLoop sl = solver.getSearchLoop();
         sl.plugSearchMonitor(new LogBasic(solver));
         if (solution) {
-            sl.plugSearchMonitor(new LogSolutions(sl, solutionFormat));
+            sl.plugSearchMonitor(new LogSolutions(sl, solutionMessage));
         }
         if (choices) {
-            sl.plugSearchMonitor(new LogChoices(solver));
+            sl.plugSearchMonitor(new LogChoices(solver, new DefaultDecisionMessage(solver)));
+        }
+    }
+
+    /**
+     * Print statistics
+     *
+     * @param solver          solver to observe
+     * @param solution        print solutions
+     * @param choices         print choices
+     * @param decisionMessage print the message on decisions
+     */
+    public static void log(Solver solver, boolean solution, boolean choices, IMessage decisionMessage) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.plugSearchMonitor(new LogBasic(solver));
+        if (solution) {
+            sl.plugSearchMonitor(new LogSolutions(sl, new DefaultSolutionMessage(solver)));
+        }
+        if (choices) {
+            sl.plugSearchMonitor(new LogChoices(solver, decisionMessage));
+        }
+    }
+
+    /**
+     * Print statistics
+     *
+     * @param solver          solver to observe
+     * @param solution        print solutions
+     * @param solutionMessage print the message on solutions
+     * @param choices         print choices
+     * @param decisionMessage print the message on decisions
+     */
+    public static void log(Solver solver, boolean solution, IMessage solutionMessage, boolean choices, IMessage decisionMessage) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.plugSearchMonitor(new LogBasic(solver));
+        if (solution) {
+            sl.plugSearchMonitor(new LogSolutions(sl, solutionMessage));
+        }
+        if (choices) {
+            sl.plugSearchMonitor(new LogChoices(solver, decisionMessage));
         }
     }
 
     public static void logWithRank(Solver solver, int s, int e) {
         AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e));
+        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
+    }
+
+    public static void logWithRank(Solver solver, int s, int e, IMessage decisionMessage) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
     }
 
     public static void logContradiction(Solver solver) {

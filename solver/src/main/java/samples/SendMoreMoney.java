@@ -27,9 +27,7 @@ package samples; /**
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.Arithmetic;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.cpviz.Visualization;
 import solver.search.loop.monitors.cpviz.visualizers.Vector;
 import solver.variables.IntVar;
@@ -64,9 +62,9 @@ public class SendMoreMoney extends AbstractProblem {
         R = VariableFactory.enumerated("R", 0, 9, solver);
         Y = VariableFactory.enumerated("Y", 0, 9, solver);
 
-        solver.post(new Arithmetic(S, "!=", 0, solver));
-        solver.post(new Arithmetic(M, "!=", 0, solver));
-        solver.post(new AllDifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, solver));
+        solver.post(IntConstraintFactory.arithm(S, "!=", 0));
+        solver.post(IntConstraintFactory.arithm(M, "!=", 0));
+        solver.post(IntConstraintFactory.alldifferent(new IntVar[]{S, E, N, D, M, O, R, Y}, "BC"));
 
 
         ALL = new IntVar[]{
@@ -78,7 +76,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(Sum.eq(ALL, COEFFS, 0, solver));
+        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, "=", 0));
     }
 
     @Override

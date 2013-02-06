@@ -26,17 +26,16 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Count;
-import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * CSPLib prob019:<br/>
@@ -68,22 +67,22 @@ public class MagicSeries extends AbstractProblem {
 
         counts = new Count[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = new Count(i, vars, Count.Relop.EQ, Views.eq(vars[i]), solver);
+            counts[i] = IntConstraintFactory.count(i, vars, "=", VariableFactory.eq(vars[i]));
             solver.post(counts[i]);
         }
-        solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1
+        solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(Sum.eq(vs2, coeff2, n, solver)); // cstr redundant 1
+        solver.post(IntConstraintFactory.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
         // default group
     }
 

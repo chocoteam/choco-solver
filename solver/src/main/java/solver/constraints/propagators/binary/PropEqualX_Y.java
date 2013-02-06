@@ -28,9 +28,9 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -64,12 +64,12 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropEqualX_Y(IntVar x, IntVar y, Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.toArray(x, y), solver, constraint, PropagatorPriority.BINARY, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
         this.x = x;
         this.y = y;
         idms = new IIntDeltaMonitor[2];
-        idms[0] = x.monitorDelta(this);
-        idms[1] = y.monitorDelta(this);
+        idms[0] = vars[0].hasEnumeratedDomain() ? vars[0].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
+        idms[1] = vars[1].hasEnumeratedDomain() ? vars[1].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         rem_proc = new RemProc(this);
     }
 

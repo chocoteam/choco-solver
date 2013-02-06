@@ -29,9 +29,9 @@ package samples.pert;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -81,10 +81,7 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-                    Constraint cc = new ReifiedConstraint(bvar,
-                            precedence(_vars[l], _durs[l], _vars[m], solver),
-                            precedence(_vars[m], _durs[m], _vars[l], solver),
-                            solver);
+                    Constraint cc = IntConstraintFactory.reified(bvar, precedence(_vars[l], _durs[l], _vars[m], solver), precedence(_vars[m], _durs[m], _vars[l], solver));
                     solver.post(cc);
                     for (int k = 0; k < cc.propagators.length; k++) {
                         reifieds.add(cc.propagators[k]);
@@ -100,8 +97,8 @@ public class PertReified extends Pert {
         solver.set(
                 new StrategiesSequencer(
                         solver.getEnvironment(),
-                        StrategyFactory.inputOrderMinVal(bvars, solver.getEnvironment()),
-                        StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment())
+                        IntStrategyFactory.inputOrder_InDomainMin(bvars),
+                        IntStrategyFactory.inputOrder_InDomainMin(vars)
                 )
         );
 

@@ -28,13 +28,14 @@
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.UndirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -68,23 +69,23 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     // CONSTRUCTOR
     //***********************************************************************************
 
-	public KruskalMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
-		super(nbNodes,propagator);
-		activeArcs = new BitSet(n*n);
-		rank = new int[n];
-		costs = new double[n*n];
-		sortedArcs = new int[n*n];
-		indexOfArc = new int[n][n];
-		p = new int[n];
-		// CCtree
-		ccN = 2*n+1;
-		// backtrable
-		ccTree = new DirectedGraph(ccN, SetType.LINKED_LIST,false);
-		ccTEdgeCost = new double[ccN];
-		ccTp = new int[n];
-		useful = new BitSet(n);
-		lca = new LCAGraphManager(ccN);
-	}
+    public KruskalMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+        super(nbNodes, propagator);
+        activeArcs = new BitSet(n * n);
+        rank = new int[n];
+        costs = new double[n * n];
+        sortedArcs = new int[n * n];
+        indexOfArc = new int[n][n];
+        p = new int[n];
+        // CCtree
+        ccN = 2 * n + 1;
+        // backtrable
+        ccTree = new DirectedGraph(ccN, SetType.LINKED_LIST, false);
+        ccTEdgeCost = new double[ccN];
+        ccTp = new int[n];
+        useful = new BitSet(n);
+        lca = new LCAGraphManager(ccN);
+    }
 
     //***********************************************************************************
     // FIND MST

@@ -70,7 +70,7 @@ public class T_constraint extends GrammarTest {
         walker.constraint();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException {
         map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
         FlatzincParser fp = parser("constraint int_le(0,x); % 0<= x\n");
@@ -84,7 +84,7 @@ public class T_constraint extends GrammarTest {
         Assert.assertTrue(c instanceof Arithmetic);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException {
         map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
         map.put("y", VariableFactory.bounded("y", 0, 2, mSolver));
@@ -100,7 +100,7 @@ public class T_constraint extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException {
         map.put("x", VariableFactory.bounded("x", 0, 2, mSolver));
         map.put("y", VariableFactory.bounded("y", 0, 2, mSolver));
@@ -115,7 +115,7 @@ public class T_constraint extends GrammarTest {
         Assert.assertTrue(c instanceof Sum);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException {
         map.put("q", VariableFactory.boundedArray("q", 2, 0, 2, mSolver));
         FlatzincParser fp = parser("constraint int_lin_eq([ 1, -1 ], [ q[1], q[2] ], -1);");

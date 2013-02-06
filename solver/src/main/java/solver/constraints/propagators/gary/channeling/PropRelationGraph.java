@@ -27,7 +27,8 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import choco.kernel.ESat;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
@@ -37,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator channeling a graph and an array of variables
@@ -60,7 +60,7 @@ public class PropRelationGraph extends Propagator {
     //***********************************************************************************
 
     public PropRelationGraph(Variable[] vars, GraphVar graph, Solver solver, Constraint cons, GraphRelation relation) {
-        super(vars, solver, cons, PropagatorPriority.LINEAR);
+        super(vars, PropagatorPriority.LINEAR);
         this.g = graph;
         this.nodeVars = vars;
         this.n = nodeVars.length;
@@ -119,16 +119,16 @@ public class PropRelationGraph extends Propagator {
         ISet ker = g.getKernelGraph().getActiveNodes();
         ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-			switch (relation.isEntail(i, j)) {
-				case TRUE:
-					if (ker.contain(i) && ker.contain(j)) {
-						g.enforceArc(i, j, aCause);
-					}
-					break;
-				case FALSE:
-					g.removeArc(i, j, aCause);
-					break;
-			}
+            switch (relation.isEntail(i, j)) {
+                case TRUE:
+                    if (ker.contain(i) && ker.contain(j)) {
+                        g.enforceArc(i, j, aCause);
+                    }
+                    break;
+                case FALSE:
+                    g.removeArc(i, j, aCause);
+                    break;
+            }
         }
     }
 }

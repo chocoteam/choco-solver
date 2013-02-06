@@ -27,13 +27,14 @@
 
 package solver.explanations;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableValueIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorInitPropagation;
@@ -68,7 +69,9 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
-        assert Configuration.PLUG_EXPLANATION : "Explanation is not activated (see Configuration.java)";
+        if (!Configuration.PLUG_EXPLANATION) {
+            throw new SolverException("Explanation is not activated (see Configuration.java)");
+        }
         removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
         database = new TIntObjectHashMap<Explanation>();

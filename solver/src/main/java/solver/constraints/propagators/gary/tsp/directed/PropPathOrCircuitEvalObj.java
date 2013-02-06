@@ -28,10 +28,11 @@
 package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -42,7 +43,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Compute the cost of the graph by summing arcs costs
@@ -81,7 +81,7 @@ public class PropPathOrCircuitEvalObj extends Propagator {
      * @param solver
      */
     public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
-        super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         sum = obj;

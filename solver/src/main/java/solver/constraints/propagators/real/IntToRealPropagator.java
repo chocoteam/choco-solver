@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.real;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -57,7 +57,7 @@ public class IntToRealPropagator extends Propagator<IntVar> {
      * @param rconstraint real constraint
      */
     public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> rconstraint) {
-        super(vars, solver, rconstraint, PropagatorPriority.LINEAR);
+        super(vars, PropagatorPriority.LINEAR);
         this.ibex = ibex;
         this.contractorIdx = cIdx;
         this.ibex.add_int_ctr(vars.length);
@@ -88,7 +88,7 @@ public class IntToRealPropagator extends Propagator<IntVar> {
                 return;
             case Ibex.ENTAILED:
                 return;
-            case Ibex.NOTHING:
+            case Ibex.NOT_SIGNIFICANT:
             default:
                 return;
         }

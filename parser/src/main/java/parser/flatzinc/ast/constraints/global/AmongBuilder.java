@@ -31,9 +31,9 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Among;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -51,6 +51,6 @@ public class AmongBuilder implements IBuilder {
         int n = exps.get(0).intValue();
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
         int[] values = exps.get(2).toIntArray();
-        return new Among(values, vars, Views.fixed(n, solver), solver);
+        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), vars, values);
     }
 }

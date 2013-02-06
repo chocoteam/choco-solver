@@ -26,12 +26,10 @@
  */
 package samples;
 
-import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -44,13 +42,11 @@ import solver.variables.VariableFactory;
  * &#32;&#32;&#32;R&#32;O&#32;B&#32;E&#32;R&#32;T<br/>
  * <br/>
  * Attribute a different value to each letter, such that the equation is correct.
+ *
  * @author Charles Prud'homme
  * @since 03/08/11
  */
 public class Donald extends AbstractProblem {
-
-    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar d, o, n, a, l, g, e, r, b, t;
     IntVar[] letters;
@@ -74,23 +70,20 @@ public class Donald extends AbstractProblem {
         t = VariableFactory.bounded("t", 0, 9, solver);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(new AllDifferent(letters, solver, type));
-        solver.post(Sum.eq(
-                new IntVar[]{d, o, n, a, l, d,
-                        g, e, r, a, l, d,
-                        r, o, b, e, r, t},
-                new int[]{100000, 10000, 1000, 100, 10, 1,
-                        100000, 10000, 1000, 100, 10, 1,
-                        -100000, -10000, -1000, -100, -10, -1,
-                }, 0, solver
-        ));
+        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
+        solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
+                g, e, r, a, l, d,
+                r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
+                100000, 10000, 1000, 100, 10, 1,
+                -100000, -10000, -1000, -100, -10, -1,
+        }, "=", 0));
 
 
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMaxVal(letters, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMax(letters));
     }
 
     @Override

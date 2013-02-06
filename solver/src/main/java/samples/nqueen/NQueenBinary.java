@@ -28,8 +28,8 @@
 package samples.nqueen;
 
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -57,18 +57,18 @@ public class NQueenBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                Constraint neq = ConstraintFactory.neq(vars[i], vars[j], solver);
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
                 solver.post(neq);
                 set.add(neq);
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
 
         IntVar[] orderedVars = orederIt2();
         /*IPropagationEngine engine = solver.getEngine();

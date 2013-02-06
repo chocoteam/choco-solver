@@ -34,10 +34,10 @@
 
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateBool;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateBool;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -74,7 +74,7 @@ public class PropIndexValue extends Propagator<IntVar> {
     }
 
     public PropIndexValue(IntVar[] vars, int offset, IntVar nb, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{nb}), solver, constraint, PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(vars, new IntVar[]{nb}), PropagatorPriority.LINEAR, true);
         n = vars.length;
         this.nb = nb;
         this.offset = offset;

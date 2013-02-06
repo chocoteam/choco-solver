@@ -26,11 +26,11 @@
  */
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.VariableUtilities;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateBool;
+import common.ESat;
+import common.util.VariableUtilities;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.IStateBool;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -62,7 +62,7 @@ public class PropElementV extends Propagator<IntVar> {
     public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset,
                         Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
-                solver, constraint, PropagatorPriority.QUADRATIC, true);
+                PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

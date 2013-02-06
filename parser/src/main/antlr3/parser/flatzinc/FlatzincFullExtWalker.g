@@ -55,7 +55,7 @@ import parser.flatzinc.ast.GoalConf;
 
 import parser.flatzinc.ast.ext.*;
 
-import solver.propagation.PropagationEngine;
+import solver.propagation.DSLEngine;
 import solver.propagation.generator.Generator;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Sort;
@@ -123,7 +123,7 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map, GoalConf gc]
 engine
 @init{
 	ArrayList<Arc> arcs= Arc.populate(mSolver);
-	PropagationEngine propagationEngine = new PropagationEngine(mSolver);
+	DSLEngine propagationEngine = new DSLEngine(mSolver);
 	}
 @after{
     if(!arcs.isEmpty()){
@@ -230,7 +230,7 @@ op  returns [Operator value]
 ///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-structure   [PropagationEngine pe] returns [PropagationStrategy ps]
+structure   [DSLEngine pe] returns [PropagationStrategy ps]
 	:	s=struct[pe]
 	{
 	$ps = s;
@@ -241,7 +241,7 @@ structure   [PropagationEngine pe] returns [PropagationStrategy ps]
 	}
 	;
 
-struct  [PropagationEngine pe] returns[PropagationStrategy item]
+struct  [DSLEngine pe] returns[PropagationStrategy item]
 @init{
      ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
 }
@@ -252,7 +252,7 @@ struct  [PropagationEngine pe] returns[PropagationStrategy item]
 	|   ^(STRUC2 (element = elt[pe]{elements.addAll(Arrays.asList(element));})+ ca=comb_attr c=coll[elements, ca])
 	;
 
-struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
+struct_reg  [DSLEngine pe] returns[PropagationStrategy item]
 @init{
     int m_idx = -1,c_idx = -1;
 }
@@ -279,7 +279,7 @@ struct_reg  [PropagationEngine pe] returns[PropagationStrategy item]
     |   ^(STREG id=IDENTIFIER ca=comb_attr {m_idx = input.mark();} . {c_idx = input.mark();} . )
 	;
 
-elt	[PropagationEngine pe] returns [ISchedulable[\] items]
+elt	[DSLEngine pe] returns [ISchedulable[\] items]
     :	s=struct[pe]
     {
     $items = new ISchedulable[]{s};

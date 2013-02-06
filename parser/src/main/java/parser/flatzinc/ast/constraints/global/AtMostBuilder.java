@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Among;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -50,7 +50,7 @@ public class AtMostBuilder implements IBuilder {
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
-        IntVar limit = VariableFactory.bounded("limit_"+n, 0, n, solver);
-        return new Among(v, x, limit, solver);
+        IntVar limit = VariableFactory.bounded("limit_" + n, 0, n, solver);
+        return IntConstraintFactory.among(limit, x, v);
     }
 }

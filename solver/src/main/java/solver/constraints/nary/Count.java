@@ -26,13 +26,15 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.Operator;
 import solver.constraints.propagators.nary.PropCount;
+import solver.exception.SolverException;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /**
  * count(VALUE,VARIABLES,RELOP,LIMIT)
@@ -47,53 +49,50 @@ import solver.variables.view.Views;
  */
 public class Count extends IntConstraint<IntVar> {
 
-    public static enum Relop {
-        EQ, GEQ, LEQ
-    }
-
-
     public final boolean leq;    // >=
     public final boolean geq;    // <=
     private final int occval;
 
-    public Count(int value, IntVar[] vars, Relop relop, IntVar limit, Solver solver) {
+    public Count(int value, IntVar[] vars, Operator relop, IntVar limit, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         this.occval = value;
         switch (relop) {
-            case GEQ:
+            case GE:
                 leq = true;
                 geq = false;
                 break;
-            case LEQ:
+            case LE:
                 leq = false;
                 geq = true;
                 break;
-            default:
             case EQ:
                 leq = true;
                 geq = true;
                 break;
+            default:
+                throw new SolverException("Unexpected operator for Count");
         }
         setPropagators(new PropCount(value, this.vars, leq, geq, solver, this));
     }
 
-    public Count(int value, IntVar[] vars, Relop relop, int limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{Views.fixed(limit, solver)}), solver);
+    public Count(int value, IntVar[] vars, Operator relop, int limit, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{VariableFactory.fixed(limit, solver)}), solver);
         this.occval = value;
         switch (relop) {
-            case GEQ:
+            case GE:
                 leq = true;
                 geq = false;
                 break;
-            case LEQ:
+            case LE:
                 leq = false;
                 geq = true;
                 break;
-            default:
             case EQ:
                 leq = true;
                 geq = true;
                 break;
+            default:
+                throw new SolverException("Unexpected operator for Count");
         }
         //CPRU  double to simulate idempotency
         setPropagators(new PropCount(value, this.vars, leq, geq, solver, this),

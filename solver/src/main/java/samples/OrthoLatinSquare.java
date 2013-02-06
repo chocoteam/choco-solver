@@ -30,13 +30,8 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.lex.Lex;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -72,7 +67,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
         List<Constraint> ADS = new ArrayList<Constraint>();
 
-        Constraint cc = new AllDifferent(vars, solver);
+        Constraint cc = IntConstraintFactory.alldifferent(vars, "BC");
         solver.post(cc);
         ADS.add(cc);
 
@@ -86,8 +81,8 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.post(new Element(square1[i], mod, vars[i], solver));
-            solver.post(new Element(square2[i], div, vars[i], solver));
+            solver.post(IntConstraintFactory.element(square1[i], mod, vars[i]));
+            solver.post(IntConstraintFactory.element(square2[i], div, vars[i]));
         }
 
 
@@ -95,12 +90,12 @@ public class OrthoLatinSquare extends AbstractProblem {
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             System.arraycopy(square1, i * m, ry, 0, m);
-            cc = new AllDifferent(ry, solver);
+            cc = IntConstraintFactory.alldifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
             ry = new IntVar[m];
             System.arraycopy(square2, i * m, ry, 0, m);
-            cc = new AllDifferent(ry, solver);
+            cc = IntConstraintFactory.alldifferent(ry, "BC");
             solver.post(cc);
             ADS.add(cc);
         }
@@ -109,14 +104,14 @@ public class OrthoLatinSquare extends AbstractProblem {
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            cc = new AllDifferent(cy, solver);
+            cc = IntConstraintFactory.alldifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            cc = new AllDifferent(cy, solver);
+            cc = IntConstraintFactory.alldifferent(cy, "BC");
             solver.post(cc);
             ADS.add(cc);
         }
@@ -130,18 +125,14 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.post(new Lex(ry1, ry2, true, solver));
+            solver.post(IntConstraintFactory.lex_less(ry1, ry2));
         }
 
     }
 
     @Override
     public void configureSearch() {
-        HeuristicValFactory.indomainMiddle(vars);
-        solver.set(StrategyVarValAssign.dyn(vars,
-                SorterFactory.minDomain(),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
     }
 
     @Override

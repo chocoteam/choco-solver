@@ -43,7 +43,7 @@ public class SetDelta implements IDelta {
 
     public final static int KERNEL = 0;
     public final static int ENVELOP = 1;
-    private IntDelta[] delta;
+    private IEnumDelta[] delta;
     private long timestamp;
     private final AbstractSearchLoop loop;
 
@@ -53,7 +53,7 @@ public class SetDelta implements IDelta {
 
     public SetDelta(AbstractSearchLoop loop) {
         this.loop = loop;
-        delta = new IntDelta[2];
+        delta = new IEnumDelta[2];
         delta[0] = new EnumDelta(loop);
         delta[1] = new EnumDelta(loop);
         timestamp = loop.timeStamp;

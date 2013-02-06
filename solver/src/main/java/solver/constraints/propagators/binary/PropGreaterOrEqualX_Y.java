@@ -28,7 +28,7 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -57,7 +57,7 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropGreaterOrEqualX_Y(IntVar[] vars, Solver solver, IntConstraint constraint) {
-        super(vars, solver, constraint, PropagatorPriority.BINARY, true);
+        super(vars, PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];
     }

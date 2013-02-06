@@ -489,7 +489,7 @@ public class MakeQueue {
         //b.loadField(P_LAST, type_2);
         Solver solver;
 //        b.inline(new Arc<V>(null,null, 0, solver = new Solver(),
-//                new PropagationEngine(solver)),"execute");
+//                new DSLEngine(solver)),"execute");
         //b.invokeInterface(C_ISCHEDULABLE, "execute", TypeDesc.BOOLEAN, null);
         b.ifZeroComparisonBranch(label_1, "!=");
         b.loadThis();

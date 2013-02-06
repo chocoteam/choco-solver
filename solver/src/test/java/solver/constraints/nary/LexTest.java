@@ -28,15 +28,16 @@
 package solver.constraints.nary;
 
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.lex.Lex;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -50,7 +51,7 @@ import solver.variables.VariableFactory;
 public class LexTest {
 
 
-    @Test
+    @Test(groups = "1s")
     public void testLessLexq() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -62,15 +63,15 @@ public class LexTest {
                 vs1[i] = VariableFactory.bounded("" + i, 0, k, solver);
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
-            solver.post(new Lex(vs1, vs2, false, solver));
-            solver.set(StrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.post(IntConstraintFactory.lex_less_eq(vs1, vs2));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), seed));
             solver.findAllSolutions();
             int kpn = (int) Math.pow(k + 1, n1 / 2);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testLex() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -82,26 +83,26 @@ public class LexTest {
                 vs1[i] = VariableFactory.bounded("" + i, 0, k, solver);
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
-            solver.post(new Lex(vs1, vs2, true, solver));
-            solver.set(StrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.post(IntConstraintFactory.lex_less(vs1, vs2));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), seed));
 
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3240);
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testLexiSatisfied() {
         Solver solver = new Solver();
         IntVar v1 = VariableFactory.bounded("v1", 1, 1, solver);
         IntVar v2 = VariableFactory.bounded("v2", 2, 2, solver);
         IntVar v3 = VariableFactory.bounded("v3", 3, 3, solver);
-        Constraint c1 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v3}, true, solver);
-        Constraint c2 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v2}, true, solver);
-        Constraint c3 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v1}, true, solver);
-        Constraint c4 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v3}, false, solver);
-        Constraint c5 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v2}, false, solver);
-        Constraint c6 = new Lex(new IntVar[]{v1, v2}, new IntVar[]{v1, v1}, false, solver);
+        Constraint c1 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c2 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c3 = IntConstraintFactory.lex_less(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
+        Constraint c4 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v3});
+        Constraint c5 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v2});
+        Constraint c6 = IntConstraintFactory.lex_less_eq(new IntVar[]{v1, v2}, new IntVar[]{v1, v1});
         solver.post(c1, c2, c3, c4, c5, c6);
         Assert.assertEquals(ESat.TRUE, c1.isSatisfied());
         Assert.assertEquals(ESat.FALSE, c2.isSatisfied());
@@ -112,7 +113,7 @@ public class LexTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void testAshish() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -125,14 +126,140 @@ public class LexTest {
         b[1] = VariableFactory.bounded("b2", 0, 0, solver);
 
 
-        solver.post(new Lex(a, b, true, solver));
+        solver.post(IntConstraintFactory.lex_less(a, b));
         try {
             solver.propagate();
 
         } catch (ContradictionException e) {
             Assert.fail();
         }
+        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void testBug1() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a2", new int[]{5, 8}, solver);
+        a[1] = VariableFactory.enumerated("a3", new int[]{-2, 0}, solver);
+
+        b[0] = VariableFactory.enumerated("b2", new int[]{5, 8}, solver);
+        b[1] = VariableFactory.enumerated("b3", new int[]{-3, -2}, solver);
+
+
+        solver.post(IntConstraintFactory.lex_less(a, b));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(5, a[0].getUB());
+        SearchMonitorFactory.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testBug2() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{-2, 5}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-1, 1}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{3, 5}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-6, -1}, solver);
+
+
+        solver.post(IntConstraintFactory.lex_less(a, b));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(-2, a[0].getUB());
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s")
+    public void testBug3() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[2];
+        IntVar[] b = new IntVar[2];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{5}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-1, 1}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{3, 5}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-6, -1}, solver);
+
+
+        solver.post(IntConstraintFactory.lex_less(a, b));
+        try {
+            solver.propagate();
+            Assert.fail();
+        } catch (ContradictionException e) {
+        }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
+    }
+
+    @Test(groups = "1s")
+    public void testBug4() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[5];
+        IntVar[] b = new IntVar[5];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{2}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{1, 3, 4}, solver);
+        a[2] = VariableFactory.enumerated("a3", new int[]{1, 2, 3, 4, 5}, solver);
+        a[3] = VariableFactory.enumerated("a4", new int[]{1, 2}, solver);
+        a[4] = VariableFactory.enumerated("a5", new int[]{3, 4, 5}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{0, 1, 2}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{1}, solver);
+        b[2] = VariableFactory.enumerated("b3", new int[]{0, 1, 2, 3, 4}, solver);
+        b[3] = VariableFactory.enumerated("b4", new int[]{0, 1}, solver);
+        b[4] = VariableFactory.enumerated("b5", new int[]{0, 1, 2}, solver);
+
+
+        solver.post(IntConstraintFactory.lex_less(a, b));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+        }
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 216);
+    }
+
+    @Test(groups = "1s")
+    public void testBug5() {
+        Solver solver = new Solver();
+        IntVar[] a = new IntVar[3];
+        IntVar[] b = new IntVar[3];
+
+        a[0] = VariableFactory.enumerated("a1", new int[]{-10, -3, 2}, solver);
+        a[1] = VariableFactory.enumerated("a2", new int[]{-5, -4, 2}, solver);
+        a[2] = VariableFactory.enumerated("a3", new int[]{2}, solver);
+
+        b[0] = VariableFactory.enumerated("b1", new int[]{-10, -1, 3}, solver);
+        b[1] = VariableFactory.enumerated("b2", new int[]{-5}, solver);
+        b[2] = VariableFactory.enumerated("b3", new int[]{-4, 2}, solver);
+
+
+        solver.post(IntConstraintFactory.lex_less(a, b));
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertEquals(-1, b[0].getLB());
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
     }
 }

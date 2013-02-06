@@ -27,16 +27,14 @@
 
 package solver.variables;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.ternary.Times;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -54,15 +52,15 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = Views.scale(X, 2);
+        IntVar Y = VariableFactory.scale(X, 2);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, 4, s)
+                IntConstraintFactory.arithm(Y, "!=", 4)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -77,15 +75,15 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = Views.scale(X, 3);
+        IntVar Y = VariableFactory.scale(X, 3);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, -2, s)
+                IntConstraintFactory.arithm(Y, "!=", -2)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -98,16 +96,16 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = Views.scale(X, coeff);
+        IntVar Y = VariableFactory.scale(X, coeff);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s)
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -119,18 +117,18 @@ public class ScaleViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = Views.fixed("C", coeff, s);
+        IntVar C = VariableFactory.fixed("C", coeff, s);
         IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s),
-                new Times(X, C, Y, s)
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1),
+                IntConstraintFactory.times(X, C, Y)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -151,7 +149,7 @@ public class ScaleViewTest {
             sb.findAllSolutions();
             sc.findAllSolutions();
             Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
-			//Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+            //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
         }
     }
 

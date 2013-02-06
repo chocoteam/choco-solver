@@ -54,9 +54,15 @@ public class Occurrence implements VariableSelector<IntVar> {
     }
 
     @Override
+    public IntVar[] getScope() {
+        return variables;
+    }
+
+    @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
@@ -64,12 +70,12 @@ public class Occurrence implements VariableSelector<IntVar> {
     public void advance() {
         int large_idx = 0;
         int large_nb_cstrs = Integer.MIN_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             int nb_cstrs = variables[idx].nbConstraints();
-            if(dsize > 1 && nb_cstrs > large_nb_cstrs){
-               large_nb_cstrs = nb_cstrs;
-               large_idx = idx;
+            if (dsize > 1 && nb_cstrs > large_nb_cstrs) {
+                large_nb_cstrs = nb_cstrs;
+                large_idx = idx;
             }
         }
         this.large_idx = large_idx;

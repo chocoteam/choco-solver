@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
+import common.ESat;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import memory.IEnvironment;
+import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
@@ -48,7 +48,7 @@ import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 import java.io.Serializable;
 
@@ -99,9 +99,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
-    protected int[] vindices;  // index of this within the list of propagator of the i^th variable
+    private int[] vindices;  // index of this within the list of propagator of the i^th variable
 
-    protected Operation[] operations;
+    private Operation[] operations;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -113,9 +113,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected short state; // 0 : new -- 1 : active -- 2 : passive
+    private short state; // 0 : new -- 1 : active -- 2 : passive
 
-    protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
+    private int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
@@ -124,7 +124,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Declaring constraint
      */
-    protected Constraint constraint;
+    protected Constraint<V, Propagator<V>> constraint;
 
     protected final PropagatorPriority priority;
 
@@ -145,7 +145,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
                     if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                        vars[i] = (V) Views.eq((IntVar) v);
+                        vars[i] = (V) VariableFactory.eq((IntVar) v);
                     } else {
                         throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
                                 "This is forbidden; you must consider using a View or a EQ constraint.");
@@ -158,14 +158,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
 
     @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
         checkVariable(vars);
         this.vars = vars.clone();
+        this.solver = vars[0].getSolver();
         this.vindices = new int[vars.length];
-        this.solver = solver;
         this.environment = solver.getEnvironment();
         this.state = NEW;
-        this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
         this.aCause = this;
@@ -193,8 +192,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         };
     }
 
-    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
-        this(vars, solver, constraint, priority, true);
+    protected Propagator(V[] vars, PropagatorPriority priority) {
+        this(vars, priority, true);
     }
 
     @Override
@@ -206,13 +205,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return solver;
     }
 
+    public void defineIn(Constraint c) {
+        this.constraint = c;
+    }
+
     /**
      * Overrides the default cause of this.
      * This is commonly used when this is declared
      *
      * @param nCause the new cause.
      */
-    public void overrideCause(Propagator nCause) {
+    public void overrideCause(Propagator<Variable> nCause) {
         this.aCause = nCause;
     }
 

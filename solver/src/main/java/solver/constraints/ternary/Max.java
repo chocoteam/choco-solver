@@ -27,10 +27,11 @@
 
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.ternary.PropMaxBC;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
@@ -64,7 +65,7 @@ public class Max extends IntConstraint<IntVar> {
             Solver solver = a.getSolver();
             IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                     Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(new Max(z, a, b, solver));
+            solver.post(IntConstraintFactory.maximum(z, a, b));
             return z;
         }
     }

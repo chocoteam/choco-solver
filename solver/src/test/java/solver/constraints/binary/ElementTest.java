@@ -27,16 +27,16 @@
 
 package solver.constraints.binary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -55,10 +55,10 @@ public class ElementTest {
     private static void model(Solver s, IEnvironment env, IntVar index, int[] values, IntVar var,
                               int offset, int nbSol) {
 
-        s.post(new Element(var, values, index, offset, s));
+        s.post(IntConstraintFactory.element(var, values, index, offset));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
-        s.set(StrategyFactory.random(allvars, env));
+        s.set(IntStrategyFactory.random(allvars, System.currentTimeMillis()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -67,7 +67,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", -3, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
@@ -77,7 +77,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", 2, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
@@ -112,36 +112,36 @@ public class ElementTest {
 
     @Test(groups = "1s")
     public void test5() {
-		if(Configuration.PLUG_EXPLANATION){
-			Solver s = new Solver();
-			s.set(ExplanationFactory.engineFactory(s));
+        if (Configuration.PLUG_EXPLANATION) {
+            Solver s = new Solver();
+            s.set(ExplanationFactory.engineFactory(s));
 
-			Random r = new Random(125);
-			int[] values = new int[10];
-			for (int i = 0; i < values.length; i++) {
-				values[i] = r.nextInt(5);
-			}
+            Random r = new Random(125);
+            int[] values = new int[10];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = r.nextInt(5);
+            }
 
-			IntVar[] vars = new IntVar[3];
-			IntVar[] indices = new IntVar[3];
-			List<Constraint> lcstrs = new ArrayList<Constraint>(1);
+            IntVar[] vars = new IntVar[3];
+            IntVar[] indices = new IntVar[3];
+            List<Constraint> lcstrs = new ArrayList<Constraint>(1);
 
-			for (int i = 0; i < vars.length; i++) {
-				vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
-				indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
-				lcstrs.add(new Element(vars[i], values, indices[i], 0, s));
-			}
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
+                indices[i] = VariableFactory.enumerated("i_" + i, 0, values.length - 1, s);
+                lcstrs.add(IntConstraintFactory.element(vars[i], values, indices[i], 0));
+            }
 
-			for (int i = 0; i < vars.length - 1; i++) {
-				lcstrs.add(new Arithmetic(vars[i], ">", vars[i + 1], s));
-			}
+            for (int i = 0; i < vars.length - 1; i++) {
+                lcstrs.add(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+            }
 
-			Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-			s.post(cstrs);
+            Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+            s.post(cstrs);
 
-			s.findAllSolutions();
-			Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
-		}
+            s.findAllSolutions();
+            Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+        }
     }
 
     public void nasty(int seed, int nbvars, int nbsols) {
@@ -163,11 +163,11 @@ public class ElementTest {
             indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(StrategyFactory.random(allvarsr, ref.getEnvironment(), seed));
+        ref.set(IntStrategyFactory.random(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(new Element(varsr[i], values, indicesr[i], 0, ref));
-            lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
+            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));
+            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

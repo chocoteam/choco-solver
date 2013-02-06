@@ -32,56 +32,33 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import solver.variables.view.Views;
-
+import solver.constraints.IntConstraintFactory;
+import solver.variables.*;
 import java.util.List;
 
 /**
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 26/01/11
  */
 public class CumulativeBuilder implements IBuilder {
 
-    @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] starts = exps.get(0).toIntVarArray(solver);
-        IntVar[] durations = exps.get(1).toIntVarArray(solver);
-        IntVar[] resources = exps.get(2).toIntVarArray(solver);
-        IntVar[] ends = new IntVar[starts.length];
-        boolean decomp = false; // can be true IFF durations, resources and limit are fixed!
-
-        for (int i = 0; i < starts.length; i++) {
-            if (durations[i].instantiated()) {
-                ends[i] = Views.offset(starts[i], durations[i].getValue());
-            } else {
-                ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
-                        starts[i].getLB() + durations[i].getLB(),
-                        starts[i].getUB() + durations[i].getUB(),
-                        solver);
-                solver.post(Sum.eq(new IntVar[]{starts[i], durations[i]}, ends[i], solver));
-                decomp = true;
-            }
-            if (!resources[i].instantiated()) {
-                decomp = true;
-            }
-        }
-        IntVar limit = exps.get(3).intVarValue(solver);
-        if (!limit.instantiated()) {
-            decomp = true;
-        }
-
-        /*if (!decomp) {
-            if (starts.length > 10000) {
-                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.GREEDY);
-            } else {
-                return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.DYNAMIC_SWEEP);
-            }
-        }*/
-        return null;
-    }
+	@Override
+	public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+		final IntVar[] starts = exps.get(0).toIntVarArray(solver);
+		final IntVar[] durations = exps.get(1).toIntVarArray(solver);
+		final IntVar[] resources = exps.get(2).toIntVarArray(solver);
+		final IntVar[] ends = new IntVar[starts.length];
+		Task[] tasks = new Task[starts.length];
+		final IntVar limit = exps.get(3).intVarValue(solver);
+		for (int i = 0; i < starts.length; i++) {
+			ends[i] = VariableFactory.bounded(starts[i].getName() + "_" + durations[i].getName(),
+					starts[i].getLB() + durations[i].getLB(),
+					starts[i].getUB() + durations[i].getUB(),
+					solver);
+			tasks[i] = new Task(starts[i],durations[i],ends[i]);
+		}
+		return IntConstraintFactory.cumulative(tasks, resources, limit);
+	}
 }

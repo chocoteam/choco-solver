@@ -31,7 +31,7 @@ import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /*
 * User : CPRUDHOM
@@ -80,9 +80,9 @@ public final class EIdArray extends Expression {
     @Override
     public BoolVar boolVarValue(Solver solver) {
         if (Integer.class.isInstance(object)) {
-            return (BoolVar) Views.fixed((Integer) object, solver);
+            return (BoolVar) VariableFactory.fixed((Integer) object, solver);
         } else if (Boolean.class.isInstance(object)) {
-            return (BoolVar) Views.fixed(((Boolean) object) ? 1 : 0, solver);
+            return (BoolVar) VariableFactory.fixed(((Boolean) object) ? 1 : 0, solver);
         }
         return (BoolVar) object;
     }
@@ -95,9 +95,9 @@ public final class EIdArray extends Expression {
     @Override
     public IntVar intVarValue(Solver solver) {
         if (Integer.class.isInstance(object)) {
-            return Views.fixed((Integer) object, solver);
+            return VariableFactory.fixed((Integer) object, solver);
         } else if (Boolean.class.isInstance(object)) {
-            return Views.fixed(((Boolean) object) ? 1 : 0, solver);
+            return VariableFactory.fixed(((Boolean) object) ? 1 : 0, solver);
         }
         return (IntVar) object;
     }

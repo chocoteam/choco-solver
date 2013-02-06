@@ -31,10 +31,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -63,14 +62,14 @@ public class TestSolveur {
             for (int i = 0; i < n - 1; i++) {
                 for (int j = i + 1; j < n; j++) {
                     //System.out.print("C"+k+" :: "+ vars[i]+ " != " + vars[j]);
-                    cstrs[k] = ConstraintFactory.neq(vars[i], vars[j], s);
+                    cstrs[k] = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
                     //System.out.println(cstrs[k]+ " ");
                     k++;
                 }
             }
 
             s.post(cstrs);
-            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+            s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -92,11 +91,11 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferent(vars, s);
+                cstrs[i] = IntConstraintFactory.alldifferent(vars, "BC");
             }
 
             s.post(cstrs);
-            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+            s.set(IntStrategyFactory.presetI(vars));
             long t = System.currentTimeMillis();
             System.out.println("nb solutions : " + s.findAllSolutions());
             t = System.currentTimeMillis() - t;
@@ -118,13 +117,13 @@ public class TestSolveur {
         int i;
         for (i = 0; i < k - 1; i++) {
             //System.out.println("C("+vars[i]+","+vars[i+1]+")");
-            cstrs[i] = ConstraintFactory.neq(vars[i], vars[i + 1], s);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]);
         }
         //System.out.println("C("+vars[n-1]+","+vars[0]+")");
-        cstrs[i] = ConstraintFactory.neq(vars[k - 1], vars[0], s);
+        cstrs[i] = IntConstraintFactory.arithm(vars[k - 1], "!=", vars[0]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -160,13 +159,13 @@ public class TestSolveur {
             int i;
             for (i = 0; i < n - 1; i++) {
                 //System.out.println("C("+vars[i]+","+vars[i+1]+")");
-                cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], s);
+                cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             }
             //System.out.println("C("+vars[n-1]+","+vars[0]+")");
-            cstrs[i] = ConstraintFactory.lt(vars[n - 1], vars[0], s);
+            cstrs[i] = IntConstraintFactory.arithm(vars[n - 1], "<", vars[0]);
 
             s.post(cstrs);
-            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+            s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 0, "nb sol");
             Assert.assertEquals(s.getMeasures().getNodeCount(), 0, "nb nod");
@@ -188,18 +187,18 @@ public class TestSolveur {
         int i;
         for (i = 0; i < (n / 2) - 1; i++) {
             //System.out.println("<("+vars[i]+","+vars[i+1]+")");
-            cstrs[i] = ConstraintFactory.neq(vars[i], vars[i + 1], s);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]);
             //System.out.println(cstrs[i]);
             int j = (n / 2);
             //System.out.println("<("+vars[i+j]+","+vars[i+j+1]+")");
-            cstrs[i + j] = ConstraintFactory.neq(vars[i + j], vars[i + j + 1], s);
+            cstrs[i + j] = IntConstraintFactory.arithm(vars[i + j], "!=", vars[i + j + 1]);
             //System.out.println(cstrs[i+j]);
         }
-        cstrs[(n / 2) - 1] = ConstraintFactory.lt(vars[(n / 2) - 1], vars[n / 2], s);
+        cstrs[(n / 2) - 1] = IntConstraintFactory.arithm(vars[(n / 2) - 1], "<", vars[n / 2]);
         //System.out.println(cstrs[(n/2)-1]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -232,13 +231,13 @@ public class TestSolveur {
         }
         int i;
         for (i = 0; i < (n / 2) - 1; i++) {
-            s.post(ConstraintFactory.neq(vars[i], vars[i + 1], s));
+            s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[i + 1]));
             int j = (n / 2);
-            s.post(ConstraintFactory.neq(vars[i + j], vars[i + j + 1], s));
+            s.post(IntConstraintFactory.arithm(vars[i + j], "!=", vars[i + j + 1]));
         }
-        s.post(ConstraintFactory.lt(vars[(n / 2) - 1], vars[n / 2], s));
+        s.post(IntConstraintFactory.arithm(vars[(n / 2) - 1], "<", vars[n / 2]));
 
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         s.findAllSolutions();
         s.getMeasures().getSolutionCount();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
@@ -267,11 +266,11 @@ public class TestSolveur {
         IntVar[] vars = VariableFactory.enumeratedArray("p", n, 0, n, solver);
 
         for (int i = 0; i < n - 1; i++) {
-            solver.post(ConstraintFactory.lt(vars[i], vars[i + 1], solver));
+            solver.post(IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]));
         }
-        solver.post(ConstraintFactory.eq(vars[0], vars[n - 1], solver));
+        solver.post(IntConstraintFactory.arithm(vars[0], "=", vars[n - 1]));
 
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
         PropagationStrategies.CONSTRAINT.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");

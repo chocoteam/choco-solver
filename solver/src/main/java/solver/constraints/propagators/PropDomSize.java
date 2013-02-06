@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -60,7 +60,7 @@ public class PropDomSize extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropDomSize(IntVar[] vars, Constraint c, Solver s) {
-        super(vars, s, c, PropagatorPriority.UNARY, false);
+        super(vars, PropagatorPriority.UNARY, false);
         n = vars.length;
         size = new IStateInt[n];
         for (int i = 0; i < n; i++) {

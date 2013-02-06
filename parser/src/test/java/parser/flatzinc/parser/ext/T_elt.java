@@ -37,9 +37,9 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.propagation.DSLEngine;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Arc;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -58,7 +58,7 @@ public class T_elt extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    PropagationEngine pe;
+    DSLEngine pe;
 
     @BeforeMethod
     public void before() {
@@ -68,14 +68,14 @@ public class T_elt extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver);
+        pe = new DSLEngine(mSolver);
 
         ArrayList<Arc> pairs = Arc.populate(mSolver);
         groups.put("G1", pairs);
@@ -92,28 +92,28 @@ public class T_elt extends GrammarExtTest {
         return walker.elt(pe);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("G1");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("G1 key var.name");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1}");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1} key any.var.name");
         ISchedulable[] scheds = elt(fp);

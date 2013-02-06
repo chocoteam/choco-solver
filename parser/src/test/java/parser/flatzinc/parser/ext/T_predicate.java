@@ -37,7 +37,7 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import parser.flatzinc.ast.ext.*;
 import solver.Solver;
-import solver.constraints.Arithmetic;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -70,32 +70,32 @@ public class T_predicate extends GrammarExtTest {
         return walker.predicate();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test0() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("true");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof TruePredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("prop.priority == 1");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof IntPredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         IntVar[] vars = VariableFactory.boundedArray("x", 2, 1, 3, mSolver);
         map.put("x", vars[0]);
         map.put("x", vars[1]);
-        map.put("c", new Arithmetic(vars[0], "<", vars[1], mSolver));
+        map.put("c", IntConstraintFactory.arithm(vars[0], "<", vars[1]));
         FlatzincFullExtParser fp = parser("in(x,y,c)");
         Predicate p = predicate(fp);
         Assert.assertTrue(p instanceof ExtPredicate);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("!prop.priority == 1)");
         Predicate p = predicate(fp);

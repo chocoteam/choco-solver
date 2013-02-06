@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -65,7 +65,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropInverseChanneling(IntVar[] X, IntVar[] Y, int Ox, int Oy, Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.CUBIC, false);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;

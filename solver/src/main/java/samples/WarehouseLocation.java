@@ -26,20 +26,17 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.binary.Element;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -103,34 +100,34 @@ public class WarehouseLocation extends AbstractProblem {
         totCost = VariableFactory.bounded("cost", 0, 99999, solver);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = Views.fixed(1, solver);
+        IntVar ONE = VariableFactory.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
-            solver.post(new Element(ONE, open, suppliers[s], 0, solver));
+            solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(new Element(costPerStore[s], c_supply[s], suppliers[s], solver));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
         }
         for (int w = 0; w < nWH; w++) {
-            solver.post(new Count(w, suppliers, Count.Relop.GEQ, open[w], solver));
+            solver.post(IntConstraintFactory.count(w, suppliers, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar counter = Views.fixed(capacity[w], solver);
-            solver.post(new Count(w, suppliers, Count.Relop.LEQ, counter, solver));
+            IntVar counter = VariableFactory.fixed(capacity[w], solver);
+            solver.post(IntConstraintFactory.count(w, suppliers, "<=", counter));
         }
 
         int[] coeffs = new int[nWH + nS];
         Arrays.fill(coeffs, 0, nWH, cost);
         Arrays.fill(coeffs, nWH, nWH + nS, 1);
-        solver.post(Sum.eq(ArrayUtils.append(open, costPerStore), coeffs, totCost, 1, solver));
+        solver.post(IntConstraintFactory.scalar(ArrayUtils.append(open, costPerStore), coeffs, "=", totCost, 1));
     }
 
     @Override
     public void configureSearch() {
         StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+                IntStrategyFactory.inputOrder_InDomainMin(suppliers),
+                IntStrategyFactory.maxReg_InDomainMin(costPerStore)
         );
         solver.set(strat);
 

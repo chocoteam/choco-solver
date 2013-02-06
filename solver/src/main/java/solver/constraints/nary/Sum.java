@@ -27,28 +27,21 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.tools.StringUtils;
-import choco.kernel.memory.IStateBitSet;
+import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.Operator;
 import solver.constraints.propagators.nary.sum.*;
 import solver.exception.SolverException;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Decr;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.metrics.DomSize;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -74,28 +67,25 @@ public class Sum extends IntConstraint<IntVar> {
 
     final int[] coeffs;
     final int b;
-    final Type op;
+    final Operator op;
 
     TObjectIntHashMap<IntVar> shared_map; // a shared map for interanl comparator
 
-    public enum Type {
-        LEQ, GEQ, EQ, NQ
-    }
 
-    protected Sum(IntVar[] vars, int[] coeffs, int pos, Type type, int b, Solver solver) {
+    protected Sum(IntVar[] vars, int[] coeffs, int pos, Operator type, int b, Solver solver) {
         super(vars, solver);
         this.coeffs = coeffs.clone();
         this.b = b;
         this.op = type;
 
-        if (vars.length > BIG_SUM_SIZE && type != Type.NQ) {
+        if (vars.length > BIG_SUM_SIZE && type != Operator.NQ) {
             setPropagators(new PropBigSum(vars, coeffs, pos, b, type, solver, this));
         } else {
             switch (type) {
-                case LEQ:
+                case LE:
                     setPropagators(new PropSumLeq(vars, coeffs, pos, b, solver, this));
                     break;
-                case GEQ:
+                case GE:
                     setPropagators(new PropSumGeq(vars, coeffs, pos, b, solver, this));
                     break;
                 case EQ:
@@ -104,6 +94,8 @@ public class Sum extends IntConstraint<IntVar> {
                 case NQ:
                     setPropagators(new PropSumNeq(vars, coeffs, pos, b, solver, this));
                     break;
+                default:
+                    throw new SolverException("Unexpected operator for Sum");
             }
         }
     }
@@ -112,7 +104,7 @@ public class Sum extends IntConstraint<IntVar> {
     ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static Sum build(IntVar[] vars, int[] coeffs, Type type, int r, Solver solver) {
+    public static Sum build(IntVar[] vars, int[] coeffs, Operator op, int r, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -136,118 +128,33 @@ public class Sum extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Sum(tmpV, tmpC, b, type, r, solver);
+        return new Sum(tmpV, tmpC, b, op, r, solver);
     }
 
-    public static Sum build(IntVar[] vars, int c, Type type, Solver solver) {
+    public static Sum build(IntVar[] vars, int c, Operator op, Solver solver) {
         int[] coeffs = new int[vars.length];
         Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, type, c, solver);
+        return build(vars, coeffs, op, c, solver);
     }
 
-    public static Sum build(IntVar[] vars, IntVar b, Type type, Solver solver) {
+    public static Sum build(IntVar[] vars, IntVar b, Operator op, Solver solver) {
         int[] cs = new int[vars.length + 1];
         Arrays.fill(cs, 1);
         cs[vars.length] = -1;
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[vars.length] = b;
-        return build(x, cs, type, 0, solver);
+        return build(x, cs, op, 0, solver);
     }
 
-    public static Sum build(IntVar[] vars, int[] coeffs, int c, Type type, Solver solver) {
-        return build(vars, coeffs, type, c, solver);
-    }
-
-    public static Sum build(IntVar[] vars, int[] coeffs, IntVar b, int c, Type type, Solver solver) {
+    public static Sum build(IntVar[] vars, int[] coeffs, IntVar b, int c, Operator op, Solver solver) {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[x.length - 1] = b;
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
-        return build(x, cs, type, 0, solver);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////// EQ ///////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Sum eq(IntVar[] vars, int c, Solver solver) {
-        return build(vars, c, Type.EQ, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, IntVar b, Solver solver) {
-        return build(vars, b, Type.EQ, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.EQ, c, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        return build(vars, coeffs, b, c, Type.EQ, solver);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////// LEQ //////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Sum leq(IntVar[] vars, int c, Solver solver) {
-        return build(vars, c, Type.LEQ, solver);
-    }
-
-    public static Sum leq(IntVar[] vars, IntVar b, Solver solver) {
-        return build(vars, b, Type.LEQ, solver);
-    }
-
-    public static Sum leq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.LEQ, c, solver);
-    }
-
-    public static Sum leq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        return build(vars, coeffs, b, c, Type.LEQ, solver);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////// GEQ //////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Sum geq(IntVar[] vars, int c, Solver solver) {
-        return build(vars, c, Type.GEQ, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, IntVar b, Solver solver) {
-        return build(vars, b, Type.GEQ, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.GEQ, c, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        return build(vars, coeffs, b, c, Type.GEQ, solver);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////// NEQ //////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Sum neq(IntVar[] vars, int c, Solver solver) {
-        return build(vars, c, Type.NQ, solver);
-    }
-
-    public static Sum neq(IntVar[] vars, IntVar b, Solver solver) {
-        return build(vars, b, Type.NQ, solver);
-    }
-
-    public static Sum neq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.NQ, c, solver);
-    }
-
-    public static Sum neq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        return build(vars, coeffs, b, c, Type.NQ, solver);
+        return build(x, cs, op, 0, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,12 +162,12 @@ public class Sum extends IntConstraint<IntVar> {
     public static IntVar var(IntVar a, IntVar b) {
         if (a.instantiated()) {
             if (b.instantiated()) {
-                return Views.fixed(a.getValue() + b.getValue(), a.getSolver());
+                return VariableFactory.fixed(a.getValue() + b.getValue(), a.getSolver());
             } else {
-                return Views.offset(b, a.getValue());
+                return VariableFactory.offset(b, a.getValue());
             }
         } else if (b.instantiated()) {
-            return Views.offset(a, b.getValue());
+            return VariableFactory.offset(a, b.getValue());
         } else {
             Solver solver = a.getSolver();
             IntVar z;
@@ -288,7 +195,7 @@ public class Sum extends IntConstraint<IntVar> {
             } else {
                 z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
             }
-            solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
+            solver.post(IntConstraintFactory.sum(new IntVar[]{a, b}, "=", z));
             return z;
         }
     }
@@ -304,9 +211,9 @@ public class Sum extends IntConstraint<IntVar> {
         switch (op) {
             case EQ:
                 return ESat.eval(sum == b);
-            case GEQ:
+            case GE:
                 return ESat.eval(sum >= b);
-            case LEQ:
+            case LE:
                 return ESat.eval(sum <= b);
             case NQ:
                 return ESat.eval(sum != b);
@@ -327,68 +234,14 @@ public class Sum extends IntConstraint<IntVar> {
             case NQ:
                 linComb.append(" =/= ");
                 break;
-            case GEQ:
+            case GE:
                 linComb.append(" >= ");
                 break;
-            case LEQ:
+            case LE:
                 linComb.append(" <= ");
                 break;
         }
         linComb.append(b);
         return linComb.toString();
-    }
-
-    @Override
-    public AbstractSorter<IntVar> getComparator(String name) {
-        if (name.equals(VAR_DECRCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Decr<IntVar>(new Coeffs(this)));
-        } else if (name.equals(VAR_DOMOVERCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Incr<IntVar>(
-                            Div.<IntVar>build(DomSize.build(), new Coeffs(this)))
-            );
-        }
-        return super.getComparator(name);
-    }
-
-    @Override
-    public HeuristicVal getIterator(String name, IntVar var) {
-        if (name.equals(VAL_TOTO)) {
-            return HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB());
-        }
-        return super.getIterator(name, var);
-    }
-
-
-    @Override
-    public IMetric<IntVar> getMetric(String name) {
-        if (name.equals(METRIC_COEFFS)) {
-            //TODO: must be composed with BELONG
-            return new Coeffs(this);//Belong.build(this);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-    static class Coeffs implements IMetric<IntVar> {
-
-        TObjectIntHashMap<IntVar> map;
-
-        public Coeffs(Sum sum) {
-            if (sum.shared_map == null) {
-                sum.shared_map = new TObjectIntHashMap<IntVar>(sum.coeffs.length);
-                for (int i = 0; i < sum.vars.length; i++) {
-                    sum.shared_map.put(sum.vars[i], sum.coeffs[i]);
-                }
-            }
-            map = sum.shared_map;
-        }
-
-        @Override
-        public int eval(IntVar var) {
-            return map.get(var);
-        }
     }
 }

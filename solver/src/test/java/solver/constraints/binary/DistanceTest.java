@@ -31,17 +31,15 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.ternary.DistanceXYZ;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
+import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -51,7 +49,7 @@ import solver.variables.view.Views;
  */
 public class DistanceTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test1() {
         for (int i = 0; i < 100; i++) {
             long nbSol, nbNod;
@@ -59,9 +57,9 @@ public class DistanceTest {
                 Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                IntVar Z = Views.abs(Sum.var(X, Views.minus(Y)));
-                solver.post(ConstraintFactory.eq(Z, 5, solver));
-                solver.set(StrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
+                IntVar Z = VariableFactory.abs(Sum.var(X, VariableFactory.minus(Y)));
+                solver.post(IntConstraintFactory.arithm(Z, "=", 5));
+                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
                 solver.findAllSolutions();
                 nbSol = solver.getMeasures().getSolutionCount();
                 nbNod = solver.getMeasures().getNodeCount();
@@ -70,8 +68,8 @@ public class DistanceTest {
                 Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                solver.post(new DistanceXYC(X, Y, DistanceXYC.Op.EQ, 5, solver));
-                solver.set(StrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
+                solver.post(IntConstraintFactory.distance(X, Y, "=", 5));
+                solver.set(IntStrategyFactory.random(new IntVar[]{X, Y}, i));
                 solver.findAllSolutions();
                 Assert.assertEquals(solver.getMeasures().getSolutionCount(), nbSol);
                 Assert.assertTrue(solver.getMeasures().getNodeCount() <= nbNod);
@@ -79,7 +77,7 @@ public class DistanceTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         for (int k = 4; k < 400; k *= 2) {
             Solver s1 = new Solver(), s2 = new Solver();
@@ -89,7 +87,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, k, s1);
                 IntVar Y = VariableFactory.enumerated("Y", 1, k, s1);
                 vs1 = new IntVar[]{X, Y};
-                Constraint c = new DistanceXYC(X, Y, DistanceXYC.Op.EQ, k / 2, s1);
+                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s1.post(c);
                 p1 = c.propagators[0];
             }
@@ -97,7 +95,7 @@ public class DistanceTest {
                 IntVar X = VariableFactory.enumerated("X", 1, k, s2);
                 IntVar Y = VariableFactory.enumerated("Y", 1, k, s2);
                 vs2 = new IntVar[]{X, Y};
-                Constraint c = new DistanceXYC(X, Y, DistanceXYC.Op.EQ, k / 2, s2);
+                Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s2.post(c);
                 p2 = c.propagators[0];
             }
@@ -112,8 +110,8 @@ public class DistanceTest {
                     s1.getEnvironment().worldPush();
                     s2.getEnvironment().worldPush();
 
-                    Random r = new Random(vs1[0], j);
-                    int val = r.next();
+                    InDomainRandom r = new InDomainRandom(j);
+                    int val = r.selectValue(vs1[0]);
                     vs1[0].removeValue(val, Cause.Null);
                     vs2[0].removeValue(val, Cause.Null);
 
@@ -133,14 +131,14 @@ public class DistanceTest {
 
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() {
         Solver solver = new Solver();
         IntVar X = VariableFactory.bounded("X", -5, 5, solver);
         IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
         IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
-        solver.post(new DistanceXYZ(X, Y, DistanceXYZ.Relop.EQ, Z, solver));
-        solver.set(StrategyFactory.inputOrderMinVal(new IntVar[]{Z,X,Y,Z}, solver.getEnvironment()));
+        solver.post(IntConstraintFactory.distance(X, Y, "=", Z));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{Z, X, Y, Z}));
         SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
         System.out.printf("end\n");

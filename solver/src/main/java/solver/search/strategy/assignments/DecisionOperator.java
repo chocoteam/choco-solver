@@ -30,6 +30,7 @@ package solver.search.strategy.assignments;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.SetVar;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -51,15 +52,16 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
     public abstract String toString();
 
     /**
-     * Evaluate the possible effect of the decision and return a boolean indicating wether or not
+     * Evaluate the possible effect of the decision and return a boolean indicating whether or not
      * the decision can reduce the domain of var.
      *
      * @param var   a variable
      * @param value a value
      * @return true if this has an effect on var
      */
-    public abstract boolean isValid(IntVar var, int value);
+    public abstract boolean isValid(V var, int value);
 
+    // INTEGERS
     public static DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
 
         @Override
@@ -170,6 +172,64 @@ public abstract class DecisionOperator<V extends Variable> implements Serializab
         @Override
         public DecisionOperator opposite() {
             return int_split;
+        }
+    };
+
+
+    // SETS
+    public static DecisionOperator<SetVar> set_force = new DecisionOperator<SetVar>() {
+
+        @Override
+        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            var.addToKernel(element, cause);
+        }
+
+        @Override
+        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            var.removeFromEnvelope(element, cause);
+        }
+
+        @Override
+        public String toString() {
+            return " contains ";
+        }
+
+        @Override
+        public boolean isValid(SetVar var, int element) {
+            return var.getEnvelope().contain(element);
+        }
+
+        @Override
+        public DecisionOperator opposite() {
+            return set_remove;
+        }
+    };
+
+    public static DecisionOperator<SetVar> set_remove = new DecisionOperator<SetVar>() {
+
+        @Override
+        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            var.removeFromEnvelope(element, cause);
+        }
+
+        @Override
+        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            var.addToKernel(element, cause);
+        }
+
+        @Override
+        public String toString() {
+            return " !contains ";
+        }
+
+        @Override
+        public boolean isValid(SetVar var, int element) {
+            return var.contains(element);
+        }
+
+        @Override
+        public DecisionOperator opposite() {
+            return set_force;
         }
     };
 }

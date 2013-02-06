@@ -1,21 +1,17 @@
 package choco.proba;
 
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import static solver.constraints.ConstraintFactory.lt;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,7 +26,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
     }
 
     @Override
@@ -50,10 +46,10 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         Collection<Constraint> allCstrs = new ArrayList<Constraint>();
         // break symmetries
         for (int i = 0; i < size - 1; i++) {
-            allCstrs.add(lt(x[i], x[i + 1], solver));
-            allCstrs.add(lt(y[i], y[i + 1], solver));
+            allCstrs.add(IntConstraintFactory.arithm(x[i], "<", x[i + 1]));
+            allCstrs.add(IntConstraintFactory.arithm(y[i], "<", y[i + 1]));
         }
-        allCstrs.add(lt(x[0], y[0], solver));
+        allCstrs.add(IntConstraintFactory.arithm(x[0], "<", y[0]));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -66,32 +62,32 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        allCstrs.add(Sum.eq(xy, coeffs, 0, solver));
+        allCstrs.add(IntConstraintFactory.scalar(xy, coeffs, "=", 0));
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = Views.sqr(x[i]);
+            sx[i] = VariableFactory.sqr(x[i]);
             allVars.add(sx[i]);
             sxy[i] = sx[i];
-            sy[i] = Views.sqr(y[i]);
+            sy[i] = VariableFactory.sqr(y[i]);
             allVars.add(sy[i]);
             sxy[size + i] = sy[i];
-            allCstrs.add(new Arithmetic(sx[i], ">=", 1, solver));
-            allCstrs.add(new Arithmetic(sy[i], ">=", 1, solver));
-            allCstrs.add(new Arithmetic(sx[i], "<=", 4 * size * size, solver));
-            allCstrs.add(new Arithmetic(sy[i], "<=", 4 * size * size, solver));
+            allCstrs.add(IntConstraintFactory.arithm(sx[i], ">=", 1));
+            allCstrs.add(IntConstraintFactory.arithm(sy[i], ">=", 1));
+            allCstrs.add(IntConstraintFactory.arithm(sx[i], "<=", 4 * size * size));
+            allCstrs.add(IntConstraintFactory.arithm(sy[i], "<=", 4 * size * size));
         }
-        allCstrs.add(Sum.eq(sxy, coeffs, 0, solver));
+        allCstrs.add(IntConstraintFactory.scalar(sxy, coeffs, "=", 0));
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        allCstrs.add(Sum.eq(x, coeffs, 2 * size * (2 * size + 1) / 4, solver));
-        allCstrs.add(Sum.eq(y, coeffs, 2 * size * (2 * size + 1) / 4, solver));
-        allCstrs.add(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
-        allCstrs.add(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
+        allCstrs.add(IntConstraintFactory.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        allCstrs.add(IntConstraintFactory.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
+        allCstrs.add(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        allCstrs.add(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
 
         allCstrs.add(new AllDifferent(xy, solver, type));
 

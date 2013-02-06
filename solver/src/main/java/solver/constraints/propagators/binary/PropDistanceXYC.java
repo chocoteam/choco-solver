@@ -27,11 +27,12 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.procedure.UnaryIntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,12 +54,7 @@ import solver.variables.delta.IIntDeltaMonitor;
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropDistanceXYC extends Propagator<IntVar> {
 
-    public final static int EQ = 0;
-    public final static int LT = 1;
-    public final static int GT = 2;
-    public final static int NQ = 3;
-
-    protected final int operator;
+    protected final Operator operator;
 
     protected final int cste;
 
@@ -66,12 +62,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     protected final IIntDeltaMonitor[] idms;
 
-    public PropDistanceXYC(IntVar[] vars, int operator, int cste, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.BINARY, false);
-        if (operator == EQ) {
+    public PropDistanceXYC(IntVar[] vars, Operator operator, int cste, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+        super(vars, PropagatorPriority.BINARY, false);
+        if (operator == Operator.EQ) {
             this.idms = new IIntDeltaMonitor[this.vars.length];
             for (int i = 0; i < this.vars.length; i++) {
-                idms[i] = this.vars[i].monitorDelta(this);
+                idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
             }
         } else {
             this.idms = new IIntDeltaMonitor[0];
@@ -105,7 +101,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     break;
             }
         }
-        if (operator == EQ) {
+        if (operator == Operator.EQ) {
             if (vars[0].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[0], vars[1]);
             } else {
@@ -118,9 +114,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 vars[1].updateLowerBound(vars[0].getLB() - cste, aCause);
                 vars[1].updateUpperBound(vars[0].getUB() + cste, aCause);
             }
-        } else if (operator == GT) {
+        } else if (operator == Operator.GT) {
             filterGT();
-        } else if (operator == LT) {
+        } else if (operator == Operator.LT) {
             filterLT();
         } else {
             filterNeq();
@@ -174,13 +170,13 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            if (operator == EQ) {
+            if (operator == Operator.EQ) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) == cste);
-            } else if (operator == LT) {
+            } else if (operator == Operator.LT) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) < cste);
-            } else if (operator == GT) {
+            } else if (operator == Operator.GT) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) > cste);
-            } else if (operator == NQ) {
+            } else if (operator == Operator.NQ) {
                 return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) != cste);
             } else {
                 throw new SolverException("operator not known");

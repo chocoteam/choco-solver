@@ -2,8 +2,7 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.extension.LargeCSP;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.extension.nary.IterTuplesTable;
 import solver.constraints.propagators.extension.nary.LargeRelation;
@@ -55,7 +54,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         this.nbnotesmax = notesmax;
 
     }
-    
+
     @Override
     void buildProblem(int size, boolean proba) {
         this.costs = makeChords(size, nbnotesmax, seed);
@@ -64,12 +63,12 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
     }
 
     /*void configSearchStrategy() {
-        this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver, seed));
+        this.solver.set(StrategyFactory.domOverWDeg_InDomainMin(this.vars, this.solver, seed));
     }*/
 
     public void makeVars() {
         this.vars = new IntVar[size];
-        this.allVars = new IntVar[size+size - 1+2];
+        this.allVars = new IntVar[size + size - 1 + 2];
         chords = new IntVar[size];
         costvars = new IntVar[size - 1];
         for (int i = 0; i < size; i++) {
@@ -78,13 +77,13 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
                 costvars[i] = VariableFactory.enumerated("costs[" + i + "]", 0, (nbnotesmax - 1), solver);
             }
         }
-        obj = VariableFactory.enumerated("obj", 0, ((size-1) * (nbnotesmax - 1)), solver);
+        obj = VariableFactory.enumerated("obj", 0, ((size - 1) * (nbnotesmax - 1)), solver);
         int i;
         for (i = 0; i < size; i++) {
             //System.out.println(vars.length + " -- " + i);
             vars[i] = allVars[i] = chords[i];
         }
-        for (int k = 0; k < size-1; k++,i++) {
+        for (int k = 0; k < size - 1; k++, i++) {
             //System.out.println(vars.length + " -- " + i);
             allVars[i] = costvars[k]; // brancher sur les chords suffit
         }
@@ -93,10 +92,10 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
     }
 
     public void makeConstraints() {
-        this.cstrs = new Constraint[size-1+2];
+        this.cstrs = new Constraint[size - 1 + 2];
         int nbCstrs = 0;
-        this.tuples = new ArrayList<List<int[]>>(size-1);
-        for (int i = 0; i < size-1; i++) {
+        this.tuples = new ArrayList<List<int[]>>(size - 1);
+        for (int i = 0; i < size - 1; i++) {
             IntVar[] vars = new IntVar[3];
             vars[0] = chords[i];
             vars[1] = chords[i + 1];
@@ -119,8 +118,8 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
                 sizes[j] = vars[j].getUB() - vars[j].getLB() + 1;
                 offsets[j] = vars[j].getLB();
             }
-	        LargeRelation relation = new IterTuplesTable(tuples_i, offsets, sizes);
-            this.cstrs[nbCstrs++] = new LargeCSP(vars, relation, LargeCSP.Type.AC32, solver);
+            LargeRelation relation = new IterTuplesTable(tuples_i, offsets, sizes);
+            this.cstrs[nbCstrs++] = IntConstraintFactory.table(vars, relation, "AC32");
             this.tuples.add(tuples_i);
             //m.addConstraint(Choco.feasTupleAC(tuples, vars[0], vars[1], vars[2]));
         }
@@ -129,8 +128,8 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         Arrays.fill(coeffs, 1);
         coeffs[size-1] = -1;
         IntVar[] sumVars = ArrayUtils.append(costvars,new IntVar[]{obj});  //*/
-         //m.addConstraint(Choco.leq(Choco.sum(costvars), obj));
-        this.cstrs[nbCstrs] = Sum.eq(costvars,obj,solver);
+        //m.addConstraint(Choco.leq(Choco.sum(costvars), obj));
+        this.cstrs[nbCstrs] = IntConstraintFactory.sum(costvars, "=", obj);
         //this.cstrs[nbCstrs] = Sum.leq(sumVars, coeffs, 0, solver);
     }
 
@@ -145,11 +144,11 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
     boolean checkSolution() {
         for (int i = 0; i < chords.length; i++) {
             for (int j = 0; j < chords.length; j++) {
-                 if (i != j) {
-                     if (chords[i].getValue() == chords[j].getValue()) {
-                         return false;
-                     }
-                 }
+                if (i != j) {
+                    if (chords[i].getValue() == chords[j].getValue()) {
+                        return false;
+                    }
+                }
             }
         }
         int sum = 0;
@@ -159,7 +158,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         if (sum != obj.getValue()) {
             return false;
         }
-        for (int i = 0; i < size-1; i++) {
+        for (int i = 0; i < size - 1; i++) {
             int varVal1 = chords[i].getValue();
             int varVal2 = chords[i + 1].getValue();
             int varVal3 = costvars[i].getValue();

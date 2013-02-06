@@ -27,9 +27,9 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.propagation.PropagationStrategies;
 import solver.variables.IntVar;

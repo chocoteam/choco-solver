@@ -53,12 +53,12 @@ public class T_bool_const extends GrammarTest {
         return walker.bool_const();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         Assert.assertTrue(bool_const(parser("true")));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         Assert.assertFalse(bool_const(parser("false")));
     }

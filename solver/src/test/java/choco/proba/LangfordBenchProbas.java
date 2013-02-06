@@ -1,11 +1,10 @@
 package choco.proba;
 
 import solver.Solver;
-import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -32,7 +31,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(position));
     }
 
     @Override
@@ -42,10 +41,10 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
         this.vars = this.allVars = position;
         for (int i = 0; i < k - 1; i++) {
             for (int j = 0; j < n; j++) {
-                allCstrs.add(new Arithmetic(position[j + (i + 1) * n], "=", position[j + i * n], "+", j + 2, solver));
+                allCstrs.add(IntConstraintFactory.arithm(position[j + (i + 1) * n], "=", position[j + i * n], "+", j + 2));
             }
         }
-        allCstrs.add(ConstraintFactory.lt(position[0], position[n * k - 1], solver));
+        allCstrs.add(IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]));
         allCstrs.add(new AllDifferent(position, solver, type));
 
         this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);

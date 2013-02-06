@@ -27,21 +27,20 @@
 
 package solver.recorder;
 
+import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.graph.input.GraphGenerator;
+import samples.sandbox.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 /**
@@ -78,7 +77,7 @@ public class HamiltonianPathTest {
         Solver solver = new Solver();
         int n = matrix.length;
         // build model
-        DirectedGraphVar graph = new DirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
+        DirectedGraphVar graph = new DirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, false);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {
@@ -93,7 +92,7 @@ public class HamiltonianPathTest {
             e.printStackTrace();
             System.exit(0);
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+        Constraint gc = new Constraint(solver);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
@@ -109,9 +108,9 @@ public class HamiltonianPathTest {
 
         // configure solver
         if (rd) {
-            solver.set(StrategyFactory.graphRandom(graph, s));
+            solver.set(GraphStrategyFactory.graphRandom(graph, s));
         } else {
-            solver.set(StrategyFactory.graphStrategy(graph, null, new ConstructorHeur(graph, 0), GraphStrategy.NodeArcPriority.ARCS));
+            solver.set(GraphStrategyFactory.graphStrategy(graph, null, new ConstructorHeur(graph, 0), GraphStrategy.NodeArcPriority.ARCS));
         }
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
         solver.findSolution();

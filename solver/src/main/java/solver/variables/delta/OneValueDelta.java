@@ -37,7 +37,7 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class OneValueDelta implements IntDelta {
+public final class OneValueDelta implements IEnumDelta {
 
 
     int value;

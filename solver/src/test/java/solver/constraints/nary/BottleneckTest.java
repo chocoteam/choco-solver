@@ -27,16 +27,13 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -65,28 +62,17 @@ public class BottleneckTest {
                 nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
                 exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
                 bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
-                lcstrs.add(Sum.eq(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1}, 0, solver));
+                lcstrs.add(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1}, "=", 0));
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-            lcstrs.add(Sum.eq(bws, sum, solver));
+            lcstrs.add(IntConstraintFactory.sum(bws, "=", sum));
 
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
-             // Heuristic val
-            for (IntVar var : allvars) {
-                var.setHeuristicVal(
-                        HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
-                );
-            }
 
-
-            solver.post(cstrs);
-            solver.set(StrategyVarValAssign.dyn(allvars,
-                    new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(allvars)),
-                    ValidatorFactory.instanciated, solver.getEnvironment()));
-
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, sum);
         }
     }
@@ -105,27 +91,17 @@ public class BottleneckTest {
                 nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
                 exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
                 bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
-                lcstrs.add(Sum.eq(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1}, 0, solver));
+                lcstrs.add(IntConstraintFactory.scalar(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1}, "=", 0));
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-            lcstrs.add(Sum.eq(bws, sum, solver));
+            lcstrs.add(IntConstraintFactory.sum(bws, "=", sum));
 
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            for (IntVar var : allvars) {
-                var.setHeuristicVal(
-                        HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
-                );
-            }
-
-
-            solver.post(cstrs);
-            solver.set(StrategyVarValAssign.dyn(allvars,
-                    new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(allvars)),
-                    ValidatorFactory.instanciated, solver.getEnvironment()));
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
 
             solver.findSolution();
         }

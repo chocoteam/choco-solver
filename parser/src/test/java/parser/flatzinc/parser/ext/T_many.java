@@ -37,8 +37,8 @@ import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.propagation.PropagationEngine;
+import solver.constraints.IntConstraintFactory;
+import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
@@ -60,7 +60,7 @@ public class T_many extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    PropagationEngine pe;
+    DSLEngine pe;
     ArrayList<Arc> arcs;
 
     @BeforeMethod
@@ -71,14 +71,14 @@ public class T_many extends GrammarExtTest {
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
-            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], mSolver);
+            cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
             map.put("c_" + i, cstrs[i]);
             map.put(vars[i].getName(), vars[i]);
         }
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver);
+        pe = new DSLEngine(mSolver);
         arcs = Arc.populate(mSolver);
     }
 
@@ -94,7 +94,7 @@ public class T_many extends GrammarExtTest {
         return walker.many(in);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each var as queue(wone)");
         FlatzincFullExtWalker.many_return _many = many(fp, arcs);
@@ -105,7 +105,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each cstr as queue(wone) of { each var as list(wfor)}");
 
@@ -117,7 +117,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each cstr as list(for) of { each var as list(wfor) key any.var.name }");
         FlatzincFullExtWalker.many_return _many = many(fp, arcs);
@@ -128,7 +128,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each prop.prioDyn as queue(wone) of { each prop as list(wfor)}");
 
@@ -140,7 +140,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Queue);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("each prop as queue(wone) key any.prop.priority");
 
@@ -156,7 +156,7 @@ public class T_many extends GrammarExtTest {
 //                                    "       each prop as queue(wone) key any.prop.priority" +
 //                                    "   } key any.any.var.cardinality
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincFullExtParser fp =
                 parser("each var as list(wone) key any.var.cardinality");
@@ -169,7 +169,7 @@ public class T_many extends GrammarExtTest {
         Assert.assertTrue(scheds.get(0) instanceof Sort);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincFullExtParser fp =
                 parser("each var as list(wone) of {each prop as queue(one) key any.prop.priority} key any.any.var.cardinality");

@@ -34,11 +34,11 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,7 +69,7 @@ public class PropBigSum extends Propagator<IntVar> {
     Node root;
     Node[] leafs;
     int index;
-    Sum.Type type;
+    Operator type;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -88,16 +88,16 @@ public class PropBigSum extends Propagator<IntVar> {
      * @param solver
      * @param intVarPropagatorConstraint
      */
-    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Sum.Type type, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Operator operator, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(vars, PropagatorPriority.LINEAR, false);
         this.coeffs = coeffs;
         this.pos = pos;
         this.sum = sum;
         int nbLayers = computeNbLayers(vars.length);
         this.leafs = new Node[vars.length];
         this.root = new Node(nbLayers, null);
-        this.type = type;
-        if (type == Sum.Type.NQ) {
+        this.type = operator;
+        if (operator == Operator.NQ) {
             throw new UnsupportedOperationException();
         }
     }
@@ -133,10 +133,10 @@ public class PropBigSum extends Propagator<IntVar> {
         }
         // filter
         switch (type) {
-            case LEQ:
+            case LE:
                 filter_max(root, root.oldLB.get());
                 break;
-            case GEQ:
+            case GE:
                 filter_min(root, root.oldUB.get());
                 break;
             case EQ:
@@ -195,14 +195,14 @@ public class PropBigSum extends Propagator<IntVar> {
             ub += vars[i].getLB() * coeffs[i];
         }
         switch (type) {
-            case LEQ:
+            case LE:
                 if (ub <= sum) {
                     return ESat.TRUE;
                 } else if (lb > sum) {
                     return ESat.FALSE;
                 }
                 return ESat.UNDEFINED;
-            case GEQ:
+            case GE:
                 if (lb >= sum) {
                     return ESat.TRUE;
                 } else if (lb < sum) {

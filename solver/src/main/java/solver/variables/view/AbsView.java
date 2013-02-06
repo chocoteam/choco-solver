@@ -27,9 +27,8 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -39,8 +38,8 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.monitor.IntDeltaMonitor;
 
 
 /**
@@ -54,12 +53,12 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends IntView<IntVar> {
+public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;
 
-    public AbsView(final IntVar var, Solver solver) {
+    public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);
     }
 
@@ -67,29 +66,34 @@ public final class AbsView extends IntView<IntVar> {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
-            return IIntDeltaMonitor.Default.NONE;
+            //return IIntDeltaMonitor.Default.NONE;
+            throw new UnsupportedOperationException();
         }
-        return new IntDeltaMonitor(var.getDelta(), propagator) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
+
             @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                if (EventType.isRemove(eventType.mask)) {
-                    for (int i = frozenFirst; i < frozenLast; i++) {
-                        if (propagator != delta.getCause(i)) {
-                            int v = delta.get(i);
-                            if (!var.contains(-v)) {
-                                boolean found = false;
-                                for (int j = i + 1; !found && j < frozenLast; j++) {
-                                    if (delta.get(j) == -v) {
-                                        found = true;
-                                    }
-                                }
-                                if (!found) {
-                                    proc.execute(Math.abs(v));
-                                }
+            protected void filter() {
+                int[] _values = values.toArray();
+                values.clear();
+                for (int i = 0; i < _values.length; i++) {
+                    int v = _values[i];
+                    if (!var.contains(-v)) {
+                        boolean found = false;
+                        for (int j = i + 1; !found && j < _values.length; j++) {
+                            if (_values[j] == -v) {
+                                found = true;
                             }
+                        }
+                        if (!found) {
+                            values.add(v);
                         }
                     }
                 }
+            }
+
+            @Override
+            protected int transform(int value) {
+                return Math.abs(value);
             }
         };
     }

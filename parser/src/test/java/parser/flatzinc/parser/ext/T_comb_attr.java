@@ -55,7 +55,7 @@ public class T_comb_attr extends GrammarExtTest {
         return walker.comb_attr();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("any.var.name");
         CombinedAttribute o = comb_attr(fp);
@@ -64,7 +64,7 @@ public class T_comb_attr extends GrammarExtTest {
         Assert.assertTrue(o.attribute == Attribute.VNAME);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("size");
         CombinedAttribute o = comb_attr(fp);
@@ -72,7 +72,7 @@ public class T_comb_attr extends GrammarExtTest {
         Assert.assertTrue(o.operators.get(0) == AttributeOperator.SIZE);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("any.prop.priority");
         CombinedAttribute o = comb_attr(fp);

@@ -26,17 +26,18 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -47,14 +48,18 @@ import java.util.Random;
  */
 public class BoundGlobalCardinlityTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test0() throws ContradictionException {
         Solver solver = new Solver();
 
         IntVar[] vars = VariableFactory.boundedArray("vars", 6, 0, 3, solver);
         IntVar[] card = VariableFactory.boundedArray("card", 4, 0, 6, solver);
 
-        solver.post(GlobalCardinality.make(vars, card, 0, solver));
+        int[] values = new int[4];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = i;
+        }
+        solver.post(IntConstraintFactory.global_cardinality(vars, values, card, false));
 
         vars[0].instantiateTo(0, Cause.Null);
         vars[1].instantiateTo(1, Cause.Null);
@@ -63,36 +68,40 @@ public class BoundGlobalCardinlityTest {
         vars[4].instantiateTo(0, Cause.Null);
         vars[5].instantiateTo(0, Cause.Null);
 
-        solver.set(StrategyFactory.presetI(ArrayUtils.append(vars, card), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.append(vars, card)));
         solver.findAllSolutions();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandom() {
         Random random = new Random();
 //        int seed= 108;{
         for (int seed = 0; seed < 200; seed++) {
             System.out.println(seed);
             random.setSeed(seed);
-            int n = 1+ random.nextInt(6);
-            int m = 1+ random.nextInt(4);
+            int n = 1 + random.nextInt(6);
+            int m = 1 + random.nextInt(4);
             //solver 1
             Solver solver = new Solver();
+            int[] values = new int[m];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m-1, solver);
+                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
                 IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
-                solver.post(GlobalCardinality.make(vars, cards, 0, solver));
-//                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                solver.set(StrategyFactory.presetI(ArrayUtils.append(vars, cards), solver.getEnvironment()));
+                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
+//              solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.presetI(ArrayUtils.append(vars, cards)));
             }
             // reformulation
             Solver ref = new Solver();
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m-1, ref);
+                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
                 IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, ref);
-                ref.post(GlobalCardinality.reformulate(vars, cards, 0, ref));
-                ref.set(StrategyFactory.presetI(ArrayUtils.append(vars, cards), ref.getEnvironment()));
+                ref.post(GlobalCardinality.reformulate(vars, cards, ref));
+                ref.set(IntStrategyFactory.presetI(ArrayUtils.append(vars, cards)));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             solver.findAllSolutions();
@@ -102,32 +111,34 @@ public class BoundGlobalCardinlityTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandom2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
             System.out.println(seed);
             random.setSeed(seed);
-            int n = 1+ random.nextInt(6);
-            int m = 1+ random.nextInt(4);
-            int[] min = new int[m];
-            int[] max = new int[m];
-            Arrays.fill(min, 0);
-            Arrays.fill(max, n);
+            int n = 1 + random.nextInt(6);
+            int m = 1 + random.nextInt(4);
             //solver 1
             Solver solver = new Solver();
+            int[] values = new int[m];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m-1, solver);
-                solver.post(GlobalCardinality.make(vars, min, max, 0, GlobalCardinality.Consistency.BC, solver));
+                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
+                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
+                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
-                solver.set(StrategyFactory.presetI(vars, solver.getEnvironment()));
+                solver.set(IntStrategyFactory.presetI(vars));
             }
             // reformulation
             Solver ref = new Solver();
             {
-                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m-1, ref);
-                ref.post(GlobalCardinality.reformulate(vars, min, max, 0, ref));
-                ref.set(StrategyFactory.presetI(vars, ref.getEnvironment()));
+                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, ref);
+                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
+                ref.post(GlobalCardinality.reformulate(vars, cards, ref));
+                ref.set(IntStrategyFactory.presetI(vars));
             }
 //            SearchMonitorFactory.log(solver, false, true);
             solver.findAllSolutions();

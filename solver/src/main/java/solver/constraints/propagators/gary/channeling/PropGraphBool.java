@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
+import common.ESat;
+import common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -61,7 +61,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
-        super(new GraphVar[]{graph}, solver, cstr, PropagatorPriority.QUADRATIC);
+        super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         this.graph = graph;
         gdm = (GraphDeltaMonitor) graph.monitorDelta(this);
         relations = rel;

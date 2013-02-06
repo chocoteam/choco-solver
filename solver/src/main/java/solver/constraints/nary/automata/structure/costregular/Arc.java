@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.automata.structure.costregular;
 
-import choco.kernel.memory.structure.IndexedObject;
+import memory.structure.IndexedObject;
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import solver.constraints.nary.automata.structure.Node;

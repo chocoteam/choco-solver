@@ -29,9 +29,8 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -57,14 +56,14 @@ public class BigLeq extends AbstractProblem {
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
 
         for (int i = 0; i < m - 1; i++) {
-            solver.post(ConstraintFactory.leq(vars[i], vars[i + 1], solver));
+            solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }
-        solver.post(new AllDifferent(vars, solver));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMidVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
     }
 
     @Override

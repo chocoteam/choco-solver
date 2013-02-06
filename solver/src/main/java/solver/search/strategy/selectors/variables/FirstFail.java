@@ -53,9 +53,15 @@ public class FirstFail implements VariableSelector<IntVar> {
     }
 
     @Override
+    public IntVar[] getScope() {
+        return variables;
+    }
+
+    @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
@@ -63,11 +69,11 @@ public class FirstFail implements VariableSelector<IntVar> {
     public void advance() {
         small_idx = 0;
         int small_dsize = Integer.MAX_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
-            if(dsize > 1 && dsize < small_dsize){
-               small_dsize = dsize;
-               small_idx = idx;
+            if (dsize > 1 && dsize < small_dsize) {
+                small_dsize = dsize;
+                small_idx = idx;
             }
         }
     }

@@ -27,12 +27,9 @@
 
 package solver.constraints;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.SolverException;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 
 /**
@@ -72,12 +69,4 @@ public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Prop
      * @return <code>ESat.TRUE</code> if this <code>Constraint</code> object is satisfied regarding <code>tuple</code>, <code>ESat.FALSE</code> otherwise.
      */
     public abstract ESat isSatisfied(int[] tuple);
-
-//    @Override
-    public HeuristicVal getIterator(String name, I var) {
-        if (name.equals(VAL_DEFAULT)) {
-            return HeuristicValFactory.fastenumVal(var);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
 }

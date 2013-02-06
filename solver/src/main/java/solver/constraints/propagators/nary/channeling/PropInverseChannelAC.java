@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -41,8 +41,9 @@ import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * X[i] = j+Ox <=> Y[j] = i+Oy
- *
+ * <p/>
  * AC propagator for enumerated domain variables
+ *
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
@@ -53,111 +54,113 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     protected IntVar[] X, Y;
     protected RemProc rem_proc;
     protected IIntDeltaMonitor[] idms;
-	private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
+    private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY, Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         for (int i = 0; i < this.vars.length; i++) {
-			if(!vars[i].hasEnumeratedDomain()){
-				throw new UnsupportedOperationException("this propagator should be used with enumerated domain variables");
-			}
+            if (!vars[i].hasEnumeratedDomain()) {
+                throw new UnsupportedOperationException("this propagator should be used with enumerated domain variables");
+            }
         }
         this.X = X;
         this.Y = Y;
         n = Y.length;
-		this.minX = minX;
-		this.minY = minY;
-		rem_proc = new RemProc();
-		this.idms = new IIntDeltaMonitor[this.vars.length];
-		for (int i = 0; i < vars.length; i++) {
-			idms[i] = this.vars[i].monitorDelta(this);
-		}
+        this.minX = minX;
+        this.minY = minY;
+        rem_proc = new RemProc();
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-		return AWAKENING_MASK;
+        return AWAKENING_MASK;
     }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			X[i].updateLowerBound(minX,aCause);
-			X[i].updateUpperBound(n-1+minX,aCause);
-			Y[i].updateLowerBound(minY,aCause);
-			Y[i].updateUpperBound(n-1+minY,aCause);
-		}
-		for(int i=0;i<n;i++){
-			enumeratedFilteringOfX(i);
-			enumeratedFilteringOfY(i);
-		}
-		for(int i=0;i<vars.length;i++){
-			idms[i].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < n; i++) {
+            X[i].updateLowerBound(minX, aCause);
+            X[i].updateUpperBound(n - 1 + minX, aCause);
+            Y[i].updateLowerBound(minY, aCause);
+            Y[i].updateUpperBound(n - 1 + minY, aCause);
+        }
+        for (int i = 0; i < n; i++) {
+            enumeratedFilteringOfX(i);
+            enumeratedFilteringOfY(i);
+        }
+        for (int i = 0; i < vars.length; i++) {
+            idms[i].unfreeze();
+        }
+    }
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		idms[varIdx].freeze();
-		idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-		idms[varIdx].unfreeze();
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        idms[varIdx].freeze();
+        idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
+    }
 
-	private void enumeratedFilteringOfX(int var) throws ContradictionException {
-		// X[i] = j+Ox <=> Y[j] = i+Oy
-		int min = X[var].getLB();
-		int	max = X[var].getUB();
-		for(int v=min;v<=max;v=X[var].nextValue(v)){
-			if(!Y[v-minX].contains(var+minY)){
-				X[var].removeValue(v,aCause);
-			}
-		}
-	}
+    private void enumeratedFilteringOfX(int var) throws ContradictionException {
+        // X[i] = j+Ox <=> Y[j] = i+Oy
+        int min = X[var].getLB();
+        int max = X[var].getUB();
+        for (int v = min; v <= max; v = X[var].nextValue(v)) {
+            if (!Y[v - minX].contains(var + minY)) {
+                X[var].removeValue(v, aCause);
+            }
+        }
+    }
 
-	private void enumeratedFilteringOfY(int var) throws ContradictionException {
-		// X[i] = j+Ox <=> Y[j] = i+Oy
-		int min = Y[var].getLB();
-		int	max = Y[var].getUB();
-		for(int v=min;v<=max ;v=Y[var].nextValue(v)){
-			if(!X[v-minY].contains(var+minX)){
-				Y[var].removeValue(v,aCause);
-			}
-		}
-	}
+    private void enumeratedFilteringOfY(int var) throws ContradictionException {
+        // X[i] = j+Ox <=> Y[j] = i+Oy
+        int min = Y[var].getLB();
+        int max = Y[var].getUB();
+        for (int v = min; v <= max; v = Y[var].nextValue(v)) {
+            if (!X[v - minY].contains(var + minX)) {
+                Y[var].removeValue(v, aCause);
+            }
+        }
+    }
 
-	private class RemProc implements UnaryIntProcedure<Integer> {
-		private int var;
-		@Override
-		public UnaryIntProcedure set(Integer idxVar) {
-			this.var = idxVar;
-			return this;
-		}
-		@Override
-		public void execute(int val) throws ContradictionException {
-			if(var<n){
-				Y[val-minX].removeValue(var+minY,aCause);
-			}else {
-				X[val-minY].removeValue(var-n+minX,aCause);
-			}
-		}
-	}
+    private class RemProc implements UnaryIntProcedure<Integer> {
+        private int var;
+
+        @Override
+        public UnaryIntProcedure set(Integer idxVar) {
+            this.var = idxVar;
+            return this;
+        }
+
+        @Override
+        public void execute(int val) throws ContradictionException {
+            if (var < n) {
+                Y[val - minX].removeValue(var + minY, aCause);
+            } else {
+                X[val - minY].removeValue(var - n + minX, aCause);
+            }
+        }
+    }
 
     @Override
     public ESat isEntailed() {
-		boolean allInst = true;
-		for(int i=0;i<n;i++){
-			if(!(vars[i].instantiated() && vars[i+n].instantiated())){
-				allInst = false;
-			}
-			if(X[i].instantiated() && !Y[X[i].getValue()-minX].contains(i+minY)){
-				return ESat.FALSE;
-			}
-			if(Y[i].instantiated() && !X[Y[i].getValue()-minY].contains(i+minX)){
-				return ESat.FALSE;
-			}
-		}
-		if(allInst)return ESat.TRUE;
-		return ESat.UNDEFINED;
+        boolean allInst = true;
+        for (int i = 0; i < n; i++) {
+            if (!(vars[i].instantiated() && vars[i + n].instantiated())) {
+                allInst = false;
+            }
+            if (X[i].instantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
+                return ESat.FALSE;
+            }
+            if (Y[i].instantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
+                return ESat.FALSE;
+            }
+        }
+        if (allInst) return ESat.TRUE;
+        return ESat.UNDEFINED;
     }
 
     @Override

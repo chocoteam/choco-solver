@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -41,7 +41,7 @@ import java.util.BitSet;
 
 /**
  * X[i] = j+Ox <=> Y[j] = i+Oy
- *
+ * <p/>
  * Propagator for bounded variables
  * it ensures :
  * LB(X[i]) = j+Ox => Y[j].contains(i+Oy)
@@ -51,6 +51,7 @@ import java.util.BitSet;
  * of this and the alldifferent constraint implied by InverseChanneling constraint
  * Such a consistency would require to know somehow holes in (bounded) domains
  * Again, AC is strongly advised
+ *
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
@@ -59,120 +60,120 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
     protected int minX, minY;
     protected int n;
     protected IntVar[] X, Y;
-	protected BitSet toCompute;
+    protected BitSet toCompute;
 
     public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY, Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.X = X;
         this.Y = Y;
         n = Y.length;
-		this.minX = minX;
-		this.minY = minY;
-		toCompute = new BitSet(2*n);
+        this.minX = minX;
+        this.minY = minY;
+        toCompute = new BitSet(2 * n);
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-		return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if((evtmask & EventType.FULL_PROPAGATION.mask)!=0){
-			for(int i=0;i<n;i++){
-				X[i].updateLowerBound(minX,aCause);
-				X[i].updateUpperBound(n-1+minX,aCause);
-				Y[i].updateLowerBound(minY,aCause);
-				Y[i].updateUpperBound(n-1+minY,aCause);
-			}
-			toCompute.clear();
-			for(int i=0;i<n;i++){
-				boundedFilteringOfX(i);
-				boundedFilteringOfY(i);
-			}
-		}
-		while (!toCompute.isEmpty()){
-			int next = toCompute.nextSetBit(0);
-			toCompute.clear(next);
-			if(next<n){
-				boundedFilteringOfX(next);
-			}else{
-				boundedFilteringOfY(next-n);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < n; i++) {
+                X[i].updateLowerBound(minX, aCause);
+                X[i].updateUpperBound(n - 1 + minX, aCause);
+                Y[i].updateLowerBound(minY, aCause);
+                Y[i].updateUpperBound(n - 1 + minY, aCause);
+            }
+            toCompute.clear();
+            for (int i = 0; i < n; i++) {
+                boundedFilteringOfX(i);
+                boundedFilteringOfY(i);
+            }
+        }
+        while (!toCompute.isEmpty()) {
+            int next = toCompute.nextSetBit(0);
+            toCompute.clear(next);
+            if (next < n) {
+                boundedFilteringOfX(next);
+            } else {
+                boundedFilteringOfY(next - n);
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		//bounds
-		if(varIdx<n){
-			boundedFilteringOfX(varIdx);
-		}else{
-			boundedFilteringOfY(varIdx - n);
-		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        //bounds
+        if (varIdx < n) {
+            boundedFilteringOfX(varIdx);
+        } else {
+            boundedFilteringOfY(varIdx - n);
+        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
 
-	private void boundedFilteringOfX(int var) throws ContradictionException {
-		// X[i] = j+Ox <=> Y[j] = i+Oy
-		int min = X[var].getLB();
-		int	max = X[var].getUB();
-		for(int v=min;v<=max;v=X[var].nextValue(v)){
-			if(!Y[v-minX].contains(var+minY)){
-				X[var].removeValue(v,aCause);
-				toCompute.set(v-minX);
-			}else{
-				break;
-			}
-		}
-		for(int v=max;v>=min;v=X[var].previousValue(v)){
-			if(!Y[v-minX].contains(var+minY)){
-				X[var].removeValue(v,aCause);
-				toCompute.set(v - minX);
-			}else{
-				break;
-			}
-		}
-	}
+    private void boundedFilteringOfX(int var) throws ContradictionException {
+        // X[i] = j+Ox <=> Y[j] = i+Oy
+        int min = X[var].getLB();
+        int max = X[var].getUB();
+        for (int v = min; v <= max; v = X[var].nextValue(v)) {
+            if (!Y[v - minX].contains(var + minY)) {
+                X[var].removeValue(v, aCause);
+                toCompute.set(v - minX);
+            } else {
+                break;
+            }
+        }
+        for (int v = max; v >= min; v = X[var].previousValue(v)) {
+            if (!Y[v - minX].contains(var + minY)) {
+                X[var].removeValue(v, aCause);
+                toCompute.set(v - minX);
+            } else {
+                break;
+            }
+        }
+    }
 
-	private void boundedFilteringOfY(int var) throws ContradictionException {
-		// X[i] = j+Ox <=> Y[j] = i+Oy
-		int min = Y[var].getLB();
-		int	max = Y[var].getUB();
-		for(int v=min;v<=max ;v=Y[var].nextValue(v)){
-			if(!X[v-minY].contains(var+minX)){
-				Y[var].removeValue(v,aCause);
-				toCompute.set(v - minY);
-			}else{
-				break;
-			}
-		}
-		for(int v=max;v>=min;v=Y[var].previousValue(v)){
-			if(!X[v-minY].contains(var+minX)){
-				Y[var].removeValue(v,aCause);
-				toCompute.set(v - minY);
-			}else{
-				break;
-			}
-		}
-	}
+    private void boundedFilteringOfY(int var) throws ContradictionException {
+        // X[i] = j+Ox <=> Y[j] = i+Oy
+        int min = Y[var].getLB();
+        int max = Y[var].getUB();
+        for (int v = min; v <= max; v = Y[var].nextValue(v)) {
+            if (!X[v - minY].contains(var + minX)) {
+                Y[var].removeValue(v, aCause);
+                toCompute.set(v - minY);
+            } else {
+                break;
+            }
+        }
+        for (int v = max; v >= min; v = Y[var].previousValue(v)) {
+            if (!X[v - minY].contains(var + minX)) {
+                Y[var].removeValue(v, aCause);
+                toCompute.set(v - minY);
+            } else {
+                break;
+            }
+        }
+    }
 
     @Override
     public ESat isEntailed() {
-		boolean allInst = true;
-		for(int i=0;i<n;i++){
-			if(!(vars[i].instantiated() && vars[i+n].instantiated())){
-				allInst = false;
-			}
-			if(X[i].instantiated() && !Y[X[i].getValue()-minX].contains(i+minY)){
-				return ESat.FALSE;
-			}
-			if(Y[i].instantiated() && !X[Y[i].getValue()-minY].contains(i+minX)){
-				return ESat.FALSE;
-			}
-		}
-		if(allInst)return ESat.TRUE;
-		return ESat.UNDEFINED;
+        boolean allInst = true;
+        for (int i = 0; i < n; i++) {
+            if (!(vars[i].instantiated() && vars[i + n].instantiated())) {
+                allInst = false;
+            }
+            if (X[i].instantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
+                return ESat.FALSE;
+            }
+            if (Y[i].instantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
+                return ESat.FALSE;
+            }
+        }
+        if (allInst) return ESat.TRUE;
+        return ESat.UNDEFINED;
     }
 
     @Override

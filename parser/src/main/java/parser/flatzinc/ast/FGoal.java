@@ -27,8 +27,7 @@
 
 package parser.flatzinc.ast;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -38,16 +37,16 @@ import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.ast.searches.IntSearch;
 import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.ABSLNS;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.enumerations.sorters.ImpactBased;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.DomOverWDegVS;
+import solver.search.strategy.selectors.variables.ActivityBased;
+import solver.search.strategy.selectors.variables.DomOverWDeg;
 import solver.search.strategy.selectors.variables.FirstFail;
+import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -92,6 +91,9 @@ public class FGoal {
                 search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
         }
+        if (gc.timeLimit > -1) {
+            aSolver.getSearchLoop().getLimitsBox().setTimeLimit(gc.timeLimit);
+        }
         aSolver.set(gc.searchPattern);
         // Then define search goal
         Variable[] vars = aSolver.getVars();
@@ -99,6 +101,7 @@ public class FGoal {
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
         }
+        StringBuilder description = new StringBuilder();
         if (annotations.size() > 0 && !gc.free) {
             AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
@@ -110,18 +113,18 @@ public class FGoal {
 
                     AbstractStrategy[] strategies = new AbstractStrategy[earray.what.size()];
                     for (int i = 0; i < strategies.length; i++) {
-                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aSolver);
+                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aSolver, description);
                     }
                     strategy = new StrategiesSequencer(aSolver.getEnvironment(), strategies);
                 } else {
-                    strategy = readSearchAnnotation(annotation, aSolver);
+                    strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
 //                solver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,
-                                StrategyFactory.random(ivars, aSolver.getEnvironment(), gc.seed))
+                                IntStrategyFactory.random(ivars, gc.seed))
                 );
 
                 System.out.println("% t:" + gc.seed);
@@ -150,31 +153,38 @@ public class FGoal {
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
             if (type == ResolutionPolicy.SATISFACTION && gc.all) {
-                aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
+                aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
             } else {
                 switch (gc.bbss) {
                     case 2:
+                        description.append("ibs");
                         ImpactBased ibs = new ImpactBased(ivars, 2, 3, 10, gc.seed, false);
+
+                        ibs.setTimeLimit(gc.timeLimit);
                         aSolver.set(ibs);
                         break;
                     case 3:
-                        DomOverWDegVS dwd = new DomOverWDegVS(ivars, aSolver, gc.seed);
-                        aSolver.set(new Assignment(ivars, dwd, new InDomainMin()));
+                        description.append("wdeg");
+                        DomOverWDeg dwd = new DomOverWDeg(ivars, gc.seed);
+                        aSolver.set(new Assignment(dwd, new InDomainMin()));
                         break;
                     case 4:
-                        aSolver.set(new Assignment(ivars, new FirstFail(ivars), new InDomainMin()));
+                        description.append("first_fail");
+                        aSolver.set(new Assignment(new FirstFail(ivars), new InDomainMin()));
                         break;
                     case 1:
                     default:
+                        description.append("abs");
                         ActivityBased abs = new ActivityBased(aSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, gc.seed);
                         aSolver.set(abs);
-                        if (type != ResolutionPolicy.SATISFACTION) { // also add LNS in optimization
-                            aSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
-                        }
+//                        if (type != ResolutionPolicy.SATISFACTION) { // also add LNS in optimization
+//                            aSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
+//                        }
                         break;
                 }
             }
         }
+        gc.setDescription(description.toString());
     }
 
     /**
@@ -184,11 +194,12 @@ public class FGoal {
      * @param solver solver within the search is defined
      * @return {@code true} if a search strategy is defined
      */
-    private static AbstractStrategy readSearchAnnotation(EAnnotation e, Solver solver) {
+    private static AbstractStrategy readSearchAnnotation(EAnnotation e, Solver solver, StringBuilder description) {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
         Search search = Search.valueOf(e.id.value);
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
+        description.append(vchoice.toString()).append(";");
         parser.flatzinc.ast.searches.Assignment assignment = parser.flatzinc.ast.searches.Assignment.valueOf(((EIdentifier) exps[2]).value);
 
         switch (search) {

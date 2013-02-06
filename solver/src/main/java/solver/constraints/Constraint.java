@@ -27,9 +27,9 @@
 
 package solver.constraints;
 
-import choco.kernel.ESat;
 import com.sun.istack.internal.Nullable;
 import org.slf4j.LoggerFactory;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -37,10 +37,6 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.RecorderExplanationEngine;
 import solver.propagation.IPriority;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.metrics.Belong;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -101,8 +97,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
         this.solver = solver;
     }
 
-
-    //BEWARE : ONLY FOR GRAPH CONSTRAINTS
     public Constraint(Solver solver) {
         this.solver = solver;
         this.vars = (V[]) new Variable[0];
@@ -143,11 +137,15 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     public ESat isEntailed() {
         int sat = 0;
         for (int i = 0; i < propagators.length; i++) {
-            ESat entail = propagators[i].isEntailed();
-            //System.out.println(propagators[i]+" => "+entail);
-            if (entail.equals(ESat.FALSE)) {
-                return entail;
-            } else if (entail.equals(ESat.TRUE)) {
+            if (!propagators[i].isStateLess()) { // we only count constraints with active propagator
+                ESat entail = propagators[i].isEntailed();
+                //System.out.println(propagators[i]+" => "+entail);
+                if (entail.equals(ESat.FALSE)) {
+                    return entail;
+                } else if (entail.equals(ESat.TRUE)) {
+                    sat++;
+                }
+            } else {
                 sat++;
             }
         }
@@ -167,6 +165,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      */
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].defineIn(this);
+        }
     }
 
     /**
@@ -184,26 +185,21 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
             this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
             System.arraycopy(tmp, 0, propagators, 0, tmp.length);
             System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
+            for (int i = tmp.length; i < tmp.length + mPropagators.length; i++) {
+                propagators[i].defineIn(this);
+            }
         }
     }
 
     /**
      * Link propagators with variables.
-     *
-     * @param cut
      */
-    public void declare(boolean cut) {
+    public void declare() {
         for (int p = 0; p < propagators.length; p++) {
             staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
         }
         for (int v = 0; v < vars.length; v++) {
             vars[v].declareIn(this);
-        }
-        if (solver.getEngine() != null && solver.getEngine().isInitialized()) {
-            if (solver.getExplainer() instanceof RecorderExplanationEngine) {
-                LoggerFactory.getLogger("exp").warn("Explanation engine does not support constraint dynamic addition!");
-            }
-            solver.getEngine().dynamicAddition(this, cut);
         }
     }
 
@@ -215,30 +211,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      */
     public int getPriority() {
         return staticPropagationPriority;
-    }
-
-    /**
-     * Returns an <code>this</code>-adapted comparator.
-     *
-     * @param name name of comparator (if overrides the default one)
-     * @return a comparator
-     */
-    @SuppressWarnings({"unchecked"})
-    public AbstractSorter<V> getComparator(String name) {
-        if (name.equals(VAR_DEFAULT)) {
-            return new Incr<V>(Belong.build(this));
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-//	public abstract HeuristicVal getIterator(String name, V var);
-
-    @SuppressWarnings({"unchecked"})
-    public IMetric<V> getMetric(String name) {
-        if (name.equals(METRIC_DEFAULT)) {
-            return Belong.build(this);
-        }
-        throw new SolverException("Unknown metric name :" + name);
     }
 
     /**

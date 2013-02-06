@@ -29,7 +29,6 @@ package solver.search.loop.monitors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.Variable;
 
 /**
  * A search monitor logger which prints solution during the search.
@@ -45,39 +44,18 @@ public final class LogSolutions implements IMonitorSolution {
 
     final AbstractSearchLoop searchLoop;
 
-    final ISolutionFormat format;
+    final IMessage message;
 
-    public LogSolutions(AbstractSearchLoop searchLoop, ISolutionFormat format) {
+    public LogSolutions(AbstractSearchLoop searchLoop, IMessage message) {
         this.searchLoop = searchLoop;
-        this.format = format;
+        this.message = message;
     }
 
-    public LogSolutions(final AbstractSearchLoop searchLoop) {
-        this(searchLoop, new ISolutionFormat() {
-            @Override
-            public String print() {
-                return String.format("- Solution #{} found. {} \n\t{}.",
-                        new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                                searchLoop.getMeasures().toOneShortLineString(),
-                                print(searchLoop.getStrategy().vars)
-                        });
-            }
-
-            private String print(Variable[] vars) {
-                StringBuilder s = new StringBuilder(32);
-                for (Variable v : vars) {
-                    s.append(v).append(' ');
-                }
-                return s.toString();
-
-            }
-        });
-    }
 
     @Override
     public void onSolution() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(format.print());
+            LOGGER.info(message.print());
         }
     }
 
