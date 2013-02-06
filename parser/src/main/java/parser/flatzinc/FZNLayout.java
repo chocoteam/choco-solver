@@ -83,7 +83,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                if (isInterrupted()) {
+                if (isUserinterruption()) {
                     LOGGER.info("% User interruption...");
                     beforeClose();
                 }

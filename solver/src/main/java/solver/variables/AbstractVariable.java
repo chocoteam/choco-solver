@@ -67,16 +67,16 @@ public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
     protected final Solver solver; // Reference to the solver containing this variable.
 
     protected Constraint[] constraints = new Constraint[8];
-    protected int cLast = 0;
+    private int cLast = 0;
 
     protected final String name;
 
-    protected Propagator[] propagators; // list of propagators of the variable
-    protected int[] pindices;    // index of the variable in the i^th propagator
-    protected int pIdx;
+    private Propagator[] propagators; // list of propagators of the variable
+    private int[] pindices;    // index of the variable in the i^th propagator
+    private int pIdx;
 
-    protected IView[] views; // views to inform of domain modification
-    protected int vIdx; // index of the last view not null in views -- not backtrable
+    private IView[] views; // views to inform of domain modification
+    private int vIdx; // index of the last view not null in views -- not backtrable
 
     protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
     protected int mIdx; // index of the last view not null in views -- not backtrable

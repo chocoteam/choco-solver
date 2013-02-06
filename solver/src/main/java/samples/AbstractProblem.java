@@ -159,16 +159,20 @@ public abstract class AbstractProblem {
             }
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    if (isInterrupted()) {
+                    if (userInterruption()) {
                         if (level.getLevel() > Level.SILENT.getLevel()) {
                             log.info("User interruption...");
                         }
-                        if (level.getLevel() > Level.QUIET.getLevel()) {
-                            log.info("{}", solver.getMeasures().toString());
-                        } else if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
-                        }
                     }
+                    if (level.getLevel() > Level.QUIET.getLevel()) {
+                        prettyOut();
+                    }
+                    if (level.getLevel() > Level.QUIET.getLevel()) {
+                        log.info("{}", solver.getMeasures().toString());
+                    } else if (level.getLevel() > Level.SILENT.getLevel()) {
+                        log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                    }
+
                 }
             });
 

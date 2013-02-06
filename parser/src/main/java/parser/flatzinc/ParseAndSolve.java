@@ -166,7 +166,7 @@ public class ParseAndSolve {
                 final AverageCSV finalAcsv = acsv;
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     public void run() {
-                        if (userinterruption) {
+                        if (isUserinterruption()) {
                             finalAcsv.record(instance, ";**ERROR**;");
                         }
                     }

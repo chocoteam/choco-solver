@@ -99,9 +99,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
-    protected int[] vindices;  // index of this within the list of propagator of the i^th variable
+    private int[] vindices;  // index of this within the list of propagator of the i^th variable
 
-    protected Operation[] operations;
+    private Operation[] operations;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -113,9 +113,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected short state; // 0 : new -- 1 : active -- 2 : passive
+    private short state; // 0 : new -- 1 : active -- 2 : passive
 
-    protected int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
+    private int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
