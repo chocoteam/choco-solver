@@ -41,12 +41,6 @@ public enum SearchPattern {
 		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
 			return strategies;
 		}
-	},
-	LAST_FAIL {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return new StaticStrategiesSequencer(new LastFail(solver,strategies),strategies);
-		}
 	};
 
 	/**

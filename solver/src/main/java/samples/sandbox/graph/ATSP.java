@@ -43,8 +43,6 @@ import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.PropLagr_MST_BSTdual;
-import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
-import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
@@ -101,9 +99,9 @@ public class ATSP {
     // MODEL CONFIGURATION
     //***********************************************************************************
 
-    private static int arbo = 0, rg = 1, pos = 2, allDiff = 3;
+    private static int arbo = 0, rg = 1, allDiff = 2;
     private static boolean khun;
-    private static int NB_PARAM = 4;
+    private static int NB_PARAM = 3;
     private static BitSet config = new BitSet(NB_PARAM);
     private static boolean bst;
 
@@ -193,7 +191,7 @@ public class ATSP {
                         bst = false;
 //						configParameters(1<<allDiff);
 //						solve();
-                        configParameters((1 << allDiff) + (1 << rg) + (1 << pos));
+                        configParameters((1 << allDiff) + (1 << rg));
                         solve();
                         bst = true;
                         solve();
@@ -259,23 +257,6 @@ public class ATSP {
             gc.addPropagators(RP);
             PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
             gc.addPropagators(SCCP);
-        }
-        if (config.get(pos)) {
-            IntVar[] pos = VariableFactory.boundedArray("pos", n, 0, n - 1, solver);
-            try {
-                pos[0].instantiateTo(0, Cause.Null);
-                pos[n - 1].instantiateTo(n - 1, Cause.Null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(0);
-            }
-            gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
-            if (config.get(rg) && bst) {
-                gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
-            } else {
-                gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
-            }
-            solver.post(IntConstraintFactory.alldifferent(pos, "BC"));
         }
         if (khun) {
 //			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
