@@ -133,7 +133,7 @@ public class ClauseTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -150,7 +150,7 @@ public class ClauseTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test30() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -167,7 +167,7 @@ public class ClauseTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test31() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -184,7 +184,7 @@ public class ClauseTest {
         Assert.assertTrue(bvars[1].instantiatedTo(0));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test32() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
@@ -201,7 +201,7 @@ public class ClauseTest {
         Assert.assertTrue(bvars[0].instantiatedTo(1));
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test33() {
         Solver solver = new Solver();
         BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);

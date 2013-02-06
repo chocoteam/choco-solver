@@ -92,28 +92,28 @@ public class T_elt extends GrammarExtTest {
         return walker.elt(pe);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("G1");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("G1 key var.name");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1}");
         ISchedulable[] scheds = elt(fp);
         Assert.assertNotNull(scheds);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1} key any.var.name");
         ISchedulable[] scheds = elt(fp);

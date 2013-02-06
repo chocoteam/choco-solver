@@ -57,14 +57,14 @@ public class T_annotations extends GrammarTest {
         return walker.annotations();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test0() throws IOException, RecognitionException {
         FlatzincParser fp = parser("");
         List<EAnnotation> as = annotations(fp);
         Assert.assertEquals(0, as.size());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testa1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("::ann1");
         List<EAnnotation> as = annotations(fp);
@@ -72,7 +72,7 @@ public class T_annotations extends GrammarTest {
         Assert.assertEquals("ann1", as.get(0).id.value);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testa2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("::ann1::ann2");
         List<EAnnotation> as = annotations(fp);
@@ -92,72 +92,72 @@ public class T_annotations extends GrammarTest {
         Assert.assertTrue(as.size() > 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException {
         fastcheck("::is_defined_var");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException {
         fastcheck("::toto(titi)");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException {
         fastcheck("::toto([])");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException {
         fastcheck("::toto([titi])");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException {
         fastcheck("::toto(0, 2)");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException {
         fastcheck("::toto(\"titi\")");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException {
         fastcheck("::is_defined_var");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test8() throws IOException {
         fastcheck("::var_is_introduced::is_defined_var");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test9() throws IOException {
         fastcheck("::output_array([1.. 3])");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test10() throws IOException {
         fastcheck(":: viz([viztype(\"vector\"), vizpos(0, 2), vizdisplay(\"expanded\"), vizwidth(8), vizheight(8), vizrange(1, 8)])");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test11() throws IOException {
         fastcheck("::int_search([a],input_order,indomain_min,complete)");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test12() throws IOException {
         fastcheck("::seq([a1(a2),a3])");
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test13() throws IOException {
         fastcheck("::seq_search([int_search([a],input_order,indomain_min,complete)])");
     }
 //
-//    @Test
+//    @Test( groups = "1s" )
 //    public void testOutput() {
 //        fzn = new FZNParser(true, false);
 //        fzn.loadInstance("array [1..2] of var 1..3: xs :: output_array([1..2]);\n" +
@@ -167,7 +167,7 @@ public class T_annotations extends GrammarTest {
 //        fzn.solver.solve();
 //    }
 //
-//    @Test
+//    @Test( groups = "1s" )
 //    public void testOutput2() {
 //        fzn = new FZNParser(true, false);
 //        fzn.loadInstance("array [1..0] of var 0..315: st_rec_y :: output_array([{}]);\n" +

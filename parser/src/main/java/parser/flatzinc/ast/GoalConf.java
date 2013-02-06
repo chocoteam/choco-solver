@@ -46,7 +46,7 @@ public class GoalConf {
     String description;
 
     public GoalConf() {
-        this(false, 0, true, false, 29091981L, SearchPattern.NONE, -1);
+        this(false, 0, false, false, 29091981L, SearchPattern.NONE, -1);
     }
 
     public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, SearchPattern sp, long timelimit) {

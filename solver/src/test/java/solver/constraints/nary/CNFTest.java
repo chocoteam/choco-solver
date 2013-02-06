@@ -43,7 +43,7 @@ import solver.variables.VariableFactory;
  */
 public class CNFTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testJGF() {
         for (int i = 0; i < 2; i++) {
 

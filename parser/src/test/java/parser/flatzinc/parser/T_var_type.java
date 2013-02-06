@@ -54,7 +54,7 @@ public class T_var_type extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var bool");
         Declaration d = var_type(fp);
@@ -62,7 +62,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertEquals(DBool.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var float");
         Declaration d = var_type(fp);
@@ -70,7 +70,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertEquals(DFloat.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var int");
         Declaration d = var_type(fp);
@@ -78,21 +78,21 @@ public class T_var_type extends GrammarTest {
         Assert.assertEquals(DInt.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var 1 .. 4");
         Declaration d = var_type(fp);
         Assert.assertTrue(d instanceof DInt2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var {1,2,3}");
         Declaration d = var_type(fp);
         Assert.assertTrue(d instanceof DManyInt);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var set of 1 .. 4");
         Declaration d = var_type(fp);
@@ -100,7 +100,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertTrue(((DSet) d).getWhat() instanceof DInt2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincParser fp = parser("var set of {1,2,3}");
         Declaration d = var_type(fp);
@@ -108,7 +108,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertTrue(((DSet) d).getWhat() instanceof DManyInt);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var bool");
         Declaration d = var_type(fp);
@@ -118,7 +118,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertEquals(DBool.me, ((DArray) d).getWhat());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test10() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var int");
         Declaration d = var_type(fp);
@@ -128,7 +128,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertEquals(DInt.me, ((DArray) d).getWhat());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test11() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var 1..3");
         Declaration d = var_type(fp);
@@ -138,7 +138,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertTrue(((DArray) d).getWhat() instanceof DInt2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test12() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var {1,2,3}");
         Declaration d = var_type(fp);
@@ -149,7 +149,7 @@ public class T_var_type extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test13() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var set of 1..3");
         Declaration d = var_type(fp);
@@ -159,7 +159,7 @@ public class T_var_type extends GrammarTest {
         Assert.assertTrue(((DArray) d).getWhat() instanceof DSet);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test14() throws IOException, RecognitionException {
         FlatzincParser fp = parser("array [1..2] of var set of {1,2,3}");
         Declaration d = var_type(fp);

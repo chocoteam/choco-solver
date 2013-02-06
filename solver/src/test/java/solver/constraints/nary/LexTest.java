@@ -51,7 +51,7 @@ import solver.variables.VariableFactory;
 public class LexTest {
 
 
-    @Test
+    @Test(groups = "1s")
     public void testLessLexq() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -71,7 +71,7 @@ public class LexTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testLex() {
         for (int seed = 0; seed < 5; seed++) {
             Solver solver = new Solver();
@@ -91,7 +91,7 @@ public class LexTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testLexiSatisfied() {
         Solver solver = new Solver();
         IntVar v1 = VariableFactory.bounded("v1", 1, 1, solver);
@@ -113,7 +113,7 @@ public class LexTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void testAshish() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -138,7 +138,7 @@ public class LexTest {
         Assert.assertEquals(6, solver.getMeasures().getSolutionCount());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBug1() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -163,7 +163,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBug2() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -187,7 +187,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 8);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBug3() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[2];
@@ -209,7 +209,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBug4() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[5];
@@ -237,7 +237,7 @@ public class LexTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 216);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testBug5() {
         Solver solver = new Solver();
         IntVar[] a = new IntVar[3];

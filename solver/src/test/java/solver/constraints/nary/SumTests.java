@@ -46,7 +46,7 @@ import java.util.Random;
  */
 public class SumTests {
 
-    @Test
+    @Test(groups = "1s")
     public void testBound() {
         Random random = new Random();
         int m = 6;

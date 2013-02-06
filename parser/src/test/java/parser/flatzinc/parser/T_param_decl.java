@@ -56,7 +56,7 @@ public class T_param_decl extends GrammarTest {
         return walker.map;
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException {
         FlatzincParser fp = parser("bool: beer_is_good = true;");
         THashMap<String, Object> map = null;
@@ -71,7 +71,7 @@ public class T_param_decl extends GrammarTest {
         Assert.assertEquals(true, ((Boolean) o).booleanValue());
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException {
         FlatzincParser fp = parser("int: n = 4;");
         THashMap<String, Object> map = null;
@@ -87,7 +87,7 @@ public class T_param_decl extends GrammarTest {
     }
 
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException {
         FlatzincParser fp = parser("array [1..7] of int: fib = [1,1,2,3,5,8,13];");
         THashMap<String, Object> map = null;
@@ -102,7 +102,7 @@ public class T_param_decl extends GrammarTest {
         Assert.assertEquals(new int[]{1, 1, 2, 3, 5, 8, 13}, o);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException {
         FlatzincParser fp = parser("array [1..3] of set of int: suc = [{5, 10, 14}, {}, {}];");
         try {

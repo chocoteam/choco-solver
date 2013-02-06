@@ -48,7 +48,7 @@ import java.util.Random;
  */
 public class BoundGlobalCardinlityTest {
 
-    @Test
+    @Test(groups = "1s")
     public void test0() throws ContradictionException {
         Solver solver = new Solver();
 
@@ -73,7 +73,7 @@ public class BoundGlobalCardinlityTest {
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandom() {
         Random random = new Random();
 //        int seed= 108;{
@@ -111,7 +111,7 @@ public class BoundGlobalCardinlityTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandom2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -127,7 +127,7 @@ public class BoundGlobalCardinlityTest {
             }
             {
                 IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, solver);
-				IntVar[] cards = VariableFactory.boundedArray("cards",m,0,n,solver);
+                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, solver);
                 solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
 //                solver.set(StrategyFactory.random(ArrayUtils.append(vars, cards), solver.getEnvironment(), seed));
                 solver.set(IntStrategyFactory.presetI(vars, solver.getEnvironment()));
@@ -135,8 +135,8 @@ public class BoundGlobalCardinlityTest {
             // reformulation
             Solver ref = new Solver();
             {
-				IntVar[] cards = VariableFactory.boundedArray("cards",m,0,n,ref);
-				IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
+                IntVar[] cards = VariableFactory.boundedArray("cards", m, 0, n, ref);
+                IntVar[] vars = VariableFactory.boundedArray("vars", n, 0, m - 1, ref);
                 ref.post(GlobalCardinality.reformulate(vars, cards, ref));
                 ref.set(IntStrategyFactory.presetI(vars, ref.getEnvironment()));
             }

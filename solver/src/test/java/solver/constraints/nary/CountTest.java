@@ -54,7 +54,7 @@ import java.util.Random;
  */
 public class CountTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testMS4() {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(4));
@@ -66,7 +66,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testMS6() {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(8));
@@ -78,7 +78,7 @@ public class CountTest {
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -93,7 +93,7 @@ public class CountTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         int n = 2;
         for (int i = 0; i < 200; i++) {

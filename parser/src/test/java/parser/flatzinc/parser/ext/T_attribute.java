@@ -53,49 +53,49 @@ public class T_attribute extends GrammarExtTest {
         return walker.attribute();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("var.name");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.VNAME);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("cstr.name");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.CNAME);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("var.cardinality");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.VCARD);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("cstr.arity");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.CARITY);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test6() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("prop.priority");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.PPRIO);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test7() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("prop.arity");
         Attribute a = attribute(fp);
         Assert.assertTrue(a == Attribute.PARITY);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test8() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("prop.prioDyn");
         Attribute a = attribute(fp);

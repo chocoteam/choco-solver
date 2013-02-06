@@ -57,7 +57,7 @@ import java.util.Random;
 
 public class LexChainTest {
 
-    @Test
+    @Test(groups = "1s")
     public void lexChainTest1() {
         Solver s = new Solver();
 

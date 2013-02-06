@@ -260,7 +260,7 @@ public class AllDifferentTest {
         return s;
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testXX() {
         Solver solver = new Solver();
         IntVar[] ts = new IntVar[4];

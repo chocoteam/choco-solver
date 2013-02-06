@@ -97,7 +97,7 @@ public class T_struct extends GrammarExtTest {
         return walker.struct(pe);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser("queue(one) of {G1,G2}");
         PropagationStrategy scheds = struct(fp);
@@ -106,7 +106,7 @@ public class T_struct extends GrammarExtTest {
     }
 
     //queue(wone) of {queue(wone) of{G1}, list of {list(for) of {G2} key var.name,rev list of {G3} key var.name}};
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincFullExtParser fp = parser(
                 "queue(wone) of {" +

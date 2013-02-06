@@ -53,7 +53,7 @@ public class T_par_type_u extends GrammarTest {
         return walker.par_type_u();
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {
         FlatzincParser fp = parser("bool");
         Declaration d = par_type_u(fp);
@@ -61,7 +61,7 @@ public class T_par_type_u extends GrammarTest {
         Assert.assertEquals(DBool.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() throws IOException, RecognitionException {
         FlatzincParser fp = parser("float");
         Declaration d = par_type_u(fp);
@@ -69,7 +69,7 @@ public class T_par_type_u extends GrammarTest {
         Assert.assertEquals(DFloat.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() throws IOException, RecognitionException {
         FlatzincParser fp = parser("int");
         Declaration d = par_type_u(fp);
@@ -77,7 +77,7 @@ public class T_par_type_u extends GrammarTest {
         Assert.assertEquals(DInt.me, d);
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
         FlatzincParser fp = parser("set of int");
         Declaration d = par_type_u(fp);
