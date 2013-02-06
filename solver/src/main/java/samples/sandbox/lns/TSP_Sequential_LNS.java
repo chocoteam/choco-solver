@@ -131,7 +131,7 @@ public class TSP_Sequential_LNS {
         solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 2, solver));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(9, true, true, false);
+        strategy.configure(9, true);
         solver.set(strategy);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));

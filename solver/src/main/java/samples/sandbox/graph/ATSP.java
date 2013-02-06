@@ -313,9 +313,9 @@ public class ATSP {
 //		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
 
         GraphStrategies first = new GraphStrategies(graph, distanceMatrix, relax);
-        first.configure(9, true, true, true);
+        first.configure(9, true);
         GraphStrategies next = new GraphStrategies(graph, distanceMatrix, relax);
-        next.configure(12, true, true, false);
+        next.configure(12, true);
         AbstractStrategy mainStrat = new Change(graph, first, next);
 
         switch (main_search) {

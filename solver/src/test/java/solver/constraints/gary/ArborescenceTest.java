@@ -56,7 +56,7 @@ public class ArborescenceTest {
                 g.getEnvelopGraph().addArc(i, j);
             }
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(s);
+        Constraint gc = new Constraint(s);
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
             preds[i] = 1;

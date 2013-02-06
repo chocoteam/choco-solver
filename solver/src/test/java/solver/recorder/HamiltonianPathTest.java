@@ -94,7 +94,7 @@ public class HamiltonianPathTest {
             e.printStackTrace();
             System.exit(0);
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+        Constraint gc = new Constraint(solver);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {

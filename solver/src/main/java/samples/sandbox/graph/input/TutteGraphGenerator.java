@@ -67,7 +67,7 @@ public class TutteGraphGenerator {
         boolean[][] output = new boolean[n][n];
         Solver solver = new Solver();
         UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
-        Constraint c = GraphConstraintFactory.makeConstraint(solver);
+        Constraint c = new Constraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
 //		c.addPropagators(new PropMaxDiameterFromNode(g,nodeDiam,0,c,solver));
@@ -113,7 +113,7 @@ public class TutteGraphGenerator {
         final ArrayList<int[][]> output = new ArrayList();
         Solver solver = new Solver();
         final UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
-        Constraint c = GraphConstraintFactory.makeConstraint(solver);
+        Constraint c = new Constraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
         c.addPropagators(new PropMaxDiameterFromNode(g, 6, 0, c, solver));

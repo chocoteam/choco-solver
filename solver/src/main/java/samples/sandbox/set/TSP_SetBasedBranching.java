@@ -141,7 +141,7 @@ public class TSP_SetBasedBranching {
         solver.post(SetConstraintsFactory.graph_channel(sets, undi, solver));
         // config
         GraphStrategies graph_strategy = new GraphStrategies(undi, matrix, mst);
-        graph_strategy.configure(policy, true, true, false);
+        graph_strategy.configure(policy, true);
         SetSearchStrategy set_strategy = new SetSearchStrategy(sets) {
             @Override
             public Decision<SetVar> getDecision() {

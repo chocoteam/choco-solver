@@ -205,7 +205,7 @@ public class DCMST {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+        Constraint gc = new Constraint(solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(undi, 1, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(undi, dMax, gc, solver));
         gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));

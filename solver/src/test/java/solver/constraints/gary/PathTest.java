@@ -58,7 +58,7 @@ public class PathTest {
                 g.getEnvelopGraph().addArc(i, j);
             }
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(s);
+        Constraint gc = new Constraint(s);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {

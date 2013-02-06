@@ -263,7 +263,7 @@ public class SOP {
     public static void configureAndSolve() {
         //SOLVER CONFIG
         GraphStrategies mainStrat = new GraphStrategies(graph, distanceMatrix, relax);
-        mainStrat.configure(policy, true, true, true);
+        mainStrat.configure(policy, true);
 //		GraphStrategies mainStrat = new GraphStrategies(transGraph,distanceMatrix,relax);
 //		mainStrat.configure(GraphStrategies.MAX_DELTA_DEGREE,true,true,false);
 //		AbstractStrategy mainStrat = StrategyFactory.ABSrandom(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);

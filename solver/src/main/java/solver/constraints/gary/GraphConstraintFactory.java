@@ -29,9 +29,7 @@ package solver.constraints.gary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.basic.PropKCliques;
-import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
-import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
@@ -40,6 +38,7 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
@@ -52,16 +51,6 @@ import solver.variables.graph.UndirectedGraphVar;
 public class GraphConstraintFactory {
 
     /**
-     * Create a generic empty constraint
-     *
-     * @param solver
-     * @return a generic empty constraint
-     */
-    public static Constraint makeConstraint(Solver solver) {
-        return new Constraint(solver);
-    }
-
-    /**
      * partition a graph variable into nCliques cliques
      * BEWARE unsafe
      *
@@ -71,7 +60,7 @@ public class GraphConstraintFactory {
      * @return
      */
     public static Constraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
-        Constraint gc = makeConstraint(solver);
+        Constraint gc = new Constraint(new Variable[]{graph,nCliques},solver);
         gc.addPropagators(new PropTransitivity(graph, solver, gc));
         gc.addPropagators(new PropKCliques(graph, solver, gc, nCliques));
         return gc;
@@ -126,7 +115,7 @@ public class GraphConstraintFactory {
      * @return
      */
     public static Constraint hamiltonianCycle(UndirectedGraphVar graph, Solver solver) {
-        Constraint gc = makeConstraint(solver);
+        Constraint gc = new Constraint(new Variable[]{graph},solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(graph, 2, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(graph, 2, gc, solver));
         gc.addPropagators(new PropCycleNoSubtour(graph, gc, solver));
@@ -150,7 +139,7 @@ public class GraphConstraintFactory {
             succs[i] = preds[i] = 1;
         }
         succs[end] = preds[origin] = 0;
-        Constraint gc = makeConstraint(solver);
+        Constraint gc = new Constraint(new Variable[]{graph},solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
@@ -171,11 +160,6 @@ public class GraphConstraintFactory {
      * @return tree constraint
      */
     public static Constraint nTrees(DirectedGraphVar graph, IntVar n, Solver solver) {
-        Constraint tree = makeConstraint(solver);
-        tree.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
-        tree.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, tree, solver));
-        tree.addPropagators(new PropKLoops(graph, solver, tree, n));
-        tree.addPropagators(new PropNTree(graph, n, solver, tree));
-        return tree;
+        return new NTree(graph,n,solver);
     }
 }

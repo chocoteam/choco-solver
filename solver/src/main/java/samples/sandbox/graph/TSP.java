@@ -133,7 +133,7 @@ public class TSP {
             throw new UnsupportedOperationException("not implemented");
         }
         GraphStrategies strategy = new GraphStrategies(undi, matrix, mst);
-        strategy.configure(policy, true, true, false);
+        strategy.configure(policy, true);
         switch (search) {
             case 0:
                 solver.set(strategy);

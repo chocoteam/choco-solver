@@ -149,7 +149,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.makeConstraint(solver);
+        gc = new Constraint(solver);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
