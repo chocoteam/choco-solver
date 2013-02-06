@@ -43,12 +43,11 @@ import solver.variables.IntVar;
 
 /**
  * Propagator for Global Cardinality Constraint (GCC) for integer variables
- * Incremental checker and basic filter: no particular consistency
- * Filter decvars only
+ * Basic filter: no particular consistency but fast and with a correct checker
  *
  * @author Jean-Guillaume Fages
  */
-public class PropFastGCC_decvars extends Propagator<IntVar> {
+public class PropFastGCC extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -68,8 +67,8 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 
 	/**
 	 * Propagator for Global Cardinality Constraint (GCC) for integer variables
-	 * Incremental checker and basic filter: no particular consistency
-	 * Filter vars decvars
+	 * Basic filter: no particular consistency but fast and with a correct checker
+	 *
 	 * @param decvars
 	 * @param restrictedValues
 	 * @param map
@@ -77,7 +76,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 	 * @param constraint
 	 * @param sol
 	 */
-	public PropFastGCC_decvars(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
+	public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
 		super(ArrayUtils.append(decvars,valueCardinalities), sol, constraint, PropagatorPriority.LINEAR, false);
 		if (restrictedValues.length != valueCardinalities.length) {
 			throw new UnsupportedOperationException();
@@ -105,7 +104,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 	@Override
 	public String toString() {
 		StringBuilder st = new StringBuilder();
-		st.append("PropFastGCC_varsFilter(");
+		st.append("PropFastGCC_(");
 		int i = 0;
 		for (; i < Math.min(4, vars.length); i++) {
 			st.append(vars[i].getName()).append(", ");
@@ -123,8 +122,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		// initialization
-		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){
+		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){// initialization
 			valueToCompute.clear();
 			for(int i=0;i<n2;i++){
 				mandatories[i].clear();
@@ -161,7 +159,7 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 			}
 		}
 		// filtering
-		fixPoint();
+		filter();
 	}
 
 	@Override
@@ -169,11 +167,12 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
-	private void fixPoint() throws ContradictionException {
-		boolean again = true;
-		while(again){
-			again = false;
-			for(int i=valueToCompute.getFirstElement();i>=0;i=valueToCompute.getNextElement()){
+	private void filter() throws ContradictionException {
+		boolean again = false;
+		for(int i=valueToCompute.getFirstElement();i>=0;i=valueToCompute.getNextElement()){
+			cards[i].updateLowerBound(mandatories[i].getSize(),aCause);
+			cards[i].updateUpperBound(mandatories[i].getSize()+possibles[i].getSize(),aCause);
+			if(cards[i].instantiated()){
 				if(possibles[i].getSize()+mandatories[i].getSize()==cards[i].getLB()){
 					for(int j=possibles[i].getFirstElement();j>=0;j=possibles[i].getNextElement()){
 						mandatories[i].add(j);
@@ -188,17 +187,20 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 						if(vars[var].removeValue(values[i],aCause)){
 							again = true;
 						}
-						possibles[i].remove(var);
 					}
+					possibles[i].clear();
 					valueToCompute.remove(i);//value[i] restriction entailed
 				}
 			}
-			// manage holes in bounded variables
-			if(boundVar.size()>0){
-				if(filterBounds()){
-					again = true;
-				}
+		}
+		// manage holes in bounded variables
+		if(boundVar.size()>0){
+			if(filterBounds()){
+				again = true;
 			}
+		}
+		if(again){// fix point
+			propagate(EventType.CUSTOM_PROPAGATION.mask);
 		}
 	}
 
@@ -258,6 +260,9 @@ public class PropFastGCC_decvars extends Propagator<IntVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
+		if(vIdx>=n){// cardinality variables
+			return EventType.INSTANTIATE.mask+EventType.BOUND.mask;
+		}
 		return EventType.INT_ALL_MASK();
 	}
 
