@@ -27,41 +27,33 @@
 
 package samples.graph;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
+import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
-import samples.sandbox.graph.input.HCP_Utils;
+import samples.sandbox.graph.input.TSP_Utils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
+import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
+import solver.objective.ObjectiveStrategy;
+import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.variables.*;
-import solver.variables.graph.GraphVar;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategies;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
 
-import java.util.ArrayList;
-
 /**
- * Solves the Knight's Tour Problem
+ * Solves the Traveling Salesman Problem
+ * parses TSPLIB instances
+ * proposes several optimization strategies
  *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class KnightTourProblem extends AbstractProblem{
+public class TravelingSalesmanProblem extends AbstractProblem{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -69,52 +61,70 @@ public class KnightTourProblem extends AbstractProblem{
 
 	@Option(name = "-tl", usage = "time limit.", required = false)
 	private long limit = 60000;
-	@Option(name = "-l", usage = "Board length.", required = false)
-	private int boardLength = 50;
-	@Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
-	private boolean closedTour = false;
+	// instance file path
+	@Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
+	private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
+	@Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
+	private int policy = 1;
 
+
+	// input cost matrix
+	private int[][] costMatrix;
+	// graph variable representing the cycle
 	private UndirectedGraphVar graph;
+	// integer variable representing the objective
+	private IntVar totalCost;
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		new KnightTourProblem().execute(args);
+		new TravelingSalesmanProblem().execute(args);
 	}
 
 	@Override
 	public void createSolver() {
-		solver = new Solver("solving the knight's tour problem with graph variables");
+		solver = new Solver("solving the Traveling Salesman Problem graph variables");
 	}
 
 	@Override
 	public void buildModel() {
-		boolean[][] matrix;
-		if(closedTour){
-			matrix = HCP_Utils.generateKingTourInstance(boardLength);
-		}else{
-			matrix = HCP_Utils.generateOpenKingTourInstance(boardLength);
-		}
-		int n = matrix.length;
+		costMatrix = TSP_Utils.parseInstance(instancePath, 200);
+		final int n = costMatrix.length;
+		solver = new Solver();
 		// variables
+		totalCost = VariableFactory.bounded("obj", 0, 99999, solver);
 		graph = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
 		for (int i = 0; i < n; i++) {
+			graph.getKernelGraph().activateNode(i);
 			for (int j = i + 1; j < n; j++) {
-				if (matrix[i][j]) {
-					graph.getEnvelopGraph().addEdge(i, j);
-				}
+				graph.getEnvelopGraph().addEdge(i, j);
 			}
 		}
 		// constraints
-		solver.post(GraphConstraintFactory.hamiltonianCycle(graph));
+		Constraint gc = GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 0);
+		// add a lagrangian relaxation
+		PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix, gc, solver);
+		mst.waitFirstSolution(true);
+		gc.addPropagators(mst);
+		solver.post(gc);
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
-//		solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
+		GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
+		strategy.configure(GraphStrategies.MIN_COST, true);
+		switch (policy){
+			case 0:solver.set(strategy);
+				System.out.println("classical top-down minimization");break;
+			case 1:solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
+				System.out.println("bottom-up minimization");break;
+			case 2:solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
+				System.out.println("dichotomic minimization");break;
+			default:throw new UnsupportedOperationException("policy should be 0, 1 or 2");
+		}
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
 		SearchMonitorFactory.log(solver, true, false);
 	}
 
@@ -123,54 +133,11 @@ public class KnightTourProblem extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		solver.findSolution();
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 	}
 
 	@Override
-	public void prettyOut() {}
-
-	//***********************************************************************************
-	// HEURISTICS
-	//***********************************************************************************
-
-	private static class MinNeigh extends ArcStrategy {
-		int n;
-
-		public MinNeigh(GraphVar graphVar) {
-			super(graphVar);
-			n = graphVar.getEnvelopGraph().getNbNodes();
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			ISet suc;
-			int from = -1;
-			int size = n + 1;
-			int sizi;
-			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize() - g.getKernelGraph().getSuccessorsOf(i).getSize();
-				if (sizi < size && sizi > 0) {
-					from = i;
-					size = sizi;
-				}
-			}
-			if (from == -1) {
-				return false;
-			}
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			this.from = from;
-			to = 2 * n;
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if (!g.getKernelGraph().arcExists(from, j)) {
-					if (j < to) {
-						to = j;
-					}
-				}
-			}
-			if (to == 2 * n) {
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
+	public void prettyOut() {
+		System.out.println("cost : "+totalCost);
 	}
 }
