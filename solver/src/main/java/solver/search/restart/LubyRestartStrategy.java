@@ -26,7 +26,7 @@
  */
 package solver.search.restart;
 
-import choco.kernel.common.util.tools.MathUtils;
+import common.util.tools.MathUtils;
 
 /**
  * Restart strategy based on:

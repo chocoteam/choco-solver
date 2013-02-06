@@ -27,7 +27,7 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -50,7 +49,7 @@ public class AbsViewTest {
     private int[][] bounded(int xl, int xu, int yl, int yu) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
         X.updateLowerBound(xl, Cause.Null);
         X.updateUpperBound(xu, Cause.Null);
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
@@ -59,7 +58,7 @@ public class AbsViewTest {
     private int[][] enumerated(int[] x, int[] y) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
 
         solver.post(IntConstraintFactory.member(X, x));
         solver.propagate();
@@ -87,7 +86,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -97,7 +96,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.bounded("Y", lby, uby, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -239,11 +238,11 @@ public class AbsViewTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
 
         solver.post(IntConstraintFactory.member(X, minX, maxX));
 //        SearchMonitorFactory.log(solver, true, false);
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));
@@ -281,10 +280,10 @@ public class AbsViewTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
         solver.post(IntConstraintFactory.member(X, domains[0]));
         //SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));

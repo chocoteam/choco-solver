@@ -1,8 +1,8 @@
 package solver.constraints.propagators.nary.alldifferent.proba;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.probabilities.DedicatedS64BitSet;
 import solver.variables.IntVar;
 
@@ -40,8 +40,8 @@ public class BitSetUnion {
                 vals.add(value);
             }
         }
-        int size = max-offset+1;
-        values = new DedicatedS64BitSet(environment,size);//environment.makeBitSet(size);
+        int size = max - offset + 1;
+        values = new DedicatedS64BitSet(environment, size);//environment.makeBitSet(size);
         occurrences = new IStateInt[size];
         for (int i = 0; i < size; i++) {
             occurrences[i] = environment.makeInt(0);

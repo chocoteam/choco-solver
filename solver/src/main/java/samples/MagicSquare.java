@@ -27,12 +27,12 @@
 
 package samples;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.enumerations.sorters.ImpactBased;
+import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 

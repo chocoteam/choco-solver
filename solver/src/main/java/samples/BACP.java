@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;

@@ -26,104 +26,105 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+
 import java.util.BitSet;
 
 public class Member extends GraphRelation<IntVar> {
 
-	BitSet values;
-	int firstVal;
-	int lastVal;
+    BitSet values;
+    int firstVal;
+    int lastVal;
 
-	public Member(IntVar[] vars, int[] values){
-		super(vars);
-		this.values = new BitSet();
-		firstVal = values[0];
-		lastVal = values[0];
-		for(int v:values){
-			firstVal = Math.min(firstVal, v);
-			lastVal = Math.max(lastVal, v);
-		}
-		for(int v:values){
-			this.values.set(v-firstVal);
-		}
-	}
+    public Member(IntVar[] vars, int[] values) {
+        super(vars);
+        this.values = new BitSet();
+        firstVal = values[0];
+        lastVal = values[0];
+        for (int v : values) {
+            firstVal = Math.min(firstVal, v);
+            lastVal = Math.max(lastVal, v);
+        }
+        for (int v : values) {
+            this.values.set(v - firstVal);
+        }
+    }
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		if(var1 != var2){
-			return ESat.FALSE;
-		}
-		IntVar x = vars[var1];
-		if(x.instantiated()){
-			if(values.get(x.getValue()-firstVal)){
-				return ESat.TRUE;
-			}else{
-				return ESat.FALSE;
-			}
-		}
-		if(x.getLB()>lastVal || x.getUB()<firstVal){
-			return ESat.FALSE;
-		}
-		if(!x.hasEnumeratedDomain()){
-			return ESat.UNDEFINED;
-		}
-		int up = x.getUB();
-		for(int i=x.getLB();i<=up;i=x.nextValue(i)){
-			if(values.get(i-firstVal)){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.FALSE;
-	}
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        if (var1 != var2) {
+            return ESat.FALSE;
+        }
+        IntVar x = vars[var1];
+        if (x.instantiated()) {
+            if (values.get(x.getValue() - firstVal)) {
+                return ESat.TRUE;
+            } else {
+                return ESat.FALSE;
+            }
+        }
+        if (x.getLB() > lastVal || x.getUB() < firstVal) {
+            return ESat.FALSE;
+        }
+        if (!x.hasEnumeratedDomain()) {
+            return ESat.UNDEFINED;
+        }
+        int up = x.getUB();
+        for (int i = x.getLB(); i <= up; i = x.nextValue(i)) {
+            if (values.get(i - firstVal)) {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.FALSE;
+    }
 
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
-		}
-		IntVar x = vars[var1];
-		if(x.getLB()<firstVal){
-			x.removeInterval(x.getLB(), firstVal-1, cause);
-		}
-		if(x.getUB()>lastVal){
-			x.removeInterval(lastVal+1, x.getUB(), cause);
-		}
-		if(x.hasEnumeratedDomain()){
-			int up = x.getUB();
-			for(int v=x.getLB(); v<=up; v = x.nextValue(v)){
-				if(!values.get(v-firstVal)){
-					x.removeValue(v, cause);
-				}
-			}
-		}
-	}
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
+        }
+        IntVar x = vars[var1];
+        if (x.getLB() < firstVal) {
+            x.removeInterval(x.getLB(), firstVal - 1, cause);
+        }
+        if (x.getUB() > lastVal) {
+            x.removeInterval(lastVal + 1, x.getUB(), cause);
+        }
+        if (x.hasEnumeratedDomain()) {
+            int up = x.getUB();
+            for (int v = x.getLB(); v <= up; v = x.nextValue(v)) {
+                if (!values.get(v - firstVal)) {
+                    x.removeValue(v, cause);
+                }
+            }
+        }
+    }
 
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
-		}
-		IntVar x = vars[var1];
-		if(x.hasEnumeratedDomain()){
-			int up = Math.min(lastVal, x.getUB());
-			int lb = Math.max(firstVal,x.getLB());
-			for(int v=lb; v<=up; v = x.nextValue(v)){
-				if(values.get(v-firstVal)){
-					x.removeValue(v, cause);
-				}
-			}
-		}else{
-			x.removeInterval(firstVal, lastVal, cause);
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		return false;
-	}
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
+        }
+        IntVar x = vars[var1];
+        if (x.hasEnumeratedDomain()) {
+            int up = Math.min(lastVal, x.getUB());
+            int lb = Math.max(firstVal, x.getLB());
+            for (int v = lb; v <= up; v = x.nextValue(v)) {
+                if (values.get(v - firstVal)) {
+                    x.removeValue(v, cause);
+                }
+            }
+        } else {
+            x.removeInterval(firstVal, lastVal, cause);
+        }
+    }
+
+    @Override
+    public boolean isDirected() {
+        return false;
+    }
 }

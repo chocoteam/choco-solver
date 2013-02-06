@@ -27,11 +27,11 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Cause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -46,7 +46,6 @@ import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -127,7 +126,7 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
-        IntVar ZERO = Views.fixed(0, solver);
+        IntVar ZERO = VariableFactory.fixed(0, solver);
         for (int i = 0; i < n; i++) {
             planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
 
@@ -138,8 +137,8 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Max.var(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
-            tardiness[i] = Max.var(ZERO, Views.offset(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, VariableFactory.offset(VariableFactory.minus(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, VariableFactory.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();
@@ -195,10 +194,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
+//        solver.set(StrategyFactory.domOverWDeg_InDomainMin(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.random(bVars, solver.getEnvironment()),
-                IntStrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+                IntStrategyFactory.random(bVars, seed),
+                IntStrategyFactory.inputOrder_InDomainMin(planes)
         ));
 
     }

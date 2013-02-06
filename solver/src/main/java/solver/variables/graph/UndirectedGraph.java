@@ -27,10 +27,10 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.
@@ -45,56 +45,60 @@ public class UndirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-	ISet[] neighbors;
-	/** activeIdx represents the nodes available in the graph */
-	ISet nodes;
-	int n;
-	SetType type;
+    ISet[] neighbors;
+    /**
+     * activeIdx represents the nodes available in the graph
+     */
+    ISet nodes;
+    int n;
+    SetType type;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**
-	 * Stored Graph
-	 * @param env solver environment
-	 * @param nbits max number of nodes
-	 * @param type of data structure
-	 * @param allNodes true iff all nodes will always remain in the graph
-	 */
-	public UndirectedGraph(IEnvironment env, int nbits, SetType type, boolean allNodes) {
-		this.type = type;
-		this.n = nbits;
-		neighbors = new ISet[nbits];
-		for(int i=0;i<n;i++){
-			neighbors[i] = SetFactory.makeStoredSet(type, nbits, env);
-		}
-		if(allNodes){
-			this.nodes = SetFactory.makeFullSet(nbits);
-		}else{
-			this.nodes = SetFactory.makeStoredSet(SetType.BITSET,nbits,env);
-		}
-	}
+    /**
+     * Stored Graph
+     *
+     * @param env      solver environment
+     * @param nbits    max number of nodes
+     * @param type     of data structure
+     * @param allNodes true iff all nodes will always remain in the graph
+     */
+    public UndirectedGraph(IEnvironment env, int nbits, SetType type, boolean allNodes) {
+        this.type = type;
+        this.n = nbits;
+        neighbors = new ISet[nbits];
+        for (int i = 0; i < n; i++) {
+            neighbors[i] = SetFactory.makeStoredSet(type, nbits, env);
+        }
+        if (allNodes) {
+            this.nodes = SetFactory.makeFullSet(nbits);
+        } else {
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, nbits, env);
+        }
+    }
 
-	/**
-	 * Unstored Graph
-	 * @param nbits max number of nodes
-	 * @param type of data structure
-	 * @param allNodes true iff all nodes will always remain in the graph
-	 */
-	public UndirectedGraph(int nbits, SetType type, boolean allNodes) {
-		this.type = type;
-		this.n = nbits;
-		neighbors = new ISet[nbits];
-		for(int i=0;i<n;i++){
-			neighbors[i] = SetFactory.makeSet(type,nbits);
-		}
-		if(allNodes){
-			this.nodes = SetFactory.makeFullSet(nbits);
-		}else{
-			this.nodes = SetFactory.makeBitSet(nbits);
-		}
-	}
+    /**
+     * Unstored Graph
+     *
+     * @param nbits    max number of nodes
+     * @param type     of data structure
+     * @param allNodes true iff all nodes will always remain in the graph
+     */
+    public UndirectedGraph(int nbits, SetType type, boolean allNodes) {
+        this.type = type;
+        this.n = nbits;
+        neighbors = new ISet[nbits];
+        for (int i = 0; i < n; i++) {
+            neighbors[i] = SetFactory.makeSet(type, nbits);
+        }
+        if (allNodes) {
+            this.nodes = SetFactory.makeFullSet(nbits);
+        } else {
+            this.nodes = SetFactory.makeBitSet(nbits);
+        }
+    }
 
     //***********************************************************************************
     // METHODS
@@ -124,30 +128,31 @@ public class UndirectedGraph implements IGraph {
         return nodes;
     }
 
-	@Override
-	/**
-	 * @inheritedDoc
-	 */
-	public SetType getType() {
-		return type;
-	}
+    @Override
+    /**
+     * @inheritedDoc
+     */
+    public SetType getType() {
+        return type;
+    }
 
-	@Override
-	public boolean activateNode(int x) {
-		return nodes.add(x);
-	}
+    @Override
+    public boolean activateNode(int x) {
+        return nodes.add(x);
+    }
 
-	@Override
-	public boolean desactivateNode(int x) {
-		if(nodes.remove(x)){
-			ISet nei = getNeighborsOf(x);
-			for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-				neighbors[j].remove(x);
-			}
-			neighbors[x].clear();
-			return true;
-		}return false;
-	}
+    @Override
+    public boolean desactivateNode(int x) {
+        if (nodes.remove(x)) {
+            ISet nei = getNeighborsOf(x);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                neighbors[j].remove(x);
+            }
+            neighbors[x].clear();
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean addEdge(int x, int y) {

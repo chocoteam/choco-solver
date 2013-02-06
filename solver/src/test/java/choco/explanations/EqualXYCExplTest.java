@@ -27,7 +27,7 @@
 
 package choco.explanations;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -77,10 +77,10 @@ public class EqualXYCExplTest {
             indicess[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, sol);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.forceInputOrderMinVal(allvarsr, ref.getEnvironment()));
+        ref.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarsr));
 
         IntVar[] allvarss = ArrayUtils.flatten(ArrayUtils.toArray(varss, indicess));
-        sol.set(IntStrategyFactory.forceInputOrderMinVal(allvarss, sol.getEnvironment()));
+        sol.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarss));
 
 
         for (int i = 0; i < varsr.length - 1; i++) {

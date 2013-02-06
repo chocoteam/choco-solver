@@ -27,6 +27,7 @@
 
 package solver.constraints.gary;
 
+import memory.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,10 +37,8 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 import static org.testng.Assert.assertEquals;
@@ -47,12 +46,12 @@ import static org.testng.Assert.assertTrue;
 
 public class PathTest {
 
-	private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
-	private static SetType graphTypeKer = SetType.BOOL_ARRAY;
+    private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
+    private static SetType graphTypeKer = SetType.BOOL_ARRAY;
 
     public static Solver model(int n, int seed, boolean path, boolean arbo, boolean RG, long nbMaxSols) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, true);
+        DirectedGraphVar g = new DirectedGraphVar("G", s, n, graphTypeEnv, graphTypeKer, true);
         for (int i = 0; i < n - 1; i++) {
             for (int j = 1; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);
@@ -88,23 +87,23 @@ public class PathTest {
         return s;
     }
 
-	public static void test(int s, int n, int nbMax) {
-		System.out.println("Test n="+n+", with seed="+s);
-		Solver path = model(n,s,true,false,false,nbMax);
-		Solver pathArbo = model(n,s,true,true,false,nbMax);
-		Solver pathArboRG = model(n,s,true,true,true,nbMax);
-		Solver arbo = model(n,s,false,true,false,nbMax);
-		Solver arboRG = model(n,s,false,true,true,nbMax);
-		// NbSolutions
-		System.out.println("nbSols : "+path.getMeasures().getSolutionCount());
-		assertEquals(path.getMeasures().getSolutionCount(), arbo.getMeasures().getSolutionCount());
-		assertEquals(path.getMeasures().getSolutionCount(), pathArbo.getMeasures().getSolutionCount());
-		assertEquals(path.getMeasures().getSolutionCount(),arboRG.getMeasures().getSolutionCount());
-		assertEquals(path.getMeasures().getSolutionCount(),pathArboRG.getMeasures().getSolutionCount());
-		// NbFails
-		if(graphTypeEnv== SetType.BOOL_ARRAY){
-			assertTrue(path.getMeasures().getFailCount()   >= arbo.getMeasures().getFailCount());
-			assertTrue(arbo.getMeasures().getFailCount()   >= arboRG.getMeasures().getFailCount());
+    public static void test(int s, int n, int nbMax) {
+        System.out.println("Test n=" + n + ", with seed=" + s);
+        Solver path = model(n, s, true, false, false, nbMax);
+        Solver pathArbo = model(n, s, true, true, false, nbMax);
+        Solver pathArboRG = model(n, s, true, true, true, nbMax);
+        Solver arbo = model(n, s, false, true, false, nbMax);
+        Solver arboRG = model(n, s, false, true, true, nbMax);
+        // NbSolutions
+        System.out.println("nbSols : " + path.getMeasures().getSolutionCount());
+        assertEquals(path.getMeasures().getSolutionCount(), arbo.getMeasures().getSolutionCount());
+        assertEquals(path.getMeasures().getSolutionCount(), pathArbo.getMeasures().getSolutionCount());
+        assertEquals(path.getMeasures().getSolutionCount(), arboRG.getMeasures().getSolutionCount());
+        assertEquals(path.getMeasures().getSolutionCount(), pathArboRG.getMeasures().getSolutionCount());
+        // NbFails
+        if (graphTypeEnv == SetType.BOOL_ARRAY) {
+            assertTrue(path.getMeasures().getFailCount() >= arbo.getMeasures().getFailCount());
+            assertTrue(arbo.getMeasures().getFailCount() >= arboRG.getMeasures().getFailCount());
 //			not true anymore because path has been upgraded to reinforce filtering
 //			assertEquals(pathArbo.getMeasures().getFailCount(), arbo.getMeasures().getFailCount());
 //			assertEquals(arboRG.getMeasures().getFailCount(), pathArboRG.getMeasures().getFailCount());
@@ -129,14 +128,14 @@ public class PathTest {
         }
     }
 
-	@Test(groups = "1s")
-	public static void testAllDataStructure(){
-		for(SetType ge: SetType.values()){
-			graphTypeEnv = ge;
-			for(SetType gk: SetType.values()){
-				graphTypeKer = gk;
-				smallTrees();
-			}
-		}
-	}
+    @Test(groups = "1s")
+    public static void testAllDataStructure() {
+        for (SetType ge : SetType.values()) {
+            graphTypeEnv = ge;
+            for (SetType gk : SetType.values()) {
+                graphTypeKer = gk;
+                smallTrees();
+            }
+        }
+    }
 }

@@ -29,25 +29,26 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
 
 /**
  * Search Patterns: generic patterns to manage search
+ *
  * @author Jean-Guillaume Fages
  */
 public enum SearchPattern {
-	NONE {
-		@Override
-		public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
-			return strategies;
-		}
-	};
+    NONE {
+        @Override
+        public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+            return strategies;
+        }
+    };
 
-	/**
-	 * Build a search strategy which integrates strategies and the given search pattern
-	 * @param solver
-	 * @param strategies
-	 * @return a search strategy which integrates strategies and the given search pattern
-	 */
-	public abstract AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
+    /**
+     * Build a search strategy which integrates strategies and the given search pattern
+     *
+     * @param solver
+     * @param strategies
+     * @return a search strategy which integrates strategies and the given search pattern
+     */
+    public abstract AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
 }

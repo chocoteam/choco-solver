@@ -29,7 +29,7 @@ package parser.flatzinc.ast.expression;
 
 import solver.Solver;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 
 /*
@@ -97,7 +97,7 @@ public final class EInt extends Expression {
 
     @Override
     public IntVar intVarValue(Solver solver) {
-        return Views.fixed(intValue(), solver);
+        return VariableFactory.fixed(intValue(), solver);
     }
 
     @Override

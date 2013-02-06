@@ -28,12 +28,13 @@
 package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -68,24 +69,24 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	public KruskalMST_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
-		super(nbNodes,propagator);
-		activeArcs = new BitSet(n*n);
-		rank = new int[n];
-		costs = new double[n*n];
-		sortedArcs = new int[n*n];
-		p = new int[n];
-		// CCtree
-		ccN = 2*n+1;
-		// backtrable
-		ccTree = new DirectedGraph(ccN, SetType.LINKED_LIST,false);
-		ccTEdgeCost = new double[ccN];
-		ccTp = new int[n];
-		useful = new BitSet(n);
-		lca = new LCAGraphManager(ccN);
-		map = new int[n][n];
-		repCosts = new double[n][n];
-	}
+    public KruskalMST_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
+        super(nbNodes, propagator);
+        activeArcs = new BitSet(n * n);
+        rank = new int[n];
+        costs = new double[n * n];
+        sortedArcs = new int[n * n];
+        p = new int[n];
+        // CCtree
+        ccN = 2 * n + 1;
+        // backtrable
+        ccTree = new DirectedGraph(ccN, SetType.LINKED_LIST, false);
+        ccTEdgeCost = new double[ccN];
+        ccTp = new int[n];
+        useful = new BitSet(n);
+        lca = new LCAGraphManager(ccN);
+        map = new int[n][n];
+        repCosts = new double[n][n];
+    }
 
     protected void sortArcs(double[][] costMatrix) {
         Comparator<Integer> comp = new Comparator<Integer>() {

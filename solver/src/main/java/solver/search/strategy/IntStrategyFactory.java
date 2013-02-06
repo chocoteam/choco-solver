@@ -27,28 +27,16 @@
 
 package solver.search.strategy;
 
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.sorters.metrics.LowerBound;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.selectors.graph.arcs.RandomArc;
-import solver.search.strategy.selectors.graph.nodes.RandomNode;
+import solver.search.strategy.selectors.values.InDomainMax;
+import solver.search.strategy.selectors.values.InDomainMiddle;
+import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.values.InDomainRandom;
+import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategyVarValAssign;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
-import solver.search.strategy.strategy.graph.NodeStrategy;
-import solver.search.strategy.strategy.set.SetSearchStrategy;
+import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
-import solver.variables.SetVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
 
 /**
  * Strategies, Variable selectors and Value selectors factory.
@@ -64,212 +52,147 @@ public final class IntStrategyFactory {
     }
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>
+     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>.
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> presetI(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.presetI(variables);
-        return StrategyVarValAssign.sta(variables,
-                SorterFactory.presetI(variables),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> presetI(IntVar[] VARS) {
+        return new Assignment(new InputOrder(VARS), new InDomainMin());
     }
 
 
     /**
-     * Assignment strategy combining <code>InputOrder</code> and <code>MinVal</code>
+     * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>.
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> inputOrderMinVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMin(variables);
-        return StrategyVarValAssign.sta(variables,
-                SorterFactory.inputOrder(variables),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> inputOrder_InDomainMin(IntVar[] VARS) {
+        return new Assignment(new InputOrder(VARS), new InDomainMin());
     }
 
     /**
      * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMin</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> forceInputOrderMinVal(Variable[] variables, IEnvironment environment) {
-        IntVar[] ivars = new IntVar[variables.length];
-        for (int i = 0; i < variables.length; i++) {
-            ivars[i] = (IntVar) variables[i];
+    public static AbstractStrategy<IntVar> force_InputOrder_InDomainMin(Variable[] VARS) {
+        IntVar[] ivars = new IntVar[VARS.length];
+        for (int i = 0; i < VARS.length; i++) {
+            ivars[i] = (IntVar) VARS[i];
         }
-        return inputOrderMinVal(ivars, environment);
+        return inputOrder_InDomainMin(ivars);
     }
 
     /**
      * Assignment strategy combining <code>InputOrder</code> and <code>InDomainMax</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> inputOrderMaxVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMax(variables);
-        return StrategyVarValAssign.sta(variables,
-                SorterFactory.inputOrder(variables),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> inputOrder_InDomainMax(IntVar[] VARS) {
+        return new Assignment(new InputOrder(VARS), new InDomainMax());
     }
 
     /**
-     * Assignment strategy combining <code>MinDom</code> and <code>MinVal</code>
+     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMin</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDomMinVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMin(variables);
-        return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> firstFail_InDomainMin(IntVar[] VARS) {
+        return new Assignment(new FirstFail(VARS), new InDomainMin());
+    }
+
+
+    /**
+     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMiddle</code>
+     *
+     * @param VARS list of variables
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> firstFail_InDomainMiddle(IntVar[] VARS) {
+        return new Assignment(new FirstFail(VARS), new InDomainMiddle());
     }
 
     /**
-     * Assignment strategy combining <code>MinDom</code> and <code>LowerBound</code>
+     * Assignment strategy combining <code>FirstFail</code> and <code>InDomainMax</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDomLowBound(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMin(variables);
-        return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(new Incr<IntVar>(LowerBound.build()), SorterFactory.inputOrder(variables)),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> firstFail_InDomainMax(IntVar[] VARS) {
+        return new Assignment(new FirstFail(VARS), new InDomainMax());
     }
 
     /**
-     * Assignment strategy combining <code>MinDom</code> and <code>MidVal</code>
+     * Assignment strategy combining <code>MaxRegret</code> and <code>InDomainMin</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDomMidVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainSplitMin(variables);
-        return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> maxReg_InDomainMin(IntVar[] VARS) {
+        return new Assignment(new MaxRegret(VARS), new InDomainMin());
     }
 
     /**
-     * Assignment strategy combining <code>MinDom</code> and <code>MaxVal</code>
+     * Assignment strategy combining <code>Random</code> and <code>Random</code>
      *
-     * @param variables   list of variables
-     * @param environment environment
+     * @param VARS list of variables
+     * @param SEED a seed for random
      * @return assignment strategy
      */
-    public static AbstractStrategy<IntVar> minDomMaxVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMax(variables);
-        return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
-                ValidatorFactory.instanciated,
-                environment);
-    }
-
-    public static AbstractStrategy<IntVar> maxRegMinVal(IntVar[] variables, IEnvironment environment) {
-        HeuristicValFactory.indomainMin(variables);
-        return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.maxRegret(), SorterFactory.inputOrder(variables)),
-                ValidatorFactory.instanciated,
-                environment);
+    public static AbstractStrategy<IntVar> random(IntVar[] VARS, long SEED) {
+        return new Assignment(new Random(VARS, SEED), new InDomainRandom(SEED));
     }
 
 
-    public static AbstractStrategy<IntVar> random(IntVar[] vars, IEnvironment environment) {
-        HeuristicValFactory.random(vars);
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.random(),
-                ValidatorFactory.instanciated,
-                environment);
+    /**
+     * Assignment strategy combining <code>DomOverWDeg</code> and <code>InDomainMin</code>
+     *
+     * @param VARS list of variables
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
+        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMiddle());
     }
 
-    public static AbstractStrategy<IntVar> random(IntVar[] vars, IEnvironment environment, long seed) {
-        HeuristicValFactory.random(seed, vars);
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.random(seed),
-                ValidatorFactory.instanciated,
-                environment);
+    /**
+     * Create an Activity based search strategy.
+     * <p/>
+     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+     * <br/>
+     *
+     * @param VARS           collection of variables
+     * @param GAMMA          aging parameters
+     * @param DELTA          for interval domain size estimation
+     * @param ALPHA          forget parameter
+     * @param RESTART        restart parameter
+     * @param FORCE_SAMPLING minimal number of iteration for sampling phase
+     * @param SEED           the seed for random
+     */
+    public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, double GAMMA, double DELTA, int ALPHA,
+                                                         double RESTART, int FORCE_SAMPLING, long SEED) {
+        return new ActivityBased(solver, VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
     }
 
-    public static AbstractStrategy<IntVar> domddegMinDom(IntVar[] vars) {
-        Solver solver = vars[0].getSolver();
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domddeg(), SorterFactory.random()),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-
-    public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, long seed) {
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        Solver solver = vars[0].getSolver();
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver, seed),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-    public static AbstractStrategy<IntVar> domwdeginputorderMindom(IntVar[] vars, Solver solver) {
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver, 0), SorterFactory.inputOrder(vars)),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-    public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, Solver solver, long seed) {
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver, seed),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-    public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver, long seed) {
-        HeuristicValFactory.indomainMiddle(vars);
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver, seed),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-
-    public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver, long seed) {
-        HeuristicValFactory.indomainMax(vars);
-        return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver, seed),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-    public static AbstractStrategy<IntVar> ABSrandom(IntVar[] vars, Solver solver, double g, double d, int a, double r, int samplingIterationForced, long seed) {
-        return new ActivityBased(solver, vars, g, d, a, r, samplingIterationForced, seed);
+    /**
+     * Create an Impact-based search strategy.
+     * <p/>
+     * <b>"Impact-Based Search Strategies for Constraint Programming",
+     * Philippe Refalo, CP2004.</b>
+     *
+     * @param VARS       variables of the problem (should be integers)
+     * @param ALPHA      aging parameter
+     * @param SPLIT      split parameter for subdomains computation
+     * @param NODEIMPACT force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
+     * @param SEED       a seed for random
+     * @param INITONLY   only apply the initialisation phase, do not update impact thereafter
+     */
+    public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
+        return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
     }
 }

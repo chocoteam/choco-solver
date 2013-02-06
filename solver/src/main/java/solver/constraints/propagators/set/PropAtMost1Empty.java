@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -65,7 +65,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
      * @param c
      */
     public PropAtMost1Empty(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.UNARY);
+        super(sets, PropagatorPriority.UNARY);
         emptySetIndex = environment.makeInt(-1);
     }
 

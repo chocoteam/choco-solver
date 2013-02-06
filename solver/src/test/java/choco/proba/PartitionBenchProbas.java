@@ -7,7 +7,6 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
     }
 
     @Override
@@ -70,10 +69,10 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         sx = new IntVar[size];
         sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            sx[i] = Views.sqr(x[i]);
+            sx[i] = VariableFactory.sqr(x[i]);
             allVars.add(sx[i]);
             sxy[i] = sx[i];
-            sy[i] = Views.sqr(y[i]);
+            sy[i] = VariableFactory.sqr(y[i]);
             allVars.add(sy[i]);
             sxy[size + i] = sy[i];
             allCstrs.add(IntConstraintFactory.arithm(sx[i], ">=", 1));

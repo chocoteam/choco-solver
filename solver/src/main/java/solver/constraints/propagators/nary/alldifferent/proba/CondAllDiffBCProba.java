@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.nary.alldifferent.proba;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import common.util.procedure.IntProcedure;
+import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;

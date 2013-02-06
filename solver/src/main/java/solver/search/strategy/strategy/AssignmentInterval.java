@@ -27,7 +27,7 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecisionReal;
 import solver.search.strategy.selectors.RealValueIterator;
@@ -59,28 +59,28 @@ public class AssignmentInterval extends AbstractStrategy<RealVar> {
     public void init() {
     }
 
-	@Override
-	public Decision<RealVar> computeDecision(RealVar variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		double value = valueIterator.selectValue(variable);
-		FastDecisionReal d = decisionPool.getE();
-		if (d == null) {
-			d = new FastDecisionReal(decisionPool);
-		}
-		d.set(variable, value);
-		return d;
-	}
+    @Override
+    public Decision<RealVar> computeDecision(RealVar variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        double value = valueIterator.selectValue(variable);
+        FastDecisionReal d = decisionPool.getE();
+        if (d == null) {
+            d = new FastDecisionReal(decisionPool);
+        }
+        d.set(variable, value);
+        return d;
+    }
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-		RealVar variable = null;
-		if (varselector.hasNext()) {
-			varselector.advance();
-			variable = varselector.getVariable();
-		}
-		return computeDecision(variable);
+        RealVar variable = null;
+        if (varselector.hasNext()) {
+            varselector.advance();
+            variable = varselector.getVariable();
+        }
+        return computeDecision(variable);
     }
 }

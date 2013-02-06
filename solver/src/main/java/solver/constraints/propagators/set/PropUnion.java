@@ -34,12 +34,12 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -73,7 +73,7 @@ public class PropUnion extends Propagator<SetVar> {
      * @param c
      */
     public PropUnion(SetVar[] sets, SetVar union, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(ArrayUtils.append(sets, new SetVar[]{union}), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(sets, new SetVar[]{union}), PropagatorPriority.LINEAR);
         k = sets.length;
         sdm = new SetDeltaMonitor[k + 1];
         for (int i = 0; i <= k; i++) {

@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -71,7 +71,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * @param c
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver, Constraint c) {
-        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), solver, c, PropagatorPriority.UNARY);
+        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY);
         this.nbEmpty = nbEmpty;
         this.sets = sets;
         this.n = sets.length;

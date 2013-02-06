@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.memory.Environments;
+import memory.Environments;
 import org.testng.annotations.Factory;
 import solver.ISolverProperties;
 import solver.explanations.ExplanationFactory;

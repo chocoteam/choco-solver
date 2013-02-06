@@ -50,7 +50,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     protected final double precision;
 
-    protected RealView(IntVar var, double precision) {
+    public RealView(IntVar var, double precision) {
         super(var.getSolver());
         this.var = var;
         this.precision = precision;

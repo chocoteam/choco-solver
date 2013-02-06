@@ -26,9 +26,9 @@
  */
 package solver.propagation.generator;
 
-import choco.kernel.common.util.objects.BitsetFactory;
-import choco.kernel.common.util.objects.IBitset;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.objects.BitsetFactory;
+import common.util.objects.IBitset;
+import common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 

@@ -34,9 +34,9 @@
 
 package samples.sandbox;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -55,7 +55,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.view.Views;
 
 /**
  * Dobble problem (card game)
@@ -116,13 +115,13 @@ public class Dobble {
             if (useGraphs) {// graph-based implied filtering
                 addGlobalGraphNValues(solver, flatVars, nbUsedSymbols, nbSymbolsPerCard);
             }
-            final IntVar max = Views.offset(nbUsedSymbols, -1);
+            final IntVar max = VariableFactory.offset(nbUsedSymbols, -1);
             solver.post(new MaxOfAList(max, flatVars, solver));
             Constraint csym = new Constraint(solver);
             csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
         }
         // search strategy
-        solver.set(IntStrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
         // output
         SearchMonitorFactory.log(solver, true, false);
         // time limit
@@ -134,7 +133,7 @@ public class Dobble {
     // NValue which considers the allDifferent on each card
     private static void addGlobalGraphNValues(Solver solver, IntVar[] flatJeu, IntVar nValTotal, int nbSymbCarte) {
         int nbNodes = flatJeu.length;
-        UndirectedGraphVar g = new UndirectedGraphVar("G",solver, nbNodes, true);
+        UndirectedGraphVar g = new UndirectedGraphVar("G", solver, nbNodes, true);
         for (int i = 0; i < nbNodes; i++) {
             g.getEnvelopGraph().addEdge(i, i);
             g.getKernelGraph().addEdge(i, i);
@@ -153,7 +152,7 @@ public class Dobble {
     // NValue which considers the allDifferent on each card
     private static void addCardsPairGraphNValues(Solver solver, IntVar[] flatIJ, IntVar nValues) {
         int nbNodes = flatIJ.length;
-        UndirectedGraphVar gpair = new UndirectedGraphVar("G",solver, nbNodes, true);
+        UndirectedGraphVar gpair = new UndirectedGraphVar("G", solver, nbNodes, true);
         for (int k1 = 0; k1 < nbNodes; k1++) {
             gpair.getEnvelopGraph().addEdge(k1, k1);
             gpair.getKernelGraph().addEdge(k1, k1);
@@ -177,7 +176,7 @@ public class Dobble {
         IntProcedure proc;
 
         protected PropTakeFirstValues(IntVar[] variables, final IntVar max, Solver solver, Constraint c) {
-            super(variables, solver, c, PropagatorPriority.LINEAR, false);
+            super(variables, PropagatorPriority.LINEAR, false);
             int n = vars.length;
             idms = new IIntDeltaMonitor[n];
             for (int i = 0; i < n; i++) {

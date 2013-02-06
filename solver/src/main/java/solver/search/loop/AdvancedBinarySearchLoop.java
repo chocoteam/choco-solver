@@ -27,7 +27,7 @@
 
 package solver.search.loop;
 
-import choco.kernel.memory.IStateInt;
+import memory.IStateInt;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;

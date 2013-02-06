@@ -27,9 +27,9 @@
 package solver.constraints.propagators.nary.lex;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -60,7 +60,7 @@ public class PropLex extends Propagator<IntVar> {
 
 
     public PropLex(IntVar[] X, IntVar[] Y, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.x = X.clone();
         this.y = Y.clone();
 

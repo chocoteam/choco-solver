@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
@@ -58,7 +58,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
      * @param op   the operator to be chosen among {0,1,2} standing for (eq,lt,gt)
      */
     public PropDistanceXYZ(IntVar[] vars, Operator op, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.TERNARY, false);
+        super(vars, PropagatorPriority.TERNARY, false);
         this.operator = op;
     }
 

@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -66,7 +66,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropSubcircuit_AntiArboFiltering(IntVar[] succs, int offSet, Constraint constraint, Solver solver) {
-        super(succs, solver, constraint, PropagatorPriority.QUADRATIC);
+        super(succs, PropagatorPriority.QUADRATIC);
         this.n = succs.length;
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);

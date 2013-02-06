@@ -27,9 +27,9 @@
 
 package solver.variables.graph;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.setDataStructures.ISet;
 import com.sun.istack.internal.NotNull;
+import memory.IEnvironment;
+import memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

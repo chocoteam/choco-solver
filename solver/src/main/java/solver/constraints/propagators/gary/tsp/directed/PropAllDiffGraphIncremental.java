@@ -26,8 +26,10 @@
  */
 package solver.constraints.propagators.gary.tsp.directed;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -36,10 +38,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraph;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.BitSet;
 
 /**
@@ -90,7 +91,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
      * @param constraint
      */
     public PropAllDiffGraphIncremental(GraphVar graph, int matchingCardinality, Solver sol, Constraint constraint) {
-        super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.QUADRATIC);
+        super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         n = graph.getEnvelopGraph().getNbNodes();
         n2 = 2 * n;
         g = graph;
@@ -98,7 +99,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         this.matchingCardinality = matchingCardinality;
         matching = new int[n2];
         nodeSCC = new int[n2];
-        digraph = new DirectedGraph(solver.getEnvironment(), n2, SetType.LINKED_LIST,false);
+        digraph = new DirectedGraph(solver.getEnvironment(), n2, SetType.LINKED_LIST, false);
         free = new BitSet(n2);
         if (g.isDirected()) {
             remProc = new DirectedRemProc();

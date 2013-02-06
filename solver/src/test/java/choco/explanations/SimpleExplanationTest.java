@@ -27,7 +27,7 @@
 
 package choco.explanations;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -67,7 +67,7 @@ public class SimpleExplanationTest {
         lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
         lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
         // configure Solver
-        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
         s.post(lcstrs);
         s.set(strategy);
         // solve
@@ -119,7 +119,7 @@ public class SimpleExplanationTest {
 //
 //    private static void solve() {
 //
-//        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+//        AbstractStrategy strategy = StrategyFactory.inputOrder_InDomainMin(vars);
 //
 //        s.post(lcstrs);
 //        s.set(strategy);

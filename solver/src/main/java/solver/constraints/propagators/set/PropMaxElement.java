@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -91,7 +91,7 @@ public class PropMaxElement extends Propagator<Variable> {
      * @param c
      */
     public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, Solver solver, Constraint c) {
-        super(new Variable[]{setVar, max}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, max}, PropagatorPriority.BINARY);
         this.max = max;
         this.set = setVar;
         this.weights = weights;

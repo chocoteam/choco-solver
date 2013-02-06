@@ -36,7 +36,6 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -67,10 +66,10 @@ public class SquareTests {
     private Solver viewE(int[][] dom, int seed) {
         Solver solver = new Solver();
         IntVar A = VariableFactory.enumerated("A", dom[0], solver);
-        IntVar B = Views.sqr(A);
+        IntVar B = VariableFactory.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -87,7 +86,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
 //        SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -109,10 +108,10 @@ public class SquareTests {
         Solver solver = new Solver();
         int n = dom[0].length - 1;
         IntVar A = VariableFactory.bounded("A", dom[0][0], dom[0][n], solver);
-        IntVar B = Views.sqr(A);
+        IntVar B = VariableFactory.sqr(A);
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 
@@ -127,7 +126,7 @@ public class SquareTests {
         solver.post(IntConstraintFactory.square(B, A));
         solver.post(IntConstraintFactory.arithm(B, ">", 0));
         SearchMonitorFactory.log(solver, true, true);
-        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(new IntVar[]{A, B}, seed));
         return solver;
     }
 

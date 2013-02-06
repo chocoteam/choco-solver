@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -61,7 +61,7 @@ public class PropOffSet extends Propagator<SetVar> {
      * x in set1 <=> x+offSet in set2
      */
     public PropOffSet(SetVar set1, SetVar set2, int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(new SetVar[]{set1, set2}, solver, c, PropagatorPriority.UNARY);
+        super(new SetVar[]{set1, set2}, PropagatorPriority.UNARY);
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[2];
         sdm[0] = set1.monitorDelta(this);

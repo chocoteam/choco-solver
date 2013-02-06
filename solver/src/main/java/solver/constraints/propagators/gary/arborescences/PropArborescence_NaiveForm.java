@@ -27,7 +27,9 @@
 
 package solver.constraints.propagators.gary.arborescences;
 
-import choco.kernel.ESat;
+import common.ESat;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -36,8 +38,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.memory.setDataStructures.ISet;
+
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -62,22 +63,24 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-	/**Ensures that graph is an arborescence rooted in node source
-	 * naive form: O(n.m)
-	 * @param graph
-	 * @param source root of the arborescence
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropArborescence_NaiveForm(DirectedGraphVar graph, int source, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		n = g.getEnvelopGraph().getNbNodes();
-		this.source = source;
-		list = new LinkedList<Integer>();
-		visited = new BitSet(n);
-		domTrans= new DirectedGraph(n, SetType.BOOL_ARRAY,false);
-	}
+    /**
+     * Ensures that graph is an arborescence rooted in node source
+     * naive form: O(n.m)
+     *
+     * @param graph
+     * @param source     root of the arborescence
+     * @param constraint
+     * @param solver
+     */
+    public PropArborescence_NaiveForm(DirectedGraphVar graph, int source, Constraint constraint, Solver solver) {
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        g = graph;
+        n = g.getEnvelopGraph().getNbNodes();
+        this.source = source;
+        list = new LinkedList<Integer>();
+        visited = new BitSet(n);
+        domTrans = new DirectedGraph(n, SetType.BOOL_ARRAY, false);
+    }
 
     //***********************************************************************************
     // METHODS
@@ -116,34 +119,34 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
         structuralPruning();
     }
 
-	private void structuralPruning() throws ContradictionException {
-		ISet succ;
-		for(int i=0;i<n;i++){
-			domTrans.getSuccessorsOf(i).clear();
-			domTrans.getPredecessorsOf(i).clear();
-		}
-		for(int i=0;i<n;i++){
-			DirectedGraph dig = new DirectedGraph(n, SetType.LINKED_LIST,false);
-			for(int j=0; j<n; j++){
-				if(j!=i){
-					succ = g.getEnvelopGraph().getSuccessorsOf(j);
-					for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-						dig.addArc(j,k);
-					}
-				}
-			}
-			allReachableFrom(source,dig);
-			for(int z=visited.nextClearBit(0);z<n;z=visited.nextClearBit(z+1)){
-				domTrans.addArc(i,z);
-			}
-		}
-		for(int i=0;i<n;i++){
-			succ = domTrans.getSuccessorsOf(i);
-			for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-				g.removeArc(k,i,aCause);
-			}
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        ISet succ;
+        for (int i = 0; i < n; i++) {
+            domTrans.getSuccessorsOf(i).clear();
+            domTrans.getPredecessorsOf(i).clear();
+        }
+        for (int i = 0; i < n; i++) {
+            DirectedGraph dig = new DirectedGraph(n, SetType.LINKED_LIST, false);
+            for (int j = 0; j < n; j++) {
+                if (j != i) {
+                    succ = g.getEnvelopGraph().getSuccessorsOf(j);
+                    for (int k = succ.getFirstElement(); k >= 0; k = succ.getNextElement()) {
+                        dig.addArc(j, k);
+                    }
+                }
+            }
+            allReachableFrom(source, dig);
+            for (int z = visited.nextClearBit(0); z < n; z = visited.nextClearBit(z + 1)) {
+                domTrans.addArc(i, z);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            succ = domTrans.getSuccessorsOf(i);
+            for (int k = succ.getFirstElement(); k >= 0; k = succ.getNextElement()) {
+                g.removeArc(k, i, aCause);
+            }
+        }
+    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

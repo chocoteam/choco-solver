@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -69,7 +69,7 @@ public class PropAllDiff extends Propagator<SetVar> {
      * @param c
      */
     public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
     }
 

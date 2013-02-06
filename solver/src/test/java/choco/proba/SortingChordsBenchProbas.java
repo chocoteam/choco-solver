@@ -63,7 +63,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
     }
 
     /*void configSearchStrategy() {
-        this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver, seed));
+        this.solver.set(StrategyFactory.domOverWDeg_InDomainMin(this.vars, this.solver, seed));
     }*/
 
     public void makeVars() {

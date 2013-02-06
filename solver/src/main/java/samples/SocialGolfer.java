@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -146,7 +146,7 @@ public class SocialGolfer extends AbstractProblem {
     @Override
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
-        solver.set(IntStrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
         /*IPropagationEngine engine = solver.getEngine();
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
         Predicate inVARS = Predicates.member(vars);

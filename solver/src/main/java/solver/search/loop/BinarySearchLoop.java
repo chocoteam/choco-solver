@@ -27,7 +27,7 @@
 
 package solver.search.loop;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -70,8 +70,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
             //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-			solver.set(IntStrategyFactory.minDomMinVal(VariableFactory.castToIntVar(solver.getVars()), solver.getEnvironment()));
-//            set(StrategyFactory.minDomMinVal(VariableFactory.castToIntVar(solver.getVars()), solver.getEnvironment()));
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars())));
+//            set(StrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars()), solver.getEnvironment()));
         }
         try {
             strategy.init(); // the initialisation of the strategy can detect inconsistency

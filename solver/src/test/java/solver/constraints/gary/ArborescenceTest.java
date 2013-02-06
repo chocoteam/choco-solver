@@ -27,6 +27,7 @@
 
 package solver.constraints.gary;
 
+import memory.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -35,22 +36,20 @@ import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveF
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
 import solver.variables.graph.GraphVar;
 
 import static org.testng.Assert.assertEquals;
 
 public class ArborescenceTest {
 
-	private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
-	private static SetType graphTypeKer = SetType.BOOL_ARRAY;
+    private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
+    private static SetType graphTypeKer = SetType.BOOL_ARRAY;
 
     public static Solver model(int n, int seed, boolean naive, boolean simple, long nbMaxSols) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, false);
+        DirectedGraphVar g = new DirectedGraphVar("G", s, n, graphTypeEnv, graphTypeKer, false);
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);
@@ -114,15 +113,15 @@ public class ArborescenceTest {
         }
     }
 
-	@Test(groups = "30s")
-	public static void testAllDataStructure(){
-		for(SetType ge: SetType.values()){
-			graphTypeEnv = ge;
-			for(SetType gk: SetType.values()){
-				graphTypeKer = gk;
-				System.out.println("env:"+ge+" ker :"+gk);
-				smallTrees();
-			}
-		}
-	}
+    @Test(groups = "30s")
+    public static void testAllDataStructure() {
+        for (SetType ge : SetType.values()) {
+            graphTypeEnv = ge;
+            for (SetType gk : SetType.values()) {
+                graphTypeKer = gk;
+                System.out.println("env:" + ge + " ker :" + gk);
+                smallTrees();
+            }
+        }
+    }
 }

@@ -27,9 +27,9 @@
 
 package solver.search.strategy.strategy;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
+import memory.IStateInt;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
@@ -113,30 +113,30 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
         }
     }
 
-	@Override
-	public Decision<Variable> computeDecision(Variable variable){
-		if(variable==null || variable.instantiated()){
-			return null;
-		}
-		int idx = index.get();
+    @Override
+    public Decision<Variable> computeDecision(Variable variable) {
+        if (variable == null || variable.instantiated()) {
+            return null;
+        }
+        int idx = index.get();
         Decision decision = null;
         while (decision == null && idx < strategies.length) {
-			if(contains(strategies[idx].vars,variable)){
-				decision = strategies[idx].computeDecision(variable);
-			}
-			idx++;
+            if (contains(strategies[idx].vars, variable)) {
+                decision = strategies[idx].computeDecision(variable);
+            }
+            idx++;
         }
         return decision;
-	}
+    }
 
-	private static boolean contains(Variable[] vars, Variable variable) {
-		for(Variable v:vars){
-			if(v.equals(variable)){
-				return true;
-			}
-		}
-		return false;
-	}
+    private static boolean contains(Variable[] vars, Variable variable) {
+        for (Variable v : vars) {
+            if (v.equals(variable)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * {@inheritDoc}

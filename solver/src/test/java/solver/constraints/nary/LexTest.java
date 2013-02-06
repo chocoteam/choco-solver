@@ -28,8 +28,8 @@
 package solver.constraints.nary;
 
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -64,7 +64,7 @@ public class LexTest {
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
             solver.post(IntConstraintFactory.lex_less_eq(vs1, vs2));
-            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), seed));
             solver.findAllSolutions();
             int kpn = (int) Math.pow(k + 1, n1 / 2);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
@@ -84,7 +84,7 @@ public class LexTest {
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
             solver.post(IntConstraintFactory.lex_less(vs1, vs2));
-            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), seed));
 
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3240);

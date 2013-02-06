@@ -31,7 +31,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -49,8 +48,8 @@ public class NQueenGlobal extends AbstractNQueen {
 
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            diag1[i] = Views.offset(vars[i], i);
-            diag2[i] = Views.offset(vars[i], -i);
+            diag1[i] = VariableFactory.offset(vars[i], i);
+            diag2[i] = VariableFactory.offset(vars[i], -i);
         }
 
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
@@ -60,7 +59,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
 
         IntVar[] orderedVars = orederIt2();
         /*IPropagationEngine engine = solver.getEngine();

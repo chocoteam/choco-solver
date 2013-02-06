@@ -27,13 +27,13 @@
 
 package solver.variables.fast;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeBoundIterator;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
+import common.ESat;
+import common.util.iterators.DisposableRangeBoundIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueBoundIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -42,7 +42,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
@@ -85,8 +84,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
 
     protected boolean reactOnRemoval = false;
 
-    protected HeuristicVal heuristicVal;
-
     private DisposableValueIterator _viterator;
 
     private DisposableRangeIterator _riterator;
@@ -103,16 +100,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.

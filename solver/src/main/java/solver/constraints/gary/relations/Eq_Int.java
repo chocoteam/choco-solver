@@ -26,7 +26,7 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -34,86 +34,86 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 public class Eq_Int extends GraphRelation<IntVar> {
-	
 
-	protected Eq_Int(IntVar[] vars) {
-		super(vars);
-	}
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		if(var1 == var2){
-			return ESat.TRUE;
-		}
-		IntVar x = vars[var1];
-		IntVar y = vars[var2];
-		if(x.instantiated() && y.instantiated() && x.getValue()==y.getValue()){
-			return ESat.TRUE;
-		}
-		if(x.getLB()>y.getUB() || x.getUB()<y.getLB()){
-			return ESat.FALSE;
-		}
-		if(!x.hasEnumeratedDomain()){
-			return ESat.UNDEFINED;
-		}
-		int up  = x.getUB();
-		int up2 = y.getUB();
-		for(int i=x.getLB();i<=up;i=x.nextValue(i)){
-			for(int j=y.getLB();j<=up2;j=y.nextValue(j)){
-				if(i==j){
-					return ESat.UNDEFINED;
-				}
-			}
-		}
-		return ESat.FALSE;
-	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			IntVar x = vars[var1];
-			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB(), cause);
-			y.updateLowerBound(x.getLB(), cause);
-			x.updateUpperBound(y.getUB(), cause);
-			y.updateUpperBound(x.getUB(), cause);
-			// ensure that, in case of enumerated domains,  holes are also propagated
-			if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
-				int ub = x.getUB();
-				for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-					if (!(y.contains(val))) {
-						x.removeValue(val, cause);
-					}
-				}
-				ub = y.getUB();
-				for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
-					if (!(x.contains(val))) {
-						y.removeValue(val, cause);
-					}
-				}
-			}
-		}
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			IntVar x = vars[var1];
-			IntVar y = vars[var2];
-			if (x.instantiated()) {
-	            y.removeValue(x.getValue(), cause);
-	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue(), cause);
-	        }
-		}else{
-			vars[var1].contradiction(cause, EventType.REMOVE, "x != x");
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		return false;
-	}
+    protected Eq_Int(IntVar[] vars) {
+        super(vars);
+    }
+
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        if (var1 == var2) {
+            return ESat.TRUE;
+        }
+        IntVar x = vars[var1];
+        IntVar y = vars[var2];
+        if (x.instantiated() && y.instantiated() && x.getValue() == y.getValue()) {
+            return ESat.TRUE;
+        }
+        if (x.getLB() > y.getUB() || x.getUB() < y.getLB()) {
+            return ESat.FALSE;
+        }
+        if (!x.hasEnumeratedDomain()) {
+            return ESat.UNDEFINED;
+        }
+        int up = x.getUB();
+        int up2 = y.getUB();
+        for (int i = x.getLB(); i <= up; i = x.nextValue(i)) {
+            for (int j = y.getLB(); j <= up2; j = y.nextValue(j)) {
+                if (i == j) {
+                    return ESat.UNDEFINED;
+                }
+            }
+        }
+        return ESat.FALSE;
+    }
+
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            IntVar x = vars[var1];
+            IntVar y = vars[var2];
+            x.updateLowerBound(y.getLB(), cause);
+            y.updateLowerBound(x.getLB(), cause);
+            x.updateUpperBound(y.getUB(), cause);
+            y.updateUpperBound(x.getUB(), cause);
+            // ensure that, in case of enumerated domains,  holes are also propagated
+            if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
+                int ub = x.getUB();
+                for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                    if (!(y.contains(val))) {
+                        x.removeValue(val, cause);
+                    }
+                }
+                ub = y.getUB();
+                for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                    if (!(x.contains(val))) {
+                        y.removeValue(val, cause);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            IntVar x = vars[var1];
+            IntVar y = vars[var2];
+            if (x.instantiated()) {
+                y.removeValue(x.getValue(), cause);
+            } else if (y.instantiated()) {
+                x.removeValue(y.getValue(), cause);
+            }
+        } else {
+            vars[var1].contradiction(cause, EventType.REMOVE, "x != x");
+        }
+    }
+
+    @Override
+    public boolean isDirected() {
+        return false;
+    }
 //	@Override
 //	public GraphProperty[] getGraphProperties() {
 //		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};

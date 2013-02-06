@@ -26,8 +26,8 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropMaxOfAList;
@@ -37,6 +37,7 @@ import solver.variables.IntVar;
  * VAL = MAX(VARS)
  * <br/>
  * CPRU: not tested yet
+ *
  * @author Charles Prud'homme
  * @since 18/03/12
  */

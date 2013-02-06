@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -74,7 +74,7 @@ public class PropBoolSum extends Propagator<IntVar> {
      * @param intVarPropagatorConstraint
      */
     public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.append(vars, new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        super(ArrayUtils.append(vars, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
         this.sum = sum;
         n = vars.length;
         min = environment.makeInt();

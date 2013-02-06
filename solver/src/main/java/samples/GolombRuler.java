@@ -27,8 +27,8 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -109,7 +109,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ticks));
     }
 
     @Override

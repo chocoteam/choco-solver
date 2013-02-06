@@ -27,17 +27,13 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -75,19 +71,8 @@ public class BottleneckTest {
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
-            // Heuristic val
-            for (IntVar var : allvars) {
-                var.setHeuristicVal(
-                        HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
-                );
-            }
 
-
-            solver.post(cstrs);
-            solver.set(StrategyVarValAssign.dyn(allvars,
-                    new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(allvars)),
-                    ValidatorFactory.instanciated, solver.getEnvironment()));
-
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, sum);
         }
     }
@@ -116,17 +101,7 @@ public class BottleneckTest {
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
 
             // Heuristic val
-            for (IntVar var : allvars) {
-                var.setHeuristicVal(
-                        HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
-                );
-            }
-
-
-            solver.post(cstrs);
-            solver.set(StrategyVarValAssign.dyn(allvars,
-                    new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(allvars)),
-                    ValidatorFactory.instanciated, solver.getEnvironment()));
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(allvars));
 
             solver.findSolution();
         }

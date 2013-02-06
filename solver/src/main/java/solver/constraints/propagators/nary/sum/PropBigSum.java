@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.Operator;
@@ -89,7 +89,7 @@ public class PropBigSum extends Propagator<IntVar> {
      * @param intVarPropagatorConstraint
      */
     public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Operator operator, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false);
         this.coeffs = coeffs;
         this.pos = pos;
         this.sum = sum;

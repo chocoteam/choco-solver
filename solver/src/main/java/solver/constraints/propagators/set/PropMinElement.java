@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -91,7 +91,7 @@ public class PropMinElement extends Propagator<Variable> {
      * @param c
      */
     public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, Solver solver, Constraint c) {
-        super(new Variable[]{setVar, min}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, min}, PropagatorPriority.BINARY);
         this.min = min;
         this.set = setVar;
     }

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.variables.IntVar;
 
 import java.util.BitSet;

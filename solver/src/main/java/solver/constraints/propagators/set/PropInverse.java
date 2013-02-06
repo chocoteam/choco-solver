@@ -34,10 +34,10 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -74,7 +74,7 @@ public class PropInverse extends Propagator<SetVar> {
      * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
      */
     public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(ArrayUtils.append(sets, invsets), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(sets, invsets), PropagatorPriority.LINEAR);
         n = sets.length;
         n2 = invsets.length;
         this.offSet1 = offSet1;

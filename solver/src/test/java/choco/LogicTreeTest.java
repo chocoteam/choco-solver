@@ -232,7 +232,7 @@ public class LogicTreeTest {
                     Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
             );
             sCNF.post(IntConstraintFactory.clauses(tree, sCNF));
-            sCNF.set(IntStrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
+            sCNF.set(IntStrategyFactory.random(rCNF, seed));
 
             //SearchMonitorFactory.log(sCNF, true, true);
             sCNF.findAllSolutions();

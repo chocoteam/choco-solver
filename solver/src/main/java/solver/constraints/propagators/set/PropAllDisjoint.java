@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -75,7 +75,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
      * @param c
      */
     public PropAllDisjoint(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
         // delta monitors
         sdm = new SetDeltaMonitor[n];

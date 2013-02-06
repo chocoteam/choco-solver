@@ -35,9 +35,9 @@
 package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -76,7 +76,7 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
      * @param solver
      */
     public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

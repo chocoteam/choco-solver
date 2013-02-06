@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -71,7 +71,7 @@ public class PropSymmetric extends Propagator<SetVar> {
      * x in set[y-offSet] <=> y in set[x-offSet]
      */
     public PropSymmetric(SetVar[] sets, final int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
-        super(sets, solver, c, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[n];

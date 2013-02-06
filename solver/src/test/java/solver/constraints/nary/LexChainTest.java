@@ -35,8 +35,8 @@ package solver.constraints.nary;
  * LexChain test file
  */
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -103,7 +103,7 @@ public class LexChainTest {
         }
 
         solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 
@@ -117,7 +117,7 @@ public class LexChainTest {
         }
 
         solver.post(new LexChain(X, true, solver));
-        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 

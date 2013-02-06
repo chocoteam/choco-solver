@@ -63,7 +63,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
         boolean flatten = false;
         boolean trace = false;
         solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));

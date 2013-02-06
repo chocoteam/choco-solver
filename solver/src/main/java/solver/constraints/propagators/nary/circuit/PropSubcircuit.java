@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -70,7 +70,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
     }
 
     public PropSubcircuit(IntVar[] vars, int offset, IntVar length, Constraint constraint, Solver solver) {
-        super(vars, solver, constraint, PropagatorPriority.UNARY, true);
+        super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         this.offset = offset;
         this.length = length;

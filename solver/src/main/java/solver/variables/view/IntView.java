@@ -38,7 +38,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -66,8 +65,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     protected ID delta;
 
     protected boolean reactOnRemoval;
-
-    protected HeuristicVal heuristicVal;
 
     public IntView(String name, IV var, Solver solver) {
         super(name, solver);
@@ -106,16 +103,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     @Override
     public boolean instantiated() {
         return var.instantiated();
-    }
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
     }
 
     public ID getDelta() {

@@ -34,10 +34,10 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -83,7 +83,7 @@ public class PropElement extends Propagator<Variable> {
      * @param c
      */
     public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver, Constraint c) {
-        super(ArrayUtils.append(array, new Variable[]{set, index}), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR);
         this.index = index;
         this.array = array;
         this.set = set;

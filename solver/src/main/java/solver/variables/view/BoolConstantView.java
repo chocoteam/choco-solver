@@ -27,7 +27,7 @@
 
 package solver.variables.view;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -46,7 +46,7 @@ import solver.variables.delta.IntDelta;
  */
 public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
 
-    protected BoolConstantView(String name, int constante, Solver solver) {
+    public BoolConstantView(String name, int constante, Solver solver) {
         super(name, constante, solver);
     }
 

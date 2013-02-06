@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.nary.tree;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetFactory;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetFactory;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -76,7 +76,7 @@ public class PropKLoops extends Propagator<IntVar> {
      * @param solver
      */
     public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet, Constraint constraint, Solver solver) {
-        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), solver, constraint, PropagatorPriority.UNARY);
+        super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY);
         this.n = succs.length;
         this.offSet = offSet;
         this.possibleLoops = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);

@@ -27,11 +27,11 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.PoolManager;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.HCP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
@@ -43,7 +43,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.exception.ContradictionException;
-import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -114,7 +114,7 @@ public class KTP_Graph_Bool {
         }
         solver = new Solver();
         // variables
-        UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        UndirectedGraphVar undi = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (matrix[i][j]) {
@@ -128,7 +128,7 @@ public class KTP_Graph_Bool {
         // config
         solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
-//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
@@ -203,11 +203,11 @@ public class KTP_Graph_Bool {
         solver.post(gc);
         // config
         solver.set(new MinNeighBool(decisionVars, gl));
-//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         // resolution
-        solver.set(new ConstraintEngine(solver));
+        solver.set(new PropagatorEngine(solver));
         solver.findSolution();
         System.out.println(solver.getMeasures());
         check(solver, decisionVars);
@@ -251,13 +251,13 @@ public class KTP_Graph_Bool {
         solver.post(gc);
         // config
 //			solver.set(new MinNeighBool(decisionVars,gl));
-        solver.set(IntStrategyFactory.minDomMinVal(graph, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(graph));
 
-//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         // resolution
-        solver.set(new ConstraintEngine(solver));
+        solver.set(new PropagatorEngine(solver));
         solver.findSolution();
         System.out.println(solver.getMeasures());
         check(solver, graph);
@@ -419,7 +419,7 @@ public class KTP_Graph_Bool {
          * @param solver
          */
         public PropBoolNoSubtour(int[] mapping, BoolVar[] decVars, BoolVar[][] graph, Constraint constraint, Solver solver) {
-            super(decVars, solver, constraint, PropagatorPriority.UNARY, true);
+            super(decVars, PropagatorPriority.UNARY, true);
             g = graph;
             this.mapping = mapping;
             this.n = graph.length;

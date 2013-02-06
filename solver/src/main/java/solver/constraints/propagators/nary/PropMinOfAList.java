@@ -26,8 +26,8 @@
  */
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -61,7 +61,7 @@ public class PropMinOfAList extends Propagator<IntVar> {
 
 
     public PropMinOfAList(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false);
         indexOfMinimumVariable = solver.getEnvironment().makeInt(-1);
     }
 

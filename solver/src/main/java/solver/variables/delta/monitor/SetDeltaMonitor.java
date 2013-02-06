@@ -26,7 +26,7 @@
  */
 package solver.variables.delta.monitor;
 
-import choco.kernel.common.util.procedure.IntProcedure;
+import common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;

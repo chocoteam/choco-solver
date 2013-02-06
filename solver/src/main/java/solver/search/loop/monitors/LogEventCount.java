@@ -26,7 +26,7 @@
  */
 package solver.search.loop.monitors;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.LoggerFactory;
 import solver.ICause;

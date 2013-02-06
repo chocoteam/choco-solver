@@ -27,7 +27,7 @@
 
 package samples.sandbox.graph;
 
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import samples.AbstractProblem;
 import samples.sandbox.graph.input.DataGenerator;
 import samples.sandbox.graph.output.TextWriter;
@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -87,7 +86,7 @@ public class Tree extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        g = new DirectedGraphVar("G",solver, n, gtype, SetType.LINKED_LIST, false);
+        g = new DirectedGraphVar("G", solver, n, gtype, SetType.LINKED_LIST, false);
         nTree = VariableFactory.enumerated("NTREE ", 1, 1, solver);
         try {
             for (int i = 0; i < n; i++) {

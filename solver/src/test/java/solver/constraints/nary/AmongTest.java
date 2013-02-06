@@ -26,7 +26,7 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -38,7 +38,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -92,7 +91,7 @@ public class AmongTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random(allvars, solver.getEnvironment(), i));
+            solver.set(IntStrategyFactory.random(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, value));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -109,7 +108,7 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(IntStrategyFactory.random(allvars, solver.getEnvironment(), i));
+            solver.set(IntStrategyFactory.random(allvars, i));
             solver.post(IntConstraintFactory.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
@@ -174,7 +173,7 @@ public class AmongTest {
             }
             solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
 
-            solver.set(IntStrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -227,7 +226,7 @@ public class AmongTest {
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
-            solver.set(IntStrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -249,7 +248,7 @@ public class AmongTest {
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
-        IntVar vval = Views.fixed(val, solver);
+        IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }

@@ -27,11 +27,11 @@
 
 package samples.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.sandbox.graph.input.TSP_Utils;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -53,91 +53,99 @@ import solver.variables.graph.UndirectedGraphVar;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class TravelingSalesmanProblem extends AbstractProblem{
+public class TravelingSalesmanProblem extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	@Option(name = "-tl", usage = "time limit.", required = false)
-	private long limit = 60000;
-	// instance file path
-	@Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
-	private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
-	@Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
-	private int policy = 1;
+    @Option(name = "-tl", usage = "time limit.", required = false)
+    private long limit = 60000;
+    // instance file path
+    @Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
+    private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
+    @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
+    private int policy = 1;
 
 
-	// input cost matrix
-	private int[][] costMatrix;
-	// graph variable representing the cycle
-	private UndirectedGraphVar graph;
-	// integer variable representing the objective
-	private IntVar totalCost;
+    // input cost matrix
+    private int[][] costMatrix;
+    // graph variable representing the cycle
+    private UndirectedGraphVar graph;
+    // integer variable representing the objective
+    private IntVar totalCost;
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		new TravelingSalesmanProblem().execute(args);
-	}
+    public static void main(String[] args) {
+        new TravelingSalesmanProblem().execute(args);
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("solving the Traveling Salesman Problem graph variables");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("solving the Traveling Salesman Problem graph variables");
+    }
 
-	@Override
-	public void buildModel() {
-		costMatrix = TSP_Utils.parseInstance(instancePath, 200);
-		final int n = costMatrix.length;
-		solver = new Solver();
-		// variables
-		totalCost = VariableFactory.bounded("obj", 0, 99999, solver);
-		graph = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
-		for (int i = 0; i < n; i++) {
-			graph.getKernelGraph().activateNode(i);
-			for (int j = i + 1; j < n; j++) {
-				graph.getEnvelopGraph().addEdge(i, j);
-			}
-		}
-		// constraints
-		Constraint gc = GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 0);
-		// add a lagrangian relaxation
-		PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix, gc, solver);
-		mst.waitFirstSolution(true);
-		gc.addPropagators(mst);
-		solver.post(gc);
-	}
+    @Override
+    public void buildModel() {
+        costMatrix = TSP_Utils.parseInstance(instancePath, 200);
+        final int n = costMatrix.length;
+        solver = new Solver();
+        // variables
+        totalCost = VariableFactory.bounded("obj", 0, 99999, solver);
+        graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        for (int i = 0; i < n; i++) {
+            graph.getKernelGraph().activateNode(i);
+            for (int j = i + 1; j < n; j++) {
+                graph.getEnvelopGraph().addEdge(i, j);
+            }
+        }
+        // constraints
+        Constraint gc = GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 0);
+        // add a lagrangian relaxation
+        PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix, gc, solver);
+        mst.waitFirstSolution(true);
+        gc.addPropagators(mst);
+        solver.post(gc);
+    }
 
-	@Override
-	public void configureSearch() {
-		GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
-		strategy.configure(GraphStrategies.MIN_COST, true);
-		switch (policy){
-			case 0:solver.set(strategy);
-				System.out.println("classical top-down minimization");break;
-			case 1:solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
-				System.out.println("bottom-up minimization");break;
-			case 2:solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
-				System.out.println("dichotomic minimization");break;
-			default:throw new UnsupportedOperationException("policy should be 0, 1 or 2");
-		}
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
-		SearchMonitorFactory.log(solver, true, false);
-	}
+    @Override
+    public void configureSearch() {
+        GraphStrategies strategy = new GraphStrategies(graph, costMatrix, null);
+        strategy.configure(GraphStrategies.MIN_COST, true);
+        switch (policy) {
+            case 0:
+                solver.set(strategy);
+                System.out.println("classical top-down minimization");
+                break;
+            case 1:
+                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
+                System.out.println("bottom-up minimization");
+                break;
+            case 2:
+                solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.DICHOTOMIC), strategy));
+                System.out.println("dichotomic minimization");
+                break;
+            default:
+                throw new UnsupportedOperationException("policy should be 0, 1 or 2");
+        }
+        solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
+        SearchMonitorFactory.log(solver, true, false);
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void configureEngine() {
+    }
 
-	@Override
-	public void solve() {
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-	}
+    @Override
+    public void solve() {
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
+    }
 
-	@Override
-	public void prettyOut() {
-		System.out.println("cost : "+totalCost);
-	}
+    @Override
+    public void prettyOut() {
+        System.out.println("cost : " + totalCost);
+    }
 }

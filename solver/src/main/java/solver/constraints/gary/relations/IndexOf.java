@@ -26,45 +26,45 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
 public class IndexOf extends GraphRelation<IntVar> {
-	
-	protected IndexOf(IntVar[] vars) {
-		super(vars);
-	}
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		IntVar x = vars[var1];
-		if(!x.contains(var2)){
-			return ESat.FALSE;
-		}
-		if(x.instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		vars[var1].instantiateTo(var2,cause);
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		vars[var1].removeValue(var2, cause);
-	}
+    protected IndexOf(IntVar[] vars) {
+        super(vars);
+    }
 
-	@Override
-	public boolean isDirected() {
-		return true;
-	}
-	
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        IntVar x = vars[var1];
+        if (!x.contains(var2)) {
+            return ESat.FALSE;
+        }
+        if (x.instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        vars[var1].instantiateTo(var2, cause);
+    }
+
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        vars[var1].removeValue(var2, cause);
+    }
+
+    @Override
+    public boolean isDirected() {
+        return true;
+    }
+
 //	@Override
 //	public GraphProperty[] getGraphProperties() {
 //		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};

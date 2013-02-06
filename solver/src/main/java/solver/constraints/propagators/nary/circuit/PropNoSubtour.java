@@ -34,9 +34,9 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -87,7 +87,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * @param solver
      */
     public PropNoSubtour(V[] vars, int offset, Solver solver, Constraint constraint) {
-        super(vars, solver, constraint, PropagatorPriority.UNARY, true);
+        super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];
         end = new IStateInt[n];

@@ -27,28 +27,28 @@
 
 package solver.constraints.gary;
 
+import memory.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.SetType;
+
 import static org.testng.Assert.assertTrue;
 
 public class NTreeTest {
 
-	private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
-	private static SetType graphTypeKer = SetType.BOOL_ARRAY;
+    private static SetType graphTypeEnv = SetType.BOOL_ARRAY;
+    private static SetType graphTypeKer = SetType.BOOL_ARRAY;
 
     public static void model(int n, int tmin, int tmax, int seed) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, false);
+        DirectedGraphVar g = new DirectedGraphVar("G", s, n, graphTypeEnv, graphTypeKer, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);
@@ -86,15 +86,15 @@ public class NTreeTest {
         }
     }
 
-	@Test(groups = "30m")
-	public static void testAllDataStructure(){
-		for(SetType ge: SetType.values()){
-			graphTypeEnv = ge;
-			for(SetType gk: SetType.values()){
-				graphTypeKer = gk;
-				System.out.println("env:"+ge+" ker :"+gk);
-				debug();
-			}
-		}
-	}
+    @Test(groups = "30m")
+    public static void testAllDataStructure() {
+        for (SetType ge : SetType.values()) {
+            graphTypeEnv = ge;
+            for (SetType gk : SetType.values()) {
+                graphTypeKer = gk;
+                System.out.println("env:" + ge + " ker :" + gk);
+                debug();
+            }
+        }
+    }
 }

@@ -34,9 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationEngines;
+import solver.propagation.PropagationEngineFactory;
 import solver.propagation.PropagationStrategies;
-import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -66,7 +66,7 @@ public abstract class AbstractProblem {
     Level level = Level.VERBOSE;
 
     @Option(name = "-engine", usage = "Propagation engine", required = false)
-    PropagationEngines engine = PropagationEngines.DEFAULT;
+    PropagationEngineFactory engine = PropagationEngineFactory.DEFAULT;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
     PropagationStrategies policy = PropagationStrategies.DEFAULT;
@@ -141,14 +141,14 @@ public abstract class AbstractProblem {
                     configureEngine();
                     break;
 //                        default:
-//                            IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment(), false, true, false);
+//                            IPropagationEngine pengine = new DSLEngine(solver.getEnvironment(), false, true, false);
 //                            policy.make(solver, pengine);
 //                            solver.set(pengine);
 //                            break;
 //                    }
 //                    break;
                 default:
-                    solver.set(new ConstraintEngine(solver));
+                    solver.set(new PropagatorEngine(solver));
                     break;
             }
 

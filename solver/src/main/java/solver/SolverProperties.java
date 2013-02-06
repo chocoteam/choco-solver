@@ -26,7 +26,7 @@
  */
 package solver;
 
-import choco.kernel.memory.Environments;
+import memory.Environments;
 import solver.explanations.ExplanationFactory;
 import solver.search.loop.SearchLoops;
 

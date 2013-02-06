@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -36,7 +36,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * CSPLib prob028:<br/>
@@ -100,20 +99,20 @@ public class BIBD extends AbstractProblem {
 
         }
         // r ones per row
-        IntVar R = Views.fixed(r, solver);
+        IntVar R = VariableFactory.fixed(r, solver);
         for (int i = 0; i < v; i++) {
             solver.post(IntConstraintFactory.count(1, vars[i], "=", R));
             //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
-        IntVar K = Views.fixed(k, solver);
+        IntVar K = VariableFactory.fixed(k, solver);
         for (int j = 0; j < b; j++) {
             solver.post(IntConstraintFactory.count(1, _vars[j], "=", K));
             //solver.post(Sum.eq(_vars[j], K, solver));
         }
 
         // Exactly l ones in scalar product between two different rows
-        IntVar L = Views.fixed(l, solver);
+        IntVar L = VariableFactory.fixed(l, solver);
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
@@ -137,7 +136,7 @@ public class BIBD extends AbstractProblem {
     @Override
     public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
-        solver.set(IntStrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.flatten(vars)));
     }
 
     @Override

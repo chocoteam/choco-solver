@@ -28,7 +28,7 @@
 package choco;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -42,7 +42,6 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +89,7 @@ public class AllDifferentTest {
             s.post(IntConstraintFactory.alldifferent(diag1, "BC"));
             s.post(IntConstraintFactory.alldifferent(diag2, "BC"));
         }
-        AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
         s.set(strategy);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -140,7 +139,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -156,8 +155,8 @@ public class AllDifferentTest {
 
         int n = 5;
         IntVar[] vars = new IntVar[n];
-        vars[0] = Views.fixed("v_0", 5, s);
-        vars[1] = Views.fixed("v_1", 3, s);
+        vars[0] = VariableFactory.fixed("v_0", 5, s);
+        vars[1] = VariableFactory.fixed("v_1", 3, s);
         vars[2] = VariableFactory.bounded("v_2", 3, 4, s);
         vars[3] = VariableFactory.bounded("v_3", 2, 6, s);
         vars[4] = VariableFactory.bounded("v_4", 2, 6, s);
@@ -170,7 +169,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -256,7 +255,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(IntStrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
         return s;
     }
 

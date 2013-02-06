@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -78,7 +78,7 @@ public class PropSumOfElements extends Propagator<Variable> {
      * @param c
      */
     public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, Solver solver, Constraint c) {
-        super(new Variable[]{indexes, sum}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY);
         this.sum = sum;
         this.set = indexes;
         this.weights = weights;

@@ -34,10 +34,10 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -79,7 +79,7 @@ public class PropIntChannel extends Propagator<Variable> {
      * x in sets[y-offSet1] <=> ints[x-offSet2] = y
      */
     public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2, Solver solver, Constraint c) {
-        super(ArrayUtils.append(setsV, intsV), solver, c, PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR);
         this.sets = setsV;
         this.ints = intsV;
         this.offSet1 = offSet1;

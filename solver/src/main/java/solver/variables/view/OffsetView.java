@@ -27,8 +27,8 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -56,7 +56,7 @@ import solver.variables.delta.NoDelta;
  */
 public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
 
-    final int cste;
+    public final int cste;
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
 

@@ -27,10 +27,10 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -40,8 +40,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomain;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
@@ -230,16 +228,6 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public NoDelta getDelta() {
         return NoDelta.singleton;
-    }
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        //useless
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return Empty.get();
     }
 
     @Override

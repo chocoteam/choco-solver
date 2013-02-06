@@ -27,7 +27,7 @@
 
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -47,15 +47,15 @@ import solver.variables.IntVar;
  * @author Jean-Guillaume Fages
  * @since 21/06/12
  */
-public class Knapsack extends Constraint<IntVar,Propagator<IntVar>>{
+public class Knapsack extends Constraint<IntVar, Propagator<IntVar>> {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public Knapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
-					int[] weight, int[] energy, Solver solver) {
-		super(ArrayUtils.append(itemOccurence,new IntVar[]{capacity,power}), solver);
-		setPropagators(new PropKnapsack(itemOccurence,capacity,power,weight,energy,this,solver));
-	}
+    public Knapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
+                    int[] weight, int[] energy, Solver solver) {
+        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), solver);
+        setPropagators(new PropKnapsack(itemOccurence, capacity, power, weight, energy, this, solver));
+    }
 }

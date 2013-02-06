@@ -41,10 +41,10 @@ import java.util.List;
 public class NQueenTestFactory {
 
     int[] propagation = {
-            0, 1, 2     // ConstraintEngine OR VariableEngine OR PropagatorEngine
+            0, 1, 2     // PropagatorEngine OR VariableEngine OR PropagatorEngine
     };
 
-    private int[] size = {4,8,12};//,5,6,7,8,9,10,11,12};
+    private int[] size = {4, 8, 12};//,5,6,7,8,9,10,11,12};
     private int[] searchloop = {0, 1};   // simple binary, advanced binary
     private int[] pilot = {0, 1};       // basic, schulte-like
 
@@ -52,13 +52,13 @@ public class NQueenTestFactory {
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
 
-        for(int s = 0; s < size.length; s++){
+        for (int s = 0; s < size.length; s++) {
             int _size = size[s];
-            for(int sl = 0; sl < searchloop.length; sl++){
+            for (int sl = 0; sl < searchloop.length; sl++) {
                 int _searchloop = searchloop[sl];
-                for(int p = 0; p < pilot.length; p++){
+                for (int p = 0; p < pilot.length; p++) {
                     int _pilot = pilot[p];
-                    for(int pe = 0; pe < propagation.length; pe++){
+                    for (int pe = 0; pe < propagation.length; pe++) {
                         int _propagation = propagation[pe];
                         lresult.add(new NQueenTest(_propagation, _pilot, _searchloop, _size));
                     }
@@ -68,5 +68,5 @@ public class NQueenTestFactory {
         return lresult.toArray();
     }
 
-    
+
 }

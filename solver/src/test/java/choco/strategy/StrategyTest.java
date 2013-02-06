@@ -27,19 +27,15 @@
 
 package choco.strategy;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
-import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -62,7 +58,7 @@ public class StrategyTest {
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
         }
-        AbstractStrategy asg = IntStrategyFactory.inputOrderMinVal(variables, env);
+        AbstractStrategy asg = IntStrategyFactory.inputOrder_InDomainMin(variables);
 
         s.set(asg);
 
@@ -113,10 +109,7 @@ public class StrategyTest {
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
-            HeuristicValFactory.indomainMin(variables[i]);
-            IntVar[] tmp = new IntVar[]{variables[i]};
-            asgs[i] = StrategyVarValAssign.sta(tmp, SorterFactory.inputOrder(tmp),
-                    ValidatorFactory.instanciated, env);
+            s.set(IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{variables[i]}));
         }
 
         StrategiesSequencer sts = new StrategiesSequencer(env, asgs);

@@ -7,7 +7,6 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.IOException;
 
@@ -35,8 +34,8 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
 
         this.cstrs = new Constraint[3 * (size - 1) + 4];
         for (int i = 0, k = 0; i < size - 1; i++, k++) {
-            IntVar tmp = Sum.var(vars[i + 1], Views.minus(vars[i]));
-            dist[i] = VariableFactory.enumerated("dist[" + i + "]", -size, size, solver);//Views.abs(tmp);
+            IntVar tmp = Sum.var(vars[i + 1], VariableFactory.minus(vars[i]));
+            dist[i] = VariableFactory.enumerated("dist[" + i + "]", -size, size, solver);
             this.cstrs[k++] = IntConstraintFactory.absolute(dist[i], tmp);
             this.cstrs[k++] = IntConstraintFactory.arithm(dist[i], ">", 0);
             this.cstrs[k] = IntConstraintFactory.arithm(dist[i], "<", size);

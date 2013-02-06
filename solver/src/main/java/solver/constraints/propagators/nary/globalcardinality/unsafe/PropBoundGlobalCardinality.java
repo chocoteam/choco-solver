@@ -26,9 +26,9 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.IntProcedure;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -107,7 +107,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     public PropBoundGlobalCardinality(IntVar[] vars, IntVar[] card, int firstCardValue, int lastCardValue, Solver solver,
                                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(makeVarTable(vars, card), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(makeVarTable(vars, card), PropagatorPriority.LINEAR, false);
         this.card = card;
         this.range = lastCardValue - firstCardValue + 1;
         int n = vars.length;

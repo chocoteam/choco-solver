@@ -84,7 +84,7 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         s.post(div);
-        s.set(IntStrategyFactory.random(vars, s.getEnvironment(), seed));
+        s.set(IntStrategyFactory.random(vars, seed));
         return s;
     }
 
@@ -109,7 +109,7 @@ public abstract class AbstractTernaryTest {
             }
             // total number of solutions: brut force algorithm
             long base = brutForceTest(domains, bounded);
-            Solver s = modeler(domains, bounded,seed);
+            Solver s = modeler(domains, bounded, seed);
 //            SearchMonitorFactory.log(s, false, false);
             try {
                 s.findAllSolutions();

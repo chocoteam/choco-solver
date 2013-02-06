@@ -26,8 +26,8 @@
  */
 package solver.propagation;
 
-import choco.kernel.memory.IEnvironment;
 import gnu.trove.list.array.TIntArrayList;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;

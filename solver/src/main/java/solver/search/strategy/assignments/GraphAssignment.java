@@ -27,10 +27,10 @@
 
 package solver.search.strategy.assignments;
 
+import memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 import java.io.Serializable;
 

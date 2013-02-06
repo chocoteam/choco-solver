@@ -38,8 +38,8 @@ import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.propagation.DSLEngine;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Arc;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -58,7 +58,7 @@ public class T_elt extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    PropagationEngine pe;
+    DSLEngine pe;
 
     @BeforeMethod
     public void before() {
@@ -75,7 +75,7 @@ public class T_elt extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver);
+        pe = new DSLEngine(mSolver);
 
         ArrayList<Arc> pairs = Arc.populate(mSolver);
         groups.put("G1", pairs);

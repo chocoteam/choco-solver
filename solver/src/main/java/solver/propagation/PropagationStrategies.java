@@ -28,7 +28,7 @@ package solver.propagation;
 
 import solver.Solver;
 import solver.propagation.hardcoded.ArcEngine;
-import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 
 /**
@@ -42,7 +42,7 @@ public enum PropagationStrategies {
     CONSTRAINT() {
         @Override
         public void make(Solver solver) {
-            solver.set(new ConstraintEngine(solver));
+            solver.set(new PropagatorEngine(solver));
         }
     },
     VARIABLE() {
@@ -60,7 +60,7 @@ public enum PropagationStrategies {
 
     //    ONE_QUEUE_WITH_ARCS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            PArc arcs = new PArc(pengine, constraints);
 //            pengine.set(new Queue(arcs).clearOut());
@@ -68,7 +68,7 @@ public enum PropagationStrategies {
 //    },
 //    PRIORITY_QUEUES_WITH_ARCS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
 //            for (int i = 0; i < constraints.length; i++) {
@@ -97,7 +97,7 @@ public enum PropagationStrategies {
 //    },
 //    ONE_QUEUE_WITH_VARS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //
 //            Variable[] variables = solver.getVars();
 //            PVar arcs = new PVar(pengine, variables);
@@ -108,7 +108,7 @@ public enum PropagationStrategies {
 //    },
 //    TWO_QUEUES_WITH_VARS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Variable[] variables = solver.getVars();
 //            Constraint[] constraints = solver.getCstrs();
 //            Queue arcs = new Queue(new PVar(pengine, variables));
@@ -118,7 +118,7 @@ public enum PropagationStrategies {
 //    },
 //    INCREASING_DEGREE_VARS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Variable[] variables = solver.getVars();
 //            Arrays.sort(variables, new Comparator<Variable>() {
 //                @Override
@@ -133,7 +133,7 @@ public enum PropagationStrategies {
 //    },
 //    ONE_QUEUE_WITH_PROPS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            PCons arcs = new PCons(pengine, constraints);
 //            PCoarse coarses = new PCoarse(pengine, constraints);
@@ -142,7 +142,7 @@ public enum PropagationStrategies {
 //    },
 //    TWO_QUEUES_WITH_PROPS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            Queue arcs = new Queue(new PCons(pengine, constraints));
 //            Queue coarses = new Queue(new PCoarse(pengine, constraints));
@@ -151,7 +151,7 @@ public enum PropagationStrategies {
 //    },
 //    PRIORITY_QUEUES_WITH_PROPS() {
 //        @SuppressWarnings({"unchecked"})
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
 //            for (int i = 0; i < constraints.length; i++) {
@@ -179,7 +179,7 @@ public enum PropagationStrategies {
 //    },
 //    GECODE() {
 //        @Override
-//        public void make(Solver solver, PropagationEngine pengine) {
+//        public void make(Solver solver, DSLEngine pengine) {
 //            Constraint[] constraints = solver.getCstrs();
 //            Sort _7qaf = new Sort(new Switcher(EvtRecEvaluators.MaxDynPriorityC, 0, 7, new Queue(), new PCons(pengine, constraints)));
 ////            SortDyn _7qac = new SortDyn(EvtRecEvaluators.MaxDynPriorityC, new PCoarse(pengine, constraints));

@@ -30,13 +30,12 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.selectors.values.InDomainMax;
+import solver.search.strategy.selectors.variables.InputOrder;
+import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -71,7 +70,7 @@ public class Grocery extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(vars, "=", 711));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
-        IntVar _711 = Views.fixed(711 * 100 * 100 * 100, solver);
+        IntVar _711 = VariableFactory.fixed(711 * 100 * 100 * 100, solver);
 
         TMP = new Constraint[3];
         TMP[0] = (IntConstraintFactory.times(vars[0], vars[1], tmp[0]));
@@ -90,38 +89,11 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        //AVOID dom/wdeg: it can change the tree search
-        //solver.set(StrategyFactory.domwdegMindom(vars, solver));
-        HeuristicValFactory.indomainSplitMax(vars);
-        solver.set(StrategyVarValAssign.sta(vars,
-                SorterFactory.inputOrder(vars),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment()));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMax(), DecisionOperator.int_split));
     }
 
     @Override
     public void configureEngine() {
-        //FIRST propagators on tmp, natural order
-        /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.but(ALL, inVARS),
-                        new IncrOrderC(TMP),
-                        Policy.FIXPOINT
-                ));
-        // THEN, LEQ constraints
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.member(LEQ),
-                        new IncrOrderV(vars),
-                        Policy.ITERATE
-                )
-        );
-        // AND, constraints on VARS, oldest first
-        solver.getEngine().addGroup(
-                Group.buildQueue(
-                        inVARS, Policy.FIXPOINT
-                )
-        );*/
     }
 
     @Override

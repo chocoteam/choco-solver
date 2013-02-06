@@ -27,8 +27,8 @@
 
 package solver.objective;
 
-import choco.kernel.ResolutionPolicy;
 import solver.ICause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;

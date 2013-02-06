@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -91,7 +91,7 @@ public class StressTest2 extends AbstractProblem {
     @Override
     public void configureSearch() {
         IntVar[] vars = ArrayUtils.append(y, x);
-        solver.set(new Assignment(vars, new InputOrder(vars, solver.getEnvironment()), new InDomainMin()));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMin()));
     }
 
     @Override

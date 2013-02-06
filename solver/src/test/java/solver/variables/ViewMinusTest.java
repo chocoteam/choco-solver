@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -51,7 +50,7 @@ public class ViewMinusTest {
         Solver solver = new Solver();
 
         IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
-        IntVar Y = Views.minus(X);
+        IntVar Y = VariableFactory.minus(X);
 
         try {
 //            solver.propagate();
@@ -111,15 +110,15 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.bounded("x", 1, 15, ref);
                 xs[1] = VariableFactory.bounded("y", -15, -1, ref);
                 ref.post(IntConstraintFactory.sum(xs, "=", 0));
-                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, solver);
-                xs[1] = Views.minus(xs[0]);
+                xs[1] = VariableFactory.minus(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
-                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -139,15 +138,15 @@ public class ViewMinusTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 15, ref);
                 xs[1] = VariableFactory.enumerated("y", -15, -1, ref);
                 ref.post(IntConstraintFactory.sum(xs, "=", 0));
-                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, solver);
-                xs[1] = Views.minus(xs[0]);
+                xs[1] = VariableFactory.minus(xs[0]);
                 solver.post(IntConstraintFactory.sum(xs, "=", 0));
-                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

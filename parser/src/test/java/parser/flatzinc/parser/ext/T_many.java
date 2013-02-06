@@ -38,7 +38,7 @@ import parser.flatzinc.FlatzincFullExtWalker;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.PropagationEngine;
+import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
@@ -60,7 +60,7 @@ public class T_many extends GrammarExtTest {
     Solver mSolver;
     THashMap<String, Object> map;
     THashMap<String, ArrayList> groups;
-    PropagationEngine pe;
+    DSLEngine pe;
     ArrayList<Arc> arcs;
 
     @BeforeMethod
@@ -78,7 +78,7 @@ public class T_many extends GrammarExtTest {
         map.put(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
-        pe = new PropagationEngine(mSolver);
+        pe = new DSLEngine(mSolver);
         arcs = Arc.populate(mSolver);
     }
 

@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -36,7 +36,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.List;
 
@@ -54,6 +53,6 @@ public class ArrayBoolXorBuilder implements IBuilder {
 
         IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
         solver.post(IntConstraintFactory.sum(as, "=", res));
-        return IntConstraintFactory.mod(res, Views.fixed(2, solver), Views.fixed(1, solver));
+        return IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver));
     }
 }

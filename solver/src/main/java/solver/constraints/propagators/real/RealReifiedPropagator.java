@@ -26,8 +26,8 @@
  */
 package solver.constraints.propagators.real;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -73,7 +73,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
      * @param solver    the solver
      */
     public RealReifiedPropagator(Ibex ibex, int cIdx, String functions, BoolVar bvar, RealVar[] vars, int options, Solver solver, RealConstraint rconstraint) {
-        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, vars), solver, rconstraint, PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, vars), PropagatorPriority.LINEAR, false);
         this.contractorIdx = cIdx;
         this.ibex = ibex;
         this.functions = functions;

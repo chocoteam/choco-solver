@@ -8,7 +8,6 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
     void configSearchStrategy() {
         //System.out.println("---------------------------");
         //SearchMonitorFactory.log(solver,true,true);
-        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
     /*@Override
@@ -62,7 +61,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
         diffs = new IntVar[(size * size - size) / 2];
         for (int k = 0, i = 0; i < size - 1; i++) {
             for (int j = i + 1; j < size; j++, k++) {
-                diffs[k] = Sum.var(ticks[j], Views.minus(ticks[i]));
+                diffs[k] = Sum.var(ticks[j], VariableFactory.minus(ticks[i]));
                 allVars.add(diffs[k]);
                 allCstrs.add(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
                 allCstrs.add(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, "<=", -((size - 1 - j + i) * (size - j + i)) / 2));

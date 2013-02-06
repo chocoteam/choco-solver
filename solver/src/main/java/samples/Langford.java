@@ -34,7 +34,6 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * CSPLib prob024:<br/>
@@ -85,7 +84,7 @@ public class Langford extends AbstractProblem {
         lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                lights[i + j * n] = IntConstraintFactory.arithm(Views.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
+                lights[i + j * n] = IntConstraintFactory.arithm(VariableFactory.offset(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]);
             }
         }
         lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
@@ -96,7 +95,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.minDomMaxVal(position, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMax(position));
     }
 
     @Override

@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.nary.intlincomb;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -47,11 +47,10 @@ public final class PropIntLinCombEq extends AbstractPropIntLinComb {
     }
 
     /**
-	 * Checks if the constraint is entailed.
-	 * @return Boolean.TRUE if the constraint is satisfied, Boolean.FALSE if it
-	 * is violated, and null if the filtering algorithm cannot infer yet.
-	 */
-	/*public Boolean isEntailed() {
+     * Checks if the constraint is entailed.
+     * @return Boolean.TRUE if the constraint is satisfied, Boolean.FALSE if it
+     * is violated, and null if the filtering algorithm cannot infer yet.
+     */    /*public Boolean isEntailed() {
         int a = coeffPolicy.computeLowerBound();
         int b = coeffPolicy.computeUpperBound();
         if (b < 0 || a > 0) {
@@ -64,37 +63,41 @@ public final class PropIntLinCombEq extends AbstractPropIntLinComb {
 	}*/
 
     /**
-	 * Checks a new lower bound.
-	 * @return true if filtering has been infered
-	 * @throws ContradictionException if a domain empties or a contradiction is
-	 * infered
+     * Checks a new lower bound.
+     *
+     * @return true if filtering has been infered
+     * @throws ContradictionException if a domain empties or a contradiction is
+     *                                infered
      */
     public boolean filterOnImprovedLowerBound()
-	throws ContradictionException {
+            throws ContradictionException {
         // the constraint check is needed only for
         // equality constraints (otherwise passive constraint)
         return propagateNewLowerBound(coeffPolicy.computeLowerBound());
-	}
-
-	/**
-	 * Checks a new upper bound.
-	 * @return true if filtering has been infered
-	 * @throws ContradictionException if a domain empties or a contradiction is
-	 * infered  */
-    public boolean filterOnImprovedUpperBound()
-	throws ContradictionException {
-        return propagateNewUpperBound(coeffPolicy.computeUpperBound());
-	}
+    }
 
     /**
-	 * Tests if the constraint is consistent
-	 * with respect to the current state of domains.
-	 * @return true iff the constraint is bound consistent
-	 * (weaker than arc consistent)
-	 */
-	public boolean isConsistent() {
+     * Checks a new upper bound.
+     *
+     * @return true if filtering has been infered
+     * @throws ContradictionException if a domain empties or a contradiction is
+     *                                infered
+     */
+    public boolean filterOnImprovedUpperBound()
+            throws ContradictionException {
+        return propagateNewUpperBound(coeffPolicy.computeUpperBound());
+    }
+
+    /**
+     * Tests if the constraint is consistent
+     * with respect to the current state of domains.
+     *
+     * @return true iff the constraint is bound consistent
+     *         (weaker than arc consistent)
+     */
+    public boolean isConsistent() {
         return (hasConsistentLowerBound() && hasConsistentUpperBound());
-	}
+    }
 
     @Override
     protected String getOperator() {

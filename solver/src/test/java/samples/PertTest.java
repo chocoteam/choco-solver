@@ -27,10 +27,10 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -38,7 +38,6 @@ import solver.propagation.PropagationStrategies;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -82,8 +81,8 @@ public class PertTest {
         solver.post(precedence(garden, 1, objective, solver));
         solver.post(precedence(painting, 2, objective, solver));
 
-        solver.set(IntStrategyFactory.minDomMinVal(new IntVar[]{masonry, carpentry, plumbing, ceiling,
-				roofing, painting, windows, facade, garden, objective}, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+                roofing, painting, windows, facade, garden, objective}));
         return solver;
 
     }
@@ -92,7 +91,7 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return IntConstraintFactory.arithm(Views.offset(x, duration), "<", y);
+        return IntConstraintFactory.arithm(VariableFactory.offset(x, duration), "<", y);
     }
 
     @Test(groups = "1s")

@@ -26,8 +26,8 @@
  */
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateBitSet;
+import common.ESat;
+import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -81,7 +81,7 @@ public class PropCount extends Propagator<IntVar> {
      */
     public PropCount(int value, IntVar[] vars, boolean onInf, boolean onSup, Solver solver,
                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false);
         this.occval = value;
         this.ovIdx = vars.length - 1;
         this.constrainOnInfNumber = onInf;

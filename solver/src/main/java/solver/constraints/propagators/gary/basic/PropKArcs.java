@@ -27,9 +27,10 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -40,7 +41,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K arcs/edges belong to the final graph
@@ -64,7 +64,7 @@ public class PropKArcs extends Propagator {
     //***********************************************************************************
 
     public PropKArcs(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
-        super(new Variable[]{graph, k}, sol, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.k = k;

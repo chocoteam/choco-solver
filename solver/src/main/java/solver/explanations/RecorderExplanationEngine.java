@@ -27,7 +27,7 @@
 
 package solver.explanations;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableValueIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;

@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.set;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.setDataStructures.ISet;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -73,7 +73,7 @@ public class PropCardinality extends Propagator<Variable> {
      * @param c
      */
     public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
-        super(new Variable[]{setVar, cardinality}, solver, c, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, cardinality}, PropagatorPriority.BINARY);
         this.card = cardinality;
         this.set = setVar;
     }

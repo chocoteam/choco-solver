@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -74,7 +74,7 @@ public class LatinSquare extends AbstractProblem {
         // Constraints
 //		Constraint check = new Constraint(solver);
         for (int i = 0; i < m; i++) {
-			IntVar[] cards = VariableFactory.boolArray("cardinalities",m,solver);
+            IntVar[] cards = VariableFactory.boolArray("cardinalities", m, solver);
             IntVar[] row = new IntVar[m];
             IntVar[] col = new IntVar[m];
             for (int x = 0; x < m; x++) {
@@ -93,7 +93,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
         //SearchMonitorFactory.log(solver, true, true);
         /*IPropagationEngine engine = solver.getEngine();
                 engine.addGroup(Group.buildQueue(
@@ -103,7 +103,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        //solver.set(new ConstraintEngine(solver));
+        //solver.set(new PropagatorEngine(solver));
     }
 
     @Override

@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -58,7 +58,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     //***********************************************************************************
 
     public PropBoolGraph(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
-        super(ArrayUtils.flatten(rel), solver, cstr, PropagatorPriority.QUADRATIC);
+        super(ArrayUtils.flatten(rel), PropagatorPriority.QUADRATIC);
         this.graph = graph;
         relations = rel;
         n = rel.length;

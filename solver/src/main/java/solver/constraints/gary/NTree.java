@@ -27,20 +27,20 @@
 
 package solver.constraints.gary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.setDataStructures.ISet;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.arborescences.PropNTree;
+import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.GraphTools;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
+import solver.variables.graph.graphOperations.GraphTools;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 /**
@@ -70,15 +70,15 @@ public class NTree extends Constraint {
     /**
      * Create a constraint for tree partitioning graph
      *
-     * @param graph  the graph variable (directed)
-     * @param nTree  the expected number of trees (IntVar)
+     * @param graph the graph variable (directed)
+     * @param nTree the expected number of trees (IntVar)
      */
     public NTree(DirectedGraphVar graph, IntVar nTree) {
         super(new Variable[]{graph, nTree}, graph.getSolver());
         setPropagators(
                 new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
                 new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-				new PropKLoops(graph, solver, this, nTree),
+                new PropKLoops(graph, solver, this, nTree),
                 new PropNTree(graph, nTree, solver, this));
         this.g = graph;
         this.nTree = nTree;

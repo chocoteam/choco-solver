@@ -27,8 +27,8 @@
 
 package samples;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
@@ -119,7 +119,7 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = IntStrategyFactory.domddegMinDom(objects);
+        AbstractStrategy strat = IntStrategyFactory.domOverWDeg_InDomainMin(objects, seed);
         // top-down
 //		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
         // dichotomic
@@ -146,7 +146,7 @@ public class Knapsack extends AbstractProblem {
     @Override
     public void configureEngine() {
         // not usefull
-//        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        IPropagationEngine pengine = new DSLEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
 //        solver.set(pengine);
     }

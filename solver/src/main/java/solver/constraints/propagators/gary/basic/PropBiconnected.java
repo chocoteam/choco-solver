@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -59,7 +59,7 @@ public class PropBiconnected extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropBiconnected(GraphVar graph, Constraint constraint, Solver solver) {
-        super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
     }

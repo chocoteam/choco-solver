@@ -27,8 +27,8 @@
 
 package solver.constraints.binary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -58,7 +58,7 @@ public class ElementTest {
         s.post(IntConstraintFactory.element(var, values, index, offset));
 
         IntVar[] allvars = ArrayUtils.toArray(index, var);
-        s.set(IntStrategyFactory.random(allvars, env));
+        s.set(IntStrategyFactory.random(allvars, System.currentTimeMillis()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
@@ -67,7 +67,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test1() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", -3, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
@@ -77,7 +77,7 @@ public class ElementTest {
     @Test(groups = "1s")
     public void test2() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
         int[] values = new int[]{1, 2, 0, 4, 3};
         IntVar index = VariableFactory.enumerated("v_0", 2, 10, s);
         IntVar var = VariableFactory.enumerated("v_1", -20, 20, s);
@@ -163,7 +163,7 @@ public class ElementTest {
             indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(IntStrategyFactory.random(allvarsr, ref.getEnvironment(), seed));
+        ref.set(IntStrategyFactory.random(allvarsr, seed));
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));

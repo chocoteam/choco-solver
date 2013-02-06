@@ -91,14 +91,14 @@ public class Eq5 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        //solver.set(StrategyFactory.ABSrandom(vars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
-        solver.set(new Assignment(vars, new InputOrder(vars, solver.getEnvironment()), new InDomainMiddle()));
+        //solver.set(StrategyFactory.ActivityBased(vars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
+        solver.set(new Assignment(new InputOrder(vars), new InDomainMiddle()));
     }
 
     @Override
     public void configureEngine() {
-//        solver.set(new ConstraintEngine(solver));
-//        IPropagationEngine engine = new PropagationEngine(solver.getEnvironment());
+//        solver.set(new PropagatorEngine(solver));
+//        IPropagationEngine engine = new DSLEngine(solver.getEnvironment());
 //        PropagationStrategies.TWO_QUEUES_WITH_PROPS.make(solver, engine);
 //        solver.set(engine);
     }

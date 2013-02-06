@@ -26,10 +26,10 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -37,7 +37,6 @@ import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -101,7 +100,7 @@ public class WarehouseLocation extends AbstractProblem {
         totCost = VariableFactory.bounded("cost", 0, 99999, solver);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = Views.fixed(1, solver);
+        IntVar ONE = VariableFactory.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
             solver.post(IntConstraintFactory.element(ONE, open, suppliers[s], 0));
         }
@@ -114,7 +113,7 @@ public class WarehouseLocation extends AbstractProblem {
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar counter = Views.fixed(capacity[w], solver);
+            IntVar counter = VariableFactory.fixed(capacity[w], solver);
             solver.post(IntConstraintFactory.count(w, suppliers, "<=", counter));
         }
 
@@ -127,8 +126,8 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void configureSearch() {
         StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                IntStrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-                IntStrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+                IntStrategyFactory.inputOrder_InDomainMin(suppliers),
+                IntStrategyFactory.maxReg_InDomainMin(costPerStore)
         );
         solver.set(strat);
 

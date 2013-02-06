@@ -34,9 +34,9 @@
 
 package solver.objective;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
+import common.util.PoolManager;
 import solver.ICause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;
@@ -118,7 +118,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             case DICHOTOMIC:
                 return new int[]{1, 1};
             default:
-                throw new UnsupportedOperationException("unknown OptimizationPolicy "+policy);
+                throw new UnsupportedOperationException("unknown OptimizationPolicy " + policy);
         }
     }
 
@@ -136,7 +136,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
                         return incLB;
                 }
             default:
-                throw new UnsupportedOperationException("unknown OptimizationPolicy "+optPolicy+" or ResolutionPolicy "+resoPolicy);
+                throw new UnsupportedOperationException("unknown OptimizationPolicy " + optPolicy + " or ResolutionPolicy " + resoPolicy);
         }
     }
 
@@ -172,7 +172,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-		System.out.println("new objective bounds ["+globalLB+","+globalUB+"]");
+        System.out.println("new objective bounds [" + globalLB + "," + globalUB + "]");
         FastDecision dec = pool.getE();
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);

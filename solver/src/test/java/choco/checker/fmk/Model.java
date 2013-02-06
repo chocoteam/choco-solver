@@ -27,9 +27,9 @@
 
 package choco.checker.fmk;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.Nullable;
+import common.util.tools.ArrayUtils;
+import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -256,7 +256,7 @@ public interface Model {
             Constraint ctr = new Constraint(s);
             ctr.addPropagators(new PropBoolSum(bools, vars[n - 1], s, ctr));
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -281,7 +281,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -306,7 +306,7 @@ public interface Model {
             IntVar[] allvars = ArrayUtils.append(X, Y);
             Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(allvars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -331,7 +331,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC");
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;

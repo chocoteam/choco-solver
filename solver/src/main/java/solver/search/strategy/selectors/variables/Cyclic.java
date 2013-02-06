@@ -48,6 +48,11 @@ public class Cyclic implements VariableSelector<RealVar> {
     }
 
     @Override
+    public RealVar[] getScope() {
+        return vars;
+    }
+
+    @Override
     public boolean hasNext() {
         int nbvars = vars.length;
         int start = current == -1 ? nbvars - 1 : current;

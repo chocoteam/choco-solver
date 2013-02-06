@@ -27,9 +27,9 @@
 
 package samples.pert;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -109,7 +109,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

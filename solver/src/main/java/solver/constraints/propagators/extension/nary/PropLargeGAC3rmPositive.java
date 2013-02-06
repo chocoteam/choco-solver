@@ -26,7 +26,7 @@
  */
 package solver.constraints.propagators.extension.nary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -75,7 +75,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     protected ValidityChecker valcheck;
 
     public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.QUADRATIC, false);
+        super(vars, PropagatorPriority.QUADRATIC, false);
         this.relation = relation;
         this.arity = vars.length;
         this.offsets = new int[arity];

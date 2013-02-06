@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.ALogicTree;
@@ -53,14 +53,14 @@ public class PropClause extends Propagator<BoolVar> {
     @SuppressWarnings({"unchecked"})
     public PropClause(ALogicTree t, Solver solver,
                       Constraint constraint) {
-        super(t.flattenBoolVar(), solver, constraint, PropagatorPriority.LINEAR, false);
+        super(t.flattenBoolVar(), PropagatorPriority.LINEAR, false);
         this.firstNotPosLit = t.getNbPositiveLiterals();
     }
 
     @SuppressWarnings({"unchecked"})
     protected PropClause(Solver solver,
                          Constraint constraint) {
-        super(new BoolVar[0], solver, constraint, PropagatorPriority.UNARY, false);
+        super(new BoolVar[0], PropagatorPriority.UNARY, false);
         this.firstNotPosLit = 0;
     }
 

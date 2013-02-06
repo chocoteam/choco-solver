@@ -64,7 +64,6 @@ public class CNFTest {
                         Literal.neg(a)
                 ), solver));
             }
-//        IntVar view = Views.offset(y, 11);
             solver.post(IntConstraintFactory.reified(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();

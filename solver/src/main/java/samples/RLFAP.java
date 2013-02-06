@@ -26,13 +26,13 @@
  */
 package samples;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.limits.LimitBox;
@@ -41,7 +41,6 @@ import solver.search.restart.RestartFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -104,12 +103,12 @@ public class RLFAP extends AbstractProblem {
             int vidx = _var[i][0] - 1;
             if (vidx > prev) {
                 for (; prev < vidx; ) {
-                    vars[prev++] = Views.fixed(0, solver);
+                    vars[prev++] = VariableFactory.fixed(0, solver);
                 }
             }
             int didx = _var[i][1];
             if (_var[i].length > 2) {
-                vars[vidx] = Views.fixed(_var[i][2], solver);
+                vars[vidx] = VariableFactory.fixed(_var[i][2], solver);
             } else {
                 vars[vidx] = VariableFactory.enumerated("v_" + vidx, _dom[didx], solver);
                 values.addAll(_dom[didx]);
@@ -160,15 +159,15 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.firstFail_InDomainMin(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
         if (true) {
-            solver.set(IntStrategyFactory.domwdegMindom(vars, seed));
-//            solver.set(new Assignment(vars, new DomOverWDegVS(vars, solver, seed),
+            solver.set(IntStrategyFactory.domOverWDeg_InDomainMin(vars, seed));
+//            solver.set(new Assignment(vars, new DomOverWDeg(vars, solver, seed),
 //                    new InDomainMin()));
         } else {
             IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
-            solver.set(IntStrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
+            solver.set(IntStrategyFactory.ActivityBased(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
                 LimitBox.failLimit(solver, 2), 25000);

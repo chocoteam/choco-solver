@@ -40,10 +40,8 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.view.Views;
 
 /**
  * This sample illustrates how to use a graph variable to
@@ -53,78 +51,80 @@ import solver.variables.view.Views;
  *
  * @author Jean-Guillaume Fages
  */
-public class CliqueEnumeration extends AbstractProblem{
+public class CliqueEnumeration extends AbstractProblem {
 
-	// graph variable
-	private UndirectedGraphVar graphvar;
-	// five nodes are involved
-	private int n = 5;
+    // graph variable
+    private UndirectedGraphVar graphvar;
+    // five nodes are involved
+    private int n = 5;
 
-	public static void main(String[] args) {
-		new CliqueEnumeration().execute(args);
-	}
+    public static void main(String[] args) {
+        new CliqueEnumeration().execute(args);
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("clique enumeration");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("clique enumeration");
+    }
 
-	@Override
-	public void buildModel() {
-		// input data
-		boolean[][] link = new boolean[n][n];
-		link[1][2] = true;
-		link[2][3] = true;
-		link[2][4] = true;
-		link[1][3] = true;
-		link[1][4] = true;
-		link[3][4] = true;
-		// graph variable
-		graphvar = VariableFactory.undirectedGraph("G", n, solver);
-		// initial domain
-		for (int i = 0; i < n; i++) {
-			graphvar.getEnvelopGraph().activateNode(i);			// potential node
-			graphvar.getEnvelopGraph().addEdge(i, i);			// potential loop
-			for (int j = i + 1; j < n; j++) {
-				if (link[i][j]) {
-					graphvar.getEnvelopGraph().addEdge(i, j);	// potential edge
-				}
-			}
-		}
-		// 1 and 2 must belong to the same clique
-		graphvar.getKernelGraph().activateNode(1);		// mandatory node
-		graphvar.getKernelGraph().activateNode(2);		// mandatory node
-		graphvar.getEnvelopGraph().addEdge(1, 1);		// mandatory loop
-		graphvar.getEnvelopGraph().addEdge(2, 2);		// mandatory loop
-		graphvar.getKernelGraph().addEdge(1, 2);		// mandatory edge
-		// constraint : the graph must be a clique
-		solver.post(GraphConstraintFactory.nCliques(graphvar, Views.fixed(1, solver)));
-	}
+    @Override
+    public void buildModel() {
+        // input data
+        boolean[][] link = new boolean[n][n];
+        link[1][2] = true;
+        link[2][3] = true;
+        link[2][4] = true;
+        link[1][3] = true;
+        link[1][4] = true;
+        link[3][4] = true;
+        // graph variable
+        graphvar = VariableFactory.undirectedGraph("G", n, solver);
+        // initial domain
+        for (int i = 0; i < n; i++) {
+            graphvar.getEnvelopGraph().activateNode(i);            // potential node
+            graphvar.getEnvelopGraph().addEdge(i, i);            // potential loop
+            for (int j = i + 1; j < n; j++) {
+                if (link[i][j]) {
+                    graphvar.getEnvelopGraph().addEdge(i, j);    // potential edge
+                }
+            }
+        }
+        // 1 and 2 must belong to the same clique
+        graphvar.getKernelGraph().activateNode(1);        // mandatory node
+        graphvar.getKernelGraph().activateNode(2);        // mandatory node
+        graphvar.getEnvelopGraph().addEdge(1, 1);        // mandatory loop
+        graphvar.getEnvelopGraph().addEdge(2, 2);        // mandatory loop
+        graphvar.getKernelGraph().addEdge(1, 2);        // mandatory edge
+        // constraint : the graph must be a clique
+        solver.post(GraphConstraintFactory.nCliques(graphvar, VariableFactory.fixed(1, solver)));
+    }
 
-	@Override
-	public void configureSearch() {
-		// search strategy (lexicographic)
-		solver.set(GraphStrategyFactory.graphLexico(graphvar));
-		// log
-		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-			public void onSolution() {
-				System.out.println("solution found : "+graphvar.getEnvelopGraph().getNeighborsOf(1));
-			}
-		});
-	}
+    @Override
+    public void configureSearch() {
+        // search strategy (lexicographic)
+        solver.set(GraphStrategyFactory.graphLexico(graphvar));
+        // log
+        SearchMonitorFactory.log(solver, true, false);
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            public void onSolution() {
+                System.out.println("solution found : " + graphvar.getEnvelopGraph().getNeighborsOf(1));
+            }
+        });
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void configureEngine() {
+    }
 
-	@Override
-	public void solve() {
-		// enumeration
-		solver.findAllSolutions();
-		// log
-		SearchMonitorFactory.log(solver, true, false);
-	}
+    @Override
+    public void solve() {
+        // enumeration
+        solver.findAllSolutions();
+        // log
+        SearchMonitorFactory.log(solver, true, false);
+    }
 
-	@Override
-	public void prettyOut() {}
+    @Override
+    public void prettyOut() {
+    }
 }

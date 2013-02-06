@@ -35,9 +35,10 @@
 package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.IStateInt;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -46,7 +47,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Simple nocircuit contraint (from noCycle of Caseaux/Laburthe)
@@ -78,7 +78,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
      * @param solver
      */
     public PropPathNoCycle(DirectedGraphVar graph, int source, int sink, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

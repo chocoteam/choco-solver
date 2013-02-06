@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.reified;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -76,7 +76,7 @@ public class PropReified extends Propagator<Variable> {
                        Propagator[] oppCons,
                        Solver solver,
                        Constraint<Variable, Propagator<Variable>> owner) {
-        super(vars, solver, owner, extractPriority(cons, oppCons), false);
+        super(vars, extractPriority(cons, oppCons), false);
         this.bVar = (BoolVar) vars[0];
         left = cons;
         right = oppCons;

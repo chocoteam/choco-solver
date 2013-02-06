@@ -26,8 +26,8 @@
  */
 package solver.variables;
 
-import choco.kernel.memory.IStateDouble;
 import com.sun.istack.internal.NotNull;
+import memory.IStateDouble;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

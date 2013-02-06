@@ -27,12 +27,11 @@
 
 package solver;
 
-import choco.kernel.ESat;
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.Environments;
-import choco.kernel.memory.IEnvironment;
+import common.ESat;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.THashSet;
+import memory.Environments;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -41,7 +40,7 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -69,8 +68,8 @@ import java.util.Properties;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
- * @see solver.propagation.PropagationEngine
- * @see choco.kernel.memory.IEnvironment
+ * @see solver.propagation.DSLEngine
+ * @see memory.IEnvironment
  * @see solver.search.loop.AbstractSearchLoop
  * @since 0.01
  */
@@ -350,7 +349,7 @@ public class Solver implements Serializable {
     public Boolean solve() {
 //        assert isValid();
         if (engine == null) {
-            this.set(new ConstraintEngine(this));
+            this.set(new PropagatorEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.setup();
@@ -360,7 +359,7 @@ public class Solver implements Serializable {
     public void propagate() throws ContradictionException {
 //        assert isValid();
         if (engine == null) {
-            this.set(new ConstraintEngine(this));
+            this.set(new PropagatorEngine(this));
         }
         engine.propagate();
     }

@@ -27,12 +27,12 @@
 
 package samples.sandbox.lns;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import samples.sandbox.graph.input.TSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Cause;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.exception.ContradictionException;
@@ -120,7 +120,7 @@ public class TSP_Sequential_LNS {
         // variables
         int max = 100 * optimum;
         IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G", solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {

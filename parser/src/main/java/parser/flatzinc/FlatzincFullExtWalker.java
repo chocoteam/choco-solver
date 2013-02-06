@@ -29,7 +29,6 @@
 
 package parser.flatzinc;
 
-import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.antlr.runtime.*;
@@ -43,9 +42,10 @@ import parser.flatzinc.ast.*;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.ast.ext.*;
+import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.propagation.DSLEngine;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 
 import java.util.ArrayList;
@@ -391,7 +391,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         ArrayList<Arc> arcs = Arc.populate(mSolver);
-        PropagationEngine propagationEngine = new PropagationEngine(mSolver);
+        DSLEngine propagationEngine = new DSLEngine(mSolver);
 
         try {
             // parser/flatzinc/FlatzincFullExtWalker.g:139:5: ( ( group_decl[arcs] )+ ps= structure[propagationEngine] )
@@ -1161,8 +1161,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "structure"
-    // parser/flatzinc/FlatzincFullExtWalker.g:233:1: structure[PropagationEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
-    public final PropagationStrategy structure(PropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:233:1: structure[DSLEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
+    public final PropagationStrategy structure(DSLEngine pe) throws RecognitionException {
         PropagationStrategy ps = null;
 
 
@@ -1235,8 +1235,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct"
-    // parser/flatzinc/FlatzincFullExtWalker.g:244:1: struct[PropagationEngine pe] returns [PropagationStrategy item] : ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) );
-    public final PropagationStrategy struct(PropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:244:1: struct[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) );
+    public final PropagationStrategy struct(DSLEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
 
@@ -1409,8 +1409,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct_reg"
-    // parser/flatzinc/FlatzincFullExtWalker.g:255:1: struct_reg[PropagationEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );
-    public final PropagationStrategy struct_reg(PropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:255:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );
+    public final PropagationStrategy struct_reg(DSLEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
 
@@ -1506,8 +1506,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "elt"
-    // parser/flatzinc/FlatzincFullExtWalker.g:282:1: elt[PropagationEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
-    public final ISchedulable[] elt(PropagationEngine pe) throws RecognitionException {
+    // parser/flatzinc/FlatzincFullExtWalker.g:282:1: elt[DSLEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
+    public final ISchedulable[] elt(DSLEngine pe) throws RecognitionException {
         ISchedulable[] items = null;
 
 
@@ -5158,7 +5158,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         }
 
         public String getDescription() {
-            return "255:1: struct_reg[PropagationEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );";
+            return "255:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );";
         }
     }
 

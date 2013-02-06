@@ -26,12 +26,12 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.setDataStructures.ISet;
-import choco.kernel.memory.setDataStructures.SetType;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+import memory.setDataStructures.ISet;
+import memory.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -95,7 +95,7 @@ public class PropGCC_AC_Cards_Fast extends Propagator<IntVar> {
      * @param sol
      */
     public PropGCC_AC_Cards_Fast(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
-        super(ArrayUtils.append(vars, cards), sol, constraint, PropagatorPriority.QUADRATIC, false);
+        super(ArrayUtils.append(vars, cards), PropagatorPriority.QUADRATIC, false);
         if (value.length != cards.length) {
             throw new UnsupportedOperationException();
         }

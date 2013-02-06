@@ -27,7 +27,7 @@
 
 package choco;
 
-import choco.kernel.memory.setDataStructures.SetType;
+import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;
@@ -126,7 +126,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
     private void basicModel() {
         // create model
-        graph = new DirectedGraphVar("G",solver, n, gt, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G", solver, n, gt, SetType.LINKED_LIST, true);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {
@@ -141,7 +141,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.hamiltonianPath(graph,0,n-1);
+        gc = GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1);
     }
 
     private Constraint integerAllDiff(boolean bc) {
@@ -353,7 +353,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        solver.post(IntConstraintFactory.circuit(vars,0));
+        solver.post(IntConstraintFactory.circuit(vars, 0));
         Boolean status = solver.findAllSolutions();
         if (status == null) {
             return -1;

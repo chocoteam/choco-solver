@@ -26,10 +26,10 @@
  */
 package solver.variables.view;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
 import com.sun.istack.internal.NotNull;
+import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

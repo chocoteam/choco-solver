@@ -27,8 +27,9 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
+import common.ESat;
+import common.util.procedure.PairProcedure;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Ensures that the final graph is antisymmetric
@@ -62,7 +62,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
     //***********************************************************************************
 
     public PropAntiSymmetric(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         enf = new EnfProc();

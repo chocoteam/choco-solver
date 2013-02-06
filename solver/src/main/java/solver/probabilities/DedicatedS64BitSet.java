@@ -1,8 +1,8 @@
 package solver.probabilities;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.S64BitSet;
-import choco.kernel.memory.trailing.EnvironmentTrailing;
+import memory.IEnvironment;
+import memory.structure.S64BitSet;
+import memory.trailing.EnvironmentTrailing;
 
 /**
  * Created by IntelliJ IDEA.

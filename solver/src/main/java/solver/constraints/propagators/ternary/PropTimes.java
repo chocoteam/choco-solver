@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.MathUtils;
+import common.ESat;
+import common.util.tools.MathUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -54,7 +54,7 @@ public class PropTimes extends Propagator<IntVar> {
 
     public PropTimes(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{v1, v2, result}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false);
         this.v0 = v1;
         this.v1 = v2;
         this.v2 = result;
@@ -67,14 +67,14 @@ public class PropTimes extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        filter(0,true,true);
-        filter(1,true,true);
-        filter(2,true,true);
+        filter(0, true, true);
+        filter(1, true, true);
+        filter(2, true, true);
     }
 
     @Override
     public final void propagate(int varIdx, int mask) throws ContradictionException {
-		filter(varIdx, EventType.isInclow(mask), EventType.isDecupp(mask));//bug
+        filter(varIdx, EventType.isInclow(mask), EventType.isDecupp(mask));//bug
     }
 
     @Override
@@ -110,30 +110,30 @@ public class PropTimes extends Propagator<IntVar> {
     //****************************************************************************************************************//
     //****************************************************************************************************************//
 
-	protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
+    protected void filter(int idx, boolean lb, boolean ub) throws ContradictionException {
         if (idx == 0) {
             awakeOnX();
         } else if (idx == 1) {
             awakeOnY();
         } else if (idx == 2) {
             awakeOnZ();
-			if (!(v2.contains(0))) {
-				lb = false;
-				ub = false;
-				if(lb){
-					int r = Math.min(getZmax(), MAX);
-					lb = v2.updateUpperBound(r, aCause);
-				}
-				if(ub){
-					int r = Math.max(getZmin(), MIN);
-					ub = v2.updateLowerBound(r, aCause);
-				}
-				if(lb || ub){
-					filter(2,lb,ub);
-				}
-			}
-		}
-	}
+            if (!(v2.contains(0))) {
+                lb = false;
+                ub = false;
+                if (lb) {
+                    int r = Math.min(getZmax(), MAX);
+                    lb = v2.updateUpperBound(r, aCause);
+                }
+                if (ub) {
+                    int r = Math.max(getZmin(), MIN);
+                    ub = v2.updateLowerBound(r, aCause);
+                }
+                if (lb || ub) {
+                    filter(2, lb, ub);
+                }
+            }
+        }
+    }
 
     /**
      * reaction when X (v0) is updated

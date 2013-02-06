@@ -27,7 +27,8 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.ESat;
+import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -37,7 +38,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import choco.kernel.memory.setDataStructures.ISet;
 
 /**
  * Propagator that ensures that K loops belong to the final graph
@@ -58,7 +58,7 @@ public class PropKLoops extends Propagator {
     //***********************************************************************************
 
     public PropKLoops(GraphVar graph, Solver sol, Constraint constraint, IntVar k) {
-        super(new Variable[]{graph, k}, sol, constraint, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;
     }
