@@ -38,7 +38,8 @@ import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremen
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
@@ -123,7 +124,7 @@ public class HCP_symImpact {
         }
         solver = new Solver();
         // variables
-        UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (matrix[i][j]) {
@@ -132,10 +133,10 @@ public class HCP_symImpact {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi, solver);
+        Constraint gc = GraphConstraintFactory.hamiltonianCycle(undi);
         solver.post(gc);
         // config
-        solver.set(StrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
+        solver.set(GraphStrategyFactory.graphStrategy(undi, null, new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 
 //        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
@@ -172,7 +173,7 @@ public class HCP_symImpact {
         }
         solver = new Solver();
         // variables
-        DirectedGraphVar dir = new DirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        DirectedGraphVar dir = new DirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         dir.getKernelGraph().activateNode(n - 1);
         for (int i = 0; i < n - 1; i++) {
             dir.getKernelGraph().activateNode(i);
@@ -183,13 +184,13 @@ public class HCP_symImpact {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.hamiltonianPath(dir, 0, n - 1, solver);
+        Constraint gc = GraphConstraintFactory.hamiltonianPath(dir, 0, n - 1);
         if (alldifferentAC) {
             gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
         }
         solver.post(gc);
         // config
-        solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
+        solver.set(GraphStrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
 //        PropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);

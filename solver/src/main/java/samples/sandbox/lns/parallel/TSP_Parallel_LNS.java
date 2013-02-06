@@ -29,7 +29,7 @@ package samples.sandbox.lns.parallel;
 
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.parallelism.AbstractParallelMaster;
+import samples.sandbox.parallelism.AbstractParallelMaster;
 import samples.sandbox.graph.input.TSP_Utils;
 import samples.sandbox.graph.output.TextWriter;
 import solver.Solver;
@@ -87,7 +87,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
         // variables
         int max = 100 * optimum;
         IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -95,10 +95,10 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
             }
         }
         // constraints
-        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 0, solver));
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 0));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(9, true, true, false);
+        strategy.configure(9, true);
         solver.set(strategy);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         // resolution

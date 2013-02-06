@@ -462,8 +462,13 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 3};
         int[] low = new int[]{0, 1, 0};
         int[] up = new int[]{1, 2, 1};
+		IntVar[] cards = new IntVar[]{
+				VariableFactory.bounded("card 0",0,1,s),
+				VariableFactory.bounded("card 1",1,2,s),
+				VariableFactory.bounded("card 2",0,1,s)
+		};
 
-        s.post(IntConstraintFactory.global_cardinality_low_up(X, values, low, up, false, "BC"));
+        s.post(IntConstraintFactory.global_cardinality(X, values, cards, false));
 
         Visualization visu = new Visualization("Gcc", s, dir + "/out");
         visu.createTree();

@@ -48,7 +48,7 @@ import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -103,7 +103,7 @@ public class LexChainTest {
         }
 
         solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
-        solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         return solver;
     }
 
@@ -117,7 +117,7 @@ public class LexChainTest {
         }
 
         solver.post(new LexChain(X, true, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         return solver;
     }
 

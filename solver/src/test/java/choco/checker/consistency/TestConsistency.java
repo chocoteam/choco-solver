@@ -183,26 +183,6 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, null, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
-    public void testGCCAC1() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelGcAC, 8, 0, 10, new boolean[]{true, true}, seed + i, "ac");
-    }
-
-    @Test(groups = "10s")
-    public void testGCCBC1() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelGcBC, 8, 0, 10, true, seed + i, "bc");
-    }
-
-    @Test(groups = "10s")
-    public void testGCCBC2() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelGcBC, 8, 0, 10, false, seed + i, "bc");
-    }
 //    NO CONSISTENCY ON TIMES CONSTRAINT
 //    @Test(groups = "10s")
 //    public void testTIMES1() {

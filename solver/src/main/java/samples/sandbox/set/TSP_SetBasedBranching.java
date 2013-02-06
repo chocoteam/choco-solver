@@ -120,7 +120,7 @@ public class TSP_SetBasedBranching {
         solver.set(SearchPattern.LAST_FAIL);
         // variables
         totalCost = VariableFactory.bounded("obj", 0, upperBound, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         final SetVar[] sets = new SetVar[n];
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
@@ -133,7 +133,7 @@ public class TSP_SetBasedBranching {
                     solver);
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0, solver);
+        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0);
         mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
         mst.waitFirstSolution(search != 0);
         gc.addPropagators(mst);
@@ -141,7 +141,7 @@ public class TSP_SetBasedBranching {
         solver.post(SetConstraintsFactory.graph_channel(sets, undi, solver));
         // config
         GraphStrategies graph_strategy = new GraphStrategies(undi, matrix, mst);
-        graph_strategy.configure(policy, true, true, false);
+        graph_strategy.configure(policy, true);
         SetSearchStrategy set_strategy = new SetSearchStrategy(sets) {
             @Override
             public Decision<SetVar> getDecision() {

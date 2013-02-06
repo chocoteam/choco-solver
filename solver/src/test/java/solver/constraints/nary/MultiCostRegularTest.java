@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -116,7 +116,7 @@ public class MultiCostRegularTest {
 
         solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, auto, costMatrix));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
-        solver.set(StrategyFactory.random(ArrayUtils.append(sequence, bounds), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.append(sequence, bounds), solver.getEnvironment(), seed));
         return solver;
     }
 

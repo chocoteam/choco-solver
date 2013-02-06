@@ -220,7 +220,7 @@ public class ATSP {
         initialUB = optimum;
         System.out.println(initialUB);
         System.out.println("initial UB : " + initialUB);
-        graph = new DirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
         try {
             for (int i = 0; i < n - 1; i++) {
@@ -236,7 +236,7 @@ public class ATSP {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
+        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1);
     }
 
     public static void addPropagators() {
@@ -313,9 +313,9 @@ public class ATSP {
 //		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
 
         GraphStrategies first = new GraphStrategies(graph, distanceMatrix, relax);
-        first.configure(9, true, true, true);
+        first.configure(9, true);
         GraphStrategies next = new GraphStrategies(graph, distanceMatrix, relax);
-        next.configure(12, true, true, false);
+        next.configure(12, true);
         AbstractStrategy mainStrat = new Change(graph, first, next);
 
         switch (main_search) {

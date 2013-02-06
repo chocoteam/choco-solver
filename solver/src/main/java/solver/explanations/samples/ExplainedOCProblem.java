@@ -32,7 +32,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -67,7 +67,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
 //        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
     }
 
 

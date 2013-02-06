@@ -4,7 +4,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -27,7 +27,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
 
     @Override
     void configSearchStrategy() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
     }
 
     @Override

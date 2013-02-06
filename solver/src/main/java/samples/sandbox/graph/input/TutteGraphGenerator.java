@@ -47,7 +47,8 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.graph.UndirectedGraphVar;
 
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class TutteGraphGenerator {
         int diam = 8;
         boolean[][] output = new boolean[n][n];
         Solver solver = new Solver();
-        UndirectedGraphVar g = new UndirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
-        Constraint c = GraphConstraintFactory.makeConstraint(solver);
+        UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        Constraint c = new Constraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
 //		c.addPropagators(new PropMaxDiameterFromNode(g,nodeDiam,0,c,solver));
@@ -89,7 +90,7 @@ public class TutteGraphGenerator {
         }
 
         solver.post(c);
-        solver.set(StrategyFactory.graphLexico(g));
+        solver.set(GraphStrategyFactory.graphLexico(g));
         SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
         if (solver.getMeasures().getSolutionCount() == 0) {
@@ -111,8 +112,8 @@ public class TutteGraphGenerator {
     public static ArrayList<int[][]> createAllTutteGraphs(final int n) {
         final ArrayList<int[][]> output = new ArrayList();
         Solver solver = new Solver();
-        final UndirectedGraphVar g = new UndirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
-        Constraint c = GraphConstraintFactory.makeConstraint(solver);
+        final UndirectedGraphVar g = new UndirectedGraphVar("G",solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
+        Constraint c = new Constraint(solver);
         c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
         c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
         c.addPropagators(new PropMaxDiameterFromNode(g, 6, 0, c, solver));
@@ -128,7 +129,7 @@ public class TutteGraphGenerator {
             }
         }
         solver.post(c);
-        solver.set(StrategyFactory.graphLexico(g));
+        solver.set(GraphStrategyFactory.graphLexico(g));
         solver.getSearchLoop().getLimitsBox().setSolutionLimit(100);
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             public void onSolution() {

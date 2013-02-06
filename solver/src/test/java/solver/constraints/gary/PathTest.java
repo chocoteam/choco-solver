@@ -35,7 +35,8 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import choco.kernel.memory.setDataStructures.SetType;
@@ -51,13 +52,13 @@ public class PathTest {
 
     public static Solver model(int n, int seed, boolean path, boolean arbo, boolean RG, long nbMaxSols) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer, true);
+        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, true);
         for (int i = 0; i < n - 1; i++) {
             for (int j = 1; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);
             }
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(s);
+        Constraint gc = new Constraint(s);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
@@ -77,7 +78,7 @@ public class PathTest {
         if (RG) {
             gc.addPropagators(new PropReducedGraphHamPath(g, gc, s));
         }
-        AbstractStrategy strategy = StrategyFactory.graphLexico(g);
+        AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {

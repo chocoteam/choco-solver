@@ -38,6 +38,7 @@ import solver.search.loop.SearchLoops;
  * @since 15/02/11
  */
 public class TestCorrectness {
+
     private SearchLoops slType; // search loop type default value
 
     public TestCorrectness() {
@@ -119,11 +120,21 @@ public class TestCorrectness {
     }
 
     @Test(groups = "1m")
-    public void testGCCBC() {
+    public void testGCC() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGcBC, n, 0, n, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
+            }
+        }
+    }
+
+	@Test(groups = "1m")
+    public void testGCC2() {
+        for (int i = 0; i < 20; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < 33; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff, n, -n / 2, 2 * n, seed, false);
             }
 
         }
@@ -277,91 +288,22 @@ public class TestCorrectness {
         }
     }
 
-    // NValue
-    @Test(groups = "1m")
+    @Test(groups = "5m")
     public void testNVALUES() {
+		String[][] filters = new String[][]{
+				{"at_most_BC"},
+				{"at_least_AC"},
+				{"at_most_greedy"},
+				{"at_most_BC","at_least_AC"},
+				{"at_least_AC","at_most_greedy"},
+				{"at_most_BC","at_most_greedy"},
+				{"at_most_BC","at_least_AC","at_most_greedy"},
+		};
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testNVALUES_AtMostBC() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testNVALUES_AtLeastAC() {
-        for (int i = 0; i < 10; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtLeastAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testNVALUES_AtMostGreedy() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_AtMostGreedy, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testNVALUES_simple() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelNValues_simple, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    // GCC
-    @Test(groups = "1m")
-    public void testGCC_AD_CARDS() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Cards, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testGCC_AD_FAST() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_Fast, n, -n / 2, 2 * n, seed, new int[]{2, 1});
-            }
-
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testGCC_AD_LOWUP() {
-        for (int i = 0; i < 20; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < 33; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff_LowUp, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+				for(String[] f:filters)
+					CorrectnessChecker.checkCorrectness(Modeler.modelNValues, n, -n / 2, 2 * n, seed, f);
             }
 
         }
@@ -372,12 +314,8 @@ public class TestCorrectness {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 33; n *= 2) {
-                long time = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, true);
-                System.out.println("true " + (int) (System.currentTimeMillis() - time));
-                time = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, false);
-                System.out.println("false " + (int) (System.currentTimeMillis() - time));
             }
         }
     }
@@ -407,8 +345,18 @@ public class TestCorrectness {
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 100; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4 * n, 1, n / 10, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4 * n, 1, n*2, seed, true);
             }
         }
     }
+
+	@Test(groups = "1m")
+	public void testCumulative() {
+		for (int i = 0; i < 20; i++) {
+			long seed = System.currentTimeMillis();
+			for (int n = 2; n < 60; n *= 2) {
+				CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4*n + 1, 1, n, seed, true);
+			}
+		}
+	}
 }

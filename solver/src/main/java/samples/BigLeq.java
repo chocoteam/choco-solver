@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -63,7 +63,7 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMidVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMidVal(vars, solver.getEnvironment()));
     }
 
     @Override

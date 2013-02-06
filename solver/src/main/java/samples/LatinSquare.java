@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -74,20 +74,17 @@ public class LatinSquare extends AbstractProblem {
         // Constraints
 //		Constraint check = new Constraint(solver);
         for (int i = 0; i < m; i++) {
-            int[] low = new int[m];
-            int[] up = new int[m];
+			IntVar[] cards = VariableFactory.boolArray("cardinalities",m,solver);
             IntVar[] row = new IntVar[m];
             IntVar[] col = new IntVar[m];
             for (int x = 0; x < m; x++) {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
-                low[x] = 0;
-                up[x] = 1;
             }
 //            solver.post(GlobalCardinality.make(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
 //            solver.post(GlobalCardinality.make(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
-            solver.post(IntConstraintFactory.global_cardinality_low_up(row, values, low, up, false, "AC"));
-            solver.post(IntConstraintFactory.global_cardinality_low_up(col, values, low, up, false, "AC"));
+            solver.post(IntConstraintFactory.global_cardinality(row, values, cards, false));
+            solver.post(IntConstraintFactory.global_cardinality(col, values, cards, false));
 //			check.addPropagators(new PropDomSize(row, check, solver));
 //			check.addPropagators(new PropDomSize(col,check,solver));
         }
@@ -96,7 +93,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
         //SearchMonitorFactory.log(solver, true, true);
         /*IPropagationEngine engine = solver.getEngine();
                 engine.addGroup(Group.buildQueue(

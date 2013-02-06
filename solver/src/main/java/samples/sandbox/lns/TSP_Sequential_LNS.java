@@ -120,7 +120,7 @@ public class TSP_Sequential_LNS {
         // variables
         int max = 100 * optimum;
         IntVar totalCost = VariableFactory.bounded("obj", 0, max, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -128,10 +128,10 @@ public class TSP_Sequential_LNS {
             }
         }
         // constraints
-        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 2, solver));
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 2));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(9, true, true, false);
+        strategy.configure(9, true);
         solver.set(strategy);
         solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));

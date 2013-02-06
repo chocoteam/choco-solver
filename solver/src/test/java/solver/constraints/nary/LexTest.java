@@ -37,7 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -64,7 +64,7 @@ public class LexTest {
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
             solver.post(IntConstraintFactory.lex_less_eq(vs1, vs2));
-            solver.set(StrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
             solver.findAllSolutions();
             int kpn = (int) Math.pow(k + 1, n1 / 2);
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), (kpn * (kpn + 1) / 2));
@@ -84,7 +84,7 @@ public class LexTest {
                 vs2[i] = VariableFactory.bounded("" + i, 0, k, solver);
             }
             solver.post(IntConstraintFactory.lex_less(vs1, vs2));
-            solver.set(StrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(ArrayUtils.append(vs1, vs2), solver.getEnvironment(), seed));
 
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3240);

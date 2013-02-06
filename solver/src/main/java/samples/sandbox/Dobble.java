@@ -49,7 +49,7 @@ import solver.constraints.propagators.gary.channeling.PropGraphRelation;
 import solver.constraints.propagators.gary.channeling.PropRelationGraph;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -122,7 +122,7 @@ public class Dobble {
             csym.addPropagators(new PropTakeFirstValues(flatVars, max, solver, csym));
         }
         // search strategy
-        solver.set(StrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(flatVars, solver.getEnvironment()));
         // output
         SearchMonitorFactory.log(solver, true, false);
         // time limit
@@ -134,7 +134,7 @@ public class Dobble {
     // NValue which considers the allDifferent on each card
     private static void addGlobalGraphNValues(Solver solver, IntVar[] flatJeu, IntVar nValTotal, int nbSymbCarte) {
         int nbNodes = flatJeu.length;
-        UndirectedGraphVar g = new UndirectedGraphVar(solver, nbNodes, true);
+        UndirectedGraphVar g = new UndirectedGraphVar("G",solver, nbNodes, true);
         for (int i = 0; i < nbNodes; i++) {
             g.getEnvelopGraph().addEdge(i, i);
             g.getKernelGraph().addEdge(i, i);
@@ -144,7 +144,7 @@ public class Dobble {
                 }
             }
         }
-        Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal, solver);
+        Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal);
         gc.addPropagators(new PropRelationGraph(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
         gc.addPropagators(new PropGraphRelation(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
         solver.post(gc);
@@ -153,7 +153,7 @@ public class Dobble {
     // NValue which considers the allDifferent on each card
     private static void addCardsPairGraphNValues(Solver solver, IntVar[] flatIJ, IntVar nValues) {
         int nbNodes = flatIJ.length;
-        UndirectedGraphVar gpair = new UndirectedGraphVar(solver, nbNodes, true);
+        UndirectedGraphVar gpair = new UndirectedGraphVar("G",solver, nbNodes, true);
         for (int k1 = 0; k1 < nbNodes; k1++) {
             gpair.getEnvelopGraph().addEdge(k1, k1);
             gpair.getKernelGraph().addEdge(k1, k1);
@@ -165,7 +165,7 @@ public class Dobble {
                 gpair.getEnvelopGraph().addEdge(k1, k2);
             }
         }
-        Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues, solver);
+        Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues);
         gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
         gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
         solver.post(gcpair);

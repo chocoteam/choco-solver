@@ -29,7 +29,7 @@ package samples;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -85,7 +85,7 @@ public class Eq20 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
     }
 
     @Override

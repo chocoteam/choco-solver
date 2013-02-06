@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -84,7 +84,7 @@ public abstract class AbstractTernaryTest {
         }
         Constraint div = make(vars, s);
         s.post(div);
-        s.set(StrategyFactory.random(vars, s.getEnvironment(), seed));
+        s.set(IntStrategyFactory.random(vars, s.getEnvironment(), seed));
         return s;
     }
 

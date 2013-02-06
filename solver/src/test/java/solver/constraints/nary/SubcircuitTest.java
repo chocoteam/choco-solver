@@ -49,7 +49,7 @@ public class SubcircuitTest {
     public static void test1() {
         Solver solver = new Solver();
         IntVar[] x = VariableFactory.boundedArray("x", 10, 0, 20, solver);
-        solver.post(IntConstraintFactory.subcircuit(x));
+        solver.post(IntConstraintFactory.subcircuit(x,0,VariableFactory.bounded("length",0,x.length-1,solver)));
         solver.findSolution();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());
     }
@@ -60,7 +60,7 @@ public class SubcircuitTest {
         IntVar[] x = VariableFactory.boundedArray("x", 5, 0, 4, solver);
         IntVar[] y = VariableFactory.boundedArray("y", 5, 5, 9, solver);
         IntVar[] vars = ArrayUtils.append(x, y);
-        solver.post(IntConstraintFactory.subcircuit(vars));
+        solver.post(IntConstraintFactory.subcircuit(vars,0,VariableFactory.bounded("length",0,vars.length-1,solver)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
     }
@@ -78,7 +78,7 @@ public class SubcircuitTest {
             e.printStackTrace();
             System.exit(0);
         }
-        solver.post(IntConstraintFactory.subcircuit(vars));
+        solver.post(IntConstraintFactory.subcircuit(vars,0,VariableFactory.bounded("length",0,vars.length-1,solver)));
         solver.findSolution();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() == 0);
     }
@@ -91,7 +91,7 @@ public class SubcircuitTest {
         int max = 4;
         IntVar[] vars = VariableFactory.boundedArray("x", n, 0, n, solver);
         IntVar nb = VariableFactory.bounded("size", min, max, solver);
-        solver.post(IntConstraintFactory.subcircuit(vars, nb));
+        solver.post(IntConstraintFactory.subcircuit(vars,0, nb));
         solver.findAllSolutions();
         int nbSol = 0;
         for (int i = min; i <= max; i++) {

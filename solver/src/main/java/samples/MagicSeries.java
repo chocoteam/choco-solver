@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Count;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -83,7 +83,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         // default group
     }
 

@@ -38,7 +38,7 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -60,7 +60,7 @@ public class AbsoluteTest {
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
@@ -72,7 +72,7 @@ public class AbsoluteTest {
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 
         solver.propagate();
 
@@ -105,7 +105,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
@@ -122,7 +122,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "=", 0), IntConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, "!=", 0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
-        solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
@@ -254,7 +254,7 @@ public class AbsoluteTest {
 
             Constraint abs = IntConstraintFactory.absolute(X, Y);
             solver.post(abs);
-            solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+            solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
             IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
             if (Boolean.TRUE == solver.findSolution()) {
                 do {
@@ -293,7 +293,7 @@ public class AbsoluteTest {
 
                         Constraint abs = IntConstraintFactory.absolute(X, Y);
                         solver.post(abs);
-                        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+                        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
                         IntVar[] vars = Arrays.copyOfRange(abs.getVariables(), 0, 2, IntVar[].class);
                         if (Boolean.TRUE == solver.findSolution()) {
                             do {

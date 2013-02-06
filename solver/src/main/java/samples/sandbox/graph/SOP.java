@@ -152,7 +152,7 @@ public class SOP {
         solver = new Solver();
         initialUB = optimum;
         System.out.println("initial UB : " + optimum);
-        graph = new DirectedGraphVar(solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G",solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
         totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
         try {
             for (int i = 0; i < n - 1; i++) {
@@ -169,7 +169,7 @@ public class SOP {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1, solver);
+        gc = GraphConstraintFactory.atsp(graph, totalCost, distanceMatrix, 0, n - 1);
     }
 
     public static void addPropagators() {
@@ -244,7 +244,7 @@ public class SOP {
     }
 
     public static void addTransitionGraph() {
-        transGraph = new DirectedGraphVar(solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY, true);
+        transGraph = new DirectedGraphVar("G",solver, n, SetType.BOOL_ARRAY, SetType.SWAP_ARRAY, true);
         for (int j = 1; j < n; j++) {
             transGraph.getEnvelopGraph().addArc(0, j);
             transGraph.getKernelGraph().addArc(0, j);
@@ -263,7 +263,7 @@ public class SOP {
     public static void configureAndSolve() {
         //SOLVER CONFIG
         GraphStrategies mainStrat = new GraphStrategies(graph, distanceMatrix, relax);
-        mainStrat.configure(policy, true, true, true);
+        mainStrat.configure(policy, true);
 //		GraphStrategies mainStrat = new GraphStrategies(transGraph,distanceMatrix,relax);
 //		mainStrat.configure(GraphStrategies.MAX_DELTA_DEGREE,true,true,false);
 //		AbstractStrategy mainStrat = StrategyFactory.ABSrandom(positions, solver, 0.999d, 0.2d, 8, 1.1d, 1, 0);

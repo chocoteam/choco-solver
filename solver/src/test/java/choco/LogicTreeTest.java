@@ -35,7 +35,7 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.LogicTreeToolBox;
 import solver.constraints.nary.cnf.Node;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -232,7 +232,7 @@ public class LogicTreeTest {
                     Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
             );
             sCNF.post(IntConstraintFactory.clauses(tree, sCNF));
-            sCNF.set(StrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
+            sCNF.set(IntStrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
 
             //SearchMonitorFactory.log(sCNF, true, true);
             sCNF.findAllSolutions();

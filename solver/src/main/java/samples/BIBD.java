@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.lex.LexChain;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -137,7 +137,7 @@ public class BIBD extends AbstractProblem {
     @Override
     public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
-        solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
     }
 
     @Override

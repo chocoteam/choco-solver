@@ -30,8 +30,8 @@ package samples.sandbox.lns.parallel;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.setDataStructures.ISet;
 import choco.kernel.memory.setDataStructures.SetType;
-import choco.kernel.parallelism.AbstractParallelMaster;
-import choco.kernel.parallelism.AbstractParallelSlave;
+import samples.sandbox.parallelism.AbstractParallelMaster;
+import samples.sandbox.parallelism.AbstractParallelSlave;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.objective.ObjectiveStrategy;
@@ -93,7 +93,7 @@ public class TSPslave extends AbstractParallelSlave {
         final Solver solver = new Solver();
         // variables
         final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.ENVELOPE_BEST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n - 1; j++) {
@@ -105,10 +105,10 @@ public class TSPslave extends AbstractParallelSlave {
         undi.getKernelGraph().addEdge(0, n - 1);
         undi.getKernelGraph().addEdge(n - 2, n - 1);
         // constraints
-        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1, solver));
+        solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(10, true, true, false);
+        strategy.configure(10, true);
         solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         //output

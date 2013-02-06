@@ -38,7 +38,8 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
 
@@ -74,7 +75,7 @@ public interface Model {
             System.arraycopy(vars, 0, sets, 0, n - 1);
             Constraint ctr = SetConstraintsFactory.union(sets, vars[n - 1], s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -105,7 +106,7 @@ public interface Model {
             System.arraycopy(vars, 0, sets, 0, n - 1);
             Constraint ctr = SetConstraintsFactory.intersection(sets, vars[n - 1], s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -134,7 +135,7 @@ public interface Model {
             }
             Constraint ctr = SetConstraintsFactory.all_disjoint(vars, s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -163,7 +164,7 @@ public interface Model {
             }
             Constraint ctr = SetConstraintsFactory.all_different(vars, s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -192,7 +193,7 @@ public interface Model {
             }
             Constraint ctr = SetConstraintsFactory.subsetEq(vars, s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -221,7 +222,7 @@ public interface Model {
             }
             Constraint ctr = SetConstraintsFactory.all_equal(vars, s);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.setLex(vars);
+            AbstractStrategy strategy = SetStrategyFactory.setLex(vars);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -255,7 +256,7 @@ public interface Model {
             Constraint ctr = new Constraint(s);
             ctr.addPropagators(new PropBoolSum(bools, vars[n - 1], s, ctr));
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -280,7 +281,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.arithm(vars[0], "=", vars[1]);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -305,7 +306,7 @@ public interface Model {
             IntVar[] allvars = ArrayUtils.append(X, Y);
             Constraint ctr = IntConstraintFactory.channeling(X, Y);
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(allvars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -330,7 +331,7 @@ public interface Model {
             }
             Constraint ctr = IntConstraintFactory.nvalues(decvars, vars[n - 1], "at_most_BC");
             Constraint[] ctrs = new Constraint[]{ctr};
-            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            AbstractStrategy strategy = IntStrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;

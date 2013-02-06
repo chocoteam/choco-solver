@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
@@ -102,7 +102,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.random(kid_gift, solver.getEnvironment(), 29091981));
+        solver.set(IntStrategyFactory.random(kid_gift, solver.getEnvironment(), 29091981));
     }
 
     @Override

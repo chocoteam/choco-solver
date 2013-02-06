@@ -34,7 +34,8 @@ import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
 import choco.kernel.memory.setDataStructures.SetType;
@@ -49,13 +50,13 @@ public class ArborescenceTest {
 
     public static Solver model(int n, int seed, boolean naive, boolean simple, long nbMaxSols) {
         Solver s = new Solver();
-        DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer, false);
+        DirectedGraphVar g = new DirectedGraphVar("G",s, n, graphTypeEnv, graphTypeKer, false);
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < n; j++) {
                 g.getEnvelopGraph().addArc(i, j);
             }
         }
-        Constraint gc = GraphConstraintFactory.makeConstraint(s);
+        Constraint gc = new Constraint(s);
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
             preds[i] = 1;
@@ -68,7 +69,7 @@ public class ArborescenceTest {
         } else {
             gc.addPropagators(new PropArborescence(g, 0, gc, s, simple));
         }
-        AbstractStrategy strategy = StrategyFactory.graphRandom(g, seed);
+        AbstractStrategy strategy = GraphStrategyFactory.graphRandom(g, seed);
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {

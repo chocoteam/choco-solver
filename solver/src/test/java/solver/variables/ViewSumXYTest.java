@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Random;
 
@@ -120,7 +120,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.bounded("y", 1, 5, ref);
                 xs[2] = VariableFactory.bounded("z", 2, 10, ref);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
             {
@@ -129,7 +129,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.bounded("y", 1, 5, solver);
                 IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -150,7 +150,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
                 xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
                 ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.set(IntStrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
             {
@@ -159,7 +159,7 @@ public class ViewSumXYTest {
                 xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
                 IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();

@@ -50,7 +50,8 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -194,7 +195,7 @@ public class DCMST {
     private static void solveDCMST(String instanceName) {
         solver = new Solver();
         totalCost = VariableFactory.bounded("obj", lb, ub, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -204,7 +205,7 @@ public class DCMST {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+        Constraint gc = new Constraint(solver);
         gc.addPropagators(new PropNodeDegree_AtLeast(undi, 1, gc, solver));
         gc.addPropagators(new PropNodeDegree_AtMost(undi, dMax, gc, solver));
         gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
@@ -252,8 +253,8 @@ public class DCMST {
         });
 
         // config
-        AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi, null, new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
-        AbstractStrategy gs = StrategyFactory.graphStrategy(undi, null, new OneNodeOutMST(undi), GraphStrategy.NodeArcPriority.ARCS);
+        AbstractStrategy firstSol = GraphStrategyFactory.graphStrategy(undi, null, new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
+        AbstractStrategy gs = GraphStrategyFactory.graphStrategy(undi, null, new OneNodeOutMST(undi), GraphStrategy.NodeArcPriority.ARCS);
         AbstractStrategy strat = new Change(undi, firstSol, gs);
         switch (search) {
             //ANDINST : first (if fail<100) then strat 0 truetrick

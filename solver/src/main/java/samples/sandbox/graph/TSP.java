@@ -115,7 +115,7 @@ public class TSP {
 //		solver = new Solver();
         // variables
         totalCost = VariableFactory.bounded("obj", 0, upperBound, solver);
-        final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        final UndirectedGraphVar undi = new UndirectedGraphVar("G",solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
         for (int i = 0; i < n; i++) {
             undi.getKernelGraph().activateNode(i);
             for (int j = i + 1; j < n; j++) {
@@ -123,7 +123,7 @@ public class TSP {
             }
         }
         // constraints
-        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0, solver);
+        Constraint gc = GraphConstraintFactory.tsp(undi, totalCost, matrix, 0);
         mst = PropLagr_OneTree.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
         mst.waitFirstSolution(search != 0);
         gc.addPropagators(mst);
@@ -133,7 +133,7 @@ public class TSP {
             throw new UnsupportedOperationException("not implemented");
         }
         GraphStrategies strategy = new GraphStrategies(undi, matrix, mst);
-        strategy.configure(policy, true, true, false);
+        strategy.configure(policy, true);
         switch (search) {
             case 0:
                 solver.set(strategy);

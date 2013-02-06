@@ -32,7 +32,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -127,8 +127,8 @@ public class WarehouseLocation extends AbstractProblem {
     @Override
     public void configureSearch() {
         StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+                IntStrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
+                IntStrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
         );
         solver.set(strat);
 

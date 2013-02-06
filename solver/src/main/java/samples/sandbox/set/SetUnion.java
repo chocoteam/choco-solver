@@ -37,7 +37,7 @@ package samples.sandbox.set;
 import solver.Solver;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
 import solver.variables.SetVarImpl;
 
@@ -68,7 +68,7 @@ public class SetUnion {
 
         solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z, solver));
 //		solver.post(SetConstraintsFactory.intersection(new SetVar[]{x, y}, z, solver));
-        solver.set(StrategyFactory.setLex(new SetVar[]{x, y, z}));
+        solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
         SearchMonitorFactory.log(solver, true, false);
 
 

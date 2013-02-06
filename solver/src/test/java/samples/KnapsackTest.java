@@ -33,7 +33,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;

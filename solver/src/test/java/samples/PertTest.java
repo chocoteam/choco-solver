@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -82,8 +82,8 @@ public class PertTest {
         solver.post(precedence(garden, 1, objective, solver));
         solver.post(precedence(painting, 2, objective, solver));
 
-        solver.set(StrategyFactory.minDomMinVal(new IntVar[]{masonry, carpentry, plumbing, ceiling,
-                roofing, painting, windows, facade, garden, objective}, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.minDomMinVal(new IntVar[]{masonry, carpentry, plumbing, ceiling,
+				roofing, painting, windows, facade, garden, objective}, solver.getEnvironment()));
         return solver;
 
     }

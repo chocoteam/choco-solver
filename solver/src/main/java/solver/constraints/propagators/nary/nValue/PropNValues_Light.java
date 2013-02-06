@@ -86,6 +86,8 @@ public class PropNValues_Light extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+		nValues.updateLowerBound(0,aCause);
+		nValues.updateUpperBound(n,aCause);
         filter();
     }
 

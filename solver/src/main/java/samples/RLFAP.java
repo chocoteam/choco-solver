@@ -38,7 +38,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -163,12 +163,12 @@ public class RLFAP extends AbstractProblem {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
         if (true) {
-            solver.set(StrategyFactory.domwdegMindom(vars, seed));
+            solver.set(IntStrategyFactory.domwdegMindom(vars, seed));
 //            solver.set(new Assignment(vars, new DomOverWDegVS(vars, solver, seed),
 //                    new InDomainMin()));
         } else {
             IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
-            solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
+            solver.set(IntStrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
                 LimitBox.failLimit(solver, 2), 25000);

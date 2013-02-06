@@ -29,10 +29,8 @@ package solver.constraints.gary;
 
 import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
+import solver.constraints.propagators.gary.basic.PropKLoops;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
@@ -51,12 +49,11 @@ import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFin
  * GAC ensured in O(alpha.m) worst case time (cf. paper Revisiting the tree constraint)
  * where alpha is the inverse of ackermann function
  * <p/>
- * BEWARE the case where some nodes do not belong to the solution has not been tested
+ * BEWARE this implementation supposes that every node is part of the solution graph
  *
- * @param <V>
  * @author Jean-Guillaume Fages
  */
-public class NTree<V extends Variable> extends Constraint<V, Propagator<V>> {
+public class NTree extends Constraint {
 
     //***********************************************************************************
     // VARIABLES
@@ -75,18 +72,13 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>> {
      *
      * @param graph  the graph variable (directed)
      * @param nTree  the expected number of trees (IntVar)
-     * @param solver
      */
-    public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver) {
-        super((V[]) new Variable[]{graph, nTree}, solver);
-//		setPropagators(
-////			new PropNSuccs(graph, solver, this, 1),
-//				new PropNLoopsTree(graph, nTree, solver, this),
-//				new PropNTree(graph, nTree,solver,this));
+    public NTree(DirectedGraphVar graph, IntVar nTree) {
+        super(new Variable[]{graph, nTree}, graph.getSolver());
         setPropagators(
-                (Propagator) new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                (Propagator) new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                new PropNLoopsTree(graph, nTree, solver, this),
+                new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
+                new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
+				new PropKLoops(graph, solver, this, nTree),
                 new PropNTree(graph, nTree, solver, this));
         this.g = graph;
         this.nTree = nTree;
@@ -180,48 +172,4 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>> {
         }
         return sinks.size();
     }
-
-//	private int calcMinTree() {
-//		int n = g.getEnvelopGraph().getNbNodes();
-//		if(SCCfinder == null){
-//			SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
-//		}
-////		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
-//		int[] sccOf = new int[n];
-//		int sccNum = 0;
-//		int node;
-//		for (TIntArrayList scc:allSCC){
-//			for(int x=0;x<scc.size();x++){
-//				sccOf[scc.get(x)] = sccNum;
-//			}
-//			sccNum++;
-//		}
-//		LinkedList<TIntArrayList> sinks = new LinkedList<TIntArrayList>();
-//		boolean looksSink = true;
-//		INeighbors nei;
-//		for (TIntArrayList scc:allSCC){
-//			looksSink = true;
-//			for(int x=0;x<scc.size();x++){
-//				node = scc.get(x);
-//				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-//				for(int suc=nei.getFirstElement(); suc>=0 && looksSink; suc=nei.getNextElement()){
-//					if (sccOf[suc]!=sccOf[node]){
-//						looksSink = false;
-//					}
-//				}
-//				if(!looksSink){
-//					x = scc.size();
-//				}
-//			}
-//			if(looksSink){
-//				sinks.add(scc);
-//			}
-//		}
-//		return sinks.size();
-//	}
-
-//    @Override
-//    public HeuristicVal getIterator(String name, V var) {
-//        throw new UnsupportedOperationException("NTree does not provide such a service");
-//    }
 }

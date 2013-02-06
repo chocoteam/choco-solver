@@ -34,7 +34,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.view.Views;
 
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
         return solver;
     }
 
@@ -97,7 +97,7 @@ public class AbsViewTest {
         IntVar Y = VariableFactory.bounded("Y", lby, uby, solver);
 
         solver.post(IntConstraintFactory.absolute(X, Y));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
         return solver;
     }
 
@@ -243,7 +243,7 @@ public class AbsViewTest {
 
         solver.post(IntConstraintFactory.member(X, minX, maxX));
 //        SearchMonitorFactory.log(solver, true, false);
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));
@@ -284,7 +284,7 @@ public class AbsViewTest {
         IntVar X = Views.abs(Y);
         solver.post(IntConstraintFactory.member(X, domains[0]));
         //SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));

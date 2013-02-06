@@ -47,7 +47,8 @@ import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -133,7 +134,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
     private void basicModel() {
         // create model
-        graph = new DirectedGraphVar(solver, n, gt, SetType.LINKED_LIST, true);
+        graph = new DirectedGraphVar("G",solver, n, gt, SetType.LINKED_LIST, true);
         try {
             graph.getKernelGraph().activateNode(n - 1);
             for (int i = 0; i < n - 1; i++) {
@@ -148,7 +149,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.makeConstraint(solver);
+        gc = new Constraint(solver);
         int[] succs = new int[n];
         int[] preds = new int[n];
         for (int i = 0; i < n; i++) {
@@ -214,7 +215,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     @Override
     public void configureSearch() {
         AbstractStrategy strategy;
-        strategy = StrategyFactory.graphRandom(graph, seed);
+        strategy = GraphStrategyFactory.graphRandom(graph, seed);
         solver.set(strategy);
     }
 
@@ -371,7 +372,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        solver.post(IntConstraintFactory.circuit(vars));
+        solver.post(IntConstraintFactory.circuit(vars,0));
         Boolean status = solver.findAllSolutions();
         if (status == null) {
             return -1;

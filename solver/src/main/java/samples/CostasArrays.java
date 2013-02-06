@@ -30,7 +30,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -81,7 +81,7 @@ public class CostasArrays extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.forceInputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.forceInputOrderMinVal(vars, solver.getEnvironment()));
     }
 
     @Override
