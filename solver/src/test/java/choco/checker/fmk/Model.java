@@ -27,7 +27,6 @@
 
 package choco.checker.fmk;
 
-import com.sun.istack.internal.Nullable;
 import common.util.tools.ArrayUtils;
 import memory.IEnvironment;
 import solver.ICause;
@@ -345,7 +344,7 @@ public interface Model {
             return null;
         }
 
-        public void explain(@Nullable Deduction d, Explanation e) {
+        public void explain( Deduction d, Explanation e) {
         }
 
         public boolean reactOnPromotion() {

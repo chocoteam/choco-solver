@@ -26,7 +26,7 @@
  */
 package solver.variables.view;
 
-import com.sun.istack.internal.Nullable;
+
 import solver.ICause;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -184,7 +184,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public void explain(@Nullable Deduction d, Explanation e) {
+    public void explain( Deduction d, Explanation e) {
     }
 
     @Override

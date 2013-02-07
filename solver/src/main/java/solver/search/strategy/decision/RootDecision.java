@@ -26,7 +26,7 @@
  */
 package solver.search.strategy.decision;
 
-import com.sun.istack.internal.Nullable;
+
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -94,7 +94,7 @@ public class RootDecision extends Decision {
     }
 
     @Override
-    public void explain(@Nullable Deduction d, Explanation e) {
+    public void explain( Deduction d, Explanation e) {
     }
 
     @Override

@@ -27,7 +27,7 @@
 
 package solver.variables.view;
 
-import com.sun.istack.internal.Nullable;
+
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -147,7 +147,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public void explain(@Nullable Deduction d, Explanation e) {
+    public void explain( Deduction d, Explanation e) {
         var.explain(VariableState.DOM, e);
     }
 
