@@ -62,14 +62,13 @@ import solver.propagation.generator.Sort;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.SortDyn;
 import solver.propagation.generator.*;
-import solver.propagation.hardcoded.ConstraintEngine;
 
 import solver.propagation.ISchedulable;
 import solver.propagation.generator.Arc;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import choco.kernel.ResolutionPolicy;
+import solver.ResolutionPolicy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +76,6 @@ import java.util.Properties;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Arrays;
-import choco.kernel.common.util.tools.ArrayUtils;
 }
 
 @members{

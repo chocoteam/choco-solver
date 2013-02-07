@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2012-11-29 14:35:56
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2013-02-07 09:07:34
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -198,11 +198,11 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "flatzinc_model"
-    // parser/flatzinc/FlatzincFullExtWalker.g:102:1: flatzinc_model[Solver aSolver, THashMap<String, Object> map, GoalConf gc] : ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:100:1: flatzinc_model[Solver aSolver, THashMap<String, Object> map, GoalConf gc] : ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal ;
     public final void flatzinc_model(Solver aSolver, THashMap<String, Object> map, GoalConf gc) throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:103:2: ( ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal )
-            // parser/flatzinc/FlatzincFullExtWalker.g:104:2: ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal
+            // parser/flatzinc/FlatzincFullExtWalker.g:101:2: ( ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal )
+            // parser/flatzinc/FlatzincFullExtWalker.g:102:2: ( pred_decl )* ( param_decl )* ( var_decl )* ( constraint )* ( engine )? solve_goal
             {
 
                 this.mSolver = aSolver;
@@ -211,7 +211,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 this.groups = new THashMap();
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:110:5: ( pred_decl )*
+                // parser/flatzinc/FlatzincFullExtWalker.g:108:5: ( pred_decl )*
                 loop1:
                 do {
                     int alt1 = 2;
@@ -225,7 +225,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt1) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:110:6: pred_decl
+                            // parser/flatzinc/FlatzincFullExtWalker.g:108:6: pred_decl
                         {
                             pushFollow(FOLLOW_pred_decl_in_flatzinc_model53);
                             pred_decl();
@@ -242,7 +242,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 } while (true);
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:110:18: ( param_decl )*
+                // parser/flatzinc/FlatzincFullExtWalker.g:108:18: ( param_decl )*
                 loop2:
                 do {
                     int alt2 = 2;
@@ -256,7 +256,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt2) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:110:19: param_decl
+                            // parser/flatzinc/FlatzincFullExtWalker.g:108:19: param_decl
                         {
                             pushFollow(FOLLOW_param_decl_in_flatzinc_model58);
                             param_decl();
@@ -273,7 +273,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 } while (true);
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:110:32: ( var_decl )*
+                // parser/flatzinc/FlatzincFullExtWalker.g:108:32: ( var_decl )*
                 loop3:
                 do {
                     int alt3 = 2;
@@ -287,7 +287,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt3) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:110:33: var_decl
+                            // parser/flatzinc/FlatzincFullExtWalker.g:108:33: var_decl
                         {
                             pushFollow(FOLLOW_var_decl_in_flatzinc_model63);
                             var_decl();
@@ -304,7 +304,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 } while (true);
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:110:44: ( constraint )*
+                // parser/flatzinc/FlatzincFullExtWalker.g:108:44: ( constraint )*
                 loop4:
                 do {
                     int alt4 = 2;
@@ -318,7 +318,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt4) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:110:45: constraint
+                            // parser/flatzinc/FlatzincFullExtWalker.g:108:45: constraint
                         {
                             pushFollow(FOLLOW_constraint_in_flatzinc_model68);
                             constraint();
@@ -335,7 +335,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 } while (true);
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:110:58: ( engine )?
+                // parser/flatzinc/FlatzincFullExtWalker.g:108:58: ( engine )?
                 int alt5 = 2;
                 switch (input.LA(1)) {
                     case IDENTIFIER: {
@@ -346,7 +346,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 switch (alt5) {
                     case 1:
-                        // parser/flatzinc/FlatzincFullExtWalker.g:110:58: engine
+                        // parser/flatzinc/FlatzincFullExtWalker.g:108:58: engine
                     {
                         pushFollow(FOLLOW_engine_in_flatzinc_model72);
                         engine();
@@ -385,7 +385,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "engine"
-    // parser/flatzinc/FlatzincFullExtWalker.g:123:1: engine : ( group_decl[arcs] )+ ps= structure[propagationEngine] ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:121:1: engine : ( group_decl[arcs] )+ ps= structure[propagationEngine] ;
     public final void engine() throws RecognitionException {
         PropagationStrategy ps = null;
 
@@ -394,10 +394,10 @@ public class FlatzincFullExtWalker extends TreeParser {
         DSLEngine propagationEngine = new DSLEngine(mSolver);
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:139:5: ( ( group_decl[arcs] )+ ps= structure[propagationEngine] )
-            // parser/flatzinc/FlatzincFullExtWalker.g:139:9: ( group_decl[arcs] )+ ps= structure[propagationEngine]
+            // parser/flatzinc/FlatzincFullExtWalker.g:137:5: ( ( group_decl[arcs] )+ ps= structure[propagationEngine] )
+            // parser/flatzinc/FlatzincFullExtWalker.g:137:9: ( group_decl[arcs] )+ ps= structure[propagationEngine]
             {
-                // parser/flatzinc/FlatzincFullExtWalker.g:139:9: ( group_decl[arcs] )+
+                // parser/flatzinc/FlatzincFullExtWalker.g:137:9: ( group_decl[arcs] )+
                 int cnt6 = 0;
                 loop6:
                 do {
@@ -412,7 +412,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt6) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:139:10: group_decl[arcs]
+                            // parser/flatzinc/FlatzincFullExtWalker.g:137:10: group_decl[arcs]
                         {
                             pushFollow(FOLLOW_group_decl_in_engine108);
                             group_decl(arcs);
@@ -464,15 +464,15 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "group_decl"
-    // parser/flatzinc/FlatzincFullExtWalker.g:142:1: group_decl[ArrayList<Arc> arcs] : ^( IDENTIFIER p= predicates ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:140:1: group_decl[ArrayList<Arc> arcs] : ^( IDENTIFIER p= predicates ) ;
     public final void group_decl(ArrayList<Arc> arcs) throws RecognitionException {
         CommonTree IDENTIFIER1 = null;
         Predicate p = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:143:5: ( ^( IDENTIFIER p= predicates ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:144:5: ^( IDENTIFIER p= predicates )
+            // parser/flatzinc/FlatzincFullExtWalker.g:141:5: ( ^( IDENTIFIER p= predicates ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:142:5: ^( IDENTIFIER p= predicates )
             {
                 IDENTIFIER1 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_group_decl139);
 
@@ -509,7 +509,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "predicates"
-    // parser/flatzinc/FlatzincFullExtWalker.g:158:1: predicates returns [Predicate pred] : (p= predicate | ^( AND (p= predicates )+ ) | ^( OR (p= predicates )+ ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:156:1: predicates returns [Predicate pred] : (p= predicate | ^( AND (p= predicates )+ ) | ^( OR (p= predicates )+ ) );
     public final Predicate predicates() throws RecognitionException {
         Predicate pred = null;
 
@@ -518,7 +518,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:159:5: (p= predicate | ^( AND (p= predicates )+ ) | ^( OR (p= predicates )+ ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:157:5: (p= predicate | ^( AND (p= predicates )+ ) | ^( OR (p= predicates )+ ) )
             int alt9 = 3;
             switch (input.LA(1)) {
                 case CARITY:
@@ -555,7 +555,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt9) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:159:9: p= predicate
+                    // parser/flatzinc/FlatzincFullExtWalker.g:157:9: p= predicate
                 {
                     pushFollow(FOLLOW_predicate_in_predicates178);
                     p = predicate();
@@ -569,7 +569,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:164:5: ^( AND (p= predicates )+ )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:162:5: ^( AND (p= predicates )+ )
                 {
 
                     ArrayList<Predicate> preds = new ArrayList();
@@ -578,7 +578,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, AND, FOLLOW_AND_in_predicates203);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:167:11: (p= predicates )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:165:11: (p= predicates )+
                     int cnt7 = 0;
                     loop7:
                     do {
@@ -607,7 +607,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt7) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:167:12: p= predicates
+                                // parser/flatzinc/FlatzincFullExtWalker.g:165:12: p= predicates
                             {
                                 pushFollow(FOLLOW_predicates_in_predicates208);
                                 p = predicates();
@@ -639,7 +639,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:172:5: ^( OR (p= predicates )+ )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:170:5: ^( OR (p= predicates )+ )
                 {
 
                     ArrayList<Predicate> preds = new ArrayList();
@@ -648,7 +648,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, OR, FOLLOW_OR_in_predicates237);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:175:10: (p= predicates )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:173:10: (p= predicates )+
                     int cnt8 = 0;
                     loop8:
                     do {
@@ -677,7 +677,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt8) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:175:11: p= predicates
+                                // parser/flatzinc/FlatzincFullExtWalker.g:173:11: p= predicates
                             {
                                 pushFollow(FOLLOW_predicates_in_predicates242);
                                 p = predicates();
@@ -722,7 +722,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "predicate"
-    // parser/flatzinc/FlatzincFullExtWalker.g:182:1: predicate returns [Predicate pred] : ( TRUE |a= attribute o= op i= INT_CONST | ^( IN (i= IDENTIFIER )+ ) | NOT p= predicate );
+    // parser/flatzinc/FlatzincFullExtWalker.g:180:1: predicate returns [Predicate pred] : ( TRUE |a= attribute o= op i= INT_CONST | ^( IN (i= IDENTIFIER )+ ) | NOT p= predicate );
     public final Predicate predicate() throws RecognitionException {
         Predicate pred = null;
 
@@ -736,7 +736,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:183:2: ( TRUE |a= attribute o= op i= INT_CONST | ^( IN (i= IDENTIFIER )+ ) | NOT p= predicate )
+            // parser/flatzinc/FlatzincFullExtWalker.g:181:2: ( TRUE |a= attribute o= op i= INT_CONST | ^( IN (i= IDENTIFIER )+ ) | NOT p= predicate )
             int alt11 = 4;
             switch (input.LA(1)) {
                 case TRUE: {
@@ -774,7 +774,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt11) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:183:4: TRUE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:181:4: TRUE
                 {
                     match(input, TRUE, FOLLOW_TRUE_in_predicate273);
 
@@ -785,7 +785,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:187:4: a= attribute o= op i= INT_CONST
+                    // parser/flatzinc/FlatzincFullExtWalker.g:185:4: a= attribute o= op i= INT_CONST
                 {
                     pushFollow(FOLLOW_attribute_in_predicate283);
                     a = attribute();
@@ -808,7 +808,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:192:2: ^( IN (i= IDENTIFIER )+ )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:190:2: ^( IN (i= IDENTIFIER )+ )
                 {
 
                     ArrayList<String> ids = new ArrayList();
@@ -817,7 +817,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, IN, FOLLOW_IN_in_predicate308);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:195:11: (i= IDENTIFIER )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:193:11: (i= IDENTIFIER )+
                     int cnt10 = 0;
                     loop10:
                     do {
@@ -832,7 +832,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt10) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:195:12: i= IDENTIFIER
+                                // parser/flatzinc/FlatzincFullExtWalker.g:193:12: i= IDENTIFIER
                             {
                                 i = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_predicate313);
 
@@ -860,7 +860,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:199:4: NOT p= predicate
+                    // parser/flatzinc/FlatzincFullExtWalker.g:197:4: NOT p= predicate
                 {
                     match(input, NOT, FOLLOW_NOT_in_predicate325);
 
@@ -889,13 +889,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "attribute"
-    // parser/flatzinc/FlatzincFullExtWalker.g:207:1: attribute returns [Attribute attr] : ( VAR | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD );
+    // parser/flatzinc/FlatzincFullExtWalker.g:205:1: attribute returns [Attribute attr] : ( VAR | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD );
     public final Attribute attribute() throws RecognitionException {
         Attribute attr = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:208:5: ( VAR | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD )
+            // parser/flatzinc/FlatzincFullExtWalker.g:206:5: ( VAR | CSTR | PROP | VNAME | VCARD | CNAME | CARITY | PPRIO | PARITY | PPRIOD )
             int alt12 = 10;
             switch (input.LA(1)) {
                 case VAR: {
@@ -948,7 +948,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt12) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:208:9: VAR
+                    // parser/flatzinc/FlatzincFullExtWalker.g:206:9: VAR
                 {
                     match(input, VAR, FOLLOW_VAR_in_attribute356);
 
@@ -957,7 +957,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:209:9: CSTR
+                    // parser/flatzinc/FlatzincFullExtWalker.g:207:9: CSTR
                 {
                     match(input, CSTR, FOLLOW_CSTR_in_attribute372);
 
@@ -966,7 +966,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:210:9: PROP
+                    // parser/flatzinc/FlatzincFullExtWalker.g:208:9: PROP
                 {
                     match(input, PROP, FOLLOW_PROP_in_attribute387);
 
@@ -975,7 +975,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:211:9: VNAME
+                    // parser/flatzinc/FlatzincFullExtWalker.g:209:9: VNAME
                 {
                     match(input, VNAME, FOLLOW_VNAME_in_attribute402);
 
@@ -984,7 +984,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:212:9: VCARD
+                    // parser/flatzinc/FlatzincFullExtWalker.g:210:9: VCARD
                 {
                     match(input, VCARD, FOLLOW_VCARD_in_attribute417);
 
@@ -993,7 +993,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 6:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:213:9: CNAME
+                    // parser/flatzinc/FlatzincFullExtWalker.g:211:9: CNAME
                 {
                     match(input, CNAME, FOLLOW_CNAME_in_attribute431);
 
@@ -1002,7 +1002,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 7:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:214:9: CARITY
+                    // parser/flatzinc/FlatzincFullExtWalker.g:212:9: CARITY
                 {
                     match(input, CARITY, FOLLOW_CARITY_in_attribute446);
 
@@ -1011,7 +1011,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 8:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:215:9: PPRIO
+                    // parser/flatzinc/FlatzincFullExtWalker.g:213:9: PPRIO
                 {
                     match(input, PPRIO, FOLLOW_PPRIO_in_attribute459);
 
@@ -1020,7 +1020,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 9:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:216:9: PARITY
+                    // parser/flatzinc/FlatzincFullExtWalker.g:214:9: PARITY
                 {
                     match(input, PARITY, FOLLOW_PARITY_in_attribute473);
 
@@ -1029,7 +1029,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 10:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:217:9: PPRIOD
+                    // parser/flatzinc/FlatzincFullExtWalker.g:215:9: PPRIOD
                 {
                     match(input, PPRIOD, FOLLOW_PPRIOD_in_attribute486);
 
@@ -1051,13 +1051,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "op"
-    // parser/flatzinc/FlatzincFullExtWalker.g:221:1: op returns [Operator value] : ( OEQ | ONQ | OLT | OGT | OLQ | OGQ );
+    // parser/flatzinc/FlatzincFullExtWalker.g:219:1: op returns [Operator value] : ( OEQ | ONQ | OLT | OGT | OLQ | OGQ );
     public final Operator op() throws RecognitionException {
         Operator value = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:222:5: ( OEQ | ONQ | OLT | OGT | OLQ | OGQ )
+            // parser/flatzinc/FlatzincFullExtWalker.g:220:5: ( OEQ | ONQ | OLT | OGT | OLQ | OGQ )
             int alt13 = 6;
             switch (input.LA(1)) {
                 case OEQ: {
@@ -1094,7 +1094,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt13) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:222:9: OEQ
+                    // parser/flatzinc/FlatzincFullExtWalker.g:220:9: OEQ
                 {
                     match(input, OEQ, FOLLOW_OEQ_in_op514);
 
@@ -1103,7 +1103,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:223:9: ONQ
+                    // parser/flatzinc/FlatzincFullExtWalker.g:221:9: ONQ
                 {
                     match(input, ONQ, FOLLOW_ONQ_in_op526);
 
@@ -1112,7 +1112,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:224:9: OLT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:222:9: OLT
                 {
                     match(input, OLT, FOLLOW_OLT_in_op538);
 
@@ -1121,7 +1121,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:225:9: OGT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:223:9: OGT
                 {
                     match(input, OGT, FOLLOW_OGT_in_op550);
 
@@ -1130,7 +1130,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:226:9: OLQ
+                    // parser/flatzinc/FlatzincFullExtWalker.g:224:9: OLQ
                 {
                     match(input, OLQ, FOLLOW_OLQ_in_op562);
 
@@ -1139,7 +1139,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 6:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:227:9: OGQ
+                    // parser/flatzinc/FlatzincFullExtWalker.g:225:9: OGQ
                 {
                     match(input, OGQ, FOLLOW_OGQ_in_op574);
 
@@ -1161,7 +1161,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "structure"
-    // parser/flatzinc/FlatzincFullExtWalker.g:233:1: structure[DSLEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
+    // parser/flatzinc/FlatzincFullExtWalker.g:231:1: structure[DSLEngine pe] returns [PropagationStrategy ps] : (s= struct[pe] |sr= struct_reg[pe] );
     public final PropagationStrategy structure(DSLEngine pe) throws RecognitionException {
         PropagationStrategy ps = null;
 
@@ -1172,7 +1172,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:234:2: (s= struct[pe] |sr= struct_reg[pe] )
+            // parser/flatzinc/FlatzincFullExtWalker.g:232:2: (s= struct[pe] |sr= struct_reg[pe] )
             int alt14 = 2;
             switch (input.LA(1)) {
                 case STRUC1:
@@ -1194,7 +1194,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt14) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:234:4: s= struct[pe]
+                    // parser/flatzinc/FlatzincFullExtWalker.g:232:4: s= struct[pe]
                 {
                     pushFollow(FOLLOW_struct_in_structure603);
                     s = struct(pe);
@@ -1208,7 +1208,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:238:6: sr= struct_reg[pe]
+                    // parser/flatzinc/FlatzincFullExtWalker.g:236:6: sr= struct_reg[pe]
                 {
                     pushFollow(FOLLOW_struct_reg_in_structure616);
                     sr = struct_reg(pe);
@@ -1235,7 +1235,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct"
-    // parser/flatzinc/FlatzincFullExtWalker.g:244:1: struct[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:242:1: struct[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) );
     public final PropagationStrategy struct(DSLEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
@@ -1250,7 +1250,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:251:5: ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:249:5: ( ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] ) | ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] ) )
             int alt17 = 2;
             switch (input.LA(1)) {
                 case STRUC1: {
@@ -1271,12 +1271,12 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt17) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:251:7: ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:249:7: ^( STRUC1 (element= elt[pe] )+ c= coll[elements, ca] )
                 {
                     match(input, STRUC1, FOLLOW_STRUC1_in_struct649);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:251:16: (element= elt[pe] )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:249:16: (element= elt[pe] )+
                     int cnt15 = 0;
                     loop15:
                     do {
@@ -1294,7 +1294,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt15) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:251:17: element= elt[pe]
+                                // parser/flatzinc/FlatzincFullExtWalker.g:249:17: element= elt[pe]
                             {
                                 pushFollow(FOLLOW_elt_in_struct656);
                                 element = elt(pe);
@@ -1329,12 +1329,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:252:6: ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:250:6: ^( STRUC2 (element= elt[pe] )+ ca= comb_attr c= coll[elements, ca] )
                 {
                     match(input, STRUC2, FOLLOW_STRUC2_in_struct674);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:252:15: (element= elt[pe] )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:250:15: (element= elt[pe] )+
                     int cnt16 = 0;
                     loop16:
                     do {
@@ -1352,7 +1352,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt16) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:252:16: element= elt[pe]
+                                // parser/flatzinc/FlatzincFullExtWalker.g:250:16: element= elt[pe]
                             {
                                 pushFollow(FOLLOW_elt_in_struct681);
                                 element = elt(pe);
@@ -1409,7 +1409,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "struct_reg"
-    // parser/flatzinc/FlatzincFullExtWalker.g:255:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:253:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );
     public final PropagationStrategy struct_reg(DSLEngine pe) throws RecognitionException {
         PropagationStrategy item = null;
 
@@ -1421,12 +1421,12 @@ public class FlatzincFullExtWalker extends TreeParser {
         int m_idx = -1, c_idx = -1;
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:278:2: ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:276:2: ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) )
             int alt18 = 2;
             alt18 = dfa18.predict(input);
             switch (alt18) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:278:4: ^( STREG id= IDENTIFIER . . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:276:4: ^( STREG id= IDENTIFIER . . )
                 {
                     match(input, STREG, FOLLOW_STREG_in_struct_reg721);
 
@@ -1447,7 +1447,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:279:9: ^( STREG id= IDENTIFIER ca= comb_attr . . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:277:9: ^( STREG id= IDENTIFIER ca= comb_attr . . )
                 {
                     match(input, STREG, FOLLOW_STREG_in_struct_reg746);
 
@@ -1506,7 +1506,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "elt"
-    // parser/flatzinc/FlatzincFullExtWalker.g:282:1: elt[DSLEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
+    // parser/flatzinc/FlatzincFullExtWalker.g:280:1: elt[DSLEngine pe] returns [ISchedulable[] items] : (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? );
     public final ISchedulable[] elt(DSLEngine pe) throws RecognitionException {
         ISchedulable[] items = null;
 
@@ -1520,7 +1520,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:283:5: (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? )
+            // parser/flatzinc/FlatzincFullExtWalker.g:281:5: (s= struct[pe] |sr= struct_reg[pe] | IDENTIFIER ( KEY a= attribute )? )
             int alt20 = 3;
             switch (input.LA(1)) {
                 case STRUC1:
@@ -1546,7 +1546,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt20) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:283:7: s= struct[pe]
+                    // parser/flatzinc/FlatzincFullExtWalker.g:281:7: s= struct[pe]
                 {
                     pushFollow(FOLLOW_struct_in_elt786);
                     s = struct(pe);
@@ -1560,7 +1560,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:287:4: sr= struct_reg[pe]
+                    // parser/flatzinc/FlatzincFullExtWalker.g:285:4: sr= struct_reg[pe]
                 {
                     pushFollow(FOLLOW_struct_reg_in_elt800);
                     sr = struct_reg(pe);
@@ -1574,11 +1574,11 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:291:4: IDENTIFIER ( KEY a= attribute )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:289:4: IDENTIFIER ( KEY a= attribute )?
                 {
                     IDENTIFIER2 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_elt809);
 
-                    // parser/flatzinc/FlatzincFullExtWalker.g:291:15: ( KEY a= attribute )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:289:15: ( KEY a= attribute )?
                     int alt19 = 2;
                     switch (input.LA(1)) {
                         case KEY: {
@@ -1589,7 +1589,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt19) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:291:16: KEY a= attribute
+                            // parser/flatzinc/FlatzincFullExtWalker.g:289:16: KEY a= attribute
                         {
                             match(input, KEY, FOLLOW_KEY_in_elt812);
 
@@ -1641,7 +1641,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "many"
-    // parser/flatzinc/FlatzincFullExtWalker.g:306:1: many[ArrayList<Arc> in] returns [ArrayList<PropagationStrategy> pss, int depth] : ( ^( MANY1 a= attribute . ) | ^( MANY2 a= attribute ca= comb_attr . ) | ^( MANY3 a= attribute . . ) | ^( MANY4 a= attribute ca= comb_attr . . ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:304:1: many[ArrayList<Arc> in] returns [ArrayList<PropagationStrategy> pss, int depth] : ( ^( MANY1 a= attribute . ) | ^( MANY2 a= attribute ca= comb_attr . ) | ^( MANY3 a= attribute . . ) | ^( MANY4 a= attribute ca= comb_attr . . ) );
     public final FlatzincFullExtWalker.many_return many(ArrayList<Arc> in) throws RecognitionException {
         FlatzincFullExtWalker.many_return retval = new FlatzincFullExtWalker.many_return();
         retval.start = input.LT(1);
@@ -1657,7 +1657,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:417:5: ( ^( MANY1 a= attribute . ) | ^( MANY2 a= attribute ca= comb_attr . ) | ^( MANY3 a= attribute . . ) | ^( MANY4 a= attribute ca= comb_attr . . ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:415:5: ( ^( MANY1 a= attribute . ) | ^( MANY2 a= attribute ca= comb_attr . ) | ^( MANY3 a= attribute . . ) | ^( MANY4 a= attribute ca= comb_attr . . ) )
             int alt21 = 4;
             switch (input.LA(1)) {
                 case MANY1: {
@@ -1686,7 +1686,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt21) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:417:9: ^( MANY1 a= attribute . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:415:9: ^( MANY1 a= attribute . )
                 {
                     match(input, MANY1, FOLLOW_MANY1_in_many856);
 
@@ -1707,7 +1707,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:418:9: ^( MANY2 a= attribute ca= comb_attr . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:416:9: ^( MANY2 a= attribute ca= comb_attr . )
                 {
                     match(input, MANY2, FOLLOW_MANY2_in_many877);
 
@@ -1734,7 +1734,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:419:9: ^( MANY3 a= attribute . . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:417:9: ^( MANY3 a= attribute . . )
                 {
                     match(input, MANY3, FOLLOW_MANY3_in_many902);
 
@@ -1759,7 +1759,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:420:9: ^( MANY4 a= attribute ca= comb_attr . . )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:418:9: ^( MANY4 a= attribute ca= comb_attr . . )
                 {
                     match(input, MANY4, FOLLOW_MANY4_in_many927);
 
@@ -1908,7 +1908,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "coll"
-    // parser/flatzinc/FlatzincFullExtWalker.g:427:1: coll[ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] returns [PropagationStrategy ps] : ( ^( QUEUE it= qiter ) | ^( LIST (r= REV )? it= liter ) | ^( HEAP (m= MAX )? it= qiter ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:425:1: coll[ArrayList<? extends ISchedulable> elements, CombinedAttribute ca] returns [PropagationStrategy ps] : ( ^( QUEUE it= qiter ) | ^( LIST (r= REV )? it= liter ) | ^( HEAP (m= MAX )? it= qiter ) );
     public final PropagationStrategy coll(ArrayList<? extends ISchedulable> elements, CombinedAttribute ca) throws RecognitionException {
         PropagationStrategy ps = null;
 
@@ -1926,7 +1926,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         }
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:437:5: ( ^( QUEUE it= qiter ) | ^( LIST (r= REV )? it= liter ) | ^( HEAP (m= MAX )? it= qiter ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:435:5: ( ^( QUEUE it= qiter ) | ^( LIST (r= REV )? it= liter ) | ^( HEAP (m= MAX )? it= qiter ) )
             int alt24 = 3;
             switch (input.LA(1)) {
                 case QUEUE: {
@@ -1951,7 +1951,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt24) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:437:7: ^( QUEUE it= qiter )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:435:7: ^( QUEUE it= qiter )
                 {
                     match(input, QUEUE, FOLLOW_QUEUE_in_coll978);
 
@@ -1973,12 +1973,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:443:7: ^( LIST (r= REV )? it= liter )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:441:7: ^( LIST (r= REV )? it= liter )
                 {
                     match(input, LIST, FOLLOW_LIST_in_coll998);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:443:15: (r= REV )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:441:15: (r= REV )?
                     int alt22 = 2;
                     switch (input.LA(1)) {
                         case REV: {
@@ -1989,7 +1989,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt22) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:443:15: r= REV
+                            // parser/flatzinc/FlatzincFullExtWalker.g:441:15: r= REV
                         {
                             r = (CommonTree) match(input, REV, FOLLOW_REV_in_coll1002);
 
@@ -2030,12 +2030,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:463:7: ^( HEAP (m= MAX )? it= qiter )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:461:7: ^( HEAP (m= MAX )? it= qiter )
                 {
                     match(input, HEAP, FOLLOW_HEAP_in_coll1023);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:463:15: (m= MAX )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:461:15: (m= MAX )?
                     int alt23 = 2;
                     switch (input.LA(1)) {
                         case MAX: {
@@ -2046,7 +2046,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt23) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:463:15: m= MAX
+                            // parser/flatzinc/FlatzincFullExtWalker.g:461:15: m= MAX
                         {
                             m = (CommonTree) match(input, MAX, FOLLOW_MAX_in_coll1027);
 
@@ -2095,13 +2095,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "qiter"
-    // parser/flatzinc/FlatzincFullExtWalker.g:481:1: qiter returns [Iterator it] : ( ONE | WONE );
+    // parser/flatzinc/FlatzincFullExtWalker.g:479:1: qiter returns [Iterator it] : ( ONE | WONE );
     public final Iterator qiter() throws RecognitionException {
         Iterator it = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:482:5: ( ONE | WONE )
+            // parser/flatzinc/FlatzincFullExtWalker.g:480:5: ( ONE | WONE )
             int alt25 = 2;
             switch (input.LA(1)) {
                 case ONE: {
@@ -2122,7 +2122,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt25) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:482:9: ONE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:480:9: ONE
                 {
                     match(input, ONE, FOLLOW_ONE_in_qiter1059);
 
@@ -2131,7 +2131,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:483:9: WONE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:481:9: WONE
                 {
                     match(input, WONE, FOLLOW_WONE_in_qiter1071);
 
@@ -2153,7 +2153,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "liter"
-    // parser/flatzinc/FlatzincFullExtWalker.g:486:1: liter returns [Iterator it] : (q= qiter | FOR | WFOR );
+    // parser/flatzinc/FlatzincFullExtWalker.g:484:1: liter returns [Iterator it] : (q= qiter | FOR | WFOR );
     public final Iterator liter() throws RecognitionException {
         Iterator it = null;
 
@@ -2162,7 +2162,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:487:5: (q= qiter | FOR | WFOR )
+            // parser/flatzinc/FlatzincFullExtWalker.g:485:5: (q= qiter | FOR | WFOR )
             int alt26 = 3;
             switch (input.LA(1)) {
                 case ONE:
@@ -2188,7 +2188,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt26) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:487:9: q= qiter
+                    // parser/flatzinc/FlatzincFullExtWalker.g:485:9: q= qiter
                 {
                     pushFollow(FOLLOW_qiter_in_liter1103);
                     q = qiter();
@@ -2201,7 +2201,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:488:9: FOR
+                    // parser/flatzinc/FlatzincFullExtWalker.g:486:9: FOR
                 {
                     match(input, FOR, FOLLOW_FOR_in_liter1115);
 
@@ -2210,7 +2210,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:489:9: WFOR
+                    // parser/flatzinc/FlatzincFullExtWalker.g:487:9: WFOR
                 {
                     match(input, WFOR, FOLLOW_WFOR_in_liter1127);
 
@@ -2232,7 +2232,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "comb_attr"
-    // parser/flatzinc/FlatzincFullExtWalker.g:494:1: comb_attr returns [CombinedAttribute ca] : ( ^( CA1 (ao= attr_op )* (ea= attribute )? ) | ^( CA2 (ao= attr_op )+ ea= attribute ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:492:1: comb_attr returns [CombinedAttribute ca] : ( ^( CA1 (ao= attr_op )* (ea= attribute )? ) | ^( CA2 (ao= attr_op )+ ea= attribute ) );
     public final CombinedAttribute comb_attr() throws RecognitionException {
         CombinedAttribute ca = null;
 
@@ -2245,7 +2245,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         ArrayList<AttributeOperator> aos = new ArrayList<AttributeOperator>();
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:501:5: ( ^( CA1 (ao= attr_op )* (ea= attribute )? ) | ^( CA2 (ao= attr_op )+ ea= attribute ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:499:5: ( ^( CA1 (ao= attr_op )* (ea= attribute )? ) | ^( CA2 (ao= attr_op )+ ea= attribute ) )
             int alt30 = 2;
             switch (input.LA(1)) {
                 case CA1: {
@@ -2266,13 +2266,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt30) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:501:7: ^( CA1 (ao= attr_op )* (ea= attribute )? )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:499:7: ^( CA1 (ao= attr_op )* (ea= attribute )? )
                 {
                     match(input, CA1, FOLLOW_CA1_in_comb_attr1161);
 
                     if (input.LA(1) == Token.DOWN) {
                         match(input, Token.DOWN, null);
-                        // parser/flatzinc/FlatzincFullExtWalker.g:501:13: (ao= attr_op )*
+                        // parser/flatzinc/FlatzincFullExtWalker.g:499:13: (ao= attr_op )*
                         loop27:
                         do {
                             int alt27 = 2;
@@ -2290,7 +2290,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                             switch (alt27) {
                                 case 1:
-                                    // parser/flatzinc/FlatzincFullExtWalker.g:501:14: ao= attr_op
+                                    // parser/flatzinc/FlatzincFullExtWalker.g:499:14: ao= attr_op
                                 {
                                     pushFollow(FOLLOW_attr_op_in_comb_attr1168);
                                     ao = attr_op();
@@ -2309,7 +2309,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                         } while (true);
 
 
-                        // parser/flatzinc/FlatzincFullExtWalker.g:501:45: (ea= attribute )?
+                        // parser/flatzinc/FlatzincFullExtWalker.g:499:45: (ea= attribute )?
                         int alt28 = 2;
                         switch (input.LA(1)) {
                             case CARITY:
@@ -2329,7 +2329,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt28) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:501:45: ea= attribute
+                                // parser/flatzinc/FlatzincFullExtWalker.g:499:45: ea= attribute
                             {
                                 pushFollow(FOLLOW_attribute_in_comb_attr1175);
                                 ea = attribute();
@@ -2350,12 +2350,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:502:9: ^( CA2 (ao= attr_op )+ ea= attribute )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:500:9: ^( CA2 (ao= attr_op )+ ea= attribute )
                 {
                     match(input, CA2, FOLLOW_CA2_in_comb_attr1188);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:502:15: (ao= attr_op )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:500:15: (ao= attr_op )+
                     int cnt29 = 0;
                     loop29:
                     do {
@@ -2374,7 +2374,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt29) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:502:16: ao= attr_op
+                                // parser/flatzinc/FlatzincFullExtWalker.g:500:16: ao= attr_op
                             {
                                 pushFollow(FOLLOW_attr_op_in_comb_attr1195);
                                 ao = attr_op();
@@ -2425,13 +2425,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "attr_op"
-    // parser/flatzinc/FlatzincFullExtWalker.g:505:1: attr_op returns [AttributeOperator ao] : ( ANY | MIN | MAX | SUM | SIZE );
+    // parser/flatzinc/FlatzincFullExtWalker.g:503:1: attr_op returns [AttributeOperator ao] : ( ANY | MIN | MAX | SUM | SIZE );
     public final AttributeOperator attr_op() throws RecognitionException {
         AttributeOperator ao = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:506:5: ( ANY | MIN | MAX | SUM | SIZE )
+            // parser/flatzinc/FlatzincFullExtWalker.g:504:5: ( ANY | MIN | MAX | SUM | SIZE )
             int alt31 = 5;
             switch (input.LA(1)) {
                 case ANY: {
@@ -2464,7 +2464,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt31) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:506:7: ANY
+                    // parser/flatzinc/FlatzincFullExtWalker.g:504:7: ANY
                 {
                     match(input, ANY, FOLLOW_ANY_in_attr_op1220);
 
@@ -2473,7 +2473,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:507:9: MIN
+                    // parser/flatzinc/FlatzincFullExtWalker.g:505:9: MIN
                 {
                     match(input, MIN, FOLLOW_MIN_in_attr_op1232);
 
@@ -2482,7 +2482,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:508:9: MAX
+                    // parser/flatzinc/FlatzincFullExtWalker.g:506:9: MAX
                 {
                     match(input, MAX, FOLLOW_MAX_in_attr_op1244);
 
@@ -2491,7 +2491,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:509:9: SUM
+                    // parser/flatzinc/FlatzincFullExtWalker.g:507:9: SUM
                 {
                     match(input, SUM, FOLLOW_SUM_in_attr_op1256);
 
@@ -2500,7 +2500,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:510:9: SIZE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:508:9: SIZE
                 {
                     match(input, SIZE, FOLLOW_SIZE_in_attr_op1268);
 
@@ -2522,7 +2522,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "par_type"
-    // parser/flatzinc/FlatzincFullExtWalker.g:520:1: par_type returns [Declaration decl] : ( ^( ARRPAR (d= index_set )+ p= par_type_u ) | ^( APAR p= par_type_u ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:518:1: par_type returns [Declaration decl] : ( ^( ARRPAR (d= index_set )+ p= par_type_u ) | ^( APAR p= par_type_u ) );
     public final Declaration par_type() throws RecognitionException {
         Declaration decl = null;
 
@@ -2533,7 +2533,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:521:5: ( ^( ARRPAR (d= index_set )+ p= par_type_u ) | ^( APAR p= par_type_u ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:519:5: ( ^( ARRPAR (d= index_set )+ p= par_type_u ) | ^( APAR p= par_type_u ) )
             int alt33 = 2;
             switch (input.LA(1)) {
                 case ARRPAR: {
@@ -2554,7 +2554,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt33) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:522:5: ^( ARRPAR (d= index_set )+ p= par_type_u )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:520:5: ^( ARRPAR (d= index_set )+ p= par_type_u )
                 {
 
                     List<Declaration> decls = new ArrayList();
@@ -2563,7 +2563,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, ARRPAR, FOLLOW_ARRPAR_in_par_type1312);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:525:18: (d= index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:523:18: (d= index_set )+
                     int cnt32 = 0;
                     loop32:
                     do {
@@ -2578,7 +2578,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt32) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:525:19: d= index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:523:19: d= index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_par_type1317);
                                 d = index_set();
@@ -2616,7 +2616,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:529:9: ^( APAR p= par_type_u )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:527:9: ^( APAR p= par_type_u )
                 {
                     match(input, APAR, FOLLOW_APAR_in_par_type1342);
 
@@ -2649,13 +2649,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "par_type_u"
-    // parser/flatzinc/FlatzincFullExtWalker.g:535:1: par_type_u returns [Declaration decl] : ( BOOL | FLOAT | SET OF INT | INT );
+    // parser/flatzinc/FlatzincFullExtWalker.g:533:1: par_type_u returns [Declaration decl] : ( BOOL | FLOAT | SET OF INT | INT );
     public final Declaration par_type_u() throws RecognitionException {
         Declaration decl = null;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:536:5: ( BOOL | FLOAT | SET OF INT | INT )
+            // parser/flatzinc/FlatzincFullExtWalker.g:534:5: ( BOOL | FLOAT | SET OF INT | INT )
             int alt34 = 4;
             switch (input.LA(1)) {
                 case BOOL: {
@@ -2684,7 +2684,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt34) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:536:9: BOOL
+                    // parser/flatzinc/FlatzincFullExtWalker.g:534:9: BOOL
                 {
                     match(input, BOOL, FOLLOW_BOOL_in_par_type_u1376);
 
@@ -2695,7 +2695,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:540:9: FLOAT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:538:9: FLOAT
                 {
                     match(input, FLOAT, FOLLOW_FLOAT_in_par_type_u1392);
 
@@ -2706,7 +2706,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:544:9: SET OF INT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:542:9: SET OF INT
                 {
                     match(input, SET, FOLLOW_SET_in_par_type_u1408);
 
@@ -2721,7 +2721,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:548:9: INT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:546:9: INT
                 {
                     match(input, INT, FOLLOW_INT_in_par_type_u1428);
 
@@ -2745,7 +2745,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "var_type"
-    // parser/flatzinc/FlatzincFullExtWalker.g:554:1: var_type returns [Declaration decl] : ( ^( ARRVAR (d= index_set )+ d= var_type_u ) | ^( AVAR d= var_type_u ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:552:1: var_type returns [Declaration decl] : ( ^( ARRVAR (d= index_set )+ d= var_type_u ) | ^( AVAR d= var_type_u ) );
     public final Declaration var_type() throws RecognitionException {
         Declaration decl = null;
 
@@ -2754,7 +2754,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:555:5: ( ^( ARRVAR (d= index_set )+ d= var_type_u ) | ^( AVAR d= var_type_u ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:553:5: ( ^( ARRVAR (d= index_set )+ d= var_type_u ) | ^( AVAR d= var_type_u ) )
             int alt36 = 2;
             switch (input.LA(1)) {
                 case ARRVAR: {
@@ -2775,7 +2775,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt36) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:556:5: ^( ARRVAR (d= index_set )+ d= var_type_u )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:554:5: ^( ARRVAR (d= index_set )+ d= var_type_u )
                 {
 
                     List<Declaration> decls = new ArrayList();
@@ -2784,7 +2784,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, ARRVAR, FOLLOW_ARRVAR_in_var_type1469);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:559:14: (d= index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:557:14: (d= index_set )+
                     int cnt35 = 0;
                     loop35:
                     do {
@@ -2799,7 +2799,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt35) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:559:15: d= index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:557:15: d= index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_var_type1474);
                                 d = index_set();
@@ -2837,7 +2837,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:563:9: ^( AVAR d= var_type_u )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:561:9: ^( AVAR d= var_type_u )
                 {
                     match(input, AVAR, FOLLOW_AVAR_in_var_type1499);
 
@@ -2870,7 +2870,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "var_type_u"
-    // parser/flatzinc/FlatzincFullExtWalker.g:569:1: var_type_u returns [Declaration decl] : ( BOOL | FLOAT | INT | ^( DD i1= INT_CONST i2= INT_CONST ) | ^( CM (i= INT_CONST )+ ) | ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( SET ^( CM (i= INT_CONST )+ ) ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:567:1: var_type_u returns [Declaration decl] : ( BOOL | FLOAT | INT | ^( DD i1= INT_CONST i2= INT_CONST ) | ^( CM (i= INT_CONST )+ ) | ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( SET ^( CM (i= INT_CONST )+ ) ) );
     public final Declaration var_type_u() throws RecognitionException {
         Declaration decl = null;
 
@@ -2880,7 +2880,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         CommonTree i = null;
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:570:5: ( BOOL | FLOAT | INT | ^( DD i1= INT_CONST i2= INT_CONST ) | ^( CM (i= INT_CONST )+ ) | ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( SET ^( CM (i= INT_CONST )+ ) ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:568:5: ( BOOL | FLOAT | INT | ^( DD i1= INT_CONST i2= INT_CONST ) | ^( CM (i= INT_CONST )+ ) | ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( SET ^( CM (i= INT_CONST )+ ) ) )
             int alt39 = 7;
             switch (input.LA(1)) {
                 case BOOL: {
@@ -2945,7 +2945,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt39) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:570:9: BOOL
+                    // parser/flatzinc/FlatzincFullExtWalker.g:568:9: BOOL
                 {
                     match(input, BOOL, FOLLOW_BOOL_in_var_type_u1534);
 
@@ -2956,7 +2956,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:574:9: FLOAT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:572:9: FLOAT
                 {
                     match(input, FLOAT, FOLLOW_FLOAT_in_var_type_u1550);
 
@@ -2967,7 +2967,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:578:9: INT
+                    // parser/flatzinc/FlatzincFullExtWalker.g:576:9: INT
                 {
                     match(input, INT, FOLLOW_INT_in_var_type_u1566);
 
@@ -2978,7 +2978,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:582:9: ^( DD i1= INT_CONST i2= INT_CONST )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:580:9: ^( DD i1= INT_CONST i2= INT_CONST )
                 {
                     match(input, DD, FOLLOW_DD_in_var_type_u1583);
 
@@ -2996,7 +2996,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:592:5: ^( CM (i= INT_CONST )+ )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:590:5: ^( CM (i= INT_CONST )+ )
                 {
 
                     ArrayList<EInt> values = new ArrayList();
@@ -3005,7 +3005,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, CM, FOLLOW_CM_in_var_type_u1626);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:595:14: (i= INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:593:14: (i= INT_CONST )+
                     int cnt37 = 0;
                     loop37:
                     do {
@@ -3020,7 +3020,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt37) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:595:15: i= INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:593:15: i= INT_CONST
                             {
                                 i = (CommonTree) match(input, INT_CONST, FOLLOW_INT_CONST_in_var_type_u1631);
 
@@ -3048,7 +3048,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 6:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:599:9: ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:597:9: ^( SET ^( DD i1= INT_CONST i2= INT_CONST ) )
                 {
                     match(input, SET, FOLLOW_SET_in_var_type_u1652);
 
@@ -3072,7 +3072,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 7:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:604:5: ^( SET ^( CM (i= INT_CONST )+ ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:602:5: ^( SET ^( CM (i= INT_CONST )+ ) )
                 {
 
                     ArrayList<EInt> values = new ArrayList();
@@ -3084,7 +3084,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, CM, FOLLOW_CM_in_var_type_u1696);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:607:19: (i= INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:605:19: (i= INT_CONST )+
                     int cnt38 = 0;
                     loop38:
                     do {
@@ -3099,7 +3099,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt38) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:607:20: i= INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:605:20: i= INT_CONST
                             {
                                 i = (CommonTree) match(input, INT_CONST, FOLLOW_INT_CONST_in_var_type_u1701);
 
@@ -3143,7 +3143,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "index_set"
-    // parser/flatzinc/FlatzincFullExtWalker.g:613:1: index_set returns [Declaration decl] : ( ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( INDEX INT ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:611:1: index_set returns [Declaration decl] : ( ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( INDEX INT ) );
     public final Declaration index_set() throws RecognitionException {
         Declaration decl = null;
 
@@ -3152,7 +3152,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         CommonTree i2 = null;
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:614:5: ( ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( INDEX INT ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:612:5: ( ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) ) | ^( INDEX INT ) )
             int alt40 = 2;
             switch (input.LA(1)) {
                 case INDEX: {
@@ -3197,7 +3197,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt40) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:614:9: ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:612:9: ^( INDEX ^( DD i1= INT_CONST i2= INT_CONST ) )
                 {
                     match(input, INDEX, FOLLOW_INDEX_in_index_set1736);
 
@@ -3221,7 +3221,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:618:9: ^( INDEX INT )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:616:9: ^( INDEX INT )
                 {
                     match(input, INDEX, FOLLOW_INDEX_in_index_set1766);
 
@@ -3250,7 +3250,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "expr"
-    // parser/flatzinc/FlatzincFullExtWalker.g:624:1: expr returns [Expression exp] : ( LB RB | LB (i= INT_CONST )+ RB |b= bool_const |i1= INT_CONST ( DD i2= INT_CONST )? | ^( EXPR LS (e= expr )* RS ) |e= id_expr | STRING );
+    // parser/flatzinc/FlatzincFullExtWalker.g:622:1: expr returns [Expression exp] : ( LB RB | LB (i= INT_CONST )+ RB |b= bool_const |i1= INT_CONST ( DD i2= INT_CONST )? | ^( EXPR LS (e= expr )* RS ) |e= id_expr | STRING );
     public final Expression expr() throws RecognitionException {
         Expression exp = null;
 
@@ -3265,7 +3265,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:625:5: ( LB RB | LB (i= INT_CONST )+ RB |b= bool_const |i1= INT_CONST ( DD i2= INT_CONST )? | ^( EXPR LS (e= expr )* RS ) |e= id_expr | STRING )
+            // parser/flatzinc/FlatzincFullExtWalker.g:623:5: ( LB RB | LB (i= INT_CONST )+ RB |b= bool_const |i1= INT_CONST ( DD i2= INT_CONST )? | ^( EXPR LS (e= expr )* RS ) |e= id_expr | STRING )
             int alt44 = 7;
             switch (input.LA(1)) {
                 case LB: {
@@ -3319,7 +3319,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt44) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:625:9: LB RB
+                    // parser/flatzinc/FlatzincFullExtWalker.g:623:9: LB RB
                 {
                     match(input, LB, FOLLOW_LB_in_expr1800);
 
@@ -3332,7 +3332,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:630:5: LB (i= INT_CONST )+ RB
+                    // parser/flatzinc/FlatzincFullExtWalker.g:628:5: LB (i= INT_CONST )+ RB
                 {
 
                     ArrayList<EInt> values = new ArrayList();
@@ -3340,7 +3340,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     match(input, LB, FOLLOW_LB_in_expr1830);
 
-                    // parser/flatzinc/FlatzincFullExtWalker.g:633:12: (i= INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:631:12: (i= INT_CONST )+
                     int cnt41 = 0;
                     loop41:
                     do {
@@ -3355,7 +3355,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt41) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:633:13: i= INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:631:13: i= INT_CONST
                             {
                                 i = (CommonTree) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1835);
 
@@ -3383,7 +3383,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:637:9: b= bool_const
+                    // parser/flatzinc/FlatzincFullExtWalker.g:635:9: b= bool_const
                 {
                     pushFollow(FOLLOW_bool_const_in_expr1858);
                     b = bool_const();
@@ -3397,11 +3397,11 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:641:9: i1= INT_CONST ( DD i2= INT_CONST )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:639:9: i1= INT_CONST ( DD i2= INT_CONST )?
                 {
                     i1 = (CommonTree) match(input, INT_CONST, FOLLOW_INT_CONST_in_expr1876);
 
-                    // parser/flatzinc/FlatzincFullExtWalker.g:641:22: ( DD i2= INT_CONST )?
+                    // parser/flatzinc/FlatzincFullExtWalker.g:639:22: ( DD i2= INT_CONST )?
                     int alt42 = 2;
                     switch (input.LA(1)) {
                         case DD: {
@@ -3412,7 +3412,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt42) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:641:23: DD i2= INT_CONST
+                            // parser/flatzinc/FlatzincFullExtWalker.g:639:23: DD i2= INT_CONST
                         {
                             match(input, DD, FOLLOW_DD_in_expr1879);
 
@@ -3434,7 +3434,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:650:5: ^( EXPR LS (e= expr )* RS )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:648:5: ^( EXPR LS (e= expr )* RS )
                 {
 
                     ArrayList<Expression> exps = new ArrayList();
@@ -3445,7 +3445,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, Token.DOWN, null);
                     match(input, LS, FOLLOW_LS_in_expr1915);
 
-                    // parser/flatzinc/FlatzincFullExtWalker.g:653:18: (e= expr )*
+                    // parser/flatzinc/FlatzincFullExtWalker.g:651:18: (e= expr )*
                     loop43:
                     do {
                         int alt43 = 2;
@@ -3465,7 +3465,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt43) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:653:19: e= expr
+                                // parser/flatzinc/FlatzincFullExtWalker.g:651:19: e= expr
                             {
                                 pushFollow(FOLLOW_expr_in_expr1920);
                                 e = expr();
@@ -3499,7 +3499,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 6:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:661:9: e= id_expr
+                    // parser/flatzinc/FlatzincFullExtWalker.g:659:9: e= id_expr
                 {
                     pushFollow(FOLLOW_id_expr_in_expr1944);
                     e = id_expr();
@@ -3513,7 +3513,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 7:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:665:9: STRING
+                    // parser/flatzinc/FlatzincFullExtWalker.g:663:9: STRING
                 {
                     STRING3 = (CommonTree) match(input, STRING, FOLLOW_STRING_in_expr1960);
 
@@ -3537,7 +3537,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "id_expr"
-    // parser/flatzinc/FlatzincFullExtWalker.g:689:1: id_expr returns [Expression exp] : IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )? ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:687:1: id_expr returns [Expression exp] : IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )? ;
     public final Expression id_expr() throws RecognitionException {
         Expression exp = null;
 
@@ -3548,8 +3548,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:690:5: ( IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )? )
-            // parser/flatzinc/FlatzincFullExtWalker.g:691:5: IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )?
+            // parser/flatzinc/FlatzincFullExtWalker.g:688:5: ( IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )? )
+            // parser/flatzinc/FlatzincFullExtWalker.g:689:5: IDENTIFIER ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )?
             {
 
                 ArrayList<Expression> exps = new ArrayList();
@@ -3557,7 +3557,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 IDENTIFIER4 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_id_expr2018);
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:694:19: ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )?
+                // parser/flatzinc/FlatzincFullExtWalker.g:692:19: ( ( LP e= expr ( CM e= expr )* RP ) | ( LS i= INT_CONST RS ) )?
                 int alt46 = 3;
                 switch (input.LA(1)) {
                     case LP: {
@@ -3572,10 +3572,10 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 switch (alt46) {
                     case 1:
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:20: ( LP e= expr ( CM e= expr )* RP )
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:20: ( LP e= expr ( CM e= expr )* RP )
                     {
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:20: ( LP e= expr ( CM e= expr )* RP )
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:21: LP e= expr ( CM e= expr )* RP
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:20: ( LP e= expr ( CM e= expr )* RP )
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:21: LP e= expr ( CM e= expr )* RP
                         {
                             match(input, LP, FOLLOW_LP_in_id_expr2022);
 
@@ -3587,7 +3587,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                             exps.add(e);
 
-                            // parser/flatzinc/FlatzincFullExtWalker.g:694:45: ( CM e= expr )*
+                            // parser/flatzinc/FlatzincFullExtWalker.g:692:45: ( CM e= expr )*
                             loop45:
                             do {
                                 int alt45 = 2;
@@ -3601,7 +3601,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                                 switch (alt45) {
                                     case 1:
-                                        // parser/flatzinc/FlatzincFullExtWalker.g:694:46: CM e= expr
+                                        // parser/flatzinc/FlatzincFullExtWalker.g:692:46: CM e= expr
                                     {
                                         match(input, CM, FOLLOW_CM_in_id_expr2030);
 
@@ -3630,10 +3630,10 @@ public class FlatzincFullExtWalker extends TreeParser {
                     }
                     break;
                     case 2:
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:76: ( LS i= INT_CONST RS )
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:76: ( LS i= INT_CONST RS )
                     {
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:76: ( LS i= INT_CONST RS )
-                        // parser/flatzinc/FlatzincFullExtWalker.g:694:77: LS i= INT_CONST RS
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:76: ( LS i= INT_CONST RS )
+                        // parser/flatzinc/FlatzincFullExtWalker.g:692:77: LS i= INT_CONST RS
                         {
                             match(input, LS, FOLLOW_LS_in_id_expr2043);
 
@@ -3673,7 +3673,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "param_decl"
-    // parser/flatzinc/FlatzincFullExtWalker.g:707:1: param_decl : ^( PAR IDENTIFIER pt= par_type e= expr ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:705:1: param_decl : ^( PAR IDENTIFIER pt= par_type e= expr ) ;
     public final void param_decl() throws RecognitionException {
         CommonTree IDENTIFIER5 = null;
         Declaration pt = null;
@@ -3682,8 +3682,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:708:2: ( ^( PAR IDENTIFIER pt= par_type e= expr ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:708:6: ^( PAR IDENTIFIER pt= par_type e= expr )
+            // parser/flatzinc/FlatzincFullExtWalker.g:706:2: ( ^( PAR IDENTIFIER pt= par_type e= expr ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:706:6: ^( PAR IDENTIFIER pt= par_type e= expr )
             {
                 match(input, PAR, FOLLOW_PAR_in_param_decl2076);
 
@@ -3723,7 +3723,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "var_decl"
-    // parser/flatzinc/FlatzincFullExtWalker.g:716:1: var_decl : ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:714:1: var_decl : ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? ) ;
     public final void var_decl() throws RecognitionException {
         CommonTree IDENTIFIER6 = null;
         Declaration vt = null;
@@ -3734,8 +3734,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:717:2: ( ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:717:6: ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? )
+            // parser/flatzinc/FlatzincFullExtWalker.g:715:2: ( ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:715:6: ^( VAR IDENTIFIER vt= var_type anns= annotations (e= expr )? )
             {
                 match(input, VAR, FOLLOW_VAR_in_var_decl2105);
 
@@ -3754,7 +3754,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 state._fsp--;
 
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:717:53: (e= expr )?
+                // parser/flatzinc/FlatzincFullExtWalker.g:715:53: (e= expr )?
                 int alt47 = 2;
                 switch (input.LA(1)) {
                     case EXPR:
@@ -3771,7 +3771,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 switch (alt47) {
                     case 1:
-                        // parser/flatzinc/FlatzincFullExtWalker.g:717:53: e= expr
+                        // parser/flatzinc/FlatzincFullExtWalker.g:715:53: e= expr
                     {
                         pushFollow(FOLLOW_expr_in_var_decl2119);
                         e = expr();
@@ -3805,7 +3805,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "constraint"
-    // parser/flatzinc/FlatzincFullExtWalker.g:723:1: constraint : ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:721:1: constraint : ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations ) ;
     public final void constraint() throws RecognitionException {
         CommonTree IDENTIFIER7 = null;
         Expression e = null;
@@ -3814,8 +3814,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:724:2: ( ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:725:2: ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations )
+            // parser/flatzinc/FlatzincFullExtWalker.g:722:2: ( ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:723:2: ^( CONSTRAINT IDENTIFIER (e= expr )+ anns= annotations )
             {
 
                 //  Solver aSolver, String id, List<Expression> exps, List<EAnnotation> annotations
@@ -3827,7 +3827,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 match(input, Token.DOWN, null);
                 IDENTIFIER7 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_constraint2146);
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:729:30: (e= expr )+
+                // parser/flatzinc/FlatzincFullExtWalker.g:727:30: (e= expr )+
                 int cnt48 = 0;
                 loop48:
                 do {
@@ -3848,7 +3848,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt48) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:729:31: e= expr
+                            // parser/flatzinc/FlatzincFullExtWalker.g:727:31: e= expr
                         {
                             pushFollow(FOLLOW_expr_in_constraint2151);
                             e = expr();
@@ -3898,7 +3898,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "solve_goal"
-    // parser/flatzinc/FlatzincFullExtWalker.g:736:1: solve_goal : ^( SOLVE anns= annotations res= resolution ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:734:1: solve_goal : ^( SOLVE anns= annotations res= resolution ) ;
     public final void solve_goal() throws RecognitionException {
         List<EAnnotation> anns = null;
 
@@ -3906,8 +3906,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:737:2: ( ^( SOLVE anns= annotations res= resolution ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:738:2: ^( SOLVE anns= annotations res= resolution )
+            // parser/flatzinc/FlatzincFullExtWalker.g:735:2: ( ^( SOLVE anns= annotations res= resolution ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:736:2: ^( SOLVE anns= annotations res= resolution )
             {
                 match(input, SOLVE, FOLLOW_SOLVE_in_solve_goal2175);
 
@@ -3952,7 +3952,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "resolution"
-    // parser/flatzinc/FlatzincFullExtWalker.g:744:1: resolution returns [ResolutionPolicy type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:742:1: resolution returns [ResolutionPolicy type, Expression expr] : ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) );
     public final FlatzincFullExtWalker.resolution_return resolution() throws RecognitionException {
         FlatzincFullExtWalker.resolution_return retval = new FlatzincFullExtWalker.resolution_return();
         retval.start = input.LT(1);
@@ -3962,7 +3962,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:745:5: ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:743:5: ( SATISFY | ^( MINIMIZE e= expr ) | ^( MAXIMIZE e= expr ) )
             int alt49 = 3;
             switch (input.LA(1)) {
                 case SATISFY: {
@@ -3987,7 +3987,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt49) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:745:9: SATISFY
+                    // parser/flatzinc/FlatzincFullExtWalker.g:743:9: SATISFY
                 {
                     match(input, SATISFY, FOLLOW_SATISFY_in_resolution2207);
 
@@ -3999,7 +3999,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:750:9: ^( MINIMIZE e= expr )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:748:9: ^( MINIMIZE e= expr )
                 {
                     match(input, MINIMIZE, FOLLOW_MINIMIZE_in_resolution2224);
 
@@ -4020,7 +4020,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:755:9: ^( MAXIMIZE e= expr )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:753:9: ^( MAXIMIZE e= expr )
                 {
                     match(input, MAXIMIZE, FOLLOW_MAXIMIZE_in_resolution2246);
 
@@ -4054,7 +4054,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "annotations"
-    // parser/flatzinc/FlatzincFullExtWalker.g:762:1: annotations returns [List<EAnnotation> anns] : ^( ANNOTATIONS (e= annotation )* ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:760:1: annotations returns [List<EAnnotation> anns] : ^( ANNOTATIONS (e= annotation )* ) ;
     public final List<EAnnotation> annotations() throws RecognitionException {
         List<EAnnotation> anns = null;
 
@@ -4063,8 +4063,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:763:5: ( ^( ANNOTATIONS (e= annotation )* ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:764:5: ^( ANNOTATIONS (e= annotation )* )
+            // parser/flatzinc/FlatzincFullExtWalker.g:761:5: ( ^( ANNOTATIONS (e= annotation )* ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:762:5: ^( ANNOTATIONS (e= annotation )* )
             {
 
                 anns = new ArrayList();
@@ -4074,7 +4074,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 if (input.LA(1) == Token.DOWN) {
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:767:23: (e= annotation )*
+                    // parser/flatzinc/FlatzincFullExtWalker.g:765:23: (e= annotation )*
                     loop50:
                     do {
                         int alt50 = 2;
@@ -4088,7 +4088,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt50) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:767:24: e= annotation
+                                // parser/flatzinc/FlatzincFullExtWalker.g:765:24: e= annotation
                             {
                                 pushFollow(FOLLOW_annotation_in_annotations2298);
                                 e = annotation();
@@ -4125,7 +4125,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "annotation"
-    // parser/flatzinc/FlatzincFullExtWalker.g:770:1: annotation returns [EAnnotation ann] : IDENTIFIER ( LP (e= expr )+ RP )? ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:768:1: annotation returns [EAnnotation ann] : IDENTIFIER ( LP (e= expr )+ RP )? ;
     public final EAnnotation annotation() throws RecognitionException {
         EAnnotation ann = null;
 
@@ -4135,8 +4135,8 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:771:5: ( IDENTIFIER ( LP (e= expr )+ RP )? )
-            // parser/flatzinc/FlatzincFullExtWalker.g:772:5: IDENTIFIER ( LP (e= expr )+ RP )?
+            // parser/flatzinc/FlatzincFullExtWalker.g:769:5: ( IDENTIFIER ( LP (e= expr )+ RP )? )
+            // parser/flatzinc/FlatzincFullExtWalker.g:770:5: IDENTIFIER ( LP (e= expr )+ RP )?
             {
 
                 ArrayList<Expression> exps = new ArrayList();
@@ -4144,7 +4144,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 IDENTIFIER8 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_annotation2335);
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:775:16: ( LP (e= expr )+ RP )?
+                // parser/flatzinc/FlatzincFullExtWalker.g:773:16: ( LP (e= expr )+ RP )?
                 int alt52 = 2;
                 switch (input.LA(1)) {
                     case LP: {
@@ -4155,11 +4155,11 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                 switch (alt52) {
                     case 1:
-                        // parser/flatzinc/FlatzincFullExtWalker.g:775:17: LP (e= expr )+ RP
+                        // parser/flatzinc/FlatzincFullExtWalker.g:773:17: LP (e= expr )+ RP
                     {
                         match(input, LP, FOLLOW_LP_in_annotation2338);
 
-                        // parser/flatzinc/FlatzincFullExtWalker.g:775:20: (e= expr )+
+                        // parser/flatzinc/FlatzincFullExtWalker.g:773:20: (e= expr )+
                         int cnt51 = 0;
                         loop51:
                         do {
@@ -4180,7 +4180,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                             switch (alt51) {
                                 case 1:
-                                    // parser/flatzinc/FlatzincFullExtWalker.g:775:21: e= expr
+                                    // parser/flatzinc/FlatzincFullExtWalker.g:773:21: e= expr
                                 {
                                     pushFollow(FOLLOW_expr_in_annotation2343);
                                     e = expr();
@@ -4228,13 +4228,13 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "bool_const"
-    // parser/flatzinc/FlatzincFullExtWalker.g:781:1: bool_const returns [boolean value] : ( TRUE | FALSE );
+    // parser/flatzinc/FlatzincFullExtWalker.g:779:1: bool_const returns [boolean value] : ( TRUE | FALSE );
     public final boolean bool_const() throws RecognitionException {
         boolean value = false;
 
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:782:5: ( TRUE | FALSE )
+            // parser/flatzinc/FlatzincFullExtWalker.g:780:5: ( TRUE | FALSE )
             int alt53 = 2;
             switch (input.LA(1)) {
                 case TRUE: {
@@ -4255,7 +4255,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt53) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:782:9: TRUE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:780:9: TRUE
                 {
                     match(input, TRUE, FOLLOW_TRUE_in_bool_const2380);
 
@@ -4264,7 +4264,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:783:9: FALSE
+                    // parser/flatzinc/FlatzincFullExtWalker.g:781:9: FALSE
                 {
                     match(input, FALSE, FOLLOW_FALSE_in_bool_const2392);
 
@@ -4286,20 +4286,20 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "pred_decl"
-    // parser/flatzinc/FlatzincFullExtWalker.g:787:1: pred_decl : ^( PREDICATE IDENTIFIER ( pred_param )+ ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:785:1: pred_decl : ^( PREDICATE IDENTIFIER ( pred_param )+ ) ;
     public final void pred_decl() throws RecognitionException {
         CommonTree IDENTIFIER9 = null;
 
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:788:2: ( ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:788:6: ^( PREDICATE IDENTIFIER ( pred_param )+ )
+            // parser/flatzinc/FlatzincFullExtWalker.g:786:2: ( ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:786:6: ^( PREDICATE IDENTIFIER ( pred_param )+ )
             {
                 match(input, PREDICATE, FOLLOW_PREDICATE_in_pred_decl2411);
 
                 match(input, Token.DOWN, null);
                 IDENTIFIER9 = (CommonTree) match(input, IDENTIFIER, FOLLOW_IDENTIFIER_in_pred_decl2413);
 
-                // parser/flatzinc/FlatzincFullExtWalker.g:788:29: ( pred_param )+
+                // parser/flatzinc/FlatzincFullExtWalker.g:786:29: ( pred_param )+
                 int cnt54 = 0;
                 loop54:
                 do {
@@ -4314,7 +4314,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                     switch (alt54) {
                         case 1:
-                            // parser/flatzinc/FlatzincFullExtWalker.g:788:29: pred_param
+                            // parser/flatzinc/FlatzincFullExtWalker.g:786:29: pred_param
                         {
                             pushFollow(FOLLOW_pred_param_in_pred_decl2415);
                             pred_param();
@@ -4355,11 +4355,11 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "pred_param"
-    // parser/flatzinc/FlatzincFullExtWalker.g:795:1: pred_param : ^( CL pred_param_type IDENTIFIER ) ;
+    // parser/flatzinc/FlatzincFullExtWalker.g:793:1: pred_param : ^( CL pred_param_type IDENTIFIER ) ;
     public final void pred_param() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:796:5: ( ^( CL pred_param_type IDENTIFIER ) )
-            // parser/flatzinc/FlatzincFullExtWalker.g:796:9: ^( CL pred_param_type IDENTIFIER )
+            // parser/flatzinc/FlatzincFullExtWalker.g:794:5: ( ^( CL pred_param_type IDENTIFIER ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:794:9: ^( CL pred_param_type IDENTIFIER )
             {
                 match(input, CL, FOLLOW_CL_in_pred_param2438);
 
@@ -4389,15 +4389,15 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "pred_param_type"
-    // parser/flatzinc/FlatzincFullExtWalker.g:800:1: pred_param_type : ( par_pred_param_type | var_pred_param_type );
+    // parser/flatzinc/FlatzincFullExtWalker.g:798:1: pred_param_type : ( par_pred_param_type | var_pred_param_type );
     public final void pred_param_type() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:801:5: ( par_pred_param_type | var_pred_param_type )
+            // parser/flatzinc/FlatzincFullExtWalker.g:799:5: ( par_pred_param_type | var_pred_param_type )
             int alt55 = 2;
             alt55 = dfa55.predict(input);
             switch (alt55) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:801:9: par_pred_param_type
+                    // parser/flatzinc/FlatzincFullExtWalker.g:799:9: par_pred_param_type
                 {
                     pushFollow(FOLLOW_par_pred_param_type_in_pred_param_type2463);
                     par_pred_param_type();
@@ -4408,7 +4408,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:802:9: var_pred_param_type
+                    // parser/flatzinc/FlatzincFullExtWalker.g:800:9: var_pred_param_type
                 {
                     pushFollow(FOLLOW_var_pred_param_type_in_pred_param_type2473);
                     var_pred_param_type();
@@ -4432,15 +4432,15 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "par_pred_param_type"
-    // parser/flatzinc/FlatzincFullExtWalker.g:806:1: par_pred_param_type : ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:804:1: par_pred_param_type : ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) );
     public final void par_pred_param_type() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:807:5: ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:805:5: ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) )
             int alt64 = 9;
             alt64 = dfa64.predict(input);
             switch (alt64) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:807:9: par_type
+                    // parser/flatzinc/FlatzincFullExtWalker.g:805:9: par_type
                 {
                     pushFollow(FOLLOW_par_type_in_par_pred_param_type2493);
                     par_type();
@@ -4451,7 +4451,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:809:9: ^( DD INT_CONST INT_CONST )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:807:9: ^( DD INT_CONST INT_CONST )
                 {
                     match(input, DD, FOLLOW_DD_in_par_pred_param_type2505);
 
@@ -4466,12 +4466,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:810:9: ^( CM ( INT_CONST )+ )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:808:9: ^( CM ( INT_CONST )+ )
                 {
                     match(input, CM, FOLLOW_CM_in_par_pred_param_type2521);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:810:14: ( INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:808:14: ( INT_CONST )+
                     int cnt56 = 0;
                     loop56:
                     do {
@@ -4486,7 +4486,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt56) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:810:14: INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:808:14: INT_CONST
                             {
                                 match(input, INT_CONST, FOLLOW_INT_CONST_in_par_pred_param_type2523);
 
@@ -4509,7 +4509,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 4:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:811:9: ^( SET ^( DD INT_CONST INT_CONST ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:809:9: ^( SET ^( DD INT_CONST INT_CONST ) )
                 {
                     match(input, SET, FOLLOW_SET_in_par_pred_param_type2536);
 
@@ -4530,7 +4530,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 5:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:812:9: ^( SET ^( CM ( INT_CONST )+ ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:810:9: ^( SET ^( CM ( INT_CONST )+ ) )
                 {
                     match(input, SET, FOLLOW_SET_in_par_pred_param_type2556);
 
@@ -4538,7 +4538,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, CM, FOLLOW_CM_in_par_pred_param_type2559);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:812:20: ( INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:810:20: ( INT_CONST )+
                     int cnt57 = 0;
                     loop57:
                     do {
@@ -4553,7 +4553,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt57) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:812:20: INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:810:20: INT_CONST
                             {
                                 match(input, INT_CONST, FOLLOW_INT_CONST_in_par_pred_param_type2561);
 
@@ -4579,12 +4579,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 6:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:814:9: ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:812:9: ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) )
                 {
                     match(input, ARRAY, FOLLOW_ARRAY_in_par_pred_param_type2576);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:814:17: ( index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:812:17: ( index_set )+
                     int cnt58 = 0;
                     loop58:
                     do {
@@ -4599,7 +4599,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt58) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:814:17: index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:812:17: index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_par_pred_param_type2578);
                                 index_set();
@@ -4636,12 +4636,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 7:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:815:9: ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:813:9: ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) )
                 {
                     match(input, ARRAY, FOLLOW_ARRAY_in_par_pred_param_type2599);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:815:17: ( index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:813:17: ( index_set )+
                     int cnt59 = 0;
                     loop59:
                     do {
@@ -4656,7 +4656,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt59) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:815:17: index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:813:17: index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_par_pred_param_type2601);
                                 index_set();
@@ -4680,7 +4680,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, CM, FOLLOW_CM_in_par_pred_param_type2605);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:815:33: ( INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:813:33: ( INT_CONST )+
                     int cnt60 = 0;
                     loop60:
                     do {
@@ -4695,7 +4695,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt60) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:815:33: INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:813:33: INT_CONST
                             {
                                 match(input, INT_CONST, FOLLOW_INT_CONST_in_par_pred_param_type2607);
 
@@ -4721,12 +4721,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 8:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:816:9: ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:814:9: ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) )
                 {
                     match(input, ARRAY, FOLLOW_ARRAY_in_par_pred_param_type2621);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:816:17: ( index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:814:17: ( index_set )+
                     int cnt61 = 0;
                     loop61:
                     do {
@@ -4741,7 +4741,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt61) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:816:17: index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:814:17: index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_par_pred_param_type2623);
                                 index_set();
@@ -4784,12 +4784,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 9:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:817:9: ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:815:9: ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) )
                 {
                     match(input, ARRAY, FOLLOW_ARRAY_in_par_pred_param_type2648);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:817:17: ( index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:815:17: ( index_set )+
                     int cnt62 = 0;
                     loop62:
                     do {
@@ -4804,7 +4804,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt62) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:817:17: index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:815:17: index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_par_pred_param_type2650);
                                 index_set();
@@ -4831,7 +4831,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                     match(input, CM, FOLLOW_CM_in_par_pred_param_type2657);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:817:39: ( INT_CONST )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:815:39: ( INT_CONST )+
                     int cnt63 = 0;
                     loop63:
                     do {
@@ -4846,7 +4846,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt63) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:817:39: INT_CONST
+                                // parser/flatzinc/FlatzincFullExtWalker.g:815:39: INT_CONST
                             {
                                 match(input, INT_CONST, FOLLOW_INT_CONST_in_par_pred_param_type2659);
 
@@ -4888,10 +4888,10 @@ public class FlatzincFullExtWalker extends TreeParser {
 
 
     // $ANTLR start "var_pred_param_type"
-    // parser/flatzinc/FlatzincFullExtWalker.g:821:1: var_pred_param_type : ( ^( VAR var_type ) | ^( VAR SET ) | ^( ARRAY ( index_set )+ ^( VAR SET ) ) );
+    // parser/flatzinc/FlatzincFullExtWalker.g:819:1: var_pred_param_type : ( ^( VAR var_type ) | ^( VAR SET ) | ^( ARRAY ( index_set )+ ^( VAR SET ) ) );
     public final void var_pred_param_type() throws RecognitionException {
         try {
-            // parser/flatzinc/FlatzincFullExtWalker.g:822:5: ( ^( VAR var_type ) | ^( VAR SET ) | ^( ARRAY ( index_set )+ ^( VAR SET ) ) )
+            // parser/flatzinc/FlatzincFullExtWalker.g:820:5: ( ^( VAR var_type ) | ^( VAR SET ) | ^( ARRAY ( index_set )+ ^( VAR SET ) ) )
             int alt66 = 3;
             switch (input.LA(1)) {
                 case VAR: {
@@ -4941,7 +4941,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
             switch (alt66) {
                 case 1:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:822:9: ^( VAR var_type )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:820:9: ^( VAR var_type )
                 {
                     match(input, VAR, FOLLOW_VAR_in_var_pred_param_type2684);
 
@@ -4958,7 +4958,7 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 2:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:823:9: ^( VAR SET )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:821:9: ^( VAR SET )
                 {
                     match(input, VAR, FOLLOW_VAR_in_var_pred_param_type2698);
 
@@ -4971,12 +4971,12 @@ public class FlatzincFullExtWalker extends TreeParser {
                 }
                 break;
                 case 3:
-                    // parser/flatzinc/FlatzincFullExtWalker.g:824:9: ^( ARRAY ( index_set )+ ^( VAR SET ) )
+                    // parser/flatzinc/FlatzincFullExtWalker.g:822:9: ^( ARRAY ( index_set )+ ^( VAR SET ) )
                 {
                     match(input, ARRAY, FOLLOW_ARRAY_in_var_pred_param_type2712);
 
                     match(input, Token.DOWN, null);
-                    // parser/flatzinc/FlatzincFullExtWalker.g:824:17: ( index_set )+
+                    // parser/flatzinc/FlatzincFullExtWalker.g:822:17: ( index_set )+
                     int cnt65 = 0;
                     loop65:
                     do {
@@ -4991,7 +4991,7 @@ public class FlatzincFullExtWalker extends TreeParser {
 
                         switch (alt65) {
                             case 1:
-                                // parser/flatzinc/FlatzincFullExtWalker.g:824:17: index_set
+                                // parser/flatzinc/FlatzincFullExtWalker.g:822:17: index_set
                             {
                                 pushFollow(FOLLOW_index_set_in_var_pred_param_type2714);
                                 index_set();
@@ -5158,7 +5158,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         }
 
         public String getDescription() {
-            return "255:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );";
+            return "253:1: struct_reg[DSLEngine pe] returns [PropagationStrategy item] : ( ^( STREG id= IDENTIFIER . . ) | ^( STREG id= IDENTIFIER ca= comb_attr . . ) );";
         }
     }
 
@@ -5226,7 +5226,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         }
 
         public String getDescription() {
-            return "800:1: pred_param_type : ( par_pred_param_type | var_pred_param_type );";
+            return "798:1: pred_param_type : ( par_pred_param_type | var_pred_param_type );";
         }
     }
 
@@ -5305,7 +5305,7 @@ public class FlatzincFullExtWalker extends TreeParser {
         }
 
         public String getDescription() {
-            return "806:1: par_pred_param_type : ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) );";
+            return "804:1: par_pred_param_type : ( par_type | ^( DD INT_CONST INT_CONST ) | ^( CM ( INT_CONST )+ ) | ^( SET ^( DD INT_CONST INT_CONST ) ) | ^( SET ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( DD INT_CONST INT_CONST ) ) | ^( ARRAY ( index_set )+ ^( CM ( INT_CONST )+ ) ) | ^( ARRAY ( index_set )+ ^( SET ^( DD INT_CONST INT_CONST ) ) ) | ^( ARRAY ( index_set )+ ^( SET ^( CM ( INT_CONST )+ ) ) ) );";
         }
     }
 
