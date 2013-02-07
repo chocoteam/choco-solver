@@ -27,8 +27,6 @@
 package solver.constraints.propagators.ternary;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -50,8 +48,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
     IntVar absX, absY, absZ;
 
 
-    public PropDivXYZ(IntVar x, IntVar y, IntVar z, Solver solver, Constraint<IntVar,
-            Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.X = x;
         this.Y = y;

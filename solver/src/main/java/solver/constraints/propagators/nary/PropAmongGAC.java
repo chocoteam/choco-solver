@@ -32,8 +32,6 @@ import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IStateBitSet;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -75,7 +73,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected boolean needFilter;
 
-    public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropAmongGAC(IntVar[] vars, int[] values) {
         super(vars, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
         this.idms = new IIntDeltaMonitor[vars.length];

@@ -185,7 +185,7 @@ public class HCP_symImpact {
         // constraints
         Constraint gc = GraphConstraintFactory.hamiltonianPath(dir, 0, n - 1);
         if (alldifferentAC) {
-            gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
+            gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1));
         }
         solver.post(gc);
         // config

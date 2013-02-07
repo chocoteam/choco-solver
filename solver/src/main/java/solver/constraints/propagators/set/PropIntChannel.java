@@ -38,8 +38,6 @@ import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -78,7 +76,7 @@ public class PropIntChannel extends Propagator<Variable> {
      * Channeling between set variables and integer variables
      * x in sets[y-offSet1] <=> ints[x-offSet2] = y
      */
-    public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2, Solver solver, Constraint c) {
+    public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2) {
         super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR);
         this.sets = setsV;
         this.ints = intsV;

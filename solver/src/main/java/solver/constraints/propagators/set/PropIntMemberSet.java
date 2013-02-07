@@ -37,8 +37,6 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -74,10 +72,8 @@ public class PropIntMemberSet extends Propagator<Variable> {
      *
      * @param setVar
      * @param intVar
-     * @param solver
-     * @param c
      */
-    public PropIntMemberSet(SetVar setVar, IntVar intVar, Solver solver, Constraint c) {
+    public PropIntMemberSet(SetVar setVar, IntVar intVar) {
         super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY);
         this.iv = intVar;
         this.set = setVar;

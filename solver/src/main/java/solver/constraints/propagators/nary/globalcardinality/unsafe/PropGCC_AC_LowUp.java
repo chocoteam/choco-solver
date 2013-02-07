@@ -33,8 +33,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -94,10 +92,8 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
      * @param value
      * @param low
      * @param up
-     * @param constraint
-     * @param sol
      */
-    public PropGCC_AC_LowUp(IntVar[] vars, int[] value, int[] low, int[] up, Constraint constraint, Solver sol) {
+    public PropGCC_AC_LowUp(IntVar[] vars, int[] value, int[] low, int[] up) {
         super(vars, PropagatorPriority.QUADRATIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

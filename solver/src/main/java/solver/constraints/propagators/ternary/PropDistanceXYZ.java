@@ -28,8 +28,6 @@
 package solver.constraints.propagators.ternary;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -57,7 +55,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
      * @param vars variable
      * @param op   the operator to be chosen among {0,1,2} standing for (eq,lt,gt)
      */
-    public PropDistanceXYZ(IntVar[] vars, Operator op, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropDistanceXYZ(IntVar[] vars, Operator op) {
         super(vars, PropagatorPriority.TERNARY, false);
         this.operator = op;
     }

@@ -40,8 +40,6 @@ import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -64,7 +62,7 @@ public class PropIntersection extends Propagator<SetVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropIntersection(SetVar[] sets, SetVar intersection, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropIntersection(SetVar[] sets, SetVar intersection) {
         super(ArrayUtils.append(sets, new SetVar[]{intersection}), PropagatorPriority.LINEAR);
         k = sets.length;
         sdm = new SetDeltaMonitor[k + 1];

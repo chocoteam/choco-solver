@@ -37,8 +37,6 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,10 +67,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
      *
      * @param X
      * @param Y
-     * @param solver
-     * @param c
      */
-    public PropSubsetEq(SetVar X, SetVar Y, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropSubsetEq(SetVar X, SetVar Y) {
         super(new SetVar[]{X, Y}, PropagatorPriority.LINEAR);
         // delta monitors
         sdm = new SetDeltaMonitor[2];

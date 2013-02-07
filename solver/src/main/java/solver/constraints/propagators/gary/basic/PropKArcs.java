@@ -31,8 +31,6 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -63,7 +61,7 @@ public class PropKArcs extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKArcs(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
+    public PropKArcs(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

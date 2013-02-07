@@ -29,8 +29,6 @@ package solver.constraints.propagators.nary.nValue;
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,10 +65,8 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * @param vars
      * @param concernedValues will be sorted!
      * @param nValues
-     * @param constraint
-     * @param solver
      */
-    public PropNValues_Light(IntVar[] vars, TIntArrayList concernedValues, IntVar nValues, Constraint constraint, Solver solver) {
+    public PropNValues_Light(IntVar[] vars, TIntArrayList concernedValues, IntVar nValues) {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = vars.length;
         concernedValues.sort();

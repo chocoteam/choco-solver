@@ -30,8 +30,6 @@ package solver.constraints.propagators.nary.circuit;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,7 +63,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropSubcircuit_AntiArboFiltering(IntVar[] succs, int offSet, Constraint constraint, Solver solver) {
+    public PropSubcircuit_AntiArboFiltering(IntVar[] succs, int offSet) {
         super(succs, PropagatorPriority.QUADRATIC);
         this.n = succs.length;
         this.offSet = offSet;

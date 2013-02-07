@@ -29,8 +29,6 @@ package solver.constraints.propagators.nary.channeling;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -62,7 +60,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
     protected IntVar[] X, Y;
     protected BitSet toCompute;
 
-    public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY, Solver solver, IntConstraint constraint) {
+    public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.X = X;
         this.Y = Y;

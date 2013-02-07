@@ -31,8 +31,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.iterators.DisposableValueIterator;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -75,20 +73,15 @@ public class PropElement extends Propagator<IntVar> {
 
     private Sort s;
 
-    public PropElement(IntVar value, int[] values, IntVar index, int offset, Sort s,
-                       Solver solver, IntConstraint constraint) {
+    public PropElement(IntVar value, int[] values, IntVar index, int offset, Sort s) {
         super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false);
         this.lval = values;
         this.cste = offset;
         this.s = s;
     }
 
-    public PropElement(IntVar value, int[] values, IntVar index, int offset,
-                       Solver solver, IntConstraint constraint) {
-        super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false);
-        this.lval = values;
-        this.cste = offset;
-        this.s = Sort.none;
+    public PropElement(IntVar value, int[] values, IntVar index, int offset) {
+        this(value, values, index, offset, Sort.none);
     }
 
     @Override

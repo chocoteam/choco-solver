@@ -31,8 +31,6 @@ import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -75,10 +73,8 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
      *
      * @param vars
      * @param nValues
-     * @param constraint
-     * @param solver
      */
-    public PropAtMostNValues_Greedy(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
+    public PropAtMostNValues_Greedy(IntVar[] vars, IntVar nValues) {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = vars.length;
         this.nValues = nValues;

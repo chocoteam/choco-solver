@@ -28,8 +28,6 @@ package solver.constraints.propagators.unary;
 
 import choco.annotations.PropAnn;
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,8 +49,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     private final int constant;
 
-    public PropNotEqualXC(IntVar var, int cste, Solver solver,
-                          Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropNotEqualXC(IntVar var, int cste) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.constant = cste;
     }

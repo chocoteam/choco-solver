@@ -38,8 +38,6 @@ import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -73,7 +71,7 @@ public class PropInverse extends Propagator<SetVar> {
      * Inverse set propagator
      * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
      */
-    public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropInverse(SetVar[] sets, SetVar[] invsets, int offSet1, int offSet2) {
         super(ArrayUtils.append(sets, invsets), PropagatorPriority.LINEAR);
         n = sets.length;
         n2 = invsets.length;

@@ -30,8 +30,6 @@ import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -73,8 +71,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     protected final IIntDeltaMonitor[] idms;
 
-    public PropDomainChanneling(BoolVar[] bs, IntVar x, Solver solver,
-                                Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropDomainChanneling(BoolVar[] bs, IntVar x) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), PropagatorPriority.LINEAR, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

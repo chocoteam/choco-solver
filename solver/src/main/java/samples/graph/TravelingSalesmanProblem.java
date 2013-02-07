@@ -105,7 +105,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
         // constraints
         Constraint gc = GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 0);
         // add a lagrangian relaxation
-        PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix, gc, solver);
+        PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix);
         mst.waitFirstSolution(true);
         gc.addPropagators(mst);
         solver.post(gc);

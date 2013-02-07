@@ -40,8 +40,6 @@ import memory.IStateInt;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -90,10 +88,8 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
      * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
      *
      * @param graph
-     * @param constraint
-     * @param solver
      */
-    public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
+    public PropReducedGraphHamPath(DirectedGraphVar graph) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);

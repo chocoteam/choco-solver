@@ -254,7 +254,7 @@ public interface Model {
                 if (rvars[i] == null) rvars[i] = vars[i];
             }
             Constraint ctr = new Constraint(s);
-            ctr.addPropagators(new PropBoolSum(bools, vars[n - 1], s, ctr));
+            ctr.addPropagators(new PropBoolSum(bools, vars[n - 1]));
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);

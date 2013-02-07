@@ -66,12 +66,12 @@ public class TutteGraphGenerator {
         Solver solver = new Solver();
         UndirectedGraphVar g = new UndirectedGraphVar("G", solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
         Constraint c = new Constraint(solver);
-        c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
-        c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
+        c.addPropagators(new PropNodeDegree_AtLeast(g, 3));
+        c.addPropagators(new PropNodeDegree_AtMost(g, 3));
 //		c.addPropagators(new PropMaxDiameterFromNode(g,nodeDiam,0,c,solver));
-        c.addPropagators(new PropMaxDiameter(g, diam, c, solver));
-        c.addPropagators(new PropNoTriangle(g, c, solver));
-        c.addPropagators(new PropBiconnected(g, c, solver));
+        c.addPropagators(new PropMaxDiameter(g, diam));
+        c.addPropagators(new PropNoTriangle(g));
+        c.addPropagators(new PropBiconnected(g));
 
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
@@ -112,11 +112,11 @@ public class TutteGraphGenerator {
         Solver solver = new Solver();
         final UndirectedGraphVar g = new UndirectedGraphVar("G", solver, n, SetType.BOOL_ARRAY, SetType.LINKED_LIST, true);
         Constraint c = new Constraint(solver);
-        c.addPropagators(new PropNodeDegree_AtLeast(g, 3, c, solver));
-        c.addPropagators(new PropNodeDegree_AtMost(g, 3, c, solver));
-        c.addPropagators(new PropMaxDiameterFromNode(g, 6, 0, c, solver));
-        c.addPropagators(new PropMaxDiameter(g, 8, c, solver));
-        c.addPropagators(new PropBiconnected(g, c, solver));
+        c.addPropagators(new PropNodeDegree_AtLeast(g, 3));
+        c.addPropagators(new PropNodeDegree_AtMost(g, 3));
+        c.addPropagators(new PropMaxDiameterFromNode(g, 6, 0));
+        c.addPropagators(new PropMaxDiameter(g, 8));
+        c.addPropagators(new PropBiconnected(g));
         // breaking some symmetries
         for (int j = 1; j < 4; j++) {
             g.getEnvelopGraph().addEdge(0, j);

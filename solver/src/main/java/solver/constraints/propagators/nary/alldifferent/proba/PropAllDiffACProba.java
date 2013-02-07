@@ -26,8 +26,6 @@
  */
 package solver.constraints.propagators.nary.alldifferent.proba;
 
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -61,11 +59,9 @@ public class PropAllDiffACProba extends PropAllDiffAC {
      * enables to control the cardinality of the matching
      *
      * @param vars
-     * @param constraint
-     * @param sol
      */
-    public PropAllDiffACProba(IntVar[] vars, Constraint constraint, Solver sol, long seed) {
-        super(vars, constraint, sol);
+    public PropAllDiffACProba(IntVar[] vars, long seed) {
+        super(vars);
         random = new Random(seed);
     }
 

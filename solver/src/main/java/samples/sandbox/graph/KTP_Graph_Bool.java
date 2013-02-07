@@ -197,7 +197,7 @@ public class KTP_Graph_Bool {
                 if (matrix[i][j])
                     bools[k++] = graph[i][j];
             }
-            gc.addPropagators(new PropBoolSum(bools, two, solver, gc));
+            gc.addPropagators(new PropBoolSum(bools, two));
         }
         gc.addPropagators(new PropBoolNoSubtour(mapping, decisionVars, graph, gc, solver));
         solver.post(gc);
@@ -246,7 +246,7 @@ public class KTP_Graph_Bool {
         // constraints
         Constraint gc = new Constraint(solver);
         solver.post(IntConstraintFactory.alldifferent(graph, "AC"));
-        gc.addPropagators(new PropNoSubtour(graph, solver, gc));
+        gc.addPropagators(new PropNoSubtour(graph));
 //			gc.addPropagators(new PropBoolNoSubtour(mapping,decisionVars,graph, gc, solver));
         solver.post(gc);
         // config

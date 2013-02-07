@@ -79,20 +79,20 @@ public class Sum extends IntConstraint<IntVar> {
         this.op = type;
 
         if (vars.length > BIG_SUM_SIZE && type != Operator.NQ) {
-            setPropagators(new PropBigSum(vars, coeffs, pos, b, type, solver, this));
+            setPropagators(new PropBigSum(vars, coeffs, pos, b, type));
         } else {
             switch (type) {
                 case LE:
-                    setPropagators(new PropSumLeq(vars, coeffs, pos, b, solver, this));
+                    setPropagators(new PropSumLeq(vars, coeffs, pos, b));
                     break;
                 case GE:
-                    setPropagators(new PropSumGeq(vars, coeffs, pos, b, solver, this));
+                    setPropagators(new PropSumGeq(vars, coeffs, pos, b));
                     break;
                 case EQ:
-                    setPropagators(new PropSumEq(vars, coeffs, pos, b, solver, this));
+                    setPropagators(new PropSumEq(vars, coeffs, pos, b));
                     break;
                 case NQ:
-                    setPropagators(new PropSumNeq(vars, coeffs, pos, b, solver, this));
+                    setPropagators(new PropSumNeq(vars, coeffs, pos, b));
                     break;
                 default:
                     throw new SolverException("Unexpected operator for Sum");

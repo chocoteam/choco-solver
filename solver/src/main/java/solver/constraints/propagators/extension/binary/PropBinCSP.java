@@ -28,8 +28,6 @@ package solver.constraints.propagators.extension.binary;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.variables.IntVar;
@@ -44,8 +42,7 @@ public abstract class PropBinCSP extends Propagator<IntVar> {
 
     protected BinRelation relation;
 
-    protected PropBinCSP(IntVar x, IntVar y, BinRelation relation,
-                         Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    protected PropBinCSP(IntVar x, IntVar y, BinRelation relation) {
         super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
         this.relation = relation;
     }

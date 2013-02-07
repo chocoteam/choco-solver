@@ -38,8 +38,6 @@ import common.ESat;
 import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -79,10 +77,8 @@ public class PropElement extends Propagator<Variable> {
      * @param array
      * @param offSet
      * @param set
-     * @param solver
-     * @param c
      */
-    public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set, Solver solver, Constraint c) {
+    public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set) {
         super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR);
         this.index = index;
         this.array = array;

@@ -32,8 +32,6 @@ import common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -89,10 +87,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      *
      * @param vars
      * @param nValues
-     * @param constraint
-     * @param solver
      */
-    public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
+    public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues) {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

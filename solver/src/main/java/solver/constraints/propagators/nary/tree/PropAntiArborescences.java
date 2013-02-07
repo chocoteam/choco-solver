@@ -31,8 +31,6 @@ import common.ESat;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -75,11 +73,9 @@ public class PropAntiArborescences extends Propagator<IntVar> {
      *
      * @param succs
      * @param offSet
-     * @param constraint
-     * @param solver
      * @param linear
      */
-    public PropAntiArborescences(IntVar[] succs, int offSet, Constraint constraint, Solver solver, boolean linear) {
+    public PropAntiArborescences(IntVar[] succs, int offSet, boolean linear) {
         super(succs, PropagatorPriority.LINEAR);
         this.n = succs.length;
         this.offSet = offSet;

@@ -28,8 +28,6 @@ package solver.constraints.propagators.nary.lex;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,7 +63,7 @@ public class PropLexChain extends Propagator<IntVar> {
     // array of vectors in the lex chain constraint
     public IntVar[][] x;
 
-    public PropLexChain(IntVar[][] vars, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropLexChain(IntVar[][] vars, boolean strict) {
         super(ArrayUtils.flatten(vars), PropagatorPriority.LINEAR, false);
         this.x = vars.clone();
         this.strict = strict;

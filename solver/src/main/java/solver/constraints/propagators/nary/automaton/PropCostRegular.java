@@ -33,8 +33,6 @@ import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateBool;
 import memory.structure.StoredIndexedBipartiteSet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
@@ -63,21 +61,18 @@ public class PropCostRegular extends Propagator<IntVar> {
     int lastWorld = -1;
 
     long lastNbOfBacktracks = -1, lastNbOfRestarts = -1;
-    final Solver solver;
 
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
 
 
-    public PropCostRegular(IntVar[] vars, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph,
-                           Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropCostRegular(IntVar[] vars, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph) {
         super(vars, PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.zIdx = vars.length - 1;
-        this.solver = solver;
         this.rem_proc = new RemProc(this);
         this.environment = solver.getEnvironment();
         this.toRemove = new TIntArrayStack();

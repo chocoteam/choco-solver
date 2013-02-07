@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.channeling;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -59,7 +57,7 @@ public class PropRelationGraph extends Propagator {
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropRelationGraph(Variable[] vars, GraphVar graph, Solver solver, Constraint cons, GraphRelation relation) {
+    public PropRelationGraph(Variable[] vars, GraphVar graph, GraphRelation relation) {
         super(vars, PropagatorPriority.LINEAR);
         this.g = graph;
         this.nodeVars = vars;

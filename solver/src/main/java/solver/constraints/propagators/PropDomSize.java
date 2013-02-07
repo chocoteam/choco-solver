@@ -37,8 +37,6 @@ package solver.constraints.propagators;
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -59,7 +57,7 @@ public class PropDomSize extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropDomSize(IntVar[] vars, Constraint c, Solver s) {
+    public PropDomSize(IntVar[] vars) {
         super(vars, PropagatorPriority.UNARY, false);
         n = vars.length;
         size = new IStateInt[n];

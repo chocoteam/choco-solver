@@ -37,8 +37,6 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -71,10 +69,8 @@ public class PropAllDisjoint extends Propagator<SetVar> {
      * In order to forbid multiple empty set, use propagator PropAtMost1Empty in addition
      *
      * @param sets
-     * @param solver
-     * @param c
      */
-    public PropAllDisjoint(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropAllDisjoint(SetVar[] sets) {
         super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
         // delta monitors

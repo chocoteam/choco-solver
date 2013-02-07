@@ -37,8 +37,6 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -70,7 +68,7 @@ public class PropSymmetric extends Propagator<SetVar> {
      * Propagator for symmetric sets
      * x in set[y-offSet] <=> y in set[x-offSet]
      */
-    public PropSymmetric(SetVar[] sets, final int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropSymmetric(SetVar[] sets, final int offSet) {
         super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
         this.offSet = offSet;

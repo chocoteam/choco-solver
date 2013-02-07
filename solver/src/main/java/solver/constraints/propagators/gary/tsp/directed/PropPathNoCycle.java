@@ -39,8 +39,6 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -74,10 +72,8 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
      * runs in O(1) per instantiation event
      *
      * @param graph
-     * @param constraint
-     * @param solver
      */
-    public PropPathNoCycle(DirectedGraphVar graph, int source, int sink, Constraint constraint, Solver solver) {
+    public PropPathNoCycle(DirectedGraphVar graph, int source, int sink) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

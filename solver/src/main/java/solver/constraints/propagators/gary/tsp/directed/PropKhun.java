@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.tsp.directed;
 import common.ESat;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.IGraphRelaxation;
@@ -67,7 +65,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKhun(DirectedGraphVar graph, IntVar objective, int[][] costsMatrix, Solver sol, Constraint constraint) {
+    public PropKhun(DirectedGraphVar graph, IntVar objective, int[][] costsMatrix) {
         super(new Variable[]{graph, objective}, PropagatorPriority.CUBIC);
         g = graph;
         obj = objective;

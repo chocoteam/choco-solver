@@ -68,7 +68,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
                 throw new UnsupportedOperationException("ERROR: multiple occurrences of value: " + v);
             }
         }
-        this.setPropagators(new PropFastGCC(vars, values, map, cards, this, solver));
+        this.setPropagators(new PropFastGCC(vars, values, map, cards));
     }
 
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {

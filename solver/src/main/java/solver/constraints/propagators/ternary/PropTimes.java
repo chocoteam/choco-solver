@@ -29,8 +29,6 @@ package solver.constraints.propagators.ternary;
 
 import common.ESat;
 import common.util.tools.MathUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -52,8 +50,7 @@ public class PropTimes extends Propagator<IntVar> {
 
     IntVar v0, v1, v2;
 
-    public PropTimes(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
-            Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropTimes(IntVar v1, IntVar v2, IntVar result) {
         super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false);
         this.v0 = v1;
         this.v1 = v2;

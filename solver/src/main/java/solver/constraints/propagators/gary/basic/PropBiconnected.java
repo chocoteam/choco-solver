@@ -28,8 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -58,7 +56,7 @@ public class PropBiconnected extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropBiconnected(GraphVar graph, Constraint constraint, Solver solver) {
+    public PropBiconnected(GraphVar graph) {
         super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());

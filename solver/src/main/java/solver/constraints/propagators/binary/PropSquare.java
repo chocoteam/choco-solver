@@ -30,8 +30,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,8 +54,7 @@ public class PropSquare extends Propagator<IntVar> {
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
 
-    public PropSquare(IntVar X, IntVar Y, Solver solver,
-                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropSquare(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false);
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {

@@ -49,7 +49,7 @@ public class LexChain extends IntConstraint<IntVar> {
         this.strict = strict;
         this.n = vars[0].length;
         this.x = vars.length;
-        setPropagators(new PropLexChain(vars, strict, solver, this));
+        setPropagators(new PropLexChain(vars, strict));
     }
 
     public LexChain(IntVar[][] vars, boolean strict, Solver solver) {
@@ -57,7 +57,7 @@ public class LexChain extends IntConstraint<IntVar> {
         this.strict = strict;
         this.n = vars[0].length;
         this.x = vars.length;
-        setPropagators(new PropLexChain(vars, strict, solver, this));
+        setPropagators(new PropLexChain(vars, strict));
     }
 
     @Override

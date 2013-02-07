@@ -79,7 +79,7 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addFunction(String functions, int option, RealVar... rvars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, option, solver, this));
+        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, option));
     }
 
     /**
@@ -102,7 +102,7 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addFunction(String functions, RealVar... rvars) {
-        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, Ibex.COMPO, solver, this));
+        addPropagators(new RealPropagator(ibex, contractors++, functions, rvars, Ibex.COMPO));
     }
 
     /**
@@ -128,7 +128,7 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addReifiedFunction(BoolVar bvar, String functions, int option, RealVar... rvars) {
-        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, option, solver, this));
+        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, option));
     }
 
     /**
@@ -155,7 +155,7 @@ public class RealConstraint extends Constraint {
      * @param rvars     a list of real variables
      */
     public void addReifiedFunction(String functions, BoolVar bvar, RealVar... rvars) {
-        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, Ibex.COMPO, solver, this));
+        addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, Ibex.COMPO));
     }
 
     /**
@@ -164,6 +164,6 @@ public class RealConstraint extends Constraint {
      * @param vars array of variables
      */
     public void discretize(IntVar... vars) {
-        addPropagators(new IntToRealPropagator(ibex, contractors++, vars, solver, this));
+        addPropagators(new IntToRealPropagator(ibex, contractors++, vars));
     }
 }

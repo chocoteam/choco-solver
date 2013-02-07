@@ -29,8 +29,6 @@ package solver.constraints.propagators.nary.globalcardinality.unsafe;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -105,8 +103,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         }
     }
 
-    public PropBoundGlobalCardinality(IntVar[] vars, IntVar[] card, int firstCardValue, int lastCardValue, Solver solver,
-                                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropBoundGlobalCardinality(IntVar[] vars, IntVar[] card, int firstCardValue, int lastCardValue) {
         super(makeVarTable(vars, card), PropagatorPriority.LINEAR, false);
         this.card = card;
         this.range = lastCardValue - firstCardValue + 1;

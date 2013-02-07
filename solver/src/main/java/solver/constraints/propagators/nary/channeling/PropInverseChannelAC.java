@@ -30,8 +30,6 @@ package solver.constraints.propagators.nary.channeling;
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +54,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     protected IIntDeltaMonitor[] idms;
     private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
 
-    public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY, Solver solver, IntConstraint constraint) {
+    public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         for (int i = 0; i < this.vars.length; i++) {
             if (!vars[i].hasEnumeratedDomain()) {

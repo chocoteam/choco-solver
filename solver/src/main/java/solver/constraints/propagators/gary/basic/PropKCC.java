@@ -28,8 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropKCC extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
+    public PropKCC(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;

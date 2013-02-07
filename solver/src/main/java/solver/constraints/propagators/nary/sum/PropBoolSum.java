@@ -37,8 +37,6 @@ package solver.constraints.propagators.nary.sum;
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -70,10 +68,8 @@ public class PropBoolSum extends Propagator<IntVar> {
      *
      * @param vars
      * @param sum
-     * @param solver
-     * @param intVarPropagatorConstraint
      */
-    public PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropBoolSum(BoolVar[] vars, IntVar sum) {
         super(ArrayUtils.append(vars, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
         this.sum = sum;
         n = vars.length;

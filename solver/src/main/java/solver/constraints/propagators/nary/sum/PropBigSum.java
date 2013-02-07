@@ -36,8 +36,6 @@ package solver.constraints.propagators.nary.sum;
 
 import common.ESat;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -85,10 +83,8 @@ public class PropBigSum extends Propagator<IntVar> {
      *
      * @param vars
      * @param sum
-     * @param solver
-     * @param intVarPropagatorConstraint
      */
-    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Operator operator, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Operator operator) {
         super(vars, PropagatorPriority.LINEAR, false);
         this.coeffs = coeffs;
         this.pos = pos;

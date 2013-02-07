@@ -39,8 +39,6 @@ import common.util.procedure.IntProcedure;
 import common.util.procedure.PairProcedure;
 import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -77,10 +75,8 @@ public class PropIntVarChanneling extends Propagator {
      *
      * @param intVars
      * @param graph
-     * @param constraint
-     * @param solver
      */
-    public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
+    public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph) {
         super(ArrayUtils.append(intVars, new Variable[]{graph}), PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

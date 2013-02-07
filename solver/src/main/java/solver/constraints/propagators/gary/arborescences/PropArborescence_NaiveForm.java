@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.arborescences;
 import common.ESat;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -68,11 +66,9 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
      * naive form: O(n.m)
      *
      * @param graph
-     * @param source     root of the arborescence
-     * @param constraint
-     * @param solver
+     * @param source root of the arborescence
      */
-    public PropArborescence_NaiveForm(DirectedGraphVar graph, int source, Constraint constraint, Solver solver) {
+    public PropArborescence_NaiveForm(DirectedGraphVar graph, int source) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();

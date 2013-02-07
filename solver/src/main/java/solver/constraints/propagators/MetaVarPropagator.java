@@ -27,8 +27,6 @@
 package solver.constraints.propagators;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.MetaVariable;
@@ -43,7 +41,7 @@ public class MetaVarPropagator extends Propagator {
 
     MetaVariable meta;
 
-    public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
+    public MetaVarPropagator(Variable[] vars, MetaVariable meta) {
         super(vars, PropagatorPriority.UNARY, true);
         this.meta = meta;
     }

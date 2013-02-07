@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -57,7 +55,7 @@ public class PropKLoops extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKLoops(GraphVar graph, Solver sol, Constraint constraint, IntVar k) {
+    public PropKLoops(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;

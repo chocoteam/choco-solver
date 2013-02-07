@@ -57,7 +57,7 @@ public class DistanceXYC extends IntConstraint<IntVar> {
         }
         this.cste = cste;
         this.operator = operator;
-        setPropagators(new PropDistanceXYC(vars, operator, cste, solver, this));
+        setPropagators(new PropDistanceXYC(vars, operator, cste));
     }
 
     @Override

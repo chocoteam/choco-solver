@@ -29,8 +29,6 @@ package solver.constraints.propagators.unary;
 
 import choco.annotations.PropAnn;
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,8 +49,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     final int lb, ub;
 
 
-    public PropNotMemberBound(IntVar var, int lb, int ub, Solver solver,
-                              Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint,
+    public PropNotMemberBound(IntVar var, int lb, int ub,
                               boolean reactOnPromotion) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion);
         this.lb = lb;

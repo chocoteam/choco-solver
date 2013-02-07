@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -72,11 +70,9 @@ public class PropMinElement extends Propagator<Variable> {
      *
      * @param setVar
      * @param min
-     * @param solver
-     * @param c
      */
-    public PropMinElement(SetVar setVar, IntVar min, Solver solver, Constraint c) {
-        this(setVar, null, 0, min, solver, c);
+    public PropMinElement(SetVar setVar, IntVar min) {
+        this(setVar, null, 0, min);
     }
 
     /**
@@ -87,13 +83,13 @@ public class PropMinElement extends Propagator<Variable> {
      * @param weights
      * @param offSet
      * @param min
-     * @param solver
-     * @param c
      */
-    public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, Solver solver, Constraint c) {
+    public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min) {
         super(new Variable[]{setVar, min}, PropagatorPriority.BINARY);
         this.min = min;
         this.set = setVar;
+        this.weights = weights;
+        this.min = min;
     }
 
     //***********************************************************************************

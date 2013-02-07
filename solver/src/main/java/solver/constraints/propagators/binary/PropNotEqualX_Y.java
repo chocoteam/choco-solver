@@ -30,8 +30,6 @@ package solver.constraints.propagators.binary;
 import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,7 +65,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     IntVar y;
 
     @SuppressWarnings({"unchecked"})
-    public PropNotEqualX_Y(IntVar x, IntVar y, Solver solver, Constraint constraint) {
+    public PropNotEqualX_Y(IntVar x, IntVar y) {
         super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
         this.x = x;
         this.y = y;

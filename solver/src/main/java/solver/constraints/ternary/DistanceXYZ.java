@@ -51,7 +51,7 @@ public class DistanceXYZ extends IntConstraint<IntVar> {
             throw new SolverException("Unexpected operator for distance");
         }
         this.operator = op;
-        setPropagators(new PropDistanceXYZ(vars, op, solver, this));
+        setPropagators(new PropDistanceXYZ(vars, op));
     }
 
     @Override

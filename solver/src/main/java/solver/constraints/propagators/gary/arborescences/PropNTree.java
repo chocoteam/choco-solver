@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.arborescences;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -63,8 +61,7 @@ public class PropNTree extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
-                     Constraint constraint) {
+    public PropNTree(DirectedGraphVar graph, IntVar nT) {
         super(new Variable[]{graph, nT}, PropagatorPriority.QUADRATIC);
         g = graph;
         nTree = nT;

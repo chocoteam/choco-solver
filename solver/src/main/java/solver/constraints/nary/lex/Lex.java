@@ -51,7 +51,7 @@ public class Lex extends IntConstraint<IntVar> {
         super(ArrayUtils.append(X, Y), solver);
         this.strict = strict;
         this.n = X.length;
-        setPropagators(new PropLex(X, Y, strict, solver, this));
+        setPropagators(new PropLex(X, Y, strict));
     }
 
     @Override

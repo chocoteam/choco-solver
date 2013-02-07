@@ -49,7 +49,7 @@ public class DomainChanneling extends IntConstraint<IntVar> {
 
     public DomainChanneling(BoolVar[] bs, IntVar x, Solver solver) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), solver);
-        setPropagators(new PropDomainChanneling(bs, x, solver, this));
+        setPropagators(new PropDomainChanneling(bs, x));
 
     }
 

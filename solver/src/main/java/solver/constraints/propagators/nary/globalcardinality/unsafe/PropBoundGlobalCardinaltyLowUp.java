@@ -27,9 +27,6 @@
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import common.util.procedure.IntProcedure;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -49,9 +46,8 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
     private static final String MSG_INCONSISTENT = "inconsistent";
 
     public PropBoundGlobalCardinaltyLowUp(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences,
-                                          int firstCardValue, int lastCardValue,
-                                          Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, null, firstCardValue, lastCardValue, solver, intVarPropagatorConstraint);
+                                          int firstCardValue, int lastCardValue) {
+        super(vars, null, firstCardValue, lastCardValue);
         this.minOccurrences = minOccurrences;
         this.maxOccurrences = maxOccurrences;
 //        l = new PartialSum(firstCardValue, this.range, minOccurrences);

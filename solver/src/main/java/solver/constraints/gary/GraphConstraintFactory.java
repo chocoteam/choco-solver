@@ -60,8 +60,8 @@ public class GraphConstraintFactory {
     public static Constraint nCliques(UndirectedGraphVar GRAPHVAR, IntVar NB_CLIQUES) {
         Solver solver = GRAPHVAR.getSolver();
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR, NB_CLIQUES}, solver);
-        gc.addPropagators(new PropTransitivity(GRAPHVAR, solver, gc));
-        gc.addPropagators(new PropKCliques(GRAPHVAR, solver, gc, NB_CLIQUES));
+        gc.addPropagators(new PropTransitivity(GRAPHVAR));
+        gc.addPropagators(new PropKCliques(GRAPHVAR, NB_CLIQUES));
         return gc;
     }
 
@@ -78,9 +78,9 @@ public class GraphConstraintFactory {
      */
     public static Constraint tsp(UndirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] EDGE_COSTS, int HELD_KARP) {
         Constraint gc = hamiltonianCycle(GRAPHVAR);
-        gc.addPropagators(new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS, gc, GRAPHVAR.getSolver()));
+        gc.addPropagators(new PropCycleEvalObj(GRAPHVAR, COSTVAR, EDGE_COSTS));
         if (HELD_KARP > 0) {
-            PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(GRAPHVAR, COSTVAR, EDGE_COSTS, gc, GRAPHVAR.getSolver());
+            PropLagr_OneTree hk = PropLagr_OneTree.oneTreeBasedRelaxation(GRAPHVAR, COSTVAR, EDGE_COSTS);
             hk.waitFirstSolution(HELD_KARP == 2);
             gc.addPropagators(hk);
         }
@@ -100,7 +100,7 @@ public class GraphConstraintFactory {
      */
     public static Constraint atsp(DirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] ARC_COSTS, int ORIGIN, int DESTINATION) {
         Constraint gc = hamiltonianPath(GRAPHVAR, ORIGIN, DESTINATION);
-        gc.addPropagators(new PropPathOrCircuitEvalObj(GRAPHVAR, COSTVAR, ARC_COSTS, gc, GRAPHVAR.getSolver()));
+        gc.addPropagators(new PropPathOrCircuitEvalObj(GRAPHVAR, COSTVAR, ARC_COSTS));
         return gc;
     }
 
@@ -113,9 +113,9 @@ public class GraphConstraintFactory {
     public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
         Solver solver = GRAPHVAR.getSolver();
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, 2, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, 2, gc, solver));
-        gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, 2));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, 2));
+        gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR));
         return gc;
     }
 
@@ -137,11 +137,11 @@ public class GraphConstraintFactory {
         }
         succs[DESTINATION] = preds[ORIGIN] = 0;
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, solver));
-        gc.addPropagators(new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION, gc, solver));
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds));
+        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds));
+        gc.addPropagators(new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION));
         return gc;
     }
 

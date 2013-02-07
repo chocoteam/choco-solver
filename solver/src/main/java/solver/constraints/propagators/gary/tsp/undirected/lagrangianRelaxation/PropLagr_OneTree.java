@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
@@ -73,7 +71,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     /**
      * MST based HK
      */
-    protected PropLagr_OneTree(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+    protected PropLagr_OneTree(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix) {
         super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
@@ -90,8 +88,8 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
     /**
      * ONE TREE based HK
      */
-    public static PropLagr_OneTree oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-        PropLagr_OneTree phk = new PropLagr_OneTree(graph, cost, costMatrix, constraint, solver);
+    public static PropLagr_OneTree oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix) {
+        PropLagr_OneTree phk = new PropLagr_OneTree(graph, cost, costMatrix);
         phk.HKfilter = new KruskalOneTree_GAC(phk.n, phk);
         phk.HK = new PrimOneTreeFinder(phk.n, phk);
         return phk;

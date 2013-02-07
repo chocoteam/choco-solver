@@ -31,8 +31,6 @@ import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
@@ -73,7 +71,7 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
     /**
      * MST based HK
      */
-    protected PropLagr_MST_BSTdual(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+    protected PropLagr_MST_BSTdual(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix) {
         super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();
@@ -95,8 +93,8 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
     /**
      * MST based HK
      */
-    public static PropLagr_MST_BSTdual mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-        PropLagr_MST_BSTdual phk = new PropLagr_MST_BSTdual(graph, from, to, cost, costMatrix, constraint, solver);
+    public static PropLagr_MST_BSTdual mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix) {
+        PropLagr_MST_BSTdual phk = new PropLagr_MST_BSTdual(graph, from, to, cost, costMatrix);
         phk.HKfilter = new KruskalMST_GAC(phk.n, phk);
         phk.HK = new PrimMSTFinder(phk.n, phk);
         return phk;
@@ -108,8 +106,8 @@ public class PropLagr_MST_BSTdual extends Propagator implements GraphLagrangianR
     /**
      * BST based HK
      */
-    public static PropLagr_MST_BSTdual bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
-        PropLagr_MST_BSTdual phk = mstBasedRelaxation(graph, from, to, cost, costMatrix, constraint, solver);
+    public static PropLagr_MST_BSTdual bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, IStateInt nR, IStateInt[] sccOf, ISet[] outArcs) {
+        PropLagr_MST_BSTdual phk = mstBasedRelaxation(graph, from, to, cost, costMatrix);
         phk.sccOf = sccOf;
         phk.nr = nR;
         return phk;

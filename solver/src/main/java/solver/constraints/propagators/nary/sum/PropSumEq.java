@@ -28,8 +28,6 @@
 package solver.constraints.propagators.nary.sum;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,8 +67,7 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] vars, int[] coeffs, int pos, int b,
-                     Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropSumEq(IntVar[] vars, int[] coeffs, int pos, int b) {
         super(vars, computePriority(vars.length), false);
         this.c = coeffs;
         this.pos = pos;

@@ -31,8 +31,6 @@ import common.util.VariableUtilities;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
 import memory.IStateBool;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -59,8 +57,7 @@ public class PropElementV extends Propagator<IntVar> {
 
     protected final IIntDeltaMonitor[] idms;
 
-    public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset,
-                        Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
                 PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];

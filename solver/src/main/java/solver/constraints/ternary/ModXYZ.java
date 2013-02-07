@@ -54,9 +54,9 @@ public class ModXYZ extends IntConstraint<IntVar> {
         IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
         setPropagators(
-                new PropDivXYZ(X, Y, t1, solver, this),
-                new PropTimesXY(t1, Y, t2, solver, this),
-                new PropSumEq(new IntVar[]{Z, t2, X}, new int[]{1, 1, -1}, 2, 0, solver, this)
+                new PropDivXYZ(X, Y, t1),
+                new PropTimesXY(t1, Y, t2),
+                new PropSumEq(new IntVar[]{Z, t2, X}, new int[]{1, 1, -1}, 2, 0)
         );
     }
 

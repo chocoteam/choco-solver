@@ -53,7 +53,7 @@ public class NotMember extends IntConstraint<IntVar> {
         this.values = new TIntHashSet(values);
         lb = 0;
         ub = 0;
-        setPropagators(new PropNotMemberEnum(var, this.values, solver, this, false));
+        setPropagators(new PropNotMemberEnum(var, this.values, false));
     }
 
     public NotMember(IntVar var, int lowerbound, int upperbound, Solver solver) {
@@ -61,7 +61,7 @@ public class NotMember extends IntConstraint<IntVar> {
         this.values = null;
         this.lb = lowerbound;
         this.ub = upperbound;
-        setPropagators(new PropNotMemberBound(var, lowerbound, upperbound, solver, this, false));
+        setPropagators(new PropNotMemberBound(var, lowerbound, upperbound, false));
     }
 
     @Override

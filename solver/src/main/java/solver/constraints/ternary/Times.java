@@ -66,8 +66,8 @@ public class Times extends IntConstraint<IntVar> {
         if (inIntBounds(X, Y)) {
 //          setPropagators(new PropTimes(v1, v2, result, solver, this));
             setPropagators(new Propagator[]{
-                    new PropTimesXY(v1, v2, result, solver, this),
-                    new PropTimesZ(v1, v2, result, solver, this)
+                    new PropTimesXY(v1, v2, result),
+                    new PropTimesZ(v1, v2, result)
             });
 
         } else {

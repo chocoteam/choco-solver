@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.basic;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +54,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropMaxDiameter(GraphVar graph, int maxDiam, Constraint constraint, Solver solver) {
+    public PropMaxDiameter(GraphVar graph, int maxDiam) {
         super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.maxDiam = maxDiam;

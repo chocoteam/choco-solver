@@ -33,8 +33,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.regular.Arc;
@@ -67,7 +65,7 @@ public class PropRegular extends Propagator<IntVar> {
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
 
-    public PropRegular(IntVar[] vars, IAutomaton automaton, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropRegular(IntVar[] vars, IAutomaton automaton) {
         super(vars, PropagatorPriority.LINEAR, false);
         _num = num++;
         this.idms = new IIntDeltaMonitor[this.vars.length];

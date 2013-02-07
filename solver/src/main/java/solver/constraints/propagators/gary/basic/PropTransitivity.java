@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.basic;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropTransitivity(V graph, Solver solver, Constraint constraint) {
+    public PropTransitivity(V graph) {
         super((V[]) new GraphVar[]{graph}, PropagatorPriority.LINEAR, false);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

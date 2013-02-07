@@ -28,9 +28,6 @@
 package solver.constraints.propagators.ternary;
 
 import common.util.tools.MathUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
@@ -45,9 +42,8 @@ import solver.variables.IntVar;
 @Deprecated
 public class PropTimesWithLong extends PropTimes {
 
-    public PropTimesWithLong(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
-            Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(v1, v2, result, solver, intVarPropagatorConstraint);
+    public PropTimesWithLong(IntVar v1, IntVar v2, IntVar result) {
+        super(v1, v2, result);
     }
 
     //****************************************************************************************************************//

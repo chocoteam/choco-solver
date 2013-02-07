@@ -33,8 +33,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -73,10 +71,8 @@ public class PropFastGCC extends Propagator<IntVar> {
      * @param restrictedValues
      * @param map
      * @param valueCardinalities
-     * @param constraint
-     * @param sol
      */
-    public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities, Constraint constraint, Solver sol) {
+    public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities) {
         super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false);
         if (restrictedValues.length != valueCardinalities.length) {
             throw new UnsupportedOperationException();

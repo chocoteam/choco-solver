@@ -45,7 +45,7 @@ public class MaxOfAList extends IntConstraint<IntVar> {
 
     public MaxOfAList(IntVar val, IntVar[] vars, Solver solver) {
         super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
-        setPropagators(new PropMaxOfAList(this.vars, solver, this));
+        setPropagators(new PropMaxOfAList(this.vars));
     }
 
     @Override
