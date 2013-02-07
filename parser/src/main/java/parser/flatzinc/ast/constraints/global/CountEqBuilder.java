@@ -58,7 +58,7 @@ public class CountEqBuilder implements IBuilder {
 
             IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
             for (int i = ylb; i <= yub; i++) {
-                solver.post(IntConstraintFactory.count(i, x, "=", cs[i - ylb]));
+                solver.post(IntConstraintFactory.count(i, x, cs[i - ylb]));
             }
             return IntConstraintFactory.element(c, cs, y, ylb);
         } else {
@@ -66,7 +66,7 @@ public class CountEqBuilder implements IBuilder {
             int y = exps.get(1).intValue();
             IntVar c = exps.get(2).intVarValue(solver);
 
-            return IntConstraintFactory.count(y, x, "=", c);
+            return IntConstraintFactory.count(y, x, c);
         }
     }
 }

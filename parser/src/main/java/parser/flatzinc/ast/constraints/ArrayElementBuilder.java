@@ -50,6 +50,6 @@ public class ArrayElementBuilder implements IBuilder {
         IntVar b = exps.get(0).intVarValue(solver);
         int[] as = exps.get(1).toIntArray();
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.element(c, as, b, 1);
+        return IntConstraintFactory.element(c, as, b, 1,"detect");
     }
 }

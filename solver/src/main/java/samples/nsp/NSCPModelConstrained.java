@@ -322,7 +322,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(IntConstraintFactory.count(a, shifts[e], "=", occurrences[e][a]));
+                solver.post(IntConstraintFactory.count(a, shifts[e], occurrences[e][a]));
             }
         }
     }
@@ -357,7 +357,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = VariableFactory.bounded("nW" + t + data.getLiteral(a) + e, lb, ub, solver);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(IntConstraintFactory.count(a, vars, "=", occ));
+                    solver.post(IntConstraintFactory.count(a, vars, occ));
                 }
             }
         }
