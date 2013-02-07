@@ -91,7 +91,6 @@ import solver.variables.VariableFactory;
  * 2) Binary constraints
  * 3) Terary constraints
  * 4) Global constraints
- * 5) Automaton-based constraints
  *
  * @author Charles Prud'homme
  * @since 21/01/13
@@ -224,18 +223,6 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Build an ELEMENT constraint: VALUE = TABLE[INDEX-OFFSET] where TABLE is an array of variables.
-     *
-     * @param VALUE value variable
-     * @param TABLE array of variables
-     * @param INDEX index variable in range [OFFSET,OFFSET+|TABLE|-1]
-	 * @param OFFSET int offset, generally 0
-     */
-    public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int OFFSET) {
-        return new Element(VALUE, TABLE, INDEX, OFFSET, VALUE.getSolver());
-    }
-
-    /**
      * Enforces VAR1 = VAR2^2
      */
     public static Square square(IntVar VAR1, IntVar VAR2) {
@@ -361,8 +348,6 @@ public enum IntConstraintFactory {
     //##################################################################################################################
     //GLOBALS ##########################################################################################################
     //##################################################################################################################
-	// For code maintenance purpose, a global constraint only has its most expressive signature
-	//##################################################################################################################
 
 	/**
      * Ensures that all variables from VARS take a different value.
@@ -415,7 +400,7 @@ public enum IntConstraintFactory {
      * @param BVARS array of boolean variables
      * @param VAR   observed variable
      */
-    public static DomainChanneling channeling(BoolVar[] BVARS, IntVar VAR) {
+    public static DomainChanneling boolean_channeling(BoolVar[] BVARS, IntVar VAR) {
         return new DomainChanneling(BVARS, VAR, VAR.getSolver());
     }
 
@@ -513,19 +498,18 @@ public enum IntConstraintFactory {
 		return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
 	}
 	
-	//TODO check signature and algorithm similar to occurrence and fastGCC
+	//TODO discussion remplacer ou non par GCC
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
-     * Enforce condition N RELOP LIMIT to hold.
+     * Enforce condition N = LIMIT to hold.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
-     * @param RELOP an operator, among {"=", ">=", "<="}
      * @param LIMIT a variable
      */
-    public static Count count(int VALUE, IntVar[] VARS, String RELOP, IntVar LIMIT) {
-        Operator op = Operator.get(RELOP);
-        return new Count(VALUE, VARS, op, LIMIT, LIMIT.getSolver());
+    public static Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
+//		return global_cardinality(VARS,new int[]{VALUE},new IntVar[]{LIMIT},false);
+        return new Count(VALUE, VARS, LIMIT, LIMIT.getSolver());
     }
 
     /**
@@ -575,6 +559,18 @@ public enum IntConstraintFactory {
         return c;
     }
 
+	/**
+     * Build an ELEMENT constraint: VALUE = TABLE[INDEX-OFFSET] where TABLE is an array of variables.
+     *
+     * @param VALUE value variable
+     * @param TABLE array of variables
+     * @param INDEX index variable in range [OFFSET,OFFSET+|TABLE|-1]
+	 * @param OFFSET int offset, generally 0
+     */
+    public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int OFFSET) {
+        return new Element(VALUE, TABLE, INDEX, OFFSET, VALUE.getSolver());
+    }
+	
     /**
      * Global Cardinality constraint (GCC):
      * Each value VALUES[i] should be taken by exactly OCCURRENCES[i] variables of VARS.
