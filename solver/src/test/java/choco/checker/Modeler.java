@@ -421,7 +421,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0);
+            Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1],0,"detect");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);

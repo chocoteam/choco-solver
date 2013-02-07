@@ -128,7 +128,6 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
-
     /**
      * Ensures VAR takes its values in TABLE
      *
@@ -208,63 +207,32 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Build ELEMENT constraint: VALUE = TABLE[INDEX]
+     * Build ELEMENT constraint: VALUE = TABLE[INDEX-OFFSET]
      *
-     * @param VALUE  value variable
-     * @param TABLE  array of int
-     * @param INDEX  index variable
-     * @param OFFSET offset matching INDEX.LB and TABLE[0]
-     */
-    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
-        assert VALUE.getSolver() == INDEX.getSolver();
-        return new Element(VALUE, TABLE, INDEX, OFFSET, "none", VALUE.getSolver());
-    }
-
-    /**
-     * Build ELEMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param VALUE  VALUE
-     * @param TABLE  TABLE
-     * @param INDEX  INDEX
-     * @param OFFSET offset matching INDEX.LB and TABLE[0]
-     * @param SORT   "asc","desc", detect" : values are sorted wrt <code>sort</code>
+     * @param VALUE  an integer variable taking its value in TABLE
+     * @param TABLE  an array of integer values
+     * @param INDEX  an integer variable representing the value of VALUE in TABLE
+     * @param OFFSET offset matching INDEX.LB and TABLE[0] (Generally 0)
+     * @param SORT   defines ordering properties of TABLE:
+	 * <p/> "none" if TABLE is not sorted
+	 * <p/> "asc" if TABLE is sorted in the increasing order
+	 * <p/> "desc" if TABLE is sorted in the decreasing order
+	 * <p/> "detect" Let the constraint detect the ordering of TABLE, if any
      */
     public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
         return new Element(VALUE, TABLE, INDEX, OFFSET, SORT, VALUE.getSolver());
     }
 
     /**
-     * Build ELEMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param VALUE value variable
-     * @param TABLE array of int
-     * @param INDEX index variable
-     */
-    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX) {
-        return new Element(VALUE, TABLE, INDEX, 0, "none", VALUE.getSolver());
-    }
-
-    /**
-     * Build ELEMENT constraint: VALUE = TABLE[INDEX]
-     *
-     * @param VALUE value variable
-     * @param TABLE array of int
-     * @param INDEX index variable
-     * @param SORT  "asc","desc", detect" : values are sorted wrt <code>sort</code>
-     */
-    public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, String SORT) {
-        return new Element(VALUE, TABLE, INDEX, 0, SORT, VALUE.getSolver());
-    }
-
-    /**
-     * Build an ELEMENT constraint: VALUE = TABLE[INDEX] where TABLE is an array of variables.
+     * Build an ELEMENT constraint: VALUE = TABLE[INDEX-OFFSET] where TABLE is an array of variables.
      *
      * @param VALUE value variable
      * @param TABLE array of variables
-     * @param INDEX index variable
+     * @param INDEX index variable in range [OFFSET,OFFSET+|TABLE|-1]
+	 * @param OFFSET int offset, generally 0
      */
-    public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int offset) {
-        return new Element(VALUE, TABLE, INDEX, offset, VALUE.getSolver());
+    public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int OFFSET) {
+        return new Element(VALUE, TABLE, INDEX, OFFSET, VALUE.getSolver());
     }
 
     /**
@@ -275,6 +243,21 @@ public enum IntConstraintFactory {
         return new Square(VAR1, VAR2, VAR1.getSolver());
     }
 
+	/**
+     * Create a table constraint over a couple of variables VAR1 and VAR2, .
+     * <p/>
+     * The <code>ALGORITHM</code> should be chosen among {"AC2201"}.
+     * <p/>
+     * <b>AC2001</b>: Arc Consistency version 2001.
+     *
+     * @param VAR1      first variable
+     * @param VAR2      second variable
+     * @param RELATION  the relation between the two variables
+     * @param ALGORITHM to choose among {"AC2001"}
+     */
+    public static BinCSP table(IntVar VAR1, IntVar VAR2, BinRelation RELATION, String ALGORITHM) {
+        return new BinCSP(VAR1, VAR2, RELATION, BinCSP.Algorithm.valueOf(ALGORITHM));
+    }
 
     //##################################################################################################################
     //TERNARIES ########################################################################################################
@@ -861,22 +844,6 @@ public enum IntConstraintFactory {
      */
     public static Sum scalar(IntVar[] VARS, int[] COEFFS, String OP, IntVar SUM, int COEFF) {
         return Sum.build(VARS, COEFFS, SUM, COEFF, Operator.get(OP), VARS[0].getSolver());
-    }
-
-    /**
-     * Create a table constraint over a couple of variables VAR1 and VAR2, .
-     * <p/>
-     * The <code>ALGORITHM</code> should be chosen among {"AC2201"}.
-     * <p/>
-     * <b>AC2001</b>: Arc Consistency version 2001.
-     *
-     * @param VAR1      first variable
-     * @param VAR2      second variable
-     * @param RELATION  the relation between the two variables
-     * @param ALGORITHM to choose among {"AC2001"}
-     */
-    public static BinCSP table(IntVar VAR1, IntVar VAR2, BinRelation RELATION, String ALGORITHM) {
-        return new BinCSP(VAR1, VAR2, RELATION, BinCSP.Algorithm.valueOf(ALGORITHM));
     }
 
     /**

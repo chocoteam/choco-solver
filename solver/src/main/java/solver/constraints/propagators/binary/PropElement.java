@@ -31,6 +31,7 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.iterators.DisposableValueIterator;
 import common.util.tools.ArrayUtils;
+import memory.structure.Operation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -78,10 +79,6 @@ public class PropElement extends Propagator<IntVar> {
         this.lval = values;
         this.cste = offset;
         this.s = s;
-    }
-
-    public PropElement(IntVar value, int[] values, IntVar index, int offset) {
-        this(value, values, index, offset, Sort.none);
     }
 
     @Override
@@ -212,15 +209,34 @@ public class PropElement extends Propagator<IntVar> {
                         if (val < prev) {
                             isAsc = false;
                         }
+						prev = val;
                     }
                 }
                 if (s == Sort.detect) {
                     if (isDsc) {
                         s = Sort.desc;
+						environment.save(new Operation() {
+							@Override
+							public void undo() {
+								s = Sort.detect;
+							}
+						});
                     } else if (isAsc) {
                         s = Sort.asc;
+						environment.save(new Operation() {
+							@Override
+							public void undo() {
+								s = Sort.detect;
+							}
+						});
                     } else {
                         s = Sort.none;
+						environment.save(new Operation() {
+							@Override
+							public void undo() {
+								s = Sort.detect;
+							}
+						});
                     }
                 }
                 hasChanged = this.vars[0].updateLowerBound(minVal, aCause);
@@ -229,8 +245,6 @@ public class PropElement extends Propagator<IntVar> {
                 iter.dispose();
             }
         }
-        // todo : <hcambaza> : why it does not perform AC on the value variable ?
-        // <nj> perhaps because it is possible to have several times the same value in VALUES
         return hasChanged;
     }
 

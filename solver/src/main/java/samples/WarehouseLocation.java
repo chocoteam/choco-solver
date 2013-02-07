@@ -106,7 +106,7 @@ public class WarehouseLocation extends AbstractProblem {
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s],0,"detect"));
         }
         for (int w = 0; w < nWH; w++) {
             solver.post(IntConstraintFactory.count(w, suppliers, ">=", open[w]));
