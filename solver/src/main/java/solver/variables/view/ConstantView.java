@@ -125,6 +125,7 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
+            assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
@@ -134,6 +135,7 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
+            assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
@@ -143,6 +145,7 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
+            assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
         }
@@ -152,6 +155,7 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
+            assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
         }
@@ -161,6 +165,7 @@ public class ConstantView implements IntVar<IntDelta> {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
+            assert cause != null;
             if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.DECUPP, "outside domain update bound");
         }
@@ -168,7 +173,7 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
-    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+    public void wipeOut(ICause cause) throws ContradictionException {
         removeValue(constante, cause);
     }
 
@@ -307,11 +312,11 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
     }
 
     @Override
-    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         //void
     }
 

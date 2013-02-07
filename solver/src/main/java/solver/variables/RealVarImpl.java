@@ -26,7 +26,6 @@
  */
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import memory.IStateDouble;
 import solver.ICause;
 import solver.Solver;
@@ -73,7 +72,8 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
     }
 
     @Override
-    public boolean updateLowerBound(double value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        TODO ICause antipromo = cause;
         double old = this.getLB();
         if (old < value) {
@@ -92,7 +92,8 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
     }
 
     @Override
-    public boolean updateUpperBound(double value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        TODO ICause antipromo = cause;
         double old = this.getUB();
         if (old > value) {
@@ -110,7 +111,8 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
     }
 
     @Override
-    public boolean updateBounds(double lowerbound, double upperbound, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        TODO ICause antipromo = cause;
         double oldlb = this.getLB();
         double oldub = this.getUB();
@@ -173,7 +175,8 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
         throw new SolverException("Unable to create delta for RealVar!");
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
@@ -181,7 +184,8 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -189,6 +193,7 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }
 

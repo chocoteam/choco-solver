@@ -27,7 +27,6 @@
 
 package solver.exception;
 
-import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.variables.Variable;
@@ -51,7 +50,6 @@ public final class ContradictionException extends Exception {
 
     private static final long serialVersionUID = 2L;
 
-    @NotNull
     public ICause c = Cause.Null;
     public Variable v = null;
     public String s;
@@ -69,6 +67,7 @@ public final class ContradictionException extends Exception {
      * @return ContradictionException the filled exception
      */
     public ContradictionException set(ICause c, Variable v, String s) {
+        assert c != null;
         this.c = c;
         this.v = v;
         this.s = s;

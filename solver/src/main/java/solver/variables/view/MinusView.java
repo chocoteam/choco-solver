@@ -77,6 +77,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -118,6 +119,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -133,6 +135,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         boolean done = var.instantiateTo(-value, this);
         if (done) {
@@ -144,6 +147,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -171,6 +175,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > value) {

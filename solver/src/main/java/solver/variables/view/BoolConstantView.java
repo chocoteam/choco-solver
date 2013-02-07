@@ -46,8 +46,8 @@ import solver.variables.delta.IntDelta;
  */
 public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
 
-    public BoolConstantView(String name, int constante, Solver solver) {
-        super(name, constante, solver);
+    public BoolConstantView(String name, int constant, Solver solver) {
+        super(name, constant, solver);
     }
 
     @Override

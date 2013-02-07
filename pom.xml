@@ -61,12 +61,6 @@
             <version>2.0.12</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
-            <version>2.14</version>
-            <scope>compile</scope>
-        </dependency>
         <!--<dependency>
             <groupId>uk.com.robust-it</groupId>
             <artifactId>cloning</artifactId>
@@ -122,7 +116,7 @@
                     <aggregate>true</aggregate>
                     <properties>
                         <owner>Ecole des Mines de Nantes</owner>
-                        <year>2011</year>
+                        <year>2013</year>
                     </properties>
                     <strictCheck>true</strictCheck>
                     <includes>

@@ -104,6 +104,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         int inf = getLB();
@@ -157,6 +158,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
@@ -181,6 +183,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (Configuration.PLUG_EXPLANATION) solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -226,6 +229,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
@@ -274,6 +278,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
@@ -305,7 +310,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
 
     @Override
-    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+    public void wipeOut(ICause cause) throws ContradictionException {
+        assert cause != null;
         removeInterval(this.getLB(), this.getUB(), cause);
     }
 
@@ -413,7 +419,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
         return new IntervalDeltaMonitor(delta, propagator);
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -423,7 +430,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -459,6 +467,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }

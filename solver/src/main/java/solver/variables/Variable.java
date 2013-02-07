@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -203,11 +202,11 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs during notification
      */
-    void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException;
+    void notifyPropagators(EventType event, ICause cause) throws ContradictionException;
 
-    void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;
+    void notifyViews(EventType event, ICause cause) throws ContradictionException;
 
-    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
+    void notifyMonitors(EventType event, ICause cause) throws ContradictionException;
 
     /**
      * Throws a contradiction exception based on <cause, message>
@@ -216,7 +215,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @param event   event causing the contradiction
      * @param message the detailed message  @throws ContradictionException expected behavior
      */
-    void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;
+    void contradiction(ICause cause, EventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

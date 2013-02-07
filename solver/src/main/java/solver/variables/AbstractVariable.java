@@ -207,6 +207,7 @@ public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
     ////////////////////////////////////////////////////////////////
 
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
                 views[i].transformEvent(event, cause);
