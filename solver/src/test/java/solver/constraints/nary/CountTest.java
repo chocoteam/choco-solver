@@ -102,7 +102,7 @@ public class CountTest {
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random(allvars, i));
-            solver.post(IntConstraintFactory.count(value, vars, "=", occ));
+            solver.post(IntConstraintFactory.count(value, vars, occ));
 //        solver.post(getTableForOccurence(solver, vars, occ, value, n));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
@@ -141,7 +141,7 @@ public class CountTest {
                 if (gac) {
                     solver.post(getTableForOccurence(solver, vs, ivc, val, sizeDom));
                 } else {
-                    solver.post(IntConstraintFactory.count(val, vs, "=", ivc));
+                    solver.post(IntConstraintFactory.count(val, vs, ivc));
                 }
             }
             solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));

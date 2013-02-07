@@ -30,14 +30,11 @@ import common.ESat;
 import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.Operator;
 import solver.constraints.propagators.nary.PropCount;
-import solver.exception.SolverException;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
- * count(VALUE,VARIABLES,RELOP,LIMIT)
+ * count(VALUE,VARIABLES,LIMIT)
  * <br/>syn.: occurencemax, occurencemin, occurrence
  * <p/>
  * <br/>Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
@@ -49,54 +46,12 @@ import solver.variables.VariableFactory;
  */
 public class Count extends IntConstraint<IntVar> {
 
-    public final boolean leq;    // >=
-    public final boolean geq;    // <=
     private final int occval;
 
-    public Count(int value, IntVar[] vars, Operator relop, IntVar limit, Solver solver) {
+    public Count(int value, IntVar[] vars, IntVar limit, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         this.occval = value;
-        switch (relop) {
-            case GE:
-                leq = true;
-                geq = false;
-                break;
-            case LE:
-                leq = false;
-                geq = true;
-                break;
-            case EQ:
-                leq = true;
-                geq = true;
-                break;
-            default:
-                throw new SolverException("Unexpected operator for Count");
-        }
-        setPropagators(new PropCount(value, this.vars, leq, geq));
-    }
-
-    public Count(int value, IntVar[] vars, Operator relop, int limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{VariableFactory.fixed(limit, solver)}), solver);
-        this.occval = value;
-        switch (relop) {
-            case GE:
-                leq = true;
-                geq = false;
-                break;
-            case LE:
-                leq = false;
-                geq = true;
-                break;
-            case EQ:
-                leq = true;
-                geq = true;
-                break;
-            default:
-                throw new SolverException("Unexpected operator for Count");
-        }
-        //CPRU  double to simulate idempotency
-        setPropagators(new PropCount(value, this.vars, leq, geq),
-                new PropCount(value, this.vars, leq, geq));
+        setPropagators(new PropCount(value, this.vars));
     }
 
     @Override
@@ -106,12 +61,7 @@ public class Count extends IntConstraint<IntVar> {
         for (int i = 0; i < nbVars; i++) {
             if (tuple[i] == occval) cptVal++;
         }
-        if (leq & geq)
-            return ESat.eval(cptVal == tuple[nbVars]);
-        else if (leq)
-            return ESat.eval(cptVal >= tuple[nbVars]);
-        else
-            return ESat.eval(cptVal <= tuple[nbVars]);
+		return ESat.eval(cptVal == tuple[nbVars]);
     }
 
     @Override
@@ -121,12 +71,7 @@ public class Count extends IntConstraint<IntVar> {
             s.append(vars[i]).append(",");
         }
         s.append(vars[vars.length - 2]).append("], ").append(occval).append(")");
-        if (leq && geq)
-            s.append(" = ");
-        else if (leq)
-            s.append(" >= ");
-        else
-            s.append(" <= ");
+		s.append(" = ");
         s.append(vars[vars.length - 1]);
         return s.toString();
     }

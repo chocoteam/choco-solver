@@ -27,6 +27,7 @@
 
 package choco.checker;
 
+import com.sun.org.apache.xpath.internal.operations.Variable;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
@@ -341,8 +342,10 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
-            Constraint[] ctrs = new Constraint[]{ctr};
+			IntVar tmp = VariableFactory.bounded("occ",0,vars.length,s);
+			Constraint link = IntConstraintFactory.arithm(tmp, ro, occVar);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
+            Constraint[] ctrs = new Constraint[]{ctr,link};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
@@ -374,8 +377,10 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-            Constraint ctr = IntConstraintFactory.count(params[1], vars, ro, occVar);
-            Constraint[] ctrs = new Constraint[]{ctr};
+			IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
+			Constraint link = IntConstraintFactory.arithm(tmp,ro,occVar);
+            Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
+            Constraint[] ctrs = new Constraint[]{ctr,link};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
