@@ -119,6 +119,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (value == 0)
             return instantiateTo(1, cause);
         else if (value == 1)
@@ -131,6 +132,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
      */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
@@ -166,6 +168,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+        assert cause != null;
         if (Configuration.PLUG_EXPLANATION) solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -209,6 +212,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
      *          if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return value > 0 && instantiateTo(value, cause);
     }
 
@@ -231,22 +235,26 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
      *          if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return value < 1 && instantiateTo(value, cause);
     }
 
 
     @Override
-    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+    public void wipeOut(ICause cause) throws ContradictionException {
+        assert cause != null;
         removeInterval(0, 1, cause);
     }
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
+        assert cause != null;
         return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
+        assert cause != null;
         return instantiateTo(0, cause);
     }
 
@@ -366,7 +374,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     }
 
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -375,7 +384,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -414,6 +424,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }

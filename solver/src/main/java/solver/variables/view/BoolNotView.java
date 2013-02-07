@@ -26,7 +26,6 @@
  */
 package solver.variables.view;
 
-import com.sun.istack.internal.NotNull;
 import common.ESat;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueIterator;
@@ -57,22 +56,26 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
     }
 
     @Override
-    public boolean setToTrue(@NotNull ICause cause) throws ContradictionException {
+    public boolean setToTrue(ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.setToFalse(cause);
     }
 
     @Override
-    public boolean setToFalse(@NotNull ICause cause) throws ContradictionException {
+    public boolean setToFalse(ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.setToTrue(cause);
     }
 
     @Override
-    public boolean removeValue(int value, @NotNull ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.removeValue(1 - value, cause);
     }
 
     @Override
-    public boolean removeInterval(int from, int to, @NotNull ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
@@ -89,17 +92,20 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
     }
 
     @Override
-    public boolean instantiateTo(int value, @NotNull ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.instantiateTo(1 - value, cause);
     }
 
     @Override
-    public boolean updateLowerBound(int value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return value > 0 && var.instantiateTo(1 - value, cause);
     }
 
     @Override
-    public boolean updateUpperBound(int value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return value < 1 && var.instantiateTo(1 - value, cause);
     }
 

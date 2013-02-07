@@ -81,16 +81,10 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-//        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
+        assert cause != null;
         if (value % cste == 0) {
             int inf = getLB();
             int sup = getUB();
-// <nju> need to delegate to the underlying variable (contradiction will be handled by the removeValue)
-//            if (value == inf && value == sup) {
-//                solver.getExplainer().removeValue(this, value, cause);
-//                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
-//            } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
@@ -114,18 +108,16 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
                         }
                     }
                     this.notifyPropagators(e, cause);
-//                        solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
             }
         }
-//        }
         return false;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-//        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -141,8 +133,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-//        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
+        assert cause != null;
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {
             notifyPropagators(EventType.INSTANTIATE, cause);
@@ -153,13 +144,9 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        assert cause != null;
         int old = this.getLB();
         if (old < value) {
-//            if (this.getUB() < value) {
-//                solver.getExplainer().updateLowerBound(this, old, value, cause);
-//                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-//            } else {
             EventType e = EventType.INCLOW;
             boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
             if (instantiated()) {
@@ -170,25 +157,17 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
             }
             if (done) {
                 this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 return true;
             }
         }
-//        }
         return false;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-//        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
+        assert cause != null;
         int old = this.getUB();
         if (old > value) {
-// <nju> need to delegate to the var, see above
-//            if (this.getLB() > value) {
-//                solver.getExplainer().updateUpperBound(this, old, value, cause);
-//                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-//            } else {
             EventType e = EventType.DECUPP;
             boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
             if (instantiated()) {
@@ -199,11 +178,9 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
             }
             if (done) {
                 this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 return true;
             }
         }
-//        }
         return false;
     }
 

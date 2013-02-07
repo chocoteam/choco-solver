@@ -27,7 +27,6 @@
 
 package solver.variables.graph;
 
-import com.sun.istack.internal.NotNull;
 import memory.IEnvironment;
 import memory.setDataStructures.ISet;
 import solver.ICause;
@@ -106,6 +105,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      * @return true iff the removal has an effect
      */
     public boolean removeNode(int x, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (kernel.getActiveNodes().contain(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
@@ -136,6 +136,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      * @return true iff the node is effectively added to the mandatory structure
      */
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (envelop.getActiveNodes().contain(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
@@ -160,7 +161,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      * @return true iff the removal has an effect
      * @throws ContradictionException
      */
-    public abstract boolean removeArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
+    public abstract boolean removeArc(int x, int y, ICause cause) throws ContradictionException;
 
     /**
      * Enforce the node y into the neighborhood of node x in any partial subgraph
@@ -170,7 +171,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      * @param cause algorithm which is related to the removal
      * @return true iff the node y is effectively added in the neighborhooh of node x
      */
-    public abstract boolean enforceArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
+    public abstract boolean enforceArc(int x, int y, ICause cause) throws ContradictionException;
 
     public enum IncidentNodes {
         PREDECESSORS() {
@@ -305,7 +306,8 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         return new GraphDeltaMonitor(delta, propagator);
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -314,7 +316,8 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -322,6 +325,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }

@@ -26,7 +26,6 @@
  */
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -58,7 +57,8 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         return true;
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -67,7 +67,8 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -108,6 +109,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }

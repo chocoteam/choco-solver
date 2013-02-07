@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators;
 
-import com.sun.istack.internal.Nullable;
+
 import common.ESat;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -470,7 +470,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
+    public void contradiction( Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(aCause, variable, message);
     }
 

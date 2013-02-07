@@ -27,8 +27,7 @@
 
 package solver.variables.view;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -121,6 +120,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
 
     @Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -129,7 +129,8 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -146,7 +147,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public void explain(@Nullable Deduction d, Explanation e) {
+    public void explain( Deduction d, Explanation e) {
         var.explain(VariableState.DOM, e);
     }
 
@@ -162,6 +163,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
@@ -178,7 +180,8 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+    public void wipeOut(ICause cause) throws ContradictionException {
+        assert cause != null;
         var.wipeOut(cause);
     }
 }

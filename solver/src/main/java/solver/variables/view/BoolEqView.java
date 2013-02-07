@@ -26,7 +26,6 @@
  */
 package solver.variables.view;
 
-import com.sun.istack.internal.NotNull;
 import common.ESat;
 import solver.ICause;
 import solver.Solver;
@@ -53,12 +52,14 @@ public class BoolEqView extends OffsetView<OneValueDelta, BoolVar<OneValueDelta>
     }
 
     @Override
-    public boolean setToTrue(@NotNull ICause cause) throws ContradictionException {
+    public boolean setToTrue(ICause cause) throws ContradictionException {
+        assert cause != null;
         return instantiateTo(1, cause);
     }
 
     @Override
-    public boolean setToFalse(@NotNull ICause cause) throws ContradictionException {
+    public boolean setToFalse(ICause cause) throws ContradictionException {
+        assert cause != null;
         return instantiateTo(0, cause);
     }
 }

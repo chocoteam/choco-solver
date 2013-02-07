@@ -27,7 +27,7 @@
 
 package solver;
 
-import com.sun.istack.internal.Nullable;
+
 import solver.constraints.Constraint;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -60,7 +60,7 @@ public interface ICause extends Serializable {
      * @param d the deduction
      * @param e explanation to feed
      */
-    void explain(@Nullable Deduction d, Explanation e);
+    void explain( Deduction d, Explanation e);
 
 
     /**

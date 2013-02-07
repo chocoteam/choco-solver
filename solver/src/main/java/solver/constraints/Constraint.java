@@ -27,7 +27,7 @@
 
 package solver.constraints;
 
-import com.sun.istack.internal.Nullable;
+
 import common.ESat;
 import solver.ICause;
 import solver.Solver;
@@ -218,7 +218,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
+    protected void contradiction(ICause cause,  Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(cause, variable, message);
     }
 

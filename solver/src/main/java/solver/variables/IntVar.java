@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
@@ -66,7 +65,7 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean removeValue(int value, @NotNull ICause cause) throws ContradictionException;
+    boolean removeValue(int value, ICause cause) throws ContradictionException;
 
     /**
      * Removes values between [<code>from, to</code>] from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -86,7 +85,7 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean removeInterval(int from, int to, @NotNull ICause cause) throws ContradictionException;
+    boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
@@ -104,7 +103,7 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean instantiateTo(int value, @NotNull ICause cause) throws ContradictionException;
+    boolean instantiateTo(int value, ICause cause) throws ContradictionException;
 
     /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
@@ -123,7 +122,7 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(int value, @NotNull ICause cause) throws ContradictionException;
+    boolean updateLowerBound(int value, ICause cause) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
@@ -142,9 +141,9 @@ public interface IntVar<ID extends IntDelta> extends Variable<ID> {
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateUpperBound(int value, @NotNull ICause cause) throws ContradictionException;
+    boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
 
-    void wipeOut(@NotNull ICause cause) throws ContradictionException;
+    void wipeOut(ICause cause) throws ContradictionException;
 
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
