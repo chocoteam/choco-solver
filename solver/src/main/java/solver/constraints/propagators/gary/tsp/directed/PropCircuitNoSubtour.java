@@ -38,8 +38,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -72,10 +70,8 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
      * runs in O(1) per instantiation event
      *
      * @param graph
-     * @param constraint
-     * @param solver
      */
-    public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
+    public PropCircuitNoSubtour(DirectedGraphVar graph) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

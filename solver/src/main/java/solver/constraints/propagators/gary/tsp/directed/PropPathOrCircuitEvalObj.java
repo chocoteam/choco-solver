@@ -33,8 +33,6 @@ import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -77,10 +75,8 @@ public class PropPathOrCircuitEvalObj extends Propagator {
      * @param graph
      * @param obj
      * @param costMatrix
-     * @param constraint
-     * @param solver
      */
-    public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+    public PropPathOrCircuitEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
         super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

@@ -32,8 +32,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -88,10 +86,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      * enables to control the cardinality of the matching
      *
      * @param vars
-     * @param constraint
-     * @param sol
      */
-    public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver sol) {
+    public PropAllDiffAC(IntVar[] vars) {
         super(vars, PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

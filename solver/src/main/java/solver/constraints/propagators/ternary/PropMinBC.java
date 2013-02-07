@@ -28,8 +28,6 @@
 package solver.constraints.propagators.ternary;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,8 +46,7 @@ public class PropMinBC extends Propagator<IntVar> {
 
     IntVar MIN, v1, v2;
 
-    public PropMinBC(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
-            Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropMinBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
         this.MIN = X;
         this.v1 = Y;

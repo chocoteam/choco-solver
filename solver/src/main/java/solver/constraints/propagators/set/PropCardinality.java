@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,10 +67,8 @@ public class PropCardinality extends Propagator<Variable> {
      *
      * @param setVar
      * @param cardinality
-     * @param solver
-     * @param c
      */
-    public PropCardinality(SetVar setVar, IntVar cardinality, Solver solver, Constraint c) {
+    public PropCardinality(SetVar setVar, IntVar cardinality) {
         super(new Variable[]{setVar, cardinality}, PropagatorPriority.BINARY);
         this.card = cardinality;
         this.set = setVar;

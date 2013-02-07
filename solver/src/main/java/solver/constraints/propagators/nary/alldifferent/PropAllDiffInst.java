@@ -28,8 +28,6 @@ package solver.constraints.propagators.nary.alldifferent;
 
 import common.ESat;
 import gnu.trove.stack.array.TIntArrayStack;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -55,10 +53,8 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * enables to control the cardinality of the matching
      *
      * @param vars
-     * @param constraint
-     * @param sol
      */
-    public PropAllDiffInst(IntVar[] vars, Constraint constraint, Solver sol) {
+    public PropAllDiffInst(IntVar[] vars) {
         super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
     }

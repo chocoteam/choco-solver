@@ -47,7 +47,7 @@ public class Regular extends IntConstraint<IntVar> {
     public Regular(IntVar[] vars, IAutomaton automaton, Solver solver) {
         super(vars, solver);
         this.automaton = automaton;
-        setPropagators(new PropRegular(vars, automaton, solver, this));
+        setPropagators(new PropRegular(vars, automaton));
     }
 
     @Override

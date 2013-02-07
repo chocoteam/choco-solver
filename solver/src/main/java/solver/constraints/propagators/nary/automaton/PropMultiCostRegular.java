@@ -41,7 +41,6 @@ import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Constant;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.FA.utils.ICounter;
@@ -215,14 +214,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param vars        decision variables
      * @param counterVars cost variables
      * @param cauto       finite automaton with costs
-     * @param solver      solver
-     * @param constraint  constraint
      */
-    public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto,
-                                Solver solver,
-                                Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto) {
         super(ArrayUtils.<IntVar>append(vars, counterVars), PropagatorPriority.CUBIC, false);
-        this.solver = solver;
         this.vs = vars;
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.channeling;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -57,7 +55,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropBoolGraph(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+    public PropBoolGraph(GraphVar graph, BoolVar[][] rel) {
         super(ArrayUtils.flatten(rel), PropagatorPriority.QUADRATIC);
         this.graph = graph;
         relations = rel;

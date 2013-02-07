@@ -54,7 +54,7 @@ public class MetaVarConstraint<V extends Variable> extends Constraint<V, Propaga
      */
     public MetaVarConstraint(V[] vars, MetaVariable meta, Solver solver) {
         super(solver);
-        setPropagators(new Propagator[]{new MetaVarPropagator(vars, meta, solver, this)});
+        setPropagators(new Propagator[]{new MetaVarPropagator(vars, meta)});
     }
 
     //***********************************************************************************

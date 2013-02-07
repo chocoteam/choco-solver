@@ -53,7 +53,7 @@ public class NValues extends IntConstraint<IntVar> {
         at_most_BC {
             @Override
             public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+                cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
                 boolean enumDom = false;
                 for (IntVar v : vars) {
                     if (v.hasEnumeratedDomain()) {
@@ -62,19 +62,19 @@ public class NValues extends IntConstraint<IntVar> {
                     }
                 }
                 if (enumDom)// added twice to perform fixpoint
-                    cons.addPropagators(new PropAtMostNValues_BC(vars, nValues, cons, solver));
+                    cons.addPropagators(new PropAtMostNValues_BC(vars, nValues));
             }
         },
         at_most_greedy {
             @Override
             public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues, cons, solver));
+                cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues));
             }
         },
         at_least_AC {
             @Override
             public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues, cons, solver));
+                cons.addPropagators(new PropAtLeastNValues_AC(vars, nValues));
             }
         };
 
@@ -93,7 +93,7 @@ public class NValues extends IntConstraint<IntVar> {
      */
     private NValues(IntVar[] vars, IntVar nValues, TIntArrayList concernedValues, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{nValues}), solver);
-        addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
+        addPropagators(new PropNValues_Light(vars, concernedValues, nValues));
     }
 
     /**

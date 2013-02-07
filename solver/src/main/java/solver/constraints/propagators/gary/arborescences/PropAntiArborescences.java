@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.arborescences;
 import common.ESat;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -66,7 +64,7 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
+    public PropAntiArborescences(DirectedGraphVar graph, boolean simple) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();

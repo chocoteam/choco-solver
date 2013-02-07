@@ -30,8 +30,6 @@ package solver.constraints.propagators.gary.basic;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,7 +65,7 @@ public class PropKCliques extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKCliques(UndirectedGraphVar graph, Solver solver, Constraint constraint, IntVar k) {
+    public PropKCliques(UndirectedGraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         g = graph;
         this.k = k;

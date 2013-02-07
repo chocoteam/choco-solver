@@ -28,8 +28,6 @@ package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -66,7 +64,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropNotEqualX_YC(IntVar[] vars, int c, Solver solver, Constraint constraint) {
+    public PropNotEqualX_YC(IntVar[] vars, int c) {
         super(vars.clone(), PropagatorPriority.BINARY, false);
         this.x = vars[0];
         this.y = vars[1];

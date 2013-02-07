@@ -33,8 +33,6 @@ import memory.IStateInt;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,10 +65,8 @@ public class PropNbEmpty extends Propagator<Variable> {
      *
      * @param sets
      * @param nbEmpty
-     * @param solver
-     * @param c
      */
-    public PropNbEmpty(SetVar[] sets, IntVar nbEmpty, Solver solver, Constraint c) {
+    public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
         super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY);
         this.nbEmpty = nbEmpty;
         this.sets = sets;

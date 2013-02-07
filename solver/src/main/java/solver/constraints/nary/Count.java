@@ -72,7 +72,7 @@ public class Count extends IntConstraint<IntVar> {
             default:
                 throw new SolverException("Unexpected operator for Count");
         }
-        setPropagators(new PropCount(value, this.vars, leq, geq, solver, this));
+        setPropagators(new PropCount(value, this.vars, leq, geq));
     }
 
     public Count(int value, IntVar[] vars, Operator relop, int limit, Solver solver) {
@@ -95,8 +95,8 @@ public class Count extends IntConstraint<IntVar> {
                 throw new SolverException("Unexpected operator for Count");
         }
         //CPRU  double to simulate idempotency
-        setPropagators(new PropCount(value, this.vars, leq, geq, solver, this),
-                new PropCount(value, this.vars, leq, geq, solver, this));
+        setPropagators(new PropCount(value, this.vars, leq, geq),
+                new PropCount(value, this.vars, leq, geq));
     }
 
     @Override

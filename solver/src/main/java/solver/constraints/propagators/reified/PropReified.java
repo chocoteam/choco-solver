@@ -29,8 +29,6 @@ package solver.constraints.propagators.reified;
 
 import common.ESat;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -73,9 +71,7 @@ public class PropReified extends Propagator<Variable> {
 
     public PropReified(Variable[] vars,
                        Propagator[] cons,
-                       Propagator[] oppCons,
-                       Solver solver,
-                       Constraint<Variable, Propagator<Variable>> owner) {
+                       Propagator[] oppCons) {
         super(vars, extractPriority(cons, oppCons), false);
         this.bVar = (BoolVar) vars[0];
         left = cons;

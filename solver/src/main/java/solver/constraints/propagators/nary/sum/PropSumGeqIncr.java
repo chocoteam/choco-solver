@@ -28,9 +28,6 @@
 package solver.constraints.propagators.nary.sum;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -48,9 +45,8 @@ import solver.variables.IntVar;
  */
 public final class PropSumGeqIncr extends PropSumEqIncr {
 
-    public PropSumGeqIncr(IntVar[] vars, int b, Solver solver,
-                          Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, b, solver, intVarPropagatorConstraint);
+    public PropSumGeqIncr(IntVar[] vars, int b) {
+        super(vars, b);
     }
 
 

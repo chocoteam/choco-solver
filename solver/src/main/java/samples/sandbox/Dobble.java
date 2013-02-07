@@ -144,8 +144,8 @@ public class Dobble {
             }
         }
         Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal);
-        gc.addPropagators(new PropRelationGraph(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
-        gc.addPropagators(new PropGraphRelation(flatJeu, g, solver, gc, GraphRelationFactory.equivalence(flatJeu)));
+        gc.addPropagators(new PropRelationGraph(flatJeu, g, GraphRelationFactory.equivalence(flatJeu)));
+        gc.addPropagators(new PropGraphRelation(flatJeu, g, solver));
         solver.post(gc);
     }
 
@@ -165,8 +165,8 @@ public class Dobble {
             }
         }
         Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues);
-        gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
-        gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, solver, gcpair, GraphRelationFactory.equivalence(flatIJ)));
+        gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, GraphRelationFactory.equivalence(flatIJ)));
+        gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, solver));
         solver.post(gcpair);
     }
 

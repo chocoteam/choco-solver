@@ -28,8 +28,6 @@ package solver.constraints.propagators.nary;
 
 import common.ESat;
 import memory.IStateBitSet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -79,8 +77,7 @@ public class PropCount extends Propagator<IntVar> {
      * @param onInf if true, constraint insures size{forall v in lvars | v = occval} <= occVar
      * @param onSup if true, constraint insure size{forall v in lvars | v = occval} >= occVar
      */
-    public PropCount(int value, IntVar[] vars, boolean onInf, boolean onSup, Solver solver,
-                     Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropCount(int value, IntVar[] vars, boolean onInf, boolean onSup) {
         super(vars, PropagatorPriority.LINEAR, false);
         this.occval = value;
         this.ovIdx = vars.length - 1;

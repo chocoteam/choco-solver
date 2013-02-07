@@ -31,8 +31,6 @@ import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.procedure.PairProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,11 +63,11 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeDegree_AtLeast(DirectedGraphVar graph, IncidentNodes setType, int degree, Constraint constraint, Solver solver) {
-        this(graph, setType, buildArray(degree, graph.getEnvelopGraph().getNbNodes()), constraint, solver);
+    public PropNodeDegree_AtLeast(DirectedGraphVar graph, IncidentNodes setType, int degree) {
+        this(graph, setType, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtLeast(DirectedGraphVar graph, IncidentNodes setType, int[] degrees, Constraint constraint, Solver solver) {
+    public PropNodeDegree_AtLeast(DirectedGraphVar graph, IncidentNodes setType, int[] degrees) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         target = setType;
         g = graph;
@@ -109,11 +107,11 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         };
     }
 
-    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int degree, Constraint constraint, Solver solver) {
-        this(graph, buildArray(degree, graph.getEnvelopGraph().getNbNodes()), constraint, solver);
+    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int degree) {
+        this(graph, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int[] degrees, Constraint constraint, Solver solver) {
+    public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int[] degrees) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         target = IncidentNodes.NEIGHBORS;
         g = graph;

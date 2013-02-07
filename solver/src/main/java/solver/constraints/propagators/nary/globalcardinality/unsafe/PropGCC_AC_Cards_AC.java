@@ -32,8 +32,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -87,10 +85,8 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
      * @param vars
      * @param value
      * @param cards
-     * @param constraint
-     * @param sol
      */
-    public PropGCC_AC_Cards_AC(IntVar[] vars, int[] value, IntVar[] cards, Constraint constraint, Solver sol) {
+    public PropGCC_AC_Cards_AC(IntVar[] vars, int[] value, IntVar[] cards) {
         super(ArrayUtils.append(vars, cards), PropagatorPriority.QUADRATIC, false);
         if (value.length != cards.length) {
             throw new UnsupportedOperationException();

@@ -27,8 +27,6 @@
 package solver.constraints.propagators.extension.nary;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.extension.FastBooleanValidityChecker;
@@ -74,7 +72,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
         super(vars, PropagatorPriority.QUADRATIC, false);
         this.relation = relation;
         this.arity = vars.length;

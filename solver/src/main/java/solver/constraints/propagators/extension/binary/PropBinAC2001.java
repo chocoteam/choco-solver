@@ -27,9 +27,6 @@
 package solver.constraints.propagators.extension.binary;
 
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -48,9 +45,8 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset0;
     protected int offset1;
 
-    public PropBinAC2001(IntVar x, IntVar y, BinRelation relation, Solver solver,
-                         Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(x, y, relation, solver, intVarPropagatorConstraint);
+    public PropBinAC2001(IntVar x, IntVar y, BinRelation relation) {
+        super(x, y, relation);
         offset0 = x.getLB();
         offset1 = y.getLB();
         currentSupport0 = new IStateInt[x.getUB() - offset0 + 1];

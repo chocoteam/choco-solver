@@ -30,8 +30,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -59,7 +57,7 @@ public class PropLex extends Propagator<IntVar> {
     public final boolean strict;
 
 
-    public PropLex(IntVar[] X, IntVar[] Y, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropLex(IntVar[] X, IntVar[] Y, boolean strict) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.x = X.clone();
         this.y = Y.clone();

@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.arborescences;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,14 +65,12 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
 
     /**
      * @param graph
-     * @param sink       root of the antiarborescence
-     * @param constraint
-     * @param solver
+     * @param sink  root of the antiarborescence
      * @PropAnn(tested = {BENCHMARK,CORRECTION})
      * <p/>
      * Ensures that graph is an antiarborescence rooted in node sink
      */
-    public PropAntiArborescence(DirectedGraphVar graph, int sink, Constraint constraint, Solver solver, boolean simple) {
+    public PropAntiArborescence(DirectedGraphVar graph, int sink, boolean simple) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();

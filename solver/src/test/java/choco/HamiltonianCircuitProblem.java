@@ -95,13 +95,13 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     public void buildModel() {
         basicModel();
         if (arbo) {
-            gc.addPropagators(new PropArborescence(graph, 0, gc, solver, true));
+            gc.addPropagators(new PropArborescence(graph, 0, true));
         }
         if (antiArbo) {
-            gc.addPropagators(new PropAntiArborescence(graph, n - 1, gc, solver, true));
+            gc.addPropagators(new PropAntiArborescence(graph, n - 1, true));
         }
         if (rg) {
-            gc.addPropagators(new PropReducedGraphHamPath(graph, gc, solver));
+            gc.addPropagators(new PropReducedGraphHamPath(graph));
         }
         Constraint[] cstrs;
         switch (allDiff) {
@@ -109,7 +109,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
                 cstrs = new Constraint[]{gc};
                 break;
             case 1:
-                gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
+                gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1));
                 cstrs = new Constraint[]{gc};
                 break;
             case 2:
@@ -169,7 +169,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc.addPropagators(new PropIntVarChanneling(integers, graph, gc, solver));
+        gc.addPropagators(new PropIntVarChanneling(integers, graph));
         if (bc) {
             return IntConstraintFactory.alldifferent(integers, "BC");
         } else {

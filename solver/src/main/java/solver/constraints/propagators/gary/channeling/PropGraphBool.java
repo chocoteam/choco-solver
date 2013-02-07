@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.channeling;
 
 import common.ESat;
 import common.util.procedure.PairProcedure;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+    public PropGraphBool(GraphVar graph, BoolVar[][] rel) {
         super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         this.graph = graph;
         gdm = (GraphDeltaMonitor) graph.monitorDelta(this);

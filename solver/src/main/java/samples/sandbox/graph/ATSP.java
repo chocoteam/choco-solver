@@ -237,15 +237,15 @@ public class ATSP {
 
     public static void addPropagators() {
         if (config.get(allDiff)) {
-            gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
+            gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1));
         }
         // STRUCTURAL FILTERING
         if (config.get(arbo)) {
-            gc.addPropagators(new PropArborescence(graph, 0, gc, solver, true));
-            gc.addPropagators(new PropAntiArborescence(graph, n - 1, gc, solver, true));
+            gc.addPropagators(new PropArborescence(graph, 0, true));
+            gc.addPropagators(new PropAntiArborescence(graph, n - 1, true));
         }
         if (config.get(rg)) {
-            PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+            PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph);
             nR = RP.getNSCC();
             sccOf = RP.getSCCOF();
             outArcs = RP.getOutArcs();
@@ -253,32 +253,32 @@ public class ATSP {
             sccFirst = RP.getSCCFirst();
             sccNext = RP.getSCCNext();
             gc.addPropagators(RP);
-            PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
+            PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
             gc.addPropagators(SCCP);
         }
         if (khun) {
 //			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
 //			gc.addPropagators(map);
 //			relax = map;
-            gc.addPropagators(new PropATSP_AssignmentBound(graph, totalCost, distanceMatrix, gc, solver));
+            gc.addPropagators(new PropATSP_AssignmentBound(graph, totalCost, distanceMatrix));
         }
         // COST BASED FILTERING
         if (instanceName.contains("rbg")) {
             if (!khun) {
-                PropKhun map = new PropKhun(graph, totalCost, distanceMatrix, solver, gc);
+                PropKhun map = new PropKhun(graph, totalCost, distanceMatrix);
                 gc.addPropagators(map);
                 relax = map;
             }
         } else {
             if (config.get(rg) && bst) {// BST-based HK
                 System.out.println("BST");
-                PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+                PropLagr_MST_BSTdual propHK_bst = PropLagr_MST_BSTdual.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, nR, sccOf, outArcs);
                 propHK_bst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);
                 gc.addPropagators(propHK_bst);
                 relax = propHK_bst;
             } else {
                 System.out.println("MST");
-                PropLagr_MST_BSTdual propHK_mst = PropLagr_MST_BSTdual.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver);
+                PropLagr_MST_BSTdual propHK_mst = PropLagr_MST_BSTdual.mstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix);
                 propHK_mst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);
                 gc.addPropagators(propHK_mst);
                 relax = propHK_mst;

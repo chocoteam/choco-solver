@@ -76,7 +76,7 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         oppcons = oppositeConstraint;
         Propagator[] left = cons.propagators.clone();
         Propagator[] right = oppositeConstraint.propagators.clone();
-        setPropagators(new PropReified(vars, left, right, solver, this));
+        setPropagators(new PropReified(vars, left, right));
 //        addPropagators(left);
 //        addPropagators(right);
     }

@@ -31,8 +31,6 @@ import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.procedure.PairProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -61,7 +59,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropEachNodeHasLoop(GraphVar graph, ISet concernedNodes, Solver sol, Constraint constraint) {
+    public PropEachNodeHasLoop(GraphVar graph, ISet concernedNodes) {
         super(new GraphVar[]{graph}, PropagatorPriority.UNARY);
         this.g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
@@ -70,8 +68,8 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
         this.concernedNodes = concernedNodes;
     }
 
-    public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
-        this(graph, graph.getEnvelopGraph().getActiveNodes(), sol, constraint);
+    public PropEachNodeHasLoop(GraphVar graph) {
+        this(graph, graph.getEnvelopGraph().getActiveNodes());
     }
 
     //***********************************************************************************

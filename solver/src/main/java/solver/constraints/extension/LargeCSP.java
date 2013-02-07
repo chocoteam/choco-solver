@@ -51,14 +51,14 @@ public class LargeCSP extends IntConstraint<IntVar> {
         this.relation = relation;
         switch (type) {
             case FC:
-                setPropagators(new PropLargeCSP(vars, relation, solver, this));
+                setPropagators(new PropLargeCSP(vars, relation));
                 break;
             case AC2001:
-                setPropagators(new PropLargeGAC2001Positive(vars, (IterTuplesTable) relation, solver, this));
+                setPropagators(new PropLargeGAC2001Positive(vars, (IterTuplesTable) relation));
                 break;
             default:
             case AC32:
-                setPropagators(new PropLargeGAC3rmPositive(vars, (IterTuplesTable) relation, solver, this));
+                setPropagators(new PropLargeGAC3rmPositive(vars, (IterTuplesTable) relation));
                 break;
         }
     }

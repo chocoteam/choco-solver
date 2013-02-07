@@ -47,7 +47,7 @@ public class DivXYZ extends IntConstraint<IntVar> {
         this.X = x;
         this.Y = y;
         this.Z = z;
-        setPropagators(new PropDivXYZ(x, y, z, solver, this));
+        setPropagators(new PropDivXYZ(x, y, z));
     }
 
 

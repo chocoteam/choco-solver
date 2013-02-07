@@ -45,7 +45,7 @@ public class MinOfAList extends IntConstraint<IntVar> {
 
     public MinOfAList(IntVar val, IntVar[] vars, Solver solver) {
         super(ArrayUtils.append(new IntVar[]{val}, vars), solver);
-        setPropagators(new PropMinOfAList(this.vars, solver, this));
+        setPropagators(new PropMinOfAList(this.vars));
     }
 
     @Override

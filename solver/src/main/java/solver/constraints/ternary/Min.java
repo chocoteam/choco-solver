@@ -52,7 +52,7 @@ public class Min extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropMinBC(X, Y, Z, solver, this));
+        setPropagators(new PropMinBC(X, Y, Z));
     }
 
     public static IntVar var(IntVar a, IntVar b) {

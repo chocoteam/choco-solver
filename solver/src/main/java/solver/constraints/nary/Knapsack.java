@@ -56,6 +56,6 @@ public class Knapsack extends Constraint<IntVar, Propagator<IntVar>> {
     public Knapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
                     int[] weight, int[] energy, Solver solver) {
         super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), solver);
-        setPropagators(new PropKnapsack(itemOccurence, capacity, power, weight, energy, this, solver));
+        setPropagators(new PropKnapsack(itemOccurence, capacity, power, weight, energy));
     }
 }

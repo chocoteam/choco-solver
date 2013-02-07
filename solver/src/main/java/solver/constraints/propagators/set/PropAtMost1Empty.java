@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -61,10 +59,8 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
      * At most one set in the array sets can be empty
      *
      * @param sets
-     * @param solver
-     * @param c
      */
-    public PropAtMost1Empty(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropAtMost1Empty(SetVar[] sets) {
         super(sets, PropagatorPriority.UNARY);
         emptySetIndex = environment.makeInt(-1);
     }

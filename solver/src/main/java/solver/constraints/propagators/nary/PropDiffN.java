@@ -31,8 +31,6 @@ import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -50,7 +48,7 @@ public class PropDiffN extends Propagator<IntVar> {
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
 
-    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, Constraint<IntVar, Propagator<IntVar>> constraint, Solver solver) {
+    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, false);
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {

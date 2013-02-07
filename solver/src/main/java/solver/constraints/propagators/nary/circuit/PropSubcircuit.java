@@ -37,8 +37,6 @@ package solver.constraints.propagators.nary.circuit;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,11 +63,11 @@ public class PropSubcircuit extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropSubcircuit(IntVar[] vars, IntVar length, Constraint constraint, Solver solver) {
-        this(vars, 0, length, constraint, solver);
+    public PropSubcircuit(IntVar[] vars, IntVar length) {
+        this(vars, 0, length);
     }
 
-    public PropSubcircuit(IntVar[] vars, int offset, IntVar length, Constraint constraint, Solver solver) {
+    public PropSubcircuit(IntVar[] vars, int offset, IntVar length) {
         super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         this.offset = offset;

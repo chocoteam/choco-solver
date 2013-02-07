@@ -87,10 +87,8 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
      *
      * @param graph
      * @param matchingCardinality
-     * @param sol
-     * @param constraint
      */
-    public PropAllDiffGraphIncremental(GraphVar graph, int matchingCardinality, Solver sol, Constraint constraint) {
+    public PropAllDiffGraphIncremental(GraphVar graph, int matchingCardinality) {
         super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         n = graph.getEnvelopGraph().getNbNodes();
         n2 = 2 * n;
@@ -121,7 +119,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
      * @param constraint
      */
     public PropAllDiffGraphIncremental(GraphVar graph, Solver sol, Constraint constraint) {
-        this(graph, graph.getEnvelopGraph().getNbNodes(), sol, constraint);
+        this(graph, graph.getEnvelopGraph().getNbNodes());
     }
 
     //***********************************************************************************

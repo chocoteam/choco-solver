@@ -33,8 +33,6 @@ import memory.IStateInt;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -72,10 +70,8 @@ public class PropKLoops extends Propagator<IntVar> {
      * @param succs
      * @param nbLoops
      * @param offSet
-     * @param constraint
-     * @param solver
      */
-    public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet, Constraint constraint, Solver solver) {
+    public PropKLoops(IntVar[] succs, IntVar nbLoops, int offSet) {
         super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY);
         this.n = succs.length;
         this.offSet = offSet;

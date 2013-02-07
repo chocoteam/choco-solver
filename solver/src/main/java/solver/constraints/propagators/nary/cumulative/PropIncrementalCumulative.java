@@ -31,8 +31,6 @@ import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +54,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
     private UndirectedGraph g;
     private ISet toCompute, tasks;
 
-    public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, Constraint constraint, Solver solver) {
+    public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa) {
         super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, false);
         this.n = s.length;
         if (!(n == d.length && n == e.length && n == h.length)) {

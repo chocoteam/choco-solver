@@ -70,27 +70,27 @@ public class Arithmetic extends IntConstraint<IntVar> {
         switch (op1) {
             case EQ:
                 // X = C
-                setPropagators(new PropEqualXC(var, cste, solver, this));
+                setPropagators(new PropEqualXC(var, cste));
                 break;
             case NQ:
                 // X =/= C
-                setPropagators(new PropNotEqualXC(var, cste, solver, this));
+                setPropagators(new PropNotEqualXC(var, cste));
                 break;
             case GE:
                 // X >= C
-                setPropagators(new PropGreaterOrEqualXC(var, cste, solver, this));
+                setPropagators(new PropGreaterOrEqualXC(var, cste));
                 break;
             case GT:
                 // X > C -->  X >= C + 1
-                setPropagators(new PropGreaterOrEqualXC(var, cste + 1, solver, this));
+                setPropagators(new PropGreaterOrEqualXC(var, cste + 1));
                 break;
             case LE:
                 // X <= C
-                setPropagators(new PropLessOrEqualXC(var, cste, solver, this));
+                setPropagators(new PropLessOrEqualXC(var, cste));
                 break;
             case LT:
                 // X < C --> X <= C - 1
-                setPropagators(new PropLessOrEqualXC(var, cste - 1, solver, this));
+                setPropagators(new PropLessOrEqualXC(var, cste - 1));
                 break;
             default:
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
@@ -107,27 +107,27 @@ public class Arithmetic extends IntConstraint<IntVar> {
         switch (op1) {
             case EQ:
                 // X = Y
-                setPropagators(new PropEqualX_Y(var1, var2, solver, this));
+                setPropagators(new PropEqualX_Y(var1, var2));
                 break;
             case NQ:
                 // X =/= Y
-                setPropagators(new PropNotEqualX_Y(var1, var2, solver, this));
+                setPropagators(new PropNotEqualX_Y(var1, var2));
                 break;
             case GE:
                 //  X >= Y
-                setPropagators(new PropGreaterOrEqualX_Y(vars, solver, this));
+                setPropagators(new PropGreaterOrEqualX_Y(vars));
                 break;
             case GT:
                 //  X > Y --> X >= Y + 1
-                setPropagators(new PropGreaterOrEqualX_YC(vars, 1, solver, this));
+                setPropagators(new PropGreaterOrEqualX_YC(vars, 1));
                 break;
             case LE:
                 //  X <= Y --> Y >= X
-                setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}, solver, this));
+                setPropagators(new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1}));
                 break;
             case LT:
                 //  X < Y --> Y >= X + 1
-                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1, solver, this));
+                setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, 1));
                 break;
             default:
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
@@ -161,17 +161,17 @@ public class Arithmetic extends IntConstraint<IntVar> {
 
             }
             if (op2 == Operator.EQ) {   // X + Y = C
-                setPropagators(new PropEqualXY_C(vars, cste, solver, this));
+                setPropagators(new PropEqualXY_C(vars, cste));
             } else if (op2 == Operator.NQ) {   // X + Y =/= C
-                setPropagators(new PropNotEqualXY_C(vars, cste, solver, this));
+                setPropagators(new PropNotEqualXY_C(vars, cste));
             } else if (op2 == Operator.GE) {   // X + Y >= C
-                setPropagators(new PropGreaterOrEqualXY_C(vars, cste, solver, this));
+                setPropagators(new PropGreaterOrEqualXY_C(vars, cste));
             } else if (op2 == Operator.GT) {   // X + Y > C --> X + Y >= C + 1
-                setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1, solver, this));
+                setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1));
             } else if (op2 == Operator.LE) {   // X + Y <= C
-                setPropagators(new PropLessOrEqualXY_C(vars, cste, solver, this));
+                setPropagators(new PropLessOrEqualXY_C(vars, cste));
             } else if (op2 == Operator.LT) {   // X + Y < C --> X +Y <= C - 1
-                setPropagators(new PropLessOrEqualXY_C(vars, cste - 1, solver, this));
+                setPropagators(new PropLessOrEqualXY_C(vars, cste - 1));
             } else {
                 throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
@@ -179,27 +179,27 @@ public class Arithmetic extends IntConstraint<IntVar> {
             switch (op2) {
                 case EQ:
                     // X - Y = C --> X = Y + C
-                    setPropagators(new PropEqualX_YC(vars, cste, solver, this));
+                    setPropagators(new PropEqualX_YC(vars, cste));
                     break;
                 case NQ:
                     // X - Y =/= C --> X =/= Y + C
-                    setPropagators(new PropNotEqualX_YC(vars, cste, solver, this));
+                    setPropagators(new PropNotEqualX_YC(vars, cste));
                     break;
                 case GE:
                     // X - Y >= C --> X >= Y + C
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste));
                     break;
                 case GT:
                     // X - Y > C --> X >= Y + C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, cste + 1));
                     break;
                 case LE:
                     // X - Y <= C --> Y >= X - C
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste));
                     break;
                 case LT:
                     // X - Y < C --> Y >= X - C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1));
                     break;
                 default:
                     throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
@@ -209,27 +209,27 @@ public class Arithmetic extends IntConstraint<IntVar> {
             switch (op1) {
                 case EQ:
                     // X = Y + C
-                    setPropagators(new PropEqualX_YC(vars, _cste, solver, this));
+                    setPropagators(new PropEqualX_YC(vars, _cste));
                     break;
                 case NQ:
                     // X =/= Y + C
-                    setPropagators(new PropNotEqualX_YC(vars, _cste, solver, this));
+                    setPropagators(new PropNotEqualX_YC(vars, _cste));
                     break;
                 case GE:
                     // X >= Y + C
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste));
                     break;
                 case GT:
                     // X > Y + C --> X >= Y + C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(vars, _cste + 1));
                     break;
                 case LE:
                     // X <= Y + C --> Y >= X - C
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste));
                     break;
                 case LT:
                     // X < Y + C --> Y > X - C + 1
-                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1, solver, this));
+                    setPropagators(new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1));
                     break;
                 default:
                     throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");

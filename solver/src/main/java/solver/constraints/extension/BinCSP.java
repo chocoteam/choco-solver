@@ -50,7 +50,7 @@ public class BinCSP extends IntConstraint<IntVar> {
         switch (algo) {
             case AC2001:
             default:
-                setPropagators(new PropBinAC2001(x, y, relation, solver, this));
+                setPropagators(new PropBinAC2001(x, y, relation));
         }
     }
 

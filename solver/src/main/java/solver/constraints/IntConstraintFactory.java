@@ -487,9 +487,9 @@ public enum IntConstraintFactory {
         Solver solver = VARS[0].getSolver();
         Constraint c = new Constraint(VARS, solver);
         c.setPropagators(
-                new PropAllDiffAC(VARS, c, solver),
-                new PropNoSubtour<IntVar>(VARS, OFFSET, solver, c),
-                new PropCircuit_AntiArboFiltering(VARS, OFFSET, c, solver));
+                new PropAllDiffAC(VARS),
+                new PropNoSubtour<IntVar>(VARS, OFFSET),
+                new PropCircuit_AntiArboFiltering(VARS, OFFSET));
         return c;
     }
 
@@ -628,8 +628,8 @@ public enum IntConstraintFactory {
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
         c.setPropagators(
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, c, solver),
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, c, solver));
+                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY),
+                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
         return c;
     }
 
@@ -647,7 +647,7 @@ public enum IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, c, solver), new PropDiffN(X, Y, WIDTH, HEIGHT, c, solver));
+        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT), new PropDiffN(X, Y, WIDTH, HEIGHT));
         return c;
     }
 
@@ -900,11 +900,11 @@ public enum IntConstraintFactory {
         Solver solver = VARS[0].getSolver();
         IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
         Constraint c = new Constraint(ArrayUtils.append(VARS, new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}), solver);
-        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n, solver, c));
-        c.addPropagators(new PropAllDiffAC(VARS, c, solver));
-        c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops, c, solver));
-        c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE, c, solver));
-        c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET, c, solver));
+        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
+        c.addPropagators(new PropAllDiffAC(VARS));
+        c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
+        c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
+        c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
         return c;
     }
 
@@ -1005,8 +1005,8 @@ public enum IntConstraintFactory {
     public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet) {
         Solver solver = nbArbo.getSolver();
         Constraint c = makeEmptyConstraint(solver);
-        c.setPropagators(new PropAntiArborescences(succs, offSet, c, solver, false),
-                new PropKLoops(succs, nbArbo, offSet, c, solver));
+        c.setPropagators(new PropAntiArborescences(succs, offSet, false),
+                new PropKLoops(succs, nbArbo, offSet));
         return c;
     }
 }

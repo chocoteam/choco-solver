@@ -29,8 +29,6 @@ package solver.constraints.propagators.binary;
 import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
-import solver.Solver;
-import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -63,7 +61,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     protected final RemProc rem_proc;
 
     @SuppressWarnings({"unchecked"})
-    public PropEqualXY_C(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
+    public PropEqualXY_C(IntVar[] vars, int c) {
         super(vars.clone(), PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];

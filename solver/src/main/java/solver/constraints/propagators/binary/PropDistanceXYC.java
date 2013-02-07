@@ -30,8 +30,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.procedure.UnaryIntProcedure;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -62,7 +60,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     protected final IIntDeltaMonitor[] idms;
 
-    public PropDistanceXYC(IntVar[] vars, Operator operator, int cste, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropDistanceXYC(IntVar[] vars, Operator operator, int cste) {
         super(vars, PropagatorPriority.BINARY, false);
         if (operator == Operator.EQ) {
             this.idms = new IIntDeltaMonitor[this.vars.length];

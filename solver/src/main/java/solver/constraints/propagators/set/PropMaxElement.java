@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -72,11 +70,9 @@ public class PropMaxElement extends Propagator<Variable> {
      *
      * @param setVar
      * @param max
-     * @param solver
-     * @param c
      */
-    public PropMaxElement(SetVar setVar, IntVar max, Solver solver, Constraint c) {
-        this(setVar, null, 0, max, solver, c);
+    public PropMaxElement(SetVar setVar, IntVar max) {
+        this(setVar, null, 0, max);
     }
 
     /**
@@ -87,10 +83,8 @@ public class PropMaxElement extends Propagator<Variable> {
      * @param weights
      * @param offset
      * @param max
-     * @param solver
-     * @param c
      */
-    public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max, Solver solver, Constraint c) {
+    public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max) {
         super(new Variable[]{setVar, max}, PropagatorPriority.BINARY);
         this.max = max;
         this.set = setVar;

@@ -36,8 +36,6 @@ package solver.constraints.propagators.nary;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -62,7 +60,7 @@ public class PropKnapsack extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropKnapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
-                        int[] weight, int[] energy, Constraint c, Solver solver) {
+                        int[] weight, int[] energy) {
         super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, true);
         this.weigth = weight;
         this.energy = energy;

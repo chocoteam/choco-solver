@@ -63,9 +63,9 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
         tree = LogicTreeToolBox.toCNF(tree);
 
         if (Singleton.TRUE.equals(tree)) {
-            return new PropClause[]{new PropTrue(solver, this)};
+            return new PropClause[]{new PropTrue(solver)};
         } else if (Singleton.FALSE.equals(tree)) {
-            return new PropClause[]{new PropFalse(solver, this)};
+            return new PropClause[]{new PropFalse(solver)};
         } else {
 
             ALogicTree[] clauses;

@@ -44,7 +44,7 @@ public class Absolute extends IntConstraint<IntVar> {
 
     public Absolute(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
-        setPropagators(new PropAbsolute(X, Y, solver, this));
+        setPropagators(new PropAbsolute(X, Y));
     }
 
     @Override

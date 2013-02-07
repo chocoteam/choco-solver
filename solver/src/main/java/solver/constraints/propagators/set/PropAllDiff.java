@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -65,10 +63,8 @@ public class PropAllDiff extends Propagator<SetVar> {
      * Ensures that all sets are different
      *
      * @param sets
-     * @param solver
-     * @param c
      */
-    public PropAllDiff(SetVar[] sets, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropAllDiff(SetVar[] sets) {
         super(sets, PropagatorPriority.LINEAR);
         n = sets.length;
     }

@@ -40,8 +40,6 @@ import common.util.tools.ArrayUtils;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,10 +67,8 @@ public class PropUnion extends Propagator<SetVar> {
      *
      * @param sets
      * @param union
-     * @param solver
-     * @param c
      */
-    public PropUnion(SetVar[] sets, SetVar union, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropUnion(SetVar[] sets, SetVar union) {
         super(ArrayUtils.append(sets, new SetVar[]{union}), PropagatorPriority.LINEAR);
         k = sets.length;
         sdm = new SetDeltaMonitor[k + 1];

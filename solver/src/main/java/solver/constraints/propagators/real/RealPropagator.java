@@ -27,11 +27,9 @@
 package solver.constraints.propagators.real;
 
 import common.ESat;
-import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.real.Ibex;
-import solver.constraints.real.RealConstraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.RealVar;
@@ -69,9 +67,8 @@ public class RealPropagator extends Propagator<RealVar> {
      * @param functions list of functions, separated by a semi-colon
      * @param vars      array of variables
      * @param options   list of options to give to IBEX
-     * @param solver    the solver
      */
-    public RealPropagator(Ibex ibex, int cIdx, String functions, RealVar[] vars, int options, Solver solver, RealConstraint rconstraint) {
+    public RealPropagator(Ibex ibex, int cIdx, String functions, RealVar[] vars, int options) {
         super(vars, PropagatorPriority.LINEAR, false);
         this.contractorIdx = cIdx;
         this.ibex = ibex;

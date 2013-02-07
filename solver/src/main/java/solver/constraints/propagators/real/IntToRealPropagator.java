@@ -27,8 +27,6 @@
 package solver.constraints.propagators.real;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.real.Ibex;
@@ -50,13 +48,11 @@ public class IntToRealPropagator extends Propagator<IntVar> {
     /**
      * Create a propagator informing Ibex of variable to discretize
      *
-     * @param ibex        continuous solver
-     * @param cIdx        index of the propagator in Ibex
-     * @param vars        array of integer variables
-     * @param solver      master solver
-     * @param rconstraint real constraint
+     * @param ibex continuous solver
+     * @param cIdx index of the propagator in Ibex
+     * @param vars array of integer variables
      */
-    public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> rconstraint) {
+    public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars) {
         super(vars, PropagatorPriority.LINEAR);
         this.ibex = ibex;
         this.contractorIdx = cIdx;

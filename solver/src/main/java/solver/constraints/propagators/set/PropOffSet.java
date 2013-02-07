@@ -30,8 +30,6 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropOffSet extends Propagator<SetVar> {
      * set2 is an offSet view of set1
      * x in set1 <=> x+offSet in set2
      */
-    public PropOffSet(SetVar set1, SetVar set2, int offSet, Solver solver, Constraint<SetVar, Propagator<SetVar>> c) {
+    public PropOffSet(SetVar set1, SetVar set2, int offSet) {
         super(new SetVar[]{set1, set2}, PropagatorPriority.UNARY);
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[2];

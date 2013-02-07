@@ -39,8 +39,6 @@ import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -78,7 +76,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
+    public PropSCCDoorsRules(DirectedGraphVar graph,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
@@ -95,10 +93,10 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
         outDoors = new TIntArrayList();
     }
 
-    public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
+    public PropSCCDoorsRules(DirectedGraphVar graph,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
-        this(graph, constraint, solver, nR, sccOf, outArcs, rg);
+        this(graph, nR, sccOf, outArcs, rg);
         this.sccFirst = sccFirst;
         this.sccNext = sccNext;
     }

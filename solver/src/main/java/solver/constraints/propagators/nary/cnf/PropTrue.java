@@ -29,7 +29,6 @@ package solver.constraints.propagators.nary.cnf;
 
 import common.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 
@@ -41,7 +40,7 @@ import solver.variables.EventType;
  */
 public class PropTrue extends PropClause {
 
-    public PropTrue(Solver solver, Constraint constraint) {
+    public PropTrue(Solver solver) {
         super(solver);
     }
 

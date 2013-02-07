@@ -36,8 +36,6 @@ package solver.constraints.propagators.set;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -74,10 +72,8 @@ public class PropSumOfElements extends Propagator<Variable> {
      * @param weights
      * @param offset
      * @param sum
-     * @param solver
-     * @param c
      */
-    public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, Solver solver, Constraint c) {
+    public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum) {
         super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY);
         this.sum = sum;
         this.set = indexes;
@@ -91,11 +87,9 @@ public class PropSumOfElements extends Propagator<Variable> {
      *
      * @param setVar
      * @param sum
-     * @param solver
-     * @param c
      */
-    public PropSumOfElements(SetVar setVar, IntVar sum, Solver solver, Constraint c) {
-        this(setVar, null, 0, sum, solver, c);
+    public PropSumOfElements(SetVar setVar, IntVar sum) {
+        this(setVar, null, 0, sum);
     }
 
     //***********************************************************************************

@@ -64,18 +64,18 @@ public class PathTest {
             succs[i] = preds[i] = 1;
         }
         succs[n - 1] = preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, s));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.SUCCESSORS, succs, gc, s));
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
+        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
+        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
         if (path) {
-            gc.addPropagators(new PropPathNoCycle(g, 0, n - 1, gc, s));
+            gc.addPropagators(new PropPathNoCycle(g, 0, n - 1));
         }
         if (arbo) {
-            gc.addPropagators(new PropArborescence(g, 0, gc, s, true));
+            gc.addPropagators(new PropArborescence(g, 0, true));
         }
         if (RG) {
-            gc.addPropagators(new PropReducedGraphHamPath(g, gc, s));
+            gc.addPropagators(new PropReducedGraphHamPath(g));
         }
         AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
         s.post(gc);

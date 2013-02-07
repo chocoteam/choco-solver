@@ -28,8 +28,6 @@ package solver.constraints.propagators.nary;
 
 import common.ESat;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropMaxOfAList extends Propagator<IntVar> {
     protected final IStateInt indexOfMaximumVariable;
 
 
-    public PropMaxOfAList(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    public PropMaxOfAList(IntVar[] vars) {
         super(vars, PropagatorPriority.LINEAR, false);
         indexOfMaximumVariable = solver.getEnvironment().makeInt(-1);
     }

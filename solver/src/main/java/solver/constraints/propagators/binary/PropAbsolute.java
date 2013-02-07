@@ -30,8 +30,6 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -59,8 +57,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected IntVar X, Y;
     protected boolean bothEnumerated;
 
-    public PropAbsolute(IntVar X, IntVar Y, Solver solver,
-                        Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false);
         this.X = vars[0];
         this.Y = vars[1];

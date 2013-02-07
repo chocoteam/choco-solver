@@ -61,12 +61,12 @@ public class ArborescenceTest {
             preds[i] = 1;
         }
         preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds, gc, s));
+        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
+        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
         if (naive) {
-            gc.addPropagators(new PropArborescence_NaiveForm(g, 0, gc, s));
+            gc.addPropagators(new PropArborescence_NaiveForm(g, 0));
         } else {
-            gc.addPropagators(new PropArborescence(g, 0, gc, s, simple));
+            gc.addPropagators(new PropArborescence(g, 0, simple));
         }
         AbstractStrategy strategy = GraphStrategyFactory.graphRandom(g, seed);
         s.post(gc);

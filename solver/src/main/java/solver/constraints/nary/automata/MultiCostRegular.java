@@ -79,7 +79,7 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
         this(vars, CR, solver);
         this.pi = pi;
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
+        setPropagators(new PropMultiCostRegular(vars, CR, pi));
     }
 
     @Override

@@ -76,10 +76,10 @@ public class NTree extends Constraint {
     public NTree(DirectedGraphVar graph, IntVar nTree) {
         super(new Variable[]{graph, nTree}, graph.getSolver());
         setPropagators(
-                new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1, this, solver),
-                new PropKLoops(graph, solver, this, nTree),
-                new PropNTree(graph, nTree, solver, this));
+                new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1),
+                new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1),
+                new PropKLoops(graph, nTree),
+                new PropNTree(graph, nTree));
         this.g = graph;
         this.nTree = nTree;
     }

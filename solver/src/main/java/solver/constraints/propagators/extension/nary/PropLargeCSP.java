@@ -27,8 +27,6 @@
 package solver.constraints.propagators.extension.nary;
 
 import common.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,7 +45,7 @@ public class PropLargeCSP extends Propagator<IntVar> {
 
     protected final int[] currentTuple;
 
-    public PropLargeCSP(IntVar[] vars, LargeRelation relation, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropLargeCSP(IntVar[] vars, LargeRelation relation) {
         super(vars, PropagatorPriority.QUADRATIC, false);
         this.relation = relation;
         this.currentTuple = new int[vars.length];

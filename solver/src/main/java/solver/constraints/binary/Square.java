@@ -44,7 +44,7 @@ public class Square extends IntConstraint<IntVar> {
 
     public Square(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
-        setPropagators(new PropSquare(X, Y, solver, this));
+        setPropagators(new PropSquare(X, Y));
     }
 
     @Override

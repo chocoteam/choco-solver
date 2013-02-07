@@ -31,8 +31,6 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -61,7 +59,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNoTriangle(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
+    public PropNoTriangle(UndirectedGraphVar graph) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         n = g.getEnvelopGraph().getNbNodes();

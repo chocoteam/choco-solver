@@ -30,8 +30,6 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.IGraphRelaxation;
@@ -87,10 +85,8 @@ public class PropATSP_AssignmentBound extends Propagator<Variable> implements IG
 
     /**
      * @param g
-     * @param constraint
-     * @param sol
      */
-    public PropATSP_AssignmentBound(DirectedGraphVar g, IntVar cost, int[][] costMatrix, Constraint constraint, Solver sol) {
+    public PropATSP_AssignmentBound(DirectedGraphVar g, IntVar cost, int[][] costMatrix) {
         super(new Variable[]{g, cost}, PropagatorPriority.CUBIC, false);
         this.gdm = g.monitorDelta(this);
         this.g = g;

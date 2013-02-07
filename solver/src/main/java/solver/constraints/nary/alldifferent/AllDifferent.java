@@ -64,22 +64,22 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 Propagator[] props = new Propagator[(s * s - s) / 2];
                 for (int i = 0; i < s - 1; i++) {
                     for (int j = i + 1; j < s; j++) {
-                        props[k++] = new PropNotEqualX_Y(vars[i], vars[j], solver, this);
+                        props[k++] = new PropNotEqualX_Y(vars[i], vars[j]);
                     }
                 }
                 setPropagators(props);
             }
             break;
             case AC:
-                addPropagators(new PropAllDiffAC(this.vars, this, solver));
+                addPropagators(new PropAllDiffAC(this.vars));
                 break;
             case ACPROBA:
-                addPropagators(new PropAllDiffInst(this.vars, this, solver));
-                addPropagators(new PropAllDiffACProba(this.vars, this, solver, 29091981L));
+                addPropagators(new PropAllDiffInst(this.vars));
+                addPropagators(new PropAllDiffACProba(this.vars, 29091981L));
 
             case BC:
             default:
-                setPropagators(new PropAllDiffBC(this.vars, solver, this));
+                setPropagators(new PropAllDiffBC(this.vars));
                 break;
         }
     }

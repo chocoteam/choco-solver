@@ -29,8 +29,6 @@ package solver.constraints.propagators.gary.tsp.undirected;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +58,7 @@ public class PropCycleEvalObj extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropCycleEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+    public PropCycleEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
         super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
         g = graph;
         sum = obj;

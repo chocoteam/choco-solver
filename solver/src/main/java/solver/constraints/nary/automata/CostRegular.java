@@ -68,7 +68,7 @@ public class CostRegular extends IntConstraint<IntVar> {
         super(ArrayUtils.append(ivars, new IntVar[]{cost}), solver);
         this.cautomaton = cautomaton;
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
-        setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));
+        setPropagators(new PropCostRegular(vars, cautomaton, graph));
     }
 
     @Override

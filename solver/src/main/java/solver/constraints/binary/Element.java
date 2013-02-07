@@ -62,7 +62,7 @@ public class Element extends IntConstraint<IntVar> {
         super(ArrayUtils.toArray(value, index), solver);
         this.values = values;
         this.offset = offset;
-        setPropagators(new PropElement(vars[0], values, vars[1], offset, PropElement.Sort.valueOf(sort), solver, this));
+        setPropagators(new PropElement(vars[0], values, vars[1], offset, PropElement.Sort.valueOf(sort)));
     }
 
     public Element(IntVar value, IntVar[] values, IntVar index, int offset, Solver solver) {
@@ -70,8 +70,8 @@ public class Element extends IntConstraint<IntVar> {
         this.values = new int[0];
         this.offset = offset;
         //CPRU  double to simulate idempotency
-        setPropagators(new PropElementV(value, values, index, offset, solver, this),
-                new PropElementV(value, values, index, offset, solver, this));
+        setPropagators(new PropElementV(value, values, index, offset),
+                new PropElementV(value, values, index, offset));
     }
 
 

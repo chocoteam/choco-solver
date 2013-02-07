@@ -37,8 +37,6 @@ package solver.constraints.propagators.nary.circuit;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -70,11 +68,9 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * runs incrementally in O(1) per instantiation event
      *
      * @param vars
-     * @param constraint
-     * @param solver
      */
-    public PropNoSubtour(V[] vars, Solver solver, Constraint constraint) {
-        this(vars, 0, solver, constraint);
+    public PropNoSubtour(V[] vars) {
+        this(vars, 0);
     }
 
     /**
@@ -83,10 +79,8 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      *
      * @param vars
      * @param offset
-     * @param constraint
-     * @param solver
      */
-    public PropNoSubtour(V[] vars, int offset, Solver solver, Constraint constraint) {
+    public PropNoSubtour(V[] vars, int offset) {
         super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];

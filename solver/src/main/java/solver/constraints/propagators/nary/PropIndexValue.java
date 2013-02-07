@@ -70,10 +70,10 @@ public class PropIndexValue extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropIndexValue(IntVar[] vars, IntVar nb, Constraint constraint, Solver solver) {
-        this(vars, 0, nb, constraint, solver);
+        this(vars, 0, nb);
     }
 
-    public PropIndexValue(IntVar[] vars, int offset, IntVar nb, Constraint constraint, Solver solver) {
+    public PropIndexValue(IntVar[] vars, int offset, IntVar nb) {
         super(ArrayUtils.append(vars, new IntVar[]{nb}), PropagatorPriority.LINEAR, true);
         n = vars.length;
         this.nb = nb;
