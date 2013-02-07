@@ -26,8 +26,7 @@
  */
 package solver.variables.view;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+
 import solver.ICause;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -107,17 +106,20 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public boolean updateLowerBound(double value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.updateLowerBound((int) value, cause);
     }
 
     @Override
-    public boolean updateUpperBound(double value, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.updateUpperBound((int) value, cause);
     }
 
     @Override
-    public boolean updateBounds(double lowerbound, double upperbound, @NotNull ICause cause) throws ContradictionException {
+    public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
+        assert cause != null;
         return var.updateLowerBound((int) lowerbound, cause) & var.updateUpperBound((int) upperbound, cause);
     }
 
@@ -155,7 +157,8 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     public void createDelta() {
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
@@ -163,7 +166,8 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -180,7 +184,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public void explain(@Nullable Deduction d, Explanation e) {
+    public void explain( Deduction d, Explanation e) {
     }
 
     @Override

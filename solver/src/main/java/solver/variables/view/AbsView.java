@@ -112,7 +112,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        assert cause != null;
         if (value < 0) {
             return false;
         }
@@ -140,6 +140,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -156,12 +157,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-// <nju> unnessary test (will be done when updating L/U B)
-//        if (value < 0) {
-//            //TODO: explication?
-//            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
-//        }
+        assert cause != null;
         int v = Math.abs(value);
         boolean done = var.updateLowerBound(-v, this);
         done |= var.updateUpperBound(v, this);
@@ -181,7 +177,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        assert cause != null;
         if (value <= 0) {
             return false;
         }
@@ -201,12 +197,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-// <nju> same as updateLowerBound, no need to test ; will be done when updating bounds
-//        if (value < 0) {
-//            //TODO: explication?
-//            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
-//        }
+        assert cause != null;
         boolean done = var.updateLowerBound(-value, this);
         done |= var.updateUpperBound(value, this);
         if (done) {

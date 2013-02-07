@@ -117,7 +117,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        assert cause != null;
         if (value < 0) {
             return false;
         }
@@ -154,6 +154,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -172,12 +173,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-// <nju> useless ... done below
-//        if (value < 0) {
-//            //TODO: explication?
-//            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
-//        }
+        assert cause != null;
         int v = floor_sqrt(value);
         if (v * v == value) { // is a perfect square ?
             boolean done = var.updateLowerBound(-v, this);
@@ -193,8 +189,6 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
             return done;
         } else { //otherwise, impossible value for instantiation
             wipeOut(cause);
-            // <nju> need to delegate to var
-            // this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
 
         return false;
@@ -202,7 +196,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        assert cause != null;
         if (value <= 0) {
             return false;
         }
@@ -223,7 +217,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
+        assert cause != null;
         if (value < 0) {
             wipeOut(cause);
         }

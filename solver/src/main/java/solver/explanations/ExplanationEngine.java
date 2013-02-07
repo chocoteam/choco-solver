@@ -52,16 +52,16 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
     ExplanationMonitorList emList;
     Solver solver;
 
-    public void removeValue(IntVar var, int val, @NotNull ICause cause) {
+    public void removeValue(IntVar var, int val, ICause cause) {
     }
 
-    public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {
+    public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
     }
 
-    public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {
+    public void updateUpperBound(IntVar intVar, int old, int value, ICause cause) {
     }
 
-    public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {
+    public void instantiateTo(IntVar var, int val, ICause cause) {
     }
 
     public AntiDomain getRemovedValues(IntVar v) {

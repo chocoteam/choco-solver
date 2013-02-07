@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import common.ESat;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -44,7 +43,7 @@ public interface BoolVar<ID extends IntDelta> extends IntVar<ID> {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(@NotNull ICause cause) throws ContradictionException;
+    boolean setToTrue(ICause cause) throws ContradictionException;
 
-    boolean setToFalse(@NotNull ICause cause) throws ContradictionException;
+    boolean setToFalse(ICause cause) throws ContradictionException;
 }

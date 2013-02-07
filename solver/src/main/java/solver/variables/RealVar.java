@@ -26,7 +26,6 @@
  */
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.NoDelta;
@@ -71,7 +70,7 @@ public interface RealVar extends Variable<NoDelta> {
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(double value, @NotNull ICause cause) throws ContradictionException;
+    boolean updateLowerBound(double value, ICause cause) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
@@ -91,7 +90,7 @@ public interface RealVar extends Variable<NoDelta> {
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean updateUpperBound(double value, @NotNull ICause cause) throws ContradictionException;
+    boolean updateUpperBound(double value, ICause cause) throws ContradictionException;
 
     /**
      * Updates the bounds of the domain of <code>this</code> to <code>value</code>.
@@ -112,7 +111,7 @@ public interface RealVar extends Variable<NoDelta> {
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean updateBounds(double lowerbound, double upperbound, @NotNull ICause cause) throws ContradictionException;
+    boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException;
 
     double getPrecision();
 }

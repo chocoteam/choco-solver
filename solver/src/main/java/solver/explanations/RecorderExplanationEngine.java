@@ -149,6 +149,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     @Override
     public void removeValue(IntVar var, int val, ICause cause) {
+        assert cause != null;
         // 1. get the deduction
         Deduction vr = getValueRemoval(var, val);
         // 2. explain the deduction
@@ -172,6 +173,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
+        assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
@@ -194,6 +196,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
+        assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
@@ -217,6 +220,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
+        assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
 //        Explanation explanation = new Explanation();

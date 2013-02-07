@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import com.sun.istack.internal.NotNull;
 import memory.IEnvironment;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
@@ -101,6 +100,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
     @Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (!envelope.contain(element)) {
             contradiction(cause, null, "");
             return true;
@@ -119,6 +119,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (kernel.contain(element)) {
             contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
             return true;
@@ -225,7 +226,8 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
         return new SetDeltaMonitor(delta, propagator);
     }
 
-    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
@@ -234,7 +236,8 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
         notifyViews(event, cause);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
@@ -242,6 +245,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }
 }
