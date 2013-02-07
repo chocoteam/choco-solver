@@ -79,7 +79,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
             for (int i = 0; i < clauses.length; i++) {
                 ALogicTree clause = clauses[i];
                 // create the propagator, based on the i^th clause
-                propClauses[i] = new PropClause(clause, solver, this);
+                propClauses[i] = new PropClause(clause, solver);
                 // create the link between the variables and the propagator,
                 // required for #propagate() step
                 BoolVar[] bvars = clause.flattenBoolVar();

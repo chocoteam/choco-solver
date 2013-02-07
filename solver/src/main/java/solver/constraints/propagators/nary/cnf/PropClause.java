@@ -29,7 +29,6 @@ package solver.constraints.propagators.nary.cnf;
 
 import common.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -51,16 +50,14 @@ public class PropClause extends Propagator<BoolVar> {
     int watchLit1, watchLit2;
 
     @SuppressWarnings({"unchecked"})
-    public PropClause(ALogicTree t, Solver solver,
-                      Constraint constraint) {
-        super(t.flattenBoolVar(), PropagatorPriority.LINEAR, false);
+    public PropClause(ALogicTree t, Solver solver) {
+        super(solver, t.flattenBoolVar(), PropagatorPriority.LINEAR, false);
         this.firstNotPosLit = t.getNbPositiveLiterals();
     }
 
     @SuppressWarnings({"unchecked"})
-    protected PropClause(Solver solver,
-                         Constraint constraint) {
-        super(new BoolVar[0], PropagatorPriority.UNARY, false);
+    protected PropClause(Solver solver) {
+        super(solver, new BoolVar[0], PropagatorPriority.UNARY, false);
         this.firstNotPosLit = 0;
     }
 
