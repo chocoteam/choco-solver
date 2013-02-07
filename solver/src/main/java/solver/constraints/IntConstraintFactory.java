@@ -318,6 +318,7 @@ public enum IntConstraintFactory {
 
     /**
      * Ensures: MAX = MAX(VAR1, VAR2)
+     * (Bound Consistency)
      *
      * @param MAX  a variable
      * @param VAR1 a variable
@@ -329,6 +330,7 @@ public enum IntConstraintFactory {
 
     /**
      * Ensures:  VAR1 = MIN(VAR2, VAR3)
+     * (Bound Consistency)
      *
      * @param MIN  result
      * @param VAR1 result
