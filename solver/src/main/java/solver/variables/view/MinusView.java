@@ -64,8 +64,8 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
-            //return IIntDeltaMonitor.Default.NONE;
-            throw new UnsupportedOperationException();
+            return IIntDeltaMonitor.Default.NONE;
+//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override

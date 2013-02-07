@@ -456,7 +456,7 @@ public class ReifiedTest {
         SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
 
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 2);
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 5);
 
     }
 
