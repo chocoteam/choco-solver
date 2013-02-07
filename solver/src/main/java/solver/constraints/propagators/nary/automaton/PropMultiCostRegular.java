@@ -202,8 +202,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     private TIntHashSet boundUpdate;
     private boolean computed;
 
-    Solver solver;
-
     protected final IIntDeltaMonitor[] idms;
     protected final RemProc rem_proc;
 

@@ -440,7 +440,7 @@ public class CPVizTest {
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 2, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 2, s);
 
-        s.post(IntConstraintFactory.channeling(X, Y));
+        s.post(IntConstraintFactory.inverse_channeling(X, Y, 0, 0));
 
         Visualization visu = new Visualization("Inverse", s, dir + "/out");
         visu.createTree();

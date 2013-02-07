@@ -94,7 +94,7 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = IntConstraintFactory.channeling(X, Y);
+            Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
@@ -130,7 +130,7 @@ public interface Modeler {
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
 
-            Constraint ctr = IntConstraintFactory.channeling(X, Y);
+            Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);

@@ -92,7 +92,7 @@ public class AmongTest {
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
             solver.set(IntStrategyFactory.random(allvars, i));
-            solver.post(IntConstraintFactory.among(occ, vars, value));
+            solver.post(IntConstraintFactory.among(occ, vars, new int[]{value}));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
@@ -168,7 +168,7 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, val
                     ));
                 } else {
-                    solver.post(IntConstraintFactory.among(ivc, vs, val));
+                    solver.post(IntConstraintFactory.among(ivc, vs, new int[]{val}));
                 }
             }
             solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));

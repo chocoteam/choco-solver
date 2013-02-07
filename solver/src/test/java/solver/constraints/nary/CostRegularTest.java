@@ -80,7 +80,7 @@ public class CostRegularTest {
             costs[i][0][1] = 1;
             costs[i][1][1] = 1;
         }
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs,cost.getLB(),cost.getUB())));
         solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
@@ -170,7 +170,7 @@ public class CostRegularTest {
             costs[i][1] = 1;
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs,cost.getLB(),cost.getUB())));
         solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
@@ -262,7 +262,7 @@ public class CostRegularTest {
             }
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs,cost.getLB(),cost.getUB())));
         solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
@@ -344,7 +344,7 @@ public class CostRegularTest {
             costs[i][1][1] = 1;
         }
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, costs));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, costs,cost.getLB(),cost.getUB())));
         solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();
@@ -415,7 +415,7 @@ public class CostRegularTest {
         }
         IntVar cost = VariableFactory.bounded("z", n / 2, n / 2 + 1, solver);
 
-        solver.post(IntConstraintFactory.cost_regular(vars, cost, auto, c2));
+        solver.post(IntConstraintFactory.cost_regular(vars, cost, CostAutomaton.makeSingleResource(auto, c2,cost.getLB(),cost.getUB())));
         solver.set(IntStrategyFactory.presetI(vars));
 
         solver.findAllSolutions();

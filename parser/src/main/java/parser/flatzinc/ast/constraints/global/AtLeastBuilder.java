@@ -51,6 +51,6 @@ public class AtLeastBuilder implements IBuilder {
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
         IntVar limit = VariableFactory.bounded("limit_" + n, n, x.length, solver);
-        return IntConstraintFactory.among(limit, x, v);
+        return IntConstraintFactory.among(limit, x, new int[]{v});
     }
 }
