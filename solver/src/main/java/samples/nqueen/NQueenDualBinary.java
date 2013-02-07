@@ -63,7 +63,7 @@ public class NQueenDualBinary extends AbstractNQueen {
                 solver.post(IntConstraintFactory.arithm(dualvars[i], "!=", dualvars[j], "+", k));
             }
         }
-        solver.post(IntConstraintFactory.channeling(vars, 1, dualvars, 1));
+        solver.post(IntConstraintFactory.inverse_channeling(vars, dualvars, 1, 1));
     }
 
 

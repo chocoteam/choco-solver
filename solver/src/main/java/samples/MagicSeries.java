@@ -67,7 +67,7 @@ public class MagicSeries extends AbstractProblem {
 
         counts = new Count[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = IntConstraintFactory.count(i, vars, "=", VariableFactory.eq(vars[i]));
+            counts[i] = IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i]));
             solver.post(counts[i]);
         }
         solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1

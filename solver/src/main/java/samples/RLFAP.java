@@ -131,10 +131,10 @@ public class RLFAP extends AbstractProblem {
             freqs = values.toArray();
             Arrays.sort(freqs);
             for (int i = 0; i < freqs.length; i++) {
-                solver.post(IntConstraintFactory.count(freqs[i], vars, "=", cards[i]));
+                solver.post(IntConstraintFactory.count(freqs[i], vars, cards[i]));
             }
             nb0 = VariableFactory.bounded("nb0", 0, freqs.length, solver);
-            solver.post(IntConstraintFactory.count(0, cards, "=", nb0));
+            solver.post(IntConstraintFactory.count(0, cards, nb0));
         }
         // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
         rank = new int[n];

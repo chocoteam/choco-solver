@@ -214,7 +214,7 @@ public class CPVizTest {
         int[] values = new int[]{1, 2, 0, 4, -10};
         IntVar index = VariableFactory.enumerated("index", -3, 10, s);
         IntVar value = VariableFactory.enumerated("value", -20, 20, s);
-        s.post(IntConstraintFactory.element(index, values, value));
+        s.post(IntConstraintFactory.element(index, values, value,0,"detect"));
 
         Visualization visu = new Visualization("Element", s, dir + "/out");
 
@@ -233,7 +233,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(IntConstraintFactory.channeling(bool, var));
+        s.post(IntConstraintFactory.boolean_channeling(bool, var));
 
         Visualization visu = new Visualization("BinaryVector", s, dir + "/out");
 
@@ -346,7 +346,7 @@ public class CPVizTest {
         BoolVar[][] bool = new BoolVar[n][n];
         for (int i = 0; i < n; i++) {
             bool[i] = VariableFactory.boolArray("bool_" + i, n, solver);
-            solver.post(IntConstraintFactory.channeling(bool[i], var[i]));
+            solver.post(IntConstraintFactory.boolean_channeling(bool[i], var[i]));
         }
         solver.post(IntConstraintFactory.alldifferent(var, "BC"));
 
@@ -369,7 +369,7 @@ public class CPVizTest {
         Solver s = new Solver();
         IntVar var = VariableFactory.enumerated("var", 1, 8, s);
         BoolVar[] bool = VariableFactory.boolArray("b", 8, s);
-        s.post(IntConstraintFactory.channeling(bool, var));
+        s.post(IntConstraintFactory.boolean_channeling(bool, var));
 
         Visualization visu = new Visualization("BoolChanneling", s, dir + "/out");
 
@@ -440,7 +440,7 @@ public class CPVizTest {
         IntVar[] X = VariableFactory.enumeratedArray("X", 3, 0, 2, s);
         IntVar[] Y = VariableFactory.enumeratedArray("Y", 3, 0, 2, s);
 
-        s.post(IntConstraintFactory.channeling(X, Y));
+        s.post(IntConstraintFactory.inverse_channeling(X, Y, 0, 0));
 
         Visualization visu = new Visualization("Inverse", s, dir + "/out");
         visu.createTree();

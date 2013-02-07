@@ -106,15 +106,17 @@ public class WarehouseLocation extends AbstractProblem {
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s]));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s],0,"detect"));
         }
         for (int w = 0; w < nWH; w++) {
-            solver.post(IntConstraintFactory.count(w, suppliers, ">=", open[w]));
+            IntVar tmp = VariableFactory.bounded("occur_"+w,0,suppliers.length,solver);
+            solver.post(IntConstraintFactory.count(w, suppliers,tmp));
+            solver.post(IntConstraintFactory.arithm(tmp, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar counter = VariableFactory.fixed(capacity[w], solver);
-            solver.post(IntConstraintFactory.count(w, suppliers, "<=", counter));
+            IntVar tmp = VariableFactory.bounded("occur_"+w,0,capacity[w],solver);
+            solver.post(IntConstraintFactory.count(w, suppliers,tmp));
         }
 
         int[] coeffs = new int[nWH + nS];

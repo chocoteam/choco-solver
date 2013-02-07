@@ -31,7 +31,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
+import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -113,8 +115,8 @@ public class MultiCostRegularTest {
             }
         }
         this.costMatrix = csts;
-
-        solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, auto, costMatrix));
+		ICostAutomaton costAutomaton = CostAutomaton.makeMultiResources(auto,costMatrix,bounds);
+        solver.post(IntConstraintFactory.multicost_regular(sequence, bounds, costAutomaton));
 //        solver.set(StrategyFactory.presetI(ArrayUtils.append(sequence, bounds), solver.getEnvironment()));
         solver.set(IntStrategyFactory.random(ArrayUtils.append(sequence, bounds), seed));
         return solver;

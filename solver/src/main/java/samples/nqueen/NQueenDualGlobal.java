@@ -71,7 +71,7 @@ public class NQueenDualGlobal extends AbstractNQueen {
         solver.post(IntConstraintFactory.alldifferent(dualdiag1, "BC"));
         solver.post(IntConstraintFactory.alldifferent(dualdiag2, "BC"));
 
-        solver.post(IntConstraintFactory.channeling(vars, 1, dualvars, 1));
+        solver.post(IntConstraintFactory.inverse_channeling(vars, dualvars, 1, 1));
     }
 
 

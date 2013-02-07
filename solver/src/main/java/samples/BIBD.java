@@ -101,13 +101,13 @@ public class BIBD extends AbstractProblem {
         // r ones per row
         IntVar R = VariableFactory.fixed(r, solver);
         for (int i = 0; i < v; i++) {
-            solver.post(IntConstraintFactory.count(1, vars[i], "=", R));
+            solver.post(IntConstraintFactory.count(1, vars[i], R));
             //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
         IntVar K = VariableFactory.fixed(k, solver);
         for (int j = 0; j < b; j++) {
-            solver.post(IntConstraintFactory.count(1, _vars[j], "=", K));
+            solver.post(IntConstraintFactory.count(1, _vars[j], K));
             //solver.post(Sum.eq(_vars[j], K, solver));
         }
 

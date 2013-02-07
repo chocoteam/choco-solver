@@ -84,9 +84,9 @@ public class EqualXYCExplTest {
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0));
+            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i],0,"detect"));
             lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
-            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i], 0));
+            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i],0,"detect"));
             lcstrss.add(IntConstraintFactory.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
         }
 

@@ -161,10 +161,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
             for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
                 for (int t = s[i].getUB(); t < e[i].getLB(); t++) {
                     time[t - min] += h[i].getLB();
-                    // checker
-                    if (time[t - min] > capaMax) {
-                        contradiction(s[i], "");
-                    }
+					capa.updateLowerBound(time[t - min],aCause);
                 }
             }
             for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {

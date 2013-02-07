@@ -30,6 +30,7 @@ import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.CostRegular;
+import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.Literal;
@@ -321,7 +322,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(IntConstraintFactory.count(a, shifts[e], "=", occurrences[e][a]));
+                solver.post(IntConstraintFactory.count(a, shifts[e], occurrences[e][a]));
             }
         }
     }
@@ -356,7 +357,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = VariableFactory.bounded("nW" + t + data.getLiteral(a) + e, lb, ub, solver);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(IntConstraintFactory.count(a, vars, "=", occ));
+                    solver.post(IntConstraintFactory.count(a, vars, occ));
                 }
             }
         }
@@ -619,7 +620,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(IntConstraintFactory.multicost_regular(shifts[e], occurrences[e], automaton, costs));
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], occurrences[e], CostAutomaton.makeMultiResources(automaton, costs,occurrences[e])));
         }
     }
 
@@ -645,7 +646,8 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int lb = data.getWeekCounterLB(e, r);
             int ub = data.getWeekCounterUB(e, r);
             IntVar[] occs = VariableFactory.boundedArray("nWR", data.nbWeeks(), lb, ub, solver);
-            solver.post(IntConstraintFactory.multicost_regular(shifts[e], ArrayUtils.append(occurrences[e], occs), automaton, costs));
+			IntVar[] cv = ArrayUtils.append(occurrences[e], occs);
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], cv, CostAutomaton.makeMultiResources(automaton, costs,cv)));
         }
     }
 

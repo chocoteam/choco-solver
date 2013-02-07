@@ -61,13 +61,6 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
 
     private final int offset;
 
-
-    private MultiCostRegular(final IntVar[] vars, final IntVar[] counterVars, final Solver solver) {
-        super(ArrayUtils.<IntVar>append(vars, counterVars), solver);
-        this.offset = vars.length;
-    }
-
-
     /**
      * Constructs a multi-cost-regular constraint propagator
      *
@@ -77,7 +70,8 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
      * @param solver solver
      */
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
-        this(vars, CR, solver);
+        super(ArrayUtils.append(vars, CR), solver);
+		this.offset = vars.length;
         this.pi = pi;
         setPropagators(new PropMultiCostRegular(vars, CR, pi));
     }

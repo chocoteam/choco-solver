@@ -267,6 +267,7 @@ public class TestConsistency {
     @Test(groups = "1m")
     public void testCOUNTAC2() {
         long seed = System.currentTimeMillis();
+		seed = 1360264007798l;
         for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }

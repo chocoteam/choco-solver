@@ -50,6 +50,6 @@ public class ExactlyBuilder implements IBuilder {
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
-        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, v);
+        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, new int[]{v});
     }
 }

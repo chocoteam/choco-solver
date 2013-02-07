@@ -303,7 +303,7 @@ public interface Model {
                 if (rvars[i + n / 2] == null) rvars[i + n / 2] = Y[i];
             }
             IntVar[] allvars = ArrayUtils.append(X, Y);
-            Constraint ctr = IntConstraintFactory.channeling(X, Y);
+            Constraint ctr = IntConstraintFactory.inverse_channeling(X, Y, 0, 0);
             Constraint[] ctrs = new Constraint[]{ctr};
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(allvars);
             s.post(ctrs);
