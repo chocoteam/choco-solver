@@ -53,7 +53,7 @@ public class Max extends IntConstraint<IntVar> {
         this.Y = Y;
         this.Z = Z;
 //        setPropagators(new PropMax(X, Y, Z, solver, this));
-        setPropagators(new PropMaxBC(X, Y, Z, solver, this));
+        setPropagators(new PropMaxBC(X, Y, Z));
     }
 
     public static IntVar var(IntVar a, IntVar b) {

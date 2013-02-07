@@ -259,7 +259,8 @@ public class LexTest {
             Assert.fail();
         }
         Assert.assertEquals(-1, b[0].getLB());
+        SearchMonitorFactory.log(solver, true, false);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 30);
     }
 }

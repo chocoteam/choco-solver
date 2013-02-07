@@ -306,18 +306,19 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Ensures VAR1 / VAR2 = VAR 3, rounding towards 0 -- Euclidean division
+     * Ensures DIVIDEND / DIVISOR = RESULT, rounding towards 0 -- Euclidean division
      *
-     * @param VAR1 dividend
-     * @param VAR2 divisor
-     * @param VAR3 result
+     * @param DIVIDEND dividend
+     * @param DIVISOR  divisor
+     * @param RESULT   result
      */
-    public static DivXYZ eucl_div(IntVar VAR1, IntVar VAR2, IntVar VAR3) {
-        return new DivXYZ(VAR1, VAR2, VAR3, VAR1.getSolver());
+    public static DivXYZ eucl_div(IntVar DIVIDEND, IntVar DIVISOR, IntVar RESULT) {
+        return new DivXYZ(DIVIDEND, DIVISOR, RESULT, DIVIDEND.getSolver());
     }
 
     /**
      * Ensures: MAX = MAX(VAR1, VAR2)
+     * (Bound Consistency)
      *
      * @param MAX  a variable
      * @param VAR1 a variable
@@ -329,6 +330,7 @@ public enum IntConstraintFactory {
 
     /**
      * Ensures:  VAR1 = MIN(VAR2, VAR3)
+     * (Bound Consistency)
      *
      * @param MIN  result
      * @param VAR1 result

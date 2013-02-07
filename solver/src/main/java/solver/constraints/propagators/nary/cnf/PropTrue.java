@@ -42,7 +42,7 @@ import solver.variables.EventType;
 public class PropTrue extends PropClause {
 
     public PropTrue(Solver solver, Constraint constraint) {
-        super(solver, constraint);
+        super(solver);
     }
 
     @Override

@@ -29,8 +29,6 @@ package solver.constraints.propagators.ternary;
 
 import common.ESat;
 import common.util.procedure.UnaryIntProcedure;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,8 +49,7 @@ public class PropMax extends Propagator<IntVar> {
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
 
-    public PropMax(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
-            Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropMax(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {

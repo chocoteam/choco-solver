@@ -109,7 +109,7 @@ public class StrategyTest {
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
-            s.set(IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{variables[i]}));
+            asgs[i] = IntStrategyFactory.inputOrder_InDomainMin(new IntVar[]{variables[i]});
         }
 
         StrategiesSequencer sts = new StrategiesSequencer(env, asgs);
