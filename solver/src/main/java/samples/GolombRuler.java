@@ -91,10 +91,10 @@ public class GolombRuler extends AbstractProblem {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
-                distances[k] = IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k], 1);
+                distances[k] = IntConstraintFactory.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, diffs[k]);
                 solver.post(distances[k]);
                 solver.post(IntConstraintFactory.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2));
-                solver.post(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, VariableFactory.fixed(1,solver), -((m - 1 - j + i) * (m - j + i)) / 2));
+                solver.post(IntConstraintFactory.scalar(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, VariableFactory.fixed(-((m - 1 - j + i) * (m - j + i)) / 2,solver)));
 				solver.post(IntConstraintFactory.arithm(diffs[k],"<=",ticks[m-1],"-",((m - 1 - j + i) * (m - j + i)) / 2));
                 m_diffs[i][j] = diffs[k];
             }
