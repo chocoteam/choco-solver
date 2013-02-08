@@ -153,4 +153,16 @@ public class PropBoolSum extends Propagator<IntVar> {
         }
         return ESat.UNDEFINED;
     }
+
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("PropBoolSum(");
+		for(int i =0;i<vars.length-2;i++){
+			sb.append(vars[i]+"+");
+		}
+		sb.append(vars[vars.length-2]+")");
+		sb.append(" = "+vars[vars.length-1]);
+		return sb.toString();
+	}
 }
