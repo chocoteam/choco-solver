@@ -75,6 +75,9 @@ import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.variables.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A Factory to declare constraint based on integer variables (only).
  * One can call directly the constructor of constraints, but it is recommended
@@ -175,28 +178,45 @@ public enum IntConstraintFactory {
 
 	 /**
      * Ensures:<br/>
-     * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
-     * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
+     * - BVAR = 1 =>  CSTR1 is satisfied, <br/>
+     * - BVAR = 0 =>  CSTR2 is satisfied<br/>
      * <p/>
+	 * Thus, if CSTR1 = !CSTR2, then this constraint ensures that
+	 * BVAR = 1 <=> CSTR1 is satified
+	 *
      * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
-     * Example of use: <br/>
+     * Example 1: <br/>
      * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
-     * b1 is equal to 1 <=> v1 = 2, b1 is equal to 0 <=> v1 != 2.
+     * b1 is equal to 1 <=> v1 = 2.
+	  *
+	 * Example 2: <br/>
+	 * - <code>reified(b1, arithm(x, ">", 2), arithm(y, "!=", 2));</code>:
+	 * b1 is equal to 1 => x = 2, b1 is equal to 0 => y != 2.
+	 * In this last example, CSTR1 and CSTR2 can be simultaneously satisfied
      *
      * @param BVAR  variable of reification
      * @param CSTR1 the constraint to be satisfied when BVAR = 1
      * @param CSTR2 the constraint to be satisfied when BVAR = 0
      */
     public static Constraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
-//		Constraint c1 = implies(BVAR,CSTR1);
-//		Constraint c2 = implies(VariableFactory.not(BVAR),CSTR2);
-//		c1.addPropagators(c2.propagators);
-//		return c1;
-		Constraint c = new Constraint(new Variable[]{BVAR},BVAR.getSolver());
+		Variable[] vars1 = CSTR1.getVariables();
+        Variable[] vars2 = CSTR2.getVariables();
+        List<Variable> union = new ArrayList<Variable>();
+        union.add(BVAR);
+        for (int i = 0; i < vars1.length; i++) {
+            if (!union.contains(vars1[i])) {
+                union.add(vars1[i]);
+            }
+        }
+        for (int i = 0; i < vars2.length; i++) {
+            if (!union.contains(vars2[i])) {
+                union.add(vars2[i]);
+            }
+        }
+		Constraint c = new Constraint(union.toArray(new Variable[union.size()]),BVAR.getSolver());
 		c.addPropagators(new PropImplied(BVAR,CSTR1));
 		c.addPropagators(new PropImplied(VariableFactory.not(BVAR),CSTR2));
 		return c;
-//        return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
 
     //##################################################################################################################
@@ -237,7 +257,7 @@ public enum IntConstraintFactory {
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
     }
-	
+
     /**
      * Ensures: <br/>
      * |VAR1-VAR2| OP CSTE
@@ -787,7 +807,7 @@ public enum IntConstraintFactory {
     public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
     }
-	
+
     /**
      * Creates a subcircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where
