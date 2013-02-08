@@ -146,34 +146,26 @@ public class Arithmetic extends IntConstraint<IntVar> {
         if (op1 == Operator.PL) {
             switch (op2) {
                 case EQ:
+					setPropagators(new PropEqualXY_C(vars, cste));
                     break;
                 case NQ:
+					setPropagators(new PropNotEqualXY_C(vars, cste));
                     break;
                 case GE:
+					setPropagators(new PropGreaterOrEqualXY_C(vars, cste));
                     break;
                 case GT:
+					setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1));
                     break;
                 case LE:
+					setPropagators(new PropLessOrEqualXY_C(vars, cste));
                     break;
                 case LT:
+					setPropagators(new PropLessOrEqualXY_C(vars, cste - 1));
                     break;
                 default:
+					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
 
-            }
-            if (op2 == Operator.EQ) {   // X + Y = C
-                setPropagators(new PropEqualXY_C(vars, cste));
-            } else if (op2 == Operator.NQ) {   // X + Y =/= C
-                setPropagators(new PropNotEqualXY_C(vars, cste));
-            } else if (op2 == Operator.GE) {   // X + Y >= C
-                setPropagators(new PropGreaterOrEqualXY_C(vars, cste));
-            } else if (op2 == Operator.GT) {   // X + Y > C --> X + Y >= C + 1
-                setPropagators(new PropGreaterOrEqualXY_C(vars, cste + 1));
-            } else if (op2 == Operator.LE) {   // X + Y <= C
-                setPropagators(new PropLessOrEqualXY_C(vars, cste));
-            } else if (op2 == Operator.LT) {   // X + Y < C --> X +Y <= C - 1
-                setPropagators(new PropLessOrEqualXY_C(vars, cste - 1));
-            } else {
-                throw new SolverException("Incorrect formula; operator should be one of those:{==, =/=, >=, >, <=, <}");
             }
         } else if (op1 == Operator.MN) {
             switch (op2) {

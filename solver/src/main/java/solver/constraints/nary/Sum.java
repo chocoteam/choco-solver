@@ -215,10 +215,12 @@ public class Sum extends IntConstraint<IntVar> {
 		int[] ext = new int[2];
 		int n = vars.length;
 		for(int i=0;i<n;i++){
-			ext[0] = Math.min(ext[0],vars[i].getLB()*coefs[i]);
-			ext[0] = Math.min(ext[0],vars[i].getUB()*coefs[i]);
-			ext[1] = Math.max(ext[1],vars[i].getLB()*coefs[i]);
-			ext[1] = Math.max(ext[1],vars[i].getUB()*coefs[i]);
+			int min = Math.min(0,vars[i].getLB()*coefs[i]);
+				min = Math.min(min,vars[i].getUB()*coefs[i]);
+			int max = Math.max(0,vars[i].getLB()*coefs[i]);
+				max = Math.max(max,vars[i].getUB()*coefs[i]);
+			ext[0] += min;
+			ext[1] += max;
 		}
 		return ext;
 	};
