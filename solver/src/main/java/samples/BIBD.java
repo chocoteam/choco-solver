@@ -119,7 +119,7 @@ public class BIBD extends AbstractProblem {
                 for (int j = 0; j < b; j++) {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
-                //solver.post(new Count(1, score, Count.Relop.EQ, L, solver));
+                //solver.post(IntConstraintFactory.count(1, score, L));
                 solver.post(IntConstraintFactory.sum(score, "=", L));
             }
         }

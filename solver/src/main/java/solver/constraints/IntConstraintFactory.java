@@ -40,7 +40,6 @@ import solver.constraints.extension.LargeCSP;
 import solver.constraints.nary.*;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.automata.CostRegular;
-import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.MultiCostRegular;
@@ -85,7 +84,7 @@ import solver.variables.VariableFactory;
  * those define in the <a href="http://www.emn.fr/z-info/sdemasse/gccat/index.html">Global Constraint Catalog</a>.
  * <p/>
  * Note that, for the sack of readability, the Java naming convention is not respected for methods arguments.
- *
+ * <p/>
  * Constraints are ordered as the following:
  * 1) Unary	constraints
  * 2) Binary constraints
@@ -213,10 +212,10 @@ public enum IntConstraintFactory {
      * @param INDEX  an integer variable representing the value of VALUE in TABLE
      * @param OFFSET offset matching INDEX.LB and TABLE[0] (Generally 0)
      * @param SORT   defines ordering properties of TABLE:
-	 * <p/> "none" if TABLE is not sorted
-	 * <p/> "asc" if TABLE is sorted in the increasing order
-	 * <p/> "desc" if TABLE is sorted in the decreasing order
-	 * <p/> "detect" Let the constraint detect the ordering of TABLE, if any
+     *               <p/> "none" if TABLE is not sorted
+     *               <p/> "asc" if TABLE is sorted in the increasing order
+     *               <p/> "desc" if TABLE is sorted in the decreasing order
+     *               <p/> "detect" Let the constraint detect the ordering of TABLE, if any
      */
     public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET, String SORT) {
         return new Element(VALUE, TABLE, INDEX, OFFSET, SORT, VALUE.getSolver());
@@ -230,7 +229,7 @@ public enum IntConstraintFactory {
         return new Square(VAR1, VAR2, VAR1.getSolver());
     }
 
-	/**
+    /**
      * Create a table constraint over a couple of variables VAR1 and VAR2, .
      * <p/>
      * The <code>ALGORITHM</code> should be chosen among {"AC2201"}.
@@ -349,7 +348,7 @@ public enum IntConstraintFactory {
     //GLOBALS ##########################################################################################################
     //##################################################################################################################
 
-	/**
+    /**
      * Ensures that all variables from VARS take a different value.
      * The consistency level should be chosen among "BC" and "AC".
      * <p/>
@@ -410,13 +409,13 @@ public enum IntConstraintFactory {
      * Performs AC if domains are enumerated.
      * If not, then it works on bounds without guaranteeing BC
      * (enumerated domains are strongly recommended)
-	 *
-	 * Beware you should have |VARS1| = |VARS2|
+     * <p/>
+     * Beware you should have |VARS1| = |VARS2|
      *
-     * @param VARS1 vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
-     * @param VARS2 vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
-     * @param OFFSET1  lowest value in VARS1 (most often 0)
-     * @param OFFSET2  lowest value in VARS2 (most often 0)
+     * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
+     * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
+     * @param OFFSET1 lowest value in VARS1 (most often 0)
+     * @param OFFSET2 lowest value in VARS2 (most often 0)
      */
     public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
         return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
@@ -432,7 +431,7 @@ public enum IntConstraintFactory {
      * <p/> allDifferent GAC algorithm: RŽgin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      *
-     * @param VARS		vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
+     * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
      * @return a circuit constraint
@@ -483,33 +482,35 @@ public enum IntConstraintFactory {
         return new ConjunctiveNormalForm(tree, solver);
     }
 
-	/**
-	 * Ensures that the assignment of a sequence of variables is recognized by CAUTOMATON, a deterministic finite automaton,
-	 * and that the sum of the costs associated to each assignment is bounded by the cost variable.
-	 * This version allows to specify different costs according to the automaton state at which the assignment occurs
-	 * (i.e. the transition starts)
-	 *
-	 * @param VARS       sequence of variables
-	 * @param COST       cost variable
-	 * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
-	 * 		  Can be built with method CostAutomaton.makeSingleResource(...)
-	 */
-	public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
-		return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
-	}
-	
-	//TODO discussion remplacer ou non par GCC
+    /**
+     * Ensures that the assignment of a sequence of variables is recognized by CAUTOMATON, a deterministic finite automaton,
+     * and that the sum of the costs associated to each assignment is bounded by the cost variable.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS       sequence of variables
+     * @param COST       cost variable
+     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
+     *                   Can be built with method CostAutomaton.makeSingleResource(...)
+     */
+    public static CostRegular cost_regular(IntVar[] VARS, IntVar COST, ICostAutomaton CAUTOMATON) {
+        return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
+    }
+
+    //TODO discussion remplacer ou non par GCC
+
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
+     * <p/>
+     * Based on Among constraint, ensures GAC.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
      * @param LIMIT a variable
      */
-    public static Constraint count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
-//		return global_cardinality(VARS,new int[]{VALUE},new IntVar[]{LIMIT},false);
-        return new Count(VALUE, VARS, LIMIT, LIMIT.getSolver());
+    public static Among count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
+        return new Among(LIMIT, VARS, VALUE, LIMIT.getSolver());
     }
 
     /**
@@ -517,11 +518,11 @@ public enum IntConstraintFactory {
      * the cumulated height of the set of tasks that overlap that point
      * does not exceed a given limit.
      *
-     * @param TASKS		TASK objects containing start, duration and end variables
-     * @param HEIGHTS	integer variables representing the resource consumption of each task
-	 * @param CAPACITY	integer variable representing the resource capacity
+     * @param TASKS    TASK objects containing start, duration and end variables
+     * @param HEIGHTS  integer variables representing the resource consumption of each task
+     * @param CAPACITY integer variable representing the resource capacity
      * @return a cumulative constraint
-	 */
+     */
     public static Constraint cumulative(Task[] TASKS, IntVar[] HEIGHTS, IntVar CAPACITY) {
         int n = TASKS.length;
         assert n > 0;
@@ -559,18 +560,18 @@ public enum IntConstraintFactory {
         return c;
     }
 
-	/**
+    /**
      * Build an ELEMENT constraint: VALUE = TABLE[INDEX-OFFSET] where TABLE is an array of variables.
      *
-     * @param VALUE value variable
-     * @param TABLE array of variables
-     * @param INDEX index variable in range [OFFSET,OFFSET+|TABLE|-1]
-	 * @param OFFSET int offset, generally 0
+     * @param VALUE  value variable
+     * @param TABLE  array of variables
+     * @param INDEX  index variable in range [OFFSET,OFFSET+|TABLE|-1]
+     * @param OFFSET int offset, generally 0
      */
     public static Element element(IntVar VALUE, IntVar[] TABLE, IntVar INDEX, int OFFSET) {
         return new Element(VALUE, TABLE, INDEX, OFFSET, VALUE.getSolver());
     }
-	
+
     /**
      * Global Cardinality constraint (GCC):
      * Each value VALUES[i] should be taken by exactly OCCURRENCES[i] variables of VARS.
@@ -637,6 +638,7 @@ public enum IntConstraintFactory {
                                     int[] WEIGHT, int[] ENERGY) {
         return new Knapsack(OCCURRENCES, CAPA, POWER, WEIGHT, ENERGY, CAPA.getSolver());
     }
+
     /**
      * For each pair of consecutive vectors VARS<sub>i</sub> and VARS<sub>i+1</sub> of the VARS collection
      * VARS<sub>i</sub> is lexicographically strictly less than than VARS<sub>i+1</sub>
@@ -697,21 +699,21 @@ public enum IntConstraintFactory {
         return new MinOfAList(MIN, VARS, MIN.getSolver());
     }
 
-	/**
-	 * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
-	 * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
-	 * This version allows to specify different costs according to the automaton state at which the assignment occurs
-	 * (i.e. the transition starts)
-	 *
-	 * @param VARS       sequence of variables
-	 * @param CVARS      cost variables
-	 * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
-	 * 					 Can be built from method CostAutomaton.makeMultiResources(...)
-	 */
-	public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
-		return new MultiCostRegular(VARS, CVARS, CAUTOMATON, VARS[0].getSolver());
-	}
-	
+    /**
+     * Ensures that the assignment of a sequence of VARS is recognized by AUTOMATON, a deterministic finite automaton,
+     * and that the sum of the cost vector COSTS associated to each assignment is bounded by the variable vector CVARS.
+     * This version allows to specify different costs according to the automaton state at which the assignment occurs
+     * (i.e. the transition starts)
+     *
+     * @param VARS       sequence of variables
+     * @param CVARS      cost variables
+     * @param CAUTOMATON a deterministic finite automaton defining the regular language and the costs
+     *                   Can be built from method CostAutomaton.makeMultiResources(...)
+     */
+    public static MultiCostRegular multicost_regular(IntVar[] VARS, IntVar[] CVARS, ICostAutomaton CAUTOMATON) {
+        return new MultiCostRegular(VARS, CVARS, CAUTOMATON, VARS[0].getSolver());
+    }
+
     /**
      * Let N be the number of distinct values assigned to the variables of the VARS collection.
      * Enforce condition N = NVALUES to hold.
@@ -733,7 +735,7 @@ public enum IntConstraintFactory {
         return new NValues(VARS, NVALUES, NVALUES.getSolver(), types);
     }
 
-	/**
+    /**
      * Enforces the sequence of VARS to be a word
      * recognized by the deterministic finite automaton AUTOMATON.
      * For example regexp = "(1|2)(3*)(4|5)";
@@ -745,7 +747,7 @@ public enum IntConstraintFactory {
     public static Regular regular(IntVar[] VARS, IAutomaton AUTOMATON) {
         return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
     }
-	
+
     /**
      * Ensures:<br/>
      * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
