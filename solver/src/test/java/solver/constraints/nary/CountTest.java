@@ -144,7 +144,7 @@ public class CountTest {
                     solver.post(IntConstraintFactory.count(val, vs, ivc));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, VariableFactory.fixed(0,solver)));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -222,7 +222,7 @@ public class CountTest {
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return IntConstraintFactory.sum(bs, occ);
     }
 
 }

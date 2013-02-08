@@ -104,7 +104,7 @@ public class OpenStacks extends AbstractProblem {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
                 solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1],0,"detect"));
-                solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, "=", o[i][t]));
+                solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, o[i][t]));
             }
         }
         o2b = VariableFactory.boolMatrix("b", np, nc, solver);
@@ -118,7 +118,7 @@ public class OpenStacks extends AbstractProblem {
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);
         for (int i = 0; i < np; i++) {
-            solver.post(IntConstraintFactory.sum(o2b[i], "=", open[i]));
+            solver.post(IntConstraintFactory.sum(o2b[i], open[i]));
         }
 
 

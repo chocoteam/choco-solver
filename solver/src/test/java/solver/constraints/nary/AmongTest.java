@@ -171,7 +171,7 @@ public class AmongTest {
                     solver.post(IntConstraintFactory.among(ivc, vs, new int[]{val}));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, "=", 0));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, vars[6]));
 
             solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
@@ -252,7 +252,7 @@ public class AmongTest {
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return IntConstraintFactory.sum(bs, occ);
     }
 
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
@@ -260,7 +260,7 @@ public class AmongTest {
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.member(vs[i], values), IntConstraintFactory.not_member(vs[i], values)));
         }
-        return IntConstraintFactory.sum(bs, "=", occ);
+        return IntConstraintFactory.sum(bs, occ);
     }
 
 }

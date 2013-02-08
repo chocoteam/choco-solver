@@ -32,8 +32,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -47,16 +49,19 @@ import java.util.List;
 public class IntLinEqReifBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
 
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        Constraint cc = IntConstraintFactory.scalar(bs, as, "=", c);
-        Constraint oc = IntConstraintFactory.scalar(bs, as, "!=", c);
-
-        return IntConstraintFactory.reified(r, cc, oc);
+		int[] bounds = Sum.getScalarBounds(bs, as);
+		IntVar scalarVar = VariableFactory.bounded("scalar",bounds[0],bounds[1],solver);
+		solver.post(IntConstraintFactory.scalar(bs, as, scalarVar));
+		solver.post(IntConstraintFactory.reified(
+				r,
+				IntConstraintFactory.arithm(scalarVar, "=", c),
+				IntConstraintFactory.arithm(scalarVar, "!=", c)));
     }
 }

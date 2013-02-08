@@ -46,10 +46,10 @@ import java.util.List;
 public class ArrayVarElementBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar b = exps.get(0).intVarValue(solver);
         IntVar[] as = exps.get(1).toIntVarArray(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.element(c, as, b, 1);
+        solver.post(IntConstraintFactory.element(c, as, b, 1));
     }
 }

@@ -46,10 +46,10 @@ import java.util.List;
 public class IntTimesBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.times(a, b, c);
+        solver.post(IntConstraintFactory.times(a, b, c));
     }
 }

@@ -58,12 +58,13 @@ public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
         int[] coeffs = new int[size];
         Arrays.fill(coeffs, 1);
+		IntVar msv = VariableFactory.fixed(ms,solver);
         for (int i = 0; i < size; i++) {
-            this.cstrs[c++] = IntConstraintFactory.scalar(matrix[i], coeffs, "=", ms);
-            this.cstrs[c++] = IntConstraintFactory.scalar(invMatrix[i], coeffs, "=", ms);
+            this.cstrs[c++] = IntConstraintFactory.scalar(matrix[i], coeffs, msv);
+            this.cstrs[c++] = IntConstraintFactory.scalar(invMatrix[i], coeffs, msv);
         }
-        this.cstrs[c++] = IntConstraintFactory.scalar(diag1, coeffs, "=", ms);
-        this.cstrs[c++] = IntConstraintFactory.scalar(diag2, coeffs, "=", ms);
+        this.cstrs[c++] = IntConstraintFactory.scalar(diag1, coeffs, msv);
+        this.cstrs[c++] = IntConstraintFactory.scalar(diag2, coeffs, msv);
 
         // Symetries breaking
         this.cstrs[c++] = IntConstraintFactory.arithm(matrix[0][size - 1], "<", matrix[size - 1][0]);

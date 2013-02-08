@@ -47,8 +47,8 @@ import java.util.List;
 public class SubcircuitBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
-        return IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length", 0, vars.length, solver));
+        solver.post(IntConstraintFactory.subcircuit(vars, 1, VariableFactory.bounded("length", 0, vars.length, solver)));
     }
 }

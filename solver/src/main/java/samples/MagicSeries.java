@@ -64,19 +64,19 @@ public class MagicSeries extends AbstractProblem {
 
         vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
 
-        counts = new Count[n];
+        counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
             counts[i] = IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i]));
             solver.post(counts[i]);
         }
-        solver.post(IntConstraintFactory.sum(vars, "=", n)); // cstr redundant 1
+        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(n,solver))); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(IntConstraintFactory.scalar(vs2, coeff2, "=", n)); // cstr redundant 1
+        solver.post(IntConstraintFactory.scalar(vs2, coeff2, VariableFactory.fixed(n,solver))); // cstr redundant 1
     }
 
     @Override

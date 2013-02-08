@@ -47,7 +47,7 @@ import java.util.List;
 public class GlobalCardinalityLowUpBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         int[] low = exps.get(2).toIntArray();
@@ -56,6 +56,6 @@ public class GlobalCardinalityLowUpBuilder implements IBuilder {
         for (int i = 0; i < low.length; i++) {
             cards[i] = VariableFactory.bounded("card of val " + values[i], low[i], up[i], solver);
         }
-        return IntConstraintFactory.global_cardinality(vars, values, cards, false);
+        solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
     }
 }

@@ -46,9 +46,9 @@ import java.util.List;
 public class NValueBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar nValues = exps.get(0).intVarValue(solver);
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        return IntConstraintFactory.nvalues(vars, nValues, "at_most_BC", "at_least_AC", "at_most_greedy");
+        solver.post(IntConstraintFactory.nvalues(vars, nValues, "at_most_BC", "at_least_AC", "at_most_greedy"));
     }
 }

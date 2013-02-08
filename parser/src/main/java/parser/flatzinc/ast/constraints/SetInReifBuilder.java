@@ -48,7 +48,7 @@ import java.util.List;
 public class SetInReifBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
@@ -62,10 +62,10 @@ public class SetInReifBuilder implements IBuilder {
             cs[1] = IntConstraintFactory.not_member(a, low, upp);
         } else {
             Exit.log("SetVar unavailable");
-            return null;
+            return;
         }
         BoolVar r = exps.get(2).boolVarValue(solver);
-        return IntConstraintFactory.reified(r, cs[0], cs[1]);
+		solver.post(IntConstraintFactory.reified(r, cs[0], cs[1]));
 
     }
 }

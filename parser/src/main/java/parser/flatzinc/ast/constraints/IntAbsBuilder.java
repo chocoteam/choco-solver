@@ -46,9 +46,9 @@ import java.util.List;
 public class IntAbsBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
-        return IntConstraintFactory.absolute(b, a);
+        solver.post(IntConstraintFactory.absolute(b, a));
     }
 }

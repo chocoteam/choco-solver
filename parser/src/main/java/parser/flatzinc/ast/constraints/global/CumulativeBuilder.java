@@ -48,7 +48,7 @@ import java.util.List;
 public class CumulativeBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         final IntVar[] starts = exps.get(0).toIntVarArray(solver);
         final IntVar[] durations = exps.get(1).toIntVarArray(solver);
         final IntVar[] resources = exps.get(2).toIntVarArray(solver);
@@ -62,6 +62,6 @@ public class CumulativeBuilder implements IBuilder {
                     solver);
             tasks[i] = new Task(starts[i], durations[i], ends[i]);
         }
-        return IntConstraintFactory.cumulative(tasks, resources, limit);
+        solver.post(IntConstraintFactory.cumulative(tasks, resources, limit));
     }
 }

@@ -63,6 +63,7 @@ import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
+import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
@@ -99,16 +100,6 @@ public enum IntConstraintFactory {
 
 
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
-
-    /**
-     * Create an empty constraint to be filled with propagators
-     *
-     * @param solver
-     * @return an empty constraint to be filled with propagators
-     */
-    public static Constraint makeEmptyConstraint(Solver solver) {
-        return new Constraint(solver);
-    }
 
     //##################################################################################################################
     // UNARIES #########################################################################################################
@@ -192,6 +183,21 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR1, op, VAR2, VAR1.getSolver());
     }
 
+	/**
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     *
+     * @param VAR1 first variable
+     * @param OP1  an operator
+     * @param VAR2 second variable
+     * @param OP2  another operator
+     * @param CSTE an operator
+     */
+    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+        Operator op1 = Operator.get(OP1);
+        Operator op2 = Operator.get(OP2);
+        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
+    }
+	
     /**
      * Ensures: <br/>
      * |VAR1-VAR2| OP CSTE
@@ -248,21 +254,6 @@ public enum IntConstraintFactory {
     //##################################################################################################################
     //TERNARIES ########################################################################################################
     //##################################################################################################################
-
-    /**
-     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
-     *
-     * @param VAR1 first variable
-     * @param OP1  an operator
-     * @param VAR2 second variable
-     * @param OP2  another operator
-     * @param CSTE an operator
-     */
-    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
-        Operator op1 = Operator.get(OP1);
-        Operator op2 = Operator.get(OP2);
-        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
-    }
 
     /**
      * Ensures: <br/>
@@ -497,20 +488,18 @@ public enum IntConstraintFactory {
         return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
     }
 
-    //TODO discussion remplacer ou non par GCC
-
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
      * <p/>
-     * Based on Among constraint, ensures GAC.
+     * Based on GlobalCardinality constraint, ensures GAC.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
      * @param LIMIT a variable
      */
-    public static Among count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
-        return new Among(LIMIT, VARS, VALUE, LIMIT.getSolver());
+    public static GlobalCardinality count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
+        return global_cardinality(VARS, new int[]{VALUE}, new IntVar[]{LIMIT}, false);
     }
 
     /**
@@ -766,6 +755,17 @@ public enum IntConstraintFactory {
         return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
 
+	/**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> = SCALAR.
+     *
+     * @param VARS   a vector of variables
+     * @param COEFFS a vector of int
+     * @param SCALAR    a variable
+     */
+    public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
+        return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
+    }
+	
     /**
      * Creates a subcircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where
@@ -798,50 +798,26 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OP SUM.
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.
      *
      * @param VARS a vector of variables
-     * @param OP   an operator among {"=", "!=", ">=","<="}
-     * @param SUM  an int
-     */
-    public static Sum sum(IntVar[] VARS, String OP, int SUM) {
-        return Sum.build(VARS, SUM, Operator.get(OP), VARS[0].getSolver());
-    }
-
-    /**
-     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OP SUM.
-     *
-     * @param VARS a vector of variables
-     * @param OP   an operator among {"=", "!=", ">=","<="}
      * @param SUM  a variable
      */
-    public static Sum sum(IntVar[] VARS, String OP, IntVar SUM) {
-        return Sum.build(VARS, SUM, Operator.get(OP), VARS[0].getSolver());
+    public static Sum sum(IntVar[] VARS, IntVar SUM) {
+        return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
     }
 
-    /**
-     * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> OP SUM.
+	/**
+     * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.
+	 * This constraint is much faster than the one over integer variables
      *
-     * @param VARS   a vector of variables
-     * @param COEFFS a vector of int
-     * @param OP     an operator among {"=", "!=", ">=","<="}
-     * @param SUM    an int
+     * @param VARS a vector of boolean variables
+     * @param SUM  a variable
      */
-    public static Sum scalar(IntVar[] VARS, int[] COEFFS, String OP, int SUM) {
-        return Sum.build(VARS, COEFFS, Operator.get(OP), SUM, VARS[0].getSolver());
-    }
-
-    /**
-     * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> OP COEFF * SUM.
-     *
-     * @param VARS   a vector of variables
-     * @param COEFFS a vector of int
-     * @param OP     an operator among {"=", "!=", ">=","<="}
-     * @param COEFF  an int
-     * @param SUM    a variable
-     */
-    public static Sum scalar(IntVar[] VARS, int[] COEFFS, String OP, IntVar SUM, int COEFF) {
-        return Sum.build(VARS, COEFFS, SUM, COEFF, Operator.get(OP), VARS[0].getSolver());
+    public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
+		Constraint c = new Constraint(ArrayUtils.append(VARS,new IntVar[]{SUM}),SUM.getSolver());
+		c.setPropagators(new PropBoolSum(VARS,SUM));
+		return c;
     }
 
     /**
@@ -877,7 +853,7 @@ public enum IntConstraintFactory {
      */
     public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet) {
         Solver solver = nbArbo.getSolver();
-        Constraint c = makeEmptyConstraint(solver);
+        Constraint c = new Constraint(ArrayUtils.append(succs,new IntVar[]{nbArbo}),solver);
         c.setPropagators(new PropAntiArborescences(succs, offSet, false),
                 new PropKLoops(succs, nbArbo, offSet));
         return c;

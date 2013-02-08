@@ -79,7 +79,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(IntConstraintFactory.reified(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste)));
             }
-            cstrs.add(IntConstraintFactory.sum(bs, "=", card[i]));
+            cstrs.add(IntConstraintFactory.sum(bs, card[i]));
         }
         return cstrs.toArray(new Constraint[cstrs.size()]);
     }

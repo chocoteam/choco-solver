@@ -32,7 +32,9 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -46,10 +48,13 @@ import java.util.List;
 public class IntLinNeBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
-        return IntConstraintFactory.scalar(bs, as, "!=", c);
+		int[] bounds = Sum.getScalarBounds(bs,as);
+		IntVar scalar = VariableFactory.bounded("scalar",bounds[0],bounds[1],solver);
+		solver.post(IntConstraintFactory.arithm(scalar,"!=",c));
+        solver.post(IntConstraintFactory.scalar(bs, as, scalar));
     }
 }

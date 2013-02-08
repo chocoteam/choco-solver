@@ -45,11 +45,11 @@ import java.util.List;
  */
 public class ExactlyBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         //int: n, array[int] of var int: x, int: v
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
-        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, new int[]{v});
+        solver.post(IntConstraintFactory.among(VariableFactory.fixed(n, solver), x, new int[]{v}));
     }
 }

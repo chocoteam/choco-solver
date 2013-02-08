@@ -119,7 +119,7 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.bounded("x", 1, 5, ref);
                 xs[1] = VariableFactory.bounded("y", 1, 5, ref);
                 xs[2] = VariableFactory.bounded("z", 2, 10, ref);
-                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0,ref)));
                 ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
@@ -149,7 +149,7 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 5, ref);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
                 xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
-                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0,ref)));
                 ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();

@@ -45,12 +45,12 @@ import java.util.List;
  */
 public class AtLeastBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         //int: n, array[int] of var int: x, int: v
         int n = exps.get(0).intValue();
         IntVar[] x = exps.get(1).toIntVarArray(solver);
         int v = exps.get(2).intValue();
         IntVar limit = VariableFactory.bounded("limit_" + n, n, x.length, solver);
-        return IntConstraintFactory.among(limit, x, new int[]{v});
+        solver.post(IntConstraintFactory.among(limit, x, new int[]{v}));
     }
 }

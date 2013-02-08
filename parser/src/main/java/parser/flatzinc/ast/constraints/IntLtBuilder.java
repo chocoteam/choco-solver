@@ -46,10 +46,10 @@ import java.util.List;
 public class IntLtBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
 
-        return IntConstraintFactory.arithm(a, "<", b);
+        solver.post(IntConstraintFactory.arithm(a, "<", b));
     }
 }

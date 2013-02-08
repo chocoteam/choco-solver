@@ -29,6 +29,7 @@ package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
 import common.ESat;
+import common.util.procedure.IntProcedure;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
@@ -45,195 +46,148 @@ import solver.variables.delta.IIntDeltaMonitor;
 /**
  * X = Y
  * <p/>
+ * Ensures Arc-Consistency
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 1 oct. 2010
  */
 @PropAnn(tested = {PropAnn.Status.CORRECTION, PropAnn.Status.EXPLAINED})
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
+	private IntVar x,y;
+	// enumerated domains
+	private boolean bothEnumerated;
+	private IIntDeltaMonitor[] idms;
+	private RemProc rem_proc;
+	private int indexToFilter;
 
-    IIntDeltaMonitor[] idms;
+	public PropEqualX_Y(IntVar x, IntVar y) {
+		super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
+		this.x = x;
+		this.y = y;
+		if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()){
+			bothEnumerated = true;
+			idms = new IIntDeltaMonitor[2];
+			idms[0] = vars[0].monitorDelta(this);
+			idms[1] = vars[1].monitorDelta(this);
+			rem_proc = new RemProc(this);
+		}
+	}
 
-    protected final RemProc rem_proc;
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		if(bothEnumerated)
+			return EventType.INT_ALL_MASK();
+		else
+			return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+	}
 
-    @SuppressWarnings({"unchecked"})
-    public PropEqualX_Y(IntVar x, IntVar y) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
-        this.x = x;
-        this.y = y;
-        idms = new IIntDeltaMonitor[2];
-        idms[0] = vars[0].hasEnumeratedDomain() ? vars[0].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        idms[1] = vars[1].hasEnumeratedDomain() ? vars[1].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        rem_proc = new RemProc(this);
-    }
+	private void updateBounds() throws ContradictionException {
+		x.updateLowerBound(y.getLB(), aCause);
+		x.updateUpperBound(y.getUB(), aCause);
+		y.updateLowerBound(x.getLB(), aCause);
+		y.updateUpperBound(x.getUB(), aCause);
+		if(y.getLB()!=x.getLB() || y.getUB()!=x.getUB()){
+			updateBounds();
+		}
+	}
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        int et = EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            et += EventType.REMOVE.mask;
-        }
-        return et;
-    }
-
-    private void updateInfX() throws ContradictionException {
-        x.updateLowerBound(y.getLB(), aCause);
-    }
-
-    private void updateInfY() throws ContradictionException {
-        y.updateLowerBound(x.getLB(), aCause);
-    }
-
-    private void updateSupX() throws ContradictionException {
-        x.updateUpperBound(y.getUB(), aCause);
-    }
-
-    private void updateSupY() throws ContradictionException {
-        y.updateUpperBound(x.getUB(), aCause);
-    }
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        updateInfX();
-        updateSupX();
-        updateInfY();
-        updateSupY();
-        // ensure that, in case of enumerated domains,  holes are also propagated
-        if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
-            int ub = x.getUB();
-            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-                if (!(y.contains(val))) {
-                    x.removeValue(val, aCause);
-                }
-            }
-            ub = y.getUB();
-            for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
-                if (!(x.contains(val))) {
-                    y.removeValue(val, aCause);
-                }
-            }
-        }
-        if (x.instantiated() && y.instantiated()) {
-            // no more test should be done on the value,
-            // filtering algo ensures that both are assigned to the same value
-            setPassive();
-        }
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		updateBounds();
+		// ensure that, in case of enumerated domains,  holes are also propagated
+		if (bothEnumerated) {
+			int ub = x.getUB();
+			for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+				if (!(y.contains(val))) {
+					x.removeValue(val, aCause);
+				}
+			}
+			ub = y.getUB();
+			for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+				if (!(x.contains(val))) {
+					y.removeValue(val, aCause);
+				}
+			}
+			idms[0].unfreeze();
+			idms[1].unfreeze();
+		}
+		if (x.instantiated()) {
+			assert (y.instantiated());
+			// no more test should be done on the value,
+			// filtering algo ensures that both are assigned to the same value
+			setPassive();
+		}
+	}
 
 
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-            setPassive();
-        } else {
-            if (EventType.isInclow(mask)) {
-                this.awakeOnLow(varIdx);
-            }
-            if (EventType.isDecupp(mask)) {
-                this.awakeOnUpp(varIdx);
-            }
-            if (EventType.isRemove(mask)) {
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-//                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
-            }
-        }
-    }
+	@Override
+	public void propagate(int varIdx, int mask) throws ContradictionException {
+		updateBounds();
+		if(x.instantiated()){
+			setPassive();
+		}else if(bothEnumerated){
+			indexToFilter = 1-varIdx;
+			idms[varIdx].freeze();
+			idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+			idms[varIdx].unfreeze();
+		}
+	}
 
-    void awakeOnInst(int index) throws ContradictionException {
-        if (index == 0) {
-            y.instantiateTo(x.getValue(), aCause);
-        } else {
-            x.instantiateTo(y.getValue(), aCause);
-        }
-    }
+	@Override
+	public ESat isEntailed() {
+		if ((x.getUB() < y.getLB()) ||
+				(x.getLB() > y.getUB()))
+			return ESat.FALSE;
+		else if (x.instantiated() &&
+				y.instantiated() &&
+				(x.getValue() == y.getValue()))
+			return ESat.TRUE;
+		else
+			return ESat.UNDEFINED;
+	}
 
-    void awakeOnLow(int index) throws ContradictionException {
-        if (index == 0) updateInfY();
-        else updateInfX();
-    }
+	private static class RemProc implements IntProcedure {
 
-    void awakeOnUpp(int index) throws ContradictionException {
-        if (index == 0) updateSupY();
-        else updateSupX();
-    }
+		private final PropEqualX_Y p;
 
-    void awakeOnRem(int index, int val) throws ContradictionException {
-        if (index == 0) y.removeValue(val, aCause);
-        else {
-            x.removeValue(val, aCause);
-        }
-    }
+		public RemProc(PropEqualX_Y p) {
+			this.p = p;
+		}
 
-    @Override
-    public ESat isEntailed() {
-        if ((x.getUB() < y.getLB()) ||
-                (x.getLB() > y.getUB()))
-            return ESat.FALSE;
-        else if (x.instantiated() &&
-                y.instantiated() &&
-                (x.getValue() == y.getValue()))
-            return ESat.TRUE;
-        else
-            return ESat.UNDEFINED;
-    }
+		@Override
+		public void execute(int i) throws ContradictionException {
+			p.vars[p.indexToFilter].removeValue(i, p.aCause);
+		}
+	}
 
-    private static class RemProc implements UnaryIntProcedure<Integer> {
+	@Override
+	public String toString() {
+		StringBuilder bf = new StringBuilder();
+		bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
+		return bf.toString();
+	}
 
-        private final PropEqualX_Y p;
-        private int idxVar;
+	@Override
+	public void explain(Deduction d, Explanation e) {
+		if (d.getVar() == x) {
+			e.add(aCause);
+			if (d instanceof ValueRemoval) {
+				y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+			} else {
+				throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
+			}
+		} else if (d.getVar() == y) {
+			e.add(aCause);
+			if (d instanceof ValueRemoval) {
+				x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+			} else {
+				throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
+			}
+		} else {
+			super.explain(d, e);
+		}
 
-        public RemProc(PropEqualX_Y p) {
-            this.p = p;
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
-        }
-
-        @Override
-        public void execute(int i) throws ContradictionException {
-            p.awakeOnRem(idxVar, i);
-        }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
-        return bf.toString();
-    }
-
-    @Override
-    public void explain(Deduction d, Explanation e) {
-        if (d.getVar() == x) {
-            e.add(aCause);
-            if (d instanceof ValueRemoval) {
-                y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-            }
-        } else if (d.getVar() == y) {
-            e.add(aCause);
-            if (d instanceof ValueRemoval) {
-                x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
-            } else {
-                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-            }
-        } else {
-            super.explain(d, e);
-        }
-
-    }
+	}
 }

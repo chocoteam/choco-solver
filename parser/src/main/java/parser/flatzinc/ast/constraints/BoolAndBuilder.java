@@ -47,11 +47,13 @@ import java.util.List;
  */
 public class BoolAndBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-
-        return IntConstraintFactory.clauses(Node.reified(Literal.pos(r), Node.and(Literal.pos(a), Literal.pos(b))), solver);
-    }
+        solver.post(IntConstraintFactory.clauses(
+				Node.reified(Literal.pos(r),
+						Node.and(Literal.pos(a),
+								Literal.pos(b))), solver));
+	}
 }

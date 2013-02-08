@@ -76,7 +76,7 @@ public class Donald extends AbstractProblem {
                 r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
                 100000, 10000, 1000, 100, 10, 1,
                 -100000, -10000, -1000, -100, -10, -1,
-        }, "=", 0));
+        }, VariableFactory.fixed(0,solver)));
 
 
     }

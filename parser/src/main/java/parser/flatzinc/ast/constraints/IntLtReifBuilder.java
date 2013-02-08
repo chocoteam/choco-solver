@@ -47,7 +47,7 @@ import java.util.List;
 public class IntLtReifBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
@@ -55,6 +55,6 @@ public class IntLtReifBuilder implements IBuilder {
         Constraint c = IntConstraintFactory.arithm(a, "<", b);
         Constraint oc = IntConstraintFactory.arithm(a, ">=", b);
 
-        return IntConstraintFactory.reified(r, c, oc);
+        solver.post(IntConstraintFactory.reified(r, c, oc));
     }
 }

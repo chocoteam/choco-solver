@@ -81,7 +81,7 @@ public class SantaClaude extends AbstractProblem {
         for (int i = 0; i < n_kids; i++) {
             solver.post(IntConstraintFactory.element(kid_price[i], gift_price, kid_gift[i],0,"detect"));
         }
-        solver.post(IntConstraintFactory.sum(kid_price, "=", total_cost));
+        solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
         RealConstraint ave_cons = new RealConstraint(solver);
         StringBuilder function = new StringBuilder("(");

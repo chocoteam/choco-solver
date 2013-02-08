@@ -44,10 +44,10 @@ import java.util.List;
  */
 public class MaximumBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         // var int: m, array[int] of var int: x
         IntVar m = exps.get(0).intVarValue(solver);
         IntVar[] x = exps.get(1).toIntVarArray(solver);
-        return new MaxOfAList(m, x, solver);
+        solver.post(new MaxOfAList(m, x, solver));
     }
 }

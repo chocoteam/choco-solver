@@ -72,9 +72,8 @@ public class SolverTest {
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(3);
 
-        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, ">=", capacites[0]));
-        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, "<=", capacites[1]));
-        lcstrs.add(IntConstraintFactory.scalar(objects, energies, "=", power, 1));
+        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa",capacites[0],capacites[1],s)));
+        lcstrs.add(IntConstraintFactory.scalar(objects, energies, power));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 

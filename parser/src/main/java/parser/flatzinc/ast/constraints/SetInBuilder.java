@@ -47,17 +47,17 @@ import java.util.List;
 public class SetInBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar var = exps.get(0).intVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            return IntConstraintFactory.member(var, values);
+            solver.post(IntConstraintFactory.member(var, values));
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            return IntConstraintFactory.member(var, low, upp);
-        }
-        Exit.log("SetVar unavailable");
-        return null;
+            solver.post(IntConstraintFactory.member(var, low, upp));
+        }else{
+			Exit.log("SetVar unavailable");
+		}
     }
 }

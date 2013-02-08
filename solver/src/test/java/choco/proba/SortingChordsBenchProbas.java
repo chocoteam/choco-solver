@@ -129,7 +129,7 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         coeffs[size-1] = -1;
         IntVar[] sumVars = ArrayUtils.append(costvars,new IntVar[]{obj});  //*/
         //m.addConstraint(Choco.leq(Choco.sum(costvars), obj));
-        this.cstrs[nbCstrs] = IntConstraintFactory.sum(costvars, "=", obj);
+        this.cstrs[nbCstrs] = IntConstraintFactory.sum(costvars, obj);
         //this.cstrs[nbCstrs] = Sum.leq(sumVars, coeffs, 0, solver);
     }
 
