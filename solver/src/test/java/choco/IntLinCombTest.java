@@ -37,7 +37,12 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Operator;
 import solver.constraints.nary.Sum;
+import solver.constraints.propagators.unary.PropEqualXC;
+import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
+import solver.constraints.propagators.unary.PropLessOrEqualXC;
+import solver.constraints.propagators.unary.PropNotEqualXC;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -54,6 +59,26 @@ import java.util.Random;
  */
 public class IntLinCombTest {
 
+	private static String operatorToString(Operator operator){
+		String opSt;
+		switch (operator) {
+            case EQ:
+                opSt = "=";break;
+            case NQ:
+                opSt = "!=";break;
+            case GE:
+                opSt = ">=";break;
+            case GT:
+                opSt = ">";break;
+            case LE:
+                opSt = "<=";break;
+            case LT:
+                opSt = "<";break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+		return opSt;
+	}
 
     public static void testOp(int n, int min, int max, int cMax, int seed, Operator operator) {
         Random random = new Random(seed);
@@ -67,9 +92,11 @@ public class IntLinCombTest {
         int constant = -random.nextInt(cMax);
 
 		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,s);
+
+
         Constraint[] cstrs = new Constraint[]{
                 IntConstraintFactory.scalar(vars, coeffs, sum),
-                IntConstraintFactory.arithm(sum, operator.name(), constant)
+                IntConstraintFactory.arithm(sum, operatorToString(operator), constant)
         };
 
         s.post(cstrs);
