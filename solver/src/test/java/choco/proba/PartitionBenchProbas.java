@@ -62,7 +62,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        allCstrs.add(IntConstraintFactory.scalar(xy, coeffs, "=", 0));
+        allCstrs.add(IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(0,solver)));
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -80,14 +80,14 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             allCstrs.add(IntConstraintFactory.arithm(sx[i], "<=", 4 * size * size));
             allCstrs.add(IntConstraintFactory.arithm(sy[i], "<=", 4 * size * size));
         }
-        allCstrs.add(IntConstraintFactory.scalar(sxy, coeffs, "=", 0));
+        allCstrs.add(IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(0,solver)));
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        allCstrs.add(IntConstraintFactory.scalar(x, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        allCstrs.add(IntConstraintFactory.scalar(y, coeffs, "=", 2 * size * (2 * size + 1) / 4));
-        allCstrs.add(IntConstraintFactory.scalar(sx, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        allCstrs.add(IntConstraintFactory.scalar(sy, coeffs, "=", 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        allCstrs.add(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
+        allCstrs.add(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
+        allCstrs.add(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
+        allCstrs.add(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
 
         allCstrs.add(new AllDifferent(xy, solver, type));
 

@@ -102,7 +102,8 @@ public class CarSequencing extends AbstractProblem {
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false));
 
                 // all others configurations may be chosen
-                solver.post(IntConstraintFactory.sum(atLeast, ">=", optfreq[optNum][1] - optfreq[optNum][0]));
+				IntVar sum = VariableFactory.bounded("sum",optfreq[optNum][1] - optfreq[optNum][0],99999999,solver);
+                solver.post(IntConstraintFactory.sum(atLeast, sum));
             }
         }
 

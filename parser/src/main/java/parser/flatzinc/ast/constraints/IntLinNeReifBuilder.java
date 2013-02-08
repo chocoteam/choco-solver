@@ -34,6 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class IntLinNeReifBuilder implements IBuilder {
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         Constraint cc = IntConstraintFactory.scalar(bs, as, "!=", c);
-        Constraint oc = IntConstraintFactory.scalar(bs, as, "=", c);
+        Constraint oc = IntConstraintFactory.scalar(bs, as, VariableFactory.fixed(c, solver));
 
         return IntConstraintFactory.reified(r, cc, oc);
     }

@@ -66,8 +66,10 @@ public class IntLinCombTest {
         }
         int constant = -random.nextInt(cMax);
 
+		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,s);
         Constraint[] cstrs = new Constraint[]{
-                Sum.build(vars, coeffs, operator, constant, s)
+                IntConstraintFactory.scalar(vars, coeffs, sum),
+                IntConstraintFactory.arithm(sum, operator.name(), constant)
         };
 
         s.post(cstrs);
@@ -99,24 +101,22 @@ public class IntLinCombTest {
 
     protected Solver sum(int[][] domains, int[] coeffs, int b, int op) {
         Solver solver = new Solver();
-
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-
-        Constraint cons;
+		String opname = "=";
         if (op == 0) {
-            cons = IntConstraintFactory.scalar(bins, coeffs, "=", b);
         } else if (op > 0) {
-            cons = IntConstraintFactory.scalar(bins, coeffs, ">=", b);
+			opname = ">=";
         } else {
-            cons = IntConstraintFactory.scalar(bins, coeffs, "<=", b);
+			opname = "<=";
         }
-
-
-        Constraint[] cstrs = new Constraint[]{cons};
-
+		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,solver);
+        Constraint[] cstrs = new Constraint[]{
+                IntConstraintFactory.scalar(bins, coeffs, sum),
+                IntConstraintFactory.arithm(sum, opname, b)
+        };
         solver.post(cstrs);
         solver.set(IntStrategyFactory.presetI(bins));
         return solver;
@@ -124,23 +124,22 @@ public class IntLinCombTest {
 
     protected Solver intlincomb(int[][] domains, int[] coeffs, int b, int op) {
         Solver solver = new Solver();
-
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-
-        Constraint cons;
+		String opname = "=";
         if (op == 0) {
-            cons = IntConstraintFactory.scalar(bins, coeffs, "=", b);
         } else if (op > 0) {
-            cons = IntConstraintFactory.scalar(bins, coeffs, ">=", b);
+			opname = ">=";
         } else {
-            cons = IntConstraintFactory.scalar(bins, coeffs, "<=", b);
+			opname = "<=";
         }
-
-        Constraint[] cstrs = new Constraint[]{cons};
-
+		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,solver);
+        Constraint[] cstrs = new Constraint[]{
+                IntConstraintFactory.scalar(bins, coeffs, sum),
+                IntConstraintFactory.arithm(sum, opname, b)
+        };
         solver.post(cstrs);
         solver.set(IntStrategyFactory.presetI(bins));
         return solver;

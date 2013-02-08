@@ -218,7 +218,11 @@ public class LogicTreeTest {
         Solver solver = new Solver();
         BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
 
-        solver.post(IntConstraintFactory.reified(rows[0], IntConstraintFactory.sum(new BoolVar[]{rows[1], rows[2]}, "=", 2), IntConstraintFactory.sum(new BoolVar[]{rows[1], rows[2]}, "<=", 1))
+        solver.post(
+				IntConstraintFactory.reified(
+						rows[0],
+						IntConstraintFactory.arithm(rows[1],"+",rows[2],"=",2),
+						IntConstraintFactory.arithm(rows[1],"+",rows[2],"<=",1))
         );
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();

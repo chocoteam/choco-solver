@@ -109,8 +109,8 @@ public class Knapsack extends AbstractProblem {
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
 
 
-        c_size = IntConstraintFactory.scalar(objects, volumes, "=", scalar, 1);
-        c_energy = IntConstraintFactory.scalar(objects, energies, "=", power, 1);
+        c_size = IntConstraintFactory.scalar(objects, volumes, scalar);
+        c_energy = IntConstraintFactory.scalar(objects, energies, power);
 
         solver.post(c_size);
         solver.post(c_energy);

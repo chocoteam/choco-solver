@@ -104,7 +104,7 @@ public class Pert extends AbstractProblem {
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, "<=", -duration);
+		return IntConstraintFactory.arithm(x,"<=",y,"-",duration);
     }
 
     @Override

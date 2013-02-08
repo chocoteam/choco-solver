@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -50,6 +51,6 @@ public class IntLinEqBuilder implements IBuilder {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
-        return IntConstraintFactory.scalar(bs, as, "=", c);
+        return IntConstraintFactory.scalar(bs, as, VariableFactory.fixed(c, solver));
     }
 }

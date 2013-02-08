@@ -192,7 +192,7 @@ public class CPVizTest {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, "=", 0));
+        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, VariableFactory.fixed(0,solver)));
 
         Visualization visu = new Visualization("AllDifferent", solver, dir + "/out");
 
@@ -264,16 +264,16 @@ public class CPVizTest {
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
             // All rows must be equal to the magic sum
-            s.post(IntConstraintFactory.sum(vars[i], "=", ms));
+            s.post(IntConstraintFactory.sum(vars[i], VariableFactory.fixed(ms,s)));
             // All columns must be equal to the magic sum
-            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), "=", ms));
+            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), VariableFactory.fixed(ms,s)));
             //record diagonals variable
             varDiag1[i] = vars[i][i];
             varDiag2[i] = vars[(n - 1) - i][i];
         }
         // Every diagonal have to be equal to the magic sum
-        s.post(IntConstraintFactory.sum(varDiag1, "=", ms));
-        s.post(IntConstraintFactory.sum(varDiag2, "=", ms));
+        s.post(IntConstraintFactory.sum(varDiag1, VariableFactory.fixed(ms,s)));
+        s.post(IntConstraintFactory.sum(varDiag2, VariableFactory.fixed(ms,s)));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
         s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
         s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));
@@ -307,16 +307,16 @@ public class CPVizTest {
         final IntVar[] varDiag2 = new IntVar[n];
         for (int i = 0; i < n; i++) {
             // All rows must be equal to the magic sum
-            s.post(IntConstraintFactory.sum(vars[i], "=", ms));
+            s.post(IntConstraintFactory.sum(vars[i], VariableFactory.fixed(ms,s)));
             // All columns must be equal to the magic sum
-            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), "=", ms));
+            s.post(IntConstraintFactory.sum(ArrayUtils.getColumn(vars, i), VariableFactory.fixed(ms,s)));
             //record diagonals variable
             varDiag1[i] = vars[i][i];
             varDiag2[i] = vars[(n - 1) - i][i];
         }
         // Every diagonal have to be equal to the magic sum
-        s.post(IntConstraintFactory.sum(varDiag1, "=", ms));
-        s.post(IntConstraintFactory.sum(varDiag2, "=", ms));
+        s.post(IntConstraintFactory.sum(varDiag1, VariableFactory.fixed(ms,s)));
+        s.post(IntConstraintFactory.sum(varDiag2, VariableFactory.fixed(ms,s)));
         //symmetry breaking constraint: enforce that the upper left corner contains the minimum corner value.
         s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[0][n - 1]));
         s.post(IntConstraintFactory.arithm(vars[0][0], "<", vars[n - 1][n - 1]));

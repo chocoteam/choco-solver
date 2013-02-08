@@ -83,7 +83,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
                 ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -109,7 +109,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.bounded("x", 0, 2, ref);
                 IntVar y = VariableFactory.bounded("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
                 ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -250,7 +250,7 @@ public class ViewsTest {
             int n = seed * 2;
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
-                ref.post(IntConstraintFactory.sum(x, "=", n));
+                ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n,solver)));
                 ref.set(IntStrategyFactory.firstFail_InDomainMin(x));
             }
             {
@@ -259,7 +259,7 @@ public class ViewsTest {
                 for (int i = 0; i < seed; i++) {
                     y[i] = Sum.var(x[i], x[i + seed]);
                 }
-                solver.post(IntConstraintFactory.sum(y, "=", n));
+                solver.post(IntConstraintFactory.sum(y, VariableFactory.fixed(n,solver)));
 
                 solver.set(IntStrategyFactory.firstFail_InDomainMin(x));
 
@@ -299,7 +299,7 @@ public class ViewsTest {
             IntVar x = VariableFactory.enumerated("x", 160, 187, ref);
             IntVar y = VariableFactory.enumerated("y", -999, 999, ref);
             IntVar z = VariableFactory.enumerated("z", -9999, 9999, ref);
-            ref.post(IntConstraintFactory.scalar(new IntVar[]{z, x}, new int[]{1, 1}, "=", 180));
+            ref.post(IntConstraintFactory.arithm(z,"+",x,"=",180));
             ref.post(IntConstraintFactory.maximum(y, VariableFactory.fixed(0, ref), z));
         }
         {
@@ -323,7 +323,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
                 ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
@@ -349,7 +349,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
@@ -374,7 +374,7 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, "=", 0));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
                 ref.post(IntConstraintFactory.absolute(az, z));
                 ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
                 ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
@@ -402,7 +402,7 @@ public class ViewsTest {
                 IntVar[] y = VariableFactory.enumeratedArray("y", k - 1, -(k - 1), k - 1, ref);
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
-                    ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, "=", 0));
+                    ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i]));
                     ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
                 ref.post(IntConstraintFactory.alldifferent(x, "BC"));

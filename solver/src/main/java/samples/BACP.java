@@ -104,11 +104,11 @@ public class BACP extends AbstractProblem {
                 );
             }
 //            sum(i in courses) (x[p, i])>=courses_per_period_lb /\
-            solver.post(IntConstraintFactory.sum(x[i], ">=", courses_per_period_lb));
 //            sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            solver.post(IntConstraintFactory.sum(x[i], "<=", courses_per_period_ub));
+            IntVar sum = VariableFactory.bounded("courses_per_period",courses_per_period_lb,courses_per_period_ub,solver);
+			solver.post(IntConstraintFactory.sum(x[i], sum));
 //            load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
-            solver.post(IntConstraintFactory.scalar(x[i], course_load, "=", load[i], 1));
+            solver.post(IntConstraintFactory.scalar(x[i], course_load, load[i], 1));
 //            load[p] >= load_per_period_lb /\
             solver.post(IntConstraintFactory.arithm(load[i], ">=", load_per_period_lb));
 //            load[p] <= objective

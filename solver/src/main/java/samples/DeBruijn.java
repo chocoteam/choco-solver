@@ -120,7 +120,7 @@ public class DeBruijn {
         for (int i = 0; i < m; i++) {
             binary[i] = VariableFactory.boolArray("binary" + i, n, s);
             IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
-            s.post(IntConstraintFactory.scalar(sum, coefs, "=", 0));
+            s.post(IntConstraintFactory.scalar(sum, coefs, VariableFactory.fixed(0,s)));
 //            s.post(ConstraintFactory.eq(x[i], Sum.build(binary[i], weights)));
         }
 

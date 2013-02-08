@@ -80,7 +80,11 @@ public class SumTests {
             x[i - 1] = VariableFactory.bounded("x_" + i, dom[i][0], dom[i][n - 1], solver);
             coeffs[i - 1] = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
         }
-        Constraint c = IntConstraintFactory.scalar(x, coeffs, "=", r, (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n));
+		int fact = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
+		for (int i = 1; i < dom.length; i++) {
+			coeffs[i-1] /= (fact);
+		}
+        Constraint c = IntConstraintFactory.scalar(x, coeffs, r);
         solver.post(c);
 //        System.out.printf("%s\n", solver);
 

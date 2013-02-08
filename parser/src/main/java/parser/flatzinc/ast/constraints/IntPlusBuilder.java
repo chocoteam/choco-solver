@@ -51,6 +51,6 @@ public class IntPlusBuilder implements IBuilder {
         vars[0] = exps.get(0).intVarValue(solver);
         vars[1] = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.sum(vars, "=", c);
+        return IntConstraintFactory.sum(vars, c);
     }
 }

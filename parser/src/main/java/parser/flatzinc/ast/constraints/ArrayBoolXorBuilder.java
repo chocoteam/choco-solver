@@ -52,7 +52,7 @@ public class ArrayBoolXorBuilder implements IBuilder {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
         IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
-        solver.post(IntConstraintFactory.sum(as, "=", res));
+        solver.post(IntConstraintFactory.sum(as, res));
         return IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver));
     }
 }

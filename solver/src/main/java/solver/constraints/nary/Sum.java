@@ -55,48 +55,27 @@ import java.util.Arrays;
  */
 public class Sum extends IntConstraint<IntVar> {
 
-    public static final String
-            VAR_DECRCOEFFS = "var_decrcoeffs",
-            VAR_DOMOVERCOEFFS = "var_domovercoeffs",
-            VAL_TOTO = "domovercoeffs",
-            METRIC_COEFFS = "met_coeffs";
-
+//    public static final String
+//            VAR_DECRCOEFFS = "var_decrcoeffs",
+//            VAR_DOMOVERCOEFFS = "var_domovercoeffs",
+//            VAL_TOTO = "domovercoeffs",
+//            METRIC_COEFFS = "met_coeffs";
 
     public static int BIG_SUM_SIZE = 160;
     public static int BIG_SUM_GROUP = 20;
 
     final int[] coeffs;
     final int b;
-    final Operator op;
-
-    TObjectIntHashMap<IntVar> shared_map; // a shared map for interanl comparator
 
 
-    protected Sum(IntVar[] vars, int[] coeffs, int pos, Operator type, int b, Solver solver) {
+    protected Sum(IntVar[] vars, int[] coeffs, int pos, int b, Solver solver) {
         super(vars, solver);
         this.coeffs = coeffs.clone();
         this.b = b;
-        this.op = type;
-
-        if (vars.length > BIG_SUM_SIZE && type != Operator.NQ) {
-            setPropagators(new PropBigSum(vars, coeffs, pos, b, type));
+        if (vars.length > BIG_SUM_SIZE) {
+            setPropagators(new PropBigSum(vars, coeffs, pos, b));
         } else {
-            switch (type) {
-                case LE:
-                    setPropagators(new PropSumLeq(vars, coeffs, pos, b));
-                    break;
-                case GE:
-                    setPropagators(new PropSumGeq(vars, coeffs, pos, b));
-                    break;
-                case EQ:
-                    setPropagators(new PropSumEq(vars, coeffs, pos, b));
-                    break;
-                case NQ:
-                    setPropagators(new PropSumNeq(vars, coeffs, pos, b));
-                    break;
-                default:
-                    throw new SolverException("Unexpected operator for Sum");
-            }
+			setPropagators(new PropSumEq(vars, coeffs, pos, b));
         }
     }
 
@@ -104,7 +83,7 @@ public class Sum extends IntConstraint<IntVar> {
     ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static Sum build(IntVar[] vars, int[] coeffs, Operator op, int r, Solver solver) {
+    private static Sum build(IntVar[] vars, int[] coeffs, int r, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -128,33 +107,43 @@ public class Sum extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Sum(tmpV, tmpC, b, op, r, solver);
+        return new Sum(tmpV, tmpC, b, r, solver);
     }
 
-    public static Sum build(IntVar[] vars, int c, Operator op, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, op, c, solver);
-    }
-
-    public static Sum build(IntVar[] vars, IntVar b, Operator op, Solver solver) {
+	/**
+	 * Ensures that sum{vars[i]} = b
+	 * @param vars
+	 * @param b
+	 * @param solver
+	 * @return a sum constraint
+	 */
+    public static Sum buildSum(IntVar[] vars, IntVar b, Solver solver) {
         int[] cs = new int[vars.length + 1];
         Arrays.fill(cs, 1);
         cs[vars.length] = -1;
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[vars.length] = b;
-        return build(x, cs, op, 0, solver);
+        return build(x, cs, 0, solver);
     }
 
-    public static Sum build(IntVar[] vars, int[] coeffs, IntVar b, int c, Operator op, Solver solver) {
+	/**
+	 * Ensures that sum{vars[i]*coreffs[i]} = b*c
+	 * @param vars
+	 * @param coeffs
+	 * @param b
+	 * @param c
+	 * @param solver
+	 * @return a scalar product constraint
+	 */
+    public static Sum buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[x.length - 1] = b;
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
-        return build(x, cs, op, 0, solver);
+        return build(x, cs, 0, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +184,7 @@ public class Sum extends IntConstraint<IntVar> {
             } else {
                 z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
             }
-            solver.post(IntConstraintFactory.sum(new IntVar[]{a, b}, "=", z));
+            solver.post(IntConstraintFactory.sum(new IntVar[]{a, b},z));
             return z;
         }
     }
@@ -208,17 +197,7 @@ public class Sum extends IntConstraint<IntVar> {
         for (int i = 0; i < tuple.length; i++) {
             sum += coeffs[i] * tuple[i];
         }
-        switch (op) {
-            case EQ:
-                return ESat.eval(sum == b);
-            case GE:
-                return ESat.eval(sum >= b);
-            case LE:
-                return ESat.eval(sum <= b);
-            case NQ:
-                return ESat.eval(sum != b);
-        }
-        return ESat.UNDEFINED;
+		return ESat.eval(sum == b);
     }
 
     @Override
@@ -227,20 +206,7 @@ public class Sum extends IntConstraint<IntVar> {
         for (int i = 0; i < coeffs.length; i++) {
             linComb.append(coeffs[i]).append('*').append(vars[i].getName()).append(coeffs[i] < coeffs.length ? " +" : " ");
         }
-        switch (op) {
-            case EQ:
-                linComb.append(" = ");
-                break;
-            case NQ:
-                linComb.append(" =/= ");
-                break;
-            case GE:
-                linComb.append(" >= ");
-                break;
-            case LE:
-                linComb.append(" <= ");
-                break;
-        }
+		linComb.append(" = ");
         linComb.append(b);
         return linComb.toString();
     }

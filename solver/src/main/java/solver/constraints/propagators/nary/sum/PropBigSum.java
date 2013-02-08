@@ -36,7 +36,6 @@ package solver.constraints.propagators.nary.sum;
 
 import common.ESat;
 import memory.IStateInt;
-import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -67,7 +66,6 @@ public class PropBigSum extends Propagator<IntVar> {
     Node root;
     Node[] leafs;
     int index;
-    Operator type;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -84,7 +82,7 @@ public class PropBigSum extends Propagator<IntVar> {
      * @param vars
      * @param sum
      */
-    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum, Operator operator) {
+    public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum) {
         super(vars, PropagatorPriority.LINEAR, false);
         this.coeffs = coeffs;
         this.pos = pos;
@@ -92,10 +90,6 @@ public class PropBigSum extends Propagator<IntVar> {
         int nbLayers = computeNbLayers(vars.length);
         this.leafs = new Node[vars.length];
         this.root = new Node(nbLayers, null);
-        this.type = operator;
-        if (operator == Operator.NQ) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private int computeNbLayers(int nbElements) {
@@ -128,34 +122,24 @@ public class PropBigSum extends Propagator<IntVar> {
             }
         }
         // filter
-        switch (type) {
-            case LE:
-                filter_max(root, root.oldLB.get());
-                break;
-            case GE:
-                filter_min(root, root.oldUB.get());
-                break;
-            case EQ:
-                int max = root.oldUB.get();
-                filter_min(root, max);
-                int min = root.oldLB.get();
-                filter_max(root, root.oldLB.get());
-                while (max != root.oldUB.get() || min != root.oldLB.get()) {
-                    if (max != root.oldUB.get()) {
-                        max = root.oldUB.get();
-                        filter_min(root, max);
-                    }
-                    if (min != root.oldLB.get()) {
-                        min = root.oldLB.get();
-                        filter_max(root, root.oldLB.get());
-                    }
-                }
-        }
-    }
+		int max = root.oldUB.get();
+		filter_min(root, max);
+		int min = root.oldLB.get();
+		filter_max(root, root.oldLB.get());
+		while (max != root.oldUB.get() || min != root.oldLB.get()) {
+			if (max != root.oldUB.get()) {
+				max = root.oldUB.get();
+				filter_min(root, max);
+			}
+			if (min != root.oldLB.get()) {
+				min = root.oldLB.get();
+				filter_max(root, root.oldLB.get());
+			}
+		}
+	}
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-
         int dub, dlb;
         if (idxVarInProp < pos) {
             dub = vars[idxVarInProp].getUB() * coeffs[idxVarInProp] - leafs[idxVarInProp].oldUB.get();
@@ -190,33 +174,12 @@ public class PropBigSum extends Propagator<IntVar> {
             lb += vars[i].getUB() * coeffs[i];
             ub += vars[i].getLB() * coeffs[i];
         }
-        switch (type) {
-            case LE:
-                if (ub <= sum) {
-                    return ESat.TRUE;
-                } else if (lb > sum) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case GE:
-                if (lb >= sum) {
-                    return ESat.TRUE;
-                } else if (lb < sum) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-            case EQ:
-                if (ub == sum && lb == sum) {
-                    return ESat.TRUE;
-                } else if (lb > sum || ub < sum) {
-                    return ESat.FALSE;
-                }
-                return ESat.UNDEFINED;
-        }
-        if (isCompletelyInstantiated()) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+		if (ub == sum && lb == sum) {
+			return ESat.TRUE;
+		} else if (lb > sum || ub < sum) {
+			return ESat.FALSE;
+		}
+		return ESat.UNDEFINED;
     }
 
     private void filter_min(Node node, int rootub) throws ContradictionException {

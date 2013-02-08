@@ -120,7 +120,7 @@ public class BIBD extends AbstractProblem {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
                 //solver.post(IntConstraintFactory.count(1, score, L));
-                solver.post(IntConstraintFactory.sum(score, "=", L));
+                solver.post(IntConstraintFactory.sum(score, L));
             }
         }
         // Symmetry breaking
