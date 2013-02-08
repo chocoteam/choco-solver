@@ -45,7 +45,7 @@ import solver.variables.IntVar;
  * <ul>VAR op VAR,</ul>
  * <ul>VAR op VAR op CSTE</ul>
  * </li>
- * where VAR is a variable, CSTE a constant and op is an operator among {"==", "=/=","<", ">", "<=, ">="} or{"+", "-"}.
+ * where VAR is a variable, CSTE a constant and op is an operator among {"=", "!=","<", ">", "<=, ">="} or{"+", "-"}.
  *
  * @author Charles Prud'homme
  * @since 21/06/12
