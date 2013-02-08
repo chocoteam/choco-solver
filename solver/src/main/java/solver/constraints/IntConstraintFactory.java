@@ -67,14 +67,13 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
+import solver.constraints.propagators.reified.PropImplied;
+import solver.constraints.reified.ImplicationConstraint;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -117,6 +116,21 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
+	 /**
+	 * Implication constraint: BVAR => CSTR
+	  * Also called half reification constraint
+     * Ensures:<br/>
+     * - BVAR = 1 =>  CSTR is satisfied, <br/>
+     * - CSTR is not satisfied => BVAR = 0 <br/>
+     * <p/>
+     *
+     * @param BVAR  variable of reification
+     * @param CSTR the constraint to be satisfied when BVAR = 1
+     */
+    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
+        return new ImplicationConstraint(BVAR, CSTR);
+    }
+
     /**
      * Ensures VAR takes its values in TABLE
      *
@@ -157,6 +171,32 @@ public enum IntConstraintFactory {
      */
     public static NotMember not_member(IntVar VAR, int LB, int UB) {
         return new NotMember(VAR, LB, UB, VAR.getSolver());
+    }
+
+	 /**
+     * Ensures:<br/>
+     * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
+     * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
+     * <p/>
+     * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
+     * Example of use: <br/>
+     * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
+     * b1 is equal to 1 <=> v1 = 2, b1 is equal to 0 <=> v1 != 2.
+     *
+     * @param BVAR  variable of reification
+     * @param CSTR1 the constraint to be satisfied when BVAR = 1
+     * @param CSTR2 the constraint to be satisfied when BVAR = 0
+     */
+    public static Constraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
+//		Constraint c1 = implies(BVAR,CSTR1);
+//		Constraint c2 = implies(VariableFactory.not(BVAR),CSTR2);
+//		c1.addPropagators(c2.propagators);
+//		return c1;
+		Constraint c = new Constraint(new Variable[]{BVAR},BVAR.getSolver());
+		c.addPropagators(new PropImplied(BVAR,CSTR1));
+		c.addPropagators(new PropImplied(VariableFactory.not(BVAR),CSTR2));
+		return c;
+//        return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
 
     //##################################################################################################################
@@ -735,24 +775,6 @@ public enum IntConstraintFactory {
      */
     public static Regular regular(IntVar[] VARS, IAutomaton AUTOMATON) {
         return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
-    }
-
-    /**
-     * Ensures:<br/>
-     * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
-     * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
-     * <p/>
-     * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
-     * Example of use: <br/>
-     * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
-     * b1 is equal to 1 <=> v1 = 2, b1 is equal to 0 <=> v1 != 2.
-     *
-     * @param BVAR  variable of reification
-     * @param CSTR1 the constraint to be satisfied when BVAR = 1
-     * @param CSTR2 the constraint to be satisfied when BVAR = 0
-     */
-    public static ReifiedConstraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
-        return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
     }
 
 	/**
