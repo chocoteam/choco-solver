@@ -101,7 +101,7 @@ public class Partition extends AbstractProblem {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        heavy[0] = IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(1,solver), 0);
+        heavy[0] = IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(0,solver));
         solver.post(heavy[0]);
 
         IntVar[] sxy, sx, sy;
@@ -116,15 +116,15 @@ public class Partition extends AbstractProblem {
             solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
             solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
         }
-        heavy[1] = IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(1,solver), 0);
+        heavy[1] = IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(0,solver));
         solver.post(heavy[1]);
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        solver.post(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(1,solver), 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(1,solver), 2 * size * (2 * size + 1) / 4));
-        solver.post(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(1,solver), 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
-        solver.post(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(1,solver), 2 * size * (2 * size + 1) * (4 * size + 1) / 12));
+        solver.post(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
+        solver.post(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
+        solver.post(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
+        solver.post(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
 
         heavy[2] = IntConstraintFactory.alldifferent(xy, "BC");
         solver.post(heavy[2]);
