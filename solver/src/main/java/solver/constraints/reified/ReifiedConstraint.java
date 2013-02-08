@@ -77,8 +77,6 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         Propagator[] left = cons.propagators.clone();
         Propagator[] right = oppositeConstraint.propagators.clone();
         setPropagators(new PropReified(vars, left, right));
-//        addPropagators(left);
-//        addPropagators(right);
     }
 
     @Override
@@ -98,9 +96,4 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
     public String toString() {
         return vars[0].toString() + "<=>" + cons.toString() + " (" + oppcons.toString() + ")";
     }
-
-//    @Override
-//    public HeuristicVal getIterator(String name, Variable var) {
-//        throw new UnsupportedOperationException("ReifiedConstraint does not provide such a service");
-//    }
 }
