@@ -183,6 +183,21 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR1, op, VAR2, VAR1.getSolver());
     }
 
+	/**
+     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
+     *
+     * @param VAR1 first variable
+     * @param OP1  an operator
+     * @param VAR2 second variable
+     * @param OP2  another operator
+     * @param CSTE an operator
+     */
+    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
+        Operator op1 = Operator.get(OP1);
+        Operator op2 = Operator.get(OP2);
+        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
+    }
+	
     /**
      * Ensures: <br/>
      * |VAR1-VAR2| OP CSTE
@@ -239,21 +254,6 @@ public enum IntConstraintFactory {
     //##################################################################################################################
     //TERNARIES ########################################################################################################
     //##################################################################################################################
-
-    /**
-     * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
-     *
-     * @param VAR1 first variable
-     * @param OP1  an operator
-     * @param VAR2 second variable
-     * @param OP2  another operator
-     * @param CSTE an operator
-     */
-    public static Arithmetic arithm(IntVar VAR1, String OP1, IntVar VAR2, String OP2, int CSTE) {
-        Operator op1 = Operator.get(OP1);
-        Operator op2 = Operator.get(OP2);
-        return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
-    }
 
     /**
      * Ensures: <br/>
