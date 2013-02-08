@@ -29,16 +29,14 @@ package solver.constraints.reified;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import solver.Solver;
+import memory.structure.Operation;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.reified.PropImplied;
-import solver.constraints.propagators.reified.PropReified;
+import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.EventType;
 import solver.variables.Variable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implication constraint: boolean b => constraint c
@@ -50,39 +48,71 @@ import java.util.List;
  */
 public class ImplicationConstraint extends Constraint<Variable, Propagator<Variable>> {
 
-    private final Constraint cons;
+	// boolean variable of the reification
 	private final BoolVar bool;
+	// constraint to apply if bool = true
+	private final Constraint targetCons;
 
 	private static Variable[] extractVariable(BoolVar bVar, Constraint c) {
-        Variable[] varsC = c.getVariables();
-        for (int i = 0; i < varsC.length; i++) {
+		Variable[] varsC = c.getVariables();
+		for (int i = 0; i < varsC.length; i++) {
 			if(varsC[i]==bVar){
 				return varsC;
 			}
-        }
-        return ArrayUtils.append(new Variable[]{bVar},varsC);
-    }
-	
-    public ImplicationConstraint(BoolVar bVar, Constraint constraint) {
-        super(extractVariable(bVar,constraint), bVar.getSolver());
-        cons = constraint;
+		}
+		return ArrayUtils.append(new Variable[]{bVar},varsC);
+	}
+
+	public ImplicationConstraint(BoolVar bVar, Constraint constraint) {
+		super(extractVariable(bVar,constraint), bVar.getSolver());
+		targetCons = constraint;
 		bool = bVar;
-        setPropagators(new PropImplied(bVar, cons));
-    }
+		PropImplied reifProp = new PropImplied(bVar, this, targetCons);
+		setPropagators(ArrayUtils.append(new Propagator[]{reifProp}, targetCons.propagators.clone()));
+		for (int i = 1; i < propagators.length; i++) {
+			propagators[i].setReifiedSilent();
+			propagators[i].overrideCause(propagators[0]);
+		}
+	}
 
-    @Override
-    public ESat isSatisfied() {
-        if (bool.instantiated()) {
-            if (bool.getValue() == 1) {
-                return cons.isSatisfied();
-            }
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public void activate() throws ContradictionException {
+		assert bool.instantiated()&&bool.getBooleanValue()==ESat.TRUE;
+		for (int p = 1; p < propagators.length; p++) {
+			assert (propagators[p].isReifiedAndSilent());
+			propagators[p].setReifiedTrue();
+			propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
+			solver.getEngine().onPropagatorExecution(propagators[p]);
+		}
+	}
+
+	@Override
+	public ESat isSatisfied() {
+		if (bool.instantiated()) {
+			if (bool.getValue() == 1) {
+				return targetCons.isSatisfied();
+			}
 			return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
+		}
+		return ESat.UNDEFINED;
+	}
 
-    @Override
-    public String toString() {
-        return bool.toString() + "=>" + cons.toString();
-    }
+	@Override
+	public ESat isEntailed() {
+		if (bool.instantiated()) {
+			if (bool.getValue() == 1) {
+				return targetCons.isEntailed();
+			}
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
+
+	@Override
+	public String toString() {
+		return bool.toString() + "=>" + targetCons.toString();
+	}
 }

@@ -35,6 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -65,7 +66,8 @@ public class SetInReifBuilder implements IBuilder {
             return;
         }
         BoolVar r = exps.get(2).boolVarValue(solver);
-		solver.post(IntConstraintFactory.reified(r, cs[0], cs[1]));
+		solver.post(IntConstraintFactory.implies(r, cs[0]));
+		solver.post(IntConstraintFactory.implies(VariableFactory.not(r), cs[1]));
 
     }
 }

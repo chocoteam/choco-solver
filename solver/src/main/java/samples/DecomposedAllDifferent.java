@@ -90,7 +90,8 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     Constraint cA = IntConstraintFactory.member(X[j], p, q);
                     Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(IntConstraintFactory.reified(a, cA, ocA));
+                    solver.post(IntConstraintFactory.implies(a, cA));
+                    solver.post(IntConstraintFactory.implies(VariableFactory.not(a), ocA));
                 }
             }
         }

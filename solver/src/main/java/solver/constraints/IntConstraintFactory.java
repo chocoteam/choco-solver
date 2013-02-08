@@ -67,16 +67,11 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
-import solver.constraints.propagators.reified.PropImplied;
 import solver.constraints.reified.ImplicationConstraint;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.variables.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -121,11 +116,19 @@ public enum IntConstraintFactory {
 
 	 /**
 	 * Implication constraint: BVAR => CSTR
-	  * Also called half reification constraint
+	 * Also called half reification constraint
      * Ensures:<br/>
-     * - BVAR = 1 =>  CSTR is satisfied, <br/>
-     * - CSTR is not satisfied => BVAR = 0 <br/>
-     * <p/>
+     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
+     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
+	 *
+	 * Example : <br/>
+     * - <code>implies(b1, arithm(v1, "=", 2));</code>:
+     * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
+	 * But if b1 is equal to 0, nothing happens
+	 *
+	 * <p/> In order to have BVAR <=> CSTR please use two constraints:
+	 * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
+	 * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
      *
      * @param BVAR  variable of reification
      * @param CSTR the constraint to be satisfied when BVAR = 1
@@ -174,49 +177,6 @@ public enum IntConstraintFactory {
      */
     public static NotMember not_member(IntVar VAR, int LB, int UB) {
         return new NotMember(VAR, LB, UB, VAR.getSolver());
-    }
-
-	 /**
-     * Ensures:<br/>
-     * - BVAR = 1 =>  CSTR1 is satisfied, <br/>
-     * - BVAR = 0 =>  CSTR2 is satisfied<br/>
-     * <p/>
-	 * Thus, if CSTR1 = !CSTR2, then this constraint ensures that
-	 * BVAR = 1 <=> CSTR1 is satified
-	 *
-     * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
-     * Example 1: <br/>
-     * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
-     * b1 is equal to 1 <=> v1 = 2.
-	  *
-	 * Example 2: <br/>
-	 * - <code>reified(b1, arithm(x, ">", 2), arithm(y, "!=", 2));</code>:
-	 * b1 is equal to 1 => x = 2, b1 is equal to 0 => y != 2.
-	 * In this last example, CSTR1 and CSTR2 can be simultaneously satisfied
-     *
-     * @param BVAR  variable of reification
-     * @param CSTR1 the constraint to be satisfied when BVAR = 1
-     * @param CSTR2 the constraint to be satisfied when BVAR = 0
-     */
-    public static Constraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
-		Variable[] vars1 = CSTR1.getVariables();
-        Variable[] vars2 = CSTR2.getVariables();
-        List<Variable> union = new ArrayList<Variable>();
-        union.add(BVAR);
-        for (int i = 0; i < vars1.length; i++) {
-            if (!union.contains(vars1[i])) {
-                union.add(vars1[i]);
-            }
-        }
-        for (int i = 0; i < vars2.length; i++) {
-            if (!union.contains(vars2[i])) {
-                union.add(vars2[i]);
-            }
-        }
-		Constraint c = new Constraint(union.toArray(new Variable[union.size()]),BVAR.getSolver());
-		c.addPropagators(new PropImplied(BVAR,CSTR1));
-		c.addPropagators(new PropImplied(VariableFactory.not(BVAR),CSTR2));
-		return c;
     }
 
     //##################################################################################################################

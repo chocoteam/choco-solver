@@ -78,12 +78,14 @@ public class LexChainTest {
 
     private ALogicTree reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
-        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
+        solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(Y[i], ">", X[i])));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b1), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
         if (i == X.length - 1) {
             return Literal.pos(b1);
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
-            solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
+            solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(Y[i], "=", X[i])));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(b2), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
             return Node.or(Literal.pos(b1), Node.and(Literal.pos(b2), reformulate(i + 1, X, Y, solver)));
         }
     }

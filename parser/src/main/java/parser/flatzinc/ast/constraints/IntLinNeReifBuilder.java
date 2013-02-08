@@ -58,9 +58,11 @@ public class IntLinNeReifBuilder implements IBuilder {
 		int[] bounds = Sum.getScalarBounds(bs,as);
 		IntVar scalarVar = VariableFactory.bounded("scalar",bounds[0],bounds[1],solver);
 		solver.post(IntConstraintFactory.scalar(bs, as, scalarVar));
-		solver.post(IntConstraintFactory.reified(
+		solver.post(IntConstraintFactory.implies(
 				r,
-				IntConstraintFactory.arithm(scalarVar, "!=", c),
+				IntConstraintFactory.arithm(scalarVar, "!=", c)));
+		solver.post(IntConstraintFactory.implies(
+				VariableFactory.not(r),
 				IntConstraintFactory.arithm(scalarVar, "=", c)));
     }
 }
