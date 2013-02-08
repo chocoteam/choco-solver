@@ -100,16 +100,6 @@ public enum IntConstraintFactory {
 
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
 
-    /**
-     * Create an empty constraint to be filled with propagators
-     *
-     * @param solver
-     * @return an empty constraint to be filled with propagators
-     */
-    public static Constraint makeEmptyConstraint(Solver solver) {
-        return new Constraint(solver);
-    }
-
     //##################################################################################################################
     // UNARIES #########################################################################################################
     //##################################################################################################################
@@ -497,20 +487,18 @@ public enum IntConstraintFactory {
         return new CostRegular(VARS, COST, CAUTOMATON, VARS[0].getSolver());
     }
 
-    //TODO discussion remplacer ou non par GCC
-
     /**
      * Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
      * Enforce condition N = LIMIT to hold.
      * <p/>
-     * Based on Among constraint, ensures GAC.
+     * Based on GlobalCardinality constraint, ensures GAC.
      *
      * @param VALUE an int
      * @param VARS  a vector of variables
      * @param LIMIT a variable
      */
-    public static Among count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
-        return new Among(LIMIT, VARS, VALUE, LIMIT.getSolver());
+    public static GlobalCardinality count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
+        return global_cardinality(VARS, new int[]{VALUE}, new IntVar[]{LIMIT}, false);
     }
 
     /**
@@ -877,7 +865,7 @@ public enum IntConstraintFactory {
      */
     public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet) {
         Solver solver = nbArbo.getSolver();
-        Constraint c = makeEmptyConstraint(solver);
+        Constraint c = new Constraint(ArrayUtils.append(succs,new IntVar[]{nbArbo}),solver);
         c.setPropagators(new PropAntiArborescences(succs, offSet, false),
                 new PropKLoops(succs, nbArbo, offSet));
         return c;

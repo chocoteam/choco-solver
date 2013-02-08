@@ -54,12 +54,6 @@ public class Among extends IntConstraint<IntVar> {
 
     private final int[] values;
 
-    public Among(IntVar limit, IntVar[] vars, int value, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
-        values = new int[]{value};
-        setPropagators(new PropAmongGAC(this.vars, values));
-    }
-
     public Among(IntVar limit, IntVar[] vars, int[] values, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         TIntHashSet setValues = new TIntHashSet(values);
