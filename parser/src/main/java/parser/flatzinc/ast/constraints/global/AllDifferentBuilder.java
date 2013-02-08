@@ -46,11 +46,10 @@ import java.util.List;
 public class AllDifferentBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
-        if (vars.length == 1) {
-            return null;
+        if (vars.length > 1) {
+			solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
         }
-        return IntConstraintFactory.alldifferent(vars, "BC");
     }
 }

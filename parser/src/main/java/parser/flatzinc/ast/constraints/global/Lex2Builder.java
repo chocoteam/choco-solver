@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class Lex2Builder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] xs = exps.get(0).toIntVarArray(solver);
         int le = (int) Math.sqrt(xs.length);
         assert le * le == xs.length;
@@ -53,6 +53,6 @@ public class Lex2Builder implements IBuilder {
         for (int i = 0; i < le; i++) {
             ys[i] = Arrays.copyOfRange(xs, le * i, le * (i + 1));
         }
-        return IntConstraintFactory.lex_chain_less_eq(ys);
+        solver.post(IntConstraintFactory.lex_chain_less_eq(ys));
     }
 }

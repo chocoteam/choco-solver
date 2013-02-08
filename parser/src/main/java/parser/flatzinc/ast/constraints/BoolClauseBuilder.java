@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class BoolClauseBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar[] bs = exps.get(1).toBoolVarArray(solver);
 
@@ -59,7 +59,6 @@ public class BoolClauseBuilder implements IBuilder {
         for (int i = 0; i < bs.length; i++) {
             lits[i + al] = Literal.neg(bs[i]);
         }
-
-        return IntConstraintFactory.clauses(Node.or(lits), solver);
+		solver.post(IntConstraintFactory.clauses(Node.or(lits), solver));
     }
 }

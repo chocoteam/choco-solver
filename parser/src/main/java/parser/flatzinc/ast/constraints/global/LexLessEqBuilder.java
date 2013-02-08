@@ -44,9 +44,9 @@ import java.util.List;
  */
 public class LexLessEqBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] xs = exps.get(0).toIntVarArray(solver);
         IntVar[] ys = exps.get(1).toIntVarArray(solver);
-        return IntConstraintFactory.lex_less_eq(xs, ys);
+        solver.post(IntConstraintFactory.lex_less_eq(xs, ys));
     }
 }

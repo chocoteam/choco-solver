@@ -52,7 +52,7 @@ import java.util.List;
  */
 public class TableBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         // array[int] of var int: x, array[int, int] of int: t
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         int[] f_t = exps.get(1).toIntArray();
@@ -87,7 +87,7 @@ public class TableBuilder implements IBuilder {
                             new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
                 }
             }
-            return IntConstraintFactory.table(x[0], x[1], relation, "AC2001");
+            solver.post(IntConstraintFactory.table(x[0], x[1], relation, "AC2001"));
         } else {
             int[] o = new int[x.length];
             int[] d = new int[x.length];
@@ -95,10 +95,8 @@ public class TableBuilder implements IBuilder {
                 o[i] = x[i].getLB();
                 d[i] = x[i].getUB() - o[i] + 1;
             }
-
-
             LargeRelation list_t = new IterTuplesTable(t, o, d);
-            return IntConstraintFactory.table(x, list_t, "AC2001");
+            solver.post(IntConstraintFactory.table(x, list_t, "AC2001"));
         }
     }
 

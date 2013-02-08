@@ -45,7 +45,7 @@ import java.util.List;
 public class CircuitBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        return IntConstraintFactory.circuit(exps.get(0).toIntVarArray(solver), 1);
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        solver.post(IntConstraintFactory.circuit(exps.get(0).toIntVarArray(solver), 1));
     }
 }

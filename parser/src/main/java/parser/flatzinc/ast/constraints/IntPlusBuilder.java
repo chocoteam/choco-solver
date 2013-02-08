@@ -46,11 +46,11 @@ import java.util.List;
 public class IntPlusBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = new IntVar[2];
         vars[0] = exps.get(0).intVarValue(solver);
         vars[1] = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        return IntConstraintFactory.sum(vars, c);
+        solver.post(IntConstraintFactory.sum(vars, c));
     }
 }

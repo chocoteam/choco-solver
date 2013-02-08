@@ -210,4 +210,16 @@ public class Sum extends IntConstraint<IntVar> {
         linComb.append(b);
         return linComb.toString();
     }
+
+	public static int[] getScalarBounds(IntVar[] vars, int[] coefs){
+		int[] ext = new int[2];
+		int n = vars.length;
+		for(int i=0;i<n;i++){
+			ext[0] = Math.min(ext[0],vars[i].getLB()*coefs[i]);
+			ext[0] = Math.min(ext[0],vars[i].getUB()*coefs[i]);
+			ext[1] = Math.max(ext[1],vars[i].getLB()*coefs[i]);
+			ext[1] = Math.max(ext[1],vars[i].getUB()*coefs[i]);
+		}
+		return ext;
+	};
 }

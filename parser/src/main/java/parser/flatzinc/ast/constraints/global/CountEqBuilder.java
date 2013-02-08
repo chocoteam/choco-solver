@@ -45,28 +45,28 @@ import java.util.List;
  */
 public class CountEqBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         // array[int] of var int: x, var int: y, var int: c
-        if (false) {
-            IntVar[] x = exps.get(0).toIntVarArray(solver);
-            IntVar y = exps.get(1).intVarValue(solver);
-            IntVar c = exps.get(2).intVarValue(solver);
+//        if (false) {
+//            IntVar[] x = exps.get(0).toIntVarArray(solver);
+//            IntVar y = exps.get(1).intVarValue(solver);
+//            IntVar c = exps.get(2).intVarValue(solver);
+//
+//            int ylb = y.getLB();
+//            int yub = y.getUB();
+//            int nb = yub - ylb + 1;
+//
+//            IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
+//            for (int i = ylb; i <= yub; i++) {
+//                solver.post(IntConstraintFactory.count(i, x, cs[i - ylb]));
+//            }
+//            solver.post(IntConstraintFactory.element(c, cs, y, ylb));
+//        } else {
+		IntVar[] x = exps.get(0).toIntVarArray(solver);
+		int y = exps.get(1).intValue();
+		IntVar c = exps.get(2).intVarValue(solver);
 
-            int ylb = y.getLB();
-            int yub = y.getUB();
-            int nb = yub - ylb + 1;
-
-            IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
-            for (int i = ylb; i <= yub; i++) {
-                solver.post(IntConstraintFactory.count(i, x, cs[i - ylb]));
-            }
-            return IntConstraintFactory.element(c, cs, y, ylb);
-        } else {
-            IntVar[] x = exps.get(0).toIntVarArray(solver);
-            int y = exps.get(1).intValue();
-            IntVar c = exps.get(2).intVarValue(solver);
-
-            return IntConstraintFactory.count(y, x, c);
-        }
+		solver.post(IntConstraintFactory.count(y, x, c));
+//        }
     }
 }

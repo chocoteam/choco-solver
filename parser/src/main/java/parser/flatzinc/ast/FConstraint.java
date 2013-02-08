@@ -89,10 +89,8 @@ public final class FConstraint {
             builder = (IBuilder) loadManager(name);
             builders.put(id, builder);
         }
-        Constraint cstr = builder.build(aSolver, id, exps, annotations);
-        if (cstr != null)
-            aSolver.post(cstr);
-        readAnnotations(map, annotations, cstr);
+        builder.build(aSolver, id, exps, annotations);
+//        readAnnotations(map, annotations, cstr);
     }
 
 

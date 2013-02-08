@@ -48,11 +48,11 @@ import java.util.List;
  */
 public class ArrayBoolXorBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
         IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
         solver.post(IntConstraintFactory.sum(as, res));
-        return IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver));
+        solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
     }
 }

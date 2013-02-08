@@ -46,11 +46,11 @@ import java.util.List;
 public class AmongBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         //var int: n, array[int] of var int: x, set of int: v
         int n = exps.get(0).intValue();
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
         int[] values = exps.get(2).toIntArray();
-        return IntConstraintFactory.among(VariableFactory.fixed(n, solver), vars, values);
+        solver.post(IntConstraintFactory.among(VariableFactory.fixed(n, solver), vars, values));
     }
 }
