@@ -28,6 +28,7 @@
 package solver.constraints.propagators;
 
 
+import com.sun.org.apache.regexp.internal.RE;
 import common.ESat;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -88,52 +89,37 @@ import java.io.Serializable;
 public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
     private static final long serialVersionUID = 2L;
-
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
-
-    protected static final short NEW = 0, ACTIVE = 1, PASSIVE = 2;
-
     private final int ID; // unique id of this
-    /**
+
+	/**
      * List of <code>variable</code> objects
      */
     protected V[] vars;
-
     private int[] vindices;  // index of this within the list of propagator of the i^th variable
 
-    private Operation[] operations;
-
-    /**
-     * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
-     * to deal with internal backtrackable structure.
-     */
-    public IEnvironment environment;
-
+	protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
+	private Operation[] operations;
 
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
     private short state; // 0 : new -- 1 : active -- 2 : passive
-
     private int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
-
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
-
     protected int fails;
 
-    /**
-     * Declaring constraint
+	/**
+     * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
+     * to deal with internal backtrackable structure.
      */
+    public IEnvironment environment;
+    /** Declaring constraint */
     protected Constraint<V, Propagator<V>> constraint;
-
     protected final PropagatorPriority priority;
-
     protected final boolean reactOnPromotion;
-
     protected final Solver solver;
-
     private TIntSet set = new TIntHashSet();
-
     protected Propagator aCause; // cause of variable modifications.
     // The default value is 'this" but it can be overridden when using in reified propagator
 
@@ -185,6 +171,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     @Override
                     public void undo() {
                         state = NEW;
+                    }
+                },
+				new Operation() {
+                    @Override
+                    public void undo() {
+                        state = REIFIED;
                     }
                 },
                 new Operation() {
@@ -297,6 +289,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
+	public void setReifiedTrue() {
+        assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
+        state = ACTIVE;
+        environment.save(operations[REIFIED]);
+        // update activity mask of variables
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].recordMask(getPropagationConditions(v));
+        }
+    }
+
+	public void setReifiedSilent() {
+        assert isStateLess() : "the propagator was not stateless";
+        state = REIFIED;
+    }
+
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
@@ -311,6 +318,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public boolean isStateLess() {
         return state == NEW;
+    }
+
+	public boolean isReifiedAndSilent() {
+        return state == REIFIED;
     }
 
     public boolean isActive() {
@@ -356,12 +367,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         vindices[idx] = val;
     }
 
-    public void unlink() {
-        for (int v = 0; v < vars.length; v++) {
-            vars[v].unlink(this, vindices[v]);
-            vindices[v] = -1;
-        }
-    }
+//    public void unlink() {
+//        for (int v = 0; v < vars.length; v++) {
+//            vars[v].unlink(this, vindices[v]);
+//            vindices[v] = -1;
+//        }
+//    }
 
     /**
      * Returns the number of variables involved in <code>this</code>.
