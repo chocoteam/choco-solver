@@ -40,6 +40,7 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
@@ -146,6 +147,7 @@ public class Solver implements Serializable {
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
+		this.engine = NoPropagationEngine.singleton;
     }
 
     public Solver() {
@@ -251,7 +253,7 @@ public class Solver implements Serializable {
 
     private void _post(boolean cut, Constraint... cs) {
         boolean dynAdd = false;
-        if (engine != null && engine.isInitialized()) {
+        if (engine != NoPropagationEngine.singleton && engine.isInitialized()) {
             dynAdd = true;
         }
 
@@ -348,7 +350,7 @@ public class Solver implements Serializable {
 
     public Boolean solve() {
 //        assert isValid();
-        if (engine == null) {
+        if (engine == NoPropagationEngine.singleton) {
             this.set(new PropagatorEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
@@ -358,7 +360,7 @@ public class Solver implements Serializable {
 
     public void propagate() throws ContradictionException {
 //        assert isValid();
-        if (engine == null) {
+        if (engine == NoPropagationEngine.singleton) {
             this.set(new PropagatorEngine(this));
         }
         engine.propagate();
