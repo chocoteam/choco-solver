@@ -220,7 +220,8 @@ public class CountTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(IntConstraintFactory.reified(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval), IntConstraintFactory.arithm(vs[i], "!=", vval)));
+            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval)));
+			solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return IntConstraintFactory.sum(bs, occ);
     }

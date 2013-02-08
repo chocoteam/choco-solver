@@ -70,7 +70,10 @@ public enum EventType implements IEventType {
 	REMOVE_FROM_ENVELOPE(2048),
 
 	// META VARIABLE
-	META(4096);
+	META(4096),
+
+	//ALL FINE EVENTS (INTVAR+GRAPHVAR+SETVAR+METAVAR)
+	ALL_FINE_EVENTS(8188);
 
     public final int mask;
     public final int strengthened_mask;

@@ -67,14 +67,11 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
-import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.reified.ImplicationConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -115,6 +112,29 @@ public enum IntConstraintFactory {
     public static Arithmetic arithm(IntVar VAR, String OP, int CSTE) {
         Operator op = Operator.get(OP);
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
+    }
+
+	 /**
+	 * Implication constraint: BVAR => CSTR
+	 * Also called half reification constraint
+     * Ensures:<br/>
+     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
+     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
+	 *
+	 * Example : <br/>
+     * - <code>implies(b1, arithm(v1, "=", 2));</code>:
+     * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
+	 * But if b1 is equal to 0, nothing happens
+	 *
+	 * <p/> In order to have BVAR <=> CSTR please use two constraints:
+	 * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
+	 * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
+     *
+     * @param BVAR  variable of reification
+     * @param CSTR the constraint to be satisfied when BVAR = 1
+     */
+    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
+        return new ImplicationConstraint(BVAR, CSTR);
     }
 
     /**
@@ -197,7 +217,7 @@ public enum IntConstraintFactory {
         Operator op2 = Operator.get(OP2);
         return new Arithmetic(VAR1, op1, VAR2, op2, CSTE, VAR1.getSolver());
     }
-	
+
     /**
      * Ensures: <br/>
      * |VAR1-VAR2| OP CSTE
@@ -737,24 +757,6 @@ public enum IntConstraintFactory {
         return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
     }
 
-    /**
-     * Ensures:<br/>
-     * - BVAR = 1 <=>  CSTR1 is satisfied, <br/>
-     * - BVAR = 0 <=>  CSTR2 is satisfied<br/>
-     * <p/>
-     * Most of the time, CSTR2 is the negation of CSTR2, but this is not mandatory.
-     * Example of use: <br/>
-     * - <code>reified(b1, arithm(v1, "=", 2), arithm(v1, "!=", 2));</code>:
-     * b1 is equal to 1 <=> v1 = 2, b1 is equal to 0 <=> v1 != 2.
-     *
-     * @param BVAR  variable of reification
-     * @param CSTR1 the constraint to be satisfied when BVAR = 1
-     * @param CSTR2 the constraint to be satisfied when BVAR = 0
-     */
-    public static ReifiedConstraint reified(BoolVar BVAR, Constraint CSTR1, Constraint CSTR2) {
-        return new ReifiedConstraint(BVAR, CSTR1, CSTR2, BVAR.getSolver());
-    }
-
 	/**
      * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> = SCALAR.
      *
@@ -765,7 +767,7 @@ public enum IntConstraintFactory {
     public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
     }
-	
+
     /**
      * Creates a subcircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where

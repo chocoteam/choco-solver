@@ -224,4 +224,16 @@ public class Sum extends IntConstraint<IntVar> {
 		}
 		return ext;
 	};
+
+	public static int[] getSumBounds(IntVar[] vars){
+		int[] ext = new int[2];
+		int n = vars.length;
+		for(int i=0;i<n;i++){
+			int min = Math.min(0,vars[i].getLB());
+			int max = Math.max(0,vars[i].getUB());
+			ext[0] += min;
+			ext[1] += max;
+		}
+		return ext;
+	};
 }

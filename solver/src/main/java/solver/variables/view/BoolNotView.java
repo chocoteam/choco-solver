@@ -178,4 +178,8 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
             }
         };
     }
+
+	public String toString(){
+		return "not(" + var.getName() + ")";
+	}
 }

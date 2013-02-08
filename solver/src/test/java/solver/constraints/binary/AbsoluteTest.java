@@ -101,8 +101,10 @@ public class AbsoluteTest {
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
-        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.arithm(X,"=",Y), IntConstraintFactory.arithm(X,"!=",Y)));
-        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.arithm(X,"+",Y,"=",0), IntConstraintFactory.arithm(X,"+",Y,"!=",0)));
+        solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(X,"=",Y)));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b1), IntConstraintFactory.arithm(X,"!=",Y)));
+        solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(X,"+",Y,"=",0)));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b2), IntConstraintFactory.arithm(X,"+",Y,"!=",0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
@@ -118,8 +120,10 @@ public class AbsoluteTest {
         BoolVar b2 = VariableFactory.bool("b2", solver);
 
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
-        solver.post(IntConstraintFactory.reified(b1, IntConstraintFactory.arithm(X,"=",Y), IntConstraintFactory.arithm(X,"!=",Y)));
-        solver.post(IntConstraintFactory.reified(b2, IntConstraintFactory.arithm(X,"+",Y,"=",0), IntConstraintFactory.arithm(X,"+",Y,"!=",0)));
+        solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(X,"=",Y)));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b1), IntConstraintFactory.arithm(X,"!=",Y)));
+        solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(X,"+",Y,"=",0)));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b2), IntConstraintFactory.arithm(X,"+",Y,"!=",0)));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));

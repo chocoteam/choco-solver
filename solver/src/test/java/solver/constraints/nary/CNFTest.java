@@ -64,7 +64,8 @@ public class CNFTest {
                         Literal.neg(a)
                 ), solver));
             }
-            solver.post(IntConstraintFactory.reified(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+            solver.post(IntConstraintFactory.implies(b, IntConstraintFactory.arithm(x, ">=", y)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(b), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             System.out.printf("%d\n", solver.getMeasures().getSolutionCount());
