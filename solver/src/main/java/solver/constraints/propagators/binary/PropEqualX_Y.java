@@ -46,6 +46,7 @@ import solver.variables.delta.IIntDeltaMonitor;
 /**
  * X = Y
  * <p/>
+ * Ensures Arc-Consistency
  * <br/>
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
