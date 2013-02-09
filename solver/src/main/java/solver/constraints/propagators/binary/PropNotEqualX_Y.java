@@ -74,7 +74,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
-//        Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
+		//Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
         if (vars[vIdx].hasEnumeratedDomain()) {
             return EventType.INSTANTIATE.mask;
         }
@@ -94,18 +94,10 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            if (varIdx == 0) {
-                removeValV1();
-            } else {
-                removeValV0();
-            }
-        } else if (EventType.isBound(mask)) {
-            // typical case: A=[1,4], B=[1,4] (bounded domains)
-            // A instantiated to 3 => nothing can be done on B
-            // then B dec supp to 3 => 3 can also be removed du to A = 3.
-            propagate(EventType.FULL_PROPAGATION.mask);
-        }
+		// typical case: A=[1,4], B=[1,4] (bounded domains)
+		// A instantiated to 3 => nothing can be done on B
+		// then B dec supp to 3 => 3 can also be removed du to A = 3.
+		propagate(0);
     }
 
     private void removeValV0() throws ContradictionException {
