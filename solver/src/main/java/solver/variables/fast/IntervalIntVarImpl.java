@@ -27,7 +27,6 @@
 
 package solver.variables.fast;
 
-import com.sun.istack.internal.NotNull;
 import common.util.iterators.DisposableRangeBoundIterator;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueBoundIterator;
