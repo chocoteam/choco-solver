@@ -126,6 +126,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		updateBounds();
 		if(x.instantiated()){
+			assert (y.instantiated());
 			setPassive();
 		}else if(bothEnumerated){
 			indexToFilter = 1-varIdx;

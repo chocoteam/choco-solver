@@ -28,7 +28,7 @@ package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
 import common.ESat;
-import common.util.procedure.UnaryIntProcedure;
+import common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -45,62 +45,51 @@ import solver.variables.delta.IIntDeltaMonitor;
  * <p/>
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 1 oct. 2010
  */
 
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropEqualX_YC extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
-    int cste;
 
-    IIntDeltaMonitor[] idms;
-
-    protected final RemProc rem_proc;
+	private IntVar x,y;
+	private final int cste;
+	// incremental filtering of enumerated domains
+	private boolean bothEnumerated;
+	private IIntDeltaMonitor[] idms;
+	private RemProc rem_proc;
+	private int indexToFilter;
+	private int offSet;
 
     @SuppressWarnings({"unchecked"})
     public PropEqualX_YC(IntVar[] vars, int c) {
         super(vars.clone(), PropagatorPriority.BINARY, true);
-        this.x = vars[0];
-        this.y = vars[1];
-        this.cste = c;
-        idms = new IIntDeltaMonitor[2];
-        idms[0] = vars[0].hasEnumeratedDomain() ? vars[0].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        idms[1] = vars[1].hasEnumeratedDomain() ? vars[1].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-        rem_proc = new RemProc(this);
+		this.x = vars[0];
+		this.y = vars[1];
+		this.cste = c;
+		if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()){
+			bothEnumerated = true;
+			idms = new IIntDeltaMonitor[2];
+			idms[0] = vars[0].monitorDelta(this);
+			idms[1] = vars[1].monitorDelta(this);
+			rem_proc = new RemProc(this);
+		}
     }
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
-    }
-
-    private void updateInfV0() throws ContradictionException {
-        x.updateLowerBound(y.getLB() + cste, aCause);
-    }
-
-    private void updateInfV1() throws ContradictionException {
-        y.updateLowerBound(x.getLB() - cste, aCause);
-    }
-
-    private void updateSupV0() throws ContradictionException {
-        x.updateUpperBound(y.getUB() + cste, aCause);
-    }
-
-    private void updateSupV1() throws ContradictionException {
-        y.updateUpperBound(x.getUB() - cste, aCause);
-    }
+	public int getPropagationConditions(int vIdx) {
+		if(bothEnumerated)
+			return EventType.INT_ALL_MASK();
+		else
+			return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+	}
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        updateInfV0();
-        updateSupV0();
-        updateInfV1();
-        updateSupV1();
+        updateBounds();
         // ensure that, in case of enumerated domains, holes are also propagated
-        if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
+        if (bothEnumerated) {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(val - cste)) {
@@ -113,56 +102,44 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                     y.removeValue(val, aCause);
                 }
             }
+			idms[0].unfreeze();
+			idms[1].unfreeze();
         }
+		if (x.instantiated()) {
+			assert (y.instantiated());
+			setPassive();
+		}
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else {
-            if (EventType.isBound(mask)) {
-                if (EventType.isInclow(mask)) {
-                    this.awakeOnLow(varIdx);
-
-                }
-                if (EventType.isDecupp(mask)) {
-                    this.awakeOnUpp(varIdx);
-
-                }
-            }
-            if (EventType.isRemove(mask)) {
-//                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].freeze();
-                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
-                idms[varIdx].unfreeze();
-            }
-        }
+        updateBounds();
+		if(x.instantiated()){
+			assert (y.instantiated());
+			setPassive();
+		}else if(bothEnumerated){
+			if(varIdx==0){
+				indexToFilter = 1;
+				offSet = -cste;
+			}else{
+				indexToFilter = 0;
+				offSet = cste;
+			}
+			idms[varIdx].freeze();
+			idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+			idms[varIdx].unfreeze();
+		}
     }
 
-    void awakeOnInst(int index) throws ContradictionException {
-        if (index == 0) y.instantiateTo(x.getValue() - cste, aCause);
-        else x.instantiateTo(y.getValue() + cste, aCause);
-    }
-
-    void awakeOnLow(int index) throws ContradictionException {
-        if (index == 0) updateSupV1();
-        else updateSupV0();
-    }
-
-    void awakeOnUpp(int index) throws ContradictionException {
-        if (index == 0) updateInfV1();
-        else updateInfV0();
-    }
-
-
-    void awakeOnRem(int index, int val) throws ContradictionException {
-        if (index == 0) {
-            y.removeValue(val - cste, aCause);
-        } else {
-            x.removeValue(val + cste, aCause);
-        }
-    }
+	private void updateBounds() throws ContradictionException {
+		x.updateLowerBound(y.getLB()+cste, aCause);
+		x.updateUpperBound(y.getUB()+cste, aCause);
+		y.updateLowerBound(x.getLB()-cste, aCause);
+		y.updateUpperBound(x.getUB()-cste, aCause);
+		if(y.getLB()!=x.getLB()-cste || y.getUB()!=x.getUB()-cste){
+			updateBounds();
+		}
+	}
 
     @Override
     public ESat isEntailed() {
@@ -181,7 +158,6 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     @Override
     public void explain(Deduction d, Explanation e) {
         //     return super.explain(d);
-
         if (d.getVar() == x) {
             e.add(this);
             if (d instanceof ValueRemoval) {
@@ -205,30 +181,25 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName())
-                .append("+").append(cste).append(")");
+        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName());
+		if(cste!=0){
+			bf.append("+").append(cste);
+		}
+		bf.append(")");
         return bf.toString();
     }
 
-    private static class RemProc implements UnaryIntProcedure<Integer> {
-
+    private static class RemProc implements IntProcedure {
 
         private final PropEqualX_YC p;
-        private int idxVar;
 
         public RemProc(PropEqualX_YC p) {
             this.p = p;
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
-        }
-
-        @Override
         public void execute(int i) throws ContradictionException {
-            p.awakeOnRem(idxVar, i);
+			p.vars[p.indexToFilter].removeValue(i+p.offSet, p.aCause);
         }
     }
 }
