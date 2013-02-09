@@ -71,7 +71,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 			idms = new IIntDeltaMonitor[2];
 			idms[0] = vars[0].monitorDelta(this);
 			idms[1] = vars[1].monitorDelta(this);
-			rem_proc = new RemProc(this);
+			rem_proc = new RemProc();
 		}
 	}
 
@@ -149,17 +149,10 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 			return ESat.UNDEFINED;
 	}
 
-	private static class RemProc implements IntProcedure {
-
-		private final PropEqualX_Y p;
-
-		public RemProc(PropEqualX_Y p) {
-			this.p = p;
-		}
-
+	private class RemProc implements IntProcedure {
 		@Override
 		public void execute(int i) throws ContradictionException {
-			p.vars[p.indexToFilter].removeValue(i, p.aCause);
+			vars[indexToFilter].removeValue(i, aCause);
 		}
 	}
 
@@ -189,6 +182,5 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 		} else {
 			super.explain(d, e);
 		}
-
 	}
 }
