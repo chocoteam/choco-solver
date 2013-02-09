@@ -28,7 +28,6 @@
 package solver.constraints.propagators;
 
 
-import com.sun.org.apache.regexp.internal.RE;
 import common.ESat;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -92,14 +91,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     private final int ID; // unique id of this
 
-	/**
+    /**
      * List of <code>variable</code> objects
      */
     protected V[] vars;
     private int[] vindices;  // index of this within the list of propagator of the i^th variable
 
-	protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
-	private Operation[] operations;
+    protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
+    private Operation[] operations;
 
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
@@ -109,19 +108,22 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
     protected int fails;
 
-	/**
+    /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
      */
     public IEnvironment environment;
-    /** Declaring constraint */
+    /**
+     * Declaring constraint
+     */
     protected Constraint<V, Propagator<V>> constraint;
     protected final PropagatorPriority priority;
     protected final boolean reactOnPromotion;
     protected final Solver solver;
     private TIntSet set = new TIntHashSet();
-    protected Propagator aCause; // cause of variable modifications.
-    // The default value is 'this" but it can be overridden when using in reified propagator
+
+    // cause of variable modifications. The default value is 'this"
+    protected Propagator aCause;
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private <V extends Variable> void checkVariable(V[] vars) {
@@ -173,7 +175,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                         state = NEW;
                     }
                 },
-				new Operation() {
+                new Operation() {
                     @Override
                     public void undo() {
                         state = REIFIED;
@@ -203,16 +205,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void defineIn(Constraint c) {
         this.constraint = c;
-    }
-
-    /**
-     * Overrides the default cause of this.
-     * This is commonly used when this is declared
-     *
-     * @param nCause the new cause.
-     */
-    public void overrideCause(Propagator<Variable> nCause) {
-        this.aCause = nCause;
     }
 
     /**
@@ -289,7 +281,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
-	public void setReifiedTrue() {
+    public void setReifiedTrue() {
         assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
         state = ACTIVE;
         environment.save(operations[REIFIED]);
@@ -299,7 +291,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
-	public void setReifiedSilent() {
+    public void setReifiedSilent() {
         assert isStateLess() : "the propagator was not stateless";
         state = REIFIED;
     }
@@ -310,17 +302,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         state = PASSIVE;
         environment.save(operations[ACTIVE]);
         //TODO: update var mask back
-        // to handle properly reified constraint, the cause must be checked
-        if (aCause == this) {
-            solver.getEngine().desactivatePropagator(this);
-        }
+        solver.getEngine().desactivatePropagator(this);
     }
 
     public boolean isStateLess() {
         return state == NEW;
     }
 
-	public boolean isReifiedAndSilent() {
+    public boolean isReifiedAndSilent() {
         return state == REIFIED;
     }
 
@@ -481,7 +470,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    public void contradiction( Variable variable, String message) throws ContradictionException {
+    public void contradiction(Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(aCause, variable, message);
     }
 
