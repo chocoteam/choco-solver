@@ -78,31 +78,16 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
         }
     }
 
-
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else {
-            if (EventType.isInclow(mask)) {
-                x.updateLowerBound(y.getLB(), aCause);
-            }
-            if (EventType.isDecupp(mask)) {
-                y.updateUpperBound(x.getUB(), aCause);
-            }
-        }
-        if (x.getLB() >= y.getUB()) {
-            this.setPassive();
-        }
-    }
-
-    void awakeOnInst(int idx) throws ContradictionException {
-        if (idx == 0) {
+        if (varIdx == 0) {
             y.updateUpperBound(x.getUB(), aCause);
         } else {
             x.updateLowerBound(y.getLB(), aCause);
         }
-
+        if (x.getLB() >= y.getUB()) {
+            this.setPassive();
+        }
     }
 
     @Override

@@ -62,7 +62,7 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
     }
 
 
@@ -77,13 +77,11 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
-            if (idxVarInProp == 0) {
-                y.updateLowerBound(this.cste - x.getUB(), aCause);
-            } else {
-                x.updateLowerBound(this.cste - y.getUB(), aCause);
-            }
-        } // else LOWER BOUND => check entailment
+		if (idxVarInProp == 0) {
+			y.updateLowerBound(this.cste - x.getUB(), aCause);
+		} else {
+			x.updateLowerBound(this.cste - y.getUB(), aCause);
+		}
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
