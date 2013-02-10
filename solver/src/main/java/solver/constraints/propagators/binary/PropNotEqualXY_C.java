@@ -85,26 +85,26 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
             removeValV1();
         } else if (y.instantiated()) {
             removeValV0();
-        }
+        } else if (x.getLB()+y.getLB()>cste || x.getUB()+y.getUB()<cste){
+			setPassive();
+		}
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-		propagate(EventType.FULL_PROPAGATION.mask);
+		propagate(0);
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(cste - y.getValue(), aCause)) {
-            this.setPassive();
-        } else if (!x.contains(cste - y.getValue())) {
+        if (x.removeValue(cste - y.getValue(), aCause)
+		|| !x.contains(cste - y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(cste - x.getValue(), aCause)) {
-            this.setPassive();
-        } else if (!y.contains(cste - x.getValue())) {
+        if (y.removeValue(cste - x.getValue(), aCause)
+		|| !y.contains(cste - x.getValue())) {
             this.setPassive();
         }
     }

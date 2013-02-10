@@ -101,17 +101,15 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue() + this.cste, aCause)) {
-            this.setPassive();
-        } else if (!x.contains(y.getValue() + cste)) {
+        if (x.removeValue(y.getValue() + this.cste, aCause)
+		|| !x.contains(y.getValue() + cste)) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue() - this.cste, aCause)) {
-            this.setPassive();
-        } else if (!y.contains(x.getValue() - cste)) {
+        if (y.removeValue(x.getValue() - this.cste, aCause)
+		|| !y.contains(x.getValue() - cste)) {
             this.setPassive();
         }
     }

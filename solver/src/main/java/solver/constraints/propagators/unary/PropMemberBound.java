@@ -68,7 +68,7 @@ public class PropMemberBound extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        propagate(EventType.FULL_PROPAGATION.mask);
+        propagate(0);
     }
 
     @Override
