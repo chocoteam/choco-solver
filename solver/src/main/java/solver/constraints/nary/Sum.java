@@ -83,7 +83,7 @@ public class Sum extends IntConstraint<IntVar> {
     ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static Sum build(IntVar[] vars, int[] coeffs, int r, Solver solver) {
+    private static Sum build(IntVar[] vars, int[] coeffs, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -107,7 +107,7 @@ public class Sum extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Sum(tmpV, tmpC, b, r, solver);
+        return new Sum(tmpV, tmpC, b, 0, solver);
     }
 
 	/**
@@ -124,7 +124,7 @@ public class Sum extends IntConstraint<IntVar> {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[vars.length] = b;
-        return build(x, cs, 0, solver);
+        return build(x, cs, solver);
     }
 
 	/**
@@ -143,7 +143,7 @@ public class Sum extends IntConstraint<IntVar> {
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
-        return build(x, cs, 0, solver);
+        return build(x, cs, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
