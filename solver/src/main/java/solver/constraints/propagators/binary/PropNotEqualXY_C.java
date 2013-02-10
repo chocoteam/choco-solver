@@ -85,39 +85,27 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
             removeValV1();
         } else if (y.instantiated()) {
             removeValV0();
-        }
+        } else if (x.getLB()+y.getLB()>cste || x.getUB()+y.getUB()<cste){
+			setPassive();
+		}
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else if (EventType.isBound(mask)) {
-            propagate(EventType.FULL_PROPAGATION.mask);
-        }
+		propagate(0);
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(cste - y.getValue(), aCause)) {
-            this.setPassive();
-        } else if (!x.contains(cste - y.getValue())) {
+        if (x.removeValue(cste - y.getValue(), aCause)
+		|| !x.contains(cste - y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(cste - x.getValue(), aCause)) {
+        if (y.removeValue(cste - x.getValue(), aCause)
+		|| !y.contains(cste - x.getValue())) {
             this.setPassive();
-        } else if (!y.contains(cste - x.getValue())) {
-            this.setPassive();
-        }
-    }
-
-    void awakeOnInst(int index) throws ContradictionException {
-        if (index == 0) {
-            removeValV1();
-        } else {
-            removeValV0();
         }
     }
 
@@ -137,7 +125,6 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     @Override
     public void explain(Deduction d, Explanation e) {
         Variable var = d.getVar();
-
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
             y.explain(VariableState.DOM, e);

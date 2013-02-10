@@ -63,13 +63,14 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].instantiateTo(constant, aCause);
-        setPassive();
+		if(vars[0].instantiateTo(constant, aCause) || vars[0].instantiated()){// view precaution
+        	setPassive();
+		}
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(EventType.FULL_PROPAGATION.mask);
+        propagate(0);
     }
 
     @Override

@@ -68,10 +68,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        // with views such as abs(...), the prop can be not entailed after initial propagation
-        if (vars[0].updateUpperBound(constant, aCause) || vars[0].getUB() <= constant) {
-            this.setPassive();
-        }
+        propagate(0);
     }
 
     @Override

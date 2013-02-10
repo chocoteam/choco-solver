@@ -83,7 +83,7 @@ public class Sum extends IntConstraint<IntVar> {
     ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static Sum build(IntVar[] vars, int[] coeffs, int r, Solver solver) {
+    private static Sum build(IntVar[] vars, int[] coeffs, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -107,7 +107,7 @@ public class Sum extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Sum(tmpV, tmpC, b, r, solver);
+        return new Sum(tmpV, tmpC, b, 0, solver);
     }
 
 	/**
@@ -124,7 +124,7 @@ public class Sum extends IntConstraint<IntVar> {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[vars.length] = b;
-        return build(x, cs, 0, solver);
+        return build(x, cs, solver);
     }
 
 	/**
@@ -143,7 +143,7 @@ public class Sum extends IntConstraint<IntVar> {
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
-        return build(x, cs, 0, solver);
+        return build(x, cs, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,8 +213,7 @@ public class Sum extends IntConstraint<IntVar> {
 
 	public static int[] getScalarBounds(IntVar[] vars, int[] coefs){
 		int[] ext = new int[2];
-		int n = vars.length;
-		for(int i=0;i<n;i++){
+		for(int i=0;i<vars.length;i++){
 			int min = Math.min(0,vars[i].getLB()*coefs[i]);
 				min = Math.min(min,vars[i].getUB()*coefs[i]);
 			int max = Math.max(0,vars[i].getLB()*coefs[i]);
@@ -227,12 +226,9 @@ public class Sum extends IntConstraint<IntVar> {
 
 	public static int[] getSumBounds(IntVar[] vars){
 		int[] ext = new int[2];
-		int n = vars.length;
-		for(int i=0;i<n;i++){
-			int min = Math.min(0,vars[i].getLB());
-			int max = Math.max(0,vars[i].getUB());
-			ext[0] += min;
-			ext[1] += max;
+		for(int i=0;i<vars.length;i++){
+			ext[0] += vars[i].getLB();
+			ext[1] += vars[i].getUB();
 		}
 		return ext;
 	};

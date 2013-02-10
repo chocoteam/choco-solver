@@ -64,16 +64,14 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].removeValue(constant, aCause)) {
-            this.setPassive();
-        } else if (!vars[0].contains(constant)) {
+        if (vars[0].removeValue(constant, aCause) || !vars[0].contains(constant)) {
             this.setPassive();
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(EventType.FULL_PROPAGATION.mask);
+        propagate(0);
     }
 
     @Override

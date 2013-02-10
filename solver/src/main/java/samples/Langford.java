@@ -61,10 +61,10 @@ import solver.variables.VariableFactory;
 public class Langford extends AbstractProblem {
 
     @Option(name = "-k", usage = "Number of sets.", required = false)
-    private int k = 2;
+    private int k = 3;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 10;
+    private int n = 9;
 
     IntVar[] position;
 

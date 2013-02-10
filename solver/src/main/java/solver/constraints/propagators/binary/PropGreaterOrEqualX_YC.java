@@ -82,20 +82,11 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            if (idxVarInProp == 0) {
-                y.updateUpperBound(x.getUB() - this.cste, aCause);
-            } else {
-                x.updateLowerBound(y.getLB() + this.cste, aCause);
-            }
-        } else {
-            if (EventType.isInclow(mask)) {
-                x.updateLowerBound(y.getLB() + this.cste, aCause);
-            }
-            if (EventType.isDecupp(mask)) {
-                y.updateUpperBound(x.getUB() - this.cste, aCause);
-            }
-        }
+		if (idxVarInProp == 0) {
+			y.updateUpperBound(x.getUB() - this.cste, aCause);
+		} else {
+			x.updateLowerBound(y.getLB() + this.cste, aCause);
+		}
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
         }
