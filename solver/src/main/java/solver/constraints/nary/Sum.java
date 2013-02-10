@@ -213,8 +213,7 @@ public class Sum extends IntConstraint<IntVar> {
 
 	public static int[] getScalarBounds(IntVar[] vars, int[] coefs){
 		int[] ext = new int[2];
-		int n = vars.length;
-		for(int i=0;i<n;i++){
+		for(int i=0;i<vars.length;i++){
 			int min = Math.min(0,vars[i].getLB()*coefs[i]);
 				min = Math.min(min,vars[i].getUB()*coefs[i]);
 			int max = Math.max(0,vars[i].getLB()*coefs[i]);
@@ -227,12 +226,9 @@ public class Sum extends IntConstraint<IntVar> {
 
 	public static int[] getSumBounds(IntVar[] vars){
 		int[] ext = new int[2];
-		int n = vars.length;
-		for(int i=0;i<n;i++){
-			int min = Math.min(0,vars[i].getLB());
-			int max = Math.max(0,vars[i].getUB());
-			ext[0] += min;
-			ext[1] += max;
+		for(int i=0;i<vars.length;i++){
+			ext[0] += vars[i].getLB();
+			ext[1] += vars[i].getUB();
 		}
 		return ext;
 	};
