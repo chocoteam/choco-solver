@@ -148,7 +148,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         int nbKer = 0;
         int index = 0;
         kerRepresentant.clear();
-        for (int i = minIndex; i < maxIndex; i++) {
+        for (int i = minIndex; i <= maxIndex; i++) {
             for (int k = bound[i].size() - 1; k >= 0; k--) {
                 node = bound[i].get(k);
                 orderedNodes[index++] = node;
@@ -253,8 +253,6 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateLowerBound(1, aCause);
-        vars[n].updateUpperBound(n, aCause);
         computeBounds();
         sortLB();
         pruneLB();
