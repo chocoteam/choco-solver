@@ -100,13 +100,17 @@ public class PropNValues_Light extends Propagator<IntVar> {
             boolean possible = false;
             boolean mandatory = false;
             mate[i] = -1;
+			int value = concernedValues.get(i);
             for (int v = 0; v < n; v++) {
-                if (vars[v].contains(concernedValues.get(i))) {
+                if (vars[v].contains(value)) {
                     possible = true;
                     if (mate[i] == -1) {
                         mate[i] = v;
                     } else {
                         mate[i] = -2;
+						if(mandatory){
+							break;
+						}
                     }
                     if (vars[v].instantiated()) {
                         mandatory = true;
@@ -122,13 +126,14 @@ public class PropNValues_Light extends Propagator<IntVar> {
             if (mandatory) {
                 count++;
             } else {
-                unusedValues[idx++] = concernedValues.get(i);
+                unusedValues[idx++] = value;
             }
         }
         // filtering cardinality variable
         nValues.updateLowerBound(count, aCause);
         nValues.updateUpperBound(countMax, aCause);
         // filtering decision variables
+		if(count!=countMax && nValues.instantiated())
         if (count == nValues.getUB()) {
             int val;
             for (int i = 0; i < idx; i++) {
@@ -150,6 +155,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
                     vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
                 }
             }
+			setPassive();
         }
     }
 
