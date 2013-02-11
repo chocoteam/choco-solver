@@ -24,37 +24,49 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables;
 
-package parser.flatzinc.ast.constraints;
-
-import common.util.tools.StringUtils;
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.search.strategy.IntStrategyFactory;
 
-import java.util.List;
+import java.util.Random;
 
 /**
- * &#8721; i &#8712; 1..n: as[i].bs[i] &#8804; c where n is the common length of as and bs
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 11/02/13
  */
-public class IntLinLeBuilder implements IBuilder {
+public class BoolNotViewTest {
 
-    @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        int[] as = exps.get(0).toIntArray();
-        IntVar[] bs = exps.get(1).toIntVarArray(solver);
-        int c = exps.get(2).intValue();
-        int[] bounds = Sum.getScalarBounds(bs, as);
-        bounds[1] = Math.min(bounds[1], c);
-        IntVar scalar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        solver.post(IntConstraintFactory.scalar(bs, as, scalar));
+    @Test(groups = "10s")
+    public void test1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 2000; seed++) {
+            random.setSeed(seed);
+            Solver ref = new Solver();
+            {
+                BoolVar[] xs = new BoolVar[2];
+                xs[0] = VariableFactory.bool("x", ref);
+                xs[1] = VariableFactory.bool("y", ref);
+                ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(1, ref)));
+                ref.set(IntStrategyFactory.random(xs, seed));
+            }
+            Solver solver = new Solver();
+            {
+                BoolVar[] xs = new BoolVar[2];
+                xs[0] = VariableFactory.bool("x", solver);
+                xs[1] = VariableFactory.not(xs[0]);
+                solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(1, solver)));
+                solver.set(IntStrategyFactory.random(xs, seed));
+            }
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+
+        }
     }
 }

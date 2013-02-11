@@ -30,8 +30,7 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.nary.MinOfAList;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -48,6 +47,6 @@ public class MinimumBuilder implements IBuilder {
         // var int: m, array[int] of var int: x
         IntVar m = exps.get(0).intVarValue(solver);
         IntVar[] x = exps.get(1).toIntVarArray(solver);
-        solver.post(new MinOfAList(m, x, solver));
+        solver.post(IntConstraintFactory.minimum(m, x));
     }
 }

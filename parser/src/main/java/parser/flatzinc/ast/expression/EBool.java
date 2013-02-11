@@ -73,6 +73,16 @@ public final class EBool extends Expression {
     }
 
     @Override
+    public boolean boolValue() {
+        return value;
+    }
+
+    @Override
+    public boolean[] toBoolArray() {
+        return new boolean[]{boolValue()};
+    }
+
+    @Override
     public BoolVar boolVarValue(Solver solver) {
         return (BoolVar) VariableFactory.fixed(intValue(), solver);
     }

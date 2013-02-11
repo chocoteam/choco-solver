@@ -38,8 +38,8 @@ import solver.variables.Variable;
  * regarding all or part of <code>Constraint</code> network.
  * Empty domain, instantiation to an out-of-domain value, etc. throws contradiction.
  * <p/>
- * For performance consideration, a <code>ContradictionException</code> is created everytime a contradiction
- * occurs. A unique object is build and set with specific case informations.
+ * For performance consideration, a <code>ContradictionException</code> is created every time a contradiction
+ * occurs. A unique object is build and set with specific case information.
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
@@ -59,7 +59,7 @@ public final class ContradictionException extends Exception {
     }
 
     /**
-     * Throws the unique <code>ContradictionException</code> filled with the specified paramaters.
+     * Throws the unique <code>ContradictionException</code> filled with the specified parameters.
      *
      * @param c the constraint at the origin of the contradiction
      * @param v the variable concerned by the contradiction

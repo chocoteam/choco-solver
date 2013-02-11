@@ -27,10 +27,10 @@
 
 package parser.flatzinc.ast.constraints;
 
+import common.util.tools.StringUtils;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
@@ -51,18 +51,19 @@ public class IntLinNeReifBuilder implements IBuilder {
     @Override
     public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         int[] as = exps.get(0).toIntArray();
-        IntVar[] bs = exps.get(1).toIntVarArray(solver);
+        IntVar[] bs =
+                exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
 
         BoolVar r = exps.get(3).boolVarValue(solver);
-		int[] bounds = Sum.getScalarBounds(bs,as);
-		IntVar scalarVar = VariableFactory.bounded("scalar",bounds[0],bounds[1],solver);
-		solver.post(IntConstraintFactory.scalar(bs, as, scalarVar));
-		solver.post(IntConstraintFactory.implies(
-				r,
-				IntConstraintFactory.arithm(scalarVar, "!=", c)));
-		solver.post(IntConstraintFactory.implies(
-				VariableFactory.not(r),
-				IntConstraintFactory.arithm(scalarVar, "=", c)));
+        int[] bounds = Sum.getScalarBounds(bs, as);
+        IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
+        solver.post(IntConstraintFactory.scalar(bs, as, scalarVar));
+        solver.post(IntConstraintFactory.implies(
+                r,
+                IntConstraintFactory.arithm(scalarVar, "!=", c)));
+        solver.post(IntConstraintFactory.implies(
+                VariableFactory.not(r),
+                IntConstraintFactory.arithm(scalarVar, "=", c)));
     }
 }
