@@ -147,7 +147,7 @@ public class Solver implements Serializable {
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
-		this.engine = NoPropagationEngine.singleton;
+        this.engine = NoPropagationEngine.SINGLETON;
     }
 
     public Solver() {
@@ -253,7 +253,7 @@ public class Solver implements Serializable {
 
     private void _post(boolean cut, Constraint... cs) {
         boolean dynAdd = false;
-        if (engine != NoPropagationEngine.singleton && engine.isInitialized()) {
+        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
             dynAdd = true;
         }
 
@@ -350,7 +350,7 @@ public class Solver implements Serializable {
 
     public Boolean solve() {
 //        assert isValid();
-        if (engine == NoPropagationEngine.singleton) {
+        if (engine == NoPropagationEngine.SINGLETON) {
             this.set(new PropagatorEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
@@ -360,7 +360,7 @@ public class Solver implements Serializable {
 
     public void propagate() throws ContradictionException {
 //        assert isValid();
-        if (engine == NoPropagationEngine.singleton) {
+        if (engine == NoPropagationEngine.SINGLETON) {
             this.set(new PropagatorEngine(this));
         }
         engine.propagate();
