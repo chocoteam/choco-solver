@@ -41,53 +41,59 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
-public class NoPropagationEngine implements IPropagationEngine{
+public enum NoPropagationEngine implements IPropagationEngine {
 
-	public final static NoPropagationEngine singleton = new NoPropagationEngine();
+    SINGLETON {
+        //***********************************************************************************
+        // METHODS
+        //***********************************************************************************
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+        @Override
+        public boolean isInitialized() {
+            return false;
+        }
 
-	@Override
-	public boolean isInitialized() {
-		return false;
-	}
+        @Override
+        public void propagate() throws ContradictionException {
+            throw new UnsupportedOperationException("no propagation engine has been defined");
+        }
 
-	@Override
-	public void propagate() throws ContradictionException {
-		throw new UnsupportedOperationException("no propagation engine has been defined");
-	}
+        @Override
+        public void flush() {
+        }
 
-	@Override
-	public void flush() {}
+        @Override
+        public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
+            throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
+                    "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
+                    "before starting resolution.");
+        }
 
-	@Override
-	public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-		throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
-				"This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-				"before starting resolution.");
-	}
+        @Override
+        public ContradictionException getContradictionException() {
+            throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
+                    "This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
+                    "before starting resolution.");
+        }
 
-	@Override
-	public ContradictionException getContradictionException() {
-		throw new UnsupportedOperationException("A failure occurred before a propagation engine has been defined." +
-				"This probably means that one variable domain has been wiped out (i.e. the problem has no solution)" +
-				"before starting resolution.");
-	}
+        @Override
+        public void clear() {
+        }
 
-	@Override
-	public void clear() {}
+        @Override
+        public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        }
 
-	@Override
-	public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {}
+        @Override
+        public void onPropagatorExecution(Propagator propagator) {
+        }
 
-	@Override
-	public void onPropagatorExecution(Propagator propagator) {}
+        @Override
+        public void desactivatePropagator(Propagator propagator) {
+        }
 
-	@Override
-	public void desactivatePropagator(Propagator propagator) {}
-
-	@Override
-	public void dynamicAddition(Constraint c, boolean cut) {}
+        @Override
+        public void dynamicAddition(Constraint c, boolean cut) {
+        }
+    };
 }
