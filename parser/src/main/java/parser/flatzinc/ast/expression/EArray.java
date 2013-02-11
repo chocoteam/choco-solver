@@ -82,6 +82,15 @@ public final class EArray extends Expression {
     }
 
     @Override
+    public boolean[] toBoolArray() {
+        boolean[] arr = new boolean[what.size()];
+        for (int i = 0; i < what.size(); i++) {
+            arr[i] = what.get(i).boolValue();
+        }
+        return arr;
+    }
+
+    @Override
     public BoolVar[] toBoolVarArray(Solver solver) {
         BoolVar[] arr = new BoolVar[what.size()];
         for (int i = 0; i < what.size(); i++) {

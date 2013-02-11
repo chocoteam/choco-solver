@@ -103,6 +103,16 @@ public final class EIdentifier extends Expression {
     }
 
     @Override
+    public boolean boolValue() {
+        return (Boolean) object;
+    }
+
+    @Override
+    public boolean[] toBoolArray() {
+        return (boolean[]) object;
+    }
+
+    @Override
     public BoolVar boolVarValue(Solver solver) {
         return (BoolVar) object;
     }

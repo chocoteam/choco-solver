@@ -8,13 +8,3 @@
 predicate cumulative(array[int] of var int: s, array[int] of var int: d,
                      array[int] of var int: r, var int: b) =
     cumulativeChoco(s,d,r,b);
-
-%-------------------------------------------------------------------------------------------%
-
-% The implementation of the constraint in the choco solver.
-% This should not be called directly, instead the definition above should
-% be used.
-predicate cumulativeChoco(array[int] of var int: s, array[int] of var int: d,
-                          array[int] of var int: r, var int: b);
-
-%-------------------------------------------------------------------------------------------%

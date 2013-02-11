@@ -31,7 +31,6 @@ import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -50,6 +49,7 @@ public class GlobalCardinalityBuilder implements IBuilder {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
-        solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
+        boolean closed = exps.get(3).boolValue();
+        solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, closed));
     }
 }

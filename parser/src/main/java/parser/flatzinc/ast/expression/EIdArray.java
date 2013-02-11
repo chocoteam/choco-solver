@@ -78,6 +78,16 @@ public final class EIdArray extends Expression {
     }
 
     @Override
+    public boolean boolValue() {
+        return (Boolean) object;
+    }
+
+    @Override
+    public boolean[] toBoolArray() {
+        return (boolean[]) object;
+    }
+
+    @Override
     public BoolVar boolVarValue(Solver solver) {
         if (Integer.class.isInstance(object)) {
             return (BoolVar) VariableFactory.fixed((Integer) object, solver);
