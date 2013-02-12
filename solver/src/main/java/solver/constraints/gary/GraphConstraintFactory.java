@@ -26,7 +26,6 @@
  */
 package solver.constraints.gary;
 
-import org.easymock.internal.matchers.Or;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
