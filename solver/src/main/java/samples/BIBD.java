@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,7 @@ public class BIBD extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("BIBD({},{},{},{},{})", new Object[]{v, b, r, k, l});
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < v; i++) {
                 st.append("\t");
                 for (int j = 0; j < b; j++) {

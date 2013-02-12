@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -69,14 +70,14 @@ public class MagicSeries extends AbstractProblem {
             counts[i] = IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i]));
             solver.post(counts[i]);
         }
-        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(n,solver))); // cstr redundant 1
+        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(n, solver))); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
         IntVar[] vs2 = new IntVar[n - 1];
         for (int i = 1; i < n; i++) {
             coeff2[i - 1] = i;
             vs2[i - 1] = vars[i];
         }
-        solver.post(IntConstraintFactory.scalar(vs2, coeff2, VariableFactory.fixed(n,solver))); // cstr redundant 1
+        solver.post(IntConstraintFactory.scalar(vs2, coeff2, VariableFactory.fixed(n, solver))); // cstr redundant 1
     }
 
     @Override
@@ -98,7 +99,7 @@ public class MagicSeries extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Magic series({})", n);
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(" ");

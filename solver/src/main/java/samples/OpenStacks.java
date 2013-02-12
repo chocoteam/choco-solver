@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
@@ -34,6 +35,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -103,7 +105,7 @@ public class OpenStacks extends AbstractProblem {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
                 IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
-                solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1],0,"detect"));
+                solver.post(IntConstraintFactory.element(value, orders[i], scheds[t - 1], 0, "detect"));
                 solver.post(IntConstraintFactory.sum(new IntVar[]{o[i][t - 1], value}, o[i][t]));
             }
         }
@@ -111,12 +113,12 @@ public class OpenStacks extends AbstractProblem {
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
-				solver.post(IntConstraintFactory.implies(btmp[0],IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver))));
-				solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[0]),IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
+                solver.post(IntConstraintFactory.implies(btmp[0], IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver))));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[0]), IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
 
-				solver.post(IntConstraintFactory.implies(btmp[1], IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver))));
-				solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[1]), IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
-				solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
+                solver.post(IntConstraintFactory.implies(btmp[1], IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver))));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[1]), IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
+                solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
             }
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);
@@ -140,7 +142,7 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().getLimitsBox().setNodeLimit(200000);
+        SearchMonitorFactory.limitNode(solver, 200000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
@@ -156,7 +158,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("(").append(norders[i]).append(")\n\t");
         }
         st.append("\n\t");
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             for (int j = 0; j < np; j++) {
                 st.append(scheds[j].getValue()).append(" ");
             }

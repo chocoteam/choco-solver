@@ -27,6 +27,7 @@
 
 package samples;
 
+import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -101,7 +102,7 @@ public class Partition extends AbstractProblem {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        heavy[0] = IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(0,solver));
+        heavy[0] = IntConstraintFactory.scalar(xy, coeffs, VariableFactory.fixed(0, solver));
         solver.post(heavy[0]);
 
         IntVar[] sxy, sx, sy;
@@ -116,15 +117,15 @@ public class Partition extends AbstractProblem {
             solver.post(IntConstraintFactory.member(sx[i], 1, 4 * size * size));
             solver.post(IntConstraintFactory.member(sy[i], 1, 4 * size * size));
         }
-        heavy[1] = IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(0,solver));
+        heavy[1] = IntConstraintFactory.scalar(sxy, coeffs, VariableFactory.fixed(0, solver));
         solver.post(heavy[1]);
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
-        solver.post(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
-        solver.post(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4,solver)));
-        solver.post(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
-        solver.post(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12,solver)));
+        solver.post(IntConstraintFactory.scalar(x, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4, solver)));
+        solver.post(IntConstraintFactory.scalar(y, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) / 4, solver)));
+        solver.post(IntConstraintFactory.scalar(sx, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver)));
+        solver.post(IntConstraintFactory.scalar(sy, coeffs, VariableFactory.fixed(2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver)));
 
         heavy[2] = IntConstraintFactory.alldifferent(xy, "BC");
         solver.post(heavy[2]);
@@ -150,7 +151,7 @@ public class Partition extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder();
-        if (Boolean.TRUE == solver.isFeasible()) {
+        if (ESat.TRUE == solver.isFeasible()) {
             int sum1 = 0, sum2 = 0;
             int i = 0;
             st.append(vars[i].getValue());

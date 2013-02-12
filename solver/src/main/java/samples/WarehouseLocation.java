@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -106,17 +107,17 @@ public class WarehouseLocation extends AbstractProblem {
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
-            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s],0,"detect"));
+            solver.post(IntConstraintFactory.element(costPerStore[s], c_supply[s], suppliers[s], 0, "detect"));
         }
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = VariableFactory.bounded("occur_"+w,0,suppliers.length,solver);
-            solver.post(IntConstraintFactory.count(w, suppliers,tmp));
+            IntVar tmp = VariableFactory.bounded("occur_" + w, 0, suppliers.length, solver);
+            solver.post(IntConstraintFactory.count(w, suppliers, tmp));
             solver.post(IntConstraintFactory.arithm(tmp, ">=", open[w]));
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar tmp = VariableFactory.bounded("occur_"+w,0,capacity[w],solver);
-            solver.post(IntConstraintFactory.count(w, suppliers,tmp));
+            IntVar tmp = VariableFactory.bounded("occur_" + w, 0, capacity[w], solver);
+            solver.post(IntConstraintFactory.count(w, suppliers, tmp));
         }
 
         int[] coeffs = new int[nWH + nS];
@@ -149,7 +150,7 @@ public class WarehouseLocation extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Warehouse location problem");
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < nWH; i++) {
                 if (open[i].getValue() > 0) {
                     st.append(String.format("\tw#%d:\n\t", i));

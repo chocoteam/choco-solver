@@ -176,6 +176,7 @@ public class ParseAndSolve {
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
+                long creationTime = -System.nanoTime();
                 THashMap<String, Object> map = new THashMap<String, Object>();
                 buildParser(new FileInputStream(new File(instance)), solver, map, gc);
                 makeEngine(solver);
@@ -186,7 +187,8 @@ public class ParseAndSolve {
                 expeng.make(solver);
 
                 LOGGER.info("% solve instance...");
-                solver.solve();
+                solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+                solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) || !gc.all);
             }
             if (!csv.equals("")) {
                 assert acsv != null;

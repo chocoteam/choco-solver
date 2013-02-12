@@ -27,12 +27,13 @@
 
 package solver.search.loop;
 
+import common.ESat;
 import memory.IEnvironment;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
-import solver.search.limits.LimitBox;
+import solver.search.limits.LimitChecker;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
@@ -42,8 +43,6 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
-
-import java.util.Properties;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -127,15 +126,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-
-    /* Previous solution count, to inform on state*/
-    long previousSolutionCount = 0;
-
     /* factory for limits management */
-    LimitBox limitsfactory;
+    LimitChecker limitchecker;
 
 
-    protected int solutionPoolCapacity;
+//    protected int solutionPoolCapacity;
     /**
      * Solution pool -- way to record solutions. Default object is no solution recorded.
      */
@@ -160,22 +155,16 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         smList = new SearchMonitorList();
         smList.add(this.measures);
         this.nextState = INIT;
-        this.limitsfactory = new LimitBox(this);
-        loadProperties(solver.properties);
+        this.limitchecker = new LimitChecker(this);
         rootWorldIndex = -1;
     }
 
-    public void reset() {
+    private void reset() {
         this.nextState = INIT;
         restaureRootNode();
         rootWorldIndex = -1;
         searchWorldIndex = -1;
-        previousSolutionCount = 0;
         this.measures.reset();
-    }
-
-    protected void loadProperties(Properties properties) {
-        solutionPoolCapacity = Integer.parseInt((String) properties.get("solver.solution.capacity"));
     }
 
     @SuppressWarnings({"unchecked"})
@@ -188,13 +177,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      *
      * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
-    public Boolean launch() {
+    public void launch(boolean stopatfirst) {
         if (nextState != INIT) {
             throw new SolverException("!! The search has not been initialized.\n" +
                     "!! Be sure you are respecting one of these call configurations :\n " +
                     "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
-        return loop();
+        this.stopAtFirstSolution = stopatfirst;
+        loop();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +194,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      *
      * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
-    Boolean loop() {
+    void loop() {
         alive = true;
         while (alive) {
             switch (nextState) {
@@ -255,9 +245,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             }
         }
         smList.beforeClose();
-        Boolean close = close();
+        close();
         smList.afterClose();
-        return close;
     }
 
     /**
@@ -265,7 +254,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
-        previousSolutionCount = 0;
         this.nextState = INITIAL_PROPAGATION;
     }
 
@@ -301,25 +289,24 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Close the search
      *
-     * @return <code>true</code> if at least one solution has been found, <br/>
+     * @return <code>true</code> if at least one more solution has been found, <br/>
      *         <code>null</code> if a limit has been reached before finding one solution, <br/>
      *         <code>false</code> otherwise
      */
-    public Boolean close() {
+    public void close() {
+        ESat sat = ESat.FALSE;
         if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {
             restaureRootNode();
             solutionpool.getBest().restore();
         }
-//            return existsSolution() && !stopAtFirstSolution && !isEncounteredLimit();
-        measures.setObjectiveOptimal(measures.getSolutionCount() > previousSolutionCount
-                && stopAtFirstSolution && limitsfactory.isReached());
-        if (measures.getSolutionCount() > previousSolutionCount) {
-            return true;
-        } else if (limitsfactory.isReached()) {
+        measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
+        if (measures.getSolutionCount() > 0) {
+            sat = ESat.TRUE;
+        } else if (limitchecker.isReached()) {
             measures.setObjectiveOptimal(false);
-            return null;
+            sat = ESat.UNDEFINED;
         }
-        return false;
+        solver.setFeasible(sat);
     }
 
     public void restaureRootNode() {
@@ -332,11 +319,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             tmp.free();
         }
     }
-
-    /**
-     * Resume the search
-     */
-    public abstract Boolean resume();
 
     /**
      * Force the search to stop
@@ -360,26 +342,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setup() {
-        this.solutionpool = SolutionPoolFactory.makeSolutionPool(solutionPoolCapacity);
-    }
-
-
-    public void stopAtFirstSolution(boolean value) {
-        this.stopAtFirstSolution = value;
-    }
-
-    public boolean stopAtFirstSolution() {
-        return this.stopAtFirstSolution;
-    }
-
     /**
-     * Gets the limit factory in order to define limits.
-     *
-     * @return the limit factory
+     * Gets the list of limits over the search loop.
      */
-    public LimitBox getLimitsBox() {
-        return limitsfactory;
+    public LimitChecker getLimits() {
+        return limitchecker;
     }
 
 
@@ -394,13 +361,26 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
+        if (objectivemanager.isOptimization()) {
+            plugSearchMonitor(objectivemanager);
+        }
         this.measures.declareObjective();
     }
 
+    /**
+     * Return the set of solution found during resolution.
+     * Depending on the choice made, the set of solution can be empty even if some solutions has been found.
+     */
     public ISolutionPool getSolutionpool() {
         return solutionpool;
     }
 
+    /**
+     * Override the default pool of solutions.
+     *
+     * @param solutionpool a pool of solutions
+     * @see SolutionPoolFactory
+     */
     public void setSolutionpool(ISolutionPool solutionpool) {
         this.solutionpool = solutionpool;
     }
@@ -412,11 +392,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void restartAfterEachFail(boolean does) {
         stateAfterFail = does ? RESTART : UP_BRANCH;
     }
-
-    public void setSolutionPoolCapacity(int solutionPoolCapacity) {
-        this.solutionPoolCapacity = solutionPoolCapacity;
-    }
-
 
     public void overridePreviousWorld(int gap) {
         this.jumpTo = gap;
@@ -443,10 +418,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
 
     public abstract String decisionToString();
-
-    public int getSolutionPoolCapacity() {
-        return solutionPoolCapacity;
-    }
 
     public int getCurrentDepth() {
         int d = 0;

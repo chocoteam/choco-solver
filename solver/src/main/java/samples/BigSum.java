@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -51,7 +52,7 @@ public class BigSum extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 0, 5000, solver);
-        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(500000,solver)));
+        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(500000, solver)));
         solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }
 
@@ -73,7 +74,7 @@ public class BigSum extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("big sum");
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

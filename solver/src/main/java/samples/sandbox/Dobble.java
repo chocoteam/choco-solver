@@ -125,7 +125,7 @@ public class Dobble {
         // output
         SearchMonitorFactory.log(solver, true, false);
         // time limit
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(timeLimit);
+        SearchMonitorFactory.limitTime(solver, timeLimit);
         // run!
         solver.findSolution();
     }

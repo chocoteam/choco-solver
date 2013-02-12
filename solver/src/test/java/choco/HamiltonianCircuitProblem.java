@@ -354,8 +354,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
         }
         solver.post(IntConstraintFactory.circuit(vars, 0));
-        Boolean status = solver.findAllSolutions();
-        if (status == null) {
+        long nbsol = solver.findAllSolutions();
+        if (nbsol == 0) {
             return -1;
         }
         return solver.getMeasures().getSolutionCount();

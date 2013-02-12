@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -103,7 +104,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int j = 0; j < g; j++) {
                     player[j] = P[i][j][k];
                 }
-                solver.post(IntConstraintFactory.sum(player, VariableFactory.fixed(1,solver)));
+                solver.post(IntConstraintFactory.sum(player, VariableFactory.fixed(1, solver)));
             }
         }
 
@@ -114,7 +115,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int i = 0; i < p; i++) {
                     group[i] = P[i][j][k];
                 }
-                solver.post(IntConstraintFactory.sum(group, VariableFactory.fixed(s,solver)));
+                solver.post(IntConstraintFactory.sum(group, VariableFactory.fixed(s, solver)));
             }
         }
 
@@ -124,7 +125,7 @@ public class SocialGolfer extends AbstractProblem {
                 for (int k = 0; k < g; k++) {
                     for (int l = 0; l < w; l++) {
                         //P[i][k][l] + P[j][k][l] - M[i][j][l] <= 1;
-                        solver.post(IntConstraintFactory.scalar(new IntVar[]{P[i][k][l], P[j][k][l], M[i][j][l]}, new int[]{1, 1, -1}, VariableFactory.bounded("scal",-1,1,solver)));
+                        solver.post(IntConstraintFactory.scalar(new IntVar[]{P[i][k][l], P[j][k][l], M[i][j][l]}, new int[]{1, 1, -1}, VariableFactory.bounded("scal", -1, 1, solver)));
                     }
                 }
             }
@@ -133,7 +134,7 @@ public class SocialGolfer extends AbstractProblem {
         // each pair of players only meets once
         for (int i = 0; i < p - 1; i++) {
             for (int j = i + 1; j < p; j++) {
-                solver.post(IntConstraintFactory.sum(M[i][j], VariableFactory.bool("sum",solver)));
+                solver.post(IntConstraintFactory.sum(M[i][j], VariableFactory.bool("sum", solver)));
             }
         }
 
@@ -181,7 +182,7 @@ public class SocialGolfer extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Social golfer({},{},{})", new Object[]{g, s, w});
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             int p = g * s;
             for (int i = 0; i < w; i++) {
                 st.append("\tWeek ").append(i + 1).append("\n");

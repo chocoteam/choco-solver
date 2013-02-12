@@ -113,7 +113,7 @@ public class Tree extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         SearchMonitorFactory.log(solver, false, false);
         sat = solver.findSolution();
         TextWriter.writeTextInto(n + ";" + d + ";" + solver.getMeasures().getNodeCount() + ";" +

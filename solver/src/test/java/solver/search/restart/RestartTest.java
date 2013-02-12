@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.nqueen.NQueenBinary;
 import solver.Solver;
-import solver.search.limits.LimitBox;
+import solver.search.limits.NodeLimit;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -54,7 +54,7 @@ public class RestartTest {
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.restart(solver, RestartFactory.geometrical(2, 1.2),
-                LimitBox.nodeLimit(solver, 2), 2);
+                new NodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -66,7 +66,7 @@ public class RestartTest {
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
-                LimitBox.nodeLimit(solver, 2), 2);
+                new NodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -75,34 +75,34 @@ public class RestartTest {
     }
 
 
-    public final static int[] LUBY_2 = {1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,16};
+    public final static int[] LUBY_2 = {1, 1, 2, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 4, 8, 1, 1, 2, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 4, 8, 16};
 
-	public final static int[] LUBY_3 = {1,1,1,3,1,1,1,3,1,1,1,3,9,
-		1,1,1,3,1,1,1,3,1,1,1,3,9,
-		1,1,1,3,1,1,1,3,1,1,1,3,9,27};
+    public final static int[] LUBY_3 = {1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,
+            1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,
+            1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9, 27};
 
-	public final static int[] LUBY_4 = {1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,16,
-		1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,16,
-		1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,16,
-		1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,1,1,1,1,4,16,64
-	};
+    public final static int[] LUBY_4 = {1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 16,
+            1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 16,
+            1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 16,
+            1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 1, 1, 1, 1, 4, 16, 64
+    };
 
-	public final static int[] GEOMETRIC_1_3 = {1,2,2,3,3,4,5,7,9,11,14,18,24,31,40};
+    public final static int[] GEOMETRIC_1_3 = {1, 2, 2, 3, 3, 4, 5, 7, 9, 11, 14, 18, 24, 31, 40};
 
-	private void checkRestart(AbstractRestartStrategy r,double factor,int[] expected) {
-		r.setGeometricalFactor(factor);
-		int[] computed = r.getSequenceExample(expected.length);
-		Assert.assertEquals(computed, expected);
-	}
+    private void checkRestart(AbstractRestartStrategy r, double factor, int[] expected) {
+        r.setGeometricalFactor(factor);
+        int[] computed = r.getSequenceExample(expected.length);
+        Assert.assertEquals(computed, expected);
+    }
 
-	@Test
-	public void testRestartStrategy() {
-		AbstractRestartStrategy r = new LubyRestartStrategy(1,2);
-		checkRestart(r, 2, LUBY_2);
-		checkRestart(r, 3, LUBY_3);
-		checkRestart(r, 4, LUBY_4);
-		r = new GeometricalRestartStrategy(1,1.3);
-		checkRestart(r, 1.3, GEOMETRIC_1_3);
-	}
+    @Test
+    public void testRestartStrategy() {
+        AbstractRestartStrategy r = new LubyRestartStrategy(1, 2);
+        checkRestart(r, 2, LUBY_2);
+        checkRestart(r, 3, LUBY_3);
+        checkRestart(r, 4, LUBY_4);
+        r = new GeometricalRestartStrategy(1, 1.3);
+        checkRestart(r, 1.3, GEOMETRIC_1_3);
+    }
 
 }

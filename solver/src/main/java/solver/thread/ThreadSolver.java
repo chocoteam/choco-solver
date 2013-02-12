@@ -30,6 +30,8 @@ package solver.thread;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
+import solver.propagation.NoPropagationEngine;
+import solver.propagation.hardcoded.PropagatorEngine;
 import solver.variables.IntVar;
 
 /**
@@ -42,14 +44,13 @@ public class ThreadSolver extends Thread {
 
     public Solver solver;
 
-    public ThreadSolver() {
-    }
+    private long creationTime;
+
+    private boolean saf = true;
+
 
     public ThreadSolver(Solver solver) {
-        this.solver = solver;
-    }
-
-    public void setSolver(Solver solver) {
+        this.creationTime -= System.nanoTime();
         this.solver = solver;
     }
 
@@ -59,16 +60,20 @@ public class ThreadSolver extends Thread {
 
     @Override
     public void run() {
-        solver.solve();
+        if (solver.getEngine() == NoPropagationEngine.SINGLETON) {
+            solver.set(new PropagatorEngine(solver));
+        }
+        solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        solver.getSearchLoop().launch(saf);
     }
 
     public void findSolution() {
-        solver.getSearchLoop().stopAtFirstSolution(false);
+        this.saf = true;
         start();
     }
 
     public void findAllSolutions() {
-        solver.getSearchLoop().stopAtFirstSolution(false);
+        this.saf = false;
         start();
     }
 
@@ -76,7 +81,7 @@ public class ThreadSolver extends Thread {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new UnsupportedOperationException("cannot optimize a satisfaction problem!");
         }
-        solver.getSearchLoop().stopAtFirstSolution(false);
+        this.saf = false;
         solver.getSearchLoop().setObjectivemanager(new ObjectiveManager(objective, policy, solver));
         start();
     }

@@ -40,21 +40,9 @@ public enum SearchLoops {
     BINARY() {
         @Override
         public void make(Solver solver) {
-            solver.setSearch(new BinarySearchLoop(solver));
+            solver.set(new BinarySearchLoop(solver));
         }
     },
-    /*ADVANCED_BINARY() {
-        @Override
-        public void make(Solver solver) {
-            solver.setSearch(new AdvancedBinarySearchLoop(solver));
-        }
-    },*/
-    /*BINARY_WITH_RECOMPUTATION() {
-        @Override
-        public void make(Solver solver) {
-            solver.setSearch(new BinarySearchLoopWithRecomputation(solver));
-        }
-    },*/
     DEFAULT() {
         @Override
         public void make(Solver solver) {

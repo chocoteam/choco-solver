@@ -24,30 +24,25 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.pattern;
 
-package solver;
+import solver.Solver;
+import solver.search.strategy.strategy.AbstractStrategy;
 
 /**
+ * Search Patterns: generic patterns to manage search
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 28 juil. 2010
+ * @since 12/02/13
  */
-public enum Constant {
-    ;
-
-    public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
-    public static final String WELCOME_VERSION = "** CHOCO v{} (May, 2011), Copyleft (c) 2010-2011";
-    public static final String CALLER = "** Solve : {}";
-
+public interface ISearchPattern {
     /**
-     * Defines the rounding precision for multicostregular algorithm
+     * Build a search strategy which integrates strategies and the given search pattern
+     *
+     * @param solver
+     * @param strategies
+     * @return a search strategy which integrates strategies and the given search pattern
      */
-    public static final int MCR_PRECISION = 4; // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
-
-    /**
-     * Defines the smallest used double for multicostregular
-     */
-    public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
-
+    AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
 }

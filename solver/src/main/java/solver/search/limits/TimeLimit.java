@@ -27,40 +27,32 @@
 
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 import solver.search.loop.monitors.IMonitorOpenNode;
-import solver.search.measure.IMeasures;
 
 /**
+ * A limit over run time.
+ * It acts as a monitor, to be up-to-date when the search loop asks for limit reaching.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class TimeLimit implements ILimit, IMonitorOpenNode {
+public class TimeLimit extends ALimit implements IMonitorOpenNode {
 
     private long timeLimit;
-    private final IMeasures measures;
 
-    protected TimeLimit(AbstractSearchLoop searchLoop, long timeLimit) {
-        this.measures = searchLoop.getMeasures();
+    public TimeLimit(Solver solver, long timeLimit) {
+        super(solver.getSearchLoop().getMeasures());
         this.timeLimit = timeLimit;
-        searchLoop.plugSearchMonitor(this);
+        solver.getSearchLoop().plugSearchMonitor(this);
     }
 
-
-    @Override
-    public void init() {
-    }
 
     @Override
     public boolean isReached() {
         final float diff = timeLimit - measures.getTimeCount();
         return diff <= 0.0;
-    }
-
-    @Override
-    public void update() {
     }
 
     @Override

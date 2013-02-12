@@ -27,7 +27,7 @@
 
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 
 /**
  * Set a limit over the number of nodes opened allowed during the search.
@@ -41,14 +41,14 @@ public final class NodeLimit extends ALimit {
 
     private long nodelimit;
 
-    protected NodeLimit(AbstractSearchLoop searchLoop, long nodelimit) {
-        super(searchLoop.getMeasures());
+    public NodeLimit(Solver solver, long nodelimit) {
+        super(solver.getSearchLoop().getMeasures());
         this.nodelimit = nodelimit;
     }
 
     @Override
     public boolean isReached() {
-        final long diff = nodelimit - measures.getNodeCount() ;
+        final long diff = nodelimit - measures.getNodeCount();
         return diff <= 0;
     }
 

@@ -156,13 +156,13 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void beforeClose() {
         if (LOGGER.isInfoEnabled()) {
             if (searchLoop.getMeasures().getSolutionCount() == 0) {
-                if ((wrongSolution && nbSolution == 0) || searchLoop.getLimitsBox().isReached()) {
+                if ((wrongSolution && nbSolution == 0) || searchLoop.getLimits().isReached()) {
                     LOGGER.info("=====UNKNOWN=====");
                 } else {
                     LOGGER.info("=====UNSATISFIABLE=====");
                 }
             } else {
-                if (searchLoop.getLimitsBox().isReached()
+                if (searchLoop.getLimits().isReached()
                         && (searchLoop.getObjectivemanager().isOptimization())) {
                     LOGGER.info("=====UNBOUNDED=====");
                 } else {

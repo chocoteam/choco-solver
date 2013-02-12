@@ -37,6 +37,7 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -133,7 +134,7 @@ public class TSP_Sequential_LNS {
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
         strategy.configure(9, true);
         solver.set(strategy);
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
+        SearchMonitorFactory.limitTime(solver, 100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));
         // resolution
         long timeInst = System.currentTimeMillis();

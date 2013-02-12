@@ -131,7 +131,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
             default:
                 throw new UnsupportedOperationException("policy should be 0, 1 or 2");
         }
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
+        SearchMonitorFactory.limitTime(solver, limit);
         SearchMonitorFactory.log(solver, true, false);
     }
 

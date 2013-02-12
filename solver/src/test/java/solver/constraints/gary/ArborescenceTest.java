@@ -35,6 +35,7 @@ import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
@@ -72,7 +73,7 @@ public class ArborescenceTest {
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {
-            s.getSearchLoop().getLimitsBox().setSolutionLimit(nbMaxSols);
+            SearchMonitorFactory.limitSolution(s, nbMaxSols);
         }
         s.findAllSolutions();
         return s;

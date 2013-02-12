@@ -75,8 +75,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.findSolution()) {
             do {
                 this.prettyOut();
             }

@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -79,7 +80,7 @@ public class Eq20 extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 0, 10, solver);
         for (int i = 0; i < coeffs.length; i++) {
-            solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), VariableFactory.fixed(coeffs[i][0],solver)));
+            solver.post(IntConstraintFactory.scalar(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), VariableFactory.fixed(coeffs[i][0], solver)));
         }
     }
 
@@ -101,7 +102,7 @@ public class Eq20 extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("20 equations");
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             for (int i = 0; i < n; i++) {
                 st.append(vars[i].getValue()).append(", ");
             }

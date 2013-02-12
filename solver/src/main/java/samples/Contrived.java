@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -100,7 +101,7 @@ public class Contrived extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Contrived problem ({},{})", new Object[]{l, d});
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             st.append("\tV :");
             for (int i = 0; i < v.length; i++) {
                 st.append(v[i].getValue()).append(" ");

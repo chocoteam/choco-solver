@@ -78,8 +78,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 
         solver.getExplainer().addExplanationMonitor(solver.getExplainer());
         SearchMonitorFactory.log(solver, false, true);
-        solver.findSolution();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.findSolution()) {
             do {
                 this.prettyOut();
             }

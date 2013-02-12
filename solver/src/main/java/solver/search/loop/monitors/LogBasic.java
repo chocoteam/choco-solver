@@ -28,8 +28,10 @@ package solver.search.loop.monitors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Constant;
+import solver.Configuration;
 import solver.Solver;
+
+import java.util.Calendar;
 
 /**
  * Basic search monitor logger, which prints welcome message at the beginning od the search and
@@ -46,19 +48,19 @@ public final class LogBasic implements IMonitorInitialize, IMonitorClose {
 
 
     final Solver solver;
-    final String version;
 
     public LogBasic(Solver solver) {
         this.solver = solver;
-        this.version = (String) solver.properties.get("solver.version");
     }
 
     @Override
     public void beforeInitialize() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(Constant.WELCOME_TITLE);
-            LOGGER.info(Constant.WELCOME_VERSION, version);
-            LOGGER.info(Constant.CALLER, solver.getName());
+            LOGGER.info(Configuration.WELCOME_TITLE);
+            LOGGER.info(Configuration.WELCOME_VERSION,
+                    new Object[]{Configuration.RELEASE_VERSION, Configuration.RELEASE_MONTH, Configuration.RELEASE_YEAR,
+                            Calendar.getInstance().get(Calendar.YEAR)});
+            LOGGER.info(Configuration.CALLER, solver.getName());
         }
     }
 

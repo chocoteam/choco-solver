@@ -27,7 +27,7 @@
 
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 
 /**
  * Set a limit over the number of backtracks allowed during the search.
@@ -42,8 +42,8 @@ public final class BacktrackLimit extends ALimit {
 
     private long backtracklimit;
 
-    protected BacktrackLimit(AbstractSearchLoop searchLoop, long backtracklimit) {
-        super(searchLoop.getMeasures());
+    public BacktrackLimit(Solver solver, long backtracklimit) {
+        super(solver.getSearchLoop().getMeasures());
         this.backtracklimit = backtracklimit;
     }
 

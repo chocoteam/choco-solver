@@ -128,7 +128,7 @@ public class NurseScheduling {
 
         Solver solver = new Solver();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, solver);
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(180000);
+        SearchMonitorFactory.limitTime(solver, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         solver.set(strategy.getGoal(solver, vars));
         if (Boolean.TRUE == solver.findSolution()) {
@@ -172,7 +172,7 @@ public class NurseScheduling {
         System.out.println(strategy.name() + "\t " + patternOptions.name() + "\t " + basisOptions.name());
         Solver solver = new Solver();
         NurseSchedulingProblem m = new NSCPModelConstrained(data, basisOptions, patternOptions, solver);
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(180000);
+        SearchMonitorFactory.limitTime(solver, 180000);
         IntVar[] vars = ArrayUtils.flatten(ArrayUtils.transpose(m.getShifts()));
         solver.set(strategy.getGoal(solver, vars));
         String solved = "0";

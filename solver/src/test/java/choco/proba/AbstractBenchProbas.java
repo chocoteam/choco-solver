@@ -32,6 +32,7 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.recorders.conditions.ICondition;
 import solver.search.loop.monitors.IMonitorInitialize;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -97,7 +98,7 @@ public abstract class AbstractBenchProbas {
         //SearchMonitorFactory.log(solver, false, false);
         this.buildProblem(size, false);
         this.solver.post(this.cstrs);
-        this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(this.solver, TIMELIMIT);
         this.configSearchStrategy();
         this.configPropStrategy();
         this.solveProcess();

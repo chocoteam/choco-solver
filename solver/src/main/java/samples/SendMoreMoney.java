@@ -76,7 +76,7 @@ public class SendMoreMoney extends AbstractProblem {
                 1000, 100, 10, 1,
                 -10000, -1000, -100, -10, -1
         };
-        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, VariableFactory.fixed(0,solver)));
+        solver.post(IntConstraintFactory.scalar(ALL, COEFFS, VariableFactory.fixed(0, solver)));
     }
 
     @Override
@@ -99,7 +99,7 @@ public class SendMoreMoney extends AbstractProblem {
                 "expanded", 0, 0, 8, 10, "SENDMORY", 0, 9);
         // add the vector to the visualizers container
         visu.addVisualizer(visualizer);
-        solver.solve();
+        solver.findSolution();
     }
 
     @Override

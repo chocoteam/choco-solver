@@ -29,12 +29,10 @@ package solver;
 
 import common.ESat;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.THashSet;
 import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -45,6 +43,8 @@ import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
+import solver.search.solution.ISolutionPool;
+import solver.search.strategy.pattern.ISearchPattern;
 import solver.search.strategy.pattern.SearchPattern;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -54,13 +54,12 @@ import sun.reflect.Reflection;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * The <code>Solver</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * It reads default properties in <code>/solver.properties</code> (it can be overriden).<br/>
+ * It reads default properties in {@link SolverProperties} (it can be overriden).<br/>
  * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: apply decisions and propagate,
  * run backups and rollbacks and store solutions.
  *
@@ -69,20 +68,12 @@ import java.util.Properties;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
- * @see solver.propagation.DSLEngine
- * @see memory.IEnvironment
- * @see solver.search.loop.AbstractSearchLoop
  * @since 0.01
  */
 public class Solver implements Serializable {
 
 
     private static final long serialVersionUID = 3L;
-
-    /**
-     * Properties of the solver
-     */
-    public Properties properties;
 
     private ExplanationEngine explainer;
 
@@ -109,7 +100,7 @@ public class Solver implements Serializable {
      */
     protected AbstractSearchLoop search;
 
-    protected SearchPattern searchPattern = SearchPattern.NONE;
+    protected ISearchPattern searchPattern = SearchPattern.NONE;
 
     protected IPropagationEngine engine;
 
@@ -125,18 +116,30 @@ public class Solver implements Serializable {
 
     /**
      * Problem feasbility:
-     * - NULL if unknown,
+     * - UNDEFINED if unknown,
      * - TRUE if satisfiable,
      * - FALSE if unsatisfiable
      */
-    Boolean feasible;
+    ESat feasible = ESat.UNDEFINED;
+
+    /**
+     * Is search complete? cf. limits
+     */
+    boolean complete = true;
 
     protected long creationTime;
 
     protected int id = 1;
 
+    /**
+     * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
+     * properties <code>solverProperties</code>.
+     *
+     * @param environment      a backtracking environment
+     * @param name             a name
+     * @param solverProperties default properties to load
+     */
     public Solver(IEnvironment environment, String name, ISolverProperties solverProperties) {
-        loadProperties();
         this.name = name;
         this.vars = new Variable[32];
         vIdx = 0;
@@ -150,42 +153,158 @@ public class Solver implements Serializable {
         this.engine = NoPropagationEngine.SINGLETON;
     }
 
+    /**
+     * Create a solver object with default parameters.
+     * Default settings are declared in {@link SolverProperties}.
+     */
     public Solver() {
         this(Environments.DEFAULT.make(),
                 Reflection.getCallerClass(2).getSimpleName(),
                 SolverProperties.DEFAULT);
     }
 
+    /**
+     * Create a solver object with default parameters, named <code>name</code>.
+     * Default settings are declared in {@link SolverProperties}.
+     */
     public Solver(String name) {
         this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
     }
 
 
-    private void loadProperties() {
-        try {
-            properties = new Properties();
-            InputStream is = getClass().getResourceAsStream("/solver.properties");
-            properties.load(is);
-        } catch (IOException e) {
-            throw new SolverException("Could not open solver.properties");
-        }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * Returns the unique and internal seach loop.
+     *
+     * @return the unique and internal <code>AbstractSearchLoop</code> object.
+     */
+    public AbstractSearchLoop getSearchLoop() {
+        return search;
     }
 
-    public void setSearch(AbstractSearchLoop searchLoop) {
+    /**
+     * Returns the propagation engine used in <code>this</code>.
+     *
+     * @return a propagation engine.
+     */
+    public IPropagationEngine getEngine() {
+        return engine;
+    }
+
+    /**
+     * Returns the array of declared <code>Variable</code> objects defined in this <code>Solver</code>.
+     *
+     * @return array of variables
+     */
+    public Variable[] getVars() {
+        return Arrays.copyOf(vars, vIdx);
+    }
+
+
+    /**
+     * Returns the number of variables involved in <code>this</code>.
+     *
+     * @return number of variables
+     */
+    public int getNbVars() {
+        return vIdx;
+    }
+
+    /**
+     * Returns the i<sup>th</sup> variables within the array of variables defined in <code>this</code>.
+     *
+     * @param i index of the variables to return.
+     * @return a variable
+     */
+    public Variable getVar(int i) {
+        return vars[i];
+    }
+
+    /**
+     * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
+     *
+     * @return array of constraints
+     */
+    public Constraint[] getCstrs() {
+        return Arrays.copyOf(cstrs, cIdx);
+    }
+
+    /**
+     * Return the number of constraints declared in <code>this</code>.
+     *
+     * @return number of constraints.
+     */
+    public int getNbCstrs() {
+        return cIdx;
+    }
+
+    /**
+     * Return the name, if any, of <code>this</code>.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Return the backtracking environment of <code>this</code>.
+     */
+    public IEnvironment getEnvironment() {
+        return environment;
+    }
+
+    /**
+     * Return a reference to the measures recorder.
+     * This enables to get, for instance, the number of solutions found, time count, etc.
+     */
+    public IMeasures getMeasures() {
+        return measures;
+    }
+
+
+    /**
+     * Return the explanation engine plugged into <code>this</code>.
+     */
+    public ExplanationEngine getExplainer() {
+        return explainer;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Override the default search loop to use in <code>this</code>.
+     *
+     * @param searchLoop the search loop to use
+     */
+    public void set(AbstractSearchLoop searchLoop) {
         this.search = searchLoop;
     }
 
+    /**
+     * Override the default search strategy to use in <code>this</code>.
+     * <p/>
+     * <b>BEWARE:</b> the default strategy requires variables to be integer.
+     *
+     * @param strategies the search strategy to use.
+     */
     public void set(AbstractStrategy strategies) {
         this.search.set(searchPattern.makeSearch(this, strategies));
     }
 
     /**
      * Set a search pattern
-     * BEWARE : should be set BEFORE setting the search strategy
+     * <b>BEWARE:</b> : should be set <b>BEFORE</b> setting the search strategy
      *
-     * @param searchPattern
+     * @param searchPattern a search pattern
+     * @deprecated
      */
-    public void set(SearchPattern searchPattern) {
+    @Deprecated
+    public void set(ISearchPattern searchPattern) {
         this.searchPattern = searchPattern;
     }
 
@@ -198,6 +317,29 @@ public class Solver implements Serializable {
     public void set(IPropagationEngine propagationEngine) {
         this.engine = propagationEngine;
     }
+
+    /**
+     * Override the explanation engine.
+     */
+    public void set(ExplanationEngine explainer) {
+        this.explainer = explainer;
+    }
+
+    /**
+     * By default, no solution is stored during the resolution process
+     * ({@link solver.search.solution.SolutionPoolFactory#NO_SOLUTION}).
+     * <p/>
+     * One may want to store one or more solutions found. To do so, overriding the default solution pool is required.
+     *
+     * @param solutionPool a solution pool, use {@link solver.search.solution.SolutionPoolFactory}
+     */
+    public void set(ISolutionPool solutionPool) {
+        this.search.setSolutionpool(solutionPool);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// RELATED TO VAR AND CSTR DECLARATION ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Link a variable to <code>this</code>.
@@ -251,6 +393,7 @@ public class Solver implements Serializable {
         _post(true, c);
     }
 
+
     private void _post(boolean cut, Constraint... cs) {
         boolean dynAdd = false;
         if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
@@ -276,88 +419,130 @@ public class Solver implements Serializable {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// RELATED TO RESOLUTION //////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public IEnvironment getEnvironment() {
-        return environment;
+    /**
+     * Returns information on the feasibility of the current problem defined by the solver.
+     * <p/>
+     * Possible back values are:
+     * <br/>- {@link ESat#TRUE}: a solution has been found,
+     * <br/>- {@link ESat#FALSE}: the CSP has been proven to have no solution,
+     * <br/>- {@link ESat#UNDEFINED}: no solution has been found so far (within given limits)
+     * without proving the unfeasibility, though.
+     *
+     * @return an {@link ESat}.
+     */
+    public ESat isFeasible() {
+        return feasible;
     }
 
-    public IMeasures getMeasures() {
-        return measures;
+    /**
+     * Changes the current feasibility state of the <code>Solver</code> object.
+     * <p/>
+     * <b>Commonly called by the search loop, should not used without any knowledge of side effects.</b>
+     *
+     * @param feasible new state
+     */
+    public void setFeasible(ESat feasible) {
+        this.feasible = feasible;
+    }
+
+    /**
+     * Returns information on the completeness of the search process.
+     * <p/>
+     * A call to {@link #isFeasible()} may provide complementary information.
+     * <p/>
+     * Possible back values are:
+     * <p/>
+     * <br/>- <code>true</code> : the resolution is complete and
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
+     * proven to be optimal, or the CSP has been proven to be unsatifisiable.
+     * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
+     */
+    public boolean isCompleteSearch() {
+        return !search.getLimits().isReached();
     }
 
     /**
      * Attempts to find the first solution of the declared problem.
-     * Main steps are:
-     * <ul>
-     * <li>setting up the configuration,</li>
-     * <li>initializing the <code>Environment</code>,</li>
-     * <li>running the initial propagation,</li>
-     * <li>if necessary, launching the search</li>
-     * </ul>
+     * Then, following solutions can be found using {@link solver.Solver#nextSolution()}.
      * <p/>
-     * Then, following solutions can be found using <code>nextSolution()</code>.
+     * An alternative is to call {@link solver.Solver#isFeasible()} which tells, whether or not, a solution has been found.
      *
-     * @return the number of found solutions.
+     * @return <code>true</code> if and only if a solution has been found.
      */
-    public Boolean findSolution() {
-        search.stopAtFirstSolution(true);
-        return solve();
+    public boolean findSolution() {
+        solve(true);
+        return measures.getSolutionCount() > 0;
     }
 
 
     /**
-     * Once <code>findSolution()</code> has been called once, other solutions can be found using
-     * <code>nextSolution()</code>. The search is then resume to the last found solution point.
-     * Beware: limits are ignored!
+     * Once {@link Solver#findSolution()} has been called once, other solutions can be found using this method.
+     * <p/>
+     * The search is then resume to the last found solution point.
      *
-     * @return a Boolean stating whereas a new solution has been found (<code>TRUE</code>),
-     *         a limit has been encountered (<code>NULL</code>), ne new solution (<code>FALSE</code>).
+     * @return a boolean stating whereas a new solution has been found (<code>true</code>), or not (<code>false</code>).
      */
     public boolean nextSolution() {
-        return search.resume();
+        long nbsol = measures.getSolutionCount();
+        search.resume();
+        return (measures.getSolutionCount() - nbsol) > 0;
     }
 
     /**
      * Attempts to find all solutions of the declared problem.
-     * Main steps are:
-     * <ul>
-     * <li>setting up the configuration,</li>
-     * <li>initializing the <code>Environment</code>,</li>
-     * <li>running the initial propagation,</li>
-     * <li>if necessary, launching the search</li>
-     * </ul>
      *
      * @return the number of found solutions.
      */
-    public Boolean findAllSolutions() {
-        search.stopAtFirstSolution(false);
-        return solve();
+    public long findAllSolutions() {
+        solve(false);
+        return measures.getSolutionCount();
     }
 
-    public Boolean findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
-        search.stopAtFirstSolution(false);
-        //search.setSolutionPoolCapacity(1);
-        if (search.getSolutionPoolCapacity() < 1) {
-//            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
-            search.setSolutionPoolCapacity(1);
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objective the variable to optimize
+     * @return an array of int [LB, UB], representing the best bounds of the <code>objective</code> found so far.
+     *         <p/>
+     *         Note that when LB = UB, the optimality has been proven.
+     */
+    public int[] findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
         this.search.setObjectivemanager(new ObjectiveManager(objective, policy, this));
-        return solve();
+        solve(false);
+        return new int[]{search.getObjectivemanager().getBestLB(), search.getObjectivemanager().getBestUB()};
     }
 
-    public Boolean solve() {
-//        assert isValid();
+    /**
+     * This method should not be called externally. It launches the resolution process.
+     */
+    protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
             this.set(new PropagatorEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
-        search.setup();
-        return search.launch();
+        search.launch(stopAtFirst);
     }
 
+    /**
+     * Propagate constraints and related events through the constraint network until a fix point is find, or a contradiction
+     * is detected.
+     *
+     * @throws ContradictionException
+     */
     public void propagate() throws ContradictionException {
 //        assert isValid();
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -367,80 +552,16 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Returns the unique and internal seach loop.
-     *
-     * @return the unique and internal <code>AbstractSearchLoop</code> object.
-     */
-    public AbstractSearchLoop getSearchLoop() {
-        return search;
-    }
-
-    public IPropagationEngine getEngine() {
-        return engine;
-    }
-
-    /**
-     * Returns the array of declared <code>Variable</code> objects defined in this <code>Solver</code>.
-     *
-     * @return array of variables
-     */
-    public Variable[] getVars() {
-        return Arrays.copyOf(vars, vIdx);
-    }
-
-
-    public int getNbVars() {
-        return vIdx;
-    }
-
-    public Variable getVar(int i) {
-        return vars[i];
-    }
-
-    /**
-     * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
-     *
-     * @return array of constraints
-     */
-    public Constraint[] getCstrs() {
-        return Arrays.copyOf(cstrs, cIdx);
-    }
-
-    public int getNbCstrs() {
-        return cIdx;
-    }
-
-    /**
-     * Returns information on the feasability of the current problem defined by the solver.
+     * Return, whether or not, the current CSP is satisfied.
      * <p/>
-     * Possible back values are:
-     * <ul>
-     * <li>TRUE : the problem is feasible, at least one solution has already been found,</li>
-     * <li>FALSE: the problem has been proven to be infeasible,</li>
-     * <li>NULL: nothing can state on the feasibility, no solution has been found yet
-     * and the search is not ended.</li>
-     * </ul>
-     *
-     * @return a Boolean
+     * Pre-requisite: this method assumes that all variables are instantiated.
+     * <p/>
+     * Otherwise, consider calling {@link Solver#isEntailed()}.
+     * <p/>
+     * Given the current assignments, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
      */
-    public Boolean isFeasible() {
-        return feasible;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Changes the current feasability state of the <code>Solver</code> object.
-     *
-     * @param feasible new state
-     */
-    public void setFeasible(Boolean feasible) {
-        this.feasible = feasible;
-    }
-
     public ESat isSatisfied() {
         ESat check = ESat.TRUE;
         for (int c = 0; c < cIdx; c++) {
@@ -455,20 +576,42 @@ public class Solver implements Serializable {
         return check;
     }
 
+    /**
+     * Return the current state of the CSP.
+     * <p/>
+     * Given the current domains, it can return a value among:
+     * <br/>- {@link ESat#TRUE}: all constraints of the CSP are satisfied for sure,
+     * <br/>- {@link ESat#FALSE}: at least one constraint of the CSP is not satisfied.
+     * <br/>- {@link ESat#UNDEFINED}: neither satisfiability nor  unsatisfiability could be proven so far.
+     * <p/>
+     * Presumably, not all variables are instantiated.
+     */
     public ESat isEntailed() {
-        ESat check = ESat.TRUE;
+        int OK = 0;
         for (int c = 0; c < cIdx; c++) {
             ESat satC = cstrs[c].isEntailed();
-            if (!ESat.TRUE.equals(satC)) {
+            if (ESat.FALSE == satC) {
                 if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
                     LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
                 }
-                check = ESat.FALSE;
+                return ESat.FALSE;
+            } else if (ESat.TRUE == satC) {
+                OK++;
             }
         }
-        return check;
+        if (OK == cIdx) {
+            return ESat.TRUE;
+        } else {
+            return ESat.UNDEFINED;
+        }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Return a string describing the CSP defined in <code>this</code>.
+     */
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
@@ -486,15 +629,9 @@ public class Solver implements Serializable {
         return st.toString();
     }
 
-    public int getNbIdElt() {
-        return id;
-    }
-
-    public int nextId() {
-        return id++;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// RELATED TO I/O ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -551,6 +688,13 @@ public class Solver implements Serializable {
         return model;
     }
 
+    /**
+     * Cloning process based on serialization.
+     * <p/>
+     * Return a clone of <code>solver</code>.
+     *
+     * @param solver solver to clone.
+     */
     public static Solver serializeClone(Solver solver) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream out;
@@ -571,37 +715,21 @@ public class Solver implements Serializable {
         return null;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
-     * Explanation engine for the solver
+     * <b>This methods should be called by the user.</b>
      */
-    public ExplanationEngine getExplainer() {
-        return explainer;
+    public int getNbIdElt() {
+        return id;
     }
 
-    public void setExplainer(ExplanationEngine explainer) {
-        this.explainer = explainer;
-    }
-
-    public void set(ExplanationEngine explainer) {
-        this.setExplainer(explainer);
-    }
-
-    public boolean isValid() {
-        // 1. check that there is no un posted constraints
-        THashSet<Constraint> cset = new THashSet<Constraint>();
-        for (int i = 0; i < vars.length; i++) {
-            cset.clear();
-            cset.addAll(Arrays.asList(vars[i].getConstraints()));
-            Propagator[] propagators = vars[i].getPropagators();
-            for (int j = 0; j < propagators.length; j++) {
-                if (!cset.contains(propagators[j].getConstraint())) {
-                    LoggerFactory.getLogger("solver")
-                            .error("The constraint \"" + propagators[j].getConstraint() + "\" exists but has not been posted within the solver.");
-                    return false;
-                }
-            }
-        }
-        return true;
+    /**
+     * <b>This methods should be called by the user.</b>
+     */
+    public int nextId() {
+        return id++;
     }
 
 }

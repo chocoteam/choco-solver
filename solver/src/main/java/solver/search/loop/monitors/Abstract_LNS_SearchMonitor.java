@@ -77,7 +77,7 @@ public abstract class Abstract_LNS_SearchMonitor implements IMonitorSolution, IM
         //			System.out.println("optimality proved");return;
         //		}
         if (!(solver.getMeasures().getSolutionCount() == 0
-                || solver.getSearchLoop().getLimitsBox().isReached()
+                || solver.getSearchLoop().getLimits().isReached()
                 || isSearchComplete())) {
             restrictLess();
             solver.getSearchLoop().restartAfterEachSolution(true);

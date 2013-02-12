@@ -27,7 +27,7 @@
 package solver.search.loop.monitors;
 
 import solver.Solver;
-import solver.search.limits.ILimit;
+import solver.search.limits.*;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.restart.IRestartStrategy;
 import solver.variables.Variable;
@@ -89,6 +89,8 @@ public enum SearchMonitorFactory {
             return s.toString();
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Print statistics
@@ -166,16 +168,36 @@ public enum SearchMonitorFactory {
         }
     }
 
+    /**
+     * Log execution during choices #s and #e
+     *
+     * @param solver a solver
+     * @param s      starting choice number
+     * @param e      ending choice number
+     */
     public static void logWithRank(Solver solver, int s, int e) {
         AbstractSearchLoop sl = solver.getSearchLoop();
         sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, new DefaultDecisionMessage(solver)));
     }
 
+    /**
+     * Log execution during choices #s and #e
+     *
+     * @param solver          a solver
+     * @param s               starting choice number
+     * @param e               ending choice number
+     * @param decisionMessage print the specific message
+     */
     public static void logWithRank(Solver solver, int s, int e, IMessage decisionMessage) {
         AbstractSearchLoop sl = solver.getSearchLoop();
         sl.plugSearchMonitor(new LogChoicesWithRank(solver, s, e, decisionMessage));
     }
 
+    /**
+     * Log contradictions thrown during the resolution
+     *
+     * @param solver a solver
+     */
     public static void logContradiction(Solver solver) {
         solver.getSearchLoop().plugSearchMonitor(new LogContradiction());
     }
@@ -207,38 +229,98 @@ public enum SearchMonitorFactory {
         ));
     }
 
+    /**
+     * Print the total number of propagation count per propagator
+     *
+     * @param solver a solver
+     */
     public static void prop_count(Solver solver) {
         solver.getSearchLoop().plugSearchMonitor(new LogPropagationCount(solver));
     }
 
+    /**
+     * Print the total number of events per variable
+     *
+     * @param solver
+     */
     public static void event_count(Solver solver) {
         solver.getSearchLoop().plugSearchMonitor(new LogEventCount(solver));
     }
 
+    /**
+     * Defines a limit on the number of nodes allowed in the tree search.
+     * When the limit is reached, the resolution is stopped.
+     *
+     * @param limit maximal number of nodes to open
+     */
     public static void limitNode(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setNodeLimit(limit);
+        solver.getSearchLoop().getLimits().add(new NodeLimit(solver, limit));
     }
 
+    /**
+     * Defines a limit over the number of solutions found during the resolution.
+     * WHen the limit is reached, the resolution is stopped.
+     *
+     * @param limit maximal number of solutions
+     */
     public static void limitSolution(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setSolutionLimit(limit);
+        solver.getSearchLoop().getLimits().add(new SolutionLimit(solver, limit));
     }
 
+
+    /**
+     * Defines a limit over the run time.
+     * When the limit is reached, the resolution is stopped.
+     * <br/>
+     * <br/>
+     * <b>One must consider also LimitChecker.setThreadTimeLimit(long), that runs the limit in a separated thread.</b>
+     *
+     * @param limit maximal resolution time in millisecond
+     * @see SearchMonitorFactory#limitThreadTime(solver.Solver, long)
+     */
     public static void limitTime(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
+        solver.getSearchLoop().getLimits().add(new TimeLimit(solver, limit));
     }
 
+
+    /**
+     * Defines a limit over the run time, set in a thread.
+     * When the limit is reached, the resolution is stopped.
+     *
+     * @param limit maximal resolution time in millisecond
+     */
     public static void limitThreadTime(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setThreadTimeLimit(limit);
+        solver.getSearchLoop().getLimits().add(new ThreadTimeLimit(limit));
     }
 
+    /**
+     * Defines a limit over the number of fails allowed during the resolution.
+     * WHen the limit is reached, the resolution is stopped.
+     *
+     * @param limit maximal number of fails
+     */
     public static void limitFail(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setFailLimit(limit);
+        solver.getSearchLoop().getLimits().add(new FailLimit(solver, limit));
     }
 
+    /**
+     * Defines a limit over the number of backtracks allowed during the resolution.
+     * WHen the limit is reached, the resolution is stopped.
+     *
+     * @param limit maximal number of backtracks
+     */
     public static void limitBacktrack(Solver solver, long limit) {
-        solver.getSearchLoop().getLimitsBox().setBacktrackLimit(limit);
+        solver.getSearchLoop().getLimits().add(new BacktrackLimit(solver, limit));
     }
 
+
+    /**
+     * Output results to a CSV file (append in set to true).
+     *
+     * @param solver   a solver
+     * @param prefix   String identifying the instance that has been solved
+     * @param filename absolute path of the CSV output file
+     */
     public static void toCSV(Solver solver, String prefix, String filename) {
         solver.getSearchLoop().plugSearchMonitor(new OutputCSV(solver, prefix, filename));
     }

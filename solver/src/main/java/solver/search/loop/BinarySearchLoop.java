@@ -60,7 +60,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             solver.getEngine().propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
-            solver.setFeasible(Boolean.FALSE);
+            solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
             interrupt();
             return;
@@ -77,7 +77,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             strategy.init(); // the initialisation of the strategy can detect inconsistency
         } catch (ContradictionException cex) {
             this.env.worldPop();
-            solver.setFeasible(Boolean.FALSE);
+            solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
             interrupt();
         }
@@ -106,7 +106,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
     protected void recordSolution() {
         //todo: checker d'Žtat
-        solver.setFeasible(Boolean.TRUE);
+        solver.setFeasible(ESat.TRUE);
         assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         solutionpool.recordSolution(solver);
         objectivemanager.update();
@@ -122,16 +122,15 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public Boolean resume() {
+    public void resume() {
         if (nextState == INIT) {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
             throw new SolverException("The search cannot be resumed.");
         }
-        previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);
-        return this.loop();
+        loop();
     }
 
     /**

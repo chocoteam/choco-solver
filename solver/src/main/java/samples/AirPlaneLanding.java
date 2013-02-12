@@ -27,6 +27,7 @@
 
 package samples;
 
+import common.ESat;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
-import solver.search.limits.LimitBox;
+import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
@@ -152,14 +153,14 @@ public class AirPlaneLanding extends AbstractProblem {
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i], solver);
                 Constraint cr1 = IntConstraintFactory.implies(boolVar, c1);
                 Constraint cr2 = IntConstraintFactory.implies(VariableFactory.not(boolVar), c2);
-				solver.post(cr1);
-				solver.post(cr2);
-				// NOTE: use to be one single reification constraint in "ranking"
-				// not sure that the mapping is still good
-				ranking.put(cr1,
+                solver.post(cr1);
+                solver.post(cr2);
+                // NOTE: use to be one single reification constraint in "ranking"
+                // not sure that the mapping is still good
+                ranking.put(cr1,
                         Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
                                 (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
-				ranking.put(cr2,
+                ranking.put(cr2,
                         Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
                                 (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
             }
@@ -190,7 +191,7 @@ public class AirPlaneLanding extends AbstractProblem {
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return IntConstraintFactory.arithm(x,"=",y,"-",duration);
+        return IntConstraintFactory.arithm(x, "=", y, "-", duration);
     }
 
     @Override
@@ -225,7 +226,7 @@ public class AirPlaneLanding extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
-        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), LimitBox.failLimit(solver, 100), 100);
+        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
         if (true) {
             solver.getSearchLoop().plugSearchMonitor(new Abstract_LNS_SearchMonitor(solver, false) {
 
@@ -272,7 +273,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() != Boolean.TRUE) {
+        if (solver.isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");
         } else {
             for (int i = 0; i < n; i++) {
