@@ -28,6 +28,7 @@ package solver.constraints.gary;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.basic.PropKCliques;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
@@ -62,6 +63,7 @@ public class GraphConstraintFactory {
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR, NB_CLIQUES}, solver);
         gc.addPropagators(new PropTransitivity(GRAPHVAR));
         gc.addPropagators(new PropKCliques(GRAPHVAR, NB_CLIQUES));
+        gc.addPropagators(new PropKCC(GRAPHVAR, NB_CLIQUES));
         return gc;
     }
 
@@ -106,6 +108,9 @@ public class GraphConstraintFactory {
 
     /**
      * GRAPHVAR must form a Hamiltonian cycle
+	 * <p/> Filtering algorithms are incremental and run in O(1) per enforced/removed edge.
+	 * <p/> Subtour elimination is an undirected adaptation of the
+	 * nocycle constraint of Caseau & Laburthe in Solving small TSPs with Constraints.
      *
      * @param GRAPHVAR
      * @return a hamiltonian cycle constraint
@@ -121,7 +126,10 @@ public class GraphConstraintFactory {
 
     /**
      * GRAPHVAR must form a Hamiltonian cycle from ORIGIN to DESTINATION
-     *
+     * <p/> Filtering algorithms are incremental and run in O(1) per enforced/removed arc.
+	 * <p/> Subtour elimination is the nocycle constraint of Caseau & Laburthe in Solving small TSPs with Constraints.
+	 * <p/> No strong filtering (such as dominator-based or SCC-based) is used here
+	 *
      * @param GRAPHVAR    variable representing a path
      * @param ORIGIN      first node of the path
      * @param DESTINATION last node of the path
@@ -149,7 +157,7 @@ public class GraphConstraintFactory {
      * Anti arborescence partitioning constraint
      * also known as tree constraint (CP'11)
      * GAC in (almost) linear time : O(alpha.m)
-     * roots are identified by loops
+     * roots are identified by loops 
      * <p/>
      * BEWARE this implementation supposes that every node is part of the solution graph
      *
