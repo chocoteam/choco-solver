@@ -87,7 +87,7 @@ public class PropRelationGraph extends Propagator {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK(); // TODO ALL_Events
+        return EventType.ALL_FINE_EVENTS.mask;
     }
 
     @Override
