@@ -103,6 +103,7 @@ public class ConnectivityFinder {
         ISet act = graph.getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             p[i] = -1;
+			CC_firstNode[i] = -1;
             neighbors[i] = graph.getSuccessorsOf(i);
         }
         int first = act.getFirstElement();
@@ -168,10 +169,11 @@ public class ConnectivityFinder {
         ISet act = graph.getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             inf[i] = Integer.MAX_VALUE;
+			CC_firstNode[i] = -1;
             p[i] = -1;
         }
         //algo
-        int start = 0;
+        int start = act.getFirstElement();
         int i = start;
         int k = 0;
         numOfNode[start] = k;
@@ -228,7 +230,7 @@ public class ConnectivityFinder {
     private int[] ND, L, H;
 
     public boolean isConnectedAndFindIsthma() {
-        if (node_CC == null) {
+        if (numOfNode == null || CC_firstNode==null) {
             CC_firstNode = new int[n];
             CC_nextNode = new int[n];
             node_CC = new int[n];
@@ -243,9 +245,10 @@ public class ConnectivityFinder {
         ISet act = graph.getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             p[i] = -1;
+			CC_firstNode[i] = -1;
         }
         //algo
-        int start = 0;
+        int start = act.getFirstElement();
         int i = start;
         int k = 0;
         numOfNode[start] = k;
@@ -285,7 +288,7 @@ public class ConnectivityFinder {
         isthmusFrom.clear();
         isthmusTo.clear();
         int currentNode;
-        for (i = n - 1; i >= 0; i--) {
+        for (i = k; i >= 0; i--) {
             currentNode = nodeOfNum[i];
             ND[currentNode] = 1;
             L[currentNode] = i;

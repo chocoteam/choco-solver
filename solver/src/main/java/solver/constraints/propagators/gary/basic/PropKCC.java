@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
+import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -72,7 +73,8 @@ public class PropKCC extends Propagator {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (k.getUB() == 1) {
+		int maxOrder = g.getEnvelopOrder();
+		if (k.getUB() == 1 && maxOrder==g.getKernelOrder() && maxOrder>1) {
             if (!env_CC_finder.isConnectedAndFindIsthma()) {
                 contradiction(g, "");
             }
@@ -80,24 +82,38 @@ public class PropKCC extends Propagator {
             for (int i = 0; i < nbIsma; i++) {
                 g.enforceArc(env_CC_finder.isthmusFrom.get(i), env_CC_finder.isthmusTo.get(i), aCause);
             }
-        } else {
-            env_CC_finder.findAllCC();
-            int ee = env_CC_finder.getNBCC();
-            k.updateLowerBound(ee, aCause);
-            if (g.instantiated()) {
-                k.updateUpperBound(ee, aCause);
-            } else if (g.getEnvelopOrder() == g.getKernelOrder()) {
-                ker_CC_finder.findAllCC();
-                int ke = ker_CC_finder.getNBCC();
-                k.updateUpperBound(ke, aCause);
-            }
         }
+		if(maxOrder==g.getKernelOrder()){
+			env_CC_finder.findAllCC();
+			int ee = env_CC_finder.getNBCC();
+			k.updateLowerBound(ee, aCause);
+			ker_CC_finder.findAllCC();
+			int ke = ker_CC_finder.getNBCC();
+			k.updateUpperBound(ke, aCause);
+		}else{
+			env_CC_finder.findAllCC();
+			int ccs = env_CC_finder.getNBCC();
+			ISet act = g.getKernelGraph().getActiveNodes();
+			int minCC = 0;
+			for(int cc=0; cc<ccs; cc++){
+				for(int i=env_CC_finder.getCC_firstNode()[cc];i>=0;i=env_CC_finder.getCC_nextNode()[i]){
+					if(act.contain(i)){
+						minCC++;
+						break;
+					}
+				}
+			}
+			k.updateLowerBound(minCC, aCause);
+			ker_CC_finder.findAllCC();
+			int ke = ker_CC_finder.getNBCC();
+			k.updateUpperBound(ke+maxOrder-g.getKernelOrder(), aCause);
+		}
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         propagate(0);
-        // todo incremental behavior
+        // todo incremental algorithm
     }
 
     //***********************************************************************************
