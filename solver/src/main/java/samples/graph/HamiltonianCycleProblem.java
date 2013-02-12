@@ -31,6 +31,7 @@ import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
+import samples.graph.input.HCP_Utils;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;

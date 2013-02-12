@@ -31,18 +31,14 @@ import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.AbstractProblem;
-import samples.sandbox.graph.input.GraphGenerator;
+import samples.graph.input.GraphGenerator;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
-import solver.constraints.propagators.gary.arborescences.PropArborescence;
-import solver.constraints.propagators.gary.tsp.directed.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.directed.PropIntVarChanneling;
-import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
+import solver.constraints.propagators.gary.path.PropIntVarChanneling;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -67,9 +63,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     private boolean[][] adjacencyMatrix;
     private Constraint gc;
     // model parameters
-    private int allDiff;
     private long seed;
-    private boolean arbo, antiArbo, rg;
+	private boolean strongFilter;
+	private int intAllDiff;//0=none; 1=NEQ; 2=BC; 3=AC;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -94,33 +90,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     @Override
     public void buildModel() {
         basicModel();
-        if (arbo) {
-            gc.addPropagators(new PropArborescence(graph, 0, true));
-        }
-        if (antiArbo) {
-            gc.addPropagators(new PropAntiArborescence(graph, n - 1, true));
-        }
-        if (rg) {
-            gc.addPropagators(new PropReducedGraphHamPath(graph));
-        }
-        Constraint[] cstrs;
-        switch (allDiff) {
-            case 0:
-                cstrs = new Constraint[]{gc};
-                break;
-            case 1:
-                gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1));
-                cstrs = new Constraint[]{gc};
-                break;
-            case 2:
-                cstrs = new Constraint[]{gc, integerAllDiff(false)};
-                break;
-            case 3:
-                cstrs = new Constraint[]{gc, integerAllDiff(true)};
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
+        Constraint[] cstrs = new Constraint[]{gc};
+		if(intAllDiff>0){
+			cstrs = new Constraint[]{gc, integerAllDiff()};
+		}
         solver.post(cstrs);
     }
 
@@ -141,20 +114,19 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             e.printStackTrace();
             System.exit(0);
         }
-        gc = GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1);
+        gc = GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1, strongFilter);
     }
 
-    private Constraint integerAllDiff(boolean bc) {
+    private Constraint integerAllDiff() {
         integers = new IntVar[n];
         try {
             int i = n - 1;
-            if (bc) {
-                integers[i] = VariableFactory.bounded("vlast", n, n, solver);
-            } else {
-                integers[i] = VariableFactory.enumerated("vlast", n, n, solver);
-            }
+			if(intAllDiff!=3)
+				integers[i] = VariableFactory.bounded("vlast", n, n, solver);
+			else
+				integers[i] = VariableFactory.enumerated("vlast", n, n, solver);
             for (i = 0; i < n - 1; i++) {
-                if (bc) {
+                if (intAllDiff!=3) {
                     integers[i] = VariableFactory.bounded("v" + i, 1, n - 1, solver);
                 } else {
                     integers[i] = VariableFactory.enumerated("v" + i, 1, n - 1, solver);
@@ -170,22 +142,19 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             System.exit(0);
         }
         gc.addPropagators(new PropIntVarChanneling(integers, graph));
-        if (bc) {
-            return IntConstraintFactory.alldifferent(integers, "BC");
-        } else {
-            return new AllDifferent(integers, solver, AllDifferent.Type.NEQS);
-        }
+		String type = "AC";
+		if(intAllDiff==2){
+			type = "BC";
+		}
+		if(intAllDiff==1){
+			type = "NEQS";
+		}
+		return IntConstraintFactory.alldifferent(integers, type);
     }
 
-    private void configParameters(int ad, boolean ab, boolean aab, boolean rg) {
-        allDiff = ad;
-        arbo = ab;
-        antiArbo = aab;
-        this.rg = rg;
-    }
-
-    private void configParameters(int ad, int p) {
-        configParameters(ad, p % 2 == 1, (p >> 1) % 2 == 1, (p >> 2) % 2 == 1);
+    private void configParameters(int ad, boolean strong) {
+        intAllDiff = ad;
+		strongFilter = strong;
     }
 
     //***********************************************************************************
@@ -265,13 +234,14 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         matrix[7][5] = true;
         long nbSols = referencemodel(matrix);
         System.out.println(nbSols);
+		testModels(matrix,0);
     }
 
     @Test(groups = "1m")
     public static void test3() {
-        int[] sizes = new int[]{5, 6, 7, 10, 15, 20};
+        int[] sizes = new int[]{6, 10};
         int[] seeds = new int[]{0, 10, 42};
-        double[] densities = new double[]{0.1, 0.2};
+        double[] densities = new double[]{0.2,0.4};
         boolean[][] matrix;
         for (int n : sizes) {
             for (double d : densities) {
@@ -286,14 +256,14 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         }
     }
 
-    @Test(groups = "1h")
+    @Test(groups = "1m")
     public static void test4() {
-        int[] sizes = new int[]{10};
-        double[] densities = new double[]{0.1, 0.2, 0.5, 0.8, 1};
+        int[] sizes = new int[]{8};
+        double[] densities = new double[]{0.1, 0.2, 0.5, 0.7};
         boolean[][] matrix;
         for (int n : sizes) {
             for (double d : densities) {
-                for (int ks = 0; ks < 50; ks++) {
+                for (int ks = 0; ks < 10; ks++) {
                     long s = System.currentTimeMillis();
                     System.out.println("n:" + n + " d:" + d + " s:" + s);
                     GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
@@ -312,18 +282,20 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         }
         System.out.println(nbSols + " sols expected");
         boolean[][] matrix = transformMatrix(m);
-        for (int i = 0; i < 4; i++) {
-            for (int p = 0; p < 8; p++) {
-                for (SetType type : SetType.values()) {
-                    gt = type;
-                    HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
-                    hcp.set(matrix, seed);
-                    hcp.configParameters(i, p);
-                    hcp.execute();
-                    Assert.assertEquals(nbSols, hcp.solver.getMeasures().getSolutionCount(), "nb sol incorrect " + i + " ; " + p + " ; " + gt);
-                }
-            }
-        }
+		boolean[] vls = new boolean[]{false,true};
+		gt = SetType.SWAP_ARRAY;
+		for (int i = 0; i < 4; i++) {
+			for (boolean p:vls) {
+				HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
+				hcp.set(matrix, seed);
+				hcp.configParameters(i, p);
+				hcp.execute();
+				Assert.assertEquals(nbSols, hcp.solver.getMeasures().getSolutionCount(), "nb sol incorrect " + i + " ; " + p + " ; " + gt);
+			}
+		}
+		System.gc();
+		System.gc();
+		System.gc();
     }
 
     private static boolean[][] transformMatrix(boolean[][] m) {

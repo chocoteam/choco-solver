@@ -30,6 +30,7 @@ package samples.graph;
 import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
+import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -139,6 +140,8 @@ public class TravelingSalesmanProblem extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        System.out.println("cost : " + totalCost);
+        System.out.println("optimum in ["
+				+ solver.getSearchLoop().getObjectivemanager().getBestLB()+","
+				+ solver.getSearchLoop().getObjectivemanager().getBestUB()+"]");
     }
 }

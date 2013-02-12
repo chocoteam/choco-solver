@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.sandbox.graph.input;
+package samples.graph.input;
 
 import gnu.trove.list.array.TIntArrayList;
 

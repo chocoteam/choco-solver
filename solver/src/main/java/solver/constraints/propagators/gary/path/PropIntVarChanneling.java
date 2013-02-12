@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.path;
 
 import common.ESat;
 import common.util.procedure.IntProcedure;
@@ -49,6 +49,12 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
 
+/**
+ * Links intVars and the graph
+ * arc (x,y)=var[x]=y
+ * values outside range [0,n-1] are not considered
+ * @author Jean-Guillaume Fages
+ */
 public class PropIntVarChanneling extends Propagator {
 
     //***********************************************************************************

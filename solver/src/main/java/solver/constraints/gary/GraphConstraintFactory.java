@@ -26,15 +26,20 @@
  */
 package solver.constraints.gary;
 
+import org.easymock.internal.matchers.Or;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.basic.PropKCliques;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.directed.PropPathOrCircuitEvalObj;
+import solver.constraints.propagators.gary.path.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.path.PropPathNoCycle;
+import solver.constraints.propagators.gary.path.PropReducedPath;
+import solver.constraints.propagators.gary.path.PropSCCDoorsRules;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
@@ -90,23 +95,6 @@ public class GraphConstraintFactory {
     }
 
     /**
-     * Constraint modeling the Asymmetric Traveling Salesman Problem
-     * turned as the Minimum Cost Hamiltonian PATH Problem
-     *
-     * @param GRAPHVAR    variable representing a Hamiltonian path
-     * @param COSTVAR     variable representing the cost of the path
-     * @param ARC_COSTS   cost matrix
-     * @param ORIGIN      origin of the path
-     * @param DESTINATION end of the path
-     * @return an ATSP constraint
-     */
-    public static Constraint atsp(DirectedGraphVar GRAPHVAR, IntVar COSTVAR, int[][] ARC_COSTS, int ORIGIN, int DESTINATION) {
-        Constraint gc = hamiltonianPath(GRAPHVAR, ORIGIN, DESTINATION);
-        gc.addPropagators(new PropPathOrCircuitEvalObj(GRAPHVAR, COSTVAR, ARC_COSTS));
-        return gc;
-    }
-
-    /**
      * GRAPHVAR must form a Hamiltonian cycle
 	 * <p/> Filtering algorithms are incremental and run in O(1) per enforced/removed edge.
 	 * <p/> Subtour elimination is an undirected adaptation of the
@@ -125,17 +113,21 @@ public class GraphConstraintFactory {
     }
 
     /**
-     * GRAPHVAR must form a Hamiltonian cycle from ORIGIN to DESTINATION
-     * <p/> Filtering algorithms are incremental and run in O(1) per enforced/removed arc.
+     * GRAPHVAR must form a Hamiltonian path from ORIGIN to DESTINATION.
+     * <p/> Basic filtering algorithms are incremental and run in O(1) per enforced/removed arc.
 	 * <p/> Subtour elimination is the nocycle constraint of Caseau & Laburthe in Solving small TSPs with Constraints.
-	 * <p/> No strong filtering (such as dominator-based or SCC-based) is used here
+	 *
+	 * <p/> Assumes that ORIGIN has no predecessor, DESTINATION has no successor and each node is mandatory.
 	 *
      * @param GRAPHVAR    variable representing a path
      * @param ORIGIN      first node of the path
      * @param DESTINATION last node of the path
+	 * @param STRONG_FILTER true iff it should be worth to spend time on advanced filtering algorithms (that runs
+	 * in linear time). If so, then it uses dominator-based and SCCs-based filtering algorithms. This option should
+	 * be used on small-size.
      * @return a hamiltonian path constraint
      */
-    public static Constraint hamiltonianPath(DirectedGraphVar GRAPHVAR, int ORIGIN, int DESTINATION) {
+    public static Constraint hamiltonianPath(DirectedGraphVar GRAPHVAR, int ORIGIN, int DESTINATION, boolean STRONG_FILTER) {
         Solver solver = GRAPHVAR.getSolver();
         int n = GRAPHVAR.getEnvelopGraph().getNbNodes();
         int[] succs = new int[n];
@@ -145,11 +137,20 @@ public class GraphConstraintFactory {
         }
         succs[DESTINATION] = preds[ORIGIN] = 0;
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds));
-        gc.addPropagators(new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds));
-        gc.addPropagators(new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION));
+        gc.setPropagators(
+				new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds),
+				new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION));
+		if(STRONG_FILTER){
+			PropReducedPath red = new PropReducedPath(GRAPHVAR);
+			PropSCCDoorsRules rules = new PropSCCDoorsRules(GRAPHVAR,red);
+			PropArborescence arbo = new PropArborescence(GRAPHVAR, ORIGIN,true);
+			PropAntiArborescence aa = new PropAntiArborescence(GRAPHVAR,DESTINATION,true);
+			PropAllDiffGraphIncremental ad = new PropAllDiffGraphIncremental(GRAPHVAR,n-1);
+			gc.addPropagators(red,rules,arbo,aa,ad);
+		}
         return gc;
     }
 

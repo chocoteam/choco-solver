@@ -1,4 +1,4 @@
-/*
+package samples.graph.output;/*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,6 @@
  * Date: 22/10/12
  * Time: 02:12
  */
-
-package samples.sandbox.graph.output;
 
 import java.io.FileWriter;
 import java.io.IOException;
