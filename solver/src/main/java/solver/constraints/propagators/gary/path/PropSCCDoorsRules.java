@@ -32,8 +32,9 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.path;
 
+import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
@@ -50,8 +51,10 @@ import solver.variables.graph.DirectedGraphVar;
 import java.util.BitSet;
 
 /**
- * @PropAnn(tested = {BENCHMARK})
+ * Ad hoc filtering rule based on SCCs
+ * @author Jean-Guillaume Fages
  */
+@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************
@@ -76,6 +79,9 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
+	public PropSCCDoorsRules(DirectedGraphVar graph, PropReducedPath rp) {
+		this(graph,rp.getNSCC(),rp.getSCCOF(),rp.getOutArcs(),rp.getReducedGraph());
+	}
     public PropSCCDoorsRules(DirectedGraphVar graph,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg) {

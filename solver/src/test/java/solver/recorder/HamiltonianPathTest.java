@@ -30,12 +30,10 @@ package solver.recorder;
 import memory.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.sandbox.graph.input.GraphGenerator;
+import samples.graph.input.GraphGenerator;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
-import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.GraphStrategyFactory;
@@ -67,14 +65,16 @@ public class HamiltonianPathTest {
                     System.out.println("n:" + n + " nbVoisins:" + nb + " s:" + s);
                     GraphGenerator gg = new GraphGenerator(n, s, GraphGenerator.InitialProperty.HamiltonianCircuit);
                     matrix = transformMatrix(gg.neighborBasedGenerator(nb));
-                    testProblem(matrix, s, true);
-                    testProblem(matrix, s, false);
+                    testProblem(matrix, s, true,false);
+                    testProblem(matrix, s, false,false);
+					testProblem(matrix, s, true,true);
+                    testProblem(matrix, s, false,true);
                 }
             }
         }
     }
 
-    private static void testProblem(boolean[][] matrix, long s, boolean rd) {
+    private static void testProblem(boolean[][] matrix, long s, boolean rd, boolean strongFilter) {
         Solver solver = new Solver();
         int n = matrix.length;
         // build model
@@ -93,18 +93,7 @@ public class HamiltonianPathTest {
             e.printStackTrace();
             System.exit(0);
         }
-        Constraint gc = new Constraint(solver);
-        int[] succs = new int[n];
-        int[] preds = new int[n];
-        for (int i = 0; i < n; i++) {
-            succs[i] = preds[i] = 1;
-        }
-        succs[n - 1] = preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.PREDECESSORS, preds));
-        gc.addPropagators(new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.PREDECESSORS, preds));
-        gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1));
+        Constraint gc = GraphConstraintFactory.hamiltonianPath(graph,0,n-1,strongFilter);
         solver.post(gc);
 
         // configure solver

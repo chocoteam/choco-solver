@@ -25,13 +25,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 19/12/12
- * Time: 14:54
- */
-
 package samples.graph;
 
 import samples.AbstractProblem;

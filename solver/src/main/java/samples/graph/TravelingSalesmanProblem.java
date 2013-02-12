@@ -30,12 +30,10 @@ package samples.graph;
 import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
-import samples.sandbox.graph.input.TSP_Utils;
+import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -49,6 +47,8 @@ import solver.variables.graph.UndirectedGraphVar;
  * Solves the Traveling Salesman Problem
  * parses TSPLIB instances
  * proposes several optimization strategies
+ *
+ * Note that using the LKH heuristic as a pre-processing would speed up the resolution
  *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
@@ -65,7 +65,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
     private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
     @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
-    private int policy = 1;
+    private int policy = 1; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
 
 
     // input cost matrix
@@ -85,7 +85,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("solving the Traveling Salesman Problem graph variables");
+        solver = new Solver("solving the Traveling Salesman Problem");
     }
 
     @Override
@@ -102,13 +102,8 @@ public class TravelingSalesmanProblem extends AbstractProblem {
                 graph.getEnvelopGraph().addEdge(i, j);
             }
         }
-        // constraints
-        Constraint gc = GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 0);
-        // add a lagrangian relaxation
-        PropLagr_OneTree mst = PropLagr_OneTree.oneTreeBasedRelaxation(graph, totalCost, costMatrix);
-        mst.waitFirstSolution(true);
-        gc.addPropagators(mst);
-        solver.post(gc);
+        // constraints (TSP basic model + lagrangian relaxation)
+        solver.post(GraphConstraintFactory.tsp(graph, totalCost, costMatrix, 2));
     }
 
     @Override
@@ -136,8 +131,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
@@ -146,6 +140,8 @@ public class TravelingSalesmanProblem extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        System.out.println("cost : " + totalCost);
+        System.out.println("optimum in ["
+				+ solver.getSearchLoop().getObjectivemanager().getBestLB()+","
+				+ solver.getSearchLoop().getObjectivemanager().getBestUB()+"]");
     }
 }

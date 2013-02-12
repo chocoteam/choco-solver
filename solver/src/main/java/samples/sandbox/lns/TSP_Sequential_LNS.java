@@ -29,8 +29,8 @@ package samples.sandbox.lns;
 
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import samples.sandbox.graph.input.TSP_Utils;
-import samples.sandbox.graph.output.TextWriter;
+import samples.graph.input.TSP_Utils;
+import samples.graph.output.TextWriter;
 import solver.Cause;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -42,7 +42,6 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
-
 import java.io.File;
 import java.util.Random;
 
@@ -132,7 +131,7 @@ public class TSP_Sequential_LNS {
         solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 2));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(9, true);
+        strategy.configure(GraphStrategies.MIN_COST, true);
         solver.set(strategy);
         SearchMonitorFactory.limitTime(solver, 100000);
         solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));

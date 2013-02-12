@@ -32,8 +32,9 @@
  * Time: 10:42
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.path;
 
+import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
@@ -52,15 +53,16 @@ import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFin
 import java.util.BitSet;
 
 /**
- * @PropAnn(tested = {BENCHMARK})
  * Maintain incrementally the reduced graph G_R and SCC
  * make G_R a hamiltonian path
  * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
  * O(n+m)
- * User: Jean-Guillaume Fages
- * Date: 17/11/2011
+ * @author Jean-Guillaume Fages
+ * @since 17/11/2011
+ * @author Jean-Guillaume Fages
  */
-public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
+@PropAnn(tested = PropAnn.Status.BENCHMARK)
+public class PropReducedPath extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -89,7 +91,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
      *
      * @param graph
      */
-    public PropReducedGraphHamPath(DirectedGraphVar graph) {
+    public PropReducedPath(DirectedGraphVar graph) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);

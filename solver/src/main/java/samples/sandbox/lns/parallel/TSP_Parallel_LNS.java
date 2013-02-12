@@ -29,8 +29,8 @@ package samples.sandbox.lns.parallel;
 
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import samples.sandbox.graph.input.TSP_Utils;
-import samples.sandbox.graph.output.TextWriter;
+import samples.graph.input.TSP_Utils;
+import samples.graph.output.TextWriter;
 import samples.sandbox.parallelism.AbstractParallelMaster;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;

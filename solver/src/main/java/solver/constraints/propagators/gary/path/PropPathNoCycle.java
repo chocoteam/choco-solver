@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.path;
 
 import choco.annotations.PropAnn;
 import common.ESat;
@@ -48,6 +48,7 @@ import solver.variables.graph.DirectedGraphVar;
 
 /**
  * Simple nocircuit contraint (from noCycle of Caseaux/Laburthe)
+ * @author Jean-Guillaume Fages
  */
 @PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropPathNoCycle extends Propagator<DirectedGraphVar> {

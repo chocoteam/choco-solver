@@ -34,8 +34,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
+import solver.constraints.propagators.gary.path.PropPathNoCycle;
+import solver.constraints.propagators.gary.path.PropReducedPath;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -76,7 +76,7 @@ public class PathTest {
             gc.addPropagators(new PropArborescence(g, 0, true));
         }
         if (RG) {
-            gc.addPropagators(new PropReducedGraphHamPath(g));
+            gc.addPropagators(new PropReducedPath(g));
         }
         AbstractStrategy strategy = GraphStrategyFactory.graphLexico(g);
         s.post(gc);

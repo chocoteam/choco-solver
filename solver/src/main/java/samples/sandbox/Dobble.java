@@ -41,6 +41,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.propagators.Propagator;
@@ -70,9 +71,9 @@ public class Dobble {
         int nbSymbolsPerCard = 5;
         // implied extra filtering
         boolean useGraphs = true;
-        boolean useGlobalNValue = false;
+        boolean useGlobalNValue = true;
         // NValue constraint parameters
-        String[] types = new String[]{"at_least_AC"};//,"at_most_BC"};
+        String[] types = new String[]{"at_least_AC","at_most_BC"};
         long timeLimit = 60 * 1000;// (in ms)
         // model and solve the Dobble problem
         solverDobble(nbCards, nbSymbols, nbSymbolsPerCard, useGraphs, useGlobalNValue, types, timeLimit);
@@ -144,8 +145,9 @@ public class Dobble {
             }
         }
         Constraint gc = GraphConstraintFactory.nCliques(g, nValTotal);
-        gc.addPropagators(new PropRelationGraph(flatJeu, g, GraphRelationFactory.equivalence(flatJeu)));
-        gc.addPropagators(new PropGraphRelation(flatJeu, g, solver));
+		GraphRelation rel = GraphRelationFactory.equivalence(flatJeu);
+        gc.addPropagators(new PropRelationGraph(flatJeu, g, rel));
+        gc.addPropagators(new PropGraphRelation(flatJeu, g, rel));
         solver.post(gc);
     }
 
@@ -165,8 +167,9 @@ public class Dobble {
             }
         }
         Constraint gcpair = GraphConstraintFactory.nCliques(gpair, nValues);
-        gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, GraphRelationFactory.equivalence(flatIJ)));
-        gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, solver));
+		GraphRelation rel = GraphRelationFactory.equivalence(flatIJ);
+        gcpair.addPropagators(new PropRelationGraph(flatIJ, gpair, rel));
+        gcpair.addPropagators(new PropGraphRelation(flatIJ, gpair, rel));
         solver.post(gcpair);
     }
 

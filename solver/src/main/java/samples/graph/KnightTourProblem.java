@@ -31,7 +31,7 @@ import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
-import samples.sandbox.graph.input.HCP_Utils;
+import samples.graph.input.HCP_Utils;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -44,6 +44,10 @@ import solver.variables.graph.UndirectedGraphVar;
 /**
  * Solves the Knight's Tour Problem
  *
+ * Uses graph variables (light data structure)
+ * Scales up to 170x170 in ten seconds 
+ * (requires -Xms2000m -Xmx2000m for memory allocation)
+ *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
@@ -54,9 +58,9 @@ public class KnightTourProblem extends AbstractProblem {
     //***********************************************************************************
 
     @Option(name = "-tl", usage = "time limit.", required = false)
-    private long limit = 60000;
+    private long limit = 10000;
     @Option(name = "-l", usage = "Board length.", required = false)
-    private int boardLength = 50;
+    private int boardLength = 80;
     @Option(name = "-open", usage = "Open tour (path instead of cycle).", required = false)
     private boolean closedTour = false;
 
@@ -99,14 +103,14 @@ public class KnightTourProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
+		// basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
-//		solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
-        SearchMonitorFactory.log(solver, true, false);
+		SearchMonitorFactory.limitTime(solver,limit);
+        SearchMonitorFactory.log(solver, false, false);
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
@@ -114,8 +118,7 @@ public class KnightTourProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-    }
+    public void prettyOut() {}
 
     //***********************************************************************************
     // HEURISTICS
