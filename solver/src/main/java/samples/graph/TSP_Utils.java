@@ -32,7 +32,7 @@
  * Time: 01:57
  */
 
-package samples.sandbox.graph.input;
+package samples.graph;
 
 import java.io.BufferedReader;
 import java.io.File;

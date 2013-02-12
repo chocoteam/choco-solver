@@ -30,10 +30,8 @@ package samples.graph;
 import memory.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
-import samples.sandbox.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
@@ -86,7 +84,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("solving the Traveling Salesman Problem graph variables");
+        solver = new Solver("solving the Traveling Salesman Problem");
     }
 
     @Override
