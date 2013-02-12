@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.search.limits.LimitBox;
+import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -388,7 +388,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
                 SearchMonitorFactory.restart(solver, RestartFactory.geometrical(3 * vars.length, r),
-                        LimitBox.failLimit(solver, 3 * vars.length), Integer.MAX_VALUE);
+                        new FailLimit(solver, 3 * vars.length), Integer.MAX_VALUE);
 
             }
         }

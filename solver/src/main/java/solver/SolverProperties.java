@@ -31,6 +31,10 @@ import solver.explanations.ExplanationFactory;
 import solver.search.loop.SearchLoops;
 
 /**
+ * Default properties for {@link Solver} object.
+ * <br/>- trailing environment,
+ * <br/>- binary search loop,
+ * <br/>- no explanation plugged in
  * <br/>
  *
  * @author Charles Prud'homme

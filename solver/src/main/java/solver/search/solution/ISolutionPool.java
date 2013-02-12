@@ -34,6 +34,9 @@ import solver.Solver;
 import java.util.List;
 
 /**
+ * An interface to define a solution pool.
+ * A solution pool stores solutions found during the resolution process.
+ * <p/>
  * <br/>
  *
  * @author Arnaud Malapert

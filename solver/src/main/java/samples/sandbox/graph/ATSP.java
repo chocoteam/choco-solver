@@ -44,7 +44,6 @@ import solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation.Pro
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -316,19 +315,8 @@ public class ATSP {
 //        DSLEngine pengine = new DSLEngine(solver.getEnvironment());
 //        PArc allArcs = new PArc(pengine, gc);
 //        solver.set(pengine.set(new Sort(allArcs).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorInitPropagation() {
-            @Override
-            public void beforeInitialPropagation() {
-            }
-
-            @Override
-            public void afterInitialPropagation() {
-                if (totalCost.instantiated()) {
-                    solver.getSearchLoop().stopAtFirstSolution(true);
-                }
-            }
-        });
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
+        // CPRU: if objective instantiated since root node, could stop search at first solution.
         SearchMonitorFactory.log(solver, true, false);
         //SOLVE
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);

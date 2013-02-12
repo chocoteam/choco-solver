@@ -36,6 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -112,7 +113,7 @@ public class HamiltonianPathTest {
         } else {
             solver.set(GraphStrategyFactory.graphStrategy(graph, null, new ConstructorHeur(graph, 0), GraphStrategy.NodeArcPriority.ARCS));
         }
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
+        SearchMonitorFactory.limitTime(solver, TIME_LIMIT);
         solver.findSolution();
         IMeasures mes = solver.getMeasures();
 

@@ -35,6 +35,19 @@ package solver;
  */
 public enum Configuration {
     ;
+
+    public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
+
+    public static final String WELCOME_VERSION = "** CHOCO v{} ({}, {}), Copyleft (c) 2010-{}";
+
+    public static final String CALLER = "** Solve : {}";
+
+    public static final String RELEASE_VERSION = "3.0";
+
+    public static final String RELEASE_MONTH = "Feb.";
+
+    public static final String RELEASE_YEAR = "2013";
+
     // Set to true plugged explanation engine -- enable total deconnection from variable
     public static final boolean PLUG_EXPLANATION = false;
 
@@ -46,7 +59,14 @@ public enum Configuration {
 
     // Set to true to print scheduling information
     public static final boolean PRINT_SCHEDULE = false;
-
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;
+    /**
+     * Defines the rounding precision for multicostregular algorithm
+     */
+    public static final int MCR_PRECISION = 4; // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
+    /**
+     * Defines the smallest used double for multicostregular
+     */
+    public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
 }

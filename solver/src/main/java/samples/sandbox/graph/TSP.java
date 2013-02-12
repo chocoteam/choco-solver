@@ -168,7 +168,7 @@ public class TSP {
         });
 //		IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         // resolution
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);

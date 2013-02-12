@@ -128,7 +128,7 @@ public class TutteGraphGenerator {
         }
         solver.post(c);
         solver.set(GraphStrategyFactory.graphLexico(g));
-        solver.getSearchLoop().getLimitsBox().setSolutionLimit(100);
+        SearchMonitorFactory.limitSolution(solver, 100);
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             public void onSolution() {
                 int[][] sol = new int[n][3];

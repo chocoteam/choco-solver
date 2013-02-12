@@ -130,7 +130,7 @@ public class KTP_Graph_Bool {
 
 //        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
         // resolution
         solver.findSolution();
@@ -205,7 +205,7 @@ public class KTP_Graph_Bool {
         solver.set(new MinNeighBool(decisionVars, gl));
 //        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         // resolution
         solver.set(new PropagatorEngine(solver));
         solver.findSolution();
@@ -255,7 +255,7 @@ public class KTP_Graph_Bool {
 
 //        IPropagationEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         // resolution
         solver.set(new PropagatorEngine(solver));
         solver.findSolution();

@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -111,7 +112,7 @@ public class Langford extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Langford's number ({},{})", k, n);
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             int[] values = new int[k * n];
             for (int i = 0; i < k; i++) {
                 for (int j = 0; j < n; j++) {

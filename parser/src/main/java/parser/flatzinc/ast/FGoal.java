@@ -41,6 +41,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
@@ -84,15 +85,13 @@ public class FGoal {
         AbstractSearchLoop search = aSolver.getSearchLoop();
         switch (type) {
             case SATISFACTION:
-                search.stopAtFirstSolution(!gc.all);
                 break;
             default:
                 IntVar obj = expr.intVarValue(aSolver);
                 search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
-                search.stopAtFirstSolution(false);
         }
         if (gc.timeLimit > -1) {
-            aSolver.getSearchLoop().getLimitsBox().setTimeLimit(gc.timeLimit);
+            SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
         aSolver.set(gc.searchPattern);
         // Then define search goal

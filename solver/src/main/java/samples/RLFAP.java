@@ -26,6 +26,7 @@
  */
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.limits.LimitBox;
+import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -170,7 +171,7 @@ public class RLFAP extends AbstractProblem {
             solver.set(IntStrategyFactory.ActivityBased(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
-                LimitBox.failLimit(solver, 2), 25000);
+                new FailLimit(solver, 2), 25000);
     }
 
     @Override
@@ -190,7 +191,7 @@ public class RLFAP extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("RLFAP {}", dir);
         StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
+        if (solver.isFeasible() == ESat.TRUE) {
             st.append("\t");
             for (int i = 0; i < vars.length; i++) {
                 st.append(vars[i].getValue()).append(" ");

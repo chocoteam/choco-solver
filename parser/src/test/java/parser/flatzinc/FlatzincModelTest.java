@@ -45,6 +45,7 @@ import java.io.InputStream;
 */
 public class FlatzincModelTest {
 
+
     @Test(groups = "1s")
     public void test1() {
         StringBuilder st = new StringBuilder();
@@ -58,7 +59,7 @@ public class FlatzincModelTest {
         Solver solver = new Solver();
         pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
 
-        solver.solve();
+        solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
@@ -73,7 +74,7 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
-        solver.solve();
+        solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
@@ -90,7 +91,7 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
-        solver.solve();
+        solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 
@@ -159,7 +160,7 @@ public class FlatzincModelTest {
         ParseAndSolve pas = new ParseAndSolve();
         Solver solver = new Solver();
         pas.buildParser(in, solver, new THashMap<String, Object>(), new GoalConf());
-        solver.solve();
+        solver.findSolution();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
 //

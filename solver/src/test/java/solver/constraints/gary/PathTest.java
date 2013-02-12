@@ -36,6 +36,7 @@ import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
@@ -81,7 +82,7 @@ public class PathTest {
         s.post(gc);
         s.set(strategy);
         if (nbMaxSols > 0) {
-            s.getSearchLoop().getLimitsBox().setSolutionLimit(nbMaxSols);
+            SearchMonitorFactory.limitSolution(s, nbMaxSols);
         }
         s.findAllSolutions();
         return s;

@@ -32,7 +32,7 @@ import common.util.iterators.DisposableIntIterator;
 import gnu.trove.stack.TIntStack;
 import memory.IStateIntVector;
 import memory.structure.StoredIndexedBipartiteSet;
-import solver.Constant;
+import solver.Configuration;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -195,7 +195,7 @@ public class FastPathFinder {
                     if (!graph.isInStack(e)) {
                         int next = graph.GArcs.dests[e];
                         double newCost = graph.GNodes.lpft[next] + graph.GArcs.temporaryCost[e];//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost + graph.GNodes.lpfs[orig] - lb <= -Constant.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.lpfs[orig] - lb <= -Configuration.MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.push(e);
                         } else if (graph.GNodes.lpft[orig] < newCost) {
@@ -305,7 +305,7 @@ public class FastPathFinder {
                     if (!graph.isInStack(e)) {
                         int dest = graph.GArcs.dests[e];//e.getOrigin()  ;
                         double newCost = graph.GNodes.spft[dest] + graph.GArcs.temporaryCost[e];
-                        if (newCost + graph.GNodes.spfs[orig] - ub >= Constant.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.spfs[orig] - ub >= Configuration.MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.push(e);
                         } else if (graph.GNodes.spft[orig] > newCost) {
@@ -415,7 +415,7 @@ public class FastPathFinder {
                         double cost = graph.GArcs.temporaryCost[e];
 
                         double newCost = graph.GNodes.spft[dest] + cost;//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost + graph.GNodes.spfs[orig] - ub >= Constant.MCR_DECIMAL_PREC) {
+                        if (newCost + graph.GNodes.spfs[orig] - ub >= Configuration.MCR_DECIMAL_PREC) {
                             graph.getInStack().set(e);
                             removed.add(e);
                         } else if (graph.GNodes.spft[orig] > newCost) {
@@ -425,7 +425,7 @@ public class FastPathFinder {
                         }
 
                         double newCost2 = graph.GNodes.lpft[dest] + cost;//cost[graph.GNodes.layers[next]][graph.GArcs.values[e]];
-                        if (newCost2 + graph.GNodes.lpfs[orig] - lb <= -Constant.MCR_DECIMAL_PREC) {
+                        if (newCost2 + graph.GNodes.lpfs[orig] - lb <= -Configuration.MCR_DECIMAL_PREC) {
                             graph.setInStack(e);
                             removed.add(e);
                         } else if (graph.GNodes.lpft[orig] < newCost2) {
@@ -528,7 +528,7 @@ public class FastPathFinder {
                         double[] cost = graph.GArcs.originalCost[e];
 
                         for (int d = 0; d < nbr; d++) {
-                            if (spft[dest][d] + cost[d] + spfs[orig][d] - z[d].getUB() >= Constant.MCR_DECIMAL_PREC) {
+                            if (spft[dest][d] + cost[d] + spfs[orig][d] - z[d].getUB() >= Configuration.MCR_DECIMAL_PREC) {
                                 graph.getInStack().set(e);
                                 removed.push(e);
                                 break;
@@ -538,7 +538,7 @@ public class FastPathFinder {
                                 update = true;
                             }
 
-                            if (lpft[dest][d] + cost[d] + lpfs[orig][d] - z[d].getLB() <= -Constant.MCR_DECIMAL_PREC) {
+                            if (lpft[dest][d] + cost[d] + lpfs[orig][d] - z[d].getLB() <= -Configuration.MCR_DECIMAL_PREC) {
                                 graph.setInStack(e);
                                 removed.push(e);
                                 break;

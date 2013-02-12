@@ -6,6 +6,7 @@
 
 package samples.nsp;
 
+import common.ESat;
 import solver.Solver;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -98,7 +99,7 @@ public class NurseSchedulingProblem {
      * @param s the CPSolver
      */
     public String solutionToString(Solver s) {
-        if (Boolean.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.isFeasible()) {
             return null;
         }
         StringBuffer buf = new StringBuffer(100);
@@ -123,7 +124,7 @@ public class NurseSchedulingProblem {
      * @param s the CPSolver
      */
     public void printSolution(Solver s) {
-        if (Boolean.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.isFeasible()) {
             System.out.println("No solution found.");
             return;
         }
@@ -147,7 +148,7 @@ public class NurseSchedulingProblem {
      * @return the current solver solution as the assignment table [nbEmployees][nbDays] if exists, null otherwise
      */
     public int[][] getSolution(Solver s) {
-        if (Boolean.TRUE != s.isFeasible()) {
+        if (ESat.TRUE != s.isFeasible()) {
             return null;
         }
         int[][] solution = new int[shifts.length][shifts[0].length];

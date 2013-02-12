@@ -139,7 +139,7 @@ public class HCP_symImpact {
 
 //        DSLEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         if (useRestarts) {
             solver.getSearchLoop().plugSearchMonitor(new Restarter());
         }
@@ -192,7 +192,7 @@ public class HCP_symImpact {
         solver.set(GraphStrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
 //        DSLEngine propagationEngine = new DSLEngine(solver.getEnvironment());
 //        solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
-        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.limitTime(solver, TIMELIMIT);
         if (useRestarts) {
             solver.getSearchLoop().plugSearchMonitor(new Restarter());
         }

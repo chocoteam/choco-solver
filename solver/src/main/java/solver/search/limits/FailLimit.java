@@ -27,7 +27,7 @@
 
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 
 /**
  * Set a limit over the number of fails allowed during the search.
@@ -41,14 +41,14 @@ public final class FailLimit extends ALimit {
 
     private long faillimit;
 
-    protected FailLimit(AbstractSearchLoop searchLoop, long faillimit) {
-        super(searchLoop.getMeasures());
+    public FailLimit(Solver solver, long faillimit) {
+        super(solver.getSearchLoop().getMeasures());
         this.faillimit = faillimit;
     }
 
     @Override
     public boolean isReached() {
-        final long diff = faillimit - measures.getFailCount() ;
+        final long diff = faillimit - measures.getFailCount();
         return diff <= 0;
     }
 

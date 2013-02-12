@@ -38,7 +38,7 @@ public class GoalConf {
     boolean free; // force free search
     int bbss; // set free search : 1: activity based, 2: impact based, 3: dom/wdeg
     boolean dec_vars; // use same decision pool as the one defines in the fzn file
-    boolean all; // search for all solutions
+    public boolean all; // search for all solutions
     long seed; // seed for random search
     SearchPattern searchPattern;  // Search pattern
     long timeLimit;

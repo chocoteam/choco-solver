@@ -39,8 +39,7 @@ import gnu.trove.stack.array.TIntArrayStack;
 import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
-import solver.Constant;
-import solver.Solver;
+import solver.Configuration;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.FA.utils.ICounter;
@@ -563,11 +562,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                 }
                 newLB = Math.max(uUb[l] - uk * (z[l + 1].getUB() - axu), 0);
                 newLA = Math.max(uUb[l + nbR] - uk * (axu - z[l + 1].getLB()), 0);
-                if (Math.abs(uUb[l] - newLB) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uUb[l] - newLB) >= Configuration.MCR_DECIMAL_PREC) {
                     uUb[l] = newLB;
                     modif = true;
                 }
-                if (Math.abs(uUb[l + nbR] - newLA) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uUb[l + nbR] - newLA) >= Configuration.MCR_DECIMAL_PREC) {
                     uUb[l + nbR] = newLA;
                     modif = true;
                 }
@@ -652,11 +651,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
                 newLB = Math.max(uLb[l] + uk * (axu - z[l + 1].getUB()), 0);
                 newLA = Math.max(uLb[l + nbR] + uk * (z[l + 1].getLB() - axu), 0);
-                if (Math.abs(uLb[l] - newLB) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uLb[l] - newLB) >= Configuration.MCR_DECIMAL_PREC) {
                     uLb[l] = newLB;
                     modif = true;
                 }
-                if (Math.abs(uLb[l + nbR] - newLA) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uLb[l + nbR] - newLA) >= Configuration.MCR_DECIMAL_PREC) {
                     uLb[l + nbR] = newLA;
                     modif = true;
                 }
@@ -700,12 +699,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected void filterDown(final double realsp) throws ContradictionException {
 
-        if (realsp - z[0].getUB() >= Constant.MCR_DECIMAL_PREC) {
+        if (realsp - z[0].getUB() >= Configuration.MCR_DECIMAL_PREC) {
             this.contradiction(null, "cost variable domain is emptied");
         }
-        if (realsp - z[0].getLB() >= Constant.MCR_DECIMAL_PREC) {
+        if (realsp - z[0].getLB() >= Configuration.MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
-            double rsp = (realsp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : realsp;
+            double rsp = (realsp - mr <= Configuration.MCR_DECIMAL_PREC) ? mr : realsp;
             z[0].updateLowerBound((int) Math.ceil(rsp), aCause);//, false);
             modifiedBound[0] = true;
         }
@@ -718,12 +717,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @throws ContradictionException if the cost variable domain is emptied
      */
     protected void filterUp(final double reallp) throws ContradictionException {
-        if (reallp - z[0].getLB() <= -Constant.MCR_DECIMAL_PREC) {
+        if (reallp - z[0].getLB() <= -Configuration.MCR_DECIMAL_PREC) {
             this.contradiction(null, "cost variable domain is emptied");
         }
-        if (reallp - z[0].getUB() <= -Constant.MCR_DECIMAL_PREC) {
+        if (reallp - z[0].getUB() <= -Configuration.MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
-            double rsp = (reallp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : reallp;
+            double rsp = (reallp - mr <= Configuration.MCR_DECIMAL_PREC) ? mr : reallp;
             z[0].updateUpperBound((int) Math.floor(rsp), aCause);//, false);
             modifiedBound[1] = true;
         }

@@ -35,7 +35,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
  *
  * @author Jean-Guillaume Fages
  */
-public enum SearchPattern {
+public enum SearchPattern implements ISearchPattern {
     NONE {
         @Override
         public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
@@ -43,12 +43,4 @@ public enum SearchPattern {
         }
     };
 
-    /**
-     * Build a search strategy which integrates strategies and the given search pattern
-     *
-     * @param solver
-     * @param strategies
-     * @return a search strategy which integrates strategies and the given search pattern
-     */
-    public abstract AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies);
 }

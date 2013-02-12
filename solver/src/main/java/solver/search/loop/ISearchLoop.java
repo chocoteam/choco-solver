@@ -40,18 +40,20 @@ import java.io.Serializable;
 public interface ISearchLoop extends Serializable {
 
     /**
-     * Solves the problem states by the solver.
+     * Launch the resolution of the problem described in a Solver.
      *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
+     * @param stopAtFirst should stop at first solution
      */
-    Boolean launch();
+    void launch(boolean stopAtFirst);
 
-    Boolean resume();
-
-    void reset();
+    /**
+     * Resume the resolution of the problem described in a Solver.
+     */
+    void resume();
 
     /**
      * Branch a search monitor
+     *
      * @param sm
      */
     void plugSearchMonitor(ISearchMonitor sm);

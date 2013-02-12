@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.decision.Decision;
 import solver.variables.EventType;
@@ -46,7 +47,7 @@ import solver.variables.IntVar;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class ObjectiveManager implements ICause {
+public class ObjectiveManager implements ICause, IMonitorInitPropagation {
 
     final private ResolutionPolicy policy;
     final IntVar objective;
@@ -208,5 +209,15 @@ public class ObjectiveManager implements ICause {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.VOID.getMask();
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+        updateLB(objective.getLB());
+        updateUB(objective.getUB());
     }
 }

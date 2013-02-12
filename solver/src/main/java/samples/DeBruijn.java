@@ -34,6 +34,7 @@
 
 package samples;
 
+import common.ESat;
 import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -120,7 +121,7 @@ public class DeBruijn {
         for (int i = 0; i < m; i++) {
             binary[i] = VariableFactory.boolArray("binary" + i, n, s);
             IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
-            s.post(IntConstraintFactory.scalar(sum, coefs, VariableFactory.fixed(0,s)));
+            s.post(IntConstraintFactory.scalar(sum, coefs, VariableFactory.fixed(0, s)));
 //            s.post(ConstraintFactory.eq(x[i], Sum.build(binary[i], weights)));
         }
 
@@ -168,7 +169,7 @@ public class DeBruijn {
         s.findSolution();
 
         // System.out.println(s.pretty());
-        if (s.isFeasible()) {
+        if (s.isFeasible() == ESat.TRUE) {
 
             int num_sols = 0;
             // ChocoUtils.printAllSolutions(model, s);
