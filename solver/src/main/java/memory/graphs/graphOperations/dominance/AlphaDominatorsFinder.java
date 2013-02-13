@@ -27,14 +27,19 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
-import solver.variables.graph.DirectedGraph;
+import memory.graphs.DirectedGraph;
 
 /**
  * Class that finds dominators of a given flow graph g(s)
- * Uses the simple LT algorithm which runs in O(m.log(n))
- * Fast in practice
+ * Uses the LT algorithm which runs in O(alpha.m)
  */
-public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder {
+public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder {
+
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
+
+    private int[] size, child;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -42,10 +47,25 @@ public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFind
 
     /**
      * Object that finds dominators of the given flow graph g(s)
-     * It uses the simple LT algorithm which runs in O(m.log(n))
+     * It uses the LT algorithm which runs in O(alpha.m)
      */
-    public SimpleDominatorsFinder(int s, DirectedGraph g) {
+    public AlphaDominatorsFinder(int s, DirectedGraph g) {
         super(s, g);
+        size = new int[n];
+        child = new int[n];
+    }
+
+    //***********************************************************************************
+    // INITIALIZATION
+    //***********************************************************************************
+
+    @Override
+    protected void initParams(boolean inverseGraph) {
+        super.initParams(inverseGraph);
+        for (int i = 0; i < n; i++) {
+            size[i] = 0;
+            child[i] = root;
+        }
     }
 
     //***********************************************************************************
@@ -53,15 +73,40 @@ public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFind
     //***********************************************************************************
 
     protected void LINK(int v, int w) {
-        ancestor[w] = v;
+        int s = w;
+        while (semi[label[w]] < semi[label[child[s]]]) {
+            if (size[s] + size[child[child[s]]] >= 2 * size[child[s]]) {
+                ancestor[child[s]] = s;
+                child[s] = child[child[s]];
+            } else {
+                size[child[s]] = size[s];
+                ancestor[s] = child[s];
+                s = ancestor[s];
+            }
+        }
+        label[s] = label[w];
+        size[v] = size[v] + size[w];
+        if (size[v] < 2 * size[w]) {
+            int k = s;
+            s = child[v];
+            child[v] = k;
+        }
+        while (s != root) {
+            ancestor[s] = v;
+            s = child[s];
+        }
     }
 
     protected int EVAL(int v) {
         if (ancestor[v] == -1) {
-            return v;
+            return label[v];
         } else {
             COMPRESS(v);
-            return label[v];
+            if (semi[label[ancestor[v]]] >= semi[label[v]]) {
+                return label[v];
+            } else {
+                return label[ancestor[v]];
+            }
         }
 
     }

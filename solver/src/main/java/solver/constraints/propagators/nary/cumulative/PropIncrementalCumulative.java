@@ -28,6 +28,7 @@ package solver.constraints.propagators.nary.cumulative;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
@@ -36,7 +37,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.UndirectedGraph;
 
 /**
  * Graph based cumulative

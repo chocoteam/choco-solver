@@ -28,6 +28,7 @@ package solver.constraints.propagators.gary.path;
 
 import common.ESat;
 import common.util.procedure.PairProcedure;
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.Solver;
@@ -37,7 +38,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package memory.graphs;
 
 import memory.IEnvironment;
 import memory.setDataStructures.ISet;

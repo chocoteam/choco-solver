@@ -28,6 +28,7 @@
 package solver.variables.graph;
 
 import memory.IEnvironment;
+import memory.graphs.IGraph;
 import memory.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;

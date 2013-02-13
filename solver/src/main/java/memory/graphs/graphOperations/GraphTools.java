@@ -27,10 +27,10 @@
 
 package solver.variables.graph.graphOperations;
 
+import memory.graphs.DirectedGraph;
+import memory.graphs.IGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.matrix.Set_BitSet;
-import solver.variables.graph.DirectedGraph;
-import solver.variables.graph.IGraph;
 
 import java.util.BitSet;
 import java.util.HashMap;

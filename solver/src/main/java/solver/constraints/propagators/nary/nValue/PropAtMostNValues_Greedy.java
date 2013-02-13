@@ -29,6 +29,7 @@ package solver.constraints.propagators.nary.nValue;
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
@@ -36,7 +37,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.UndirectedGraph;
 
 import java.util.BitSet;
 

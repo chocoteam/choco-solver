@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -38,7 +39,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.UndirectedGraph;
 import solver.variables.graph.UndirectedGraphVar;
 
 /**
