@@ -34,13 +34,13 @@ import memory.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume
+ * User: chameau, Jean-Guillaume Fages
  * Date: 9 f�vr. 2011
  * <p/>
  * *
- * Specific implementation of a directed graph
+ * Directed graph implementation : arcs are indexed per endpoints
  */
-public class DirectedGraph implements IDirectedGraph {
+public class DirectedGraph implements IGraph {
 
     //***********************************************************************************
     // VARIABLES
@@ -59,47 +59,54 @@ public class DirectedGraph implements IDirectedGraph {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public DirectedGraph(int nbits, SetType type, boolean allNodes) {
+	/**
+	 * Creates an empty graph.
+	 * Allocates memory for n nodes (but they should then be added explicitely,
+	 * unless allNodes is true).
+	 * 
+	 * @param n			maximum number of nodes
+	 * @param type		data structure to use for representing node successors and predecessors
+	 * @param allNodes	true iff all nodes must always remain present in the graph
+	 */
+    public DirectedGraph(int n, SetType type, boolean allNodes) {
         this.type = type;
-        this.n = nbits;
-        predecessors = new ISet[nbits];
-        successors = new ISet[nbits];
+        this.n = n;
+        predecessors = new ISet[n];
+        successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeSet(type, nbits);
-            successors[i] = SetFactory.makeSet(type, nbits);
+            predecessors[i] = SetFactory.makeSet(type, n);
+            successors[i] = SetFactory.makeSet(type, n);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(nbits);
+            this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeBitSet(nbits);
+            this.nodes = SetFactory.makeBitSet(n);
         }
     }
 
-    public DirectedGraph(int order, boolean[][] matrix, SetType type, boolean allNodes) {
-        this(order, type, allNodes);
-        for (int i = 0; i < order; i++) {
-            for (int j = 0; j < order; j++) {
-                if (matrix[i][j]) {
-                    this.successors[i].add(j);
-                    this.predecessors[j].add(i);
-                }
-            }
-        }
-    }
-
-    public DirectedGraph(IEnvironment env, int nb, SetType type, boolean allNodes) {
-        this.n = nb;
+	/**
+	 * Creates an empty backtrable graph of n nodes
+	 * Allocates memory for n nodes (but they should then be added explicitely,
+	 * unless allNodes is true).
+	 * 
+	 * @param env		storing environment
+	 * @param n		maximum number of nodes
+	 * @param type		data structure to use for representing node successors and predecessors
+	 * @param allNodes	true iff all nodes must always remain present in the graph
+	 */
+    public DirectedGraph(IEnvironment env, int n, SetType type, boolean allNodes) {
+        this.n = n;
         this.type = type;
-        predecessors = new ISet[nb];
-        successors = new ISet[nb];
+        predecessors = new ISet[n];
+        successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeStoredSet(type, nb, env);
-            successors[i] = SetFactory.makeStoredSet(type, nb, env);
+            predecessors[i] = SetFactory.makeStoredSet(type, n, env);
+            successors[i] = SetFactory.makeStoredSet(type, n, env);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(nb);
+            this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, nb, env);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, env);
         }
     }
 
@@ -108,31 +115,17 @@ public class DirectedGraph implements IDirectedGraph {
     //***********************************************************************************
 
     public String toString() {
-        return "Successors :\n" + toStringSuccs() + "\nPredecessors :\n" + toStringPreds();
-    }
-
-    public String toStringSuccs() {
-        String res = "";
+		StringBuilder sb = new StringBuilder();
+		sb.append("nodes : \n"+nodes);
+		sb.append("successors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            res += "pot-" + i + ": ";
+            sb.append(i+" -> {");
             for (int j = successors[i].getFirstElement(); j >= 0; j = successors[i].getNextElement()) {
-                res += j + " ";
+                sb.append(j+" ");
             }
-            res += "\n";
+            sb.append("}\n");
         }
-        return res;
-    }
-
-    public String toStringPreds() {
-        String res = "";
-        for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            res += "pot-" + i + ": ";
-            for (int j = predecessors[i].getFirstElement(); j >= 0; j = predecessors[i].getNextElement()) {
-                res += j + " ";
-            }
-            res += "\n";
-        }
-        return res;
+        return sb.toString();
     }
 
     @Override
@@ -186,38 +179,11 @@ public class DirectedGraph implements IDirectedGraph {
         return false;
     }
 
-//    @Override
-//    public boolean addEdge(int x, int y) {
-//		assert (nodes.contain(y)) :"incoherent directed graph : node "+y+" has not been added to this yet";
-//		assert (nodes.contain(x)) :"incoherent directed graph : node "+x+" has not been added to this yet";
-//        if (x == y) {
-//            return addArc(x, y);
-//        }
-//        boolean b = addArc(x, y);
-//        b |= addArc(y, x);
-//		assert (arcExists(y,x)) :"incoherent directed graph";
-//        return b;
-//    }
-
-//    @Override
-//    public boolean removeEdge(int x, int y) {
-//        boolean b = removeArc(x, y);
-//		b |= removeArc(y, x);
-//		assert (!arcExists(y,x)):"error while removing edge";
-//        return b;
-//    }
-//
-//    @Override
-//    public boolean edgeExists(int x, int y) {
-//        boolean b = arcExists(x, y) || arcExists(y, x);
-//        return b;
-//    }
-
     /**
      * remove arc (from,to) from the graph
      *
-     * @param from
-     * @param to
+     * @param from	a node index
+     * @param to	a node index
      * @return true iff arc (from,to) was in the graph
      */
     public boolean removeArc(int from, int to) {
@@ -233,8 +199,8 @@ public class DirectedGraph implements IDirectedGraph {
     /**
      * Test whether arc (from,to) exists or not in the graph
      *
-     * @param from
-     * @param to
+     * @param from	a node index
+     * @param to	a node index
      * @return true iff arc (from,to) exists in the graph
      */
     public boolean arcExists(int from, int to) {
@@ -245,11 +211,21 @@ public class DirectedGraph implements IDirectedGraph {
         return false;
     }
 
-    /**
+	@Override
+	public boolean isArcOrEdge(int from, int to){
+		return arcExists(from,to);
+	}
+
+	@Override
+	public boolean isDirected() {
+		return true;
+	}
+
+	/**
      * add arc (from,to) to the graph
      *
-     * @param from
-     * @param to
+     * @param from	a node index
+     * @param to	a node index
      * @return true iff arc (from,to) was not already in the graph
      */
     public boolean addArc(int from, int to) {
@@ -264,22 +240,33 @@ public class DirectedGraph implements IDirectedGraph {
         return false;
     }
 
-//    @Override
-//    /**
-//     * @inheritedDoc
-//     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-//     */
-//    public ISet getNeighborsOf(int x) {
-//        return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
-//    }
-
-    @Override
+    /**
+     * Get successors of node x
+     *
+     * @param x node index
+     * @return successors of x
+     */
     public ISet getSuccessorsOf(int x) {
         return successors[x];
     }
 
-    @Override
+	@Override
+	public ISet getSuccsOrNeigh(int x){
+		return successors[x];
+	}
+
+    /**
+     * Get predecessors of node x
+     *
+     * @param x node index
+     * @return predecessors of x
+     */
     public ISet getPredecessorsOf(int x) {
         return predecessors[x];
     }
+
+	@Override
+	public ISet getPredsOrNeigh(int x){
+		return predecessors[x];
+	}
 }

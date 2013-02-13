@@ -135,12 +135,15 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 ISet nei = digraph.getPredecessorsOf(j);
                 for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
                     if (i != varIdx) {
-                        digraph.removeEdge(i, j);
+						digraph.removeArc(i, j);
+						digraph.removeArc(j, i);
                     }
                 }
                 int i = digraph.getSuccessorsOf(j).getFirstElement();
                 if (i != -1 && i != varIdx) {
-                    digraph.removeEdge(i, j);
+                    digraph.removeArc(i, j);
+                    digraph.removeArc(j, i);
+
                 }
             }
             return true;
@@ -399,7 +402,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         int idx;
 
         public void execute(int i) {
-            digraph.removeEdge(idx, map.get(i));
+            digraph.removeArc(idx, map.get(i));
+            digraph.removeArc(map.get(i),idx);
         }
 
         @Override

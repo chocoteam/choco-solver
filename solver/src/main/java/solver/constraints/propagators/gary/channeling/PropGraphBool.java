@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 
 /**
@@ -77,10 +78,10 @@ public class PropGraphBool extends Propagator<GraphVar> {
         for (int i = 0; i < n; i++) {
             graph.enforceNode(i, aCause);
             for (int j = 0; j < n; j++) {
-                if (!graph.getEnvelopGraph().arcExists(i, j)) {
+                if (!graph.getEnvelopGraph().isArcOrEdge(i, j)) {
                     relations[i][j].setToFalse(aCause);
                 }
-                if (graph.getKernelGraph().arcExists(i, j)) {
+                if (graph.getKernelGraph().isArcOrEdge(i, j)) {
                     relations[i][j].setToTrue(aCause);
                 }
             }
@@ -117,7 +118,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (relations[i][j].instantiated()) {
-                    if (graph.getEnvelopGraph().arcExists(i, j) != (relations[i][j].getValue() == 1)) {
+                    if (graph.getEnvelopGraph().isArcOrEdge(i, j) != (relations[i][j].getValue() == 1)) {
                         return ESat.FALSE;
                     }
                 } else {

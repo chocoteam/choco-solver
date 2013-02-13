@@ -137,17 +137,17 @@ public class PropGraphChannel extends Propagator<Variable> {
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 g.enforceArc(i, j, aCause);
             }
-            tmp = g.getKernelGraph().getSuccessorsOf(i);
+            tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 sets[i].addToKernel(j, aCause);
             }
             tmp = sets[i].getEnvelope();
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-                if (!g.getEnvelopGraph().arcExists(i, j)) {
+                if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
             }
-            tmp = g.getEnvelopGraph().getSuccessorsOf(i);
+            tmp = g.getEnvelopGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 if (!sets[i].getEnvelope().contain(j)) {
                     g.removeArc(i, j, aCause);
@@ -181,11 +181,11 @@ public class PropGraphChannel extends Propagator<Variable> {
         for (int i = 0; i < n; i++) {
             ISet tmp = sets[i].getKernel();
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-                if (!g.getEnvelopGraph().arcExists(i, j)) {
+                if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     return ESat.FALSE;
                 }
             }
-            tmp = g.getKernelGraph().getSuccessorsOf(i);
+            tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 if (!sets[i].getEnvelope().contain(j)) {
                     return ESat.FALSE;

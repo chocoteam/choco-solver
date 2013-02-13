@@ -27,6 +27,7 @@
 
 package solver.constraints.gary;
 
+import memory.graphs.Orientation;
 import memory.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -40,8 +41,6 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -65,10 +64,10 @@ public class PathTest {
             succs[i] = preds[i] = 1;
         }
         succs[n - 1] = preds[0] = 0;
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.SUCCESSORS, succs));
-        gc.addPropagators(new PropNodeDegree_AtLeast(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
-        gc.addPropagators(new PropNodeDegree_AtMost(g, GraphVar.IncidentNodes.PREDECESSORS, preds));
+        gc.addPropagators(new PropNodeDegree_AtLeast(g, Orientation.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtMost(g, Orientation.SUCCESSORS, succs));
+        gc.addPropagators(new PropNodeDegree_AtLeast(g, Orientation.PREDECESSORS, preds));
+        gc.addPropagators(new PropNodeDegree_AtMost(g, Orientation.PREDECESSORS, preds));
         if (path) {
             gc.addPropagators(new PropPathNoCycle(g, 0, n - 1));
         }

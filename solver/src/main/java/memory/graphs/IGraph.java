@@ -29,13 +29,12 @@ package memory.graphs;
 
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-
 import java.io.Serializable;
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
- *         <p/>
- *         Provide an interface for the graph manipulation
+ * <p/>
+ * Provide an interface for the graph manipulation
  */
 public interface IGraph extends Serializable {
 
@@ -47,7 +46,6 @@ public interface IGraph extends Serializable {
 
     /**
      * Activate node x
-     *
      * @param x a node index
      * @return true iff x was not already activated
      */
@@ -55,7 +53,6 @@ public interface IGraph extends Serializable {
 
     /**
      * Desactivate node x
-     *
      * @param x a node index
      * @return true iff x was activated
      */
@@ -63,15 +60,51 @@ public interface IGraph extends Serializable {
 
     /**
      * The number of nodes of the graph
-     *
      * @return the number of nodes of the graph
      */
     int getNbNodes();
 
     /**
      * Get the type of the graph
-     *
      * @return the type of the graph SPARSE or DENSE
      */
     SetType getType();
+
+
+	/**
+	 * Get either x's successors or neighbors.
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @return x's successors if <code>this</code> is directed
+	 * 			x's neighbors otherwise
+	 */
+	ISet getSuccsOrNeigh(int x);
+
+	/**
+	 * Get either x's predecessors or neighbors.
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @return x's predecessors if <code>this</code> is directed
+	 * 			x's neighbors otherwise
+	 */
+	ISet getPredsOrNeigh(int x);
+
+	/**
+	 * If <code>this </code> is directed
+	 * returns true if and only if arc (x,y) exists
+	 * Else, if <code>this</code> is undirected
+	 * returns true if and only if edge (x,y) exists
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @param y a node index
+	 */
+	boolean isArcOrEdge(int x, int y);
+
+	/**
+	 * @return true if and only if <code>this</code> is a directed graph
+	 */
+	boolean isDirected();
 }

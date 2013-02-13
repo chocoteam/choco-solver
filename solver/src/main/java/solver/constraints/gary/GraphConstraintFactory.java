@@ -26,6 +26,7 @@
  */
 package solver.constraints.gary;
 
+import memory.graphs.Orientation;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
@@ -137,10 +138,10 @@ public class GraphConstraintFactory {
         succs[DESTINATION] = preds[ORIGIN] = 0;
         Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
         gc.setPropagators(
-				new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs),
-				new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.SUCCESSORS, succs),
-				new PropNodeDegree_AtLeast(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds),
-				new PropNodeDegree_AtMost(GRAPHVAR, GraphVar.IncidentNodes.PREDECESSORS, preds),
+				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.SUCCESSORS, succs),
+				new PropNodeDegree_AtLeast(GRAPHVAR, Orientation.PREDECESSORS, preds),
+				new PropNodeDegree_AtMost(GRAPHVAR, Orientation.PREDECESSORS, preds),
 				new PropPathNoCycle(GRAPHVAR, ORIGIN, DESTINATION));
 		if(STRONG_FILTER){
 			PropReducedPath red = new PropReducedPath(GRAPHVAR);

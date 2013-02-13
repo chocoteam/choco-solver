@@ -98,61 +98,61 @@ public class GraphTools {
     // Subgraphs
     //***********************************************************************************
 
-    /**
-     * Create a new graph which is a subraph of graph deduced from a subset and some parameters.
-     * done in O(m+n) operations
-     *
-     * @param graph     original graph
-     * @param subset    of nodes to keep in the subgraph
-     * @param skipFirst if the first node of the subset should be skipped
-     * @param reverse   if all arcs should be reversed
-     * @returna new graph which is a subraph of graph deduced from a subset and some parameters.
-     */
-    public static DirectedGraph createSubgraph(DirectedGraph graph, ISet subset, boolean skipFirst, boolean reverse) {
-        int nb = subset.getSize();
-        if (subset.getSize() == 0) {
-            throw new UnsupportedOperationException("error ");
-        }
-        if (skipFirst) {
-            nb--;
-        }
-
-        boolean[][] matrix = new boolean[nb][nb];
-        int[] indexes = new int[nb];
-        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-        int nodeInNewGraph = 0;
-        boolean first = true;
-        for (int k = subset.getFirstElement(); k >= 0; k = subset.getNextElement()) {
-            if (first && skipFirst) {
-                first = false;
-            } else {
-                indexes[nodeInNewGraph] = k;
-                map.put(k, nodeInNewGraph);
-                nodeInNewGraph++;
-            }
-        }
-        nodeInNewGraph = 0;
-        first = true;
-        ISet nei;
-        for (int k = subset.getFirstElement(); k >= 0; k = subset.getNextElement()) {
-            if (first && skipFirst) {
-                first = false;
-            } else {
-                nei = graph.getSuccessorsOf(k);
-                for (int l = nei.getFirstElement(); l >= 0; l = nei.getNextElement()) {
-                    if (map.get(l) != null) {
-                        if (!reverse) {
-                            matrix[nodeInNewGraph][map.get(l)] = true;
-                        } else {
-                            matrix[map.get(l)][nodeInNewGraph] = true;
-                        }
-                    }
-                }
-                nodeInNewGraph++;
-            }
-        }
-        return new DirectedGraph(nb, matrix, graph.getType(), false);
-    }
+//    /**
+//     * Create a new graph which is a subraph of graph deduced from a subset and some parameters.
+//     * done in O(m+n) operations
+//     *
+//     * @param graph     original graph
+//     * @param subset    of nodes to keep in the subgraph
+//     * @param skipFirst if the first node of the subset should be skipped
+//     * @param reverse   if all arcs should be reversed
+//     * @returna new graph which is a subraph of graph deduced from a subset and some parameters.
+//     */
+//    public static DirectedGraph createSubgraph(DirectedGraph graph, ISet subset, boolean skipFirst, boolean reverse) {
+//        int nb = subset.getSize();
+//        if (subset.getSize() == 0) {
+//            throw new UnsupportedOperationException("error ");
+//        }
+//        if (skipFirst) {
+//            nb--;
+//        }
+//
+//        boolean[][] matrix = new boolean[nb][nb];
+//        int[] indexes = new int[nb];
+//        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+//        int nodeInNewGraph = 0;
+//        boolean first = true;
+//        for (int k = subset.getFirstElement(); k >= 0; k = subset.getNextElement()) {
+//            if (first && skipFirst) {
+//                first = false;
+//            } else {
+//                indexes[nodeInNewGraph] = k;
+//                map.put(k, nodeInNewGraph);
+//                nodeInNewGraph++;
+//            }
+//        }
+//        nodeInNewGraph = 0;
+//        first = true;
+//        ISet nei;
+//        for (int k = subset.getFirstElement(); k >= 0; k = subset.getNextElement()) {
+//            if (first && skipFirst) {
+//                first = false;
+//            } else {
+//                nei = graph.getSuccessorsOf(k);
+//                for (int l = nei.getFirstElement(); l >= 0; l = nei.getNextElement()) {
+//                    if (map.get(l) != null) {
+//                        if (!reverse) {
+//                            matrix[nodeInNewGraph][map.get(l)] = true;
+//                        } else {
+//                            matrix[map.get(l)][nodeInNewGraph] = true;
+//                        }
+//                    }
+//                }
+//                nodeInNewGraph++;
+//            }
+//        }
+//        return new DirectedGraph(nb, matrix, graph.getType(), false);
+//    }
 
 //    /**
 //     * Create a new directed graph which is a subraph of an undirected graph

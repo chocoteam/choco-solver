@@ -29,8 +29,7 @@ package memory.graphs.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.IGraph;
-import memory.graphs.IUndirectedGraph;
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.ISet;
 
 /**
@@ -46,7 +45,7 @@ public class ConnectivityFinder {
     //***********************************************************************************
 
     private int n;
-    private IUndirectedGraph graph;
+    private UndirectedGraph graph;
     private ISet[] neighbors;
     private int[] CC_firstNode, CC_nextNode, node_CC, p;
     private int nbCC;
@@ -59,7 +58,7 @@ public class ConnectivityFinder {
      *
      * @param g graph
      */
-    public ConnectivityFinder(IUndirectedGraph g) {
+    public ConnectivityFinder(UndirectedGraph g) {
         graph = g;
         n = g.getNbNodes();
         neighbors = new ISet[n];

@@ -60,7 +60,7 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
         }
         chooseOneNode();
         inTree.set(oneNode);
-        ISet nei = g.getSuccessorsOf(oneNode);
+        ISet nei = g.getNeighborsOf(oneNode);
         int min1 = -1;
         int min2 = -1;
         boolean b1 = false, b2 = false;
@@ -104,9 +104,9 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
         }
         int first = -1, sizeFirst = n + 1;
         for (int i = 0; i < n; i++) {
-            if (i != oneNode && g.getSuccessorsOf(i).getSize() < sizeFirst) {
+            if (i != oneNode && g.getNeighborsOf(i).getSize() < sizeFirst) {
                 first = i;
-                sizeFirst = g.getSuccessorsOf(i).getSize();
+                sizeFirst = g.getNeighborsOf(i).getSize();
             }
         }
         if (first == -1) {

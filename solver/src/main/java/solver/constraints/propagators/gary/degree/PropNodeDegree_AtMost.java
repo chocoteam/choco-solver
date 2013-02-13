@@ -29,7 +29,10 @@ package solver.constraints.propagators.gary.degree;
 
 import common.ESat;
 import common.util.procedure.PairProcedure;
+import memory.graphs.IGraph;
+import memory.graphs.Orientation;
 import memory.setDataStructures.ISet;
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -37,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.GraphVar.IncidentNodes;
 import solver.variables.graph.UndirectedGraphVar;
 
 /**
@@ -55,24 +57,24 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     GraphDeltaMonitor gdm;
     private PairProcedure enf_proc;
     private int[] degrees;
-    private IncidentNodes target;
+    private IncidentSet target;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeDegree_AtMost(DirectedGraphVar graph, IncidentNodes setType, int degree) {
+    public PropNodeDegree_AtMost(DirectedGraphVar graph, Orientation setType, int degree) {
         this(graph, setType, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtMost(DirectedGraphVar graph, IncidentNodes setType, int[] degrees) {
+    public PropNodeDegree_AtMost(DirectedGraphVar graph, Orientation setType, int[] degrees) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
-        target = setType;
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.degrees = degrees;
-        switch (target) {
+        switch (setType) {
             case SUCCESSORS:
+				target = new SNIS();
                 enf_proc = new PairProcedure() {
                     public void execute(int i, int j) throws ContradictionException {
                         checkAtMost(i);
@@ -80,22 +82,15 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
                 };
                 break;
             case PREDECESSORS:
+				target = new PIS();
                 enf_proc = new PairProcedure() {
                     public void execute(int i, int j) throws ContradictionException {
-                        checkAtMost(j);
-                    }
-                };
-                break;
-            case NEIGHBORS:
-                enf_proc = new PairProcedure() {
-                    public void execute(int i, int j) throws ContradictionException {
-                        checkAtMost(i);
                         checkAtMost(j);
                     }
                 };
                 break;
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("wrong parameter: use either PREDECESSORS or SUCCESSORS");
         }
     }
 
@@ -103,9 +98,9 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
         this(graph, buildArray(degree, graph.getEnvelopGraph().getNbNodes()));
     }
 
-    public PropNodeDegree_AtMost(UndirectedGraphVar graph, int[] degrees) {
+    public PropNodeDegree_AtMost(final UndirectedGraphVar graph, int[] degrees) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
-        target = IncidentNodes.NEIGHBORS;
+        target = new SNIS();
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.degrees = degrees;
@@ -191,4 +186,40 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
             }
         }
     }
+
+	private class SNIS implements IncidentSet{
+
+		@Override
+		public ISet getSet(IGraph graph, int i) {
+			return graph.getSuccsOrNeigh(i);
+		}
+
+		@Override
+		public void enforce(GraphVar g, int from, int to, ICause cause) throws ContradictionException {
+			g.enforceArc(from,to,cause);
+		}
+
+		@Override
+		public void remove(GraphVar g, int from, int to, ICause cause) throws ContradictionException {
+			g.removeArc(from,to,cause);
+		}
+	}
+
+	private class PIS implements IncidentSet{
+
+		@Override
+		public ISet getSet(IGraph graph, int i) {
+			return graph.getPredsOrNeigh(i);
+		}
+
+		@Override
+		public void enforce(GraphVar g, int from, int to, ICause cause) throws ContradictionException {
+			g.enforceArc(to,from,cause);
+		}
+
+		@Override
+		public void remove(GraphVar g, int from, int to, ICause cause) throws ContradictionException {
+			g.removeArc(to,from,cause);
+		}
+	}
 }

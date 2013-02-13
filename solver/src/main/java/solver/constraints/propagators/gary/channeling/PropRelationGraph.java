@@ -94,14 +94,14 @@ public class PropRelationGraph extends Propagator {
     public ESat isEntailed() {
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            nei = g.getEnvelopGraph().getSuccsOrNeigh(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (g.getKernelGraph().arcExists(i, j) && relation.isEntail(i, j) == ESat.FALSE) {
+                if (g.getKernelGraph().isArcOrEdge(i, j) && relation.isEntail(i, j) == ESat.FALSE) {
                     return ESat.FALSE;
                 }
             }
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (relation.isEntail(i, j) == ESat.UNDEFINED && !g.getKernelGraph().arcExists(i, j)) {
+                if (relation.isEntail(i, j) == ESat.UNDEFINED && !g.getKernelGraph().isArcOrEdge(i, j)) {
                     return ESat.UNDEFINED;
                 }
             }
@@ -115,7 +115,7 @@ public class PropRelationGraph extends Propagator {
 
     private void checkVar(int i) throws ContradictionException {
         ISet ker = g.getKernelGraph().getActiveNodes();
-        ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+        ISet nei = g.getEnvelopGraph().getSuccsOrNeigh(i);
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
             switch (relation.isEntail(i, j)) {
                 case TRUE:

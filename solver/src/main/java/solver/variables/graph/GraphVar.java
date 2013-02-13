@@ -90,8 +90,8 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         ISet suc;
         ISet act = getEnvelopGraph().getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            suc = envelop.getSuccessorsOf(i);
-            if (suc.getSize() != getKernelGraph().getSuccessorsOf(i).getSize()) {
+            suc = envelop.getSuccsOrNeigh(i);
+            if (suc.getSize() != getKernelGraph().getSuccsOrNeigh(i).getSize()) {
                 return false;
             }
         }
@@ -113,9 +113,12 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         } else if (!envelop.getActiveNodes().contain(x)) {
             return false;
         }
-        ISet nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+        ISet nei = envelop.getSuccsOrNeigh(x);
         for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
             removeArc(x, i, cause);
+        }
+		nei = envelop.getPredsOrNeigh(x);
+        for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
             removeArc(i, x, cause);
         }
         if (envelop.desactivateNode(x)) {
@@ -173,56 +176,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      * @return true iff the node y is effectively added in the neighborhooh of node x
      */
     public abstract boolean enforceArc(int x, int y, ICause cause) throws ContradictionException;
-
-    public enum IncidentNodes {
-        PREDECESSORS() {
-            public ISet getSet(IGraph graph, int i) {
-                return graph.getPredecessorsOf(i);
-            }
-
-            public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.removeArc(to, from, cause);
-            }
-
-            public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.enforceArc(to, from, cause);
-            }
-        },
-        SUCCESSORS() {
-            public ISet getSet(IGraph graph, int i) {
-                return graph.getSuccessorsOf(i);
-            }
-
-            public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.removeArc(from, to, cause);
-            }
-
-            public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.enforceArc(from, to, cause);
-            }
-        },
-        NEIGHBORS() {
-            public ISet getSet(IGraph graph, int i) {
-                return graph.getNeighborsOf(i);
-            }
-
-            public void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.removeArc(from, to, cause);
-                gv.removeArc(to, from, cause);
-            }
-
-            public void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException {
-                gv.enforceArc(from, to, cause);
-                gv.enforceArc(to, from, cause);
-            }
-        };
-
-        public abstract ISet getSet(IGraph graph, int i);
-
-        public abstract void enforce(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
-
-        public abstract void remove(GraphVar gv, int from, int to, ICause cause) throws ContradictionException;
-    }
 
     //***********************************************************************************
     // ACCESSORS
@@ -291,6 +244,13 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 
     @Override
     public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("graph_var "+getName());
+		sb.append("\ninstantiated = "+instantiated()+"\n");
+		sb.append("\nenvelope graph \n");
+		sb.append(envelop.toString());
+		sb.append("\nkernel graph \n");
+		sb.append(kernel.toString());
         return getName();
     }
 
@@ -333,13 +293,18 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     // SOLUTIONS : STORE AND RESTORE
     //***********************************************************************************
 
+	/**
+	 * @return the value of the graph variable represented through an adjacency matrix
+	 * plus a set of nodes (last line of value).
+	 * This method is not supposed to be used except for restoring solutions.
+	 */
     public boolean[][] getValue() {
         int n = getEnvelopGraph().getNbNodes();
         boolean[][] vals = new boolean[n + 1][n];
         ISet kerNodes = getKernelGraph().getActiveNodes();
         ISet kerSuccs;
         for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-            kerSuccs = getKernelGraph().getSuccessorsOf(i);
+            kerSuccs = getKernelGraph().getSuccsOrNeigh(i);
             for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
                 vals[i][j] = true; // arc in
             }
@@ -348,16 +313,24 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         return vals;
     }
 
-    public void instantiateTo(boolean[][] values, ICause cause) throws ContradictionException {
-        int n = values.length - 1;
+	/**
+	 * Instantiates <code>this</code> to value which represents an adjacency
+	 * matrix plus a set of nodes (last line of value).
+	 * This method is not supposed to be used except for restoring solutions.
+	 * @param value		value of <code>this</code>
+	 * @param cause
+	 * @throws ContradictionException
+	 */
+    public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
+        int n = value.length - 1;
         for (int i = 0; i < n; i++) {
-            if (values[n][i]) {//nodes
+            if (value[n][i]) {//nodes
                 enforceNode(i, cause);
             } else {
                 removeNode(i, cause);
             }
             for (int j = 0; j < n; j++) {
-                if (values[i][j]) {//arcs
+                if (value[i][j]) {//arcs
                     enforceArc(i, j, cause);
                 } else {
                     removeArc(i, j, cause);

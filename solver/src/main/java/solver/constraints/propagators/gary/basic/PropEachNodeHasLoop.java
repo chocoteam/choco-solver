@@ -81,7 +81,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
         ISet env = g.getEnvelopGraph().getActiveNodes();
         for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
             if (concernedNodes.contain(i)) {
-                if (g.getEnvelopGraph().arcExists(i, i)) {
+                if (g.getEnvelopGraph().isArcOrEdge(i, i)) {
                     if (g.getKernelGraph().getActiveNodes().contain(i)) {
                         g.enforceArc(i, i, aCause);
                     }
@@ -118,7 +118,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     public ESat isEntailed() {
         ISet ker = g.getKernelGraph().getActiveNodes();
         for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
-            if (concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)) {
+            if (concernedNodes.contain(i) && !g.getKernelGraph().getSuccsOrNeigh(i).contain(i)) {
                 return ESat.FALSE;
             }
         }

@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Propagator that ensures that the final graph consists in K Connected Components (CC)
@@ -51,7 +51,7 @@ public class PropKCC extends Propagator {
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
+    private UndirectedGraphVar g;
     private IntVar k;
     private ConnectivityFinder env_CC_finder, ker_CC_finder;
 
@@ -59,7 +59,7 @@ public class PropKCC extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKCC(GraphVar graph, IntVar k) {
+    public PropKCC(UndirectedGraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.k = k;
@@ -112,8 +112,7 @@ public class PropKCC extends Propagator {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-        // todo incremental algorithm
+        propagate(0); // todo incremental algorithm
     }
 
     //***********************************************************************************

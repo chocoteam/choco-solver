@@ -172,7 +172,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 		mandatoryArcsList.clear();
 		ISet nei;
 		for (int i = 0; i < n; i++) {
-			nei = g.getKernelGraph().getSuccessorsOf(i);
+			nei = g.getKernelGraph().getNeighborsOf(i);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				if (i < j) {
 					mandatoryArcsList.add(i * n + j);
@@ -184,7 +184,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 	protected void setCosts() {
 		ISet nei;
 		for (int i = 0; i < n; i++) {
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			nei = g.getEnvelopGraph().getNeighborsOf(i);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				if (i < j) {
 					costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
@@ -232,7 +232,7 @@ public class PropLagr_OneTree extends Propagator implements GraphLagrangianRelax
 	protected void updateCostMatrix() {
 		ISet nei;
 		for (int i = 0; i < n; i++) {
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			nei = g.getEnvelopGraph().getNeighborsOf(i);
 			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
 				if (i < j) {
 					costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];

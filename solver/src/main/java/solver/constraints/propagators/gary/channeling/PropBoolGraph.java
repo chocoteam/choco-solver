@@ -34,6 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 
 /**
@@ -95,7 +96,7 @@ public class PropBoolGraph extends Propagator<BoolVar> {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (relations[i][j].instantiated()) {
-                    if (relations[i][j].getValue() == 1 && !graph.getEnvelopGraph().arcExists(i, j)) {
+                    if (relations[i][j].getValue() == 1 && !graph.getEnvelopGraph().isArcOrEdge(i, j)) {
                         return ESat.FALSE;
                     }
                 } else {
