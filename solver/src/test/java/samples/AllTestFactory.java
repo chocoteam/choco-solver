@@ -28,6 +28,7 @@ package samples;
 
 import memory.Environments;
 import org.testng.annotations.Factory;
+import samples.basics.AbsoluteEvaluation;
 import solver.ISolverProperties;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationStrategies;

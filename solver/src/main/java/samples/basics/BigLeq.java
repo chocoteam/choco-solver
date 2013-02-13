@@ -24,10 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -35,6 +36,8 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * Simple example which sorts m integers in range [0,m-1]
+ * by using an allDifferent constraint and arithmetic constraints (leq)
  * <br/>
  *
  * @author Charles Prud'homme
@@ -54,7 +57,6 @@ public class BigLeq extends AbstractProblem {
     @Override
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
-
         for (int i = 0; i < m - 1; i++) {
             solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }

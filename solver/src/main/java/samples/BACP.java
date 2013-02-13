@@ -108,15 +108,15 @@ public class BACP extends AbstractProblem {
 								IntConstraintFactory.arithm(course_period[j], "!=", i))
                 );
             }
-//            sum(i in courses) (x[p, i])>=courses_per_period_lb /\
-//            sum(i in courses) (x[p, i])<=courses_per_period_ub /\
+			// sum(i in courses) (x[p, i])>=courses_per_period_lb /\
+			// sum(i in courses) (x[p, i])<=courses_per_period_ub /\
             IntVar sum = VariableFactory.bounded("courses_per_period",courses_per_period_lb,courses_per_period_ub,solver);
 			solver.post(IntConstraintFactory.sum(x[i], sum));
-//            load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
+			//  load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
             solver.post(IntConstraintFactory.scalar(x[i], course_load, load[i]));
-//            load[p] >= load_per_period_lb /\
+			//  load[p] >= load_per_period_lb /\
             solver.post(IntConstraintFactory.arithm(load[i], ">=", load_per_period_lb));
-//            load[p] <= objective
+			//  load[p] <= objective
             solver.post(IntConstraintFactory.arithm(load[i], "<=", objective));
         }
 
@@ -196,21 +196,19 @@ public class BACP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
+		SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override
-    public void configureEngine() {
-        SearchMonitorFactory.log(solver, true, false);
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
     @Override
-    public void prettyOut() {
-    }
+    public void prettyOut() {}
 
     public static void main(String[] args) {
         new BACP().execute(args);

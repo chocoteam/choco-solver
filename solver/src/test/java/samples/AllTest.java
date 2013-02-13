@@ -32,6 +32,7 @@ import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.basics.AbsoluteEvaluation;
 import solver.Configuration;
 import solver.ISolverProperties;
 import solver.Solver;

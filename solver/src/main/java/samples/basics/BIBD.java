@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -102,14 +102,12 @@ public class BIBD extends AbstractProblem {
         // r ones per row
         IntVar R = VariableFactory.fixed(r, solver);
         for (int i = 0; i < v; i++) {
-            solver.post(IntConstraintFactory.count(1, vars[i], R));
-            //solver.post(Sum.eq(vars[i], R, solver));
+            solver.post(IntConstraintFactory.sum(vars[i], R));
         }
         // k ones per column
         IntVar K = VariableFactory.fixed(k, solver);
         for (int j = 0; j < b; j++) {
-            solver.post(IntConstraintFactory.count(1, _vars[j], K));
-            //solver.post(Sum.eq(_vars[j], K, solver));
+            solver.post(IntConstraintFactory.sum(_vars[j], K));
         }
 
         // Exactly l ones in scalar product between two different rows
@@ -120,46 +118,33 @@ public class BIBD extends AbstractProblem {
                 for (int j = 0; j < b; j++) {
                     solver.post(IntConstraintFactory.times(_vars[j][i1], _vars[j][i2], score[j]));
                 }
-                //solver.post(IntConstraintFactory.count(1, score, L));
                 solver.post(IntConstraintFactory.sum(score, L));
             }
         }
         // Symmetry breaking
-        for (int i = 1; i < v; i++) {
-            solver.post(new LexChain(false, solver, vars[i], vars[i - 1]));
-        }
-        for (int j = 1; j < b; j++) {
-            solver.post(new LexChain(false, solver, _vars[j], _vars[j - 1]));
-        }
+		BoolVar[][] rev = new BoolVar[v][];
+		for (int i = 0; i < v; i++) {
+			rev[i] = vars[v-1-i];
+		}
+		solver.post(IntConstraintFactory.lex_chain_less_eq(rev));
+		BoolVar[][] _rev = new BoolVar[b][];
+		for (int i = 0; i < b; i++) {
+			_rev[i] = _vars[b-1-i];
+		}
+		solver.post(IntConstraintFactory.lex_chain_less_eq(_rev));
     }
 
 
     @Override
     public void configureSearch() {
-        //TODO: changer la strategie pour une plus efficace
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.flatten(vars)));
     }
 
     @Override
-    public void configureEngine() {
-        // BEWARE: etrangement, gecode effectue presque 2 fois moins de propagations...
-        // BEWARE: les OCCURR peuvent tre remplacees par des SUM, mais plus lent (bien que nb prop < )
-        /*solver.getEngine().addGroup(
-                Group.buildQueue(
-                        Predicates.but(ALL, inVARS),
-                        Policy.FIXPOINT
-                ));
-        solver.getEngine().addGroup(
-                Group.buildQueue(
-                        inVARS, Policy.FIXPOINT
-                ));*/
-        //EngineStrategies.constraintOriented(solver);
-
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.statEveryXXms(solver, 1000);
         solver.findSolution();
     }
 

@@ -24,9 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -44,7 +45,6 @@ import solver.variables.VariableFactory;
  * @since 02/08/11
  */
 public class Alpha extends AbstractProblem {
-
 
     IntVar[] letters;
 
@@ -92,13 +92,11 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        //TODO: changer la strategie pour une plus efficace
         solver.set(IntStrategyFactory.firstFail_InDomainMin(letters));
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

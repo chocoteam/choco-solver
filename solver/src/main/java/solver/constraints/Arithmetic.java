@@ -60,7 +60,6 @@ public class Arithmetic extends IntConstraint<IntVar> {
         return operator.equals(Operator.PL) || operator.equals(Operator.MN);
     }
 
-
     public Arithmetic(IntVar var, Operator op, int cste, Solver solver) {
         super(new IntVar[]{var}, solver);
         this.op1 = op;
