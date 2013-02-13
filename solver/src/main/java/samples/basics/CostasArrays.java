@@ -24,9 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
@@ -52,7 +53,7 @@ import solver.variables.VariableFactory;
 public class CostasArrays extends AbstractProblem {
 
     @Option(name = "-o", usage = "Costas array size.", required = false)
-    private static int n = 13;  // should be <15 to be solved quickly
+    private static int n = 14;  // should be <15 to be solved quickly
 
     IntVar[] vars, vectors;
 
@@ -75,7 +76,7 @@ public class CostasArrays extends AbstractProblem {
             }
         }
         solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
-        solver.post(IntConstraintFactory.alldifferent(vectors, "AC"));
+        solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
     }
 
     @Override

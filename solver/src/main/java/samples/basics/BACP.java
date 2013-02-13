@@ -24,8 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
+import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -92,11 +93,13 @@ public class BACP extends AbstractProblem {
         // whether period i has a course j assigned
         x = VariableFactory.boolMatrix("X", n_periods, n_courses, solver);
         // total load for each period
-        load = VariableFactory.enumeratedArray("load", load_per_period_ub - load_per_period_lb + 1, 0, n_periods, solver);
+        load = VariableFactory.enumeratedArray("load", n_periods, 0, load_per_period_ub - load_per_period_lb + 1, solver);
         // opt. target
         objective = VariableFactory.bounded("objective", load_per_period_lb, load_per_period_ub, solver);
-
-        for (int i = 0; i < n_periods; i++) {
+		// sum variable
+		IntVar sum = VariableFactory.bounded("courses_per_period",courses_per_period_lb,courses_per_period_ub,solver);
+		// constraints
+		for (int i = 0; i < n_periods; i++) {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
@@ -110,7 +113,6 @@ public class BACP extends AbstractProblem {
             }
 			// sum(i in courses) (x[p, i])>=courses_per_period_lb /\
 			// sum(i in courses) (x[p, i])<=courses_per_period_ub /\
-            IntVar sum = VariableFactory.bounded("courses_per_period",courses_per_period_lb,courses_per_period_ub,solver);
 			solver.post(IntConstraintFactory.sum(x[i], sum));
 			//  load[p] = sum(c in courses) (x[p, c]*course_load[c])/\
             solver.post(IntConstraintFactory.scalar(x[i], course_load, load[i]));
