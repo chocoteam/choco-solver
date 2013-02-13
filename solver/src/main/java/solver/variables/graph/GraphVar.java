@@ -310,7 +310,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         assert cause != null;
         notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
-            //records.forEach(afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
@@ -326,7 +325,6 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         assert cause != null;
-//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

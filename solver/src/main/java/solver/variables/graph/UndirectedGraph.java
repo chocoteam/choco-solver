@@ -160,23 +160,21 @@ public class UndirectedGraph implements IGraph {
             neighbors[x].add(y);
             return true;
         }
-        if ((!neighbors[x].contain(y)) && (!neighbors[y].contain(x))) {
+        if (!neighbors[x].contain(y)) {
+			assert (!neighbors[y].contain(x)) :"asymmetric adjacency matrix in an undirected graph";
             neighbors[x].add(y);
             neighbors[y].add(x);
             return true;
         }
-        assert (!((!neighbors[x].contain(y)) || (!neighbors[y].contain(x)))) :
-                "asymmetric adjacency matrix in an undirected graph";
         return false;
     }
 
     @Override
     public boolean edgeExists(int x, int y) {
-        if (neighbors[x].contain(y) && neighbors[y].contain(x)) {
+        if (neighbors[x].contain(y)) {
+			assert (neighbors[y].contain(x)) :"asymmetric adjacency matrix in an undirected graph";
             return true;
         }
-        assert (!(neighbors[x].contain(y) || neighbors[y].contain(x))) :
-                "asymmetric adjacency matrix in an undirected graph";
         return false;
     }
 
@@ -194,13 +192,12 @@ public class UndirectedGraph implements IGraph {
             neighbors[y].remove(x);
             return true;
         }
-        if ((neighbors[x].contain(y)) && (neighbors[y].contain(x))) {
+        if (neighbors[x].contain(y)) {
+			assert (neighbors[y].contain(x)) :"asymmetric adjacency matrix in an undirected graph";
             neighbors[x].remove(y);
             neighbors[y].remove(x);
             return true;
         }
-        assert (!((neighbors[x].contain(y)) || (neighbors[y].contain(x)))) :
-                "asymmetric adjacency matrix in an undirected graph";
         return false;
     }
 

@@ -162,7 +162,11 @@ public class DirectedGraph implements IGraph {
 
     @Override
     public boolean activateNode(int x) {
-        return nodes.add(x);
+		if(!nodes.contain(x)){
+			return nodes.add(x);
+		}else{
+			return false;
+		}
     }
 
     @Override
@@ -178,22 +182,29 @@ public class DirectedGraph implements IGraph {
             predecessors[x].clear();
             return true;
         }
+		assert (predecessors[x].getSize()==0) :"incoherent directed graph";
+		assert (successors[x].getSize()==0) :"incoherent directed graph";
         return false;
     }
 
     @Override
     public boolean addEdge(int x, int y) {
+		assert (nodes.contain(y)) :"incoherent directed graph : node "+y+" has not been added to this yet";
+		assert (nodes.contain(x)) :"incoherent directed graph : node "+x+" has not been added to this yet";
         if (x == y) {
             return addArc(x, y);
         }
         boolean b = addArc(x, y);
         b |= addArc(y, x);
+		assert (arcExists(y,x)) :"incoherent directed graph";
         return b;
     }
 
     @Override
     public boolean removeEdge(int x, int y) {
-        boolean b = removeArc(x, y) || removeArc(y, x);
+        boolean b = removeArc(x, y);
+		b |= removeArc(y, x);
+		assert (!arcExists(y,x)):"error while removing edge";
         return b;
     }
 
@@ -211,13 +222,12 @@ public class DirectedGraph implements IGraph {
      * @return true iff arc (from,to) was in the graph
      */
     public boolean removeArc(int from, int to) {
-        if ((successors[from].contain(to)) && (predecessors[to].contain(from))) {
+        if (successors[from].contain(to)) {
+			assert (predecessors[to].contain(from)) :"incoherent directed graph";
             successors[from].remove(to);
             predecessors[to].remove(from);
             return true;
         }
-        assert (!((successors[from].contain(to)) || (predecessors[to].contain(from)))) :
-                "incoherent directed graph";
         return false;
     }
 
@@ -229,11 +239,9 @@ public class DirectedGraph implements IGraph {
      * @return true iff arc (from,to) exists in the graph
      */
     public boolean arcExists(int from, int to) {
-        if (successors[from].contain(to) || predecessors[to].contain(from)) {
-            if (successors[from].contain(to) && predecessors[to].contain(from)) {
-                return true;
-            }
-            throw new UnsupportedOperationException("incoherent directed graph");
+        if (successors[from].contain(to)) {
+			assert (predecessors[to].contain(from)) :"incoherent directed graph";
+			return true;
         }
         return false;
     }
@@ -248,13 +256,12 @@ public class DirectedGraph implements IGraph {
     public boolean addArc(int from, int to) {
         activateNode(from);
         activateNode(to);
-        if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))) {
+        if (!successors[from].contain(to)) {
+			assert (!predecessors[to].contain(from)) :"incoherent directed graph";
             successors[from].add(to);
             predecessors[to].add(from);
             return true;
         }
-        assert (!((!successors[from].contain(to)) || (!predecessors[to].contain(from)))) :
-                "incoherent directed graph";
         return false;
     }
 
