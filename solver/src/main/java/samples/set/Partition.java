@@ -35,24 +35,28 @@
 package samples.set;
 
 import samples.AbstractProblem;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.SetStrategyFactory;
+import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.SetVarImpl;
 import solver.variables.VariableFactory;
 
 /**
  * Small problem to illustrate how to use set variables
- * enumerates sets such which partition a universe)
+ * finds a partition a universe so that the sum of elements in universe
+ * (restricted to the arbitrary interval [12,19]) is minimal
  *
  * @author Jean-Guillaume Fages
  */
 public class Partition extends AbstractProblem {
 
     private SetVar x, y, z, universe;
+	private IntVar sum;
 	private boolean noEmptySet = true;
 
     public static void main(String[] args) {
@@ -70,6 +74,7 @@ public class Partition extends AbstractProblem {
         y = new SetVarImpl("y", solver);
         z = new SetVarImpl("z", solver);
         universe = new SetVarImpl("universe", solver);
+		sum = VariableFactory.bounded("sum of universe",12,19,solver);
         // x initial domain
         x.getEnvelope().add(1);
         x.getKernel().add(1);
@@ -87,34 +92,28 @@ public class Partition extends AbstractProblem {
         z.getEnvelope().add(3);
         z.getEnvelope().add(5);
         z.getEnvelope().add(7);
-        // universe initial domain
+        z.getEnvelope().add(12);
+        // universe initial domain (note that the universe is a variable)
         universe.getEnvelope().add(1);
         universe.getEnvelope().add(2);
         universe.getEnvelope().add(3);
         universe.getEnvelope().add(5);
         universe.getEnvelope().add(7);
         universe.getEnvelope().add(8);
-        // set-union constraint
+        universe.getEnvelope().add(42);
+        // partition constraint
         solver.post(SetConstraintsFactory.partition(new SetVar[]{x, y, z}, universe));
 		if(noEmptySet){
+			// forbid empty sets
 			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0,solver)));
 		}
+		// restricts the sum of elements in universe
+		solver.post(SetConstraintsFactory.sum(universe,sum));
     }
 
     @Override
     public void configureSearch() {
         solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z, universe}));
-        SearchMonitorFactory.log(solver, true, false);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                System.out.println("solution found");
-                System.out.println("x : {" + x.getEnvelope() + "}");
-                System.out.println("y : {" + y.getEnvelope() + "}");
-                System.out.println("z : {" + z.getEnvelope() + "}");
-                System.out.println("universe : {" + universe.getEnvelope() + "}");
-            }
-        });
     }
 
     @Override
@@ -122,9 +121,15 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findAllSolutions();
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,sum);
     }
 
     @Override
-    public void prettyOut() {}
+    public void prettyOut() {
+		System.out.println("best solution found");
+		System.out.println("x : {" + x.getEnvelope() + "}");
+		System.out.println("y : {" + y.getEnvelope() + "}");
+		System.out.println("z : {" + z.getEnvelope() + "}");
+		System.out.println("universe : {" + universe.getEnvelope() + "} "+sum);
+	}
 }

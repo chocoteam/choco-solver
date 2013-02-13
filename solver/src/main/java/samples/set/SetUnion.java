@@ -42,6 +42,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
 import solver.variables.SetVarImpl;
+import solver.variables.VariableFactory;
 
 /**
  * Small problem to illustrate how to use set variables
@@ -52,6 +53,7 @@ import solver.variables.SetVarImpl;
 public class SetUnion extends AbstractProblem {
 
     private SetVar x, y, z;
+	private boolean noEmptySet = false;
 
     public static void main(String[] args) {
         new SetUnion().execute(args);
@@ -85,6 +87,9 @@ public class SetUnion extends AbstractProblem {
         z.getEnvelope().add(3);
         // set-union constraint
         solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
+		if(noEmptySet){
+			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
+		}
     }
 
     @Override
