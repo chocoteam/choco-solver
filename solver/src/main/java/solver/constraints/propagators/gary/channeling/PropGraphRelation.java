@@ -97,7 +97,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
             return ESat.UNDEFINED;
         }
         for (int i = 0; i < n; i++) {
-            ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            ISet nei = g.getEnvelopGraph().getSuccsOrNeigh(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (relation.isEntail(i, j) == ESat.FALSE) {
                     return ESat.FALSE;
@@ -114,10 +114,10 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
     private void checkVar(int i) throws ContradictionException {
         ISet ker = g.getKernelGraph().getActiveNodes();
         for (int j = ker.getFirstElement(); j >= 0; j = ker.getNextElement()) {
-            if (g.getKernelGraph().arcExists(i, j)) {
+            if (g.getKernelGraph().isArcOrEdge(i, j)) {
                 relation.applyTrue(i, j, solver, aCause);
             } else {
-                if (!g.getEnvelopGraph().arcExists(i, j)) {
+                if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     if (ker.contain(i)) {
                         relation.applyFalse(i, j, solver, aCause);
                     }

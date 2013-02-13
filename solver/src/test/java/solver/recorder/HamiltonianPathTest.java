@@ -123,10 +123,10 @@ public class HamiltonianPathTest {
     }
 
     // constructive heuristic, can be useful to debug
-    private static class ConstructorHeur extends ArcStrategy {
+    private static class ConstructorHeur extends ArcStrategy<DirectedGraphVar> {
         int source, n;
 
-        public ConstructorHeur(GraphVar graphVar, int s) {
+        public ConstructorHeur(DirectedGraphVar graphVar, int s) {
             super(graphVar);
             source = s;
             n = graphVar.getEnvelopGraph().getNbNodes();

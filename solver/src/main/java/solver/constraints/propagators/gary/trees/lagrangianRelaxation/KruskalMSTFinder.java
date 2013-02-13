@@ -30,12 +30,11 @@ package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 import gnu.trove.list.array.TIntArrayList;
 import memory.graphs.DirectedGraph;
 import memory.graphs.UndirectedGraph;
+import memory.graphs.graphOperations.dominance.LCAGraphManager;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
-
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -123,7 +122,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
             Tree.getNeighborsOf(i).clear();
             ccTree.desactivateNode(i);
             ccTree.activateNode(i);
-            size += g.getSuccessorsOf(i).getSize();
+            size += g.getNeighborsOf(i).getSize();
         }
         if (size % 2 != 0) {
             throw new UnsupportedOperationException();
@@ -133,7 +132,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         Integer[] integers = new Integer[size];
         int idx = 0;
         for (int i = 0; i < n; i++) {
-            nei = g.getSuccessorsOf(i);
+            nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     integers[idx] = i * n + j;
@@ -188,7 +187,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         }
         // Trivially infeasible arcs
         while (idx >= 0) {
-            if (!Tree.arcExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
+            if (!Tree.edgeExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
                 propHK.remove(sortedArcs[idx] / n, sortedArcs[idx] % n);
                 activeArcs.clear(idx);
             }
@@ -217,7 +216,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         }
         // Trivially infeasible arcs
         while (idx >= 0) {
-            if (!Tree.arcExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
+            if (!Tree.edgeExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
                 propHK.remove(sortedArcs[idx] / n, sortedArcs[idx] % n);
                 activeArcs.clear(idx);
             }
@@ -265,7 +264,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         for (int arc = activeArcs.nextSetBit(fi); arc >= 0; arc = activeArcs.nextSetBit(arc + 1)) {
             i = sortedArcs[arc] / n;
             j = sortedArcs[arc] % n;
-            if (!Tree.arcExists(i, j)) {
+            if (!Tree.edgeExists(i, j)) {
                 if (propHK.isMandatory(i, j)) {
                     throw new UnsupportedOperationException();
                 }

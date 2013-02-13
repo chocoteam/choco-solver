@@ -120,41 +120,4 @@ public abstract class GraphAssignment implements Serializable {
             return " removal ";
         }
     };
-
-    public static GraphAssignment graph_split = new GraphAssignment() {
-        @Override
-        public void apply(GraphVar var, int node, int highestIdx, ICause cause) throws ContradictionException {
-            ISet nei = var.getEnvelopGraph().getSuccessorsOf(node);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (j > highestIdx) {
-                    var.removeArc(node, j, cause);
-                }
-            }
-        }
-
-        @Override
-        public void unapply(GraphVar var, int node, int highestIdx, ICause cause) throws ContradictionException {
-            ISet nei = var.getEnvelopGraph().getSuccessorsOf(node);
-            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (j <= highestIdx) {
-                    var.removeArc(node, j, cause);
-                }
-            }
-        }
-
-        @Override
-        public void apply(GraphVar var, int node, ICause cause) throws ContradictionException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void unapply(GraphVar var, int node, ICause cause) throws ContradictionException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String toString() {
-            return " split ";
-        }
-    };
 }

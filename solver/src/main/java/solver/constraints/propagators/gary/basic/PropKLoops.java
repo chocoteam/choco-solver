@@ -71,10 +71,10 @@ public class PropKLoops extends Propagator {
         int max = 0;
         ISet nodes = g.getEnvelopGraph().getActiveNodes();
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            if (g.getKernelGraph().arcExists(i, i)) {
+            if (g.getKernelGraph().isArcOrEdge(i, i)) {
                 min++;
                 max++;
-            } else if (g.getEnvelopGraph().arcExists(i, i)) {
+            } else if (g.getEnvelopGraph().isArcOrEdge(i, i)) {
                 max++;
             }
         }
@@ -85,7 +85,7 @@ public class PropKLoops extends Propagator {
         } else if (k.instantiated()) {
             if (k.getValue() == max) {
                 for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-                    if (g.getEnvelopGraph().arcExists(i, i)) {
+                    if (g.getEnvelopGraph().isArcOrEdge(i, i)) {
                         g.enforceArc(i, i, aCause);
                     }
                 }
@@ -93,7 +93,7 @@ public class PropKLoops extends Propagator {
             }
             if (k.getValue() == min) {
                 for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-                    if (!g.getKernelGraph().arcExists(i, i)) {
+                    if (!g.getKernelGraph().isArcOrEdge(i, i)) {
                         g.removeArc(i, i, aCause);
                     }
                 }
@@ -123,10 +123,10 @@ public class PropKLoops extends Propagator {
         int max = 0;
         ISet env = g.getEnvelopGraph().getActiveNodes();
         for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
-            if (g.getKernelGraph().arcExists(i, i)) {
+            if (g.getKernelGraph().isArcOrEdge(i, i)) {
                 min++;
                 max++;
-            } else if (g.getEnvelopGraph().arcExists(i, i)) {
+            } else if (g.getEnvelopGraph().isArcOrEdge(i, i)) {
                 max++;
             }
         }

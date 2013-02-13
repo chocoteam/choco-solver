@@ -126,7 +126,7 @@ public class TSPslave extends AbstractParallelSlave {
             throw new UnsupportedOperationException(outputCost + ">" + ub);
         }
         int x = 0;
-        ISet nei = undi.getEnvelopGraph().getSuccessorsOf(x);
+        ISet nei = undi.getEnvelopGraph().getNeighborsOf(x);
         int y = nei.getFirstElement();
         if (y == n - 1) {
             y = nei.getNextElement();
@@ -136,7 +136,7 @@ public class TSPslave extends AbstractParallelSlave {
             outputFragment[i] = fragToReal[x];
             tmp = x;
             x = y;
-            nei = undi.getEnvelopGraph().getSuccessorsOf(x);
+            nei = undi.getEnvelopGraph().getNeighborsOf(x);
             y = nei.getFirstElement();
             if (y == tmp) {
                 y = nei.getNextElement();

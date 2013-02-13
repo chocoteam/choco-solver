@@ -134,7 +134,7 @@ public class GraphStrategies extends GraphStrategy {
 
     private boolean evaluateNeighbors(int i) {
         for (int j = 0; j < n; j++) {
-            if (g.getEnvelopGraph().arcExists(i, j) && !g.getKernelGraph().arcExists(i, j)) {
+            if (g.getEnvelopGraph().isArcOrEdge(i, j) && !g.getKernelGraph().isArcOrEdge(i, j)) {
                 int v = -1;
                 switch (mode) {
                     case LEX:
@@ -143,29 +143,29 @@ public class GraphStrategies extends GraphStrategy {
                         return true;
                     case MIN_P_DEGREE:
                     case MAX_P_DEGREE:
-                        v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
-                                + g.getEnvelopGraph().getPredecessorsOf(j).getSize();
+                        v = g.getEnvelopGraph().getSuccsOrNeigh(i).getSize()
+                                + g.getEnvelopGraph().getPredsOrNeigh(j).getSize();
                         break;
                     case MIN_M_DEGREE:
                     case MAX_M_DEGREE:
-                        v = g.getKernelGraph().getSuccessorsOf(i).getSize()
-                                + g.getKernelGraph().getPredecessorsOf(j).getSize();
+                        v = g.getKernelGraph().getSuccsOrNeigh(i).getSize()
+                                + g.getKernelGraph().getPredsOrNeigh(j).getSize();
                         break;
                     case MIN_DELTA_DEGREE:
                     case MAX_DELTA_DEGREE:
-                        v = g.getEnvelopGraph().getSuccessorsOf(i).getSize()
-                                + g.getEnvelopGraph().getPredecessorsOf(j).getSize()
-                                - g.getKernelGraph().getSuccessorsOf(i).getSize()
-                                - g.getKernelGraph().getPredecessorsOf(j).getSize();
+                        v = g.getEnvelopGraph().getSuccsOrNeigh(i).getSize()
+                                + g.getEnvelopGraph().getPredsOrNeigh(j).getSize()
+                                - g.getKernelGraph().getSuccsOrNeigh(i).getSize()
+                                - g.getKernelGraph().getPredsOrNeigh(j).getSize();
                         break;
                     case MIN_COMMON:
                     case MAX_COMMON:
                         v = 0;
                         for (int k = 0; k < n; k++) {
-                            if (g.getEnvelopGraph().getSuccessorsOf(k).contain(i)) {
+                            if (g.getEnvelopGraph().getSuccsOrNeigh(k).contain(i)) {
                                 v++;
                             }
-                            if (g.getEnvelopGraph().getSuccessorsOf(k).contain(j)) {
+                            if (g.getEnvelopGraph().getSuccsOrNeigh(k).contain(j)) {
                                 v++;
                             }
                         }

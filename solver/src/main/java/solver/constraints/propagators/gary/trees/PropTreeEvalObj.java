@@ -79,7 +79,7 @@ public class PropTreeEvalObj extends Propagator {
         int minCost = 1000000;
         int maxCost = 0;
         for (int i = 0; i < n; i++) {
-            ISet nei = g.getEnvelopGraph().getSuccessorsOf(i);
+            ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     ce++;
@@ -124,7 +124,7 @@ public class PropTreeEvalObj extends Propagator {
         ISet succs;
         int delta = sum.getUB() - minSum;
         for (int i = 0; i < n; i++) {
-            succs = g.getEnvelopGraph().getSuccessorsOf(i);
+            succs = g.getEnvelopGraph().getNeighborsOf(i);
             for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                 if (i < j && !g.getKernelGraph().edgeExists(i, j)) {
                     if (distMatrix[i][j] - lowestUnused[i] > delta) {

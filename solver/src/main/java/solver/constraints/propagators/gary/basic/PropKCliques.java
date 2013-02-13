@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
+import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -37,8 +38,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-
 import java.util.BitSet;
 
 /**

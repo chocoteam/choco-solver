@@ -30,6 +30,9 @@ package solver.constraints.propagators.gary.arborescences;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
+import memory.graphs.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import memory.graphs.graphOperations.dominance.AlphaDominatorsFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -38,9 +41,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
 
 public class PropNTree extends Propagator {
 

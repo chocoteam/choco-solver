@@ -47,7 +47,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
+    private UndirectedGraphVar g;
     private IGraphDeltaMonitor gdm;
     private BitSet toCompute;
     private TIntArrayList list;
@@ -83,14 +83,14 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
 
     private void check(int i) throws ContradictionException {
         list.clear();
-        ISet nei = g.getKernelGraph().getSuccessorsOf(i);
+        ISet nei = g.getKernelGraph().getNeighborsOf(i);
         for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
             list.add(j);
         }
         int nl = list.size();
         for (int j1 = 0; j1 < nl; j1++) {
             for (int j2 = j1 + 1; j2 < nl; j2++) {
-                if (g.getKernelGraph().getSuccessorsOf(list.get(j1)).contain(list.get(j2))) {
+                if (g.getKernelGraph().getNeighborsOf(list.get(j1)).contain(list.get(j2))) {
                     g.removeArc(list.get(j2), i, aCause);
                 }
             }

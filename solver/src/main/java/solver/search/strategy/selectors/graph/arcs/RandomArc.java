@@ -51,8 +51,8 @@ public class RandomArc extends ArcStrategy<GraphVar> {
         pTo.clear();
         ISet envSuc, kerSuc;
         for (int i = envNodes.getFirstElement(); i >= 0; i = envNodes.getNextElement()) {
-            envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
-            kerSuc = g.getKernelGraph().getSuccessorsOf(i);
+            envSuc = g.getEnvelopGraph().getSuccsOrNeigh(i);
+            kerSuc = g.getKernelGraph().getSuccsOrNeigh(i);
             if (envSuc.getSize() != kerSuc.getSize()) {
                 for (int j = envSuc.getFirstElement(); j >= 0; j = envSuc.getNextElement()) {
                     if (!kerSuc.contain(j)) {

@@ -31,6 +31,7 @@ import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
@@ -38,8 +39,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**

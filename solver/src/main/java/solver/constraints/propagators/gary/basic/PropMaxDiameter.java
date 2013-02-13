@@ -34,17 +34,16 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.graph.GraphVar;
-
+import solver.variables.graph.UndirectedGraphVar;
 import java.util.BitSet;
 
-public class PropMaxDiameter extends Propagator<GraphVar> {
+public class PropMaxDiameter extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
+    private UndirectedGraphVar g;
     private int maxDiam, n;
     private BitSet visited;
     private TIntArrayList set, nextSet;
@@ -54,8 +53,8 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropMaxDiameter(GraphVar graph, int maxDiam) {
-        super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
+    public PropMaxDiameter(UndirectedGraphVar graph, int maxDiam) {
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         this.maxDiam = maxDiam;
         n = g.getEnvelopGraph().getNbNodes();
@@ -90,7 +89,7 @@ public class PropMaxDiameter extends Propagator<GraphVar> {
         int depth = 0;
         while (!set.isEmpty() && depth < maxDiam) {
             for (i = set.size() - 1; i >= 0; i--) {
-                nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
+                nei = g.getEnvelopGraph().getNeighborsOf(set.get(i));
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!visited.get(j)) {
                         visited.set(j);

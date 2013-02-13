@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.path;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.Solver;
@@ -38,9 +39,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**
@@ -56,14 +56,14 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
+public class PropAllDiffGraphIncremental extends Propagator<DirectedGraphVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     private int n, n2;
-    private GraphVar g;
+    private DirectedGraphVar g;
     GraphDeltaMonitor gdm;
     private DirectedGraph digraph;
     private int[] matching;
@@ -88,8 +88,8 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
      * @param graph
      * @param matchingCardinality
      */
-    public PropAllDiffGraphIncremental(GraphVar graph, int matchingCardinality) {
-        super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+    public PropAllDiffGraphIncremental(DirectedGraphVar graph, int matchingCardinality) {
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
         n = graph.getEnvelopGraph().getNbNodes();
         n2 = 2 * n;
         g = graph;
@@ -118,7 +118,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
      * @param sol
      * @param constraint
      */
-    public PropAllDiffGraphIncremental(GraphVar graph, Solver sol, Constraint constraint) {
+    public PropAllDiffGraphIncremental(DirectedGraphVar graph, Solver sol, Constraint constraint) {
         this(graph, graph.getEnvelopGraph().getNbNodes());
     }
 

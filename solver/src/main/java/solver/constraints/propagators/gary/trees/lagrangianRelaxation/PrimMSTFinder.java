@@ -114,7 +114,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
     protected void addNode(int i) {
         if (!inTree.get(i)) {
             inTree.set(i);
-            ISet nei = g.getSuccessorsOf(i);
+            ISet nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (!inTree.get(j)) {
                     if (propHK.isMandatory(i, j)) {
@@ -135,9 +135,9 @@ public class PrimMSTFinder extends AbstractTreeFinder {
             double delta = UB - treeCost;
             ISet nei;
             for (int i = 0; i < n; i++) {
-                nei = g.getSuccessorsOf(i);
+                nei = g.getNeighborsOf(i);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                    if (i < j && (!Tree.arcExists(i, j)) && costs[i][j] - maxTArc > delta) {
+                    if (i < j && (!Tree.edgeExists(i, j)) && costs[i][j] - maxTArc > delta) {
                         propHK.remove(i, j);
                     }
                 }

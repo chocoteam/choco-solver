@@ -189,7 +189,7 @@ public class TSP_Sequential_LNS {
             bestCost = cost.getValue();
             System.out.println("new objective : " + bestCost);
             int x = 0;
-            ISet nei = g.getEnvelopGraph().getSuccessorsOf(x);
+            ISet nei = g.getEnvelopGraph().getNeighborsOf(x);
             int y = nei.getFirstElement();
             if (y == n - 1) {
                 y = nei.getNextElement();
@@ -199,7 +199,7 @@ public class TSP_Sequential_LNS {
                 bestSolution[i] = x;
                 tmp = x;
                 x = y;
-                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                nei = g.getEnvelopGraph().getNeighborsOf(x);
                 y = nei.getFirstElement();
                 if (y == tmp) {
                     y = nei.getNextElement();

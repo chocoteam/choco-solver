@@ -25,11 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphOperations.connectivity;
+package memory.graphs.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.IGraph;
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.ISet;
 
 /**
@@ -45,7 +45,7 @@ public class ConnectivityFinder {
     //***********************************************************************************
 
     private int n;
-    private IGraph graph;
+    private UndirectedGraph graph;
     private ISet[] neighbors;
     private int[] CC_firstNode, CC_nextNode, node_CC, p;
     private int nbCC;
@@ -58,13 +58,13 @@ public class ConnectivityFinder {
      *
      * @param g graph
      */
-    public ConnectivityFinder(IGraph g) {
+    public ConnectivityFinder(UndirectedGraph g) {
         graph = g;
         n = g.getNbNodes();
         neighbors = new ISet[n];
         p = new int[n];
         for (int i = graph.getActiveNodes().getFirstElement(); i >= 0; i = graph.getActiveNodes().getNextElement()) {
-            neighbors[i] = graph.getSuccessorsOf(i);
+            neighbors[i] = graph.getNeighborsOf(i);
         }
     }
 
@@ -104,7 +104,7 @@ public class ConnectivityFinder {
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             p[i] = -1;
 			CC_firstNode[i] = -1;
-            neighbors[i] = graph.getSuccessorsOf(i);
+            neighbors[i] = graph.getNeighborsOf(i);
         }
         int first = act.getFirstElement();
         int cc = 0;

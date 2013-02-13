@@ -30,6 +30,9 @@ package solver.constraints.gary;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.graphs.DirectedGraph;
+import memory.graphs.Orientation;
+import memory.graphs.graphOperations.GraphTools;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropNTree;
@@ -40,8 +43,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.GraphTools;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 /**
  * Constraint for tree partitioning an anti-arborscence
@@ -76,8 +77,8 @@ public class NTree extends Constraint {
     public NTree(DirectedGraphVar graph, IntVar nTree) {
         super(new Variable[]{graph, nTree}, graph.getSolver());
         setPropagators(
-                new PropNodeDegree_AtLeast(graph, GraphVar.IncidentNodes.SUCCESSORS, 1),
-                new PropNodeDegree_AtMost(graph, GraphVar.IncidentNodes.SUCCESSORS, 1),
+                new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
+                new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
                 new PropKLoops(graph, nTree),
                 new PropNTree(graph, nTree));
         this.g = graph;

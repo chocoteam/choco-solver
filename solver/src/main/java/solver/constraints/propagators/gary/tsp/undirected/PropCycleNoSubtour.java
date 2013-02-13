@@ -38,6 +38,7 @@ import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
+import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -45,7 +46,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case
@@ -102,7 +102,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
         }
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getKernelGraph().getSuccessorsOf(i);
+            nei = g.getKernelGraph().getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     enforce(i, j);

@@ -29,13 +29,12 @@ package memory.graphs;
 
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-
 import java.io.Serializable;
 
 /**
  * @author Jean-Guillaume Fages, Xavier Lorca
- *         <p/>
- *         Provide an interface for the graph manipulation
+ * <p/>
+ * Provide an interface for the graph manipulation
  */
 public interface IGraph extends Serializable {
 
@@ -47,92 +46,65 @@ public interface IGraph extends Serializable {
 
     /**
      * Activate node x
-     *
-     * @param x
+     * @param x a node index
      * @return true iff x was not already activated
      */
     boolean activateNode(int x);
 
     /**
      * Desactivate node x
-     *
-     * @param x
+     * @param x a node index
      * @return true iff x was activated
      */
     boolean desactivateNode(int x);
 
     /**
-     * test whether edge (x,y) is in the graph or not
-     *
-     * @param x
-     * @param y
-     * @return true iff edge (x,y) is in the graph
-     */
-    boolean edgeExists(int x, int y);
-
-    /**
-     * test whether arc (x,y) is in the graph or not
-     * NB : arc is oriented whereas edge is not
-     *
-     * @param x
-     * @param y
-     * @return true iff arc (x,y) is in the graph
-     */
-    boolean arcExists(int x, int y);
-
-    /**
-     * Add edge (x,y) to the graph
-     *
-     * @param x
-     * @param y
-     * @return true iff (x,y) was not already in the graph
-     */
-    boolean addEdge(int x, int y);
-
-    /**
-     * Remove edge (x,y) from the graph
-     *
-     * @param x
-     * @param y
-     * @return true iff (x,y) was in the graph
-     */
-    boolean removeEdge(int x, int y);
-
-    /**
-     * Get neighbors of x
-     *
-     * @param x node
-     * @return neighbors of x (predecessors and/or successors)
-     */
-    ISet getNeighborsOf(int x);
-
-    /**
-     * Get predecessors of x
-     *
-     * @param x node
-     * @return predecessors of x
-     */
-    ISet getPredecessorsOf(int x);
-
-    /**
-     * Get successors of x
-     *
-     * @param x node
-     * @return successors of x
-     */
-    ISet getSuccessorsOf(int x);
-
-    /**
      * The number of nodes of the graph
-     *
      * @return the number of nodes of the graph
      */
     int getNbNodes();
 
     /**
      * Get the type of the graph
-     *
      * @return the type of the graph SPARSE or DENSE
      */
     SetType getType();
+
+
+	/**
+	 * Get either x's successors or neighbors.
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @return x's successors if <code>this</code> is directed
+	 * 			x's neighbors otherwise
+	 */
+	ISet getSuccsOrNeigh(int x);
+
+	/**
+	 * Get either x's predecessors or neighbors.
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @return x's predecessors if <code>this</code> is directed
+	 * 			x's neighbors otherwise
+	 */
+	ISet getPredsOrNeigh(int x);
+
+	/**
+	 * If <code>this </code> is directed
+	 * returns true if and only if arc (x,y) exists
+	 * Else, if <code>this</code> is undirected
+	 * returns true if and only if edge (x,y) exists
+	 * <p/>
+	 * This method enables to capitalize some code but should be called with care
+	 * @param x a node index
+	 * @param y a node index
+	 */
+	boolean isArcOrEdge(int x, int y);
+
+	/**
+	 * @return true if and only if <code>this</code> is a directed graph
+	 */
+	boolean isDirected();
 }

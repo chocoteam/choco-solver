@@ -58,45 +58,49 @@ public class UndirectedGraph implements IGraph {
     //***********************************************************************************
 
     /**
-     * Stored Graph
+     * Creates an empty backtrable undirected graph.
+	 * Allocates memory for n nodes (but they should then be added explicitely,
+	 * unless allNodes is true).
      *
-     * @param env      solver environment
-     * @param nbits    max number of nodes
-     * @param type     of data structure
-     * @param allNodes true iff all nodes will always remain in the graph
+     * @param env		solver environment
+     * @param n			max number of nodes
+     * @param type		data structure storing for node neighbors
+     * @param allNodes	true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(IEnvironment env, int nbits, SetType type, boolean allNodes) {
+    public UndirectedGraph(IEnvironment env, int n, SetType type, boolean allNodes) {
         this.type = type;
-        this.n = nbits;
-        neighbors = new ISet[nbits];
+        this.n = n;
+        neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(type, nbits, env);
+            neighbors[i] = SetFactory.makeStoredSet(type, n, env);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(nbits);
+            this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, nbits, env);
+            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, n, env);
         }
     }
 
     /**
-     * Unstored Graph
-     *
-     * @param nbits    max number of nodes
-     * @param type     of data structure
-     * @param allNodes true iff all nodes will always remain in the graph
+     * Creates an empty undirected graph.
+	 * Allocates memory for n nodes (but they should then be added explicitely,
+	 * unless allNodes is true).
+	 *
+     * @param n			max number of nodes
+     * @param type		data structure used for storing node neighbors
+     * @param allNodes	true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(int nbits, SetType type, boolean allNodes) {
+    public UndirectedGraph(int n, SetType type, boolean allNodes) {
         this.type = type;
-        this.n = nbits;
-        neighbors = new ISet[nbits];
+        this.n = n;
+        neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeSet(type, nbits);
+            neighbors[i] = SetFactory.makeSet(type, n);
         }
         if (allNodes) {
-            this.nodes = SetFactory.makeFullSet(nbits);
+            this.nodes = SetFactory.makeFullSet(n);
         } else {
-            this.nodes = SetFactory.makeBitSet(nbits);
+            this.nodes = SetFactory.makeBitSet(n);
         }
     }
 
@@ -105,11 +109,17 @@ public class UndirectedGraph implements IGraph {
     //***********************************************************************************
 
     public String toString() {
-        String res = "";
+        StringBuilder sb = new StringBuilder();
+		sb.append("nodes : \n"+nodes);
+		sb.append("successors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
-            res += "pot-" + i + ": " + getNeighborsOf(i) + "\n";
+            sb.append(i+" -> {");
+            for (int j = neighbors[i].getFirstElement(); j >= 0; j = neighbors[i].getNextElement()) {
+                sb.append(j+" ");
+            }
+            sb.append("}\n");
         }
-        return res;
+        return sb.toString();
     }
 
     @Override
@@ -154,7 +164,13 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
+    /**
+     * Add edge (x,y) to the graph
+     *
+     * @param x	a node index
+     * @param y	a node index
+     * @return true iff (x,y) was not already in the graph
+     */
     public boolean addEdge(int x, int y) {
         if (x == y && !neighbors[x].contain(y)) {
             neighbors[x].add(y);
@@ -169,7 +185,13 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
+    /**
+     * test whether edge (x,y) is in the graph or not
+     *
+     * @param x	a node index
+     * @param y	a node index
+     * @return true iff edge (x,y) is in the graph
+     */
     public boolean edgeExists(int x, int y) {
         if (neighbors[x].contain(y)) {
 			assert (neighbors[y].contain(x)) :"asymmetric adjacency matrix in an undirected graph";
@@ -178,15 +200,18 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
-    public boolean arcExists(int x, int y) {
-        if (neighbors[x].contain(y)) {
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public boolean isArcOrEdge(int x, int y){
+		return edgeExists(x,y);
+	}
 
-    @Override
+    /**
+     * Remove edge (x,y) from the graph
+     *
+     * @param x	a node index
+     * @param y	a node index
+     * @return true iff (x,y) was in the graph
+     */
     public boolean removeEdge(int x, int y) {
         if (x == y && neighbors[x].contain(y)) {
             neighbors[y].remove(x);
@@ -201,18 +226,28 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
+    /**
+     * Get neighbors of node x
+     *
+     * @param x node index
+     * @return neighbors of x (predecessors and/or successors)
+     */
     public ISet getNeighborsOf(int x) {
         return neighbors[x];
     }
 
     @Override
-    public ISet getPredecessorsOf(int x) {
+    public ISet getPredsOrNeigh(int x) {
         return neighbors[x];
     }
 
     @Override
-    public ISet getSuccessorsOf(int x) {
+    public ISet getSuccsOrNeigh(int x) {
         return neighbors[x];
     }
+
+	@Override
+	public boolean isDirected(){
+		return false;
+	}
 }

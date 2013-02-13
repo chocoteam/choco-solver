@@ -30,12 +30,11 @@ package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 import gnu.trove.list.array.TIntArrayList;
 import memory.graphs.DirectedGraph;
 import memory.graphs.UndirectedGraph;
+import memory.graphs.graphOperations.dominance.LCAGraphManager;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
-
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -107,17 +106,16 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
             p[i] = i;
             rank[i] = 0;
             ccTp[i] = i;
-            Tree.getPredecessorsOf(i).clear();
-            Tree.getSuccessorsOf(i).clear();
+            Tree.getNeighborsOf(i).clear();
             ccTree.desactivateNode(i);
             ccTree.activateNode(i);
-            size += g.getSuccessorsOf(i).getSize();
+            size += g.getNeighborsOf(i).getSize();
         }
         Integer[] integers = new Integer[size];
         int idx = 0;
         ISet nei;
         for (int i = 0; i < n; i++) {
-            nei = g.getSuccessorsOf(i);
+            nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 integers[idx] = i * n + j;
                 costs[i * n + j] = costMatrix[i][j];
@@ -177,7 +175,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         list.add(k);
         while (!list.isEmpty()) {
             k = list.removeFirst();
-            nei = Tree.getSuccessorsOf(k);
+            nei = Tree.getNeighborsOf(k);
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 if (ccTp[s] == -1) {
                     ccTp[s] = k;
@@ -189,7 +187,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
                     }
                 }
             }
-            nei = Tree.getPredecessorsOf(k);
+            nei = Tree.getNeighborsOf(k);
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 if (ccTp[s] == -1) {
                     ccTp[s] = k;
@@ -206,7 +204,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
 
     protected void markTreeEdges(int[] next, int i, int j) {
         int rep = i * n + j;
-        if (Tree.arcExists(j, i)) {
+        if (Tree.edgeExists(j, i)) {
             if (map[j][i] == -1) {
                 map[j][i] = map[i][j] = rep;
             }
@@ -258,7 +256,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         }
         // Trivially infeasible arcs
         while (idx >= 0) {
-            if (!Tree.arcExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
+            if (!Tree.edgeExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
                 propHK.remove(sortedArcs[idx] / n, sortedArcs[idx] % n);
                 activeArcs.clear(idx);
             }
@@ -284,7 +282,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         for (int arc = activeArcs.nextSetBit(0); arc >= 0; arc = activeArcs.nextSetBit(arc + 1)) {
             i = sortedArcs[arc] / n;
             j = sortedArcs[arc] % n;
-            if (!Tree.arcExists(i, j)) {
+            if (!Tree.edgeExists(i, j)) {
                 repCosts[i][j] = costs[i * n + j] - ccTEdgeCost[lca.getLCA(i, j)];
                 if (repCosts[i][j] > delta) {
                     activeArcs.clear(arc);
@@ -296,7 +294,7 @@ public class KruskalMST_GAC extends AbstractTreeFinder {
         }
         ISet nei;
         for (i = 0; i < n; i++) {
-            nei = Tree.getSuccessorsOf(i);
+            nei = Tree.getNeighborsOf(i);
             for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (map[i][j] != -1) {
                     repCosts[i][j] = costs[map[i][j]] - costs[i * n + j];
