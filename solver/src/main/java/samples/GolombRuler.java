@@ -33,9 +33,12 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.LinkedList;
 
 /**
  * CSPLib prob006:<br/>
@@ -54,9 +57,6 @@ public class GolombRuler extends AbstractProblem {
 
     @Option(name = "-m", usage = "Golomb ruler order.", required = false)
     private int m = 10;
-
-    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar[] ticks;
     IntVar[] diffs;
@@ -83,7 +83,6 @@ public class GolombRuler extends AbstractProblem {
         }
         solver.post(lex);
 
-
         diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
         m_diffs = new IntVar[m][m];
         distances = new Constraint[(m * m - m) / 2];
@@ -99,7 +98,7 @@ public class GolombRuler extends AbstractProblem {
                 m_diffs[i][j] = diffs[k];
             }
         }
-        alldiff = IntConstraintFactory.alldifferent(diffs, "BC");
+        alldiff = IntConstraintFactory.alldifferent(diffs, "AC");
         solver.post(alldiff);
 
         // break symetries
@@ -111,6 +110,7 @@ public class GolombRuler extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(ticks));
+		SearchMonitorFactory.log(solver,true,false);
     }
 
     @Override
