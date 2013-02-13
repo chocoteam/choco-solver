@@ -369,7 +369,7 @@ public final class SetConstraintsFactory {
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
         Solver solver = SETS[0].getSolver();
         Constraint c = all_disjoint(SETS);
-        c.setPropagators(new PropUnion(SETS, UNIVERSE));
+        c.addPropagators(new PropUnion(SETS, UNIVERSE));
         return c;
     }
 
