@@ -139,7 +139,7 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
      * @param ub a valid upper bound
      */
     public void updateUB(int ub) {
-        this.bestKnownUpperBound = Math.max(bestKnownUpperBound, ub);
+        this.bestKnownUpperBound = Math.min(bestKnownUpperBound, ub);
     }
 
     /**
