@@ -39,7 +39,7 @@ import memory.setDataStructures.SetType;
  * <p/>
  * Specific implementation of an undirected graph
  */
-public class UndirectedGraph implements IGraph {
+public class UndirectedGraph implements IUndirectedGraph {
 
     //***********************************************************************************
     // VARIABLES
@@ -178,13 +178,13 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
-    public boolean arcExists(int x, int y) {
-        if (neighbors[x].contain(y)) {
-            return true;
-        }
-        return false;
-    }
+//    @Override
+//    public boolean arcExists(int x, int y) {
+//        if (neighbors[x].contain(y)) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     @Override
     public boolean removeEdge(int x, int y) {
@@ -206,13 +206,13 @@ public class UndirectedGraph implements IGraph {
         return neighbors[x];
     }
 
-    @Override
-    public ISet getPredecessorsOf(int x) {
-        return neighbors[x];
-    }
-
-    @Override
-    public ISet getSuccessorsOf(int x) {
-        return neighbors[x];
-    }
+//    @Override
+//    public ISet getPredecessorsOf(int x) {
+//        return neighbors[x];
+//    }
+//
+//    @Override
+//    public ISet getSuccessorsOf(int x) {
+//        return neighbors[x];
+//    }
 }

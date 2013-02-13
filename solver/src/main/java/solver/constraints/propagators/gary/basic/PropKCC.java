@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
+import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -36,7 +37,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 /**
  * Propagator that ensures that the final graph consists in K Connected Components (CC)

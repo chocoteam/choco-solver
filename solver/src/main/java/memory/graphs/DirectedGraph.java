@@ -31,7 +31,6 @@ import memory.IEnvironment;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetFactory;
 import memory.setDataStructures.SetType;
-import solver.variables.graph.graphOperations.GraphTools;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,7 +40,7 @@ import solver.variables.graph.graphOperations.GraphTools;
  * *
  * Specific implementation of a directed graph
  */
-public class DirectedGraph implements IGraph {
+public class DirectedGraph implements IDirectedGraph {
 
     //***********************************************************************************
     // VARIABLES
@@ -187,32 +186,32 @@ public class DirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
-    public boolean addEdge(int x, int y) {
-		assert (nodes.contain(y)) :"incoherent directed graph : node "+y+" has not been added to this yet";
-		assert (nodes.contain(x)) :"incoherent directed graph : node "+x+" has not been added to this yet";
-        if (x == y) {
-            return addArc(x, y);
-        }
-        boolean b = addArc(x, y);
-        b |= addArc(y, x);
-		assert (arcExists(y,x)) :"incoherent directed graph";
-        return b;
-    }
+//    @Override
+//    public boolean addEdge(int x, int y) {
+//		assert (nodes.contain(y)) :"incoherent directed graph : node "+y+" has not been added to this yet";
+//		assert (nodes.contain(x)) :"incoherent directed graph : node "+x+" has not been added to this yet";
+//        if (x == y) {
+//            return addArc(x, y);
+//        }
+//        boolean b = addArc(x, y);
+//        b |= addArc(y, x);
+//		assert (arcExists(y,x)) :"incoherent directed graph";
+//        return b;
+//    }
 
-    @Override
-    public boolean removeEdge(int x, int y) {
-        boolean b = removeArc(x, y);
-		b |= removeArc(y, x);
-		assert (!arcExists(y,x)):"error while removing edge";
-        return b;
-    }
-
-    @Override
-    public boolean edgeExists(int x, int y) {
-        boolean b = arcExists(x, y) || arcExists(y, x);
-        return b;
-    }
+//    @Override
+//    public boolean removeEdge(int x, int y) {
+//        boolean b = removeArc(x, y);
+//		b |= removeArc(y, x);
+//		assert (!arcExists(y,x)):"error while removing edge";
+//        return b;
+//    }
+//
+//    @Override
+//    public boolean edgeExists(int x, int y) {
+//        boolean b = arcExists(x, y) || arcExists(y, x);
+//        return b;
+//    }
 
     /**
      * remove arc (from,to) from the graph
@@ -265,14 +264,14 @@ public class DirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
-    /**
-     * @inheritedDoc
-     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-     */
-    public ISet getNeighborsOf(int x) {
-        return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
-    }
+//    @Override
+//    /**
+//     * @inheritedDoc
+//     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
+//     */
+//    public ISet getNeighborsOf(int x) {
+//        return GraphTools.mergeNeighborhoods(successors[x], predecessors[x], getNbNodes());
+//    }
 
     @Override
     public ISet getSuccessorsOf(int x) {

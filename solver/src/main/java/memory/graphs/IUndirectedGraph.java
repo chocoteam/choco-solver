@@ -25,60 +25,49 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.graphs.graphOperations.dominance;
+package memory.graphs;
 
-import memory.graphs.DirectedGraph;
+import memory.setDataStructures.ISet;
 
 /**
- * Class that finds dominators of a given flow graph g(s)
- * Uses the simple LT algorithm which runs in O(m.log(n))
- * Fast in practice
+ * @author Jean-Guillaume Fages, Xavier Lorca
+ *         <p/>
+ *         Provide an interface for the symmetric graph manipulation
  */
-public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder {
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+public interface IUndirectedGraph extends IGraph {
 
     /**
-     * Object that finds dominators of the given flow graph g(s)
-     * It uses the simple LT algorithm which runs in O(m.log(n))
+     * test whether edge (x,y) is in the graph or not
+     *
+     * @param x
+     * @param y
+     * @return true iff edge (x,y) is in the graph
      */
-    public SimpleDominatorsFinder(int s, DirectedGraph g) {
-        super(s, g);
-    }
+    boolean edgeExists(int x, int y);
 
-    //***********************************************************************************
-    // LINK-EVAL
-    //***********************************************************************************
+    /**
+     * Add edge (x,y) to the graph
+     *
+     * @param x
+     * @param y
+     * @return true iff (x,y) was not already in the graph
+     */
+    boolean addEdge(int x, int y);
 
-    protected void LINK(int v, int w) {
-        ancestor[w] = v;
-    }
+    /**
+     * Remove edge (x,y) from the graph
+     *
+     * @param x
+     * @param y
+     * @return true iff (x,y) was in the graph
+     */
+    boolean removeEdge(int x, int y);
 
-    protected int EVAL(int v) {
-        if (ancestor[v] == -1) {
-            return v;
-        } else {
-            COMPRESS(v);
-            return label[v];
-        }
-
-    }
-
-    protected void COMPRESS(int v) {
-        int k = v;
-        list.clear();
-        while (ancestor[ancestor[k]] != -1) {
-            list.add(k);
-            k = ancestor[k];
-        }
-        for (k = list.size() - 1; k >= 0; k--) {
-            v = list.get(k);
-            if (semi[label[ancestor[v]]] < semi[label[v]]) {
-                label[v] = label[ancestor[v]];
-            }
-            ancestor[v] = ancestor[ancestor[v]];
-        }
-    }
+    /**
+     * Get neighbors of x
+     *
+     * @param x node
+     * @return neighbors of x (predecessors and/or successors)
+     */
+    ISet getNeighborsOf(int x);
 }

@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphOperations.dominance;
+package memory.graphs.graphOperations.dominance;
 
 import memory.graphs.DirectedGraph;
 

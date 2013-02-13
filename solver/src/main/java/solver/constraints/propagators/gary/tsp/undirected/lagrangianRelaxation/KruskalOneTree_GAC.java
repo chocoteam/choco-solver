@@ -100,9 +100,9 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
             Tree.getNeighborsOf(i).clear();
             ccTree.desactivateNode(i);
             ccTree.activateNode(i);
-            size += g.getSuccessorsOf(i).getSize();
+            size += g.getNeighborsOf(i).getSize();
         }
-        size -= g.getSuccessorsOf(0).getSize();
+        size -= g.getNeighborsOf(0).getSize();
         if (size % 2 != 0) {
             throw new UnsupportedOperationException();
         }
@@ -111,7 +111,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         Integer[] integers = new Integer[size];
         int idx = 0;
         for (int i = 1; i < n; i++) {
-            nei = g.getSuccessorsOf(i);
+            nei = g.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j) {
                     integers[idx] = i * n + j;
@@ -149,7 +149,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         for (int arc = activeArcs.nextSetBit(0); arc >= 0; arc = activeArcs.nextSetBit(arc + 1)) {
             i = sortedArcs[arc] / n;
             j = sortedArcs[arc] % n;
-            if (!Tree.arcExists(i, j)) {
+            if (!Tree.edgeExists(i, j)) {
                 marginalCosts[i][j] = costs[i * n + j] - ccTEdgeCost[lca.getLCA(i, j)];
                 if (marginalCosts[i][j] > delta) {
                     activeArcs.clear(arc);
@@ -160,7 +160,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
             }
         }
         for (i = 1; i < n; i++) {
-            nei = Tree.getSuccessorsOf(i);
+            nei = Tree.getNeighborsOf(i);
             for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                 if (i < j)
                     if (map[i][j] == -1 || costs[map[i][j]] - costs[i * n + j] > delta) {
@@ -191,7 +191,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         }
         // Trivially infeasible arcs
         while (idx >= 0) {
-            if (!Tree.arcExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
+            if (!Tree.edgeExists(sortedArcs[idx] / n, sortedArcs[idx] % n)) {
                 propHK.remove(sortedArcs[idx] / n, sortedArcs[idx] % n);
                 activeArcs.clear(idx);
             }
@@ -275,7 +275,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
     }
 
     private void add0Node() throws ContradictionException {
-        ISet nei = g.getSuccessorsOf(0);
+        ISet nei = g.getNeighborsOf(0);
         min1 = -1;
         min2 = -1;
         boolean b1 = false, b2 = false;
@@ -342,7 +342,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
         list.add(k);
         while (!list.isEmpty()) {
             k = list.removeFirst();
-            nei = Tree.getSuccessorsOf(k);
+            nei = Tree.getNeighborsOf(k);
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 if (ccTp[s] == -1) {
                     ccTp[s] = k;

@@ -113,7 +113,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
         System.out.println("cost : " + bestCost);
         bestSolution = new int[n];
         int x = 0;
-        ISet nei = undi.getEnvelopGraph().getSuccessorsOf(x);
+        ISet nei = undi.getEnvelopGraph().getNeighborsOf(x);
         int y = nei.getFirstElement();
         int tmp;
         String s = "";
@@ -121,7 +121,7 @@ public class TSP_Parallel_LNS extends AbstractParallelMaster<TSPslave> {
             bestSolution[i] = x;
             tmp = x;
             x = y;
-            nei = undi.getEnvelopGraph().getSuccessorsOf(x);
+            nei = undi.getEnvelopGraph().getNeighborsOf(x);
             y = nei.getFirstElement();
             if (y == tmp) {
                 y = nei.getNextElement();

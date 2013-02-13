@@ -124,10 +124,10 @@ public class KnightTourProblem extends AbstractProblem {
     // HEURISTICS
     //***********************************************************************************
 
-    private static class MinNeigh extends ArcStrategy {
+    private static class MinNeigh extends ArcStrategy<UndirectedGraphVar> {
         int n;
 
-        public MinNeigh(GraphVar graphVar) {
+        public MinNeigh(UndirectedGraphVar graphVar) {
             super(graphVar);
             n = graphVar.getEnvelopGraph().getNbNodes();
         }
@@ -139,7 +139,7 @@ public class KnightTourProblem extends AbstractProblem {
             int size = n + 1;
             int sizi;
             for (int i = 0; i < n; i++) {
-                sizi = g.getEnvelopGraph().getSuccessorsOf(i).getSize() - g.getKernelGraph().getSuccessorsOf(i).getSize();
+                sizi = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
                 if (sizi < size && sizi > 0) {
                     from = i;
                     size = sizi;
@@ -148,11 +148,11 @@ public class KnightTourProblem extends AbstractProblem {
             if (from == -1) {
                 return false;
             }
-            suc = g.getEnvelopGraph().getSuccessorsOf(from);
+            suc = g.getEnvelopGraph().getNeighborsOf(from);
             this.from = from;
             to = 2 * n;
             for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-                if (!g.getKernelGraph().arcExists(from, j)) {
+                if (!g.getKernelGraph().edgeExists(from, j)) {
                     if (j < to) {
                         to = j;
                     }

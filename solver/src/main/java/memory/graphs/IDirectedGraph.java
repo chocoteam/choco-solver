@@ -25,60 +25,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.graphs.graphOperations.dominance;
+package memory.graphs;
 
-import memory.graphs.DirectedGraph;
+import memory.setDataStructures.ISet;
 
 /**
- * Class that finds dominators of a given flow graph g(s)
- * Uses the simple LT algorithm which runs in O(m.log(n))
- * Fast in practice
+ * @author Jean-Guillaume Fages, Xavier Lorca
+ *         <p/>
+ *         Provide an interface for the directed graph manipulation
  */
-public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder {
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+public interface IDirectedGraph extends IGraph {
 
     /**
-     * Object that finds dominators of the given flow graph g(s)
-     * It uses the simple LT algorithm which runs in O(m.log(n))
+     * test whether arc (x,y) is in the graph or not
+     * NB : arc is oriented whereas edge is not
+     *
+     * @param x
+     * @param y
+     * @return true iff arc (x,y) is in the graph
      */
-    public SimpleDominatorsFinder(int s, DirectedGraph g) {
-        super(s, g);
-    }
+    boolean arcExists(int x, int y);
 
-    //***********************************************************************************
-    // LINK-EVAL
-    //***********************************************************************************
+    /**
+     * Get predecessors of x
+     *
+     * @param x node
+     * @return predecessors of x
+     */
+    ISet getPredecessorsOf(int x);
 
-    protected void LINK(int v, int w) {
-        ancestor[w] = v;
-    }
-
-    protected int EVAL(int v) {
-        if (ancestor[v] == -1) {
-            return v;
-        } else {
-            COMPRESS(v);
-            return label[v];
-        }
-
-    }
-
-    protected void COMPRESS(int v) {
-        int k = v;
-        list.clear();
-        while (ancestor[ancestor[k]] != -1) {
-            list.add(k);
-            k = ancestor[k];
-        }
-        for (k = list.size() - 1; k >= 0; k--) {
-            v = list.get(k);
-            if (semi[label[ancestor[v]]] < semi[label[v]]) {
-                label[v] = label[ancestor[v]];
-            }
-            ancestor[v] = ancestor[ancestor[v]];
-        }
-    }
+    /**
+     * Get successors of x
+     *
+     * @param x node
+     * @return successors of x
+     */
+    ISet getSuccessorsOf(int x);
 }

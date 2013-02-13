@@ -39,6 +39,7 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import memory.setDataStructures.linkedlist.Set_Std_2LinkedList;
@@ -48,8 +49,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**

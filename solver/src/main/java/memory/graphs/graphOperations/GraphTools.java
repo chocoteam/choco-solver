@@ -24,8 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.variables.graph.graphOperations;
+package memory.graphs.graphOperations;
 
 import memory.graphs.DirectedGraph;
 import memory.graphs.IGraph;
@@ -155,43 +154,43 @@ public class GraphTools {
         return new DirectedGraph(nb, matrix, graph.getType(), false);
     }
 
-    /**
-     * Create a new directed graph which is a subraph of an undirected graph
-     * every edge is replaced by two arcs
-     * If the graph is directed then it will be considered as if it was undirected i.e (x,y) => (x,y) & (y,x)
-     * done in O(m+n) operations
-     *
-     * @param undirectedGraph original undirected graph
-     * @param subset          of nodes to keep in the subgraph
-     * @returna new directed graph which is a subraph of an undirected graph deduced from a subset.
-     */
-    public static DirectedGraph createSubgraph(IGraph undirectedGraph, ISet subset) {
-        int nb = subset.getSize();
-        boolean[][] matrix = new boolean[nb][nb];
-        int[] indexes = new int[nb];
-        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-        int nodeInNewGraph = 0;
-        for (int j = subset.getFirstElement(); j >= 0; j = subset.getNextElement()) {
-            indexes[nodeInNewGraph] = j;
-            map.put(j, nodeInNewGraph);
-            nodeInNewGraph++;
-        }
-        nodeInNewGraph = 0;
-        ISet nei;
-        for (int j = subset.getFirstElement(); j >= 0; j = subset.getNextElement()) {
-            indexes[nodeInNewGraph] = j;
-            map.put(j, nodeInNewGraph);
-            nodeInNewGraph++;
-            nei = undirectedGraph.getNeighborsOf(j);
-            for (int k = nei.getFirstElement(); k >= 0; k = nei.getNextElement()) {
-                if (map.get(k) != null) {
-                    matrix[nodeInNewGraph][map.get(k)] = true;
-                }
-            }
-            nodeInNewGraph++;
-        }
-        return new DirectedGraph(nb, matrix, undirectedGraph.getType(), false);
-    }
+//    /**
+//     * Create a new directed graph which is a subraph of an undirected graph
+//     * every edge is replaced by two arcs
+//     * If the graph is directed then it will be considered as if it was undirected i.e (x,y) => (x,y) & (y,x)
+//     * done in O(m+n) operations
+//     *
+//     * @param undirectedGraph original undirected graph
+//     * @param subset          of nodes to keep in the subgraph
+//     * @returna new directed graph which is a subraph of an undirected graph deduced from a subset.
+//     */
+//    public static DirectedGraph createSubgraph(IGraph undirectedGraph, ISet subset) {
+//        int nb = subset.getSize();
+//        boolean[][] matrix = new boolean[nb][nb];
+//        int[] indexes = new int[nb];
+//        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+//        int nodeInNewGraph = 0;
+//        for (int j = subset.getFirstElement(); j >= 0; j = subset.getNextElement()) {
+//            indexes[nodeInNewGraph] = j;
+//            map.put(j, nodeInNewGraph);
+//            nodeInNewGraph++;
+//        }
+//        nodeInNewGraph = 0;
+//        ISet nei;
+//        for (int j = subset.getFirstElement(); j >= 0; j = subset.getNextElement()) {
+//            indexes[nodeInNewGraph] = j;
+//            map.put(j, nodeInNewGraph);
+//            nodeInNewGraph++;
+//            nei = undirectedGraph.getNeighborsOf(j);
+//            for (int k = nei.getFirstElement(); k >= 0; k = nei.getNextElement()) {
+//                if (map.get(k) != null) {
+//                    matrix[nodeInNewGraph][map.get(k)] = true;
+//                }
+//            }
+//            nodeInNewGraph++;
+//        }
+//        return new DirectedGraph(nb, matrix, undirectedGraph.getType(), false);
+//    }
 
     //***********************************************************************************
     // INeighbors operations

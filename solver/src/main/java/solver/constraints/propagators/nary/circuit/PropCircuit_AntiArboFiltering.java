@@ -29,15 +29,14 @@ package solver.constraints.propagators.nary.circuit;
 
 import common.ESat;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import memory.graphs.graphOperations.dominance.SimpleDominatorsFinder;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
-
 import java.util.Random;
 
 public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {

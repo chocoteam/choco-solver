@@ -31,6 +31,7 @@ import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
@@ -39,8 +40,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.BitSet;
 
 /**
@@ -354,10 +353,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         int idx;
 
         public void execute(int i) throws ContradictionException {
-            digraph.removeEdge(idx, map.get(i));
-            if (digraph.arcExists(idx, map.get(i)) || digraph.arcExists(map.get(i), idx)) {
-                throw new UnsupportedOperationException();
-            }
+			digraph.removeArc(idx,map.get(i));
+			digraph.removeArc(map.get(i),idx);
         }
 
         @Override

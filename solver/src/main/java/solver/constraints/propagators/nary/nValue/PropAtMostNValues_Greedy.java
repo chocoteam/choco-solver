@@ -91,8 +91,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 
     private void buildDigraph() {
         for (int i = 0; i < n; i++) {
-            cliques.getSuccessorsOf(i).clear();
-            cliques.getPredecessorsOf(i).clear();
+            cliques.getNeighborsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             for (int i2 = i + 1; i2 < n; i2++) {

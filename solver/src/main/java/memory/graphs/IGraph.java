@@ -48,7 +48,7 @@ public interface IGraph extends Serializable {
     /**
      * Activate node x
      *
-     * @param x
+     * @param x a node index
      * @return true iff x was not already activated
      */
     boolean activateNode(int x);
@@ -56,71 +56,10 @@ public interface IGraph extends Serializable {
     /**
      * Desactivate node x
      *
-     * @param x
+     * @param x a node index
      * @return true iff x was activated
      */
     boolean desactivateNode(int x);
-
-    /**
-     * test whether edge (x,y) is in the graph or not
-     *
-     * @param x
-     * @param y
-     * @return true iff edge (x,y) is in the graph
-     */
-    boolean edgeExists(int x, int y);
-
-    /**
-     * test whether arc (x,y) is in the graph or not
-     * NB : arc is oriented whereas edge is not
-     *
-     * @param x
-     * @param y
-     * @return true iff arc (x,y) is in the graph
-     */
-    boolean arcExists(int x, int y);
-
-    /**
-     * Add edge (x,y) to the graph
-     *
-     * @param x
-     * @param y
-     * @return true iff (x,y) was not already in the graph
-     */
-    boolean addEdge(int x, int y);
-
-    /**
-     * Remove edge (x,y) from the graph
-     *
-     * @param x
-     * @param y
-     * @return true iff (x,y) was in the graph
-     */
-    boolean removeEdge(int x, int y);
-
-    /**
-     * Get neighbors of x
-     *
-     * @param x node
-     * @return neighbors of x (predecessors and/or successors)
-     */
-    ISet getNeighborsOf(int x);
-
-    /**
-     * Get predecessors of x
-     *
-     * @param x node
-     * @return predecessors of x
-     */
-    ISet getPredecessorsOf(int x);
-
-    /**
-     * Get successors of x
-     *
-     * @param x node
-     * @return successors of x
-     */
-    ISet getSuccessorsOf(int x);
 
     /**
      * The number of nodes of the graph

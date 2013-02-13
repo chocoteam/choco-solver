@@ -25,11 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphOperations.connectivity;
+package memory.graphs.graphOperations.connectivity;
 
 import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
-
 import java.io.Serializable;
 import java.util.BitSet;
 

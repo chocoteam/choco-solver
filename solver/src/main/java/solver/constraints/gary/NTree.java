@@ -30,6 +30,8 @@ package solver.constraints.gary;
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.graphs.DirectedGraph;
+import memory.graphs.graphOperations.GraphTools;
+import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
 import memory.setDataStructures.ISet;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropNTree;
@@ -40,8 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.GraphTools;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 /**
  * Constraint for tree partitioning an anti-arborscence
