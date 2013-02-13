@@ -225,14 +225,18 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     //***********************************************************************************
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
+        int nbInst = 0;
+		for (int i = 0; i < n; i++) {
+			if(vars[i].instantiated()){
+				nbInst++;
+				for (int j = i + 1; j < n; j++) {
+					if (vars[j].instantiated() && vars[i].getValue()==vars[j].getValue()) {
+						return ESat.FALSE;
+					}
+				}
+			}
+		}
+		if(nbInst==vars.length){
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
