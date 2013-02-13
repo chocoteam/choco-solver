@@ -188,7 +188,7 @@ public class ParseAndSolve {
 
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
-                solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) || !gc.all);
+                solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
             }
             if (!csv.equals("")) {
                 assert acsv != null;
