@@ -122,11 +122,6 @@ public class Solver implements Serializable {
      */
     ESat feasible = ESat.UNDEFINED;
 
-    /**
-     * Is search complete? cf. limits
-     */
-    boolean complete = true;
-
     protected long creationTime;
 
     protected int id = 1;

@@ -131,9 +131,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
 
     /**
-     * Solution pool -- way to record solutions. Default object is no solution recorded.
+     * Solution pool -- way to record solutions. Default object is last solution recorded.
      */
-    ISolutionPool solutionpool = SolutionPoolFactory.NO_SOLUTION.make();
+    ISolutionPool solutionpool = SolutionPoolFactory.LAST_ONE.make();
 
     public SearchMonitorList smList;
 
