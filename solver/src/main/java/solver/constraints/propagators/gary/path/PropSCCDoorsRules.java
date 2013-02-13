@@ -39,13 +39,13 @@ import common.ESat;
 import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.DirectedGraphVar;
 
 import java.util.BitSet;

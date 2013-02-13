@@ -27,6 +27,7 @@
 
 package solver.variables.graph;
 
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;

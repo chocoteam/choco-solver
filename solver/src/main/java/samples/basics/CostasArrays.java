@@ -24,51 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * Costas Arrays
+ * "Given n in N, find an array s = [s_1, ..., s_n], such that
+ * <ul>
+ * <li>s is a permutation of Z_n = {0,1,...,n-1};</li>
+ * <li>the vectors v(i,j) = (j-i)x + (s_j-s_i)y are all different </li>
+ * </ul>
+ * <br/>
+ * An array v satisfying these conditions is called a Costas array of size n;
+ * the problem of finding such an array is the Costas Array problem of size n."
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 14/03/12
+ * @author Jean-Guillaume Fages
+ * @since 25/01/11
  */
-public class BigLeq extends AbstractProblem {
-    @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 10;
+public class CostasArrays extends AbstractProblem {
 
-    IntVar[] vars;
+    @Option(name = "-o", usage = "Costas array size.", required = false)
+    private static int n = 14;  // should be <15 to be solved quickly
+
+    IntVar[] vars, vectors;
 
     @Override
     public void createSolver() {
-        solver = new Solver("BigLeq");
+        solver = new Solver("CostasArrays");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
-
-        for (int i = 0; i < m - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
+        vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+        vectors = new IntVar[n * n - n];
+        int idx = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    vectors[idx] = VariableFactory.offset(Sum.var(vars[j], VariableFactory.minus(vars[i])), 2 * n * (j - i));
+                    idx++;
+                }
+            }
         }
-        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
+        solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(vars));
     }
 
     @Override
     public void configureEngine() {
     }
+
 
     @Override
     public void solve() {
@@ -77,20 +96,22 @@ public class BigLeq extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("bigleq({})", m);
-        StringBuilder st = new StringBuilder();
-        st.append("\t");
-        for (int i = 0; i < m - 1; i++) {
-            st.append(String.format("%d ", vars[i].getValue()));
-            if (i % 10 == 9) {
-                st.append("\n\t");
+        String s = "";
+        for (int i = 0; i < n; i++) {
+            s += "|";
+            for (int j = 0; j < n; j++) {
+                if (j == vars[i].getValue()) {
+                    s += "x|";
+                } else {
+                    s += "-|";
+                }
             }
+            s += "\n";
         }
-        st.append(String.format("%d", vars[m - 1].getValue()));
-        LoggerFactory.getLogger("bench").info(st.toString());
+        System.out.println(s);
     }
 
     public static void main(String[] args) {
-        new BigLeq().execute(args);
+        new CostasArrays().execute(args);
     }
 }

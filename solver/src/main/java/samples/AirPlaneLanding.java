@@ -149,8 +149,8 @@ public class AirPlaneLanding extends AbstractProblem {
                 BoolVar boolVar = VariableFactory.bool("b_" + i + "_" + j, solver);
                 booleans.add(boolVar);
 
-                Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j], solver);
-                Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i], solver);
+                Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
+                Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
                 Constraint cr1 = IntConstraintFactory.implies(boolVar, c1);
                 Constraint cr2 = IntConstraintFactory.implies(VariableFactory.not(boolVar), c2);
                 solver.post(cr1);
@@ -190,7 +190,7 @@ public class AirPlaneLanding extends AbstractProblem {
         solver.post(IntConstraintFactory.alldifferent(planes, "BC"));
     }
 
-    static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
+    static Constraint precedence(IntVar x, int duration, IntVar y) {
         return IntConstraintFactory.arithm(x, "=", y, "-", duration);
     }
 
@@ -207,27 +207,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 IntStrategyFactory.random(bVars, seed),
                 IntStrategyFactory.inputOrder_InDomainMin(planes)
         ));
-
-    }
-
-    @Override
-    public void configureEngine() {
-        /*IPropagationEngine engine = solver.getEngine();
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        new Cond(
-                                Predicates.member(ranking.keys(new Constraint[ranking.size()])),
-                                new Seq(
-                                        new MappingC(ranking),
-                                        new IncrOrderV(ArrayUtils.append(bVars, planes))),
-                                new MappingV(planes, costLAT)
-                        ),
-                        Policy.FIXPOINT
-                ));*/
-        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
-        if (true) {
+		// -----
+		boolean lns = true;
+		SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
+        if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new Abstract_LNS_SearchMonitor(solver, false) {
 
                 private int coeff = 10;
@@ -261,11 +244,14 @@ public class AirPlaneLanding extends AbstractProblem {
         } else {
             SearchMonitorFactory.log(solver, true, false);
         }
+
     }
 
     @Override
+    public void configureEngine() {}
+
+    @Override
     public void solve() {
-        //solver.getSearchLoop().getLimitsBox().setTimeLimit(20000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

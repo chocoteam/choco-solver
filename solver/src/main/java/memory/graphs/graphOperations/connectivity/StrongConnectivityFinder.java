@@ -27,8 +27,8 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
-import solver.variables.graph.DirectedGraph;
 
 import java.io.Serializable;
 import java.util.BitSet;

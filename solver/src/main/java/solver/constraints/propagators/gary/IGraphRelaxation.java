@@ -34,7 +34,7 @@
 
 package solver.constraints.propagators.gary;
 
-import solver.variables.graph.IGraph;
+import memory.graphs.IGraph;
 
 public interface IGraphRelaxation {
 

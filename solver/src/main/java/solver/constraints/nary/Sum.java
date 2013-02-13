@@ -35,14 +35,12 @@ import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.Operator;
-import solver.constraints.propagators.nary.sum.*;
-import solver.exception.SolverException;
+import solver.constraints.propagators.nary.sum.PropBigSum;
+import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
-
 import java.util.Arrays;
 
 /**
@@ -54,12 +52,6 @@ import java.util.Arrays;
  * @since 18/03/11
  */
 public class Sum extends IntConstraint<IntVar> {
-
-//    public static final String
-//            VAR_DECRCOEFFS = "var_decrcoeffs",
-//            VAR_DOMOVERCOEFFS = "var_domovercoeffs",
-//            VAL_TOTO = "domovercoeffs",
-//            METRIC_COEFFS = "met_coeffs";
 
     public static int BIG_SUM_SIZE = 160;
     public static int BIG_SUM_GROUP = 20;

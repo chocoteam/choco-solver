@@ -27,8 +27,8 @@
 
 package solver.variables.graph.graphOperations.dominance;
 
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
-import solver.variables.graph.DirectedGraph;
 
 /**
  * Class enabling to compute LCA queries in constant time over the DFS tree of a given graph

@@ -30,6 +30,7 @@ import common.ESat;
 import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
@@ -38,7 +39,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.graph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 import java.util.BitSet;

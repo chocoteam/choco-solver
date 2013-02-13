@@ -28,9 +28,9 @@
 package solver.variables.graph.graphOperations.dominance;
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.graphs.DirectedGraph;
 import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
-import solver.variables.graph.DirectedGraph;
 
 /**
  * Class that finds dominators of a given flow graph g(s)

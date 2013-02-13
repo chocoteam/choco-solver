@@ -24,10 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -35,6 +36,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * Simple example using a sum constraint on a large set of variables
  * @author Jean-Guillaume Fages
  * @since 22/06/12
  */
@@ -62,8 +64,7 @@ public class BigSum extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

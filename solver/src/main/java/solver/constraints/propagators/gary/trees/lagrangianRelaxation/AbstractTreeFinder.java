@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
+import memory.graphs.UndirectedGraph;
 import memory.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
-import solver.variables.graph.UndirectedGraph;
 
 public abstract class AbstractTreeFinder {
 

@@ -29,8 +29,8 @@ package solver.variables.graph.graphOperations.connectivity;
 
 
 import gnu.trove.list.array.TIntArrayList;
+import memory.graphs.IGraph;
 import memory.setDataStructures.ISet;
-import solver.variables.graph.IGraph;
 
 /**
  * Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
