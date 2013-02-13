@@ -24,15 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.IMonitorOpenNode;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 
 import java.util.Scanner;
@@ -128,19 +128,17 @@ public class CarSequencing extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(cars));
-//		solver.set(StrategyFactory.firstFail_InDomainMin(cars, solver.getEnvironment()));
         solver.getSearchLoop().plugSearchMonitor(new IMonitorOpenNode() {
             int c = 0;
 
             @Override
-            public void beforeOpenNode() {
-            }
+            public void beforeOpenNode() {}
 
             @Override
             public void afterOpenNode() {
                 c++;
                 if (c % 100 == 0) {
-                    System.out.println("tree search nodes : " + c);
+                    System.out.println("# search nodes : " + c);
                 }
             }
         });
@@ -156,22 +154,7 @@ public class CarSequencing extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {
-//		LoggerFactory.getLogger("bench").info("Car sequencing : {}", data.name());
-//		LoggerFactory.getLogger("bench").info(data.source());
-//		LoggerFactory.getLogger("bench").info("\nA valid sequence for this set of cars is:");
-//		for (int i = 0; i < cars.length; i++) {
-//			int k = cars[i].getValue();
-//			LoggerFactory.getLogger("bench").info(String.format("%d\t %s", k, Arrays.toString(matrix[k])));
-//		}
-        Variable[] vars = solver.getVars();
-        for (Variable v : vars) {
-            if (!v.instantiated()) {
-                System.out.println(v);
-                throw new UnsupportedOperationException();
-            }
-        }
-    }
+    public void prettyOut() {}
 
     public static void main(String[] args) {
         new CarSequencing().execute(args);
