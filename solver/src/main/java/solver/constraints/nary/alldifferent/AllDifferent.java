@@ -33,6 +33,7 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualX_Y;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_Fast;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffInst;
 import solver.constraints.propagators.nary.alldifferent.proba.PropAllDiffACProba;
@@ -71,7 +72,8 @@ public class AllDifferent extends IntConstraint<IntVar> {
             }
             break;
             case AC:
-                addPropagators(new PropAllDiffAC(this.vars));
+//                addPropagators(new PropAllDiffAC(this.vars));
+				addPropagators(new PropAllDiffAC_Fast(this.vars));
                 break;
             case ACPROBA:
                 addPropagators(new PropAllDiffInst(this.vars));
