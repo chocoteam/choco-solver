@@ -67,7 +67,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
         List<Constraint> ADS = new ArrayList<Constraint>();
 
-        Constraint cc = IntConstraintFactory.alldifferent(vars, "BC");
+        Constraint cc = IntConstraintFactory.alldifferent(vars, "AC");
         solver.post(cc);
         ADS.add(cc);
 
@@ -136,25 +136,7 @@ public class OrthoLatinSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-        //TODO: propagation
-        /*solver.getEngine().addGroup(
-                Group.buildQueue(
-                        but(light, member(ALLDIFFS)),
-                        Policy.FIXPOINT
-                ));
-        solver.getEngine().addGroup(
-                Group.buildQueue(
-                        member_light(ALLDIFFS),
-                        Policy.FIXPOINT
-                ));
-
-        solver.getEngine().addGroup(
-                Group.buildQueue(
-                        all(),
-                        Policy.ONE
-                ));*/
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

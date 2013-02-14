@@ -24,12 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -61,10 +62,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = new IntVar[n];
-
         vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
-
         counts = new Constraint[n];
         for (int i = 0; i < n; i++) {
             counts[i] = IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i]));
@@ -83,12 +81,10 @@ public class MagicSeries extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
-        // default group
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

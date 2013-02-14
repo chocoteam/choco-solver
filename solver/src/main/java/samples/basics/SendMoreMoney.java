@@ -1,4 +1,4 @@
-package samples; /**
+package samples.basics; /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@ package samples; /**
  */
 
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.cpviz.Visualization;

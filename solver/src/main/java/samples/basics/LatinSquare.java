@@ -24,11 +24,12 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -62,7 +63,6 @@ public class LatinSquare extends AbstractProblem {
         vars = new IntVar[m * m];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
-//                vars[i * m + j] = VariableFactory.bounded("C" + i + "_" + j, 0, m - 1, solver);
                 vars[i * m + j] = VariableFactory.enumerated("C" + i + "_" + j, 0, m - 1, solver);
             }
         }
@@ -72,43 +72,28 @@ public class LatinSquare extends AbstractProblem {
         }
 
         // Constraints
-//		Constraint check = new Constraint(solver);
         for (int i = 0; i < m; i++) {
-            IntVar[] cards = VariableFactory.boolArray("cardinalities", m, solver);
             IntVar[] row = new IntVar[m];
             IntVar[] col = new IntVar[m];
             for (int x = 0; x < m; x++) {
                 row[x] = vars[i * m + x];
                 col[x] = vars[x * m + i];
             }
-//            solver.post(GlobalCardinality.make(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
-//            solver.post(GlobalCardinality.make(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
-            solver.post(IntConstraintFactory.global_cardinality(row, values, cards, false));
-            solver.post(IntConstraintFactory.global_cardinality(col, values, cards, false));
-//			check.addPropagators(new PropDomSize(row, check, solver));
-//			check.addPropagators(new PropDomSize(col,check,solver));
+            solver.post(IntConstraintFactory.alldifferent(col, "AC"));
+            solver.post(IntConstraintFactory.alldifferent(row, "AC"));
         }
-//		solver.post(check);
     }
 
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
-        //SearchMonitorFactory.log(solver, true, true);
-        /*IPropagationEngine engine = solver.getEngine();
-                engine.addGroup(Group.buildQueue(
-						Predicates.member(vars), Policy.FIXPOINT
-				));*/
     }
 
     @Override
-    public void configureEngine() {
-        //solver.set(new PropagatorEngine(solver));
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
-//		SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
     }
 

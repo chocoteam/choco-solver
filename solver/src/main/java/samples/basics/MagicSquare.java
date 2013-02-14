@@ -25,11 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package samples.basics;
 
 import common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.selectors.variables.ImpactBased;
@@ -110,19 +111,7 @@ public class MagicSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-        //TODO: choisir une meilleure stratégie
-        // default group
-        /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.light(),
-                        new Seq(
-                                IncrArityP.get(),
-                                new IncrOrderV(vars)
-                        ),
-                        Policy.FIXPOINT
-                ));*/
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

@@ -52,20 +52,14 @@ public class OpenStacks extends AbstractProblem {
     @Option(name = "-d", aliases = "--data", usage = "Open stacks instance.", required = false)
     Data data = Data.small;
 
-
     int nc; // nb of customers
     int np; // nb of products
-
     int[][] orders; // which customer orders which product
-
     int[] norders; // nb of orders per customer
-
     IntVar[] scheds; // schedule of products
-
     IntVar[][] o; // orders fill after time t
     BoolVar[][] o2b;
     IntVar[] open; // schedule of products
-
     IntVar objective;
 
 

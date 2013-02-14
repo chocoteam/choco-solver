@@ -25,11 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package samples.basics;
 
 import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -144,7 +145,6 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.statEveryXXms(solver, 5000);
         solver.findSolution();
     }
 
