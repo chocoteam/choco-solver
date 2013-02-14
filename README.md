@@ -11,4 +11,5 @@ Choco3 comes with:
 - various search strategies, from basic ones (fist_fail, smallest, etc.) to most complex (impact-based and activity-based search),
 - explanation-based engine, that enables conflict-based back jumping, dynamic backtracking and path repair,
 
-But also, a FlatZinc parser, facilities to interact with the search loop, etc.
+But also, a FlatZinc parser, facilities to interact with the search loop, factories to help modelling, many samples, etc.
+
