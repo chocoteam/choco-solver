@@ -152,7 +152,7 @@ public class FlatzincModelTest {
                         "array[1 .. 3] of int: lbound = [0,1,0];\n" +
                         "array[1 .. 3] of int: ubound = [1,1,1];\n" +
                         "array[1 .. 3] of var 1 .. 10: vars;\n" +
-                        "constraint globalCardinalityLowUpChoco(vars, covers, lbound, ubound);\n" +
+                        "constraint globalCardinalityLowUpChoco(vars, covers, lbound, ubound,false);\n" +
                         "solve satisfy;");
 
         InputStream in = new ByteArrayInputStream(st.toString().getBytes());
