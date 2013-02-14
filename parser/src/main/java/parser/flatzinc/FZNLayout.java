@@ -84,8 +84,8 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 if (isUserinterruption()) {
-                    LOGGER.info("% User interruption...");
                     beforeClose();
+                    LOGGER.info("% Unexpected resolution interruption!");
                 }
             }
         });
@@ -119,10 +119,8 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                 LOGGER.info("----------");
             }
         } else {
-            wrongSolution = true;
-            LOGGER.info("% Wrong solution found!");
-            LOGGER.info("% Waiting to be killed !");
-
+            LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
+            System.exit(-200);
         }
     }
 
