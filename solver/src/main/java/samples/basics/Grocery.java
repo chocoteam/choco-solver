@@ -24,10 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -35,10 +36,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.selectors.values.InDomainMax;
-import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.strategy.Assignment;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -55,7 +52,10 @@ import solver.variables.VariableFactory;
  * Constraint Programming in Oz. A Tutorial. 2001."
  * <br/>
  *
- * @author Charles Prud'homme
+ * This problem deals with large domains which result in integer overflows with classical constraints.
+ * Thus, this example introduces a dedicated propagator which handles large value products.
+ *
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 08/08/11
  */
 public class Grocery extends AbstractProblem {
@@ -68,62 +68,34 @@ public class Grocery extends AbstractProblem {
 		solver = new Solver("Grocery");
 	}
 
-//    @Override
-//    public void buildModel() {
-//        vars = VariableFactory.enumeratedArray("item", 4, 0, 711, solver);
-//        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(711,solver)));
-//
-//        IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
-//        IntVar _711 = VariableFactory.fixed(711 * 100 * 100 * 100, solver);
-//
-//        TMP = new Constraint[3];
-//        TMP[0] = (IntConstraintFactory.times(vars[0], vars[1], tmp[0]));
-//        TMP[1] = (IntConstraintFactory.times(vars[2], vars[3], tmp[1]));
-//        TMP[2] = (IntConstraintFactory.times(tmp[0], tmp[1], _711));
-//        solver.post(TMP);
-//
-//        // symetries
-//        LEQ = new Constraint[3];
-//        LEQ[0] = (IntConstraintFactory.arithm(vars[0], "<=", vars[1]));
-//        LEQ[1] = (IntConstraintFactory.arithm(vars[1], "<=", vars[2]));
-//        LEQ[2] = (IntConstraintFactory.arithm(vars[2], "<=", vars[3]));
-//        solver.post(LEQ);
-//
-//    }
-
 	@Override
 	public void buildModel() {
-		int lb = 1;
-		int ub = 711-3; // (708)
-		ub = 711/2;
-		itemCost = VariableFactory.enumeratedArray("item", 4, lb, ub, solver);
+		itemCost = VariableFactory.enumeratedArray("item", 4, 1, 711, solver);
 		IntVar _711 = VariableFactory.fixed(711, solver);
 		solver.post(IntConstraintFactory.sum(itemCost, _711));
 
 		// intermediary products
-		IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711*711, solver);
+		IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 71100, solver);
 		solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
-		solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
-		solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
 		solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
 
-		// the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3]
+		// the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3] (equal to tmp[0]*tmp[1])
 		// is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
 		// which uses a long to handle such a product
-		Constraint large = new Constraint(tmp,solver);
-		large.addPropagators(new PropLargeProduct(tmp));
 
-		// symetries
-		Constraint[] LEQ = new Constraint[3];
-		LEQ[0] = (IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));
-		LEQ[1] = (IntConstraintFactory.arithm(itemCost[1], "<=", itemCost[2]));
-		LEQ[2] = (IntConstraintFactory.arithm(itemCost[2], "<=", itemCost[3]));
-		solver.post(LEQ);
+		Constraint large = new Constraint(tmp,solver);
+		large.addPropagators(new PropLargeProduct(tmp,711000000));
+		solver.post(large);
+
+		// symmetry breaking
+		solver.post(IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));
+		solver.post(IntConstraintFactory.arithm(itemCost[1], "<=", itemCost[2]));
+		solver.post(IntConstraintFactory.arithm(itemCost[2], "<=", itemCost[3]));
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(IntStrategyFactory.inputOrder_InDomainMin(itemCost));
+		solver.set(IntStrategyFactory.inputOrder_InDomainMax(itemCost));
 	}
 
 	@Override
@@ -148,34 +120,61 @@ public class Grocery extends AbstractProblem {
 		new Grocery().execute(args);
 	}
 
+	/**
+	 * Simple propagator ensuring that vars[0]*vars[1] = target
+	 * It has been designed to handle large values (by using longs)
+	 */
 	private class PropLargeProduct extends Propagator<IntVar>{
-		public PropLargeProduct(IntVar[] vrs){
+		private long target;
+
+		/**
+		 * Large product propagator
+		 * @param vrs		two integer variables
+		 * @param target	long representing the expected value of vrs[0]*vrs[1]
+		 */
+		public PropLargeProduct(IntVar[] vrs, long target){
+			// involved variables, priority (=arity), false (the last parameter should always be false!)
 			super(vrs, PropagatorPriority.BINARY, false);
+			assert vrs.length==2;
+			this.target = target;
 		}
 		@Override
+		/**
+		 * Propagation condition : if a variable is instantiated or a domain bound is modified
+		 */
 		public int getPropagationConditions(int vIdx) {
 			return EventType.INSTANTIATE.mask+EventType.BOUND.mask;
 		}
 		@Override
+		/**
+		 * Initial propagation algorithm. Runs in O(1)
+		 */
 		public void propagate(int evtmask) throws ContradictionException {
 			long min = (long)(vars[0].getLB())*(long)(vars[1].getLB());
-			long max = (long)(vars[0].getUB())*(long)(vars[1].getUB());
-			if(min>711000000){
+			if(min>target){
 				contradiction(vars[0],"");
 			}
-			if(max>0 && max<711000000){
+			long max = (long)(vars[0].getUB())*(long)(vars[1].getUB());
+			if(max>0 && max<target){
 				contradiction(vars[0],"");
 			}
 		}
 		@Override
+		/**
+		 * Incremental propagation (called after the initial propagation, each time a variable bound is modified.
+		 * In this case, we call the initial propagation directly (it runs in constant time).
+		 */
 		public void propagate(int idxVarInProp, int mask) throws ContradictionException {
 			propagate(0);
 		}
 		@Override
+		/**
+		 * Entailment condition and feasibility checker
+		 */
 		public ESat isEntailed() {
 			long min = (long)(vars[0].getLB())*(long)(vars[1].getLB());
 			long max = (long)(vars[0].getUB())*(long)(vars[1].getUB());
-			if(min>711000000 || (max>0 && max<711000000)){
+			if(min>target || (max>0 && max<target)){
 				return ESat.FALSE;
 			}
 			if(isCompletelyInstantiated()){

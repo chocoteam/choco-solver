@@ -44,6 +44,8 @@ import solver.variables.graph.UndirectedGraphVar;
  * Solves the Hamiltonian Cycle Problem
  * <p/>
  * Uses graph variables and a light but fast filtering
+ * Parses HCP instances of the TSPLIB:
+ * See <a href = "http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/">TSPLIB</a>
  *
  * @author Jean-Guillaume Fages
  * @since Oct. 2012

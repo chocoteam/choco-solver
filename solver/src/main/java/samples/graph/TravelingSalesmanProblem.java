@@ -45,7 +45,8 @@ import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Solves the Traveling Salesman Problem
- * parses TSPLIB instances
+ * parses TSP instances of the TSPLIB library
+ * See <a href = "http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/">TSPLIB</a>
  * proposes several optimization strategies
  *
  * Note that using the LKH heuristic as a pre-processing would speed up the resolution
@@ -95,9 +96,10 @@ public class TravelingSalesmanProblem extends AbstractProblem {
         solver = new Solver();
         // variables
         totalCost = VariableFactory.bounded("obj", 0, 99999, solver);
-        graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
-        for (int i = 0; i < n; i++) {
-            graph.getKernelGraph().activateNode(i);
+		// creates a graph containing n nodes
+        graph = new UndirectedGraphVar("G", solver, n, SetType.SWAP_ARRAY, SetType.LINKED_LIST, true);
+        // adds potential edges
+		for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 graph.getEnvelopGraph().addEdge(i, j);
             }
