@@ -42,9 +42,9 @@ import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Solves the Knight's Tour Problem
- *
+ * <p/>
  * Uses graph variables (light data structure)
- * Scales up to 170x170 in ten seconds 
+ * Scales up to 170x170 in ten seconds
  * (requires -Xms2000m -Xmx2000m for memory allocation)
  *
  * @author Jean-Guillaume Fages
@@ -102,14 +102,11 @@ public class KnightTourProblem extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-		// basically branch on sparse areas of the graph
+        // basically branch on sparse areas of the graph
         solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
-		SearchMonitorFactory.limitTime(solver,limit);
+        SearchMonitorFactory.limitTime(solver, limit);
         SearchMonitorFactory.log(solver, false, false);
     }
-
-    @Override
-    public void configureEngine() {}
 
     @Override
     public void solve() {
@@ -117,7 +114,8 @@ public class KnightTourProblem extends AbstractProblem {
     }
 
     @Override
-    public void prettyOut() {}
+    public void prettyOut() {
+    }
 
     //***********************************************************************************
     // HEURISTICS

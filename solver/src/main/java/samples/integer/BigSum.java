@@ -24,77 +24,66 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.integer;
 
-package solver.explanations.samples;
-
-
+import common.ESat;
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * Simple example using a sum constraint on a large set of variables
+ *
+ * @author Jean-Guillaume Fages
+ * @since 22/06/12
  */
-public class ExplainedOCProblem extends AbstractProblem {
+public class BigSum extends AbstractProblem {
+
+    int n = 1000;
 
     IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("BigSum");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
-        }
+        vars = VariableFactory.boundedArray("v", n, 0, 5000, solver);
+        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(500000, solver)));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
-
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
+        LoggerFactory.getLogger("bench").info("big sum");
+        StringBuilder st = new StringBuilder();
+        if (solver.isFeasible() == ESat.TRUE) {
+            for (int i = 0; i < n; i++) {
+                st.append(vars[i].getValue()).append(", ");
             }
+        } else {
+            st.append("\tINFEASIBLE");
         }
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new BigSum().execute(args);
     }
 }

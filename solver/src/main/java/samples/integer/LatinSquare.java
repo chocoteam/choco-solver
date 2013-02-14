@@ -24,77 +24,97 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.integer;
 
-package solver.explanations.samples;
-
-
+import common.util.tools.StringUtils;
+import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-/**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
- */
-public class ExplainedOCProblem extends AbstractProblem {
+import java.text.MessageFormat;
 
+/**
+ * <a href="http://en.wikipedia.org/wiki/Latin_square">wikipedia</a>:<br/>
+ * "A Latin square is an n x n array filled with n different Latin letters,
+ * each occurring exactly once in each row and exactly once in each column"
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 15/06/11
+ */
+public class LatinSquare extends AbstractProblem {
+
+    @Option(name = "-n", usage = "Latin square size.", required = false)
+    int m = 20;
     IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("Latin square");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
+        vars = new IntVar[m * m];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < m; j++) {
+                vars[i * m + j] = VariableFactory.enumerated("C" + i + "_" + j, 0, m - 1, solver);
+            }
+        }
+        int[] values = new int[m];
+        for (int v = 0; v < m; v++) {
+            values[v] = v;
+        }
+
+        // Constraints
+        for (int i = 0; i < m; i++) {
+            IntVar[] row = new IntVar[m];
+            IntVar[] col = new IntVar[m];
+            for (int x = 0; x < m; x++) {
+                row[x] = vars[i * m + x];
+                col[x] = vars[x * m + i];
+            }
+            solver.post(IntConstraintFactory.alldifferent(col, "AC"));
+            solver.post(IntConstraintFactory.alldifferent(row, "AC"));
         }
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
-
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
-            }
+        StringBuilder st = new StringBuilder();
+        String line = "+";
+        for (int i = 0; i < m; i++) {
+            line += "----+";
         }
+        line += "\n";
+        st.append(line);
+        for (int i = 0; i < m; i++) {
+            st.append("|");
+            for (int j = 0; j < m; j++) {
+                st.append(StringUtils.pad((char) (vars[i * m + j].getValue() + 97) + "", -3, " ")).append(" |");
+            }
+            st.append(MessageFormat.format("\n{0}", line));
+        }
+        st.append("\n\n\n");
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new LatinSquare().execute(args);
     }
 }

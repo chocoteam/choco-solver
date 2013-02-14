@@ -24,77 +24,90 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.integer;
 
-package solver.explanations.samples;
-
-
+import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.constraints.nary.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * Costas Arrays
+ * "Given n in N, find an array s = [s_1, ..., s_n], such that
+ * <ul>
+ * <li>s is a permutation of Z_n = {0,1,...,n-1};</li>
+ * <li>the vectors v(i,j) = (j-i)x + (s_j-s_i)y are all different </li>
+ * </ul>
+ * <br/>
+ * An array v satisfying these conditions is called a Costas array of size n;
+ * the problem of finding such an array is the Costas Array problem of size n."
+ * <br/>
+ *
+ * @author Jean-Guillaume Fages
+ * @since 25/01/11
  */
-public class ExplainedOCProblem extends AbstractProblem {
+public class CostasArrays extends AbstractProblem {
 
-    IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
+    @Option(name = "-o", usage = "Costas array size.", required = false)
+    private static int n = 14;  // should be <15 to be solved quickly
+
+    IntVar[] vars, vectors;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("CostasArrays");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
+        vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
+        vectors = new IntVar[n * n - n];
+        int idx = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    vectors[idx] = VariableFactory.offset(Sum.var(vars[j], VariableFactory.minus(vars[i])), 2 * n * (j - i));
+                    idx++;
+                }
+            }
         }
+        solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+        solver.post(IntConstraintFactory.alldifferent(vectors, "BC"));
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(vars));
     }
 
 
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
+        String s = "";
+        for (int i = 0; i < n; i++) {
+            s += "|";
+            for (int j = 0; j < n; j++) {
+                if (j == vars[i].getValue()) {
+                    s += "x|";
+                } else {
+                    s += "-|";
                 }
             }
+            s += "\n";
         }
+        System.out.println(s);
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new CostasArrays().execute(args);
     }
 }

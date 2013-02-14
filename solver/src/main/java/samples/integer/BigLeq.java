@@ -24,77 +24,71 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.integer;
 
-package solver.explanations.samples;
-
-
+import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * Simple example which sorts m integers in range [0,m-1]
+ * by using an allDifferent constraint and arithmetic constraints (leq)
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 14/03/12
  */
-public class ExplainedOCProblem extends AbstractProblem {
+public class BigLeq extends AbstractProblem {
+    @Option(name = "-o", usage = "All interval series size.", required = false)
+    private int m = 10;
 
     IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("BigLeq");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
+        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
+        for (int i = 0; i < m - 1; i++) {
+            solver.post(IntConstraintFactory.arithm(vars[i], "<=", vars[i + 1]));
         }
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.firstFail_InDomainMiddle(vars));
     }
-
 
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
+        LoggerFactory.getLogger("bench").info("bigleq({})", m);
+        StringBuilder st = new StringBuilder();
+        st.append("\t");
+        for (int i = 0; i < m - 1; i++) {
+            st.append(String.format("%d ", vars[i].getValue()));
+            if (i % 10 == 9) {
+                st.append("\n\t");
             }
         }
+        st.append(String.format("%d", vars[m - 1].getValue()));
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new BigLeq().execute(args);
     }
 }

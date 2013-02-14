@@ -104,7 +104,7 @@ public class Pert extends AbstractProblem {
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-		return IntConstraintFactory.arithm(x,"<=",y,"-",duration);
+        return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
     }
 
     @Override
@@ -131,27 +131,6 @@ public class Pert extends AbstractProblem {
         }
     }
 
-
-    @Override
-    public void configureEngine() {
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.priority(PropagatorPriority.TERNARY),
-                        new Cond(
-                                Predicates.lhs(),
-                                new MappingV(vars, rank),
-                                new Decr(new MappingV(vars, rank))),
-                        Policy.ITERATE
-                ));
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.FIXPOINT
-                ));*/
-
-    }
 
     @Override
     public void solve() {
