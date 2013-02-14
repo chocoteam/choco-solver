@@ -28,12 +28,13 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
+import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Propagator that ensures that the final graph consists in K Connected Components (CC)
@@ -42,13 +43,13 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropBiconnected extends Propagator<GraphVar> {
+public class PropBiconnected extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
+    private UndirectedGraphVar g;
     private ConnectivityFinder env_CC_finder;
 
 
@@ -56,8 +57,8 @@ public class PropBiconnected extends Propagator<GraphVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropBiconnected(GraphVar graph) {
-        super(new GraphVar[]{graph}, PropagatorPriority.LINEAR);
+    public PropBiconnected(UndirectedGraphVar graph) {
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         this.g = graph;
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
     }
