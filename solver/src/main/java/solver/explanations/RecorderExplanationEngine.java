@@ -314,7 +314,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 cause.explain(vr, expl);
                 invdom.set(v);
                 if (isTraceOn() && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, val, cause, expl);
+                    onRemoveValue(var, v, cause, expl);
                 }
             }
         }
