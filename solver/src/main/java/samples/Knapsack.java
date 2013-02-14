@@ -119,41 +119,16 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        AbstractStrategy strat = IntStrategyFactory.domOverWDeg_InDomainMin(objects, seed);
-        // top-down
-//		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
-        // dichotomic
-        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.DICHOTOMIC), strat));
-        // bottom-up
-//		solver.set(strat);
-
-        // old stuff
-        /*AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
-            AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
-
-            AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
-
-            solver.set(StrategyVarValAssign.dyn(objects,
-                    seq,
-                    ValidatorFactory.instanciated,
-                    solver.getEnvironment()));*/
-//        final ActivityBased abs = new ActivityBased(solver, objects, 0.999d, 0.02d, 8, 2.0d, 1, seed);
-//        SearchMonitorFactory.log(solver, true, false);
-//        solver.set(abs);
-//        solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, objects, seed, abs, false, objects.length / 2));
+        AbstractStrategy strat = IntStrategyFactory.inputOrder_InDomainMin(objects);
+        // top-down maximization
+        solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat));
     }
 
     @Override
-    public void configureEngine() {
-        // not usefull
-//        IPropagationEngine pengine = new DSLEngine(solver.getEnvironment());
-//        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
-//        solver.set(pengine);
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {
-//      SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
     }
 
