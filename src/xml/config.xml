@@ -1,4 +1,4 @@
-<configuration debug = "false">
+<configuration debug="false">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -9,7 +9,7 @@
     <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
 
     <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>GALAK.LOG</file>
+        <file>CHOCO3.LOG</file>
         <encoder>
             <pattern>%msg%n</pattern>
         </encoder>

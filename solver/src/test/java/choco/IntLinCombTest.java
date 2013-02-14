@@ -36,13 +36,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Operator;
-import solver.constraints.nary.Sum;
-import solver.constraints.propagators.unary.PropEqualXC;
-import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
-import solver.constraints.propagators.unary.PropLessOrEqualXC;
-import solver.constraints.propagators.unary.PropNotEqualXC;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -55,30 +49,35 @@ import java.util.Random;
  * User : cprudhom<br/>
  * Mail : cprudhom(a)emn.fr<br/>
  * Date : 23 avr. 2010<br/>
- * Since : Galak 0.1<br/>
  */
 public class IntLinCombTest {
 
-	private static String operatorToString(Operator operator){
-		String opSt;
-		switch (operator) {
+    private static String operatorToString(Operator operator) {
+        String opSt;
+        switch (operator) {
             case EQ:
-                opSt = "=";break;
+                opSt = "=";
+                break;
             case NQ:
-                opSt = "!=";break;
+                opSt = "!=";
+                break;
             case GE:
-                opSt = ">=";break;
+                opSt = ">=";
+                break;
             case GT:
-                opSt = ">";break;
+                opSt = ">";
+                break;
             case LE:
-                opSt = "<=";break;
+                opSt = "<=";
+                break;
             case LT:
-                opSt = "<";break;
+                opSt = "<";
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
-		return opSt;
-	}
+        return opSt;
+    }
 
     public static void testOp(int n, int min, int max, int cMax, int seed, Operator operator) {
         Random random = new Random(seed);
@@ -91,7 +90,7 @@ public class IntLinCombTest {
         }
         int constant = -random.nextInt(cMax);
 
-		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,s);
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, s);
 
 
         Constraint[] cstrs = new Constraint[]{
@@ -132,14 +131,14 @@ public class IntLinCombTest {
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-		String opname = "=";
+        String opname = "=";
         if (op == 0) {
         } else if (op > 0) {
-			opname = ">=";
+            opname = ">=";
         } else {
-			opname = "<=";
+            opname = "<=";
         }
-		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,solver);
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
         Constraint[] cstrs = new Constraint[]{
                 IntConstraintFactory.scalar(bins, coeffs, sum),
                 IntConstraintFactory.arithm(sum, opname, b)
@@ -155,14 +154,14 @@ public class IntLinCombTest {
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-		String opname = "=";
+        String opname = "=";
         if (op == 0) {
         } else if (op > 0) {
-			opname = ">=";
+            opname = ">=";
         } else {
-			opname = "<=";
+            opname = "<=";
         }
-		IntVar sum = VariableFactory.bounded("scal",-99999999,99999999,solver);
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
         Constraint[] cstrs = new Constraint[]{
                 IntConstraintFactory.scalar(bins, coeffs, sum),
                 IntConstraintFactory.arithm(sum, opname, b)
