@@ -29,7 +29,7 @@ package solver.constraints.nary;
 import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.MagicSeries;
+import samples.basics.MagicSeries;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
