@@ -95,10 +95,8 @@ public class CarSequencing extends AbstractProblem {
                     // optfreq[optNum][0] times AT MOST
                     atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
                 }
-//				solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, options[optNum], atMost, false));
                 IntVar[] atLeast = VariableFactory.boundedArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, solver);
-//				solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
                 solver.post(IntConstraintFactory.global_cardinality(carSequence, idleConfs[optNum], atLeast, false));
 
                 // all others configurations may be chosen
@@ -112,7 +110,6 @@ public class CarSequencing extends AbstractProblem {
             expArray[i] = VariableFactory.enumerated("var_" + i, 0, demands[i], solver);
             values[i] = i;
         }
-//		solver.post(GlobalCardinality.make(cars, values, expArray, solver));
         solver.post(IntConstraintFactory.global_cardinality(cars, values, expArray, false));
     }
 

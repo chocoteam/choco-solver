@@ -30,6 +30,7 @@ package samples;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.basics.MagicSquare;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;

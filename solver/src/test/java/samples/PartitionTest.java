@@ -29,6 +29,7 @@ package samples;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.basics.Partition;
 import solver.Solver;
 
 /**

@@ -25,20 +25,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
+import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.LinkedList;
 
 /**
  * CSPLib prob006:<br/>
@@ -98,7 +96,7 @@ public class GolombRuler extends AbstractProblem {
                 m_diffs[i][j] = diffs[k];
             }
         }
-        alldiff = IntConstraintFactory.alldifferent(diffs, "AC");
+        alldiff = IntConstraintFactory.alldifferent(diffs, "BC");
         solver.post(alldiff);
 
         // break symetries

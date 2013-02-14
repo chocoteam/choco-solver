@@ -24,9 +24,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -34,6 +35,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * Simple example which orders a set of integer variables
  * <br/>
  *
  * @author Charles Prud'homme

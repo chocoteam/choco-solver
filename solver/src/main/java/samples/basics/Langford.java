@@ -24,11 +24,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -90,7 +91,7 @@ public class Langford extends AbstractProblem {
         }
         lights[(k - 1) * n] = IntConstraintFactory.arithm(position[0], "<", position[n * k - 1]);
         solver.post(lights);
-        alldiff = IntConstraintFactory.alldifferent(position, "BC");
+        alldiff = IntConstraintFactory.alldifferent(position, "AC");
         solver.post(alldiff);
     }
 
@@ -100,8 +101,7 @@ public class Langford extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

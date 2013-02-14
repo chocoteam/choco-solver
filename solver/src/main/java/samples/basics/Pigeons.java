@@ -25,9 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;

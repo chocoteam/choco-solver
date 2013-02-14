@@ -24,12 +24,13 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
@@ -148,30 +149,10 @@ public class SocialGolfer extends AbstractProblem {
     public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
         solver.set(IntStrategyFactory.inputOrder_InDomainMax(vars));
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.setDeal(IPropagationEngine.Deal.QUEUE);
-        Predicate inVARS = Predicates.member(vars);
-        Predicate ALL = Predicates.all();
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.but(ALL, inVARS),
-                        new IncrOrderV(vars),
-                        Policy.FIXPOINT
-                )
-        );
-        engine.addGroup(
-                Group.buildGroup(
-                        inVARS,
-                        new IncrOrderV(vars),
-                        Policy.FIXPOINT
-                )
-        );*/
-
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

@@ -24,66 +24,72 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
-import solver.variables.IntVar;
+import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
 /**
- * A verbal arithmetic puzzle:
+ * CSPLib: prob015:<br/>
+ * "The problem is to put n balls labelled {1,...n} into 3 boxes so that
+ * for any triple of balls (x,y,z) with x+y=z, not all are in the same box.
+ * This has a solution iff n < 14.
  * <br/>
- * &#32;&#32;&#32;D&#32;O&#32;N&#32;A&#32;L&#32;D<br/>
- * +&#32;G&#32;E&#32;R&#32;A&#32;L&#32;D<br/>
- * ========<br/>
- * &#32;&#32;&#32;R&#32;O&#32;B&#32;E&#32;R&#32;T<br/>
+ * One natural generalization is to consider partitioning into k boxes (for k>3)."
+ * <p/>
  * <br/>
- * Attribute a different value to each letter, such that the equation is correct.
  *
  * @author Charles Prud'homme
- * @since 03/08/11
+ * @since 19/08/11
  */
-public class Donald extends AbstractProblem {
+public class SchurLemma extends AbstractProblem {
 
-    IntVar d, o, n, a, l, g, e, r, b, t;
-    IntVar[] letters;
+    @Option(name = "-n", usage = "Number of balls.", required = false)
+    int n = 43;
+
+    @Option(name = "-k", usage = "Number of boxes.", required = false)
+    int k = 4;
+
+
+    BoolVar[][] M;
 
     @Override
     public void createSolver() {
-        solver = new Solver("Donald");
+        solver = new Solver();
     }
 
     @Override
     public void buildModel() {
-        d = VariableFactory.bounded("d", 1, 9, solver);
-        o = VariableFactory.bounded("o", 0, 9, solver);
-        n = VariableFactory.bounded("n", 0, 9, solver);
-        a = VariableFactory.bounded("a", 0, 9, solver);
-        l = VariableFactory.bounded("l", 0, 9, solver);
-        g = VariableFactory.bounded("g", 1, 9, solver);
-        e = VariableFactory.bounded("e", 0, 9, solver);
-        r = VariableFactory.bounded("r", 1, 9, solver);
-        b = VariableFactory.bounded("b", 0, 9, solver);
-        t = VariableFactory.bounded("t", 0, 9, solver);
-        letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
-        solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
-                g, e, r, a, l, d,
-                r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
-                100000, 10000, 1000, 100, 10, 1,
-                -100000, -10000, -1000, -100, -10, -1,
-        }, VariableFactory.fixed(0,solver)));
+        M = VariableFactory.boolMatrix("b", n, k, solver); // M_ij is true iff ball i is in box j
 
+        for (int i = 0; i < n; i++) {
+            solver.post(IntConstraintFactory.sum(M[i], VariableFactory.fixed(1, solver)));
+        }
 
+        for (int i = 0; i < k; i++) {
+            for (int x = 1; x <= n; x++) {
+                for (int y = 1; y <= n; y++) {
+                    for (int z = 1; z <= n; z++) {
+                        if (x + y == z)
+                            solver.post(IntConstraintFactory.sum(new BoolVar[]{M[x - 1][i], M[y - 1][i], M[z - 1][i]}, VariableFactory.bounded("sum", 0, 2, solver)));
+                    }
+                }
+            }
+        }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMax(letters));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.flatten(M)));
     }
 
     @Override
@@ -97,16 +103,25 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
+        LoggerFactory.getLogger("bench").info("Schur's lemma ({},{})", new Object[]{n, k});
         StringBuilder st = new StringBuilder();
-        st.append("\t");
-        for (int i = 0; i < letters.length; i++) {
-            st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
+        if (solver.isFeasible() == ESat.TRUE) {
+            for (int i = 0; i < k; i++) {
+                st.append("\tBox #").append(i + 1).append(": ");
+                for (int j = 0; j < n; j++) {
+                    if (M[j][i].getValue() > 0) {
+                        st.append(j + 1).append(" ");
+                    }
+                }
+                st.append("\n");
+            }
+        } else {
+            st.append("\tINFEASIBLE");
         }
         LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new Donald().execute(args);
+        new SchurLemma().execute(args);
     }
 }
