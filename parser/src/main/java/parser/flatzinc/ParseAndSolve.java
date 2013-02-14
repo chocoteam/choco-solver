@@ -201,8 +201,6 @@ public class ParseAndSolve {
     protected void makeEngine(Solver solver) {
         switch (eng) {
             case 0:
-                // let the default propagation strategy,
-                break;
             case 1:
                 solver.set(new PropagatorEngine(solver));
                 break;
