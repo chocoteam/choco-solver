@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
-    <artifactId>choco</artifactId>
+    <artifactId>choco3</artifactId>
     <packaging>pom</packaging>
     <version>13.02-SNAPSHOT</version>
     <name>Choco3: an Open-Source Constraint Solver</name>

@@ -1,20 +1,17 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2.1"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2.1 http://maven.apache.org/xsd/assembly-2.2.1.xsd">
-    <id>with-dep</id>
+    <id>w-dep</id>
     <formats>
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
             <unpack>true</unpack>
-            <unpackOptions>
-                <excludes>
-                    <exclude>**/*.class</exclude>
-                </excludes>
-            </unpackOptions>
-            <scope>compile</scope>
+            <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
 </assembly>
