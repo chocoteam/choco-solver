@@ -65,17 +65,43 @@ public class PathRepair extends ConflictBasedBackjumping {
             super.updateVRExplainUponbacktracking(nworld, expl, cause);
         }
         cobdec.clearDecisionPath();
+
+        // preliminary : compute where to jump back
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
+        int myworld = nworld;
+        while (dec != RootDecision.ROOT && myworld > 1) {
+            dec = dec.getPrevious();
+            myworld--;
+        }
+        Decision jmpBck = dec;
+        if (mExplanationEngine.isTraceOn() && LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        }
+
+        // now we can explicitly enforce the jump
+        dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
 
-            //TODO ajouter la validité
-            // 1. make a reverse copy of the decision, ready to be a LEFT branch
             if (!dec.hasNext()) {
-                dec.reverse();
+                // on a right branch, necessarily have an explanation (it is a refutation)
+
+                if (! mExplanationEngine.flatten(dec.getNegativeDeduction()).contain(jmpBck.getPositiveDeduction())) {
+                    // everything is fine ... this refutation does not depend on what we are reconsidering
+                    // set it as non activated and
+                    dec.rewind();
+                    // add it to the decisions to force
+                    cobdec.push(dec);
+
+                } else {
+                    // we need to forget everything and start from scratch on this decision
+                    // so nothing to be done
+                }
+            } else {
+                // on a left branch, we need to keep things as is (a left branch can not depend from anything, it is always a willful decision
+                dec.rewind();
+                cobdec.push(dec);
             }
-            dec.rewind();
-            // 3. add it to the pool of decision to force
-            cobdec.push(dec);
+
             // get the previous
             dec = dec.getPrevious();
             nworld--;
