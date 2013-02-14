@@ -47,7 +47,7 @@ import solver.variables.graph.UndirectedGraphVar;
  * Solves the Traveling Salesman Problem
  * parses TSPLIB instances
  * proposes several optimization strategies
- *
+ * <p/>
  * Note that using the LKH heuristic as a pre-processing would speed up the resolution
  *
  * @author Jean-Guillaume Fages
@@ -131,9 +131,6 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {}
-
-    @Override
     public void solve() {
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
     }
@@ -141,7 +138,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("optimum in ["
-				+ solver.getSearchLoop().getObjectivemanager().getBestLB()+","
-				+ solver.getSearchLoop().getObjectivemanager().getBestUB()+"]");
+                + solver.getSearchLoop().getObjectivemanager().getBestLB() + ","
+                + solver.getSearchLoop().getObjectivemanager().getBestUB() + "]");
     }
 }

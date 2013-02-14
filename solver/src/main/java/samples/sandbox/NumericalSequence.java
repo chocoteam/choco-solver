@@ -24,95 +24,81 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.sandbox;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 18:25
- */
-
-package samples.set;
-
+import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.set.SetConstraintsFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.SetStrategyFactory;
-import solver.variables.SetVar;
-import solver.variables.SetVarImpl;
+import solver.search.strategy.IntStrategyFactory;
+import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Small problem to illustrate how to use set variables
- * enumerates sets such that z = union(x,y)
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @since 06/07/12
  */
-public class SetUnion extends AbstractProblem {
+public class NumericalSequence extends AbstractProblem {
 
-    private SetVar x, y, z;
-    private boolean noEmptySet = false;
-
-    public static void main(String[] args) {
-        new SetUnion().execute(args);
-    }
+    @Option(name = "-n", usage = "Max value.", required = false)
+    int n = 20;
+    IntVar[] U;
 
     @Override
     public void createSolver() {
-        solver = new Solver("set union sample");
+        solver = new Solver("Suite (" + n + ")");
     }
 
     @Override
     public void buildModel() {
-        x = new SetVarImpl("x", solver);
-        y = new SetVarImpl("y", solver);
-        z = new SetVarImpl("z", solver);
-        // x initial domain
-        x.getEnvelope().add(2);
-        x.getEnvelope().add(1);
-        x.getKernel().add(1);
-        x.getEnvelope().add(3);
-        // y initial domain
-        y.getEnvelope().add(6);
-        y.getEnvelope().add(2);
-        y.getEnvelope().add(7);
-        // z initial domain
-        z.getEnvelope().add(1);
-        z.getEnvelope().add(2);
-        z.getKernel().add(2);
-        z.getEnvelope().add(5);
-        z.getEnvelope().add(7);
-        z.getEnvelope().add(3);
-        // set-union constraint
-        solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
-        if (noEmptySet) {
-            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
+        U = new IntVar[n];
+        U[0] = VariableFactory.fixed("U_0", n, solver);
+        U[n - 1] = VariableFactory.fixed("U_" + (n - 1), 1, solver);
+        for (int i = 1; i < n - 1; i++) {
+            U[i] = VariableFactory.enumerated("U_" + i, 1, n + 1, solver);
         }
+        for (int i = 1; i < n - 1; i++) {
+            // U[i+1] = U[U[i]-1]-1
+            solver.post(IntConstraintFactory.element(VariableFactory.offset(U[i], 1), U, VariableFactory.offset(U[i - 1], -1), 1));
+        }
+        for (int i = 1; i < n / 2; i++) {
+            // U[n + 1 - i] = n+ 1 - U[i]
+            solver.post(IntConstraintFactory.arithm(U[n - 1 - i], "+", U[i], "=", n + 1));
+        }
+        solver.post(IntConstraintFactory.alldifferent(U, "BC"));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
-        SearchMonitorFactory.log(solver, true, false);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                System.out.println("solution found");
-                System.out.println("x : {" + x.getEnvelope() + "}");
-                System.out.println("y : {" + y.getEnvelope() + "}");
-                System.out.println("z : {" + z.getEnvelope() + "}");
-            }
-        });
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(U));
     }
 
     @Override
     public void solve() {
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                StringBuilder st = new StringBuilder();
+                st.append("{").append(U[0].getValue());
+                for (int i = 1; i < U.length; i++) {
+                    st.append(",").append(U[i].getValue());
+                }
+                st.append("}");
+                System.out.printf("%s\n", st.toString());
+            }
+        });
+        System.out.printf("M = %d\n", n);
         solver.findAllSolutions();
     }
 
     @Override
     public void prettyOut() {
+    }
+
+    public static void main(String[] args) {
+        new NumericalSequence().execute(args);
     }
 }

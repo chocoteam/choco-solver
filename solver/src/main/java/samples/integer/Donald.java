@@ -24,77 +24,86 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.integer;
 
-package solver.explanations.samples;
-
-
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * A verbal arithmetic puzzle:
+ * <br/>
+ * &#32;&#32;&#32;D&#32;O&#32;N&#32;A&#32;L&#32;D<br/>
+ * +&#32;G&#32;E&#32;R&#32;A&#32;L&#32;D<br/>
+ * ========<br/>
+ * &#32;&#32;&#32;R&#32;O&#32;B&#32;E&#32;R&#32;T<br/>
+ * <br/>
+ * Attribute a different value to each letter, such that the equation is correct.
+ *
+ * @author Charles Prud'homme
+ * @since 03/08/11
  */
-public class ExplainedOCProblem extends AbstractProblem {
+public class Donald extends AbstractProblem {
 
-    IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
+    IntVar d, o, n, a, l, g, e, r, b, t;
+    IntVar[] letters;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("Donald");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
-        }
+        d = VariableFactory.bounded("d", 1, 9, solver);
+        o = VariableFactory.bounded("o", 0, 9, solver);
+        n = VariableFactory.bounded("n", 0, 9, solver);
+        a = VariableFactory.bounded("a", 0, 9, solver);
+        l = VariableFactory.bounded("l", 0, 9, solver);
+        g = VariableFactory.bounded("g", 1, 9, solver);
+        e = VariableFactory.bounded("e", 0, 9, solver);
+        r = VariableFactory.bounded("r", 1, 9, solver);
+        b = VariableFactory.bounded("b", 0, 9, solver);
+        t = VariableFactory.bounded("t", 0, 9, solver);
+        letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
+
+        solver.post(IntConstraintFactory.alldifferent(letters, "BC"));
+        solver.post(IntConstraintFactory.scalar(new IntVar[]{d, o, n, a, l, d,
+                g, e, r, a, l, d,
+                r, o, b, e, r, t}, new int[]{100000, 10000, 1000, 100, 10, 1,
+                100000, 10000, 1000, 100, 10, 1,
+                -100000, -10000, -1000, -100, -10, -1,
+        }, VariableFactory.fixed(0, solver)));
+
+
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.firstFail_InDomainMax(letters));
     }
-
 
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
-            }
+        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
+        StringBuilder st = new StringBuilder();
+        st.append("\t");
+        for (int i = 0; i < letters.length; i++) {
+            st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
         }
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new Donald().execute(args);
     }
 }

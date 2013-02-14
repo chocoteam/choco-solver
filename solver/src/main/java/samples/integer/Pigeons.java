@@ -25,76 +25,60 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.samples;
+package samples.integer;
 
-
+import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * N pigeons nest in N-1 nests.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 05/04/11
  */
-public class ExplainedOCProblem extends AbstractProblem {
+public class Pigeons extends AbstractProblem {
 
+    @Option(name = "-n", usage = "Number of nests.", required = false)
+    int n = 10;
     IntVar[] vars;
-    int n = 4;
-    int vals = n - 1;
 
     @Override
     public void createSolver() {
-        solver = new Solver();
+        solver = new Solver("Pigeons");
     }
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("x", 2 * n, 1, vals, solver);
+        vars = VariableFactory.enumeratedArray("p", n, 1, n - 1, solver);
+
         for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++)
-                solver.post(IntConstraintFactory.arithm(vars[2 * i], "!=", vars[2 * j]));
+            for (int j = i + 1; j < n; j++) {
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));
+            }
         }
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
     }
-
 
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
-        if (solver.findSolution()) {
-            do {
-                this.prettyOut();
-            }
-            while (solver.nextSolution());
-        }
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        for (IntVar v : vars) {
-//            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
-                }
-            }
-        }
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new Pigeons().execute(args);
     }
 }

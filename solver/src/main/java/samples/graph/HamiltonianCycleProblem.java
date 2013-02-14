@@ -48,110 +48,108 @@ import solver.variables.graph.UndirectedGraphVar;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class HamiltonianCycleProblem extends AbstractProblem{
+public class HamiltonianCycleProblem extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	@Option(name = "-tl", usage = "time limit.", required = false)
-	private long limit = 10000;
-	@Option(name = "-inst", usage = "TSPLIB HCP Instance file path.", required = false)
-	private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb5000.hcp";
-	// graph variable expected to form a Hamiltonian Cycle
-	private UndirectedGraphVar graph;
+    @Option(name = "-tl", usage = "time limit.", required = false)
+    private long limit = 10000;
+    @Option(name = "-inst", usage = "TSPLIB HCP Instance file path.", required = false)
+    private String instancePath = "/Users/jfages07/Documents/code/ALL_hcp/alb5000.hcp";
+    // graph variable expected to form a Hamiltonian Cycle
+    private UndirectedGraphVar graph;
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		new HamiltonianCycleProblem().execute(args);
-	}
+    public static void main(String[] args) {
+        new HamiltonianCycleProblem().execute(args);
+    }
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("solving the Hamiltonian Cycle Problem");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("solving the Hamiltonian Cycle Problem");
+    }
 
-	@Override
-	public void buildModel() {
-		boolean[][] matrix = HCP_Utils.parseTSPLIBInstance(instancePath);
-		int n = matrix.length;
-		// variables (use linked lists because the graph is sparse)
-		graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
-		for (int i = 0; i < n; i++) {
-			for (int j = i + 1; j < n; j++) {
-				if (matrix[i][j]) {
-					graph.getEnvelopGraph().addEdge(i, j);
-				}
-			}
-		}
-		// constraints
-		solver.post(GraphConstraintFactory.hamiltonianCycle(graph));
-	}
+    @Override
+    public void buildModel() {
+        boolean[][] matrix = HCP_Utils.parseTSPLIBInstance(instancePath);
+        int n = matrix.length;
+        // variables (use linked lists because the graph is sparse)
+        graph = new UndirectedGraphVar("G", solver, n, SetType.LINKED_LIST, SetType.LINKED_LIST, true);
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (matrix[i][j]) {
+                    graph.getEnvelopGraph().addEdge(i, j);
+                }
+            }
+        }
+        // constraints
+        solver.post(GraphConstraintFactory.hamiltonianCycle(graph));
+    }
 
-	@Override
-	public void configureSearch() {
-		// basically branch on sparse areas of the graph
-		solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
-		SearchMonitorFactory.limitTime(solver,limit);
-		SearchMonitorFactory.log(solver, false, false);
-	}
+    @Override
+    public void configureSearch() {
+        // basically branch on sparse areas of the graph
+        solver.set(GraphStrategyFactory.graphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeArcPriority.ARCS));
+        SearchMonitorFactory.limitTime(solver, limit);
+        SearchMonitorFactory.log(solver, false, false);
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
 
-	@Override
-	public void solve() {
-		solver.findSolution();
-	}
+    @Override
+    public void prettyOut() {
+    }
 
-	@Override
-	public void prettyOut() {}
+    //***********************************************************************************
+    // HEURISTICS
+    //***********************************************************************************
 
-	//***********************************************************************************
-	// HEURISTICS
-	//***********************************************************************************
+    private static class MinNeigh extends ArcStrategy<UndirectedGraphVar> {
+        int n;
 
-	private static class MinNeigh extends ArcStrategy<UndirectedGraphVar> {
-		int n;
+        public MinNeigh(UndirectedGraphVar graphVar) {
+            super(graphVar);
+            n = graphVar.getEnvelopGraph().getNbNodes();
+        }
 
-		public MinNeigh(UndirectedGraphVar graphVar) {
-			super(graphVar);
-			n = graphVar.getEnvelopGraph().getNbNodes();
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			ISet suc;
-			int from = -1;
-			int size = n + 1;
-			int sizi;
-			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
-				if (sizi < size && sizi > 0) {
-					from = i;
-					size = sizi;
-				}
-			}
-			if (from == -1) {
-				return false;
-			}
-			suc = g.getEnvelopGraph().getNeighborsOf(from);
-			this.from = from;
-			to = 2 * n;
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if (!g.getKernelGraph().edgeExists(from, j)) {
-					if (j < to) {
-						to = j;
-					}
-				}
-			}
-			if (to == 2 * n) {
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
-	}
+        @Override
+        public boolean computeNextArc() {
+            ISet suc;
+            int from = -1;
+            int size = n + 1;
+            int sizi;
+            for (int i = 0; i < n; i++) {
+                sizi = g.getEnvelopGraph().getNeighborsOf(i).getSize() - g.getKernelGraph().getNeighborsOf(i).getSize();
+                if (sizi < size && sizi > 0) {
+                    from = i;
+                    size = sizi;
+                }
+            }
+            if (from == -1) {
+                return false;
+            }
+            suc = g.getEnvelopGraph().getNeighborsOf(from);
+            this.from = from;
+            to = 2 * n;
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (!g.getKernelGraph().edgeExists(from, j)) {
+                    if (j < to) {
+                        to = j;
+                    }
+                }
+            }
+            if (to == 2 * n) {
+                throw new UnsupportedOperationException();
+            }
+            return true;
+        }
+    }
 }

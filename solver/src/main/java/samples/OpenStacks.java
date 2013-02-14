@@ -131,10 +131,6 @@ public class OpenStacks extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
-
-    @Override
     public void solve() {
         SearchMonitorFactory.limitNode(solver, 200000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);

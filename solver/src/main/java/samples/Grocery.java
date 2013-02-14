@@ -35,10 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.assignments.DecisionOperator;
-import solver.search.strategy.selectors.values.InDomainMax;
-import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.strategy.Assignment;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,12 +57,12 @@ import solver.variables.VariableFactory;
 public class Grocery extends AbstractProblem {
 
 
-	IntVar[] itemCost;
+    IntVar[] itemCost;
 
-	@Override
-	public void createSolver() {
-		solver = new Solver("Grocery");
-	}
+    @Override
+    public void createSolver() {
+        solver = new Solver("Grocery");
+    }
 
 //    @Override
 //    public void buildModel() {
@@ -91,98 +87,99 @@ public class Grocery extends AbstractProblem {
 //
 //    }
 
-	@Override
-	public void buildModel() {
-		int lb = 1;
-		int ub = 711-3; // (708)
-		ub = 711/2;
-		itemCost = VariableFactory.enumeratedArray("item", 4, lb, ub, solver);
-		IntVar _711 = VariableFactory.fixed(711, solver);
-		solver.post(IntConstraintFactory.sum(itemCost, _711));
+    @Override
+    public void buildModel() {
+        int lb = 1;
+        int ub = 711 - 3; // (708)
+        ub = 711 / 2;
+        itemCost = VariableFactory.enumeratedArray("item", 4, lb, ub, solver);
+        IntVar _711 = VariableFactory.fixed(711, solver);
+        solver.post(IntConstraintFactory.sum(itemCost, _711));
 
-		// intermediary products
-		IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711*711, solver);
-		solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
-		solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
-		solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
-		solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
+        // intermediary products
+        IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 711, solver);
+        solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
+        solver.post(IntConstraintFactory.times(itemCost[0], itemCost[1], tmp[0]));
+        solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
+        solver.post(IntConstraintFactory.times(itemCost[2], itemCost[3], tmp[1]));
 
-		// the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3]
-		// is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
-		// which uses a long to handle such a product
-		Constraint large = new Constraint(tmp,solver);
-		large.addPropagators(new PropLargeProduct(tmp));
+        // the global product itemCost[0]*itemCost[1]*itemCost[2]*itemCost[3]
+        // is too large to be used within integer ranges. Thus, we will set up a dedicated constraint
+        // which uses a long to handle such a product
+        Constraint large = new Constraint(tmp, solver);
+        large.addPropagators(new PropLargeProduct(tmp));
 
-		// symetries
-		Constraint[] LEQ = new Constraint[3];
-		LEQ[0] = (IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));
-		LEQ[1] = (IntConstraintFactory.arithm(itemCost[1], "<=", itemCost[2]));
-		LEQ[2] = (IntConstraintFactory.arithm(itemCost[2], "<=", itemCost[3]));
-		solver.post(LEQ);
-	}
+        // symetries
+        Constraint[] LEQ = new Constraint[3];
+        LEQ[0] = (IntConstraintFactory.arithm(itemCost[0], "<=", itemCost[1]));
+        LEQ[1] = (IntConstraintFactory.arithm(itemCost[1], "<=", itemCost[2]));
+        LEQ[2] = (IntConstraintFactory.arithm(itemCost[2], "<=", itemCost[3]));
+        solver.post(LEQ);
+    }
 
-	@Override
-	public void configureSearch() {
-		solver.set(IntStrategyFactory.inputOrder_InDomainMin(itemCost));
-	}
+    @Override
+    public void configureSearch() {
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(itemCost));
+    }
 
-	@Override
-	public void configureEngine() {}
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
 
-	@Override
-	public void solve() {
-		solver.findSolution();
-	}
+    @Override
+    public void prettyOut() {
+        LoggerFactory.getLogger("bench").info("Grocery");
+        StringBuilder st = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
+        }
+        LoggerFactory.getLogger("bench").info(st.toString());
+    }
 
-	@Override
-	public void prettyOut() {
-		LoggerFactory.getLogger("bench").info("Grocery");
-		StringBuilder st = new StringBuilder();
-		for (int i = 0; i < 4; i++) {
-			st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
-		}
-		LoggerFactory.getLogger("bench").info(st.toString());
-	}
+    public static void main(String[] args) {
+        new Grocery().execute(args);
+    }
 
-	public static void main(String[] args) {
-		new Grocery().execute(args);
-	}
+    private class PropLargeProduct extends Propagator<IntVar> {
+        public PropLargeProduct(IntVar[] vrs) {
+            super(vrs, PropagatorPriority.BINARY, false);
+        }
 
-	private class PropLargeProduct extends Propagator<IntVar>{
-		public PropLargeProduct(IntVar[] vrs){
-			super(vrs, PropagatorPriority.BINARY, false);
-		}
-		@Override
-		public int getPropagationConditions(int vIdx) {
-			return EventType.INSTANTIATE.mask+EventType.BOUND.mask;
-		}
-		@Override
-		public void propagate(int evtmask) throws ContradictionException {
-			long min = (long)(vars[0].getLB())*(long)(vars[1].getLB());
-			long max = (long)(vars[0].getUB())*(long)(vars[1].getUB());
-			if(min>711000000){
-				contradiction(vars[0],"");
-			}
-			if(max>0 && max<711000000){
-				contradiction(vars[0],"");
-			}
-		}
-		@Override
-		public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-			propagate(0);
-		}
-		@Override
-		public ESat isEntailed() {
-			long min = (long)(vars[0].getLB())*(long)(vars[1].getLB());
-			long max = (long)(vars[0].getUB())*(long)(vars[1].getUB());
-			if(min>711000000 || (max>0 && max<711000000)){
-				return ESat.FALSE;
-			}
-			if(isCompletelyInstantiated()){
-				return ESat.TRUE;
-			}else{
-				return ESat.UNDEFINED;
-			}
-		}
-	}
+        @Override
+        public int getPropagationConditions(int vIdx) {
+            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            long min = (long) (vars[0].getLB()) * (long) (vars[1].getLB());
+            if (min > 711000000) {
+                contradiction(vars[0], "");
+            }
+            long max = (long) (vars[0].getUB()) * (long) (vars[1].getUB());
+            if (max > 0 && max < 711000000) {
+                contradiction(vars[0], "");
+            }
+        }
+
+        @Override
+        public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+            propagate(0);
+        }
+
+        @Override
+        public ESat isEntailed() {
+            long min = (long) (vars[0].getLB()) * (long) (vars[1].getLB());
+            long max = (long) (vars[0].getUB()) * (long) (vars[1].getUB());
+            if (min > 711000000 || (max > 0 && max < 711000000)) {
+                return ESat.FALSE;
+            }
+            if (isCompletelyInstantiated()) {
+                return ESat.TRUE;
+            } else {
+                return ESat.UNDEFINED;
+            }
+        }
+    }
 }

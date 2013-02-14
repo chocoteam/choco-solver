@@ -70,10 +70,6 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
-
-    @Override
     public void solve() {
         if (solver.findSolution()) {
             do {

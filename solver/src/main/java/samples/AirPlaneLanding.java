@@ -207,9 +207,9 @@ public class AirPlaneLanding extends AbstractProblem {
                 IntStrategyFactory.random(bVars, seed),
                 IntStrategyFactory.inputOrder_InDomainMin(planes)
         ));
-		// -----
-		boolean lns = true;
-		SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
+        // -----
+        boolean lns = true;
+        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new Abstract_LNS_SearchMonitor(solver, false) {
 
@@ -246,9 +246,6 @@ public class AirPlaneLanding extends AbstractProblem {
         }
 
     }
-
-    @Override
-    public void configureEngine() {}
 
     @Override
     public void solve() {
