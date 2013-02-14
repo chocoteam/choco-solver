@@ -24,10 +24,11 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -77,11 +78,11 @@ public class Photo extends AbstractProblem {
 
             solver.post(
 					IntConstraintFactory.implies(viols[i],
-					IntConstraintFactory.arithm(dist[i],"=",2)));
+					IntConstraintFactory.arithm(dist[i],"<=",2)));
 
 			solver.post(
 					IntConstraintFactory.implies(VariableFactory.not(viols[i]),
-					IntConstraintFactory.arithm(dist[i],"=",1)));
+					IntConstraintFactory.arithm(dist[i],">=",1)));
         }
         solver.post(IntConstraintFactory.sum(viols, violations));
         solver.post(IntConstraintFactory.alldifferent(positions, "BC"));
@@ -91,27 +92,10 @@ public class Photo extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.firstFail_InDomainMin(positions));
-        /*IPropagationEngine engine = solver.getEngine();
-//        engine.addGroup(Group.buildGroup(
-            engine.addGroup(Group.buildQueue(
-                Predicates.member(viols),
-//                new IncrOrderV(viols),
-                Policy.FIXPOINT
-        ));
-        engine.addGroup(Group.buildQueue(
-                Predicates.member(positions),
-                Policy.FIXPOINT
-        ));
-        engine.addGroup(Group.buildQueue(
-                Predicates.all(),
-                Policy.ONE
-        ));*/
-
     }
 
     @Override
-    public void configureEngine() {
-    }
+    public void configureEngine() {}
 
     @Override
     public void solve() {

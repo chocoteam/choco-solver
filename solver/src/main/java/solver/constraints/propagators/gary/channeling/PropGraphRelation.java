@@ -29,7 +29,6 @@ package solver.constraints.propagators.gary.channeling;
 
 import common.ESat;
 import memory.setDataStructures.ISet;
-import solver.Solver;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;

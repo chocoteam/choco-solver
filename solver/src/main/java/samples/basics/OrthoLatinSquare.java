@@ -24,17 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package samples;
+package samples.basics;
 
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +71,6 @@ public class OrthoLatinSquare extends AbstractProblem {
         solver.post(cc);
         ADS.add(cc);
 
-
         int[] mod = new int[mm];
         int[] div = new int[mm];
         for (int i = 0; i < m; i++) {
@@ -84,7 +83,6 @@ public class OrthoLatinSquare extends AbstractProblem {
             solver.post(IntConstraintFactory.element(square1[i], mod, vars[i],0,"detect"));
             solver.post(IntConstraintFactory.element(square2[i], div, vars[i],0,"detect"));
         }
-
 
         // Rows
         for (int i = 0; i < m; i++) {
@@ -127,7 +125,6 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
             solver.post(IntConstraintFactory.lex_less(ry1, ry2));
         }
-
     }
 
     @Override

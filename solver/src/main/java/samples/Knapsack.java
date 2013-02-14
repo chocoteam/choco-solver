@@ -31,7 +31,6 @@ import org.kohsuke.args4j.Option;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.Sum;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.strategy.IntStrategyFactory;
@@ -61,13 +60,13 @@ public class Knapsack extends AbstractProblem {
     @Option(name = "-n", usage = "Restricted to n objects.", required = false)
     int n = 13;
 
+	// input data
     int[] capacites;
     int[] energies;
     int[] volumes;
     int[] nbOmax;
 
-    Sum c_size, c_energy;
-
+	// variables
     public IntVar power;
     public IntVar[] objects;
 
@@ -98,29 +97,27 @@ public class Knapsack extends AbstractProblem {
     public void buildModel() {
         setUp();
         int nos = energies.length;
-
+		// occurrence of each item
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
             objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, nbOmax[i], solver);
         }
-
+		// objective variable
         power = VariableFactory.bounded("power", 0, 9999, solver);
 
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
-
-
-        c_size = IntConstraintFactory.scalar(objects, volumes, scalar);
-        c_energy = IntConstraintFactory.scalar(objects, energies, power);
-
-        solver.post(c_size);
-        solver.post(c_energy);
+        // capacity restriction constraint
+		solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
+		// objective computation constraint
+		solver.post(IntConstraintFactory.scalar(objects, energies, power));
+		// dedicated constraint to speed up the search
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 
     @Override
     public void configureSearch() {
         AbstractStrategy strat = IntStrategyFactory.inputOrder_InDomainMin(objects);
-        // top-down maximization
+        // trick : top-down maximization
         solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(power, OptimizationPolicy.TOP_DOWN), strat));
     }
 

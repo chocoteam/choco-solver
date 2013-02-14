@@ -36,7 +36,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDeltaMonitor;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 
 import java.util.BitSet;

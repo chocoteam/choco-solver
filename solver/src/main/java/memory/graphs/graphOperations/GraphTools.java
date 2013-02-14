@@ -27,12 +27,9 @@
 package memory.graphs.graphOperations;
 
 import memory.graphs.DirectedGraph;
-import memory.graphs.IGraph;
 import memory.setDataStructures.ISet;
-import memory.setDataStructures.matrix.Set_BitSet;
 
 import java.util.BitSet;
-import java.util.HashMap;
 
 /**
  * Class containing some static methods to manipulate graphs

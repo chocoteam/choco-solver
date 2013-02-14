@@ -38,8 +38,6 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.set.SetConstraintsFactory;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
