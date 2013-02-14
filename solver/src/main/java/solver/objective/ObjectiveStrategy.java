@@ -155,18 +155,20 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
                 || (nbSols == solver.getMeasures().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
             return null;
         }
+		if(obj.instantiated()){
+			return null;
+		}
         if (firstCall) {
             firstCall = false;
             globalLB = obj.getLB();
             globalUB = obj.getUB();
         }
         nbSols = solver.getMeasures().getSolutionCount();
-        globalUB = obj.getUB();
         globalLB = Math.max(globalLB, obj.getLB());//check
         globalUB = Math.min(globalUB, obj.getUB());//check
-        ObjectiveManager man = solver.getSearchLoop().getObjectivemanager();
-        man.updateLB(globalLB);
-        man.updateUB(globalUB);
+//        ObjectiveManager man = solver.getSearchLoop().getObjectivemanager();
+//        man.updateLB(globalLB);
+//        man.updateUB(globalUB);
         if (globalLB > globalUB) {
             return null;
         }
@@ -188,7 +190,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalLB = value + 1;
-            solver.getSearchLoop().getObjectivemanager().updateLB(globalLB);
+//            solver.getSearchLoop().getObjectivemanager().updateLB(globalLB);
             var.updateLowerBound(globalLB, cause);
         }
 
@@ -217,7 +219,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalUB = value - 1;
-            solver.getSearchLoop().getObjectivemanager().updateUB(globalUB);
+//            solver.getSearchLoop().getObjectivemanager().updateUB(globalUB);
             var.updateUpperBound(globalUB, cause);
         }
 

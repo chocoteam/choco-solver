@@ -130,7 +130,7 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
      * @param lb a valid lower bound
      */
     public void updateLB(int lb) {
-        this.bestKnownLowerBound = Math.max(bestKnownLowerBound, lb);
+//        this.bestKnownLowerBound = Math.max(bestKnownLowerBound, lb);
     }
 
     /**
@@ -139,7 +139,7 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
      * @param ub a valid upper bound
      */
     public void updateUB(int ub) {
-        this.bestKnownUpperBound = Math.min(bestKnownUpperBound, ub);
+//        this.bestKnownUpperBound = Math.min(bestKnownUpperBound, ub);
     }
 
     /**
