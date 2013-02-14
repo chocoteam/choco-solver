@@ -30,7 +30,6 @@ package solver.constraints.propagators.binary;
 import choco.annotations.PropAnn;
 import common.ESat;
 import common.util.procedure.IntProcedure;
-import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;

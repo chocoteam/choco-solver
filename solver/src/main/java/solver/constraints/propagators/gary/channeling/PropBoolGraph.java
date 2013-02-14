@@ -34,7 +34,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 
 /**

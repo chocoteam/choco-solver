@@ -38,7 +38,6 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 
 /**
