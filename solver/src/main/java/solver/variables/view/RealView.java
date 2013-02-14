@@ -133,7 +133,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
         double lb = var.getLB();
         double ub = var.getUB();
         if (ub - lb < precision) return true;
-        return nextValue(lb) >= ub;   // TODO ˆ confirmer auprs de Gilles
+        return nextValue(lb) >= ub;   // TODO a confirmer aupres de Gilles
     }
 
     private double nextValue(double x) {
@@ -184,7 +184,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public void explain( Deduction d, Explanation e) {
+    public void explain(Deduction d, Explanation e) {
     }
 
     @Override

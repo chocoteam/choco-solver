@@ -38,7 +38,7 @@ import solver.variables.delta.IGraphDelta;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
+ * Date: 7 feb. 2011
  */
 public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
 

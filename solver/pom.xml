@@ -35,7 +35,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>solver</artifactId>
     <packaging>jar</packaging>
-    <name>Choco3 solver</name>
+    <name>Choco3 core solver</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>

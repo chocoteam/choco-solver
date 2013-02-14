@@ -35,7 +35,7 @@ import memory.structure.S64BitSet;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 9 févr. 2011
+ * Date: 9 feb. 2011
  */
 public class Set_Std_BitSet extends S64BitSet implements ISet {
 

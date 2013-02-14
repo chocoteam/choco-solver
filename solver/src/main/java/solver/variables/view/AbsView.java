@@ -594,7 +594,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
                         ml2u = Integer.MAX_VALUE;
                         Ml2u = Integer.MAX_VALUE;
                         if (l2u.hasNext()) {
-                            //la: gérer le 0 et les autres cas
+                            //la: gerer le 0 et les autres cas
                             if (l2u.max() <= 0) {
                                 this.ml2u = -l2u.max();
                                 this.Ml2u = -l2u.min();

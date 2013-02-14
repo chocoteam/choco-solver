@@ -658,7 +658,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                         ml2u = Integer.MIN_VALUE;
                         Ml2u = Integer.MIN_VALUE;
                         if (l2u.hasNext()) {
-                            //la: gérer le 0 et les autres cas
+                            //la: gerer le 0 et les autres cas
                             if (l2u.max() <= 0) {
                                 this.ml2u = -l2u.max();
                                 this.Ml2u = -l2u.min();
@@ -763,7 +763,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
                 notifyPropagators(EventType.INSTANTIATE, cause);
-            } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
+            } else { // otherwise, we do not know the previous values, so its hard to tell whether it is LB or UB mod
                 notifyPropagators(EventType.BOUND, cause);
             }
         } else {

@@ -71,7 +71,10 @@ import solver.constraints.reified.ImplicationConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.variables.*;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.Task;
+import solver.variables.VariableFactory;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -114,23 +117,23 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
-	 /**
-	 * Implication constraint: BVAR => CSTR
-	 * Also called half reification constraint
+    /**
+     * Implication constraint: BVAR => CSTR
+     * Also called half reification constraint
      * Ensures:<br/>
      * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
      * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-	 *
-	 * Example : <br/>
+     * <p/>
+     * Example : <br/>
      * - <code>implies(b1, arithm(v1, "=", 2));</code>:
      * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
-	 * But if b1 is equal to 0, nothing happens
-	 *
-	 * <p/> In order to have BVAR <=> CSTR please use two constraints:
-	 * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
-	 * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
+     * But if b1 is equal to 0, nothing happens
+     * <p/>
+     * <p/> In order to have BVAR <=> CSTR please use two constraints:
+     * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
+     * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
      *
-     * @param BVAR  variable of reification
+     * @param BVAR variable of reification
      * @param CSTR the constraint to be satisfied when BVAR = 1
      */
     public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
@@ -203,7 +206,7 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR1, op, VAR2, VAR1.getSolver());
     }
 
-	/**
+    /**
      * Ensures: VAR1 OP VAR2, where OP in {"=", "!=", ">","<",">=","<="}
      *
      * @param VAR1 first variable
@@ -439,7 +442,7 @@ public enum IntConstraintFactory {
      * <p/>
      * Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
-     * <p/> allDifferent GAC algorithm: RŽgin (AAAI'94)
+     * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
@@ -757,12 +760,12 @@ public enum IntConstraintFactory {
         return new Regular(VARS, AUTOMATON, VARS[0].getSolver());
     }
 
-	/**
+    /**
      * Enforces that &#8721;<sub>i in |VARS|</sub>COEFFS<sub>i</sub> * VARS<sub>i</sub> = SCALAR.
      *
      * @param VARS   a vector of variables
      * @param COEFFS a vector of int
-     * @param SCALAR    a variable
+     * @param SCALAR a variable
      */
     public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
@@ -777,7 +780,7 @@ public enum IntConstraintFactory {
      * <p/>
      * <p/> Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
-     * <p/> allDifferent GAC algorithm: RŽgin (AAAI'94)
+     * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
      *
      * @param VARS
@@ -809,17 +812,17 @@ public enum IntConstraintFactory {
         return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
     }
 
-	/**
+    /**
      * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.
-	 * This constraint is much faster than the one over integer variables
+     * This constraint is much faster than the one over integer variables
      *
      * @param VARS a vector of boolean variables
      * @param SUM  a variable
      */
     public static Constraint sum(BoolVar[] VARS, IntVar SUM) {
-		Constraint c = new Constraint(ArrayUtils.append(VARS,new IntVar[]{SUM}),SUM.getSolver());
-		c.setPropagators(new PropBoolSum(VARS,SUM));
-		return c;
+        Constraint c = new Constraint(ArrayUtils.append(VARS, new IntVar[]{SUM}), SUM.getSolver());
+        c.setPropagators(new PropBoolSum(VARS, SUM));
+        return c;
     }
 
     /**
@@ -855,7 +858,7 @@ public enum IntConstraintFactory {
      */
     public static Constraint tree(IntVar[] succs, IntVar nbArbo, int offSet) {
         Solver solver = nbArbo.getSolver();
-        Constraint c = new Constraint(ArrayUtils.append(succs,new IntVar[]{nbArbo}),solver);
+        Constraint c = new Constraint(ArrayUtils.append(succs, new IntVar[]{nbArbo}), solver);
         c.setPropagators(new PropAntiArborescences(succs, offSet, false),
                 new PropKLoops(succs, nbArbo, offSet));
         return c;

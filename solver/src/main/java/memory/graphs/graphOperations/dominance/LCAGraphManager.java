@@ -155,7 +155,7 @@ public class LCAGraphManager {
      * LCA PREPROCESSING O(m+n) by Chris Lewis
      * 1.	Do a depth first traversal of the general tree to assign depth-first search numbers to the nodes. For each node set a pointer to its parent.
      * 2.	Using a linear time bottom up algorithm, compute I(v) for each node. For each k such that I(v) = k for some v, set L(k) to point to the head of the run containing k.
-     * (=>I(v) pointe sur le dernier ŽlŽment, L(I(v)) vers le premier)
+     * (=>I(v) pointe sur le dernier element, L(I(v)) vers le premier)
      * o	The head of a run is identified when computing I values. v is identified as the head of its run if the I value of v's parent is not I(v).
      * o	After this step, the head of a run containing an arbitrary node v can be located in constant time. First compute I(v) then look up the value L(I(v)).
      * 3.	Given a complete binary tree with node-depth ceiling(log n)-1, map each node v in the general tree to I(v) in the binary tree (Fig 4).
@@ -213,7 +213,7 @@ public class LCAGraphManager {
      * Get the lowest common ancestor of two nodes in O(1) time
      * Query by Chris Lewis
      * 1.	Find the lowest common ancestor b in the binary tree of nodes I(x) and I(y).
-     * 2.	Find the smallest position j ³ h(b) such that both numbers A x and A y have 1-bits in position j.
+     * 2.	Find the smallest position j &ge; h(b) such that both numbers A x and A y have 1-bits in position j.
      * This gives j = h(I(z)).
      * 3.	Find node x', the closest node to x on the same run as z:
      * a.	Find the position l of the right-most 1 bit in A x

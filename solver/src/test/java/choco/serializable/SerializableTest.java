@@ -44,7 +44,7 @@ import java.io.*;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 3 déc. 2010
+ * @since 3 dec. 2010
  */
 public class SerializableTest {
 

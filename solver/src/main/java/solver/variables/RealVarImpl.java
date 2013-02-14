@@ -143,7 +143,7 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
         double lb = LB.get();
         double ub = UB.get();
         if (ub - lb < precision) return true;
-        return nextValue(lb) >= ub;   // TODO ˆ confirmer auprs de Gilles
+        return nextValue(lb) >= ub;   // TODO a confirmer aupres de Gilles
     }
 
     private double nextValue(double x) {

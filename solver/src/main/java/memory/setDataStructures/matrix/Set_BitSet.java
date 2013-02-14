@@ -34,7 +34,7 @@ import java.util.BitSet;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 9 févr. 2011
+ * Date: 9 feb. 2011
  */
 public class Set_BitSet extends BitSet implements ISet {
 

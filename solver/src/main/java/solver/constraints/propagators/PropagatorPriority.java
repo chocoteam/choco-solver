@@ -31,7 +31,7 @@ package solver.constraints.propagators;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 11 aožt 2010
+ * @since 11 aug. 2010
  */
 public enum PropagatorPriority {
 

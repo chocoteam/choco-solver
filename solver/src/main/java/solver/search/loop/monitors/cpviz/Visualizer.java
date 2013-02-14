@@ -38,7 +38,7 @@ import solver.search.strategy.decision.Decision;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 9 déc. 2010
+ * @since 9 dec. 2010
  */
 public abstract class Visualizer {
 

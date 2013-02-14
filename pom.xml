@@ -5,7 +5,7 @@
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>rocs-1.0-SNAPSHOT</version>
+    <version>13.02-SNAPSHOT</version>
     <name>Choco3: an Open-Source Constraint Solver</name>
     <url>http://www.emn.fr/z-info/choco-solver/</url>
 

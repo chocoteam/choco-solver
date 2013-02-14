@@ -40,7 +40,7 @@ import solver.variables.VariableFactory;
  * v is of length 5 and the variables have domain {1 . . . 50}.
  * An AllDifferent constraint is placed on v, and also v[4] = v[5].
  * Therefore there are no solutions.
- * w is a vector of length l ³ 4, containing variables with domain {1...d}.
+ * w is a vector of length l &ge; 4, containing variables with domain {1...d}.
  * A AllDifferent constraint is placed on w,
  * and the two vectors v,w are linked by
  * v[1] = w[1], v[2] = w[2], v[3] = w[3], and v[4] = w[4]

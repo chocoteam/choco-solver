@@ -36,7 +36,7 @@ import solver.variables.Variable;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 9 déc. 2010
+ * @since 9 dec. 2010
  */
 public class Vector extends Visualizer {
     private static final String type = "vector";
@@ -92,7 +92,7 @@ public class Vector extends Visualizer {
                 if (focus) {
                     writer.focus(Integer.toString(i + 1), group, type);
                 } else {
-                    writer.fail(Integer.toString(i + 1), group, (Integer)decision.getDecisionValue());
+                    writer.fail(Integer.toString(i + 1), group, (Integer) decision.getDecisionValue());
                 }
             }
         }

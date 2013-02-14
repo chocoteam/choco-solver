@@ -33,7 +33,7 @@ import memory.trailing.EnvironmentTrailing;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 9 févr. 2011
+ * Date: 9 feb. 2011
  */
 public class OperationTrail implements ITrailStorage {
 

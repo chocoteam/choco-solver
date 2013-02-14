@@ -104,8 +104,8 @@ public class ProbaUtils {
         return (coefBinome(m1, k) * coefBinome(m - m1, n - k)) / coefBinome(m, n);
     }
 
-    // p1 probabilitŽs de gagner pour chaque loi de Bernoulli (|p1| = n)
-    // p2 probabilitŽs de perdre pour chaque loi de Bernoulli (|p2| = n)
+    // p1 probabilites de gagner pour chaque loi de Bernoulli (|p1| = n)
+    // p2 probabilites de perdre pour chaque loi de Bernoulli (|p2| = n)
     // n nombre de loi de Bernoulli, n > 0
     // k parametre de la loi
     public static double[][] generalizedNewton(double[] p1, double[] p2, int n, int k) {

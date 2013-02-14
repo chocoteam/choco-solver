@@ -31,11 +31,12 @@ import java.util.Arrays;
 
 /**
  * <br/>
+ * <p/>
+ * TODO duplicate with {@code solver.probabilities.ProbaUtils}
+ * <p/>
  *
  * @author Charles Prud'homme
- * @since 17 aožt 2010
- *        <p/>
- *        * TODO duplicate with {@code solver.probabilities.ProbaUtils}
+ * @since 17 aug 2010
  */
 public class StatisticUtils {
 

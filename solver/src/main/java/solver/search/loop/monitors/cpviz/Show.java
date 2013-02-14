@@ -31,12 +31,13 @@ package solver.search.loop.monitors.cpviz;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 9 déc. 2010
+ * @since 9 dec. 2010
  */
 public enum Show {
     TREE(1), VIZ(2);
 
     final int mask;
+
     Show(int i) {
         this.mask = i;
     }

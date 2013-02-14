@@ -47,7 +47,7 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
+ * Date: 7 feb. 2011
  */
 public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
         implements Variable<IGraphDelta> {
@@ -117,7 +117,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
             removeArc(x, i, cause);
         }
-		nei = envelop.getPredsOrNeigh(x);
+        nei = envelop.getPredsOrNeigh(x);
         for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
             removeArc(i, x, cause);
         }
@@ -244,13 +244,13 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 
     @Override
     public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("graph_var "+getName());
-		sb.append("\ninstantiated = "+instantiated()+"\n");
-		sb.append("\nenvelope graph \n");
-		sb.append(envelop.toString());
-		sb.append("\nkernel graph \n");
-		sb.append(kernel.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("graph_var " + getName());
+        sb.append("\ninstantiated = " + instantiated() + "\n");
+        sb.append("\nenvelope graph \n");
+        sb.append(envelop.toString());
+        sb.append("\nkernel graph \n");
+        sb.append(kernel.toString());
         return getName();
     }
 
@@ -293,11 +293,11 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     // SOLUTIONS : STORE AND RESTORE
     //***********************************************************************************
 
-	/**
-	 * @return the value of the graph variable represented through an adjacency matrix
-	 * plus a set of nodes (last line of value).
-	 * This method is not supposed to be used except for restoring solutions.
-	 */
+    /**
+     * @return the value of the graph variable represented through an adjacency matrix
+     *         plus a set of nodes (last line of value).
+     *         This method is not supposed to be used except for restoring solutions.
+     */
     public boolean[][] getValue() {
         int n = getEnvelopGraph().getNbNodes();
         boolean[][] vals = new boolean[n + 1][n];
@@ -313,14 +313,15 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         return vals;
     }
 
-	/**
-	 * Instantiates <code>this</code> to value which represents an adjacency
-	 * matrix plus a set of nodes (last line of value).
-	 * This method is not supposed to be used except for restoring solutions.
-	 * @param value		value of <code>this</code>
-	 * @param cause
-	 * @throws ContradictionException
-	 */
+    /**
+     * Instantiates <code>this</code> to value which represents an adjacency
+     * matrix plus a set of nodes (last line of value).
+     * This method is not supposed to be used except for restoring solutions.
+     *
+     * @param value value of <code>this</code>
+     * @param cause
+     * @throws ContradictionException
+     */
     public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
         int n = value.length - 1;
         for (int i = 0; i < n; i++) {

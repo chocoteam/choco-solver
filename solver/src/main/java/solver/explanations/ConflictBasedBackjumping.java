@@ -71,9 +71,9 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
     }
 
     /**
-     * Identifie la décision à remettre en cause
-     * Met l'explication de la réfutation dans la base d'explications
-     * parce que comme c'est implicite au niveau de la search ça bren'apparaîtrait pas sinon
+     * Identifie la decision a remettre en cause
+     * Met l'explication de la refutation dans la base d'explications
+     * parce que comme c'est implicite au niveau de la search ca bren'apparaitrait pas sinon
      *
      * @param nworld
      * @param expl

@@ -36,7 +36,7 @@ import solver.search.loop.AbstractSearchLoop;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 aožt 2010
+ * @since 18 aug. 2010
  */
 class LogStatEveryXXms implements IMonitorInitPropagation {
 

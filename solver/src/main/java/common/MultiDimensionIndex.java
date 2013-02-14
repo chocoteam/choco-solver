@@ -30,7 +30,7 @@ package common;
 /*
 * User : charles
 * Mail : cprudhom(a)emn.fr
-* Date : 17 févr. 2009
+* Date : 17 feb. 2009
 * Since : Choco 2.0.1
 * Update : Choco 2.0.1
 *

@@ -68,7 +68,7 @@ import static solver.search.loop.monitors.cpviz.CPVizConstant.*;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 9 déc. 2010
+ * @since 9 dec. 2010
  */
 
 // BEWARE: indices must start at 1

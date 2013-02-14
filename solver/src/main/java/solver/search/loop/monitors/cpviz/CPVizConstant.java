@@ -32,7 +32,7 @@ package solver.search.loop.monitors.cpviz;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 déc. 2010
+ * @since 6 dec. 2010
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class CPVizConstant {

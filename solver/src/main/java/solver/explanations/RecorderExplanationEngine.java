@@ -176,7 +176,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
-        for (int v = old; v < val; v++) {    // itŽration explicite des valeurs retirŽes
+        for (int v = old; v < val; v++) {    // iteration explicite des valeurs retirees
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
                 Explanation expl = database.get(vr.id);
@@ -199,7 +199,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
 //        Explanation explanation = new Explanation();
-        for (int v = old; v > val; v--) {    // itŽration explicite des valeurs retirŽes
+        for (int v = old; v > val; v--) {    // iteration explicite des valeurs retirees
             if (!invdom.get(v)) {
                 Deduction vr = getValueRemoval(var, v);
                 Explanation expl = database.get(vr.id);

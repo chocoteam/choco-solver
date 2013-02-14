@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Class representing a set (of nodes)
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
- * Date: 9 févr. 2011
+ * Date: 9 feb. 2011
  */
 public interface ISet extends Serializable {
 

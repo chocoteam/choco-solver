@@ -35,7 +35,7 @@ import java.awt.*;
  *
  * @author Arnaud Malapert</br>
  * @version 2.0.1</br>
- * @since 8 déc. 2008 version 2.0.1</br>
+ * @since 8 dec. 2008 version 2.0.1</br>
  */
 public final class MathUtils {
 
