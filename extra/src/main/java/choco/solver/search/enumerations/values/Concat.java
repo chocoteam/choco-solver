@@ -27,37 +27,40 @@
 
 package choco.solver.search.enumerations.values;
 
-public class UnConcat<A> extends ValueIterator<ValueIterator<A>> {
-	ValueIterator<A> h;
-	int nbPieces;
-	ValueIterator<A>[] hs;
-	public UnConcat(ValueIterator<A> h1, int n) {
-		h = h1;
-		nbPieces = n;
-        hs = new ValueIterator[nbPieces];
-		int lengthOfAPiece = h.length()/nbPieces;
-		for (int i=0; i<nbPieces; i++) {
-			if (i==nbPieces-1) {
-				// the last part can be longer
-				hs[i] = new AuxFromTo<A>(h,i*lengthOfAPiece,h.length()-1);
-			} else {
-				hs[i] = new AuxFromTo<A>(h,i*lengthOfAPiece,(i+1)*lengthOfAPiece-1);
-			}
-		}
-	}
-	public ValueIterator<A> get(int i) {
-		return hs[i];
-	}
-	public int length() {
-		return hs.length;
-	}
-	public String toString() {
-		String result = "UnConcat(";
-		result += h + "," + nbPieces;
-		//for (int i=0; i<hs.length-1; i++) {
-			//result += hs[i] + ",";
-		//}
-		//result += hs[hs.length-1];
-		return result +")";
-	}
+public class Concat<A> extends ValueIterator<A> {
+    ValueIterator<ValueIterator<A>> p;
+    int[] cumulatedLengths;
+
+    Concat(ValueIterator<ValueIterator<A>> p1) {
+        p = p1;
+        cumulatedLengths = new int[p.length()];
+        cumulatedLengths[0] = p1.get(0).length();
+        for (int i = 1; i < cumulatedLengths.length; i++) {
+            cumulatedLengths[i] = cumulatedLengths[i - 1] + p1.get(i).length();
+        }
+    }
+
+    public A get(int i) {
+        int j = 0;
+        while (i >= cumulatedLengths[j]) {
+            j++;
+        }
+        if (j == 0) {
+            return p.get(j).get(i);
+        } else {
+            return p.get(j).get(i - cumulatedLengths[j - 1]);
+        }
+    }
+
+    public int length() {
+        int result = 0;
+        for (int i = 0; i < p.length(); i++) {
+            result += p.get(i).length();
+        }
+        return result;
+    }
+
+    public String toString() {
+        return "Concat(" + p + ")";
+    }
 }

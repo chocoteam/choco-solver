@@ -27,25 +27,30 @@
 
 package choco.solver.search.enumerations.values;
 
-public class SplitAt<A> extends ValueIterator<ValueIterator<A>> {
-	ValueIterator<A> s;
-	int at;
-	ValueIterator<A>[] hs;
-	SplitAt(ValueIterator<A> s1, int at1) {
-		s = s1;
-		at = at1;
-		hs = new ValueIterator[2];
-		hs[0] = new AuxFromTo<A>(s,0,at);
-		hs[1] = new AuxFromTo<A>(s,at+1,s.length()-1);
-	}
-	public ValueIterator<A> get(int i) {
-		return hs[i];
-	}
-	public int length() {
-		return hs.length; //2!
-	}
-	public String toString() {
-		//return "SplitAt(" + hs[0] + "," + hs[1] +")";
-		return "SplitAt(" + s + "," + at +")";
-	}
+public class ApplyReverseAt<A> extends ValueIterator<ValueIterator<A>> {
+    ValueIterator<ValueIterator<A>> p;
+    int j;
+    ValueIterator<A> reverseJ;
+
+    public ApplyReverseAt(ValueIterator<ValueIterator<A>> p1, int i) {
+        p = p1;
+        j = i;
+        reverseJ = new Reverse<A>(p.get(j));
+    }
+
+    public int length() {
+        return p.length();
+    }
+
+    public ValueIterator<A> get(int i) {
+        if (i == j) {
+            return reverseJ;
+        } else {
+            return p.get(i);
+        }
+    }
+
+    public String toString() {
+        return "ApplyReverseAt(" + p + "," + j + ")";
+    }
 }

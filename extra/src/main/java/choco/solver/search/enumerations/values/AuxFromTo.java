@@ -26,37 +26,27 @@
  */
 
 package choco.solver.search.enumerations.values;
+// auxiliary class for UnConcat do not use manually, can loose elements
 
-public class Concat<A> extends ValueIterator<A> {
-	ValueIterator<ValueIterator<A>> p;
-	int[] cumulatedLengths;
-	Concat(ValueIterator<ValueIterator<A>> p1) {
-		p = p1;
-		cumulatedLengths = new int[p.length()];
-		cumulatedLengths[0] = p1.get(0).length(); 
-		for (int i=1; i<cumulatedLengths.length; i++) {
-			cumulatedLengths[i] = cumulatedLengths[i-1]+p1.get(i).length(); 
-		}
-	}
-	public A get(int i) {
-		int j=0;
-		while (i>=cumulatedLengths[j]) {
-			j++;
-		}
-		if (j==0) {
-			return p.get(j).get(i);
-		} else {
-			return p.get(j).get(i-cumulatedLengths[j-1]);
-		}
-	}
-	public int length() {
-		int result = 0;
-		for (int i=0;i<p.length();i++) {
-			result += p.get(i).length();
-		}
-		return result;
-	}
-	public String toString() {
-		return "Concat(" + p + ")";
-	}
+public class AuxFromTo<A> extends ValueIterator<A> {
+    ValueIterator<A> h;
+    int from, to;
+
+    AuxFromTo(ValueIterator<A> h, int f, int t) {
+        this.h = h;
+        from = f;
+        to = t;
+    }
+
+    public A get(int i) {
+        return h.get(from + i);
+    }
+
+    public int length() {
+        return to - from + 1;
+    }
+
+    public String toString() {
+        return "FromTo(" + h + "," + from + "," + to + ")";
+    }
 }

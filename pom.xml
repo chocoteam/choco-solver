@@ -6,8 +6,12 @@
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
     <version>rocs-1.0-SNAPSHOT</version>
-    <name>CHOCO</name>
-    <url>http://maven.apache.org</url>
+    <name>Choco3: an Open-Source Constraint Solver</name>
+    <url>http://www.emn.fr/z-info/choco-solver/</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -21,12 +25,17 @@
                 <artifactId>parser</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>choco</groupId>
+                <artifactId>extra</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
         <module>solver</module>
         <module>parser</module>
-        <module>contrib</module>
+        <module>extra</module>
     </modules>
     <dependencies>
         <dependency>
@@ -95,6 +104,7 @@
 
     </pluginRepositories>
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

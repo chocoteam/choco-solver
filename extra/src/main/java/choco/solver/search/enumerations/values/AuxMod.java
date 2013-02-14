@@ -26,23 +26,28 @@
  */
 
 package choco.solver.search.enumerations.values;
-// auxiliary class for UnConcat do not use manually, can loose elements
+// auxiliary class for UnZip do not use manually, can loose elements
 
-public class AuxFromTo<A> extends ValueIterator<A> {
-	ValueIterator<A> h;
-	int from, to;
-	AuxFromTo(ValueIterator<A> h, int f, int t) {
-		this.h = h;
-		from = f;
-		to = t;
-	}
-	public A get(int i) {
-		return h.get(from+i);
-	}
-	public int length() {
-		return to-from+1;
-	}
-	public String toString() {
-		return "FromTo(" + h + "," + from + "," + to + ")";
-	}
+public class AuxMod<A> extends ValueIterator<A> {
+    ValueIterator<A> h;
+    int start, mod, length;
+
+    AuxMod(ValueIterator<A> h1, int start1, int mod1, int length1) {
+        h = h1;
+        mod = mod1;
+        start = start1;
+        length = length1;
+    }
+
+    public A get(int i) {
+        return h.get(start + i * mod);
+    }
+
+    public int length() {
+        return length;
+    }
+
+    public String toString() {
+        return "Mod(" + h + "," + start + "," + mod + "," + length + ")";
+    }
 }

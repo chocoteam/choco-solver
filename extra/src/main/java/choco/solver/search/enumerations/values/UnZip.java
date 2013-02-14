@@ -27,18 +27,36 @@
 
 package choco.solver.search.enumerations.values;
 
-public class Reverse<A> extends ValueIterator<A> {
-	ValueIterator<A> s;
-	Reverse(ValueIterator<A> s1) {
-		s = s1;
-	}
-	public int length() {
-		return s.length();
-	}
-	public A get(int i) {
-		return s.get(s.length()-i-1);
-	}
-	public String toString() {
-		return "Reverse(" + s + ")";
-	}
+public class UnZip<A> extends ValueIterator<ValueIterator<A>> {
+    ValueIterator<A> h;
+    int nbPieces;
+    ValueIterator<A>[] hs;
+
+    UnZip(ValueIterator<A> h1, int nbPieces1) {
+        h = h1;
+        nbPieces = nbPieces1;
+        hs = new ValueIterator[nbPieces];
+        int q = h.length() / nbPieces;
+        int r = h.length() % nbPieces;
+        for (int i = 0; i < nbPieces; i++) {
+            // the r first parts are one element longer
+            if (i < r) {
+                hs[i] = new AuxMod<A>(h, i, nbPieces, q + 1);
+            } else {
+                hs[i] = new AuxMod<A>(h, i, nbPieces, q);
+            }
+        }
+    }
+
+    public ValueIterator<A> get(int i) {
+        return hs[i];
+    }
+
+    public int length() {
+        return hs.length;
+    }
+
+    public String toString() {
+        return "UnZip(" + h + "," + nbPieces + ")";
+    }
 }

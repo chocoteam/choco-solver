@@ -27,26 +27,22 @@
 
 package choco.solver.search.enumerations.values;
 
-public class ApplyReverseAt<A> extends ValueIterator<ValueIterator<A>> {
-	ValueIterator<ValueIterator<A>> p;
-	int j;
-	ValueIterator<A> reverseJ;
-	public ApplyReverseAt(ValueIterator<ValueIterator<A>> p1, int i) {
-		p = p1;
-		j=i;
-		reverseJ = new Reverse<A>(p.get(j));
-	}
-	public int length() {
-		return p.length();
-	}
-	public ValueIterator<A> get(int i) {
-		if (i==j) {
-			return reverseJ;
-		} else {
-			return p.get(i);
-		}
-	}
-	public String toString() {
-		return "ApplyReverseAt(" + p + "," + j + ")";
-	}
+public class MapReverse<A> extends ValueIterator<ValueIterator<A>> {
+    ValueIterator<ValueIterator<A>> p;
+
+    MapReverse(ValueIterator<ValueIterator<A>> p1) {
+        p = p1;
+    }
+
+    public int length() {
+        return p.length();
+    }
+
+    public ValueIterator<A> get(int i) {
+        return new Reverse<A>(p.get(i));
+    }
+
+    public String toString() {
+        return "MapReverse(" + p + ")";
+    }
 }

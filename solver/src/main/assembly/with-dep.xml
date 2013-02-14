@@ -9,6 +9,11 @@
     <dependencySets>
         <dependencySet>
             <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>**/*.class</exclude>
+                </excludes>
+            </unpackOptions>
             <scope>compile</scope>
         </dependencySet>
     </dependencySets>

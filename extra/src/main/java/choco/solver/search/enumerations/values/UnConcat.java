@@ -26,24 +26,42 @@
  */
 
 package choco.solver.search.enumerations.values;
-// auxiliary class for UnZip do not use manually, can loose elements
 
-public class AuxMod<A> extends ValueIterator<A> {
-	ValueIterator<A> h;
-	int start, mod, length;
-	AuxMod(ValueIterator<A> h1, int start1, int mod1, int length1) {
-		h = h1;
-		mod = mod1;
-		start = start1;
-		length = length1;
-	}
-	public A get(int i) {
-		return h.get(start+i*mod);
-	}
-	public int length() {
-		return length;
-	}
-	public String toString() {
-		return "Mod(" + h + "," + start + "," + mod + "," + length + ")";
-	}
+public class UnConcat<A> extends ValueIterator<ValueIterator<A>> {
+    ValueIterator<A> h;
+    int nbPieces;
+    ValueIterator<A>[] hs;
+
+    public UnConcat(ValueIterator<A> h1, int n) {
+        h = h1;
+        nbPieces = n;
+        hs = new ValueIterator[nbPieces];
+        int lengthOfAPiece = h.length() / nbPieces;
+        for (int i = 0; i < nbPieces; i++) {
+            if (i == nbPieces - 1) {
+                // the last part can be longer
+                hs[i] = new AuxFromTo<A>(h, i * lengthOfAPiece, h.length() - 1);
+            } else {
+                hs[i] = new AuxFromTo<A>(h, i * lengthOfAPiece, (i + 1) * lengthOfAPiece - 1);
+            }
+        }
+    }
+
+    public ValueIterator<A> get(int i) {
+        return hs[i];
+    }
+
+    public int length() {
+        return hs.length;
+    }
+
+    public String toString() {
+        String result = "UnConcat(";
+        result += h + "," + nbPieces;
+        //for (int i=0; i<hs.length-1; i++) {
+        //result += hs[i] + ",";
+        //}
+        //result += hs[hs.length-1];
+        return result + ")";
+    }
 }

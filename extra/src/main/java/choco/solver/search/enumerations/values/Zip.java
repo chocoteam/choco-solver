@@ -27,32 +27,33 @@
 
 package choco.solver.search.enumerations.values;
 
-public class UnZip<A> extends ValueIterator<ValueIterator<A>> {
-	ValueIterator<A> h;
-	int nbPieces;
-	ValueIterator<A>[] hs;
-	UnZip(ValueIterator<A> h1, int nbPieces1) {
-		h = h1;
-		nbPieces = nbPieces1;
-		hs = new ValueIterator[nbPieces];
-		int q = h.length() / nbPieces;
-		int r = h.length() % nbPieces;
-		for (int i=0; i<nbPieces; i++) {
-			// the r first parts are one element longer
-			if (i<r) {
-				hs[i] = new AuxMod<A>(h,i,nbPieces, q+1);
-			} else {
-				hs[i] = new AuxMod<A>(h,i,nbPieces, q);
-			}
-		}
-	}
-	public ValueIterator<A> get(int i) {
-		return hs[i];
-	}
-	public int length() {
-		return hs.length;
-	}
-	public String toString() {
-		return "UnZip(" + h + "," + nbPieces + ")";
-	}
+public class Zip<A> extends ValueIterator<A> {
+    ValueIterator<ValueIterator<A>> p;
+
+    public Zip(ValueIterator<ValueIterator<A>> p1) {
+        p = p1;
+    }
+
+    public A get(int i) {
+        int nbParts = p.length();
+        int part = i % nbParts;
+        int inPart = i / nbParts;
+        // the parts can have different sizes, so if empty take the next one (in a ring)
+        while (inPart >= p.get(part).length()) {
+            part = (part + 1) % nbParts;
+        }
+        return p.get(part).get(inPart);
+    }
+
+    public int length() {
+        int result = 0;
+        for (int i = 0; i < p.length(); i++) {
+            result += p.get(i).length();
+        }
+        return result;
+    }
+
+    public String toString() {
+        return "Zip(" + p + ")";
+    }
 }
