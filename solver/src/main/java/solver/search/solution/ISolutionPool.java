@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -43,7 +44,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 19 juil. 2010
  */
-public interface ISolutionPool {
+public interface ISolutionPool extends Serializable {
 
     final static Logger LOGGER = LoggerFactory.getLogger(ISolutionPool.class);
 
