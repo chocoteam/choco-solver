@@ -36,8 +36,8 @@ public class RandomPhrase {
 
     public static void main(String[] args) {
         for (int i = 0; i < 20; i++) {
-            org.antlr.tool.RandomPhrase.main(new String[]{"/Users/cprudhom/Thse/Notes/20121026_grammar/NDSL.g", "structure"});
-//            org.antlr.tool.RandomPhrase.main(new String[]{"/Users/cprudhom/Sources/Galak/parser/src/main/antlr3/parser/flatzinc/FlatzincFullExtWalker.g","engine"});
+//            org.antlr.tool.RandomPhrase.main(new String[]{"/Users/cprudhom/Thse/Notes/20121026_grammar/NDSL.g", "structure"});
+//            org.antlr.tool.RandomPhrase.main(new String[]{"/Users/cprudhom/Sources/Choco3/parser/src/main/antlr3/parser/flatzinc/FlatzincFullExtWalker.g","engine"});
         }
     }
 }

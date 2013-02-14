@@ -57,7 +57,7 @@
     <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
 
     <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>GALAK.LOG</file>
+        <file>CHOCO3.LOG</file>
         <encoder>
             <pattern>%msg%n</pattern>
         </encoder>

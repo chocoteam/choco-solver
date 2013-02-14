@@ -323,7 +323,7 @@ public class TestConsistency {
 
 //    @Test
 //    public void runner() throws ClassNotFoundException, IOException, ContradictionException {
-//        Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Galak/SOLVER_ERROR.ser");
+//        Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Choco3/SOLVER_ERROR.ser");
 //        s.getEnvironment().worldPopUntil(0);
 //        s.getEnvironment().worldPush();
 //        Constraint[] constraints = s.getCstrs();
