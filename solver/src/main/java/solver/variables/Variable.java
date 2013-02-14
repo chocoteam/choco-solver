@@ -49,19 +49,18 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
     // TYPE (exclusive)
-    public final int VAR = 1;
-    public final int CSTE = 1 << 1;
-    public final int VIEW = 1 << 2;
-    public final int TYPE = (1 << 3) - 1;
+    public static final int VAR = 1;
+    public static final int CSTE = 1 << 1;
+    public static final int VIEW = 1 << 2;
+    public static final int TYPE = (1 << 3) - 1;
     // KIND (exclusive)
-    public final int INT = 1 << 3;
-    public final int BOOL = INT + 1 << 4;
-    public final int GRAPH = 1 << 5;
-    public final int SET = 1 << 6;
-    public final int REAL = 1 << 7;
-    public final int TASK = 1 << 8;
-    public final int META = 1 << 9;
-    public final int KIND = (1 << 9) - 1 - TYPE;
+    public static final int INT = 1 << 3;
+    public static final int BOOL = INT + 1 << 4;
+    public static final int GRAPH = 1 << 5;
+    public static final int SET = 1 << 6;
+    public static final int REAL = 1 << 7;
+    public static final int META = 1 << 8;
+    public static final int KIND = (1 << 8) - 1 - TYPE;
 
     /**
      * Indicates wether <code>this</code> is instantiated (see implemetations to know what instantiation means).

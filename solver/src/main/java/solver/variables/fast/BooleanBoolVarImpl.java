@@ -430,7 +430,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
 
     @Override
     public int getTypeAndKind() {
-        return VAR + BOOL + INT;
+        return VAR + BOOL;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
