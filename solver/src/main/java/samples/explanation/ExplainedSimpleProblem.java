@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.samples;
+package samples.explanation;
 
 import samples.AbstractProblem;
 import solver.Solver;

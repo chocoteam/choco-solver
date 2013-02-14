@@ -187,29 +187,6 @@ public class Explanation extends Deduction {
         return propagators.get(i);
     }
 
-    /**
-     * Retrieve the most recent world to backtrack to, with respect to the variable assignment stored in this.
-     * This is usefull for the <b>dynamic backtracking</b>.
-     *
-     * @param explainer the engine
-     * @return the world index to backtrack to
-     */
-    public int getMostRecentWorldToBacktrack(ExplanationEngine explainer) {
-        int topworld = 0;
-        if (this.deductions != null) {
-            for (int d = 0; d < deductions.size(); d++) {
-                Deduction dec = deductions.get(d);
-                if (dec.mType == Type.DecLeft) {
-                    int world = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
-                    if (world > topworld) {
-                        topworld = world;
-                    }
-                }
-            }
-        }
-        return 1 + (explainer.solver.getEnvironment().getWorldIndex() - topworld);
-    }
-
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder("E_" + id);
@@ -221,18 +198,20 @@ public class Explanation extends Deduction {
             for (Deduction d : this.deductions) {
                 bf.append(d).append(", ");
             }
-
-            bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+            if (deductions.size() > 1) {
+                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+            }
         }
 
         bf.append(" ; P:");
         if (this.propagators != null) {
             bf.append("(" + this.propagators.size() + ") ");
             for (Propagator p : this.propagators) {
-
                 bf.append(p).append(", ");
             }
-            bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+            if (propagators.size() > 1) {
+                bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+            }
         }
 
         return bf.toString();

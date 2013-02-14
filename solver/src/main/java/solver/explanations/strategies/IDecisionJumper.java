@@ -24,57 +24,30 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.explanations.strategies;
 
-package solver.explanations;
+import solver.explanations.Explanation;
 
-import solver.Solver;
+import java.io.Serializable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * An interface to define a decision jumper.
+ * This is commonly used when plugging in explanations, to indicate the decision to reconsider.
+ * It indicates the number of jump to do (a jump is equivalent a backtrack) to find the correct decision.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 12/02/13
  */
-public enum ExplanationFactory {
+public interface IDecisionJumper extends Serializable {
 
-    NONE {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new ExplanationEngine(solver));
-        }
-    }, RECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
-        }
-    }, FLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
-        }
-    };
-
-    public abstract void make(Solver solver);
-
-
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
-    }
-
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
-        return eng;
-    }
+    /**
+     * Retrieve the number of worlds to backtrack, with respect to the variable assignment stored in this.
+     * This is useful for the <b>dynamic backtracking</b>.
+     *
+     * @param explanation       the explanation of the current failure
+     * @param currentWorldIndex index of the current world
+     * @return the world index to backtrack to
+     */
+    public abstract int compute(Explanation explanation, int currentWorldIndex);
 }

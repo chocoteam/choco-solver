@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -46,10 +47,19 @@ import java.io.Serializable;
  * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine implements Serializable, IExplanationMonitor {
+public class ExplanationEngine implements Serializable {
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
-    ExplanationMonitorList emList;
     Solver solver;
+    static final boolean TRACEON = false;
+
+    /**
+     * Builds an ExplanationEngine
+     *
+     * @param slv associated solver's environment
+     */
+    public ExplanationEngine(Solver slv) {
+        this.solver = slv;
+    }
 
     public void removeValue(IntVar var, int val, ICause cause) {
     }
@@ -93,7 +103,6 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
         return null;
     }
 
-
     /**
      * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
      * <code>var</code>
@@ -114,7 +123,6 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
         return null;
     }
 
-
     /**
      * Provides the recorded explanation in database for the removal of value <code>val</code>
      * from variable <code>var</code>
@@ -128,18 +136,6 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
         return null;
     }
 
-
-    /**
-     * Builds an ExplanationEngine
-     *
-     * @param slv associated solver's environment
-     */
-    public ExplanationEngine(Solver slv) {
-        this.solver = slv;
-        emList = new ExplanationMonitorList();
-    }
-
-
     /**
      * provides a BranchingDecision associated to a decision
      *
@@ -151,33 +147,53 @@ public class ExplanationEngine implements Serializable, IExplanationMonitor {
         return null;
     }
 
+    /**
+     * Store the <code>explanation</code> of the <code>deduction</code>
+     *
+     * @param deduction   deduction to explain
+     * @param explanation explanation of the deduction
+     */
+    public void store(Deduction deduction, Explanation explanation) {
+
+    }
+
+    public void delete(Deduction deduction) {
+
+    }
 
     /**
-     * adds a ExplanationMonitor to the explainer in order to catch explanation-related events
+     * Remove the <code>decision</code> from the set of left decisions over <code>var</code>
      *
-     * @param mon the monitor to be added
+     * @param decision a left decision over <code>var</code>
+     * @param var      a variable
      */
-    public void addExplanationMonitor(IExplanationMonitor mon) {
-        emList.add(mon);
+    public void removeLeftDecisionFrom(Decision decision, Variable var) {
     }
 
-    @Override
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
+        LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
     }
 
-    @Override
-    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
+    public void onContradiction(ContradictionException cex, Explanation explanation) {
+        if (cex.v != null) {
+            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
+        } else if (cex.c != null) {
+            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
+        }
     }
 
-    @Override
-    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public Solver getSolver() {
+        return solver;
     }
 
-    @Override
-    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision) {
+    public boolean isTraceOn() {
+        return TRACEON;
     }
 }
