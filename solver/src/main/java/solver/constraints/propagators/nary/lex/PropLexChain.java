@@ -75,16 +75,53 @@ public class PropLexChain extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filter();
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            for (int i = 0; i < N; i++) {
+                UB[M - 1][i] = x[M - 1][i].getUB();
+            }
+
+            for (int i = M - 2; i >= 0; i--) {
+                computeUB(x[i], UB[i + 1], UB[i]);
+            }
+
+            for (int i = 0; i < N; i++) {
+                LB[0][i] = x[0][i].getLB();
+            }
+
+            for (int i = 1; i < M; i++) {
+                computeLB(x[i], LB[i - 1], LB[i]);
+            }
+        }
+        for (int i = 0; i < M; i++) {
+            boundsLex(LB[i], x[i], UB[i]);
+        }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        int vec_idx = idxVarInProp % M;
+        if (EventType.isDecupp(mask)) {
+            for (int i = 0; i < N; i++) {
+                UB[vec_idx][i] = x[vec_idx][i].getUB();
+            }
+            for (int i = vec_idx - 1; i >= 0; i--) {
+                computeUB(x[i], UB[i + 1], UB[i]);
+            }
+        }
+        if (EventType.isInclow(mask)) {
+            for (int i = 0; i < N; i++) {
+                LB[vec_idx][i] = x[vec_idx][i].getLB();
+            }
+
+            for (int i = vec_idx + 1; i < M; i++) {
+                computeLB(x[i], LB[i - 1], LB[i]);
+            }
+        }
         forcePropagate(EventType.FULL_PROPAGATION);
     }
 
@@ -127,10 +164,9 @@ public class PropLexChain extends Propagator<IntVar> {
      * @param a lexicographically smallest feasible lower bound
      * @param x the vector of variables among other vectors in the chain of vectors
      * @param b lexicographically largest feasible  upper bound
-     * @param j index of the vector x  in  the chain
      * @throws ContradictionException
      */
-    public void boundsLex(int[] a, IntVar[] x, int[] b, int j) throws ContradictionException {
+    public void boundsLex(int[] a, IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         while (i < N && a[i] == b[i]) {
             x[i].updateLowerBound(a[i], aCause);
@@ -144,7 +180,7 @@ public class PropLexChain extends Propagator<IntVar> {
         if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;
         }
-        i += 1;
+        i++;
         while (i < N && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
             if (x[i].hasEnumeratedDomain()) {
                 x[i].removeInterval(b[i] + 1, a[i] - 1, aCause);
@@ -270,39 +306,7 @@ public class PropLexChain extends Propagator<IntVar> {
 
             } else {
                 lower[i] = x[i].getLB();
-
             }
-        }
-    }
-
-    /**
-     * Implements the main filtering algorithm by calling
-     * {@link  PropLexChain#boundsLex(int[], IntVar[], int[], int) boundsLex} for
-     * each vector in the chain.
-     * If there is no variable aliasing then the fixed-point is reached in one run.
-     *
-     * @throws ContradictionException
-     */
-    public void filter() throws ContradictionException {
-
-        for (int i = 0; i < N; i++) {
-            UB[M - 1][i] = x[M - 1][i].getUB();
-        }
-
-        for (int i = M - 2; i >= 0; i--) {
-            computeUB(x[i], UB[i + 1], UB[i]);
-        }
-
-        for (int i = 0; i < N; i++) {
-            LB[0][i] = x[0][i].getLB();
-        }
-
-        for (int i = 1; i < M; i++) {
-            computeLB(x[i], LB[i - 1], LB[i]);
-        }
-
-        for (int i = 0; i < M; i++) {
-            boundsLex(LB[i], x[i], UB[i], i);
         }
     }
 }
