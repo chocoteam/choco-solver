@@ -41,7 +41,6 @@ import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.restart.RestartFactory;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -387,7 +386,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     vAct[i].transfer();
                 }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
-                SearchMonitorFactory.restart(solver, RestartFactory.geometrical(3 * vars.length, r),
+                SearchMonitorFactory.geometrical(solver, 3 * vars.length, r,
                         new FailLimit(solver, 3 * vars.length), Integer.MAX_VALUE);
 
             }

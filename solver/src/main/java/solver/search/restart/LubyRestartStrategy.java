@@ -45,7 +45,7 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
 
     private int divFactor;
 
-    protected LubyRestartStrategy(int scaleFactor, int geometricalFactor) {
+    public LubyRestartStrategy(int scaleFactor, int geometricalFactor) {
         super("LUBY", scaleFactor, geometricalFactor);
     }
 

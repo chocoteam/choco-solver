@@ -41,7 +41,6 @@ import solver.exception.ContradictionException;
 import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.restart.RestartFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -209,7 +208,7 @@ public class AirPlaneLanding extends AbstractProblem {
         ));
         // -----
         boolean lns = true;
-        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), new FailLimit(solver, 100), 100);
+        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new Abstract_LNS_SearchMonitor(solver, false) {
 
