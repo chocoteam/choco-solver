@@ -31,7 +31,6 @@ import common.ESat;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
-import solver.Cause;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -191,7 +190,7 @@ public class AirPlaneLanding extends AbstractProblem {
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y) {
-        return IntConstraintFactory.arithm(x, "=", y, "-", duration);
+        return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
     }
 
     @Override
@@ -228,12 +227,11 @@ public class AirPlaneLanding extends AbstractProblem {
                         throw new UnsupportedOperationException();
                     }
                     bestCost = objective.getValue();
-                    System.out.println("new objective : " + bestCost);
                 }
 
                 @Override
                 protected void fixSomeVariables() throws ContradictionException {
-                    objective.updateUpperBound(bestCost / coeff - 1, Cause.Null);
+                    objective.updateUpperBound(bestCost / coeff - 1, this);
                 }
 
                 @Override
