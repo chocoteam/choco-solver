@@ -96,10 +96,6 @@ public class CycloHexan extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
-
-    @Override
     public void solve() {
         solver.findAllSolutions();
     }

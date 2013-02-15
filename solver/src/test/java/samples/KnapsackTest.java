@@ -30,6 +30,7 @@ package samples;
 import gnu.trove.list.array.TFloatArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.integer.Knapsack;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.variables.IntVar;

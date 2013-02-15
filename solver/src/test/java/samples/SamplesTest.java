@@ -27,7 +27,7 @@
 package samples;
 
 import org.testng.annotations.Test;
-import samples.basics.*;
+import samples.integer.*;
 
 /**
  * <br/>

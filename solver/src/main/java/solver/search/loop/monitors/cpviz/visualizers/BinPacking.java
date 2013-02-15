@@ -27,9 +27,9 @@
 package solver.search.loop.monitors.cpviz.visualizers;
 
 import org.slf4j.Logger;
+import solver.search.loop.monitors.cpviz.Visualizer;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
-import solver.search.loop.monitors.cpviz.Visualizer;
 
 /**
  * A specialized visualizer for the bin packing constraint.

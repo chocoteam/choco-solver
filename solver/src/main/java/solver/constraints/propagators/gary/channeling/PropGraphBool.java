@@ -35,7 +35,6 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 
 /**

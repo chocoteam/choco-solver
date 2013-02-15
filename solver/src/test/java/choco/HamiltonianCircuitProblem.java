@@ -37,7 +37,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.path.PropIntVarChanneling;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
@@ -64,8 +63,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     private Constraint gc;
     // model parameters
     private long seed;
-	private boolean strongFilter;
-	private int intAllDiff;//0=none; 1=NEQ; 2=BC; 3=AC;
+    private boolean strongFilter;
+    private int intAllDiff;//0=none; 1=NEQ; 2=BC; 3=AC;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -91,9 +90,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
     public void buildModel() {
         basicModel();
         Constraint[] cstrs = new Constraint[]{gc};
-		if(intAllDiff>0){
-			cstrs = new Constraint[]{gc, integerAllDiff()};
-		}
+        if (intAllDiff > 0) {
+            cstrs = new Constraint[]{gc, integerAllDiff()};
+        }
         solver.post(cstrs);
     }
 
@@ -121,12 +120,12 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         integers = new IntVar[n];
         try {
             int i = n - 1;
-			if(intAllDiff!=3)
-				integers[i] = VariableFactory.bounded("vlast", n, n, solver);
-			else
-				integers[i] = VariableFactory.enumerated("vlast", n, n, solver);
+            if (intAllDiff != 3)
+                integers[i] = VariableFactory.bounded("vlast", n, n, solver);
+            else
+                integers[i] = VariableFactory.enumerated("vlast", n, n, solver);
             for (i = 0; i < n - 1; i++) {
-                if (intAllDiff!=3) {
+                if (intAllDiff != 3) {
                     integers[i] = VariableFactory.bounded("v" + i, 1, n - 1, solver);
                 } else {
                     integers[i] = VariableFactory.enumerated("v" + i, 1, n - 1, solver);
@@ -142,19 +141,19 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
             System.exit(0);
         }
         gc.addPropagators(new PropIntVarChanneling(integers, graph));
-		String type = "AC";
-		if(intAllDiff==2){
-			type = "BC";
-		}
-		if(intAllDiff==1){
-			type = "NEQS";
-		}
-		return IntConstraintFactory.alldifferent(integers, type);
+        String type = "AC";
+        if (intAllDiff == 2) {
+            type = "BC";
+        }
+        if (intAllDiff == 1) {
+            type = "NEQS";
+        }
+        return IntConstraintFactory.alldifferent(integers, type);
     }
 
     private void configParameters(int ad, boolean strong) {
         intAllDiff = ad;
-		strongFilter = strong;
+        strongFilter = strong;
     }
 
     //***********************************************************************************
@@ -167,10 +166,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         AbstractStrategy strategy;
         strategy = GraphStrategyFactory.graphRandom(graph, seed);
         solver.set(strategy);
-    }
-
-    @Override
-    public void configureEngine() {
     }
 
     @Override
@@ -234,14 +229,14 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         matrix[7][5] = true;
         long nbSols = referencemodel(matrix);
         System.out.println(nbSols);
-		testModels(matrix,0);
+        testModels(matrix, 0);
     }
 
     @Test(groups = "1m")
     public static void test3() {
         int[] sizes = new int[]{6, 10};
         int[] seeds = new int[]{0, 10, 42};
-        double[] densities = new double[]{0.2,0.4};
+        double[] densities = new double[]{0.2, 0.4};
         boolean[][] matrix;
         for (int n : sizes) {
             for (double d : densities) {
@@ -282,20 +277,20 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
         }
         System.out.println(nbSols + " sols expected");
         boolean[][] matrix = transformMatrix(m);
-		boolean[] vls = new boolean[]{false,true};
-		gt = SetType.SWAP_ARRAY;
-		for (int i = 0; i < 4; i++) {
-			for (boolean p:vls) {
-				HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
-				hcp.set(matrix, seed);
-				hcp.configParameters(i, p);
-				hcp.execute();
-				Assert.assertEquals(nbSols, hcp.solver.getMeasures().getSolutionCount(), "nb sol incorrect " + i + " ; " + p + " ; " + gt);
-			}
-		}
-		System.gc();
-		System.gc();
-		System.gc();
+        boolean[] vls = new boolean[]{false, true};
+        gt = SetType.SWAP_ARRAY;
+        for (int i = 0; i < 4; i++) {
+            for (boolean p : vls) {
+                HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
+                hcp.set(matrix, seed);
+                hcp.configParameters(i, p);
+                hcp.execute();
+                Assert.assertEquals(nbSols, hcp.solver.getMeasures().getSolutionCount(), "nb sol incorrect " + i + " ; " + p + " ; " + gt);
+            }
+        }
+        System.gc();
+        System.gc();
+        System.gc();
     }
 
     private static boolean[][] transformMatrix(boolean[][] m) {

@@ -31,7 +31,6 @@ import memory.setDataStructures.ISet;
 import memory.setDataStructures.SetType;
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
-import solver.Cause;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -42,6 +41,7 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
+
 import java.io.File;
 import java.util.Random;
 
@@ -224,9 +224,9 @@ public class TSP_Sequential_LNS {
             for (int k = 0; k < nbFixedVars; k++) {
                 x = rd.nextInt(n);
                 if (x < n - 1) {
-                    g.enforceArc(bestSolution[x], bestSolution[x + 1], Cause.Null);
+                    g.enforceArc(bestSolution[x], bestSolution[x + 1], this);
                 } else {
-                    g.enforceArc(bestSolution[x], bestSolution[0], Cause.Null);
+                    g.enforceArc(bestSolution[x], bestSolution[0], this);
                 }
             }
         }

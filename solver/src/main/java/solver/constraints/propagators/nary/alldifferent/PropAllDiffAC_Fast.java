@@ -27,7 +27,6 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import common.ESat;
-import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateInt;
@@ -40,7 +39,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.BitSet;
 

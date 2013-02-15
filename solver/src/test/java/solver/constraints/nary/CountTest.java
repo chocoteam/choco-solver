@@ -29,7 +29,7 @@ package solver.constraints.nary;
 import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.basics.MagicSeries;
+import samples.integer.MagicSeries;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -144,7 +144,7 @@ public class CountTest {
                     solver.post(IntConstraintFactory.count(val, vs, ivc));
                 }
             }
-            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, VariableFactory.fixed(0,solver)));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, VariableFactory.fixed(0, solver)));
 
             //s.setValIntSelector(new RandomIntValSelector(interseed));
             //s.setVarIntSelector(new RandomIntVarSelector(s, interseed + 10));
@@ -221,7 +221,7 @@ public class CountTest {
         IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
             solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval)));
-			solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
         return IntConstraintFactory.sum(bs, occ);
     }

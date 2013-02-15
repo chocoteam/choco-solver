@@ -125,10 +125,6 @@ public abstract class AbstractNQueen extends AbstractProblem {
         return orderedVars;
     }
 
-    @Override
-    public void configureEngine() {
-    }
-
 
     @Override
     public void solve() {
