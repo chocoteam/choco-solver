@@ -32,7 +32,7 @@ import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.basics.AbsoluteEvaluation;
+import samples.integer.AbsoluteEvaluation;
 import solver.Configuration;
 import solver.ISolverProperties;
 import solver.Solver;
@@ -92,7 +92,6 @@ public class AllTest {
             prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
             prob.buildModel();
             prob.configureSearch();
-            prob.configureEngine();
             //  prob.overrideExplanation();
             SearchMonitorFactory.log(prob.solver, true, true);
             prob.solver.findAllSolutions();

@@ -28,7 +28,6 @@ package solver.search.loop.monitors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.selectors.variables.ActivityBased;
@@ -102,7 +101,7 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
     private void random() throws ContradictionException {
         for (int k = 0; k < nbFixedVars; k++) {
             int x = rd.nextInt(vars.length + 1);
-            vars[x].instantiateTo(bestSolution[x], Cause.Null);
+            vars[x].instantiateTo(bestSolution[x], this);
         }
     }
 
@@ -118,7 +117,7 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
                     idx = k;
                 }
             }
-            vars[idx].instantiateTo(bestSolution[idx], Cause.Null);
+            vars[idx].instantiateTo(bestSolution[idx], this);
             selected.set(idx);
         }
     }

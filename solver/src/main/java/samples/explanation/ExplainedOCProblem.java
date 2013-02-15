@@ -71,10 +71,6 @@ public class ExplainedOCProblem extends AbstractProblem {
 
 
     @Override
-    public void configureEngine() {
-    }
-
-    @Override
     public void solve() {
         SearchMonitorFactory.log(solver, true, true);
         solver.set(ExplanationFactory.engineFactory(solver, false, false));

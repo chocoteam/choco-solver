@@ -46,7 +46,6 @@ import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.P
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 
 /**

@@ -34,10 +34,14 @@
 
 package solver.search.loop.monitors;
 
+import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 
-public abstract class Abstract_LNS_SearchMonitor implements IMonitorSolution, IMonitorInterruption, IMonitorClose, IMonitorRestart {
+public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorClose, IMonitorRestart {
 
     //***********************************************************************************
     // VARIABLES
@@ -145,4 +149,23 @@ public abstract class Abstract_LNS_SearchMonitor implements IMonitorSolution, IM
      * Called when no solution was found during a LNS run (trapped into a local optimum)
      */
     protected abstract void restrictLess();
+
+    @Override
+    public Constraint getConstraint() {
+        return null;
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
 }

@@ -40,7 +40,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
-import solver.variables.graph.GraphVar;
+
 import java.util.BitSet;
 
 /**

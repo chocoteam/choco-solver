@@ -106,10 +106,6 @@ public class CliqueEnumeration extends AbstractProblem {
     }
 
     @Override
-    public void configureEngine() {
-    }
-
-    @Override
     public void solve() {
         // enumeration
         solver.findAllSolutions();

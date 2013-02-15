@@ -29,7 +29,7 @@ package samples;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.basics.GolombRuler;
+import samples.integer.GolombRuler;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.propagation.PropagationStrategies;

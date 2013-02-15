@@ -34,8 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationEngineFactory;
-import solver.propagation.PropagationStrategies;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -65,12 +63,6 @@ public abstract class AbstractProblem {
     @Option(name = "-log", usage = "Quiet resolution", required = false)
     Level level = Level.VERBOSE;
 
-    @Option(name = "-engine", usage = "Propagation engine", required = false)
-    PropagationEngineFactory engine = PropagationEngineFactory.DEFAULT;
-
-    @Option(name = "-policy", usage = "Propagation policy", required = false)
-    PropagationStrategies policy = PropagationStrategies.DEFAULT;
-
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
 
@@ -93,8 +85,6 @@ public abstract class AbstractProblem {
     public abstract void buildModel();
 
     public abstract void configureSearch();
-
-    public abstract void configureEngine();
 
     public abstract void solve();
 
@@ -133,24 +123,7 @@ public abstract class AbstractProblem {
 
             overrideExplanation();
 
-            switch (engine) {
-                case DEFAULT:
-//                case DSLDRIVEN:
-//                    switch (policy) {
-//                        case DEFAULT:
-                    configureEngine();
-                    break;
-//                        default:
-//                            IPropagationEngine pengine = new DSLEngine(solver.getEnvironment(), false, true, false);
-//                            policy.make(solver, pengine);
-//                            solver.set(pengine);
-//                            break;
-//                    }
-//                    break;
-                default:
-                    solver.set(new PropagatorEngine(solver));
-                    break;
-            }
+            solver.set(new PropagatorEngine(solver));
 
             if (level.getLevel() > Level.QUIET.getLevel()) {
                 SearchMonitorFactory.log(solver,

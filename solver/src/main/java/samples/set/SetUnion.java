@@ -53,7 +53,7 @@ import solver.variables.VariableFactory;
 public class SetUnion extends AbstractProblem {
 
     private SetVar x, y, z;
-	private boolean noEmptySet = false;
+    private boolean noEmptySet = false;
 
     public static void main(String[] args) {
         new SetUnion().execute(args);
@@ -87,9 +87,9 @@ public class SetUnion extends AbstractProblem {
         z.getEnvelope().add(3);
         // set-union constraint
         solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
-		if(noEmptySet){
-			solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
-		}
+        if (noEmptySet) {
+            solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
+        }
     }
 
     @Override
@@ -105,10 +105,6 @@ public class SetUnion extends AbstractProblem {
                 System.out.println("z : {" + z.getEnvelope() + "}");
             }
         });
-    }
-
-    @Override
-    public void configureEngine() {
     }
 
     @Override
