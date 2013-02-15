@@ -69,11 +69,6 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
-
-    @Override
-    public void configureEngine() {
-    }
-
     @Override
     public void solve() {
         SearchMonitorFactory.log(solver, true, true);

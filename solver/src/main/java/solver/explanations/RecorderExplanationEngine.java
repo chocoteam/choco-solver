@@ -38,7 +38,7 @@ import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
 import solver.explanations.strategies.IDynamicBacktrackingAlgorithm;
 import solver.explanations.strategies.PathRepair;
-import solver.explanations.strategies.jumper.MaximumDomainSizeJumper;
+import solver.explanations.strategies.jumper.RandomDecisionJumper;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorInitPropagation;
@@ -76,7 +76,11 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
         if (!Configuration.PLUG_EXPLANATION) {
-            throw new SolverException("Explanation is not activated (see Configuration.java)");
+            throw new SolverException("\nExplanations are not plugged in.\n" +
+                    "To activate explanations, one can modify the configurations.property file\n" +
+                    "or create a user.property file at project root directory which contains the following two lines:\n" +
+                    "# Enabling explanations:\n" +
+                    "PLUG_EXPLANATION=true\n");
         }
         removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
@@ -87,7 +91,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         solver.getSearchLoop().plugSearchMonitor(this);
 
 //        dbalgo = new ConflictBasedBackjumping(this);
-        dbalgo = new PathRepair(this, new MaximumDomainSizeJumper());
+        dbalgo = new PathRepair(this, new RandomDecisionJumper(5));
     }
 
     @Override

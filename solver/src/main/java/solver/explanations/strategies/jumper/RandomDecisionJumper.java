@@ -67,7 +67,7 @@ public class RandomDecisionJumper implements IDecisionJumper {
                 }
             }
         }
-        int world = worlds.get(random.nextInt(worlds.size()));
+        int world = worlds.isEmpty() ? 0 : worlds.get(random.nextInt(worlds.size()));
         return 1 + (currentWorldIndex - world);
     }
 }
