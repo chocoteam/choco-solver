@@ -35,6 +35,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
+import solver.explanations.strategies.DynamicBacktrackFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,7 +62,8 @@ public class EqualXYCExplTest {
 
         Solver ref = new Solver();
         Solver sol = new Solver();
-        sol.set(ExplanationFactory.engineFactory(sol, true, false));
+        ExplanationFactory.FLATTEN.make(sol);
+        DynamicBacktrackFactory.cbj(sol);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
@@ -84,9 +86,9 @@ public class EqualXYCExplTest {
 
 
         for (int i = 0; i < varsr.length - 1; i++) {
-            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i],0,"detect"));
+            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, "detect"));
             lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
-            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i],0,"detect"));
+            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i], 0, "detect"));
             lcstrss.add(IntConstraintFactory.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
         }
 

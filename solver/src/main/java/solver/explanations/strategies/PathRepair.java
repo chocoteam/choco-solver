@@ -27,11 +27,12 @@
 package solver.explanations.strategies;
 
 
+import solver.Configuration;
 import solver.ICause;
 import solver.explanations.BranchingDecision;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.explanations.RecorderExplanationEngine;
+import solver.explanations.ExplanationEngine;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
@@ -48,7 +49,7 @@ public class PathRepair extends ConflictBasedBackjumping {
 
     DecisionsSet cobdec;
 
-    public PathRepair(RecorderExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
+    public PathRepair(ExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
         super(mExplanationEngine, decisionJumper);
         cobdec = new DecisionsSet(this);
     }
@@ -74,7 +75,7 @@ public class PathRepair extends ConflictBasedBackjumping {
             myworld--;
         }
         Decision jmpBck = dec;
-        if (mExplanationEngine.isTraceOn() && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             LOGGER.info("::EXPL:: WILL BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
 
@@ -85,7 +86,7 @@ public class PathRepair extends ConflictBasedBackjumping {
             if (!dec.hasNext()) {
                 // on a right branch, necessarily have an explanation (it is a refutation)
 
-                if (! mExplanationEngine.flatten(dec.getNegativeDeduction()).contain(jmpBck.getPositiveDeduction())) {
+                if (!mExplanationEngine.flatten(dec.getNegativeDeduction()).contain(jmpBck.getPositiveDeduction())) {
                     // everything is fine ... this refutation does not depend on what we are reconsidering
                     // set it as non activated and
                     dec.rewind();
@@ -122,7 +123,7 @@ public class PathRepair extends ConflictBasedBackjumping {
 
             mSolver.getSearchLoop().decision = cobdec;
         }
-        if (mExplanationEngine.isTraceOn() && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }

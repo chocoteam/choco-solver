@@ -65,7 +65,7 @@ public class AllTest {
                 Environments.TRAIL.make(),
                 new AllSolverProp(
                         SearchLoops.BINARY,
-                        ExplanationFactory.TRACERECORDER),
+                        ExplanationFactory.RECORDER),
                 PropagationStrategies.CONSTRAINT, 6);
     }
 
