@@ -29,10 +29,13 @@ package solver.explanations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
+import solver.explanations.strategies.IDynamicBacktrackingAlgorithm;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -50,7 +53,6 @@ import java.io.Serializable;
 public class ExplanationEngine implements Serializable {
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     Solver solver;
-    static final boolean TRACEON = false;
 
     /**
      * Builds an ExplanationEngine
@@ -59,6 +61,16 @@ public class ExplanationEngine implements Serializable {
      */
     public ExplanationEngine(Solver slv) {
         this.solver = slv;
+    }
+
+    /**
+     * Override the default dynamic backtrack algorithm (<code>cbj</code>).
+     * Such an algorithm is called on failure to choose the decision to backtrack to.
+     *
+     * @param dbalgo the dynamic backtrack algorithm to execute on failure
+     */
+    public void setDynamicBacktrackingAlgorithm(IDynamicBacktrackingAlgorithm dbalgo) {
+        throw new SolverException("Make sure an active explanation engine is defined (see solver.explanations.ExplanationFactory).");
     }
 
     public void removeValue(IntVar var, int val, ICause cause) {
@@ -194,6 +206,6 @@ public class ExplanationEngine implements Serializable {
     }
 
     public boolean isTraceOn() {
-        return TRACEON;
+        return Configuration.PRINT_EXPLANATION;
     }
 }

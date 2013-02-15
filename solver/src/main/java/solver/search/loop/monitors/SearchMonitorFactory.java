@@ -29,7 +29,8 @@ package solver.search.loop.monitors;
 import solver.Solver;
 import solver.search.limits.*;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.restart.IRestartStrategy;
+import solver.search.restart.GeometricalRestartStrategy;
+import solver.search.restart.LubyRestartStrategy;
 import solver.variables.Variable;
 
 /**
@@ -66,6 +67,7 @@ public enum SearchMonitorFactory {
             return s.toString();
 
         }
+
     }
 
     private static class DefaultDecisionMessage implements IMessage {
@@ -88,8 +90,8 @@ public enum SearchMonitorFactory {
             }
             return s.toString();
         }
-    }
 
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -216,16 +218,36 @@ public enum SearchMonitorFactory {
     }
 
     /**
-     * Branch a restart strategy on the search
+     * Branch a luby restart strategy to the solver
      *
      * @param solver               the solver
-     * @param restartStrategy      the kind of restart strategy
+     * @param scaleFactor          scale factor
+     * @param geometricalFactor    increasing factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
      */
-    public static void restart(Solver solver, IRestartStrategy restartStrategy, ILimit restartStrategyLimit, int restartLimit) {
+    public static void luby(Solver solver, int scaleFactor, int geometricalFactor,
+                            ILimit restartStrategyLimit, int restartLimit) {
         solver.getSearchLoop().plugSearchMonitor(new RestartManager(
-                restartStrategy, restartStrategyLimit, solver.getSearchLoop(), restartLimit
+                new LubyRestartStrategy(scaleFactor, geometricalFactor),
+                restartStrategyLimit, solver.getSearchLoop(), restartLimit
+        ));
+    }
+
+    /**
+     * Build a geometrical restart strategy
+     *
+     * @param solver               the solver
+     * @param scaleFactor          scale factor
+     * @param geometricalFactor    increasing factor
+     * @param restartStrategyLimit restart trigger
+     * @param restartLimit         restart limits (limit of number of restarts)
+     */
+    public static void geometrical(Solver solver, int scaleFactor, double geometricalFactor,
+                                   ILimit restartStrategyLimit, int restartLimit) {
+        solver.getSearchLoop().plugSearchMonitor(new RestartManager(
+                new GeometricalRestartStrategy(scaleFactor, geometricalFactor),
+                restartStrategyLimit, solver.getSearchLoop(), restartLimit
         ));
     }
 

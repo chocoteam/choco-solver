@@ -28,12 +28,13 @@ package solver.explanations.strategies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.explanations.BranchingDecision;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.explanations.RecorderExplanationEngine;
+import solver.explanations.ExplanationEngine;
 import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -47,16 +48,16 @@ import solver.search.strategy.decision.RootDecision;
 public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm {
 
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
-    protected RecorderExplanationEngine mExplanationEngine;
+    protected ExplanationEngine mExplanationEngine;
     protected Solver mSolver;
 
     protected IDecisionJumper decisionJumper;
 
-    public ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine) {
+    public ConflictBasedBackjumping(ExplanationEngine mExplanationEngine) {
         this(mExplanationEngine, new MostRecentWorldJumper());
     }
 
-    protected ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine, IDecisionJumper ws) {
+    protected ConflictBasedBackjumping(ExplanationEngine mExplanationEngine, IDecisionJumper ws) {
         this.mExplanationEngine = mExplanationEngine;
         this.mSolver = mExplanationEngine.getSolver();
         this.decisionJumper = ws;
@@ -99,7 +100,7 @@ public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm {
             Deduction right = dec.getNegativeDeduction();
             mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
         }
-        if (mExplanationEngine.isTraceOn() && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
         }
     }

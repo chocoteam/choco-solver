@@ -36,9 +36,8 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
+import solver.explanations.strategies.ConflictBasedBackjumping;
 import solver.explanations.strategies.IDynamicBacktrackingAlgorithm;
-import solver.explanations.strategies.PathRepair;
-import solver.explanations.strategies.jumper.RandomDecisionJumper;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorInitPropagation;
@@ -71,7 +70,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     protected TIntHashSet toexpand = new TIntHashSet();
     protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
 
-    protected final IDynamicBacktrackingAlgorithm dbalgo;
+    protected IDynamicBacktrackingAlgorithm dbalgo;
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
@@ -90,8 +89,12 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
         solver.getSearchLoop().plugSearchMonitor(this);
 
-//        dbalgo = new ConflictBasedBackjumping(this);
-        dbalgo = new PathRepair(this, new RandomDecisionJumper(5));
+        dbalgo = new ConflictBasedBackjumping(this);
+    }
+
+    @Override
+    public void setDynamicBacktrackingAlgorithm(IDynamicBacktrackingAlgorithm dbalgo) {
+        this.dbalgo = dbalgo;
     }
 
     @Override
@@ -118,7 +121,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 cex.c.explain(null, expl);
             }
             Explanation complete = flatten(expl);
-            if (isTraceOn() && LOGGER.isInfoEnabled()) {
+            if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
                 onContradiction(cex, complete);
             }
             dbalgo.backtrackOn(complete, cex.c);
@@ -242,7 +245,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         invdom.set(val);
 
         // 5. explanations monitoring
-        if (isTraceOn() && LOGGER.isInfoEnabled()) {
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             onRemoveValue(var, val, cause, expl);
         }
     }
@@ -265,7 +268,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 cause.explain(vr, expl);
                 invdom.set(v);
 //                explanation.add(expl);
-                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
                     onRemoveValue(var, val, cause, expl);
                 }
             }
@@ -289,7 +292,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 }
                 cause.explain(vr, expl);
                 invdom.set(v);
-                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
                     onRemoveValue(var, val, cause, expl);
                 }
             }
@@ -317,7 +320,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 }
                 cause.explain(vr, expl);
                 invdom.set(v);
-                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
                     onRemoveValue(var, v, cause, expl);
                 }
             }

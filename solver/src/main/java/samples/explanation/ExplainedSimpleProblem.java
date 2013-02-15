@@ -31,6 +31,7 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
+import solver.explanations.strategies.DynamicBacktrackFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -64,9 +65,8 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
-        boolean flatten = false;
-        boolean trace = false;
-        solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));
+        ExplanationFactory.RECORDER.make(solver);
+        DynamicBacktrackFactory.cbj(solver);
     }
 
     @Override

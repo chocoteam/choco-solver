@@ -37,7 +37,7 @@ package solver.search.restart;
  */
 public class GeometricalRestartStrategy extends AbstractRestartStrategy {
 
-    protected GeometricalRestartStrategy(int scaleFactor, double geometricalFactor) {
+    public GeometricalRestartStrategy(int scaleFactor, double geometricalFactor) {
         super("GEOM", scaleFactor, geometricalFactor);
     }
 
