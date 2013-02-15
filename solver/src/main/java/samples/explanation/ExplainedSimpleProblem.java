@@ -25,56 +25,74 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations;
+package samples.explanation;
 
+import samples.AbstractProblem;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.explanations.ExplanationFactory;
+import solver.search.strategy.IntStrategyFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * Date: 01/05/11
+ * Time: 13:26
  */
-public enum ExplanationFactory {
+public class ExplainedSimpleProblem extends AbstractProblem {
 
-    NONE {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new ExplanationEngine(solver));
-        }
-    }, RECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
-        }
-    }, FLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
-        }
-    };
+    IntVar[] vars;
+    int n = 4;
+    int vals = n + 1;
 
-    public abstract void make(Solver solver);
-
-
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
+    @Override
+    public void createSolver() {
+        solver = new Solver();
     }
 
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
-        return eng;
+
+    @Override
+    public void buildModel() {
+        vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
+        for (int i = 0; i < vars.length - 1; i++) {
+            solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+        }
+    }
+
+    @Override
+    public void configureSearch() {
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
+        boolean flatten = false;
+        boolean trace = false;
+        solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));
+    }
+
+    @Override
+    public void solve() {
+        if (solver.findSolution()) {
+            do {
+                this.prettyOut();
+            }
+            while (solver.nextSolution());
+        }
+    }
+
+    @Override
+    public void prettyOut() {
+
+        for (IntVar v : vars) {
+//            System.out.println("* variable " + v);
+            for (int i = 1; i <= vals; i++) {
+                if (!v.contains(i)) {
+                    System.out.println(v.getName() + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new ExplainedSimpleProblem().execute(args);
     }
 }

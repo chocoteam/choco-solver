@@ -36,9 +36,15 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
+import solver.explanations.strategies.IDynamicBacktrackingAlgorithm;
+import solver.explanations.strategies.PathRepair;
+import solver.explanations.strategies.jumper.RandomDecisionJumper;
 import solver.propagation.queues.CircularQueue;
+import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorInitPropagation;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -52,7 +58,7 @@ import solver.variables.Variable;
  * Here we just record the explanations in a HashMap ...
  * <p/>
  */
-public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation {
+public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation, IMonitorContradiction, IMonitorSolution {
 
     TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
     TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
@@ -65,21 +71,27 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     protected TIntHashSet toexpand = new TIntHashSet();
     protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
 
-    protected ConflictBasedBackjumping cbj;
+    protected final IDynamicBacktrackingAlgorithm dbalgo;
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
         if (!Configuration.PLUG_EXPLANATION) {
-            throw new SolverException("Explanation is not activated (see Configuration.java)");
+            throw new SolverException("\nExplanations are not plugged in.\n" +
+                    "To activate explanations, one can modify the configurations.property file\n" +
+                    "or create a user.property file at project root directory which contains the following two lines:\n" +
+                    "# Enabling explanations:\n" +
+                    "PLUG_EXPLANATION=true\n");
         }
         removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
         database = new TIntObjectHashMap<Explanation>();
         leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
         rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
+
         solver.getSearchLoop().plugSearchMonitor(this);
-//        cbj = new ConflictBasedBackjumping(this);
-        cbj = new DynamicBacktracking(this);
+
+//        dbalgo = new ConflictBasedBackjumping(this);
+        dbalgo = new PathRepair(this, new RandomDecisionJumper(5));
     }
 
     @Override
@@ -92,6 +104,53 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     @Override
     public void afterInitialPropagation() {
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onContradiction(ContradictionException cex) {
+        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
+            Explanation expl = new Explanation();
+            if (cex.v != null) {
+                cex.v.explain(VariableState.DOM, expl);
+            } else {
+                cex.c.explain(null, expl);
+            }
+            Explanation complete = flatten(expl);
+            if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                onContradiction(cex, complete);
+            }
+            dbalgo.backtrackOn(complete, cex.c);
+        } else {
+            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
+        }
+    }
+
+    @Override
+    public void onSolution() {
+        // we need to prepare a "false" backtrack on this decision
+        Decision dec = solver.getSearchLoop().decision;
+        while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
+            dec = dec.getPrevious();
+        }
+        if (dec != RootDecision.ROOT) {
+            Explanation explanation = new Explanation();
+            Decision d = dec.getPrevious();
+            while ((d != RootDecision.ROOT)) {
+                if (d.hasNext()) {
+                    explanation.add(d.getPositiveDeduction());
+                }
+                d = d.getPrevious();
+            }
+            store(dec.getNegativeDeduction(), explanation);
+        }
+        solver.getSearchLoop().overridePreviousWorld(1);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public AntiDomain getRemovedValues(IntVar v) {
@@ -110,7 +169,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         return database.get(getValueRemoval(var, val).id);
     }
 
-    protected ValueRemoval getValueRemoval(IntVar var, int val) {
+    public ValueRemoval getValueRemoval(IntVar var, int val) {
         int vid = var.getId();
         ValueRemoval vr;
         TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
@@ -148,6 +207,21 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     }
 
     @Override
+    public void store(Deduction deduction, Explanation explanation) {
+        database.put(deduction.id, explanation);
+    }
+
+    @Override
+    public void delete(Deduction deduction) {
+        database.remove(deduction.id);
+    }
+
+    @Override
+    public void removeLeftDecisionFrom(Decision decision, Variable var) {
+        leftbranchdecisions.get(var.getId()).remove(decision.getId());
+    }
+
+    @Override
     public void removeValue(IntVar var, int val, ICause cause) {
         assert cause != null;
         // 1. get the deduction
@@ -168,7 +242,9 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         invdom.set(val);
 
         // 5. explanations monitoring
-//        emList.onRemoveValue(var, val, cause, expl);
+        if (isTraceOn() && LOGGER.isInfoEnabled()) {
+            onRemoveValue(var, val, cause, expl);
+        }
     }
 
     @Override
@@ -189,9 +265,11 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 cause.explain(vr, expl);
                 invdom.set(v);
 //                explanation.add(expl);
+                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, val, cause, expl);
+                }
             }
         }
-//        emList.onUpdateLowerBound(var, old, val, cause, explanation);
     }
 
     @Override
@@ -211,7 +289,9 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 }
                 cause.explain(vr, expl);
                 invdom.set(v);
-//                explanation.add(explain);
+                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, val, cause, expl);
+                }
             }
         }
 //        emList.onUpdateUpperBound(var, old, val, cause, explanation);
@@ -237,7 +317,9 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 }
                 cause.explain(vr, expl);
                 invdom.set(v);
-//                explanation.add(explain);
+                if (isTraceOn() && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, v, cause, expl);
+                }
             }
         }
 //        emList.onInstantiateTo(var, val, cause, explanation);
@@ -308,46 +390,6 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     @Override
     public Deduction explain(Deduction deduction) {
         return deduction;
-    }
-
-    @Override
-    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: INST to " + val + " FOR " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision) {
-        if (LOGGER.isInfoEnabled()) {
-            if (cex.v != null) {
-                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-            } else if (cex.c != null) {
-                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
-            }
-            LOGGER.info("::EXPL:: BACKTRACK on " + decision + " (up to " + upTo + " level(s))");
-        }
     }
 
 }

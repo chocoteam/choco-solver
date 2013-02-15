@@ -24,57 +24,50 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.explanations.strategies.jumper;
 
-package solver.explanations;
+import gnu.trove.list.array.TIntArrayList;
+import solver.explanations.BranchingDecision;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.strategies.IDecisionJumper;
 
-import solver.Solver;
+import java.util.Random;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * A decision jumper chooses randomly the number of jumps to do, among decisions involved in the explanation
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 12/02/13
  */
-public enum ExplanationFactory {
+public class RandomDecisionJumper implements IDecisionJumper {
 
-    NONE {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new ExplanationEngine(solver));
-        }
-    }, RECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
-        }
-    }, FLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
-        }
-    };
+    Random random;
+    TIntArrayList worlds;
 
-    public abstract void make(Solver solver);
-
-
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
+    /**
+     * Create a random decision jumper
+     *
+     * @param seed the seed for randomness
+     */
+    public RandomDecisionJumper(long seed) {
+        random = new Random(seed);
+        this.worlds = new TIntArrayList();
     }
 
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
-        return eng;
+    @Override
+    public int compute(Explanation explanation, int currentWorldIndex) {
+        worlds.clear();
+        if (explanation.nbDeductions() > 0) {
+            for (int d = 0; d < explanation.nbDeductions(); d++) {
+                Deduction dec = explanation.getDeduction(d);
+                if (dec.getmType() == Deduction.Type.DecLeft) {
+                    worlds.add(((BranchingDecision) dec).getDecision().getWorldIndex() + 1);
+                }
+            }
+        }
+        int world = worlds.isEmpty() ? 0 : worlds.get(random.nextInt(worlds.size()));
+        return 1 + (currentWorldIndex - world);
     }
 }

@@ -24,13 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations;
+package solver.explanations.strategies;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorContradiction;
-import solver.search.loop.monitors.IMonitorSolution;
+import solver.explanations.BranchingDecision;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.RecorderExplanationEngine;
+import solver.explanations.strategies.jumper.MostRecentWorldJumper;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
@@ -40,47 +44,44 @@ import solver.search.strategy.decision.RootDecision;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitorSolution {
+public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm {
 
+    static Logger LOGGER = LoggerFactory.getLogger("explainer");
     protected RecorderExplanationEngine mExplanationEngine;
     protected Solver mSolver;
 
+    protected IDecisionJumper decisionJumper;
+
     public ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine) {
-        this.mExplanationEngine = mExplanationEngine;
-        this.mSolver = mExplanationEngine.solver;
-        mExplanationEngine.solver.getSearchLoop().plugSearchMonitor(this);
+        this(mExplanationEngine, new MostRecentWorldJumper());
     }
 
+    protected ConflictBasedBackjumping(RecorderExplanationEngine mExplanationEngine, IDecisionJumper ws) {
+        this.mExplanationEngine = mExplanationEngine;
+        this.mSolver = mExplanationEngine.getSolver();
+        this.decisionJumper = ws;
+    }
+
+    public Solver getSolver() {
+        return mSolver;
+    }
+
+
     @Override
-    public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = new Explanation();
-            if (cex.v != null) {
-                cex.v.explain(VariableState.DOM, expl);
-            } else {
-                cex.c.explain(null, expl);
-            }
-            Explanation complete = mExplanationEngine.flatten(expl);
-            int upto = complete.getMostRecentWorldToBacktrack(mExplanationEngine);
-            mSolver.getSearchLoop().overridePreviousWorld(upto);
-            Decision dec = updateVRExplainUponbacktracking(upto, complete, cex.c);
-            mExplanationEngine.emList.onContradiction(cex, complete, upto, dec);
-        } else {
-            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
-        }
+    public void backtrackOn(Explanation explanation, ICause cause) {
+        int upto = decisionJumper.compute(explanation, mSolver.getEnvironment().getWorldIndex());
+        mSolver.getSearchLoop().overridePreviousWorld(upto);
+        updateVRExplainUponbacktracking(upto, explanation, cause);
     }
 
     /**
-     * Identifie la decision a remettre en cause
-     * Met l'explication de la refutation dans la base d'explications
-     * parce que comme c'est implicite au niveau de la search ca bren'apparaitrait pas sinon
+     * Identify the decision to reconsider, and explain its refutation in the explanation data base
      *
-     * @param nworld
-     * @param expl
-     * @param cause
-     * @return
+     * @param nworld index of the world to backtrack to
+     * @param expl   explanation of the backtrack
+     * @param cause  cause of the failure
      */
-    protected Decision updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
+    protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {
         Decision dec = mSolver.getSearchLoop().decision; // the current decision to undo
         while (dec != RootDecision.ROOT && nworld > 1) {
             dec = dec.getPrevious();
@@ -91,35 +92,15 @@ public class ConflictBasedBackjumping implements IMonitorContradiction, IMonitor
                 throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
             Deduction left = dec.getPositiveDeduction();
             expl.remove(left);
-            assert left.mType == Deduction.Type.DecLeft;
+            assert left.getmType() == Deduction.Type.DecLeft;
             BranchingDecision va = (BranchingDecision) left;
-            mExplanationEngine.leftbranchdecisions.get(va.getVar().getId()).remove(va.getDecision().getId());
+            mExplanationEngine.removeLeftDecisionFrom(va.getDecision(), va.getVar());
 
             Deduction right = dec.getNegativeDeduction();
-            mExplanationEngine.database.put(right.id, mExplanationEngine.flatten(expl));
+            mExplanationEngine.store(right, mExplanationEngine.flatten(expl));
         }
-        return dec;
+        if (mExplanationEngine.isTraceOn() && LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: BACKTRACK on " + dec /*+ " (up to " + nworld + " level(s))"*/);
+        }
     }
-
-    @Override
-    public void onSolution() {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = mSolver.getSearchLoop().decision;
-        while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
-            dec = dec.getPrevious();
-        }
-        if (dec != RootDecision.ROOT) {
-            Explanation explanation = new Explanation();
-            Decision d = dec.getPrevious();
-            while ((d != RootDecision.ROOT)) {
-                if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
-                }
-                d = d.getPrevious();
-            }
-            mExplanationEngine.database.put(dec.getNegativeDeduction().id, explanation);
-        }
-        mSolver.getSearchLoop().overridePreviousWorld(1);
-    }
-
 }

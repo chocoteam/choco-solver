@@ -46,7 +46,7 @@ public abstract class Deduction implements Identity, Comparable<Deduction> {
 
     final int id;
 
-    protected enum Type {
+    public enum Type {
         Exp, ValRem, DecLeft, DecRight
     }
 
@@ -79,5 +79,9 @@ public abstract class Deduction implements Identity, Comparable<Deduction> {
     @Override
     public int getId() {
         return id;
+    }
+
+    public Type getmType() {
+        return mType;
     }
 }

@@ -24,57 +24,37 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.explanations.strategies.jumper;
 
-package solver.explanations;
-
-import solver.Solver;
+import solver.explanations.BranchingDecision;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.strategies.IDecisionJumper;
+import solver.variables.IntVar;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * A decision jumper which select the world to jump to by considering the size of decision variable domain.
+ * It selects the decision involving the maximum variable domain size.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 12/02/13
  */
-public enum ExplanationFactory {
-
-    NONE {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new ExplanationEngine(solver));
+public class MaximumDomainSizeJumper implements IDecisionJumper {
+    @Override
+    public int compute(Explanation explanation, int currentWorldIndex) {
+        int dworld = 0, maxDomSize = 0, curDomSize;
+        if (explanation.nbDeductions() > 0) {
+            for (int d = 0; d < explanation.nbDeductions(); d++) {
+                Deduction dec = explanation.getDeduction(d);
+                IntVar ivar = (IntVar) dec.getVar();
+                curDomSize = ivar.getDomainSize();
+                if (dec.getmType() == Deduction.Type.DecLeft && maxDomSize < curDomSize) {
+                    dworld = ((BranchingDecision) dec).getDecision().getWorldIndex() + 1;
+                    maxDomSize = curDomSize;
+                }
+            }
         }
-    }, RECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
-        }
-    }, FLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
-        }
-    };
-
-    public abstract void make(Solver solver);
-
-
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
-    }
-
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
-        return eng;
+        return 1 + (currentWorldIndex - dworld);
     }
 }

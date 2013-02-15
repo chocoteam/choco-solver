@@ -92,7 +92,7 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
         return previous;
     }
 
-    protected void setWorldIndex(int wi) {
+    public void setWorldIndex(int wi) {
         this.worldIndex = wi;
     }
 

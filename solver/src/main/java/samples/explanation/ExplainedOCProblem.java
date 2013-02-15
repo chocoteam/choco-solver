@@ -25,12 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.samples;
+package samples.explanation;
 
 
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.explanations.ExplanationFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -71,9 +72,8 @@ public class ExplainedOCProblem extends AbstractProblem {
 
     @Override
     public void solve() {
-
-        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        SearchMonitorFactory.log(solver, false, true);
+        SearchMonitorFactory.log(solver, true, true);
+        solver.set(ExplanationFactory.engineFactory(solver, false, false));
         if (solver.findSolution()) {
             do {
                 this.prettyOut();

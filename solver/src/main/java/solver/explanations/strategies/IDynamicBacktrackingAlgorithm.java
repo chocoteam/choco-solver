@@ -24,57 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.explanations.strategies;
 
-package solver.explanations;
-
-import solver.Solver;
+import solver.ICause;
+import solver.explanations.Explanation;
 
 /**
- * Created by IntelliJ IDEA.
- * User: njussien
- * Date: 19/10/11
- * Time: 19:22
+ * An interface to define operations of dynamic backtracking, in opposition with "standard backtracking".
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 12/02/13
  */
-public enum ExplanationFactory {
-
-    NONE {
-        @Override
-        public void make(Solver solver) {
-            solver.set(new ExplanationEngine(solver));
-        }
-    }, RECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
-        }
-    }, FLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
-        }
-    };
-
-    public abstract void make(Solver solver);
+public interface IDynamicBacktrackingAlgorithm {
 
 
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
-    }
-
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
-        return eng;
-    }
+    /**
+     * Define rules to dynamically backtrack in the tree search, based on <code>explanation</code>.
+     *
+     * @param explanation the explanation of the current failure
+     * @param cause       origin of the failure
+     */
+    void backtrackOn(Explanation explanation, ICause cause);
 }

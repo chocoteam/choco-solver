@@ -25,12 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.samples;
+package samples.explanation;
+
 
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -41,36 +43,36 @@ import solver.variables.VariableFactory;
  * Date: 01/05/11
  * Time: 13:26
  */
-public class ExplainedSimpleProblem extends AbstractProblem {
+public class ExplainedOCProblemSmall extends AbstractProblem {
 
     IntVar[] vars;
     int n = 4;
-    int vals = n + 1;
+    int vals = n - 1;
 
     @Override
     public void createSolver() {
         solver = new Solver();
     }
 
-
     @Override
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
-        for (int i = 0; i < vars.length - 1; i++) {
-            solver.post(IntConstraintFactory.arithm(vars[i], ">", vars[i + 1]));
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++)
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));
         }
     }
 
     @Override
     public void configureSearch() {
-        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
-        boolean flatten = false;
-        boolean trace = false;
-        solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));
+//        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
     }
 
     @Override
     public void solve() {
+        SearchMonitorFactory.log(solver, true, true);
+        solver.set(ExplanationFactory.engineFactory(solver, false, false));
         if (solver.findSolution()) {
             do {
                 this.prettyOut();
@@ -81,18 +83,17 @@ public class ExplainedSimpleProblem extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-
         for (IntVar v : vars) {
 //            System.out.println("* variable " + v);
             for (int i = 1; i <= vals; i++) {
                 if (!v.contains(i)) {
-                    System.out.println(v.getName() + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
+                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
                 }
             }
         }
     }
 
     public static void main(String[] args) {
-        new ExplainedSimpleProblem().execute(args);
+        new ExplainedOCProblem().execute(args);
     }
 }
