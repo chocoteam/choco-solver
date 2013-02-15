@@ -37,7 +37,7 @@ package solver.constraints.propagators.set;
 import common.ESat;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
-import memory.setDataStructures.ISet;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

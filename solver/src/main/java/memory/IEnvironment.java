@@ -27,8 +27,8 @@
 
 package memory;
 
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import memory.structure.IndexedBipartiteSet;
 import memory.structure.Operation;
 

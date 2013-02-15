@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.UndirectedGraph;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.UndirectedGraph;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;

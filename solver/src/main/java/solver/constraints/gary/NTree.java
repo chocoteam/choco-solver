@@ -29,11 +29,11 @@ package solver.constraints.gary;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.DirectedGraph;
-import memory.graphs.Orientation;
-import memory.graphs.graphOperations.GraphTools;
-import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.graphs.Orientation;
+import common.util.graphOperations.GraphTools;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropNTree;
 import solver.constraints.propagators.gary.basic.PropKLoops;

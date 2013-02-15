@@ -27,7 +27,7 @@
 
 package solver.variables;
 
-import memory.setDataStructures.ISet;
+import common.util.objects.setDataStructures.ISet;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetIntVarImpl;

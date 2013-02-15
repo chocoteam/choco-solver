@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
-import memory.setDataStructures.ISet;
+import common.util.graphOperations.connectivity.ConnectivityFinder;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

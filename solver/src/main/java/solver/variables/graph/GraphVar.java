@@ -28,8 +28,8 @@
 package solver.variables.graph;
 
 import memory.IEnvironment;
-import memory.graphs.IGraph;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.IGraph;
+import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

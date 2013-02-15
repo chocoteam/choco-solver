@@ -27,7 +27,7 @@
 
 package solver.variables;
 
-import memory.setDataStructures.ISet;
+import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;

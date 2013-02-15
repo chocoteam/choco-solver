@@ -27,7 +27,7 @@
 
 package solver.variables.graph;
 
-import memory.setDataStructures.linkedlist.Set_Std_LinkedList;
+import common.util.objects.setDataStructures.linkedlist.Set_Std_LinkedList;
 import memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;

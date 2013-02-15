@@ -27,7 +27,7 @@
 package solver.constraints.gary.relations;
 
 import common.ESat;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

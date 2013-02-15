@@ -27,8 +27,8 @@
 
 package solver.constraints.gary;
 
-import memory.graphs.Orientation;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.Orientation;
+import common.util.objects.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;

@@ -29,9 +29,9 @@ package solver.constraints.propagators.gary.degree;
 
 import common.ESat;
 import common.util.procedure.PairProcedure;
-import memory.graphs.IGraph;
-import memory.graphs.Orientation;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.IGraph;
+import common.util.objects.graphs.Orientation;
+import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;

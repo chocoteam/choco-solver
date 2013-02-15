@@ -28,11 +28,11 @@
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.DirectedGraph;
-import memory.graphs.UndirectedGraph;
-import memory.graphs.graphOperations.dominance.LCAGraphManager;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.graphs.UndirectedGraph;
+import common.util.graphOperations.dominance.LCAGraphManager;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import java.util.Arrays;
