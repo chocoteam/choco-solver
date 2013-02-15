@@ -26,6 +26,11 @@
  */
 package solver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Properties;
+
 /**
  * Global settings
  * <br/>
@@ -36,37 +41,54 @@ package solver;
 public enum Configuration {
     ;
 
-    public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
+    private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
-    public static final String WELCOME_VERSION = "** CHOCO v{} ({}, {}), Copyleft (c) 2010-{}";
+    private static final String UDPATH = "/user.properties";
 
-    public static final String CALLER = "** Solve : {}";
+    private static final String PATH = "/configuration.properties";
 
-    public static final String RELEASE_VERSION = "3.0";
+    private static Properties properties = new Properties();
 
-    public static final String RELEASE_MONTH = "Feb.";
+    static {
+        try {
+            properties.load(Configuration.class.getResourceAsStream(PATH));
+        } catch (Exception e) {
+            logger.error("Unable to load " + PATH + " file from classpath.", e);
+            System.exit(1);
+        }
+        // then override values, if any
+        try {
+            properties.load(Configuration.class.getResourceAsStream(UDPATH));
+        } catch (NullPointerException e) {
+            //            logger.warn("No user defined properties. Skip loading " + UDPATH + " file.");
+        } catch (Exception e) {
+            logger.error("Unable to load " + UDPATH + " file from classpath.", e);
+        }
+    }
 
-    public static final String RELEASE_YEAR = "2013";
+    public static final String WELCOME_TITLE = properties.getProperty("WELCOME_TITLE");
+
+    public static final String CALLER = properties.getProperty("CALLER");
 
     // Set to true plugged explanation engine -- enable total deconnection from variable
-    public static final boolean PLUG_EXPLANATION = false;
+    public static final boolean PLUG_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PLUG_EXPLANATION"));
 
     // Set to true to print propagation information
-    public static final boolean PRINT_PROPAGATION = false;
+    public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));
 
     // Set to true to print event occurring on variables
-    public static final boolean PRINT_VAR_EVENT = false;
+    public static final boolean PRINT_VAR_EVENT = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));
 
     // Set to true to print scheduling information
-    public static final boolean PRINT_SCHEDULE = false;
+    public static final boolean PRINT_SCHEDULE = Boolean.parseBoolean(properties.getProperty("PRINT_SCHEDULE"));
+
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;
-    /**
-     * Defines the rounding precision for multicostregular algorithm
-     */
-    public static final int MCR_PRECISION = 4; // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
-    /**
-     * Defines the smallest used double for multicostregular
-     */
+
+    // Defines the rounding precision for multicostregular algorithm
+    // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
+    public static final int MCR_PRECISION = Integer.parseInt(properties.getProperty("MCR_PRECISION"));
+
+    // Defines the smallest used double for multicostregular
     public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
 }

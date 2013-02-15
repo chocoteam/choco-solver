@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;
 
-import java.util.Calendar;
-
 /**
  * Basic search monitor logger, which prints welcome message at the beginning od the search and
  * search statistics at the end of the search.
@@ -57,9 +55,6 @@ public final class LogBasic implements IMonitorInitialize, IMonitorClose {
     public void beforeInitialize() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(Configuration.WELCOME_TITLE);
-            LOGGER.info(Configuration.WELCOME_VERSION,
-                    new Object[]{Configuration.RELEASE_VERSION, Configuration.RELEASE_MONTH, Configuration.RELEASE_YEAR,
-                            Calendar.getInstance().get(Calendar.YEAR)});
             LOGGER.info(Configuration.CALLER, solver.getName());
         }
     }
