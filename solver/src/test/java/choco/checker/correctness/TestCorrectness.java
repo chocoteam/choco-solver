@@ -253,6 +253,29 @@ public class TestCorrectness {
         }
     }
 
+    // LEX CHAIN
+    @Test(groups = "1m")
+    public void testLEXCH1() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 3; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelLexChainAC, n, -n, 2 * n, seed, true);
+            }
+
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testLEXCH2() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 3; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelLexChainAC, n, -n, 2 * n, seed, false);
+            }
+
+        }
+    }
+
     // ELEMENT
     @Test(groups = "1m")
     public void testELEMENTBC() {

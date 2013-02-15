@@ -27,7 +27,6 @@
 
 package choco.checker;
 
-import com.sun.org.apache.xpath.internal.operations.Variable;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
@@ -36,6 +35,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.lex.Lex;
+import solver.constraints.nary.lex.LexChain;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -342,10 +342,10 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-			IntVar tmp = VariableFactory.bounded("occ",0,vars.length,s);
-			Constraint link = IntConstraintFactory.arithm(tmp, ro, occVar);
+            IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
+            Constraint link = IntConstraintFactory.arithm(tmp, ro, occVar);
             Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
-            Constraint[] ctrs = new Constraint[]{ctr,link};
+            Constraint[] ctrs = new Constraint[]{ctr, link};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
@@ -377,10 +377,10 @@ public interface Modeler {
                     ro = ">=";
                     break;
             }
-			IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
-			Constraint link = IntConstraintFactory.arithm(tmp,ro,occVar);
+            IntVar tmp = VariableFactory.bounded("occ", 0, vars.length, s);
+            Constraint link = IntConstraintFactory.arithm(tmp, ro, occVar);
             Constraint ctr = IntConstraintFactory.count(params[1], vars, tmp);
-            Constraint[] ctrs = new Constraint[]{ctr,link};
+            Constraint[] ctrs = new Constraint[]{ctr, link};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
@@ -415,6 +415,36 @@ public interface Modeler {
         }
     };
 
+    Modeler modelLexChainAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("LexChain");
+
+            IntVar[] X = new IntVar[n / 3];
+            for (int i = 0; i < n / 3; i++) {
+                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], X[i]);
+            }
+            IntVar[] Y = new IntVar[n / 3];
+            for (int i = n / 3; i < 2 * n / 3; i++) {
+                Y[i - n / 3] = VariableFactory.enumerated("Y_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], Y[i - n / 3]);
+            }
+            IntVar[] Z = new IntVar[n / 3];
+            for (int i = 2 * n / 3; i < n; i++) {
+                Z[i - 2 * n / 3] = VariableFactory.enumerated("Z_" + i, domains[i], s);
+                if (map != null) map.put(domains[i], Z[i - 2 * n / 3]);
+            }
+            Constraint ctr = new LexChain((Boolean) parameters, s, X, Y, Z);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y));
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
     Modeler modelNthBC = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
@@ -426,7 +456,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 if (map != null) map.put(domains[i], vars[i]);
             }
-            Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1],0,"detect");
+            Constraint ctr = IntConstraintFactory.element(vars[0], new int[]{-2, 0, 1, -1, 0, 4}, vars[1], 0, "detect");
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);

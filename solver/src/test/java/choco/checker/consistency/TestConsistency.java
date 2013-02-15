@@ -286,6 +286,20 @@ public class TestConsistency {
     }
 
     @Test(groups = "1m")
+    public void testLEXC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, true, seed + i, "ac");
+    }
+
+    @Test(groups = "10s")
+    public void testLEXC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelLexChainAC, 9, -10, 10, false, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
     public void testELEMENTBC1() {
         long seed = 0;//System.currentTimeMillis();
         for (int i = 0; i < 999; i++) {
