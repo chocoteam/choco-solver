@@ -27,7 +27,7 @@
 package solver.search.strategy.selectors.graph.arcs;
 
 import gnu.trove.list.array.TIntArrayList;
-import memory.setDataStructures.ISet;
+import common.util.objects.setDataStructures.ISet;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
 

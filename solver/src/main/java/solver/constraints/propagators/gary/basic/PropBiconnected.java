@@ -28,7 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import memory.graphs.graphOperations.connectivity.ConnectivityFinder;
+import common.util.graphOperations.connectivity.ConnectivityFinder;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

@@ -27,7 +27,7 @@
 
 package samples.graph;
 
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.graph.input.TSP_Utils;

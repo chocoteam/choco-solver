@@ -27,8 +27,8 @@
 
 package solver.variables.graph;
 
-import memory.graphs.DirectedGraph;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;

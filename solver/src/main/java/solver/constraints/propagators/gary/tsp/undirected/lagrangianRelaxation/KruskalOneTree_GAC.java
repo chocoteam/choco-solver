@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
-import memory.graphs.UndirectedGraph;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.UndirectedGraph;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.KruskalMSTFinder;
 import solver.exception.ContradictionException;

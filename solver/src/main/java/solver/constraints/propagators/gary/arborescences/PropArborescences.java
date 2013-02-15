@@ -28,12 +28,12 @@
 package solver.constraints.propagators.gary.arborescences;
 
 import common.ESat;
-import memory.graphs.DirectedGraph;
-import memory.graphs.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import memory.graphs.graphOperations.dominance.AlphaDominatorsFinder;
-import memory.graphs.graphOperations.dominance.SimpleDominatorsFinder;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import common.util.graphOperations.dominance.AlphaDominatorsFinder;
+import common.util.graphOperations.dominance.SimpleDominatorsFinder;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

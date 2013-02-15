@@ -29,11 +29,11 @@ package solver.constraints.propagators.gary.arborescences;
 
 import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
-import memory.graphs.DirectedGraph;
-import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
-import memory.graphs.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import memory.graphs.graphOperations.dominance.AlphaDominatorsFinder;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import common.util.graphOperations.dominance.AlphaDominatorsFinder;
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

@@ -27,8 +27,8 @@
 
 package samples.sandbox.lns.parallel;
 
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import samples.sandbox.parallelism.AbstractParallelMaster;
 import samples.sandbox.parallelism.AbstractParallelSlave;
 import solver.ResolutionPolicy;

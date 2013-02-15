@@ -30,9 +30,9 @@ package memory.copy;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.*;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetFactory;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetFactory;
+import common.util.objects.setDataStructures.SetType;
 import memory.structure.Operation;
 import solver.propagation.queues.LinkedList;
 

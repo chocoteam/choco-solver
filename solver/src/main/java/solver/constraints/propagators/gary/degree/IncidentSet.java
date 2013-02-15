@@ -34,8 +34,8 @@
 
 package solver.constraints.propagators.gary.degree;
 
-import memory.graphs.IGraph;
-import memory.setDataStructures.ISet;
+import common.util.objects.graphs.IGraph;
+import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphVar;
