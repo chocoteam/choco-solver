@@ -26,7 +26,7 @@
  */
 package solver.constraints.gary;
 
-import memory.graphs.Orientation;
+import common.util.objects.graphs.Orientation;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;

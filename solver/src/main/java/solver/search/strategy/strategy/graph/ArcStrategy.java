@@ -26,7 +26,7 @@
  */
 package solver.search.strategy.strategy.graph;
 
-import memory.setDataStructures.ISet;
+import common.util.objects.setDataStructures.ISet;
 import solver.variables.graph.GraphVar;
 
 public abstract class ArcStrategy<G extends GraphVar> {

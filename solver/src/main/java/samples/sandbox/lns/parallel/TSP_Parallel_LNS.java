@@ -27,8 +27,8 @@
 
 package samples.sandbox.lns.parallel;
 
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
 import samples.sandbox.parallelism.AbstractParallelMaster;

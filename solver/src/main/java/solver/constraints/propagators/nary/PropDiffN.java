@@ -28,10 +28,10 @@ package solver.constraints.propagators.nary;
 
 import common.ESat;
 import common.util.tools.ArrayUtils;
-import memory.graphs.UndirectedGraph;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetFactory;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.UndirectedGraph;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetFactory;
+import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

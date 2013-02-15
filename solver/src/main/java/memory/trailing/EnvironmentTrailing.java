@@ -29,9 +29,9 @@ package memory.trailing;
 
 
 import memory.*;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetFactory;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetFactory;
+import common.util.objects.setDataStructures.SetType;
 import memory.structure.Operation;
 import memory.trailing.trail.*;
 

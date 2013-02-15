@@ -37,9 +37,9 @@ import memory.buffer.type.safe.LongBuffering;
 import memory.buffer.type.unsafe.BoolBufferingUnsafe;
 import memory.buffer.type.unsafe.IntBufferingUnsafe;
 import memory.buffer.type.unsafe.LongBufferingUnsafe;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetFactory;
-import memory.setDataStructures.SetType;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetFactory;
+import common.util.objects.setDataStructures.SetType;
 import memory.structure.Operation;
 
 /**

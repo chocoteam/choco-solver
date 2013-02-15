@@ -28,10 +28,10 @@ package solver.constraints.propagators.gary.path;
 
 import common.ESat;
 import common.util.procedure.PairProcedure;
-import memory.graphs.DirectedGraph;
-import memory.graphs.graphOperations.connectivity.StrongConnectivityFinder;
-import memory.setDataStructures.ISet;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

@@ -27,8 +27,8 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
-import memory.graphs.UndirectedGraph;
-import memory.setDataStructures.SetType;
+import common.util.objects.graphs.UndirectedGraph;
+import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 
