@@ -38,7 +38,6 @@ import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.restart.RestartFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -165,7 +164,7 @@ public class RLFAP extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.domOverWDeg_InDomainMin(vars, seed));
-        SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2), new FailLimit(solver, 2), 25000);
+        SearchMonitorFactory.luby(solver, 2, 2, new FailLimit(solver, 2), 25000);
     }
 
     @Override

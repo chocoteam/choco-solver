@@ -53,7 +53,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(2, 1.2),
+        SearchMonitorFactory.geometrical(solver, 2, 1.2,
                 new NodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
@@ -65,7 +65,7 @@ public class RestartTest {
     @Test(groups = "1s")
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
-        SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
+        SearchMonitorFactory.luby(solver, 2, 2,
                 new NodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution

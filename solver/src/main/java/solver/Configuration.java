@@ -70,8 +70,11 @@ public enum Configuration {
 
     public static final String CALLER = properties.getProperty("CALLER");
 
-    // Set to true plugged explanation engine -- enable total deconnection from variable
+    // Set to true to plug explanation engine in -- enable total disconnection
     public static final boolean PLUG_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PLUG_EXPLANATION"));
+
+    // Set to true to print explanation information
+    public static final boolean PRINT_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PRINT_EXPLANATION"));
 
     // Set to true to print propagation information
     public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));

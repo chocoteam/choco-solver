@@ -45,36 +45,21 @@ public enum ExplanationFactory {
     }, RECORDER {
         @Override
         public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, false));
-        }
-    }, TRACERECORDER {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false, true));
+            solver.set(ExplanationFactory.engineFactory(solver, false));
         }
     }, FLATTEN {
         @Override
         public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, false));
-        }
-    }, TRACEFLATTEN {
-        @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true, true));
+            solver.set(ExplanationFactory.engineFactory(solver, true));
         }
     };
 
     public abstract void make(Solver solver);
 
 
-    public static ExplanationEngine engineFactory(Solver slv) {
-        return ExplanationFactory.engineFactory(slv, false, false);
-    }
-
-    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
+    private static ExplanationEngine engineFactory(Solver slv, boolean flattened) {
         ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
                 : new RecorderExplanationEngine(slv);
-//        if (trace) eng.addExplanationMonitor(eng);
         return eng;
     }
 }
