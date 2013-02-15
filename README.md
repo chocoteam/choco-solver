@@ -13,3 +13,8 @@ Choco3 comes with:
 
 But also, a FlatZinc parser, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
+Choco3 is distrubuted under BSD licence (Copyright (c) 1999-2013, Ecole des Mines de Nantes).
+
+
+===================
+The Choco3 dev team.
