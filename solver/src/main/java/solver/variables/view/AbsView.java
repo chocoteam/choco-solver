@@ -55,9 +55,6 @@ import solver.variables.delta.NoDelta;
  */
 public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
-    protected DisposableValueIterator _viterator;
-    protected DisposableRangeIterator _riterator;
-
     public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);
     }
@@ -353,11 +350,13 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
                     u2l = var.getValueIterator(false);
 
                     super.topDownInit();
-                    if (l2u.hasNext()) {
+                    while (l2u.hasNext()) {
                         this.vl2u = l2u.next();
+                        if (this.vl2u >= 0) break;
                     }
-                    if (u2l.hasPrevious()) {
+                    while (u2l.hasPrevious()) {
                         this.vu2l = u2l.previous();
+                        if (this.vu2l <= 0) break;
                     }
                 }
 
@@ -394,11 +393,19 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
                 @Override
                 public int previous() {
                     int max = -this.vl2u > this.vu2l ? -this.vl2u : this.vu2l;
-                    if (-this.vl2u == max && this.l2u.hasNext()) {
-                        this.vl2u = this.l2u.next();
+                    if (this.vl2u == max) {
+                        if (this.l2u.hasNext()) {
+                            this.vl2u = l2u.next();
+                        } else {
+                            this.vl2u = Integer.MAX_VALUE;
+                        }
                     }
-                    if (this.vu2l == max && this.u2l.hasPrevious()) {
-                        this.vu2l = u2l.previous();
+                    if (-this.vu2l == max) {
+                        if (this.u2l.hasPrevious()) {
+                            this.vu2l = u2l.previous();
+                        } else {
+                            this.vu2l = -Integer.MAX_VALUE;
+                        }
                     }
                     return max;
                 }

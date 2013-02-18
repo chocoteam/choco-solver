@@ -54,9 +54,6 @@ import solver.variables.delta.NoDelta;
  */
 public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
-    protected DisposableValueIterator _viterator;
-    protected DisposableRangeIterator _riterator;
-
     public SqrView(IntVar var, Solver solver) {
         super("(" + var.getName() + "^2)", var, solver);
     }
@@ -398,11 +395,13 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                     u2l = var.getValueIterator(false);
 
                     super.topDownInit();
-                    if (l2u.hasNext()) {
+                    while (l2u.hasNext()) {
                         this.vl2u = l2u.next();
+                        if (this.vl2u >= 0) break;
                     }
-                    if (u2l.hasPrevious()) {
+                    while (u2l.hasPrevious()) {
                         this.vu2l = u2l.previous();
+                        if (this.vu2l <= 0) break;
                     }
                 }
 
@@ -439,11 +438,19 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                 @Override
                 public int previous() {
                     int max = -this.vl2u > this.vu2l ? -this.vl2u : this.vu2l;
-                    if (-this.vl2u == max && this.l2u.hasNext()) {
-                        this.vl2u = this.l2u.next();
+                    if (-this.vl2u == max) {
+                        if (this.l2u.hasNext()) {
+                            this.vl2u = this.l2u.next();
+                        } else {
+                            this.vl2u = Integer.MAX_VALUE;
+                        }
                     }
-                    if (this.vu2l == max && this.u2l.hasPrevious()) {
-                        this.vu2l = u2l.previous();
+                    if (this.vu2l == max) {
+                        if (this.u2l.hasPrevious()) {
+                            this.vu2l = u2l.previous();
+                        } else {
+                            this.vu2l = -Integer.MAX_VALUE;
+                        }
                     }
                     return max * max;
                 }
@@ -475,8 +482,8 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                 int Ml2u;
                 int mu2l;
                 int Mu2l;
-                int value;
-                int bound;
+                int min;
+                int max;
 
                 @Override
                 public void bottomUpInit() {
@@ -516,7 +523,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                         }
                         u2l.previous();
                     }
-                    _next();
+                    next();
                 }
 
                 @Override
@@ -525,7 +532,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                     u2l = var.getRangeIterator(false);
 
                     super.topDownInit();
-                    ml2u = Ml2u = mu2l = Mu2l = Integer.MIN_VALUE;
+                    ml2u = Ml2u = mu2l = Mu2l = Integer.MAX_VALUE;
 
                     if (l2u.hasNext()) {
                         if (l2u.max() <= 0) {
@@ -547,39 +554,26 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                         }
                         u2l.previous();
                     }
-                    _previous();
+                    previous();
                 }
 
                 @Override
                 public boolean hasNext() {
-                    if (value < bound) {
-                        value++;
-                    }
-                    return value < Integer.MAX_VALUE;
+                    return min < Integer.MAX_VALUE;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    if (value > bound) {
-                        value--;
-                    }
-                    return value > Integer.MIN_VALUE;
+                    return min < Integer.MAX_VALUE;
                 }
 
                 @Override
                 public void next() {
-                    if (value >= bound) {
-                        _next();
-                    }
-                }
-
-
-                private void _next() {
-                    value = bound = Integer.MAX_VALUE;
+                    min = max = Integer.MAX_VALUE;
                     // disjoint ranges
                     if (Ml2u < mu2l - 1) {
-                        value = ml2u - 1; //-1 due to hasNext()
-                        bound = Ml2u;
+                        min = ml2u;
+                        max = Ml2u;
                         if (l2u.hasNext()) {
                             ml2u = l2u.min();
                             Ml2u = l2u.max();
@@ -589,8 +583,8 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                             Ml2u = Integer.MAX_VALUE;
                         }
                     } else if (Mu2l < ml2u - 1) {
-                        value = mu2l - 1; //-1 due to hasNext()
-                        bound = Mu2l;
+                        min = mu2l;
+                        max = Mu2l;
                         if (u2l.hasPrevious()) {
                             Mu2l = -u2l.min();
                             mu2l = -u2l.max();
@@ -602,20 +596,20 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                     } else {
                         // we build the current range
                         if (Ml2u + 1 == mu2l) {
-                            value = ml2u - 1; //-1 due to hasNext()
-                            bound = Mu2l;
+                            min = ml2u;
+                            max = Mu2l;
                         } else if (Mu2l + 1 == ml2u) {
-                            value = mu2l - 1; //-1 due to hasNext()
-                            bound = Ml2u;
+                            min = mu2l;
+                            max = Ml2u;
                         } else {
-                            value = ml2u < mu2l ? ml2u : mu2l;
-                            bound = Ml2u < Mu2l ? Ml2u : Mu2l;
+                            min = ml2u < mu2l ? ml2u : mu2l;
+                            max = Ml2u < Mu2l ? Ml2u : Mu2l;
                         }
                         boolean change;
                         do {
                             change = false;
-                            if (value < ml2u && ml2u <= bound) {
-                                bound = bound > Ml2u ? bound : Ml2u;
+                            if (min <= ml2u && ml2u <= max) {
+                                max = max > Ml2u ? max : Ml2u;
                                 if (l2u.hasNext()) {
                                     ml2u = l2u.min();
                                     Ml2u = l2u.max();
@@ -626,8 +620,8 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                                     Ml2u = Integer.MAX_VALUE;
                                 }
                             }
-                            if (value < mu2l && mu2l <= bound) {
-                                bound = bound > Mu2l ? bound : Mu2l;
+                            if (min <= mu2l && mu2l <= max) {
+                                max = max > Mu2l ? max : Mu2l;
                                 if (u2l.hasPrevious()) {
                                     Mu2l = -u2l.min();
                                     mu2l = -u2l.max();
@@ -644,19 +638,13 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
                 @Override
                 public void previous() {
-                    if (value <= bound) {
-                        _previous();
-                    }
-                }
-
-                private void _previous() {
-                    value = bound = Integer.MIN_VALUE;
+                    min = max = Integer.MAX_VALUE;
                     // disjoint ranges
                     if (ml2u > Mu2l + 1) {
-                        bound = ml2u;
-                        value = Ml2u + 1; //+1 due to hasPrevious()
-                        ml2u = Integer.MIN_VALUE;
-                        Ml2u = Integer.MIN_VALUE;
+                        min = ml2u;
+                        max = Ml2u;
+                        ml2u = Integer.MAX_VALUE;
+                        Ml2u = Integer.MAX_VALUE;
                         if (l2u.hasNext()) {
                             //la: gerer le 0 et les autres cas
                             if (l2u.max() <= 0) {
@@ -668,11 +656,11 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                             }
                             l2u.next();
                         }
-                    } else if (Mu2l + 1 < ml2u) {
-                        bound = mu2l;
-                        value = Mu2l + 1; //+1 due to hasPrevious()
-                        mu2l = Integer.MIN_VALUE;
-                        Mu2l = Integer.MIN_VALUE;
+                    } else if (Mu2l < ml2u - 1) {
+                        min = mu2l;
+                        max = Mu2l;
+                        mu2l = Integer.MAX_VALUE;
+                        Mu2l = Integer.MAX_VALUE;
                         if (u2l.min() >= 0) {
                             this.mu2l = u2l.min();
                             this.Mu2l = u2l.max();
@@ -683,22 +671,22 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                     } else {
                         // we build the current range
                         if (Ml2u + 1 == mu2l) {
-                            bound = ml2u;
-                            value = Mu2l + 1; //+1 due to hasPrevious()
+                            min = ml2u;
+                            max = Mu2l;
                         } else if (Mu2l + 1 == ml2u) {
-                            bound = mu2l;
-                            value = Ml2u + 1; //+1 due to hasPrevious()
+                            min = mu2l;
+                            max = Ml2u;
                         } else {
-                            bound = ml2u > mu2l ? ml2u : mu2l;
-                            value = (Ml2u > Mu2l ? Ml2u : Mu2l) + 1; //+1 due to hasPrevious()
+                            min = ml2u > mu2l ? ml2u : mu2l;
+                            max = Ml2u > Mu2l ? Ml2u : Mu2l;
                         }
                         boolean change;
                         do {
                             change = false;
-                            if (bound <= Ml2u && Ml2u < value) {
-                                bound = bound < ml2u ? bound : ml2u;
-                                ml2u = Integer.MIN_VALUE;
-                                Ml2u = Integer.MIN_VALUE;
+                            if (min <= Ml2u && Ml2u <= max) {
+                                min = min < ml2u ? min : ml2u;
+                                ml2u = Integer.MAX_VALUE;
+                                Ml2u = Integer.MAX_VALUE;
                                 if (l2u.hasNext()) {
                                     if (l2u.max() <= 0) {
                                         this.ml2u = -l2u.max();
@@ -711,10 +699,10 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                                     change = true;
                                 }
                             }
-                            if (bound <= mu2l && mu2l < value) {
-                                bound = bound < mu2l ? bound : mu2l;
-                                mu2l = Integer.MIN_VALUE;
-                                Mu2l = Integer.MIN_VALUE;
+                            if (min <= mu2l && mu2l <= max) {
+                                min = min < mu2l ? min : mu2l;
+                                mu2l = Integer.MAX_VALUE;
+                                Mu2l = Integer.MAX_VALUE;
                                 if (u2l.hasPrevious()) {
                                     if (u2l.min() >= 0) {
                                         this.mu2l = u2l.min();
@@ -733,12 +721,12 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
                 @Override
                 public int min() {
-                    return value * value;
+                    return min * min;
                 }
 
                 @Override
                 public int max() {
-                    return value * value;
+                    return max * max;
                 }
 
                 @Override

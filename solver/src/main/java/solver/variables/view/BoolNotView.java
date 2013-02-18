@@ -27,8 +27,6 @@
 package solver.variables.view;
 
 import common.ESat;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -141,22 +139,12 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
 
     @Override
     public int nextValue(int v) {
-        return var.previousValue(v);
+        return var.previousValue(1 - v);
     }
 
     @Override
     public int previousValue(int v) {
-        return var.nextValue(v);
-    }
-
-    @Override
-    public DisposableValueIterator getValueIterator(boolean bottomUp) {
-        return var.getValueIterator(!bottomUp);
-    }
-
-    @Override
-    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        return var.getRangeIterator(!bottomUp);
+        return var.nextValue(1 - v);
     }
 
     @Override
@@ -179,7 +167,7 @@ public class BoolNotView extends IntView<OneValueDelta, BoolVar<OneValueDelta>> 
         };
     }
 
-	public String toString(){
-		return "not(" + var.getName() + ")";
-	}
+    public String toString() {
+        return "not(" + var.getName() + ")";
+    }
 }

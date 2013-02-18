@@ -26,6 +26,8 @@
  */
 package solver.variables;
 
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -67,6 +69,35 @@ public class BoolNotViewTest {
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt() {
+        Solver ref = new Solver();
+        BoolVar o = VariableFactory.bool("b", ref);
+        BoolVar v = VariableFactory.not(o);
+        DisposableValueIterator vit = v.getValueIterator(true);
+        while (vit.hasNext()) {
+            Assert.assertTrue(o.contains(vit.next()));
+        }
+        vit.dispose();
+        vit = v.getValueIterator(false);
+        while (vit.hasNext()) {
+            Assert.assertTrue(o.contains(vit.next()));
+        }
+        vit.dispose();
+        DisposableRangeIterator rit = v.getRangeIterator(true);
+        while (rit.hasNext()) {
+            rit.next();
+            Assert.assertTrue(o.contains(rit.min()));
+            Assert.assertTrue(o.contains(rit.max()));
+        }
+        rit = v.getRangeIterator(false);
+        while (rit.hasNext()) {
+            rit.next();
+            Assert.assertTrue(o.contains(rit.min()));
+            Assert.assertTrue(o.contains(rit.max()));
         }
     }
 }

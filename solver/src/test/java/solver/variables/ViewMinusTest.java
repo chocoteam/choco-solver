@@ -26,6 +26,9 @@
  */
 package solver.variables;
 
+import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -152,6 +155,74 @@ public class ViewMinusTest {
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 20; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.minus(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(-vit.next()));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-vit.previous()));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.previous();
+            }
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 40; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.minus(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(-vit.next()));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-vit.previous()));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.previous();
+            }
         }
     }
 

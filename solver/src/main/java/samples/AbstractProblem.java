@@ -141,11 +141,6 @@ public abstract class AbstractProblem {
             }
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    if (userInterruption()) {
-                        if (level.getLevel() > Level.SILENT.getLevel()) {
-                            log.info("User interruption...");
-                        }
-                    }
                     if (level.getLevel() > Level.QUIET.getLevel()) {
                         prettyOut();
                     }
@@ -153,6 +148,11 @@ public abstract class AbstractProblem {
                         log.info("{}", solver.getMeasures().toString());
                     } else if (level.getLevel() > Level.SILENT.getLevel()) {
                         log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                    }
+                    if (userInterruption()) {
+                        if (level.getLevel() > Level.SILENT.getLevel()) {
+                            log.info("Unexpected resolution interruption!");
+                        }
                     }
 
                 }

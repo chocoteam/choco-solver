@@ -53,8 +53,6 @@ import solver.variables.delta.NoDelta;
  */
 public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
-    DisposableValueIterator _viterator;
-    DisposableRangeIterator _riterator;
 
     public MinusView(final IntVar var, Solver solver) {
         super("-(" + var.getName() + ")", var, solver);
