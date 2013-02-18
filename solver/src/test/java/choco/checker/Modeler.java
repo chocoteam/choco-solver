@@ -438,7 +438,7 @@ public interface Modeler {
             Constraint ctr = new LexChain((Boolean) parameters, s, X, Y, Z);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y));
+            AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(ArrayUtils.append(X, Y, Z));
             s.post(ctrs);
             s.set(strategy);
             return s;
