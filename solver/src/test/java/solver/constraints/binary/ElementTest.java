@@ -36,7 +36,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.explanations.strategies.DynamicBacktrackFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -115,8 +114,7 @@ public class ElementTest {
     public void test5() {
         if (Configuration.PLUG_EXPLANATION) {
             Solver s = new Solver();
-            ExplanationFactory.RECORDER.make(s);
-            DynamicBacktrackFactory.cbj(s);
+            ExplanationFactory.CBJ.plugin(s, false);
 
             Random r = new Random(125);
             int[] values = new int[10];

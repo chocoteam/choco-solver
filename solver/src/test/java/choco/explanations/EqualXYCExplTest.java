@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.explanations.strategies.DynamicBacktrackFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -62,8 +61,7 @@ public class EqualXYCExplTest {
 
         Solver ref = new Solver();
         Solver sol = new Solver();
-        ExplanationFactory.FLATTEN.make(sol);
-        DynamicBacktrackFactory.cbj(sol);
+        ExplanationFactory.CBJ.plugin(sol, true);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];

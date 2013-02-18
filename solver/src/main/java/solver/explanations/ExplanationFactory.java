@@ -28,8 +28,14 @@
 package solver.explanations;
 
 import solver.Solver;
+import solver.explanations.strategies.ConflictBasedBackjumping;
+import solver.explanations.strategies.IDecisionJumper;
+import solver.explanations.strategies.PathRepair;
+import solver.explanations.strategies.jumper.RandomDecisionJumper;
 
 /**
+ * A non exhaustive list of ways to plug and exploit explanations.
+ * <br/>
  * Created by IntelliJ IDEA.
  * User: njussien
  * Date: 19/10/11
@@ -39,27 +45,78 @@ public enum ExplanationFactory {
 
     NONE {
         @Override
-        public void make(Solver solver) {
+        public void plugin(Solver solver, boolean flattened) {
             solver.set(new ExplanationEngine(solver));
         }
-    }, RECORDER {
+    },
+    /**
+     * Active explanations, but do not interact with search.
+     */
+    SILENT {
         @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, false));
+        public void plugin(Solver solver, boolean flattened) {
+            plugExpl(solver, flattened);
         }
-    }, FLATTEN {
+    },
+    /**
+     * add a Conflict-based jumping policy on contradiction to an explained solver.
+     * It backtracks up to most recent decision involved in the explanation, and forget younger decisions.
+     */
+    CBJ {
         @Override
-        public void make(Solver solver) {
-            solver.set(ExplanationFactory.engineFactory(solver, true));
+        public void plugin(Solver solver, boolean flattened) {
+            plugExpl(solver, flattened);
+            new ConflictBasedBackjumping(solver.getExplainer());
+        }
+    },
+    /**
+     * add a Dynamic-Backtracking policy on contradiction to an explained solver.
+     * It backtracks up to most recent decision involved in the explanation.
+     */
+    DBT {
+        @Override
+        public void plugin(Solver solver, boolean flattened) {
+            plugExpl(solver, flattened);
         }
     };
 
-    public abstract void make(Solver solver);
+    /**
+     * Plug explanations into coe<code>solver</code>.
+     *
+     * @param solver    the solver to observe
+     * @param flattened should explanations be flattened?
+     */
+    public abstract void plugin(Solver solver, boolean flattened);
 
 
-    private static ExplanationEngine engineFactory(Solver slv, boolean flattened) {
-        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                : new RecorderExplanationEngine(slv);
-        return eng;
+    private static void plugExpl(Solver solver, boolean flattened) {
+        assert !solver.getExplainer().isActive() : "Explanations are already turn on!";
+        solver.set(flattened ? new FlattenedRecorderExplanationEngine(solver)
+                : new RecorderExplanationEngine(solver));
+    }
+
+    /**
+     * add a path-repair policy on contradiction to an explained solver.
+     * It backtracks up to a random decision involved in the explanation.
+     *
+     * @param solver    solver which is explained
+     * @param flattened should explanations be flattened?
+     */
+    public static void path_repair(Solver solver, long seed, boolean flattened) {
+        plugExpl(solver, flattened);
+        new PathRepair(solver.getExplainer(), new RandomDecisionJumper(seed));
+    }
+
+    /**
+     * add a path-repair policy on contradiction to an explained solver.
+     * It backtracks up to a decision involved in the explanation, using <code>decisionJumper</code>.
+     *
+     * @param solver         solver which is explained
+     * @param decisionJumper a specific algorithm to decide which decision to jump to.
+     * @param flattened      should explanations be flattened?
+     */
+    public static void path_repair(Solver solver, IDecisionJumper decisionJumper, boolean flattened) {
+        plugExpl(solver, flattened);
+        new PathRepair(solver.getExplainer(), decisionJumper);
     }
 }

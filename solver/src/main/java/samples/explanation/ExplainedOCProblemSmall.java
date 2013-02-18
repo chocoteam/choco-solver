@@ -32,7 +32,6 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.explanations.strategies.DynamicBacktrackFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -74,8 +73,7 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     public void solve() {
         SearchMonitorFactory.log(solver, true, true);
 
-        ExplanationFactory.RECORDER.make(solver);
-        DynamicBacktrackFactory.cbj(solver);
+        ExplanationFactory.CBJ.plugin(solver, false);
 
         if (solver.findSolution()) {
             do {
