@@ -27,6 +27,9 @@
 
 package solver.variables;
 
+import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -161,5 +164,73 @@ public class ScaleViewTest {
         sc.findAllSolutions();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
         //Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 20; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.scale(o, 2);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(vit.next() / 2));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(vit.previous() / 2));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(rit.min() / 2));
+                Assert.assertTrue(o.contains(rit.max() / 2));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(rit.min() / 2));
+                Assert.assertTrue(o.contains(rit.max() / 2));
+                rit.previous();
+            }
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 40; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.scale(o, 2);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(vit.next() / 2));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(vit.previous() / 2));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(rit.min() / 2));
+                Assert.assertTrue(o.contains(rit.max() / 2));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(rit.min() / 2));
+                Assert.assertTrue(o.contains(rit.max() / 2));
+                rit.previous();
+            }
+        }
     }
 }

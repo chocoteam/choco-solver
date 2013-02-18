@@ -27,6 +27,8 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -294,6 +296,100 @@ public class AbsViewTest {
                 message);
         Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),
                 message + " node:" + solver.getMeasures().getNodeCount() + " <= " + ref.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 5; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.abs(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = vit.next();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = vit.previous();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 5; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.abs(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = vit.next();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = vit.previous();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
+        }
     }
 
 }

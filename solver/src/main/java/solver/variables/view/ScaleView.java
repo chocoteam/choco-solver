@@ -55,8 +55,6 @@ import solver.variables.delta.NoDelta;
 public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     public final int cste;
-    DisposableValueIterator _viterator;
-    DisposableRangeIterator _riterator;
 
     public ScaleView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "*" + cste + ")", var, solver);

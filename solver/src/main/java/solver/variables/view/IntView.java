@@ -28,6 +28,10 @@
 package solver.variables.view;
 
 
+import common.util.iterators.DisposableRangeBoundIterator;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueBoundIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -64,6 +68,10 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     protected ID delta;
 
     protected boolean reactOnRemoval;
+
+    protected DisposableValueIterator _viterator;
+
+    protected DisposableRangeIterator _riterator;
 
     public IntView(String name, IV var, Solver solver) {
         super(name, solver);
@@ -147,7 +155,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public void explain( Deduction d, Explanation e) {
+    public void explain(Deduction d, Explanation e) {
         var.explain(VariableState.DOM, e);
     }
 
@@ -166,6 +174,32 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         assert cause != null;
 //        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
+    }
+
+
+    @Override
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueBoundIterator(this);
+        }
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
+    }
+
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeBoundIterator(this);
+        }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
