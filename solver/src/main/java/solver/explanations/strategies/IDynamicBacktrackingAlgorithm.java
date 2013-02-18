@@ -26,8 +26,7 @@
  */
 package solver.explanations.strategies;
 
-import solver.ICause;
-import solver.explanations.Explanation;
+import java.io.Serializable;
 
 /**
  * An interface to define operations of dynamic backtracking, in opposition with "standard backtracking".
@@ -36,14 +35,5 @@ import solver.explanations.Explanation;
  * @author Charles Prud'homme
  * @since 12/02/13
  */
-public interface IDynamicBacktrackingAlgorithm {
-
-
-    /**
-     * Define rules to dynamically backtrack in the tree search, based on <code>explanation</code>.
-     *
-     * @param explanation the explanation of the current failure
-     * @param cause       origin of the failure
-     */
-    void backtrackOn(Explanation explanation, ICause cause);
+public interface IDynamicBacktrackingAlgorithm extends Serializable {
 }

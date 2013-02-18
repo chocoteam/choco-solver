@@ -31,21 +31,24 @@ import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.explanations.BranchingDecision;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationEngine;
+import solver.exception.ContradictionException;
+import solver.explanations.*;
 import solver.explanations.strategies.jumper.MostRecentWorldJumper;
+import solver.search.loop.monitors.IMonitorContradiction;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
 /**
+ * This class describes operations to execute to perform Conflict-based back jumping.
+ * I reacts on contradictions, by computing the decision to bracktrack to, and on solutions to by explaining
+ * the refutation of the decision that leads to the solution.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm {
+public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm, IMonitorContradiction, IMonitorSolution {
 
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
     protected ExplanationEngine mExplanationEngine;
@@ -61,18 +64,53 @@ public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm {
         this.mExplanationEngine = mExplanationEngine;
         this.mSolver = mExplanationEngine.getSolver();
         this.decisionJumper = ws;
+        mSolver.getSearchLoop().plugSearchMonitor(this);
     }
 
     public Solver getSolver() {
         return mSolver;
     }
 
+    @Override
+    public void onContradiction(ContradictionException cex) {
+        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
+            Explanation expl = new Explanation();
+            if (cex.v != null) {
+                cex.v.explain(VariableState.DOM, expl);
+            } else {
+                cex.c.explain(null, expl);
+            }
+            Explanation complete = mExplanationEngine.flatten(expl);
+            if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+                mExplanationEngine.onContradiction(cex, complete);
+            }
+            int upto = decisionJumper.compute(complete, mSolver.getEnvironment().getWorldIndex());
+            mSolver.getSearchLoop().overridePreviousWorld(upto);
+            updateVRExplainUponbacktracking(upto, complete, cex.c);
+        } else {
+            throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
+        }
+    }
 
     @Override
-    public void backtrackOn(Explanation explanation, ICause cause) {
-        int upto = decisionJumper.compute(explanation, mSolver.getEnvironment().getWorldIndex());
-        mSolver.getSearchLoop().overridePreviousWorld(upto);
-        updateVRExplainUponbacktracking(upto, explanation, cause);
+    public void onSolution() {
+        // we need to prepare a "false" backtrack on this decision
+        Decision dec = mSolver.getSearchLoop().decision;
+        while ((dec != RootDecision.ROOT) && (!dec.hasNext())) {
+            dec = dec.getPrevious();
+        }
+        if (dec != RootDecision.ROOT) {
+            Explanation explanation = new Explanation();
+            Decision d = dec.getPrevious();
+            while ((d != RootDecision.ROOT)) {
+                if (d.hasNext()) {
+                    explanation.add(d.getPositiveDeduction());
+                }
+                d = d.getPrevious();
+            }
+            mExplanationEngine.store(dec.getNegativeDeduction(), explanation);
+        }
+        mSolver.getSearchLoop().overridePreviousWorld(1);
     }
 
     /**

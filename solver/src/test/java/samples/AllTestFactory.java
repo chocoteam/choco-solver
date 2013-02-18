@@ -72,10 +72,8 @@ public class AllTestFactory {
 
     ExplanationFactory[] expFact = new ExplanationFactory[]{
             ExplanationFactory.NONE,
-            ExplanationFactory.FLATTEN,
-            ExplanationFactory.RECORDER,
-//            ExplanationFactory.TRACEFLATTEN,
-//            ExplanationFactory.TRACERECORDER
+            ExplanationFactory.CBJ,
+            ExplanationFactory.DBT,
     };
 
     SearchLoops[] slFact = new SearchLoops[]{
@@ -94,7 +92,7 @@ public class AllTestFactory {
         for (int p = 0; p < problems.length; p++)
             for (ExplanationFactory x : expFact)
                 for (SearchLoops sl : slFact) {
-                    ISolverProperties pr = new AllSolverProp(sl, x);
+                    ISolverProperties pr = new AllSolverProp(sl, x, false);
                     for (Environments e : envFact)
                         for (PropagationStrategies st : pol)
                             lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, st, nbSol[p]));

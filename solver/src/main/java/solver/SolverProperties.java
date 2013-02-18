@@ -47,6 +47,6 @@ public enum SolverProperties implements ISolverProperties {
     public void loadPropertiesIn(Solver solver) {
         Environments.TRAIL.make();
         SearchLoops.DEFAULT.make(solver);
-        ExplanationFactory.NONE.make(solver);
+        ExplanationFactory.NONE.plugin(solver, false);
     }
 }

@@ -102,11 +102,14 @@ public class ParseAndSolve {
     @Option(name = "-sp", usage = "Search pattern.", required = false)
     protected SearchPattern searchp = SearchPattern.NONE;
 
-    @Option(name = "-exp", usage = "Explanation engine.", required = false)
-    protected ExplanationFactory expeng = ExplanationFactory.NONE;
+    @Option(name = "-exp", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
+    ExplanationFactory expeng = ExplanationFactory.NONE;
+
+    @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
+    protected boolean fexp = false;
 
 
-    @Option(name = "-l", aliases = {"--loop"}, usage = "Loooooop.", required = false)
+    @Option(name = "-l", aliases = {"--loop"}, usage = "Set the number of times a problem is solved (default: 1).", required = false)
     protected long l = 1;
 
     private boolean userinterruption = true;
@@ -184,7 +187,13 @@ public class ParseAndSolve {
                     assert acsv != null;
                     acsv.setSolver(solver);
                 }
-                expeng.make(solver);
+                if (!solver.getExplainer().isActive()) {
+                    if (expeng != ExplanationFactory.NONE) {
+                        expeng.plugin(solver, fexp);
+                    } else if (fexp) {
+                        ExplanationFactory.SILENT.plugin(solver, fexp);
+                    }
+                }
 
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());

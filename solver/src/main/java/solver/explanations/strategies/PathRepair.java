@@ -37,7 +37,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 
 /**
- * A dynamic backtracking algorithm based on the decisio-repair, or path-repair principle.
+ * A dynamic backtracking algorithm based on the decision-repair, or path-repair principle.
  * It selects the decision to undo w.r.t. a {@link IDecisionJumper}.
  * Note that by giving {@link solver.explanations.strategies.jumper.MostRecentWorldJumper}, it acts like <code>dbt</code>.
  * <br/>
@@ -52,13 +52,6 @@ public class PathRepair extends ConflictBasedBackjumping {
     public PathRepair(ExplanationEngine mExplanationEngine, IDecisionJumper decisionJumper) {
         super(mExplanationEngine, decisionJumper);
         cobdec = new DecisionsSet(this);
-    }
-
-    @Override
-    public void backtrackOn(Explanation explanation, ICause cause) {
-        int upto = decisionJumper.compute(explanation, mSolver.getEnvironment().getWorldIndex());
-        mSolver.getSearchLoop().overridePreviousWorld(upto);
-        updateVRExplainUponbacktracking(upto, explanation, cause);
     }
 
     protected void updateVRExplainUponbacktracking(int nworld, Explanation expl, ICause cause) {

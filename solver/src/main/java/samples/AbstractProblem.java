@@ -60,14 +60,17 @@ public abstract class AbstractProblem {
         }
     }
 
-    @Option(name = "-log", usage = "Quiet resolution", required = false)
+    @Option(name = "-l", aliases = "--log", usage = "Quiet resolution", required = false)
     Level level = Level.VERBOSE;
 
-    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
+    @Option(name = "-s", aliases = "--seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
 
-    @Option(name = "-exp", usage = "Explanation engine.", required = false)
-    protected ExplanationFactory expeng = ExplanationFactory.NONE;
+    @Option(name = "-e", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
+    ExplanationFactory expeng = ExplanationFactory.NONE;
+
+    @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
+    protected boolean fexp = false;
 
     protected Solver solver;
 
@@ -106,7 +109,13 @@ public abstract class AbstractProblem {
     }
 
     protected void overrideExplanation() {
-        expeng.make(solver);
+        if (!solver.getExplainer().isActive()) {
+            if (expeng != ExplanationFactory.NONE) {
+                expeng.plugin(solver, fexp);
+            } else if (fexp) {
+                ExplanationFactory.SILENT.plugin(solver, fexp);
+            }
+        }
     }
 
     private final boolean userInterruption() {

@@ -41,20 +41,22 @@ public class AllSolverProp implements ISolverProperties {
 
     SearchLoops slIdx;
     ExplanationFactory expIdx;
+    boolean flattenExpl;
 
-    public AllSolverProp(SearchLoops slIdx, ExplanationFactory expIdx) {
+    public AllSolverProp(SearchLoops slIdx, ExplanationFactory expIdx, boolean flattenExpl) {
         this.slIdx = slIdx;
         this.expIdx = expIdx;
+        this.flattenExpl = flattenExpl;
     }
 
     @Override
     public void loadPropertiesIn(Solver solver) {
         slIdx.make(solver);
-        expIdx.make(solver);
+        expIdx.plugin(solver, flattenExpl);
     }
 
     @Override
     public String toString() {
-        return slIdx +" & "+ expIdx;
+        return slIdx + " & " + expIdx;
     }
 }
