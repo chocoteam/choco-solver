@@ -1,47 +1,45 @@
-/**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.propagators.nary.automaton;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
-import solver.Constant;
-import solver.Solver;
-import solver.constraints.Constraint;
+import solver.Configuration;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.FA.utils.ICounter;
@@ -53,9 +51,9 @@ import solver.constraints.nary.automata.structure.multicostregular.StoredDirecte
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -203,8 +201,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     private TIntHashSet boundUpdate;
     private boolean computed;
 
-    Solver solver;
-
+    protected final IIntDeltaMonitor[] idms;
     protected final RemProc rem_proc;
 
 
@@ -214,15 +211,14 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param vars        decision variables
      * @param counterVars cost variables
      * @param cauto       finite automaton with costs
-     * @param solver      solver
-     * @param constraint  constraint
      */
-    public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto,
-                                Solver solver,
-                                Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.<IntVar>append(vars, counterVars), solver, constraint, PropagatorPriority.CUBIC, false);
-        this.solver = solver;
+    public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto) {
+        super(ArrayUtils.<IntVar>append(vars, counterVars), PropagatorPriority.CUBIC, false);
         this.vs = vars;
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++) {
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         this.offset = vars.length;
         this.z = counterVars;
         this.nbR = this.z.length - 1;
@@ -250,11 +246,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
-    }
-
-    @Override
     public int getPropagationConditions(int vIdx) {
 //TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
         return EventType.INT_ALL_MASK();
@@ -279,36 +270,38 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                     if (j == right + 1) {
                         right = j;
                     } else {
-                        vs[i].removeInterval(left, right, this);//, false);
+                        vs[i].removeInterval(left, right, aCause);//, false);
                         left = right = j;
                     }
                 }
             }
-            vs[i].removeInterval(left, right, this);//, false);
+            vs[i].removeInterval(left, right, aCause);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
         }
         filter();
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
-        if (vIdx < offset) {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        if (varIdx < offset) {
             checkWorld();
-            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-            boundUpdate.add(vIdx - offset);
+            boundUpdate.add(varIdx - offset);
             computed = false;
         }
-//        if (getNbPendingER() == 0 && toRemove.size() > 0) {
-//            filter();
-//        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
@@ -569,11 +562,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                 }
                 newLB = Math.max(uUb[l] - uk * (z[l + 1].getUB() - axu), 0);
                 newLA = Math.max(uUb[l + nbR] - uk * (axu - z[l + 1].getLB()), 0);
-                if (Math.abs(uUb[l] - newLB) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uUb[l] - newLB) >= Configuration.MCR_DECIMAL_PREC) {
                     uUb[l] = newLB;
                     modif = true;
                 }
-                if (Math.abs(uUb[l + nbR] - newLA) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uUb[l + nbR] - newLA) >= Configuration.MCR_DECIMAL_PREC) {
                     uUb[l + nbR] = newLA;
                     modif = true;
                 }
@@ -658,11 +651,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
                 newLB = Math.max(uLb[l] + uk * (axu - z[l + 1].getUB()), 0);
                 newLA = Math.max(uLb[l + nbR] + uk * (z[l + 1].getLB() - axu), 0);
-                if (Math.abs(uLb[l] - newLB) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uLb[l] - newLB) >= Configuration.MCR_DECIMAL_PREC) {
                     uLb[l] = newLB;
                     modif = true;
                 }
-                if (Math.abs(uLb[l + nbR] - newLA) >= Constant.MCR_DECIMAL_PREC) {
+                if (Math.abs(uLb[l + nbR] - newLA) >= Configuration.MCR_DECIMAL_PREC) {
                     uLb[l + nbR] = newLA;
                     modif = true;
                 }
@@ -706,13 +699,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected void filterDown(final double realsp) throws ContradictionException {
 
-        if (realsp - z[0].getUB() >= Constant.MCR_DECIMAL_PREC) {
+        if (realsp - z[0].getUB() >= Configuration.MCR_DECIMAL_PREC) {
             this.contradiction(null, "cost variable domain is emptied");
         }
-        if (realsp - z[0].getLB() >= Constant.MCR_DECIMAL_PREC) {
+        if (realsp - z[0].getLB() >= Configuration.MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
-            double rsp = (realsp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : realsp;
-            z[0].updateLowerBound((int) Math.ceil(rsp), this);//, false);
+            double rsp = (realsp - mr <= Configuration.MCR_DECIMAL_PREC) ? mr : realsp;
+            z[0].updateLowerBound((int) Math.ceil(rsp), aCause);//, false);
             modifiedBound[0] = true;
         }
     }
@@ -724,13 +717,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @throws ContradictionException if the cost variable domain is emptied
      */
     protected void filterUp(final double reallp) throws ContradictionException {
-        if (reallp - z[0].getLB() <= -Constant.MCR_DECIMAL_PREC) {
+        if (reallp - z[0].getLB() <= -Configuration.MCR_DECIMAL_PREC) {
             this.contradiction(null, "cost variable domain is emptied");
         }
-        if (reallp - z[0].getUB() <= -Constant.MCR_DECIMAL_PREC) {
+        if (reallp - z[0].getUB() <= -Configuration.MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
-            double rsp = (reallp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : reallp;
-            z[0].updateUpperBound((int) Math.floor(rsp), this);//, false);
+            double rsp = (reallp - mr <= Configuration.MCR_DECIMAL_PREC) ? mr : reallp;
+            z[0].updateUpperBound((int) Math.floor(rsp), aCause);//, false);
             modifiedBound[1] = true;
         }
     }
@@ -840,8 +833,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, this);//, false);
-            z.updateUpperBound(bounds.max.value, this);//, false);
+            z.updateLowerBound(bounds.min.value, aCause);//, false);
+            z.updateUpperBound(bounds.max.value, aCause);//, false);
 
         }
     }

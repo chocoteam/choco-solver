@@ -1,44 +1,42 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.VariableUtilities;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateBool;
-import solver.Solver;
-import solver.constraints.Constraint;
+import common.ESat;
+import common.util.VariableUtilities;
+import common.util.procedure.UnaryIntProcedure;
+import common.util.tools.ArrayUtils;
+import memory.IStateBool;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * A class implementing the constraint VALUE = TABLE[INDEX],
@@ -57,11 +55,16 @@ public class PropElementV extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
-    public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset,
-                        Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+    protected final IIntDeltaMonitor[] idms;
+
+    public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
-                solver, constraint, PropagatorPriority.QUADRATIC, true);
-        this.offset = offset;
+                PropagatorPriority.QUADRATIC, true);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++) {
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
+        this.offset = -offset;
         valueUpdateNeeded = environment.makeBool(true);
         indexUpdateNeeded = environment.makeBool(true);
         rem_proc = new RemProc(this);
@@ -76,8 +79,8 @@ public class PropElementV extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         int n = vars.length;
         IntVar idxVar = getIndexVar();
-        idxVar.updateLowerBound(0 - offset, this);
-        idxVar.updateUpperBound(n - 3 - offset, this);
+        idxVar.updateLowerBound(0 - offset, aCause);
+        idxVar.updateUpperBound(n - 3 - offset, aCause);
         if (indexUpdateNeeded.get()) {
             updateIndexFromValue();
         }
@@ -86,21 +89,26 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (valueUpdateNeeded.get()) {
             updateValueFromIndex();
         }
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            awakeOnInst(vIdx);
+            awakeOnInst(varIdx);
         }
         if (EventType.isInclow(mask)) {
-            awakeOnInf(vIdx);
+            awakeOnInf(varIdx);
         }
         if (EventType.isDecupp(mask)) {
-            awakeOnSup(vIdx);
+            awakeOnSup(varIdx);
         }
         if (EventType.isRemove(mask)) {
-            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
     }
 
@@ -162,8 +170,8 @@ public class PropElementV extends Propagator<IntVar> {
         // further optimization:
         // I should consider for the min, the minimum value in domain(c.vars[feasibleIndex) that is >= to valVar.inf
         // (it can be greater than valVar.inf if there are holes in domain(c.vars[feasibleIndex]))
-        valVar.updateLowerBound(minval, this);
-        valVar.updateUpperBound(maxval, this);
+        valVar.updateLowerBound(minval, aCause);
+        valVar.updateUpperBound(maxval, aCause);
         // v1.0: propagate on holes when valVar has an enumerated domain
         if (valVar.hasEnumeratedDomain()) {
             int ubV = valVar.getUB();
@@ -178,7 +186,7 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!possibleV) {
-                    valVar.removeValue(v, this);
+                    valVar.removeValue(v, aCause);
                 }
             }
         }
@@ -195,19 +203,19 @@ public class PropElementV extends Propagator<IntVar> {
                 VariableUtilities.emptyUnion(valVar, vars[minFeasibleIndex + offset])) {
             minFeasibleIndex++;
         }
-        idxVar.updateLowerBound(minFeasibleIndex, this);
+        idxVar.updateLowerBound(minFeasibleIndex, aCause);
 
 
         while (idxVar.contains(maxFeasibleIndex) &&
                 (VariableUtilities.emptyUnion(valVar, vars[maxFeasibleIndex + offset]))) {
             maxFeasibleIndex--;
         }
-        idxVar.updateUpperBound(maxFeasibleIndex, this);
+        idxVar.updateUpperBound(maxFeasibleIndex, aCause);
 
         if (idxVar.hasEnumeratedDomain()) { //those remVal would be ignored for variables using an interval approximation for domain
             for (int i = minFeasibleIndex + 1; i < maxFeasibleIndex - 1; i++) {
                 if (idxVar.contains(i) && VariableUtilities.emptyUnion(valVar, vars[i + offset])) {
-                    idxVar.removeValue(i, this);
+                    idxVar.removeValue(i, aCause);
                 }
             }
         }
@@ -226,10 +234,10 @@ public class PropElementV extends Propagator<IntVar> {
         IntVar valVar = getValueVar();
         IntVar targetVar = vars[indexVal + offset];
         // code similar to awake@Equalxyc
-        valVar.updateLowerBound(targetVar.getLB(), this);
-        valVar.updateUpperBound(targetVar.getUB(), this);
-        targetVar.updateLowerBound(valVar.getLB(), this);
-        targetVar.updateUpperBound(valVar.getUB(), this);
+        valVar.updateLowerBound(targetVar.getLB(), aCause);
+        valVar.updateUpperBound(targetVar.getUB(), aCause);
+        targetVar.updateLowerBound(valVar.getLB(), aCause);
+        targetVar.updateUpperBound(valVar.getUB(), aCause);
         if (targetVar.hasEnumeratedDomain()) {
             int left = Integer.MIN_VALUE;
             int right = left;
@@ -239,14 +247,14 @@ public class PropElementV extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        valVar.removeInterval(left, right, this);
+                        valVar.removeInterval(left, right, aCause);
                         left = val;
                         right = val;
                     }
                     //valVar.removeValue(val, this);
                 }
             }
-            valVar.removeInterval(left, right, this);
+            valVar.removeInterval(left, right, aCause);
         }
         if (valVar.hasEnumeratedDomain()) {
             int left = Integer.MIN_VALUE;
@@ -257,14 +265,14 @@ public class PropElementV extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        targetVar.removeInterval(left, right, this);
+                        targetVar.removeInterval(left, right, aCause);
                         left = val;
                         right = val;
                     }
 //                    targetVar.removeValue(val, this);
                 }
             }
-            targetVar.removeInterval(left, right, this);
+            targetVar.removeInterval(left, right, aCause);
         }
     }
 
@@ -280,7 +288,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) { // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].updateLowerBound(valVar.getLB(), this);
+                vars[idxVal + offset].updateLowerBound(valVar.getLB(), aCause);
             } else {
                 updateIndexFromValue();
             }
@@ -288,11 +296,11 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.updateLowerBound(vars[idx].getLB(), this);
+                    valVar.updateLowerBound(vars[idx].getLB(), aCause);
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, aCause);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getLB() > valVar.getLB()) {
@@ -303,7 +311,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         minval = Math.min(minval, vars[feasibleIndex].getLB());
                     }
-                    valVar.updateLowerBound(minval, this);//CPRU not idempotent
+                    valVar.updateLowerBound(minval, aCause);//CPRU not idempotent
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -323,7 +331,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].updateUpperBound(valVar.getUB(), this);
+                vars[idxVal + offset].updateUpperBound(valVar.getUB(), aCause);
             } else {
                 updateIndexFromValue();
             }
@@ -331,11 +339,11 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.updateUpperBound(vars[idx].getUB(), this);
+                    valVar.updateUpperBound(vars[idx].getUB(), aCause);
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, aCause);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getUB() < valVar.getUB()) {
@@ -346,7 +354,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         maxval = Math.max(maxval, vars[feasibleIndex].getUB());
                     }
-                    valVar.updateUpperBound(maxval, this);//CPRU not idempotent
+                    valVar.updateUpperBound(maxval, aCause);//CPRU not idempotent
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -362,7 +370,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].instantiateTo(valVar.getValue(), this);
+                vars[idxVal + offset].instantiateTo(valVar.getValue(), aCause);
             } else {
                 updateIndexFromValue();
             }
@@ -370,11 +378,11 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.instantiateTo(vars[idx].getValue(), this);
+                    valVar.instantiateTo(vars[idx].getValue(), aCause);
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, aCause);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else {
@@ -392,7 +400,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].removeValue(x, this);
+                vars[idxVal + offset].removeValue(x, aCause);
             } else {
                 updateIndexFromValue();
             }
@@ -400,7 +408,7 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.removeValue(x, this);
+                    valVar.removeValue(x, aCause);
                 }
             } else if ((idxVar.contains(idx - offset)) && (valVar.hasEnumeratedDomain())) {
                 boolean existsSupport = false;
@@ -412,11 +420,26 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!existsSupport) {
-                    valVar.removeValue(x, this);//CPRU not idempotent
+                    valVar.removeValue(x, aCause);//CPRU not idempotent
                 }
             }
         }
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(this.vars[vars.length - 1]).append(" = ");
+        sb.append(" <");
+        int i = 0;
+        for (; i < Math.min(this.vars.length - 3, 2); i++) {
+            sb.append(this.vars[i]).append(", ");
+        }
+        if (i == 2 && this.vars.length - 3 > 2) sb.append("..., ");
+        sb.append(this.vars[vars.length - 3]);
+        sb.append("> [").append(this.vars[vars.length - 2]).append(']');
+        return sb.toString();
+    }
+
 
     private static class RemProc implements UnaryIntProcedure<Integer> {
 

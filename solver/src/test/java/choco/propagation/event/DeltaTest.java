@@ -30,7 +30,12 @@ package choco.propagation.event;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
-import solver.variables.delta.Delta;
+import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.exception.ContradictionException;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+import solver.variables.delta.EnumDelta;
 
 /**
  * <br/>
@@ -41,12 +46,31 @@ import solver.variables.delta.Delta;
 public class DeltaTest {
 
     @Test(groups = "1s")
-    public void testAdd(){
-        Delta d = new Delta();
-        for(int i = 1; i < 40; i++){
+    public void testAdd() {
+        Solver sol = new Solver();
+        EnumDelta d = new EnumDelta(sol.getSearchLoop());
+        for (int i = 1; i < 40; i++) {
             d.add(i, Cause.Null);
             Assert.assertEquals(d.size(), i);
         }
+    }
+
+    @Test(groups = "1s")
+    public void testEq() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VariableFactory.enumerated("X", 1, 6, solver);
+        IntVar y = VariableFactory.enumerated("Y", 1, 6, solver);
+
+        solver.post(IntConstraintFactory.arithm(x, "=", y));
+
+        solver.propagate();
+
+        x.removeValue(4, Cause.Null);
+
+        solver.propagate();
+
+        Assert.assertFalse(y.contains(4));
+
     }
 
 }

@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.nqueen.NQueenBinary;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
+import solver.constraints.IntConstraintFactory;
 import solver.thread.ThreadSolver;
 import solver.variables.IntVar;
 
@@ -46,8 +46,9 @@ public class ThreadSolverTest {
     protected Solver modeler(int n) {
         NQueenBinary pb = new NQueenBinary();
         pb.readArgs("-q", Integer.toString(n));
+        pb.createSolver();
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
 
         return pb.getSolver();
     }
@@ -64,10 +65,10 @@ public class ThreadSolverTest {
         int n1 = n / 2;
 
         Solver sm1 = modeler(n);
-        sm1.post(ConstraintFactory.leq((IntVar) sm1.getVars()[0], n1, sm1));
+        sm1.post(IntConstraintFactory.arithm((IntVar) sm1.getVars()[0], "<=", n1));
 
         Solver sm2 = modeler(n);
-        sm2.post(ConstraintFactory.geq((IntVar) sm2.getVars()[0], n1 + 1, sm2));
+        sm2.post(IntConstraintFactory.arithm((IntVar) sm2.getVars()[0], ">=", n1 + 1));
 
         ThreadSolver ts1 = new ThreadSolver(sm1);
         ThreadSolver ts2 = new ThreadSolver(sm2);
@@ -100,8 +101,8 @@ public class ThreadSolverTest {
             solvers[i].join();
         }
         for (int i = 1; i < n; i++) {
-            Assert.assertEquals(solvers[i].solver.getMeasures().getSolutionCount(),solvers[0].solver.getMeasures().getSolutionCount());
-            Assert.assertEquals(solvers[i].solver.getMeasures().getNodeCount(),solvers[0].solver.getMeasures().getNodeCount());
+            Assert.assertEquals(solvers[i].solver.getMeasures().getSolutionCount(), solvers[0].solver.getMeasures().getSolutionCount());
+            Assert.assertEquals(solvers[i].solver.getMeasures().getNodeCount(), solvers[0].solver.getMeasures().getNodeCount());
         }
     }
 

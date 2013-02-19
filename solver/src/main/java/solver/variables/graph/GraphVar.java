@@ -1,34 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.graph;
 
-import choco.kernel.memory.IEnvironment;
-import com.sun.istack.internal.NotNull;
+import memory.IEnvironment;
+import common.util.objects.graphs.IGraph;
+import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -39,14 +40,17 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
+ * Date: 7 feb. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<GraphVar> implements Variable<IGraphDelta>, IVariableGraph {
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, GraphVar<E>>
+        implements Variable<IGraphDelta> {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -62,11 +66,16 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
-    public GraphVar(Solver solver) {
-        super("G", solver);
+
+    /**
+     * Creates a graph variable
+     *
+     * @param solver
+     */
+    public GraphVar(String name, Solver solver) {
+        super(name, solver);
         solver.associates(this);
         this.environment = solver.getEnvironment();
-        this.makeList(this);
     }
 
     //***********************************************************************************
@@ -78,56 +87,67 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         if (getEnvelopOrder() != getKernelOrder()) {
             return false;
         }
-        INeighbors suc;
-        IActiveNodes act = getEnvelopGraph().getActiveNodes();
+        ISet suc;
+        ISet act = getEnvelopGraph().getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            suc = envelop.getSuccessorsOf(i);
-            if (suc.neighborhoodSize() != getKernelGraph().getSuccessorsOf(i).neighborhoodSize()) {
-                for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-                    if (!kernel.arcExists(i, j)) {
-                        return false;
-                    }
-                }
+            suc = envelop.getSuccsOrNeigh(i);
+            if (suc.getSize() != getKernelGraph().getSuccsOrNeigh(i).getSize()) {
+                return false;
             }
         }
         return true;
     }
 
-    @Override
+    /**
+     * Remove node x from the maximal partial subgraph
+     *
+     * @param x     node's index
+     * @param cause algorithm which is related to the removal
+     * @return true iff the removal has an effect
+     */
     public boolean removeNode(int x, ICause cause) throws ContradictionException {
-        if (kernel.getActiveNodes().isActive(x)) {
+        assert cause != null;
+        if (kernel.getActiveNodes().contain(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
-        } else if (!envelop.getActiveNodes().isActive(x)) {
+        } else if (!envelop.getActiveNodes().contain(x)) {
             return false;
         }
-        if (reactOnModification) {
-            INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
-            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause);
-                removeArc(i, x, cause);
-            }
+        ISet nei = envelop.getSuccsOrNeigh(x);
+        for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+            removeArc(x, i, cause);
+        }
+        nei = envelop.getPredsOrNeigh(x);
+        for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+            removeArc(i, x, cause);
         }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
-                delta.add(x,IGraphDelta.NR,cause);
+                delta.add(x, IGraphDelta.NR, cause);
             }
             EventType e = EventType.REMOVENODE;
-            notifyMonitors(e, cause);
+            notifyPropagators(e, cause);
             return true;
         }
         return false;
     }
 
-    @Override
+    /**
+     * Enforce the node x to belong to any partial subgraph
+     *
+     * @param x     node's index
+     * @param cause algorithm which is related to the modification
+     * @return true iff the node is effectively added to the mandatory structure
+     */
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-        if (envelop.getActiveNodes().isActive(x)) {
+        assert cause != null;
+        if (envelop.getActiveNodes().contain(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
-                    delta.add(x,IGraphDelta.NE,cause);
+                    delta.add(x, IGraphDelta.NE, cause);
                 }
                 EventType e = EventType.ENFORCENODE;
-                notifyMonitors(e, cause);
+                notifyPropagators(e, cause);
                 return true;
             }
             return false;
@@ -136,30 +156,66 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         return true;
     }
 
+    /**
+     * Remove node y from the neighborhood of node x from the maximal partial subgraph
+     *
+     * @param x     node's index
+     * @param y     node's index
+     * @param cause algorithm which is related to the removal
+     * @return true iff the removal has an effect
+     * @throws ContradictionException
+     */
+    public abstract boolean removeArc(int x, int y, ICause cause) throws ContradictionException;
+
+    /**
+     * Enforce the node y into the neighborhood of node x in any partial subgraph
+     *
+     * @param x     node's index
+     * @param y     node's index
+     * @param cause algorithm which is related to the removal
+     * @return true iff the node y is effectively added in the neighborhooh of node x
+     */
+    public abstract boolean enforceArc(int x, int y, ICause cause) throws ContradictionException;
+
     //***********************************************************************************
     // ACCESSORS
     //***********************************************************************************
 
-    @Override
+    /**
+     * Compute the order of the graph in its current state (ie the number of nodes that may belong to an instantiation)
+     *
+     * @return the number of nodes that may belong to an instantiation
+     */
     public int getEnvelopOrder() {
-        return envelop.getActiveNodes().neighborhoodSize();
+        return envelop.getActiveNodes().getSize();
     }
 
-    @Override
+    /**
+     * Compute the order of the graph in its final state (ie the minimum number of nodes that necessarily belong to any instantiation)
+     *
+     * @return the minimum number of nodes that necessarily belong to any instantiation
+     */
     public int getKernelOrder() {
-        return kernel.getActiveNodes().neighborhoodSize();
+        return kernel.getActiveNodes().getSize();
     }
 
-    @Override
-    public IStoredGraph getKernelGraph() {
+    /**
+     * @return the graph representing the domain of the variable graph
+     */
+    public E getKernelGraph() {
         return kernel;
     }
 
-    @Override
-    public IStoredGraph getEnvelopGraph() {
+    /**
+     * @return the graph representing the instantiated values (nodes and edges) of the variable graph
+     */
+    public E getEnvelopGraph() {
         return envelop;
     }
 
+    /**
+     * @return true iff the graph is directed
+     */
     public abstract boolean isDirected();
 
     //***********************************************************************************
@@ -167,12 +223,12 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     //***********************************************************************************
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
+    public void explain(VariableState what, int val, Explanation to) {
         throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
     }
 
@@ -180,64 +236,107 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     public IGraphDelta getDelta() {
         return delta;
     }
-	
-	@Override
-	public int getType() {
-		return Variable.GRAPH;
-	}
+
+    @Override
+    public int getTypeAndKind() {
+        return VAR + GRAPH;
+    }
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("graph_var " + getName());
+        sb.append("\ninstantiated = " + instantiated() + "\n");
+        sb.append("\nenvelope graph \n");
+        sb.append(envelop.toString());
+        sb.append("\nkernel graph \n");
+        sb.append(kernel.toString());
         return getName();
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
+    public void createDelta() {
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new GraphDelta();
+            delta = new GraphDelta(solver.getSearchLoop());
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new GraphDeltaMonitor(delta, propagator);
+    }
+
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
     }
 
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
+    }
+
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+        assert cause != null;
         solver.getEngine().fails(cause, this, message);
     }
 
+    //***********************************************************************************
+    // SOLUTIONS : STORE AND RESTORE
+    //***********************************************************************************
+
+    /**
+     * @return the value of the graph variable represented through an adjacency matrix
+     *         plus a set of nodes (last line of value).
+     *         This method is not supposed to be used except for restoring solutions.
+     */
+    public boolean[][] getValue() {
+        int n = getEnvelopGraph().getNbNodes();
+        boolean[][] vals = new boolean[n + 1][n];
+        ISet kerNodes = getKernelGraph().getActiveNodes();
+        ISet kerSuccs;
+        for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
+            kerSuccs = getKernelGraph().getSuccsOrNeigh(i);
+            for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
+                vals[i][j] = true; // arc in
+            }
+            vals[n][i] = true; // node in
+        }
+        return vals;
+    }
+
+    /**
+     * Instantiates <code>this</code> to value which represents an adjacency
+     * matrix plus a set of nodes (last line of value).
+     * This method is not supposed to be used except for restoring solutions.
+     *
+     * @param value value of <code>this</code>
+     * @param cause
+     * @throws ContradictionException
+     */
     public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
-        int n = value.length;
+        int n = value.length - 1;
         for (int i = 0; i < n; i++) {
+            if (value[n][i]) {//nodes
+                enforceNode(i, cause);
+            } else {
+                removeNode(i, cause);
+            }
             for (int j = 0; j < n; j++) {
-                if (value[i][j]) {
+                if (value[i][j]) {//arcs
                     enforceArc(i, j, cause);
                 } else {
                     removeArc(i, j, cause);
                 }
             }
         }
-
-    }
-
-    public boolean[][] getValue() {
-        int n = getEnvelopGraph().getNbNodes();
-        boolean[][] vals = new boolean[n][n];
-        IActiveNodes kerNodes = getKernelGraph().getActiveNodes();
-        INeighbors kerSuccs;
-        for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-            kerSuccs = getKernelGraph().getSuccessorsOf(i);
-            for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-                vals[i][j] = true;
-            }
-        }
-        return vals;
     }
 }

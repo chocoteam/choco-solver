@@ -1,41 +1,38 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.extension.nary;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
+import common.ESat;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.extension.FastBooleanValidityChecker;
 import solver.constraints.propagators.extension.FastValidityChecker;
 import solver.constraints.propagators.extension.ValidityChecker;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -75,8 +72,8 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     //by avoiding checking the bounds
     protected ValidityChecker valcheck;
 
-    public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.QUADRATIC, false);
+    public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
+        super(vars, PropagatorPriority.QUADRATIC, false);
         this.relation = relation;
         this.arity = vars.length;
         this.offsets = new int[arity];
@@ -127,21 +124,55 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
+    public void propagate(int vIdx, int mask) throws ContradictionException {
         filter(vIdx);
     }
 
+    /*@Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            int[] tuple = new int[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                tuple[i] = vars[i].getValue();
+            }
+            return ESat.eval(relation.isConsistent(tuple));
+        }
+        return ESat.UNDEFINED;
+    }*/
     @Override
     public ESat isEntailed() {
-//        if (isCompletelyInstantiated()) {
-//            int[] tuple = new int[vars.length];
-//            for (int i = 0; i < vars.length; i++) {
-//                tuple[i] = vars[i].getValue();
-//            }
-//            return ESat.eval(relation.isConsistent(tuple));
-//        }
-//        return ESat.UNDEFINED;
-        return ESat.TRUE;
+        if (isCompletelyInstantiated()) {
+            int[] tuple = new int[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                tuple[i] = vars[i].getValue();
+            }
+
+            int minListIdx = -1;
+            int minSize = Integer.MAX_VALUE;
+            for (int i = 0; i < tuple.length; i++) {
+                if (tab[i][tuple[i] - offsets[i]].length < minSize) {
+                    minSize = tab[i][tuple[i] - offsets[i]].length;
+                    minListIdx = i;
+                }
+            }
+            int currentIdxSupport;
+            int[] currentSupport;
+            int nva = tuple[minListIdx] - relation.getRelationOffset(minListIdx);
+            for (int i = 0; i < tab[minListIdx][nva].length; i++) {
+                currentIdxSupport = tab[minListIdx][nva][i];
+                currentSupport = relation.getTuple(currentIdxSupport);
+                boolean isValid = true;
+                for (int j = 0; isValid && j < tuple.length; j++) {
+                    if (tuple[j] != currentSupport[j]) {
+                        isValid = false;
+                    }
+                }
+                if (isValid) return ESat.TRUE;
+            }
+            return ESat.FALSE;
+
+        }
+        return ESat.UNDEFINED;
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,14 +192,14 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[i].removeInterval(left, right, this);
+                        vars[i].removeInterval(left, right, aCause);
                         left = right = val;
                     }
                 } else {
                     setSupport(tab[i][nva][0]);
                 }
             }
-            vars[i].removeInterval(left, right, this);
+            vars[i].removeInterval(left, right, aCause);
         }
     }
 
@@ -216,7 +247,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[indexVar].removeInterval(left, right, this);
+                        vars[indexVar].removeInterval(left, right, aCause);
                         left = right = val;
                     }
                 } else {
@@ -224,7 +255,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                 }
             }
         }
-        vars[indexVar].removeInterval(left, right, this);
+        vars[indexVar].removeInterval(left, right, aCause);
     }
 
 

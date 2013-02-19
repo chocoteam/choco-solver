@@ -27,20 +27,20 @@
 
 package parser.flatzinc.ast.constraints;
 
+import common.util.tools.StringUtils;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.nary.IntLinComb;
-import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
-import static solver.constraints.ConstraintFactory.scalar;
-
 /**
+ * (&#8721; i &#8712; 1..n: as[i].bs[i] = c) &#8660; r where n is the common length of as and bs
  * <br/>
  *
  * @author Charles Prud'homme
@@ -49,15 +49,21 @@ import static solver.constraints.ConstraintFactory.scalar;
 public class IntLinEqReifBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
+
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        return new ReifiedConstraint(r,
-                scalar(bs, as, IntLinComb.Operator.EQ, c, solver),
-                scalar(bs, as, IntLinComb.Operator.NEQ, c, solver),
-                solver);
+        int[] bounds = Sum.getScalarBounds(bs, as);
+        IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
+        solver.post(IntConstraintFactory.scalar(bs, as, scalarVar));
+        solver.post(IntConstraintFactory.implies(
+                r,
+                IntConstraintFactory.arithm(scalarVar, "=", c)));
+        solver.post(IntConstraintFactory.implies(
+                VariableFactory.not(r),
+                IntConstraintFactory.arithm(scalarVar, "!=", c)));
     }
 }

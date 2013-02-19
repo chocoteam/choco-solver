@@ -27,12 +27,10 @@
 
 package samples.nqueen;
 
-import solver.Solver;
-import solver.constraints.nary.AllDifferent;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -44,26 +42,24 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];
 
         for (int i = 0; i < n; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            diag1[i] = Views.offset(vars[i], i);
-            diag2[i] = Views.offset(vars[i], -i);
+            diag1[i] = VariableFactory.offset(vars[i], i);
+            diag2[i] = VariableFactory.offset(vars[i], -i);
         }
 
-        solver.post(new AllDifferent(vars, solver));
-        solver.post(new AllDifferent(diag1, solver));
-        solver.post(new AllDifferent(diag2, solver));
+        solver.post(IntConstraintFactory.alldifferent(vars, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag1, "BC"));
+        solver.post(IntConstraintFactory.alldifferent(diag2, "BC"));
     }
 
     @Override
-    public void configureSolver() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+    public void configureSearch() {
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
 
         IntVar[] orderedVars = orederIt2();
         /*IPropagationEngine engine = solver.getEngine();

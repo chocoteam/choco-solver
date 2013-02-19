@@ -29,9 +29,9 @@ package samples.pert;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -51,9 +51,13 @@ public class PertReified extends Pert {
     List<Propagator> reifieds;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("PertReified");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
         reifieds = new ArrayList<Propagator>();
@@ -77,13 +81,15 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-                    Constraint cc = new ReifiedConstraint(bvar,
-                            precedence(_vars[l], _durs[l], _vars[m], solver),
-                            precedence(_vars[m], _durs[m], _vars[l], solver),
-                            solver);
-                    solver.post(cc);
-                    for (int k = 0; k < cc.propagators.length; k++) {
-                        reifieds.add(cc.propagators[k]);
+					Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m], solver));
+					Constraint c2 = IntConstraintFactory.implies(VariableFactory.not(bvar),precedence(_vars[m], _durs[m], _vars[l], solver));
+					solver.post(c1);
+					solver.post(c2);
+                    for (int k = 0; k < c1.propagators.length; k++) {
+                        reifieds.add(c1.propagators[k]);
+                    }
+					for (int k = 0; k < c2.propagators.length; k++) {
+                        reifieds.add(c2.propagators[k]);
                     }
                 }
             }
@@ -92,12 +98,12 @@ public class PertReified extends Pert {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(
                 new StrategiesSequencer(
                         solver.getEnvironment(),
-                        StrategyFactory.inputOrderMinVal(bvars, solver.getEnvironment()),
-                        StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment())
+                        IntStrategyFactory.inputOrder_InDomainMin(bvars),
+                        IntStrategyFactory.inputOrder_InDomainMin(vars)
                 )
         );
 

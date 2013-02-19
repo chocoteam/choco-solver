@@ -26,14 +26,16 @@
  */
 package solver.variables;
 
+import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
+import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Random;
 
@@ -51,10 +53,10 @@ public class ViewMinusTest {
         Solver solver = new Solver();
 
         IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
-        IntVar Y = Views.minus(X);
+        IntVar Y = VariableFactory.minus(X);
 
         try {
-            solver.propagate();
+//            solver.propagate();
             Assert.assertFalse(Y.instantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);
@@ -110,16 +112,16 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, ref);
                 xs[1] = VariableFactory.bounded("y", -15, -1, ref);
-                ref.post(Sum.eq(xs, 0, ref));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 15, solver);
-                xs[1] = Views.minus(xs[0]);
-                solver.post(Sum.eq(xs, 0, solver));
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(),seed));
+                xs[1] = VariableFactory.minus(xs[0]);
+                solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
@@ -138,21 +140,89 @@ public class ViewMinusTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, ref);
                 xs[1] = VariableFactory.enumerated("y", -15, -1, ref);
-                ref.post(Sum.eq(xs, 0, ref));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, ref)));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 15, solver);
-                xs[1] = Views.minus(xs[0]);
-                solver.post(Sum.eq(xs, 0, solver));
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(),seed));
+                xs[1] = VariableFactory.minus(xs[0]);
+                solver.post(IntConstraintFactory.sum(xs, VariableFactory.fixed(0, solver)));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
 
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.minus(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(-vit.next()));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-vit.previous()));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.previous();
+            }
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.minus(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(-vit.next()));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-vit.previous()));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(-rit.min()));
+                Assert.assertTrue(o.contains(-rit.max()));
+                rit.previous();
+            }
         }
     }
 

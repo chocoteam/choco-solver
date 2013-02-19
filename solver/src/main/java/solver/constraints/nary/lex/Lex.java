@@ -26,8 +26,8 @@
  */
 package solver.constraints.nary.lex;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.lex.PropLex;
@@ -51,7 +51,7 @@ public class Lex extends IntConstraint<IntVar> {
         super(ArrayUtils.append(X, Y), solver);
         this.strict = strict;
         this.n = X.length;
-        setPropagators(new PropLex(X, Y, strict, solver, this));
+        setPropagators(new PropLex(X, Y, strict));
     }
 
     @Override

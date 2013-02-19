@@ -42,5 +42,5 @@ import java.util.List;
  */
 public interface IBuilder {
 
-    Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations);
+    void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations);
 }

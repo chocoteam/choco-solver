@@ -1,42 +1,38 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary.lex;
 
 import choco.annotations.PropAnn;
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateBool;
-import choco.kernel.memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -49,20 +45,20 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
-@PropAnn(tested = {PropAnn.Status.CONSISTENCY, PropAnn.Status.CORRECTION, PropAnn.Status.BENCHMARK,PropAnn.Status.IDEMPOTENCE})
+@PropAnn(tested = {PropAnn.Status.CONSISTENCY, PropAnn.Status.CORRECTION, PropAnn.Status.BENCHMARK, PropAnn.Status.IDEMPOTENCE})
 public class PropLex extends Propagator<IntVar> {
 
     public final int n;            // size of both vectors
     public final IStateInt alpha;  // size of both vectors
     public final IStateInt beta;
-    public final IStateBool entailed;
+    public boolean entailed;
     public final IntVar[] x;
     public final IntVar[] y;
     public final boolean strict;
 
 
-    public PropLex(IntVar[] X, IntVar[] Y, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.LINEAR, false);
+    public PropLex(IntVar[] X, IntVar[] Y, boolean strict) {
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
         this.x = X.clone();
         this.y = Y.clone();
 
@@ -70,7 +66,7 @@ public class PropLex extends Propagator<IntVar> {
         this.n = X.length;
         alpha = environment.makeInt(0);
         beta = environment.makeInt(0);
-        entailed = environment.makeBool(false);
+        entailed = false;
     }
 
     @Override
@@ -80,18 +76,20 @@ public class PropLex extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
+        } else {
+            gacLexLeq(alpha.get());
         }
-        filter(alpha.get());
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
+    public void propagate(int vIdx, int mask) throws ContradictionException {
+        entailed = false;
         if (vIdx < n) {
-            filter(vIdx);
+            gacLexLeq(vIdx);
         } else {
-            filter(vIdx - n);
+            gacLexLeq(vIdx - n);
         }
     }
 
@@ -147,13 +145,13 @@ public class PropLex extends Propagator<IntVar> {
     }
 
     public void ACleq(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB(), this);
-        y[i].updateLowerBound(x[i].getLB(), this);
+        x[i].updateUpperBound(y[i].getUB(), aCause);
+        y[i].updateLowerBound(x[i].getLB(), aCause);
     }
 
     public void ACless(int i) throws ContradictionException {
-        x[i].updateUpperBound(y[i].getUB() - 1, this);
-        y[i].updateLowerBound(x[i].getLB() + 1, this);
+        x[i].updateUpperBound(y[i].getUB() - 1, aCause);
+        y[i].updateLowerBound(x[i].getLB() + 1, aCause);
     }
 
     public void updateAlpha(int i) throws ContradictionException {
@@ -161,14 +159,19 @@ public class PropLex extends Propagator<IntVar> {
             this.contradiction(null, "");
         }
         if (i == n) {
-            entailed.set(true);
-        } else {
-            if (!groundEq(x[i], y[i])) {
-                alpha.set(i);
-                filter(i);
+            if (strict) {
+                this.contradiction(null, "");
             } else {
-                updateAlpha(i + 1);
+                entailed = true;
+                setPassive();
+                return;
             }
+        }
+        if (!groundEq(x[i], y[i])) {
+            alpha.set(i);
+            gacLexLeq(i);
+        } else {
+            updateAlpha(i + 1);
         }
     }
 
@@ -179,7 +182,7 @@ public class PropLex extends Propagator<IntVar> {
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
             if (x[i].getUB() >= y[i].getLB()) {
-                filter(i);
+                gacLexLeq(i);
             }
         } else if (x[i].getLB() == y[i].getUB()) {
             updateBeta(i - 1);
@@ -193,70 +196,108 @@ public class PropLex extends Propagator<IntVar> {
      *          if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
-        entailed.set(false);
+        entailed = false;
         int i = 0;
+        int a, b;
         while (i < n && groundEq(x[i], y[i])) {
             i++;
         }
         if (i == n) {
             if (!strict) {
-                entailed.set(true);
+                entailed = true;
+                setPassive();
             } else {
                 this.contradiction(null, "");
             }
         } else {
-            alpha.set(i);
+            a = i;
             if (checkLex(i)) {
-                entailed.set(true);
+                setPassive();
+                return;
             }
-            beta.set(-1);
+            b = -1;
             while (i != n && x[i].getLB() <= y[i].getUB()) {
                 if (x[i].getLB() == y[i].getUB()) {
-                    if (beta.get() == -1) {
-                        beta.set(i);
+                    if (b == -1) {
+                        b = i;
                     }
                 } else {
-                    beta.set(-1);
+                    b = -1;
                 }
                 i++;
             }
-            if (i == n) {
-                if (!strict) {
-                    beta.set(Integer.MAX_VALUE);
-                } else {
-                    beta.set(n);
-                }
-            } else if (beta.get() == -1) {
-                beta.set(i);
+
+            if (!strict && i == n) {
+                b = Integer.MAX_VALUE;
             }
-            if (alpha.get() >= beta.get()) {
+            if (b == -1) {
+                b = i;
+            }
+            if (a >= b) {
                 this.contradiction(null, "");
             }
-            filter(alpha.get());
+            alpha.set(a);
+            beta.set(b);
+            gacLexLeq(a);
         }
     }
 
-    public void filter(int i) throws ContradictionException {
-        if (i < beta.get() && !entailed.get()) {                   //Part A
-            if (i == alpha.get() && (i + 1 == beta.get())) {        //Part B
-                ACless(i);
-                if (checkLex(i)) {
-                    entailed.set(true);
-                }
-            } else if (i == alpha.get() && (i + 1 < beta.get())) {  //Part C
-                ACleq(i);
-                if (checkLex(i)) {
-                    entailed.set(true);
-                } else if (groundEq(x[i], y[i])) {
-                    updateAlpha(i + 1);
-                }
-            } else if (alpha.get() < i && i < beta.get()) {         //Part D
-                if (((i == beta.get() - 1) && x[i].getLB() == y[i].getUB()) || greater(x[i], y[i])) {
-                    updateBeta(i - 1);
-                }
+    public void gacLexLeq(int i) throws ContradictionException {
+        int a = alpha.get();
+        int b = beta.get();
+        //Part A
+        if (i >= b || entailed) {
+            return;
+        }
+        //Part B
+        if (i == a && (i + 1) == b) {
+            ACless(i);
+            if (checkLex(i)) {
+                entailed = true;
+                setPassive();
+                return;
+            }
+        }
+        //Part C
+        if (i == a && (i + 1) < b) {
+            ACleq(i);
+            if (checkLex(i)) {
+                entailed = true;
+                setPassive();
+                return;
+            }
+            if (groundEq(x[i], y[i])) {
+                updateAlpha(i + 1);
+            }
+        }
+        //Part D
+        if (a < i && i < b) {
+            if ((i == (b - 1) && x[i].getLB() == y[i].getUB()) || greater(x[i], y[i])) {
+                updateBeta(i - 1);
             }
         }
     }
 
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("LEX <");
+        int i = 0;
+        for (; i < Math.min(this.x.length - 1, 2); i++) {
+            sb.append(this.x[i]).append(", ");
+        }
+        if (i == 2 && this.x.length - 1 > 2) sb.append("..., ");
+        sb.append(this.x[x.length - 1]);
+        sb.append(">, <");
+        i = 0;
+        for (; i < Math.min(this.y.length - 1, 2); i++) {
+            sb.append(this.y[i]).append(", ");
+        }
+        if (i == 2 && this.y.length - 1 > 2) sb.append("..., ");
+        sb.append(this.y[y.length - 1]);
+        sb.append(">");
+
+        return sb.toString();
+    }
 
 }

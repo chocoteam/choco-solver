@@ -26,8 +26,8 @@
  */
 package solver.constraints.nary.channeling;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.channeling.PropDomainChanneling;
@@ -49,7 +49,7 @@ public class DomainChanneling extends IntConstraint<IntVar> {
 
     public DomainChanneling(BoolVar[] bs, IntVar x, Solver solver) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), solver);
-        setPropagators(new PropDomainChanneling(bs, x, solver, this));
+        setPropagators(new PropDomainChanneling(bs, x));
 
     }
 

@@ -1,45 +1,43 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
+import common.ESat;
+import common.util.iterators.DisposableValueIterator;
+import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
-import solver.Solver;
-import solver.constraints.Constraint;
+import memory.IStateBitSet;
+import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -69,13 +67,19 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private IStateInt[] occs;
 
+    protected final IIntDeltaMonitor[] idms;
+
     protected final RemProc rem_proc;
 
     protected boolean needFilter;
 
-    public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
+    public PropAmongGAC(IntVar[] vars, int[] values) {
+        super(vars, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
+        this.idms = new IIntDeltaMonitor[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
+        }
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
         UB = environment.makeInt(0);
@@ -95,6 +99,38 @@ public class PropAmongGAC extends Propagator<IntVar> {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         }
         return EventType.INSTANTIATE.mask + +EventType.BOUND.mask + EventType.REMOVE.mask;
+    }
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            if (varIdx == nb_vars) {
+                return true;
+            } else {
+                needFilter = false;
+                if (EventType.isInstantiate(mask)) {
+                    if (both.get(varIdx)) {
+                        IntVar var = vars[varIdx];
+                        int val = var.getValue();
+                        if (setValues.contains(val)) {
+                            LB.add(1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        } else {
+                            UB.add(-1);
+                            both.set(varIdx, false);
+                            needFilter = true;
+                        }
+                    }
+                } else {
+                    idms[varIdx].freeze();
+                    idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                    idms[varIdx].unfreeze();
+                }
+                return needFilter;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -119,6 +155,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
             }
             LB.set(lb);
             UB.set(ub);
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].unfreeze();
+            }
         }
         filter();
     }
@@ -126,8 +165,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected void filter() throws ContradictionException {
         int lb = LB.get();
         int ub = UB.get();
-        vars[nb_vars].updateLowerBound(lb, this);
-        vars[nb_vars].updateUpperBound(ub, this);
+        vars[nb_vars].updateLowerBound(lb, aCause);
+        vars[nb_vars].updateUpperBound(ub, aCause);
 
         int min = Math.max(vars[nb_vars].getLB(), lb);
         int max = Math.min(vars[nb_vars].getUB(), ub);
@@ -144,32 +183,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-        if (varIdx == nb_vars) {
-            filter();
-        } else {
-            needFilter = false;
-            if (EventType.isInstantiate(mask)) {
-                if (both.get(varIdx)) {
-                    IntVar var = vars[varIdx];
-                    int val = var.getValue();
-                    if (setValues.contains(val)) {
-                        LB.add(1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    } else {
-                        UB.add(-1);
-                        both.set(varIdx, false);
-                        needFilter = true;
-                    }
-                }
-            } else {
-                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
-            }
-            if (needFilter) {
-                filter();
-            }
-        }
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        filter();
     }
 
     /**
@@ -178,12 +193,11 @@ public class PropAmongGAC extends Propagator<IntVar> {
      * @throws ContradictionException if contradiction occurs.
      */
     private void removeOnlyValues() throws ContradictionException {
-        int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
             if (v.hasEnumeratedDomain()) {
                 for (int value : values) {
-                    if (v.removeValue(value, this)) {
+                    if (v.removeValue(value, aCause)) {
                         occs[i].add(-1);
                     }
                 }
@@ -191,23 +205,23 @@ public class PropAmongGAC extends Propagator<IntVar> {
                 int lb = v.getLB();
                 int ub = v.getUB();
                 int k1 = 0;
-                int k2 = values.length-1;
+                int k2 = values.length - 1;
                 // values is sorted
                 // so first, find the first value inside dom(v)
-                while(k1 < k2 && values[k1]<lb){
+                while (k1 < k2 && values[k1] < lb) {
                     k1++;
                 }
                 // and bottom-up shaving
-                while(k1 <= k2 && v.removeValue(values[k1], this)){
+                while (k1 <= k2 && v.removeValue(values[k1], aCause)) {
                     occs[i].add(-1);
                     k1++;
                 }
                 // then find the last value inside dom(v)
-                while(k2 > k1 && values[k2]>ub){
+                while (k2 > k1 && values[k2] > ub) {
                     k2--;
                 }
                 // and top bottom shaving
-                while(k2 >= k1 && v.removeValue(values[k2], this)){
+                while (k2 >= k1 && v.removeValue(values[k2], aCause)) {
                     occs[i].add(-1);
                     k2--;
                 }
@@ -232,12 +246,12 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        v.removeInterval(left, right, this);
+                        v.removeInterval(left, right, aCause);
                         left = right = value;
                     }
                 }
             }
-            v.removeInterval(left, right, this);
+            v.removeInterval(left, right, aCause);
             it.dispose();
         }
     }
@@ -256,7 +270,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    protected static class RemProc implements UnaryIntProcedure<Integer> {
+    protected static class RemProc implements UnarySafeIntProcedure<Integer> {
 
         final PropAmongGAC p;
         int varIdx;
@@ -266,13 +280,13 @@ public class PropAmongGAC extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer integer) {
+        public UnarySafeIntProcedure set(Integer integer) {
             varIdx = integer;
             return this;
         }
 
         @Override
-        public void execute(int val) throws ContradictionException {
+        public void execute(int val) {
             if (p.both.get(varIdx)) {
                 if (p.setValues.contains(val)) {
                     p.occs[varIdx].add(-1);

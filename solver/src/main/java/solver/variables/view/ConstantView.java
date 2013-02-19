@@ -1,37 +1,36 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.objects.IList;
-import choco.kernel.memory.IStateBool;
-import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IStateBool;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,12 +38,13 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
+import solver.explanations.antidom.AntiDomain;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
@@ -59,7 +59,7 @@ import solver.variables.domain.IIntDomain;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ConstantView implements IntVar {
+public class ConstantView implements IntVar<IntDelta> {
 
     protected final int constante;
     protected final String name;
@@ -96,8 +96,23 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int[] getPIndices() {
-        return new int[0];
+    public int getNbProps() {
+        return 0;
+    }
+
+    @Override
+    public Propagator getPropagator(int idx) {
+        return null;
+    }
+
+    @Override
+    public int getIndiceInPropagator(int pidx) {
+        return 0;
+    }
+
+    @Override
+    public IntView[] getViews() {
+        return new IntView[0];
     }
 
     @Override
@@ -105,10 +120,12 @@ public class ConstantView implements IntVar {
         return ID;
     }
 
+
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            assert cause != null;
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
@@ -117,7 +134,8 @@ public class ConstantView implements IntVar {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            assert cause != null;
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
@@ -126,7 +144,8 @@ public class ConstantView implements IntVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            assert cause != null;
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
         }
         return false;
@@ -135,7 +154,8 @@ public class ConstantView implements IntVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            assert cause != null;
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
         }
         return false;
@@ -144,10 +164,16 @@ public class ConstantView implements IntVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            assert cause != null;
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.DECUPP, "outside domain update bound");
         }
         return false;
+    }
+
+    @Override
+    public void wipeOut(ICause cause) throws ContradictionException {
+        removeValue(constante, cause);
     }
 
     @Override
@@ -209,26 +235,6 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        //useless
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return Empty.get();
-    }
-
-    @Override
-    public void activate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
-    public void desactivate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
     public boolean instantiated() {
         return true;
     }
@@ -249,37 +255,28 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public IList getMonitors() {
-        return null;
-    }
-
-    @Override
     public int nbConstraints() {
         //who cares?
         return 0;
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        Explanation explanation = new Explanation();
-        if (empty.get()) {
-            explanation.add(solver.getExplainer().explain(this, constante));
-        }
-        return explanation;
+    public AntiDomain antiDomain() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-         Explanation explanation = new Explanation();
+    public void explain(VariableState what, Explanation to) {
         if (empty.get()) {
-            explanation.add(solver.getExplainer().explain(this, constante));
+            to.add(solver.getExplainer().explain(this, constante));
         }
-        return explanation;
     }
 
     @Override
-    public int nbMonitors() {
-        return 0;
+    public void explain(VariableState what, int val, Explanation to) {
+        if (empty.get()) {
+            to.add(solver.getExplainer().explain(this, constante));
+        }
     }
 
     @Override
@@ -287,20 +284,38 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
+    public int link(Propagator propagator, int idxInProp) {
+        return -1;
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
+    public void recordMask(int mask) {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        return IIntDeltaMonitor.Default.NONE;
+    }
+
+    @Override
+    public void createDelta() {
+    }
+
+    @Override
+    public void unlink(Propagator propagator, int idx) {
+    }
+
+    @Override
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         //void
     }
 
     @Override
-    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    }
+
+    @Override
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         //void
     }
 
@@ -321,8 +336,13 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return Variable.INT + Variable.CSTE;
+    }
+
+    @Override
+    public int compareTo(Variable o) {
+        return this.getId() - o.getId();
     }
 
     @Override

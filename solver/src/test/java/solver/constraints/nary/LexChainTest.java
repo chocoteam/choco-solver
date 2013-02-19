@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.nary;
@@ -35,24 +35,20 @@ package solver.constraints.nary;
  * LexChain test file
  */
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import junit.framework.Assert;
+import common.ESat;
+import common.util.tools.ArrayUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.reified.ReifiedConstraint;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,7 +57,7 @@ import java.util.Random;
 
 public class LexChainTest {
 
-    @Test
+    @Test(groups = "1s")
     public void lexChainTest1() {
         Solver s = new Solver();
 
@@ -82,16 +78,14 @@ public class LexChainTest {
 
     private ALogicTree reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
-        solver.post(new ReifiedConstraint(b1,
-                new GreaterOrEqualX_YC(Y[i], X[i], 1, solver),
-                new GreaterOrEqualX_YC(X[i], Y[i], 0, solver), solver));
+        solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(Y[i], ">", X[i])));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(b1), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
         if (i == X.length - 1) {
             return Literal.pos(b1);
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
-            solver.post(new ReifiedConstraint(b2,
-                    new EqualX_YC(Y[i], X[i], 0, solver),
-                    new NotEqualX_YC(X[i], Y[i], 0, solver), solver));
+            solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(Y[i], "=", X[i])));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(b2), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
             return Node.or(Literal.pos(b1), Node.and(Literal.pos(b2), reformulate(i + 1, X, Y, solver)));
         }
     }
@@ -110,8 +104,8 @@ public class LexChainTest {
             //refor.post(new ConjunctiveNormalForm(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        solver.post(new ConjunctiveNormalForm(Node.and(trees), solver));
-        solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 
@@ -125,7 +119,7 @@ public class LexChainTest {
         }
 
         solver.post(new LexChain(X, true, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
+        solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }
 
@@ -144,7 +138,7 @@ public class LexChainTest {
             refor.findAllSolutions();
             lex.findAllSolutions();
 
-            Assert.assertEquals(String.format("seed:%d", seed), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+            Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
         }
     }
 
@@ -163,7 +157,7 @@ public class LexChainTest {
             refor.findAllSolutions();
             lex.findAllSolutions();
 
-            Assert.assertEquals(String.format("seed:%d", seed), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+            Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
         }
     }
 
@@ -174,7 +168,7 @@ public class LexChainTest {
         Solver lex = lex(n, m, k, seed, true);
         refor.findAllSolutions();
         lex.findAllSolutions();
-        Assert.assertEquals(String.format("seed:%d", 0), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+        Assert.assertEquals(refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount(), String.format("seed:%d", seed));
     }
 
     @Test(groups = "10m")

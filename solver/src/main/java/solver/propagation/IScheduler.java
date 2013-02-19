@@ -35,8 +35,9 @@ import solver.exception.ContradictionException;
  *
  * @author Charles Prud'homme
  * @since 05/12/11
+ * @revision 04/03/12 add update feature
  */
-public interface IScheduler<S extends ISchedulable> extends IExecutable{
+public interface IScheduler<S extends ISchedulable> extends IExecutable {
 
     /**
      * Schedule an element
@@ -58,6 +59,15 @@ public interface IScheduler<S extends ISchedulable> extends IExecutable{
      */
     void flush();
 
+    /**
+     * Does this require to be informed of element modification
+     *
+     * @return <code>true</code> if this needs to be informed of any modification of its elements
+     */
+    boolean needUpdate();
+
+    void update(S element);
+
     public static enum Default implements IScheduler {
         NONE() {
             @Override
@@ -71,6 +81,15 @@ public interface IScheduler<S extends ISchedulable> extends IExecutable{
             @Override
             public boolean execute() throws ContradictionException {
                 return true;
+            }
+
+            @Override
+            public boolean needUpdate() {
+                return false;
+            }
+
+            @Override
+            public void update(ISchedulable element) {
             }
 
             @Override

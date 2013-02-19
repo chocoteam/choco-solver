@@ -26,23 +26,15 @@
  */
 package samples.nsp;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.GlobalCardinality;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.CostRegular;
+import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
-import solver.constraints.nary.automata.MultiCostRegular;
-import solver.constraints.nary.automata.Regular;
 import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.EqualXC;
-import solver.constraints.unary.NotEqualXC;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -139,9 +131,9 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int t = trip[2];
             int a = trip[3];
             if (mandatory) {
-                solver.post(ConstraintFactory.eq(shifts[e][t], a, solver));
+                solver.post(IntConstraintFactory.arithm(shifts[e][t], "=", a));
             } else {
-                solver.post(ConstraintFactory.neq(shifts[e][t], a, solver));
+                solver.post(IntConstraintFactory.arithm(shifts[e][t], "!=", a));
             }
         }
     }
@@ -184,7 +176,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         for (int i = 1; i < occ.length; i++) {
             for (int j = 0; j < i; j++) {
                 for (int a = 0; a < occ[0].length; a++) {
-                    solver.post(ConstraintFactory.eq(occ[i][a], occ[j][a], solver));
+                    solver.post(IntConstraintFactory.arithm(occ[i][a], "=", occ[j][a]));
                 }
             }
         }
@@ -215,21 +207,27 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         IntVar[][] cards = ArrayUtils.transpose(covers);
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (int t = 0; t < vars.length; t++) {
-            solver.post(GlobalCardinality.make(vars[t], cards[t], 0, solver));
+            int[] values = new int[cards[t].length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality(vars[t], values, cards[t], false));
         }
     }
 
     private void makeCoverWithGCCFix(Solver solver) {
         description += "cover[gccFix] ";
-        int[] coverLB = new int[data.nbActivities()];
-        int[] coverUB = new int[data.nbActivities()];
+        IntVar[] cover = new IntVar[data.nbActivities()];
         for (int a = 0; a < data.nbActivities(); a++) {
-            coverLB[a] = data.getCoverLB(a);
-            coverUB[a] = data.getCoverUB(a);
+            cover[a] = VariableFactory.bounded("cover_" + a, data.getCoverLB(a), data.getCoverUB(a), solver);
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
-            solver.post(GlobalCardinality.make(var, coverLB, coverUB, 0, GlobalCardinality.Consistency.BC, solver));
+            int[] values = new int[cover.length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality(var, values, cover, false));
         }
     }
 
@@ -251,7 +249,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 
     private void makeCoverCounterCoupling(Solver solver, int a) {
         description += "coupling[" + a + "] ";
-        solver.post(Sum.eq(ArrayUtils.getColumn(occurrences, a, IntVar.class), data.getTotalCover(a), solver));
+        solver.post(IntConstraintFactory.sum(ArrayUtils.getColumn(occurrences, a, IntVar.class), VariableFactory.fixed(data.getTotalCover(a),solver)));
     }
 
     private void makeCoverCounterCouplingAndEquity(Solver solver) {
@@ -285,7 +283,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             g++;
         }
         description += "couplingEquality[" + a + "] ";
-        solver.post(Sum.eq(occ, sizes, data.getTotalCover(a), solver));
+        solver.post(IntConstraintFactory.scalar(occ, sizes, VariableFactory.fixed(data.getTotalCover(a),solver)));
     }
 
 
@@ -305,7 +303,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCountersWithGCC(Solver solver) {
         description += "countM[gcc] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(GlobalCardinality.make(shifts[e], occurrences[e], 0, solver));
+            int[] values = new int[occurrences[e].length];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = i;
+            }
+            solver.post(IntConstraintFactory.global_cardinality(shifts[e], values, occurrences[e], false));
         }
 
     }
@@ -320,7 +322,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCounterWithOccurrence(Solver solver, int a) {
         for (int e = 0; e < data.nbEmployees(); e++) {
             if (occurrences[e][a].getLB() > 0 || occurrences[e][a].getUB() < data.nbDays()) {
-                solver.post(new Count(a, shifts[e], Count.Relop.EQ, occurrences[e][a], solver));
+                solver.post(IntConstraintFactory.count(a, shifts[e], occurrences[e][a]));
             }
         }
     }
@@ -355,7 +357,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
 //                    IntVar occ = ConstraintFactory.makeIntVar("nW" + t + data.getLiteral(a) + e, lb, ub, "cp:bound", Options.V_NO_DECISION);
                     IntVar occ = VariableFactory.bounded("nW" + t + data.getLiteral(a) + e, lb, ub, solver);
                     System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                    solver.post(new Count(a, vars, Count.Relop.EQ, occ, solver));
+                    solver.post(IntConstraintFactory.count(a, vars, occ));
                 }
             }
         }
@@ -365,15 +367,17 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         description += "countW[gcc] ";
         IntVar[] vars = new IntVar[7];
         for (int e = 0; e < data.nbEmployees(); e++) {
-            int[] lb = new int[data.nbActivities()];
-            int[] ub = new int[data.nbActivities()];
+            IntVar[] cards = new IntVar[data.nbActivities()];
             for (int a = 0; a < data.nbActivities(); a++) {
-                lb[a] = data.getWeekCounterLB(e, a);
-                ub[a] = data.getWeekCounterLB(e, a);
+                cards[a] = VariableFactory.bounded("card_" + a, data.getWeekCounterLB(e, a), data.getWeekCounterLB(e, a), solver);
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                solver.post(GlobalCardinality.make(vars, lb, ub, 0, GlobalCardinality.Consistency.BC, solver));
+                int[] values = new int[cards.length];
+                for (int i = 0; i < values.length; i++) {
+                    values[i] = i;
+                }
+                solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, false));
             }
         }
 
@@ -461,19 +465,25 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         Literal.pos(bvars[0]),
                         Node.or(Literal.pos(bvars[1]), Literal.pos(bvars[2]), Literal.pos(bvars[3]))
                 );
-                solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], n, solver), new NotEqualXC(s[t], n, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], n, solver), new NotEqualXC(s[t + 1], n, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[2], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[3], new EqualXC(s[t + 2], r, solver), new NotEqualXC(s[t + 2], r, solver), solver));
+                solver.post(IntConstraintFactory.clauses(tree, solver));
+                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", n)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", n)));
+                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
+                solver.post(IntConstraintFactory.implies(bvars[2], IntConstraintFactory.arithm(s[t + 1], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[2]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[3], IntConstraintFactory.arithm(s[t + 2], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[3]), IntConstraintFactory.arithm(s[t + 2], "!=", r)));
             }
             int t = data.nbDays() - 2;
             BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
 //            solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             ALogicTree tree = Node.implies(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-            solver.post(new ConjunctiveNormalForm(tree, solver));
-            solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], n, solver), new NotEqualXC(s[t], n, solver), solver));
-            solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], n, solver), new NotEqualXC(s[t + 1], n, solver), solver));
+            solver.post(IntConstraintFactory.clauses(tree, solver));
+            solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", n)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", n)));
+            solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", n)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", n)));
         }
     }
 
@@ -505,13 +515,19 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                                 Node.or(Literal.pos(bvars[2]), Literal.pos(bvars[3]))),
                         Node.and(Literal.pos(bvars[4]), Literal.pos(bvars[5]))
                 );
-                solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], r, solver), new NotEqualXC(s[t], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[2], new EqualXC(s[t + 7], r, solver), new NotEqualXC(s[t + 7], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[3], new EqualXC(s[t + 8], r, solver), new NotEqualXC(s[t + 8], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[4], new EqualXC(s[t + 14], r, solver), new NotEqualXC(s[t + 14], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[5], new EqualXC(s[t + 15], r, solver), new NotEqualXC(s[t + 15], r, solver), solver));
+                solver.post(IntConstraintFactory.clauses(tree, solver));
+                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[2], IntConstraintFactory.arithm(s[t + 7], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[2]), IntConstraintFactory.arithm(s[t + 7], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[3], IntConstraintFactory.arithm(s[t + 8], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[3]), IntConstraintFactory.arithm(s[t + 8], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[4], IntConstraintFactory.arithm(s[t + 14], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[4]), IntConstraintFactory.arithm(s[t + 14], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[5], IntConstraintFactory.arithm(s[t + 15], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[5]), IntConstraintFactory.arithm(s[t + 15], "!=", r)));
 
                 /*solver.post(ConstraintFactory.implies(
          ConstraintFactory.and(
@@ -570,9 +586,11 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             for (int t = 5; t + 1 < data.nbDays(); t += 7) {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
                 ALogicTree tree = Node.ifOnlyIf(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
-                solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], r, solver), new NotEqualXC(s[t], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
+                solver.post(IntConstraintFactory.clauses(tree, solver));
+                solver.post(IntConstraintFactory.implies(bvars[0], IntConstraintFactory.arithm(s[t], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[0]), IntConstraintFactory.arithm(s[t], "!=", r)));
+                solver.post(IntConstraintFactory.implies(bvars[1], IntConstraintFactory.arithm(s[t + 1], "=", r)));
+                solver.post(IntConstraintFactory.implies(VariableFactory.not(bvars[1]), IntConstraintFactory.arithm(s[t + 1], "!=", r)));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));
             }
         }
@@ -602,7 +620,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         FiniteAutomaton automaton = this.makeForbiddenPatternsAsAutomaton();
         description += "pat[regular/" + automaton.getNbStates() + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(new Regular(shifts[e], automaton, solver));
+            solver.post(IntConstraintFactory.regular(shifts[e], automaton));
         }
     }
 
@@ -616,7 +634,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         description += "pat[MCRegular/" + automaton.getNbStates() + "/" + costs[0][0].length + "] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(new MultiCostRegular(shifts[e], occurrences[e], automaton, costs, solver));
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], occurrences[e], CostAutomaton.makeMultiResources(automaton, costs,occurrences[e])));
         }
     }
 
@@ -642,7 +660,8 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             int lb = data.getWeekCounterLB(e, r);
             int ub = data.getWeekCounterUB(e, r);
             IntVar[] occs = VariableFactory.boundedArray("nWR", data.nbWeeks(), lb, ub, solver);
-            solver.post(new MultiCostRegular(shifts[e], ArrayUtils.append(occurrences[e], occs), automaton, costs, solver));
+			IntVar[] cv = ArrayUtils.append(occurrences[e], occs);
+            solver.post(IntConstraintFactory.multicost_regular(shifts[e], cv, CostAutomaton.makeMultiResources(automaton, costs,cv)));
         }
     }
 

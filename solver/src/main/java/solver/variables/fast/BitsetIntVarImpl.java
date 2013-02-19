@@ -1,53 +1,54 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.fast;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
-import com.sun.istack.internal.NotNull;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IEnvironment;
+import memory.IStateBitSet;
+import memory.IStateInt;
 import solver.Cause;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.explanations.antidom.AntiDomBitset;
+import solver.explanations.antidom.AntiDomain;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.delta.Delta;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.EnumDelta;
+import solver.variables.delta.IEnumDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import solver.variables.delta.monitor.EnumDeltaMonitor;
 
 /**
  * <br/>
@@ -55,7 +56,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<IEnumDelta>> implements IntVar<IEnumDelta> {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,10 +71,9 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
     private final IStateInt SIZE;
     //offset of the lower bound and the first value in the domain
     private final int OFFSET;
+    private final int LENGTH;
 
-    private IntDelta delta = NoDelta.singleton;
-
-    protected HeuristicVal heuristicVal;
+    private IEnumDelta delta = NoDelta.singleton;
 
     private DisposableValueIterator _viterator;
     private DisposableRangeIterator _riterator;
@@ -88,12 +88,12 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
         this.VALUES = env.makeBitSet(capacity);
         for (int i = 0; i < sortedValues.length; i++) {
-            this.VALUES.set(sortedValues[i] - OFFSET, true);
+            this.VALUES.set(sortedValues[i] - OFFSET);
         }
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(capacity - 1);
-        this.SIZE = env.makeInt(sortedValues.length);
-        this.makeList(this);
+        this.SIZE = env.makeInt(VALUES.cardinality());
+        LENGTH = capacity;
     }
 
     public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
@@ -106,7 +106,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(values.prevSetBit(values.size()));
         this.SIZE = env.makeInt(cardinality);
-        this.makeList(this);
+        LENGTH = this.UB.get();
     }
 
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
@@ -117,26 +117,16 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         int capacity = max - min + 1;
         this.VALUES = env.makeBitSet(capacity);
         for (int i = 0; i <= max - min; i++) {
-            this.VALUES.set(i, true);
+            this.VALUES.set(i);
         }
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(max - min);
         this.SIZE = env.makeInt(capacity);
-        this.makeList(this);
+        LENGTH = capacity;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -149,72 +139,55 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value       value to remove from the domain (int)
-     * @param cause       removal releaser
+     * @param value value to remove from the domain (int)
+     * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-        boolean change = false;
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        assert cause != null;
         ICause antipromo = cause;
-        int inf = getLB();
-        int sup = getUB();
-        if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, antipromo);
+        int aValue = value - OFFSET;
+        boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
+        if (change) {
+            if (SIZE.get() == 1) {
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
 //            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
-            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
-        } else {
-            if (inf <= value && value <= sup) {
-                EventType e = EventType.REMOVE;
+                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+            }
+            EventType e = EventType.REMOVE;
+            this.VALUES.clear(aValue);
+            this.SIZE.add(-1);
+            if (reactOnRemoval) {
+                delta.add(aValue + OFFSET, cause);
+            }
 
-                int aValue = value - OFFSET;
-                change = VALUES.get(aValue);
-                this.VALUES.set(aValue, false);
-                if (change) {
-                    this.SIZE.add(-1);
-                    if (reactOnRemoval) {
-                        delta.add(aValue + OFFSET, cause);
-                    }
+            if (value == getLB()) {
+                LB.set(VALUES.nextSetBit(aValue));
+                e = EventType.INCLOW;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
-
-                if (value == inf) {
-                    LB.set(VALUES.nextSetBit(aValue));
-                    e = EventType.INCLOW;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                } else if (value == sup) {
-                    UB.set(VALUES.prevSetBit(aValue));
-                    e = EventType.DECUPP;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                }
-                if (change && !VALUES.isEmpty()) {
-                    if (this.instantiated()) {
-                        e = EventType.INSTANTIATE;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
-                    }
-                    this.notifyMonitors(e, cause);
-                } else {
-                    if (VALUES.isEmpty()) {
-                        solver.getExplainer().removeValue(this, value, antipromo);
-//                        monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
-                        this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
-                    }
+            } else if (value == getUB()) {
+                UB.set(VALUES.prevSetBit(aValue));
+                e = EventType.DECUPP;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            assert !VALUES.isEmpty();
+            if (this.instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            this.notifyPropagators(e, cause);
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
         }
-        if (change) {
-            solver.getExplainer().removeValue(this, value, antipromo);
-        }
-//        monitors.forEach(afterModification.set(this, EventType.REMOVE, cause));
         return change;
     }
 
@@ -223,6 +196,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
@@ -247,15 +221,17 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value       instantiation value (int)
-     * @param cause       instantiation releaser
+     * @param value instantiation value (int)
+     * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
+        assert cause != null;
+        if (Configuration.PLUG_EXPLANATION)
+            solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -266,11 +242,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
                 for (; i < aValue; i = VALUES.nextSetBit(i + 1)) {
-                    delta.add(i + OFFSET,cause);
+                    delta.add(i + OFFSET, cause);
                 }
                 i = VALUES.nextSetBit(aValue + 1);
                 for (; i >= 0; i = VALUES.nextSetBit(i + 1)) {
-                    delta.add(i + OFFSET,cause);
+                    delta.add(i + OFFSET, cause);
                 }
             }
             this.VALUES.clear();
@@ -282,7 +258,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
             if (VALUES.isEmpty()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-            this.notifyMonitors(EventType.INSTANTIATE, cause);
+            this.notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -302,19 +278,20 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new lower bound (included)
-     * @param cause       updating releaser
+     * @param value new lower bound (included)
+     * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         boolean change;
         ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -340,8 +317,8 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                this.notifyPropagators(e, cause);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -361,19 +338,20 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new upper bound (included)
-     * @param cause       update releaser
+     * @param value new upper bound (included)
+     * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        assert cause != null;
         boolean change;
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -381,7 +359,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
                     for (int i = old - OFFSET; i > aValue; i = VALUES.prevSetBit(i - 1)) {
-                        delta.add(i + OFFSET,cause);
+                        delta.add(i + OFFSET, cause);
                     }
                 }
                 VALUES.clear(aValue + 1, old - OFFSET + 1);
@@ -398,12 +376,18 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                this.notifyPropagators(e, cause);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
         return false;
+    }
+
+    @Override
+    public void wipeOut(ICause cause) throws ContradictionException {
+        assert cause != null;
+        removeInterval(this.getLB(), this.getUB(), cause);
     }
 
     public boolean instantiated() {
@@ -477,7 +461,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
     }
 
     @Override
-    public IntDelta getDelta() {
+    public IEnumDelta getDelta() {
         return delta;
     }
 
@@ -493,7 +477,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 s.append(',').append(i);
                 nb--;
             }
-            if (nb == 0) {
+            if (nb == 0 && SIZE.get() > 6) {
                 s.append("...,").append(this.getUB());
             }
             s.append('}');
@@ -505,27 +489,50 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
 
+
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new Delta();
+    public void createDelta() {
+        if (!reactOnRemoval) {
+            delta = new EnumDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new EnumDeltaMonitor(delta, propagator);
+    }
+
+
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
     }
 
+
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain(VariableState what) {
-        Explanation expl = new Explanation(null, null);
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+
+    @Override
+    public AntiDomain antiDomain() {
+        return new AntiDomBitset(this);
+    }
+
+    public void explain(VariableState what, Explanation to) {
+        AntiDomain invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
@@ -533,32 +540,30 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                expl.add(solver.getExplainer().explain(this, val));
+                to.add(solver.getExplainer().explain(this, val));
             }
         }
-
+        it.dispose();
 //        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
-        return expl;
     }
 
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = new Explanation();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        to.add(solver.getExplainer().explain(this, val));
     }
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+        assert cause != null;
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return VAR + INT;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -30,10 +30,12 @@ package choco;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.constraints.nary.cnf.*;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.cnf.ALogicTree;
+import solver.constraints.nary.cnf.Literal;
+import solver.constraints.nary.cnf.LogicTreeToolBox;
+import solver.constraints.nary.cnf.Node;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -45,200 +47,204 @@ import solver.variables.VariableFactory;
  */
 public class LogicTreeTest {
 
-    @Test(groups = "1s")
-    public void test1() {
-        Solver solver = new Solver();
+	@Test(groups = "1s")
+	public void test1() {
+		Solver solver = new Solver();
 
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
-
-
-        ALogicTree root = Node.nand(Node.nor(a, b), Node.or(c, d));
-
-        root = LogicTreeToolBox.toCNF(root);
-
-        Assert.assertEquals(root.toString(), "((b or a or not c) and (b or a or not d))");
-    }
-
-    @Test(groups = "1s")
-    public void test12() {
-        Solver solver = new Solver();
-
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
-        Literal e = Literal.pos(VariableFactory.bool("e", solver));
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
 
 
-        ALogicTree root = Node.and(Node.nand(Node.nor(a, b), Node.or(c, d)), e);
+		ALogicTree root = Node.nand(Node.nor(a, b), Node.or(c, d));
 
-        root = LogicTreeToolBox.toCNF(root);
+		root = LogicTreeToolBox.toCNF(root);
 
-        Assert.assertEquals(root.toString(), "(e and (b or a or not c) and (b or a or not d))");
-    }
+		Assert.assertEquals(root.toString(), "((b or a or not c) and (b or a or not d))");
+	}
 
+	@Test(groups = "1s")
+	public void test12() {
+		Solver solver = new Solver();
 
-    @Test(groups = "1s")
-    public void test2() {
-        Solver solver = new Solver();
-
-        Literal a = Literal.neg(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
-
-        ALogicTree root = Node.or(Node.or(Node.or(a, b), c), d);
-
-        LogicTreeToolBox.merge(ALogicTree.Operator.OR, root);
-
-        Assert.assertEquals(root.toString(), "(d or c or not a or b)");
-    }
-
-    @Test(groups = "1s")
-    public void test3() {
-        Solver solver = new Solver();
-
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-
-        ALogicTree root = Node.or(Node.and(a, b), c);
-        root = LogicTreeToolBox.developOr(root);
-        Assert.assertEquals(root.toString(), "((a or c) and (b or c))");
-    }
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
+		Literal e = Literal.pos(VariableFactory.bool("e", solver));
 
 
-    @Test(groups = "1s")
-    public void test4() {
-        Solver solver = new Solver();
+		ALogicTree root = Node.and(Node.nand(Node.nor(a, b), Node.or(c, d)), e);
 
-        Literal a = Literal.neg(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
+		root = LogicTreeToolBox.toCNF(root);
 
-        ALogicTree root = Node.nor(Node.or(Node.nand(a, b), c), d);
-
-        LogicTreeToolBox.expandNot(root);
-
-        Assert.assertEquals(root.toString(), "(((not a and b) and not c) and not d)");
-    }
+		Assert.assertEquals(root.toString(), "(e and (b or a or not c) and (b or a or not d))");
+	}
 
 
-    @Test(groups = "1s")
-    public void test5() {
-        Solver solver = new Solver();
+	@Test(groups = "1s")
+	public void test2() {
+		Solver solver = new Solver();
 
-        Literal a = Literal.neg(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
+		Literal a = Literal.neg(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
 
-        ALogicTree root = Node.and(Node.and(Node.and(a, b), c), d);
+		ALogicTree root = Node.or(Node.or(Node.or(a, b), c), d);
 
-        LogicTreeToolBox.merge(ALogicTree.Operator.AND, root);
+		LogicTreeToolBox.merge(ALogicTree.Operator.OR, root);
 
-        Assert.assertEquals(root.toString(), "(d and c and not a and b)");
-    }
+		Assert.assertEquals(root.toString(), "(d or c or not a or b)");
+	}
 
+	@Test(groups = "1s")
+	public void test3() {
+		Solver solver = new Solver();
 
-    @Test(groups = "1s")
-    public void test6() {
-        Solver solver = new Solver();
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
 
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-
-        ALogicTree root = Node.implies(a, b);
-
-        root = LogicTreeToolBox.toCNF(root);
-
-        Assert.assertEquals(root.toString(), "(b or not a)");
-    }
-
-    @Test(groups = "1s")
-    public void test7() {
-        Solver solver = new Solver();
-
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		ALogicTree root = Node.or(Node.and(a, b), c);
+		root = LogicTreeToolBox.developOr(root);
+		Assert.assertEquals(root.toString(), "((a or c) and (b or c))");
+	}
 
 
-        ALogicTree root = Node.ifThenElse(a, b, c);
+	@Test(groups = "1s")
+	public void test4() {
+		Solver solver = new Solver();
 
-        root = LogicTreeToolBox.toCNF(root);
+		Literal a = Literal.neg(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
 
-        Assert.assertEquals(root.toString(), "((a or c) and (b or not a) and (b or c))");
-    }
+		ALogicTree root = Node.nor(Node.or(Node.nand(a, b), c), d);
 
-    @Test(groups = "1s")
-    public void test8() {
-        Solver solver = new Solver();
+		LogicTreeToolBox.expandNot(root);
 
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal na = Literal.neg(a.flattenBoolVar()[0]);
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal nb = Literal.neg(b.flattenBoolVar()[0]);
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
+		Assert.assertEquals(root.toString(), "(((not a and b) and not c) and not d)");
+	}
 
-        ALogicTree root = Node.and(Node.or(a, b, na), Node.or(c, d), Node.or(b, nb));
 
-        root = LogicTreeToolBox.toCNF(root);
+	@Test(groups = "1s")
+	public void test5() {
+		Solver solver = new Solver();
 
-        Assert.assertEquals(root.toString(), "(c or d)");
-    }
+		Literal a = Literal.neg(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
 
-    @Test(groups = "1s")
-    public void test9() {
-        Solver solver = new Solver();
+		ALogicTree root = Node.and(Node.and(Node.and(a, b), c), d);
 
-        Literal a = Literal.pos(VariableFactory.bool("a", solver));
-        Literal na = Literal.neg(a.flattenBoolVar()[0]);
-        Literal b = Literal.pos(VariableFactory.bool("b", solver));
-        Literal c = Literal.pos(VariableFactory.bool("c", solver));
-        Literal d = Literal.pos(VariableFactory.bool("d", solver));
+		LogicTreeToolBox.merge(ALogicTree.Operator.AND, root);
 
-        ALogicTree root = Node.and(a, b, na, c, d);
+		Assert.assertEquals(root.toString(), "(d and c and not a and b)");
+	}
 
-        root = LogicTreeToolBox.toCNF(root);
 
-        Assert.assertEquals(root.toString(), "false");
-    }
+	@Test(groups = "1s")
+	public void test6() {
+		Solver solver = new Solver();
 
-    @Test(groups = "1s")
-    public void test10() {
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
 
-        Solver solver = new Solver();
-        BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
+		ALogicTree root = Node.implies(a, b);
 
-        solver.post(new ReifiedConstraint(rows[0],
-                Sum.eq(new BoolVar[]{rows[1], rows[2]}, 2, solver),
-                Sum.leq(new BoolVar[]{rows[1], rows[2]}, 1, solver),
-                solver)
-        );
-        //SearchMonitorFactory.log(solver, true, true);
-        solver.findAllSolutions();
-        long nbSol = solver.getMeasures().getSolutionCount();
+		root = LogicTreeToolBox.toCNF(root);
 
-        for (int seed = 0; seed < 2000; seed++) {
-            Solver sCNF = new Solver();
-            BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
-            ALogicTree tree = Node.ifOnlyIf(
-                    Literal.pos(rCNF[0]),
-                    Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
-            );
-            sCNF.post(new ConjunctiveNormalForm(tree, sCNF));
-            sCNF.set(StrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
+		Assert.assertEquals(root.toString(), "(b or not a)");
+	}
 
-            //SearchMonitorFactory.log(sCNF, true, true);
-            sCNF.findAllSolutions();
-            Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
-        }
-    }
+	@Test(groups = "1s")
+	public void test7() {
+		Solver solver = new Solver();
+
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+
+
+		ALogicTree root = Node.ifThenElse(a, b, c);
+
+		root = LogicTreeToolBox.toCNF(root);
+
+		Assert.assertEquals(root.toString(), "((a or c) and (b or not a) and (b or c))");
+	}
+
+	@Test(groups = "1s")
+	public void test8() {
+		Solver solver = new Solver();
+
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal na = Literal.neg(a.flattenBoolVar()[0]);
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal nb = Literal.neg(b.flattenBoolVar()[0]);
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
+
+		ALogicTree root = Node.and(Node.or(a, b, na), Node.or(c, d), Node.or(b, nb));
+
+		root = LogicTreeToolBox.toCNF(root);
+
+		Assert.assertEquals(root.toString(), "(c or d)");
+	}
+
+	@Test(groups = "1s")
+	public void test9() {
+		Solver solver = new Solver();
+
+		Literal a = Literal.pos(VariableFactory.bool("a", solver));
+		Literal na = Literal.neg(a.flattenBoolVar()[0]);
+		Literal b = Literal.pos(VariableFactory.bool("b", solver));
+		Literal c = Literal.pos(VariableFactory.bool("c", solver));
+		Literal d = Literal.pos(VariableFactory.bool("d", solver));
+
+		ALogicTree root = Node.and(a, b, na, c, d);
+
+		root = LogicTreeToolBox.toCNF(root);
+
+		Assert.assertEquals(root.toString(), "false");
+	}
+
+	@Test(groups = "1s")
+	public void test10() {
+
+		Solver solver = new Solver();
+		BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
+
+		solver.post(
+				IntConstraintFactory.implies(
+						rows[0],
+						IntConstraintFactory.arithm(rows[1],"+",rows[2],"=",2)));
+		solver.post(
+				IntConstraintFactory.implies(
+						VariableFactory.not(rows[0]),
+						IntConstraintFactory.arithm(rows[1],"+",rows[2],"<=",1))
+		);
+		//SearchMonitorFactory.log(solver, true, true);
+		solver.findAllSolutions();
+		long nbSol = solver.getMeasures().getSolutionCount();
+
+		for (int seed = 0; seed < 2000; seed++) {
+			Solver sCNF = new Solver();
+			BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
+			ALogicTree tree = Node.ifOnlyIf(
+					Literal.pos(rCNF[0]),
+					Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
+			);
+			sCNF.post(IntConstraintFactory.clauses(tree, sCNF));
+			sCNF.set(IntStrategyFactory.random(rCNF, seed));
+
+			//SearchMonitorFactory.log(sCNF, true, true);
+			sCNF.findAllSolutions();
+			Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
+		}
+	}
 
 }

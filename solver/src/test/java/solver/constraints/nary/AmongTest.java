@@ -26,21 +26,18 @@
  */
 package solver.constraints.nary;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.exception.ContradictionException;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -55,7 +52,7 @@ import java.util.Random;
  */
 public class AmongTest {
 
-    @Test
+    @Test(groups = "1s")
     public void testRandomProblems() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -70,7 +67,7 @@ public class AmongTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void testRandomProblems2() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;
@@ -85,7 +82,7 @@ public class AmongTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test2() {
         int n = 2;
         for (int i = 0; i < 500; i++) {
@@ -94,15 +91,15 @@ public class AmongTest {
             int value = 1;
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Among(value, vars, occ, solver));
+            solver.set(IntStrategyFactory.random(allvars, i));
+            solver.post(IntConstraintFactory.among(occ, vars, new int[]{value}));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
     }
 
-    @Test
+    @Test(groups = "1s")
     public void test3() {
         int n = 2;
         for (int i = 0; i < 500; i++) {
@@ -111,13 +108,32 @@ public class AmongTest {
             int[] values = {1, 2, 0};
             IntVar occ = VariableFactory.bounded("oc", 0, n, solver);
             IntVar[] allvars = ArrayUtils.append(vars, new IntVar[]{occ});
-            solver.set(StrategyFactory.random(allvars, solver.getEnvironment(), i));
-            solver.post(new Among(values, vars, occ, solver));
+            solver.set(IntStrategyFactory.random(allvars, i));
+            solver.post(IntConstraintFactory.among(occ, vars, values));
 //            solver.post(getDecomposition(solver, vars, occ, values));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 9);
         }
+    }
+
+    @Test(groups = "1s")
+    public void test4() {
+        Solver solver = new Solver();
+        IntVar[] vars = VariableFactory.enumeratedArray("o", 4, new int[]{0, 1, 2, 5}, solver);
+        int[] values = {1, 2, 0};
+        IntVar occ = VariableFactory.bounded("oc", 0, 4, solver);
+        solver.post(IntConstraintFactory.among(occ, vars, values));
+        try {
+            solver.propagate();
+
+            vars[0].removeValue(1, Cause.Null);
+            vars[0].removeValue(2, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        solver.findAllSolutions();
     }
 
     public long randomOcc(long nbsol, int seed, boolean enumvar, int nbtest, boolean gac) {
@@ -152,12 +168,12 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, val
                     ));
                 } else {
-                    solver.post(new Among(val, vs, ivc, solver));
+                    solver.post(IntConstraintFactory.among(ivc, vs, new int[]{val}));
                 }
             }
-            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
+            solver.post(IntConstraintFactory.scalar(new IntVar[]{vars[0], vars[3]}, new int[]{1, 1}, vars[6]));
 
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -205,12 +221,12 @@ public class AmongTest {
                     solver.post(getDecomposition(solver, vs, ivc, values
                     ));
                 } else {
-                    solver.post(new Among(values, vs, ivc, solver));
+                    solver.post(IntConstraintFactory.among(ivc, vs, values));
                 }
             }
 //            solver.post(Sum.eq(new IntVar[]{vars[0], vars[3], vars[6]}, new int[]{1, 1, -1}, 0, solver));
 
-            solver.set(StrategyFactory.random(vars, solver.getEnvironment(), seed));
+            solver.set(IntStrategyFactory.random(vars, seed));
             solver.findAllSolutions();
             if (nbsol == -1) {
                 nbsol = solver.getMeasures().getSolutionCount();
@@ -232,21 +248,21 @@ public class AmongTest {
      */
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int val) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
-        IntVar vval = Views.fixed(val, solver);
+        IntVar vval = VariableFactory.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new EqualX_YC(vs[i], vval, 0, solver),
-                    new NotEqualX_YC(vs[i], vval, 0, solver), solver));
+            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.arithm(vs[i], "=", vval)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.arithm(vs[i], "!=", vval)));
         }
-        return Sum.eq(bs, occ, solver);
+        return IntConstraintFactory.sum(bs, occ);
     }
 
     public Constraint getDecomposition(Solver solver, IntVar[] vs, IntVar occ, int[] values) {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new Member(vs[i], values, solver),
-                    new NotMember(vs[i], values, solver), solver));
+            solver.post(IntConstraintFactory.implies(bs[i], IntConstraintFactory.member(vs[i], values)));
+            solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[i]), IntConstraintFactory.not_member(vs[i], values)));
         }
-        return Sum.eq(bs, occ, solver);
+        return IntConstraintFactory.sum(bs, occ);
     }
 
 }

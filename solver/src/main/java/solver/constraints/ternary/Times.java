@@ -27,11 +27,13 @@
 
 package solver.constraints.ternary;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.ternary.PropTimes;
-import solver.constraints.propagators.ternary.PropTimesWithLong;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.ternary.PropTimesXY;
+import solver.constraints.propagators.ternary.PropTimesZ;
+import solver.exception.SolverException;
 import solver.variables.IntVar;
 
 /**
@@ -63,9 +65,14 @@ public class Times extends IntConstraint<IntVar> {
         this.Y = v2;
         this.Z = result;
         if (inIntBounds(X, Y)) {
-            setPropagators(new PropTimes(v1, v2, result, solver, this));
+            setPropagators(new Propagator[]{
+                    new PropTimesXY(v1, v2, result),
+                    new PropTimesZ(v1, v2, result)
+            });
+
         } else {
-            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
+            throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
+//            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
         }
     }
 

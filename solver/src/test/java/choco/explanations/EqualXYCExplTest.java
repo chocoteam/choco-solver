@@ -27,15 +27,15 @@
 
 package choco.explanations;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
-import solver.constraints.binary.EqualXY_C;
+import solver.constraints.IntConstraintFactory;
 import solver.explanations.ExplanationFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -51,18 +51,17 @@ import java.util.Random;
  */
 public class EqualXYCExplTest {
 
-
     public void model(int seed, int nbvars) {
 
         Random r = new Random(seed);
         int[] values = new int[nbvars];
-        for(int i = 0; i < values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             values[i] = r.nextInt(nbvars);
         }
 
         Solver ref = new Solver();
         Solver sol = new Solver();
-        sol.set(ExplanationFactory.engineFactory(sol));
+        ExplanationFactory.CBJ.plugin(sol, true);
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
@@ -73,22 +72,22 @@ public class EqualXYCExplTest {
 
         for (int i = 0; i < varsr.length; i++) {
             varsr[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, ref);
-            indicesr[i] = VariableFactory.enumerated("i_"+i, 0, nbvars,ref);
+            indicesr[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, ref);
             varss[i] = VariableFactory.enumerated("v_" + i, 0, nbvars, sol);
-            indicess[i] = VariableFactory.enumerated("i_"+i, 0, nbvars,sol);
+            indicess[i] = VariableFactory.enumerated("i_" + i, 0, nbvars, sol);
         }
         IntVar[] allvarsr = ArrayUtils.flatten(ArrayUtils.toArray(varsr, indicesr));
-        ref.set(StrategyFactory.forceInputOrderMinVal(allvarsr, ref.getEnvironment()));
+        ref.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarsr));
 
         IntVar[] allvarss = ArrayUtils.flatten(ArrayUtils.toArray(varss, indicess));
-        sol.set(StrategyFactory.forceInputOrderMinVal(allvarss, sol.getEnvironment()));
+        sol.set(IntStrategyFactory.force_InputOrder_InDomainMin(allvarss));
 
 
-        for (int i = 0; i < varsr.length - 1 ; i++) {
-            lcstrsr.add(new Element(varsr[i], values, indicesr[i], 0, ref));
-            lcstrsr.add(new EqualXY_C(varsr[i], indicesr[i+1], 2 * nbvars / 3 , ref));
-            lcstrss.add(new Element(varss[i], values, indicess[i], 0, sol));
-            lcstrss.add(new EqualXY_C(varss[i], indicess[i+1], 2 * nbvars / 3 , sol));
+        for (int i = 0; i < varsr.length - 1; i++) {
+            lcstrsr.add(IntConstraintFactory.element(varsr[i], values, indicesr[i], 0, "detect"));
+            lcstrsr.add(IntConstraintFactory.arithm(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3));
+            lcstrss.add(IntConstraintFactory.element(varss[i], values, indicess[i], 0, "detect"));
+            lcstrss.add(IntConstraintFactory.arithm(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);
@@ -105,10 +104,13 @@ public class EqualXYCExplTest {
         Assert.assertTrue(sol.getMeasures().getBackTrackCount() <= ref.getMeasures().getBackTrackCount());
     }
 
-    @Test (groups="10s")
+    @Test(groups = "10s")
     public void test1() {
-        model(125, 10);
-        model(153, 15);
-        model(1234, 12);
+        if (Configuration.PLUG_EXPLANATION) {
+            model(125, 4);
+            model(125, 10);
+            model(153, 15);
+            model(1234, 12);
+        }
     }
 }

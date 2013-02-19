@@ -1,47 +1,45 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.delta.monitor.IntDeltaMonitor;
-import solver.variables.delta.view.ViewDelta;
+import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 
 /**
@@ -55,46 +53,46 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends View<IntVar> {
+public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
-    protected DisposableValueIterator _viterator;
-    protected DisposableRangeIterator _riterator;
-
-    public AbsView(final IntVar var, Solver solver) {
+    public AbsView(IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(),this) {
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        var.createDelta();
+        if (var.getDelta() == NoDelta.singleton) {
+            return IIntDeltaMonitor.Default.NONE;
+//            throw new UnsupportedOperationException();
+        }
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
 
-                @Override
-                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                    if (EventType.isRemove(eventType.mask)) {
-                        for (int i = frozenFirst; i < frozenLast; i++) {
-                            if(propagator!=delta.getCause(i)){
-                                int v = delta.get(i);
-                                if (!var.contains(-v)) {
-                                    boolean found = false;
-                                    for (int j = i + 1; !found && j < frozenLast; j++) {
-                                        if (delta.get(j) == -v) {
-                                            found = true;
-                                        }
-                                    }
-                                    if (!found) {
-                                        proc.execute(Math.abs(v));
-                                    }
-                                }
+            @Override
+            protected void filter() {
+                int[] _values = values.toArray();
+                values.clear();
+                for (int i = 0; i < _values.length; i++) {
+                    int v = _values[i];
+                    if (!var.contains(-v)) {
+                        boolean found = false;
+                        for (int j = i + 1; !found && j < _values.length; j++) {
+                            if (_values[j] == -v) {
+                                found = true;
                             }
+                        }
+                        if (!found) {
+                            values.add(v);
                         }
                     }
                 }
-            });
-            reactOnRemoval = true;
-        }
+            }
+
+            @Override
+            protected int transform(int value) {
+                return Math.abs(value);
+            }
+        };
     }
 
     @Override
@@ -111,7 +109,7 @@ public final class AbsView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        assert cause != null;
         if (value < 0) {
             return false;
         }
@@ -132,13 +130,14 @@ public final class AbsView extends View<IntVar> {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -147,7 +146,7 @@ public final class AbsView extends View<IntVar> {
             boolean done = var.removeInterval(-to, -from, this);
             done |= var.removeInterval(from, to, this);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -155,11 +154,7 @@ public final class AbsView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        if (value < 0) {
-            //TODO: explication?
-            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
-        }
+        assert cause != null;
         int v = Math.abs(value);
         boolean done = var.updateLowerBound(-v, this);
         done |= var.updateUpperBound(v, this);
@@ -172,14 +167,14 @@ public final class AbsView extends View<IntVar> {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        assert cause != null;
         if (value <= 0) {
             return false;
         }
@@ -192,18 +187,14 @@ public final class AbsView extends View<IntVar> {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-        if (value < 0) {
-            //TODO: explication?
-            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
-        }
+        assert cause != null;
         boolean done = var.updateLowerBound(-value, this);
         done |= var.updateUpperBound(value, this);
         if (done) {
@@ -214,7 +205,7 @@ public final class AbsView extends View<IntVar> {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -226,8 +217,11 @@ public final class AbsView extends View<IntVar> {
 
     @Override
     public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value) || var.instantiatedTo(-value) ||
-                (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug
+        if (var.contains(value) || var.contains(-value)) {
+            return var.instantiated() ||
+                    (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug
+        }
+        return false;
     }
 
     @Override
@@ -236,16 +230,14 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        return var.explain(VariableState.DOM);
+    public void explain(VariableState what, Explanation to) {
+        var.explain(VariableState.DOM, to);
     }
 
     @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = new Explanation();
-        expl.add(var.explain(what, val));
-        expl.add(var.explain(what, -val));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val, to);
+        var.explain(what, -val, to);
     }
 
     @Override
@@ -314,11 +306,6 @@ public final class AbsView extends View<IntVar> {
     @Override
     public String toString() {
         return "|" + this.var.toString() + "| = [" + getLB() + "," + getUB() + "]";
-    }
-
-    @Override
-    public int getType() {
-        return Variable.INTEGER;
     }
 
     @Override
@@ -604,7 +591,7 @@ public final class AbsView extends View<IntVar> {
                         ml2u = Integer.MAX_VALUE;
                         Ml2u = Integer.MAX_VALUE;
                         if (l2u.hasNext()) {
-                            //la: gérer le 0 et les autres cas
+                            //la: gerer le 0 et les autres cas
                             if (l2u.max() <= 0) {
                                 this.ml2u = -l2u.max();
                                 this.Ml2u = -l2u.min();
@@ -707,12 +694,12 @@ public final class AbsView extends View<IntVar> {
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
             } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyMonitors(EventType.BOUND, cause);
+                notifyPropagators(EventType.BOUND, cause);
             }
         } else {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
     }
 }

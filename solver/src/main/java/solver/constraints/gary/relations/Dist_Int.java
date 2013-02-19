@@ -26,86 +26,85 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
-/**Relation of distance (fixed) between two integer variables 
+/**
+ * Relation of distance (fixed) between two integer variables
  * Used for VRP (time windows)
  * Xi + MATRIX_i_j = Xj
- * 
- * @author Jean-Guillaume Fages
  *
+ * @author Jean-Guillaume Fages
  */
 public class Dist_Int extends GraphRelation<IntVar> {
-	
-	private int[][] distanceMatrix;
 
-	protected Dist_Int(IntVar[] vars, int[][] matrix) {
-		super(vars);
-		this.distanceMatrix = matrix;
-		if(matrix.length!=matrix[0].length){
-			throw new UnsupportedOperationException("the distance matrix should be squarred");
-		}
-	}
+    private int[][] distanceMatrix;
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		if(var1 == var2){
-			if(distanceMatrix[var1][var2]==0){
-				return ESat.TRUE;
-			}else{
-				return ESat.FALSE;
-			}
-		}
-		IntVar x = vars[var1];
-		IntVar y = vars[var2];
-		if(x.getLB()+distanceMatrix[var1][var2]>y.getUB() || x.getUB()+distanceMatrix[var1][var2]<y.getLB()){
-			return ESat.FALSE;
-		}
-		if(x.instantiated() && y.instantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			IntVar x = vars[var1];
-			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause);
-			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
-			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], cause);
-		}
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			IntVar x = vars[var1];
-			IntVar y = vars[var2];
-			if (x.instantiated()) {
-	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause);
-	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause);
-	        }
-		}else if(distanceMatrix[var1][var2]==0){
+    protected Dist_Int(IntVar[] vars, int[][] matrix) {
+        super(vars);
+        this.distanceMatrix = matrix;
+        if (matrix.length != matrix[0].length) {
+            throw new UnsupportedOperationException("the distance matrix should be squarred");
+        }
+    }
+
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        if (var1 == var2) {
+            if (distanceMatrix[var1][var2] == 0) {
+                return ESat.TRUE;
+            } else {
+                return ESat.FALSE;
+            }
+        }
+        IntVar x = vars[var1];
+        IntVar y = vars[var2];
+        if (x.getLB() + distanceMatrix[var1][var2] > y.getUB() || x.getUB() + distanceMatrix[var1][var2] < y.getLB()) {
+            return ESat.FALSE;
+        }
+        if (x.instantiated() && y.instantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            IntVar x = vars[var1];
+            IntVar y = vars[var2];
+            x.updateLowerBound(y.getLB() - distanceMatrix[var1][var2], cause);
+            x.updateUpperBound(y.getUB() - distanceMatrix[var1][var2], cause);
+            y.updateLowerBound(x.getLB() + distanceMatrix[var1][var2], cause);
+            y.updateUpperBound(x.getUB() + distanceMatrix[var1][var2], cause);
+        }
+    }
+
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+        if (var1 != var2) {
+            IntVar x = vars[var1];
+            IntVar y = vars[var2];
+            if (x.instantiated()) {
+                y.removeValue(x.getValue() + distanceMatrix[var1][var2], cause);
+            } else if (y.instantiated()) {
+                x.removeValue(y.getValue() - distanceMatrix[var1][var2], cause);
+            }
+        } else if (distanceMatrix[var1][var2] == 0) {
 //			vars[var1].contradiction(prop, "x != x"); 
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		return true;
-	}
-	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.REFLEXIVITY};
-	}
+        }
+    }
+
+    @Override
+    public boolean isDirected() {
+        return true;
+    }
+
+//	@Override
+//	public GraphProperty[] getGraphProperties() {
+//		return new GraphProperty[]{GraphProperty.REFLEXIVITY};
+//	}
 }

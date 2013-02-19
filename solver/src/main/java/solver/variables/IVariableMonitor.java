@@ -27,6 +27,9 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.exception.ContradictionException;
+
+import java.io.Serializable;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -36,16 +39,7 @@ import solver.ICause;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> {
-
-    /**
-     * Operations to execute before updating the domain variable
-     *
-     * @param var   variable concerned
-     * @param evt   modification event
-     * @param cause origin of the modification
-     */
-    void beforeUpdate(V var, EventType evt, ICause cause);
+public interface IVariableMonitor<V extends Variable> extends Serializable{
 
     /**
      * Operations to execute after updating the domain variable
@@ -54,31 +48,6 @@ public interface IVariableMonitor<V extends Variable> {
      * @param evt   modification event
      * @param cause origin of the modification
      */
-    void afterUpdate(V var, EventType evt, ICause cause);
-
-    /**
-     * Operations to execute if a contradiction occurs during variable modification
-     *
-     * @param var   variable concerned
-     * @param evt   modification event
-     * @param cause origin of the modification
-     */
-    void contradict(V var, EventType evt, ICause cause);
-
-    /**
-     * Return the index of <code>this</code> in <code>variable</code>
-     *
-     * @param variable a variable, must be a known <code>this</code>
-     * @return index index of <code>this</code> in <code>variable</code> list of event recorder
-     */
-    public abstract int getIdxInV(V variable);
-
-    /**
-     * Return the index of <code>this</code> in <code>variable</code>
-     *
-     * @param variable a variable, must be a known <code>this</code>
-     * @param idx      index of <code>this</code> in <code>variable</code> list of event recorder
-     */
-    public abstract void setIdxInV(V variable, int idx);
+    void onUpdate(V var, EventType evt, ICause cause) throws ContradictionException;
 
 }

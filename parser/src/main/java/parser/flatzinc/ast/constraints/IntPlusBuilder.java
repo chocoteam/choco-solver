@@ -31,13 +31,13 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
 
 /**
+ * a + b = c
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,12 +46,11 @@ import java.util.List;
 public class IntPlusBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = new IntVar[2];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = exps.get(i).intVarValue(solver);
-        }
-        IntVar c = exps.get(3).intVarValue(solver);
-        return ConstraintFactory.sum(vars, IntLinComb.Operator.EQ, c, 1, solver);
+        vars[0] = exps.get(0).intVarValue(solver);
+        vars[1] = exps.get(1).intVarValue(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        solver.post(IntConstraintFactory.sum(vars, c));
     }
 }

@@ -26,10 +26,6 @@
  */
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
-
 import java.io.Serializable;
 
 /**
@@ -41,34 +37,28 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public interface IDeltaMonitor<D extends IDelta> extends Serializable {
+public interface IDeltaMonitor extends Serializable {
 
-	void freeze();
+    void freeze();
 
-	void unfreeze();
+    void unfreeze();
 
-	void clear();
+    void clear();
 
-	void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
+    public static enum Default implements IDeltaMonitor {
+        NONE() {
+            @Override
+            public void freeze() {
+            }
 
-	public static enum Default implements IDeltaMonitor<IDelta> {
-		NONE() {
+            @Override
+            public void unfreeze() {
+            }
 
-			@Override
-			public void freeze() {}
-
-			@Override
-			public void unfreeze() {
-			}
-
-			@Override
-			public void clear() {
-			}
-
-			@Override
-			public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-			}
-		}
-	}
+            @Override
+            public void clear() {
+            }
+        }
+    }
 
 }

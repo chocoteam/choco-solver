@@ -1,52 +1,46 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.nary;
 
-import choco.kernel.ESat;
+import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.propagators.nary.sum.PropBigSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
-import solver.constraints.propagators.nary.sum.PropSumGeq;
-import solver.constraints.propagators.nary.sum.PropSumLeq;
-import solver.exception.SolverException;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Decr;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.metrics.DomSize;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
-
+import solver.variables.VariableFactory;
+import solver.variables.fast.BitsetIntVarImpl;
+import solver.variables.fast.IntervalIntVarImpl;
 import java.util.Arrays;
 
 /**
@@ -59,24 +53,29 @@ import java.util.Arrays;
  */
 public class Sum extends IntConstraint<IntVar> {
 
-    public static final String
-            VAR_DECRCOEFFS = "var_decrcoeffs",
-            VAR_DOMOVERCOEFFS = "var_domovercoeffs",
-            VAL_TOTO = "domovercoeffs",
-            METRIC_COEFFS = "met_coeffs";
-
+    public static int BIG_SUM_SIZE = 160;
+    public static int BIG_SUM_GROUP = 20;
 
     final int[] coeffs;
     final int b;
-    final Type op;
 
-    TObjectIntHashMap<IntVar> shared_map; // a shared map for interanl comparator
 
-    public enum Type {
-        LEQ, GEQ, EQ
+    protected Sum(IntVar[] vars, int[] coeffs, int pos, int b, Solver solver) {
+        super(vars, solver);
+        this.coeffs = coeffs.clone();
+        this.b = b;
+        if (vars.length > BIG_SUM_SIZE) {
+            setPropagators(new PropBigSum(vars, coeffs, pos, b));
+        } else {
+			setPropagators(new PropSumEq(vars, coeffs, pos, b));
+        }
     }
 
-    private static Sum build(IntVar[] vars, int[] coeffs, Type type, int r, Solver solver) {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static Sum build(IntVar[] vars, int[] coeffs, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
         for (int i = 0; i < vars.length; i++) {
             map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
@@ -100,119 +99,89 @@ public class Sum extends IntConstraint<IntVar> {
             }
             map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
-        return new Sum(tmpV, tmpC, b, type, r, solver);
+        return new Sum(tmpV, tmpC, b, 0, solver);
     }
 
-    protected Sum(IntVar[] vars, int[] coeffs, int pos, Type type, int b, Solver solver) {
-        super(vars, solver);
-        this.coeffs = coeffs.clone();
-        this.b = b;
-        this.op = type;
-
-        int l = vars.length;
-        IntVar[] x = new IntVar[l];
-        int s = 0;
-        int i = 0;
-        for (; i < pos; i++) {
-            if (coeffs[i] != 1) {
-                x[s++] = Views.scale(vars[i], coeffs[i]);
-            } else {
-                x[s++] = vars[i];
-            }
-        }
-        for (int e = l; i < l; i++) {
-            if (coeffs[i] != -1) {
-                x[--e] = Views.minus(Views.scale(vars[i], -coeffs[i]));
-            } else {
-                x[--e] = Views.minus(vars[i]);
-            }
-        }
-
-        switch (type)
-
-        {
-            case LEQ:
-                setPropagators(new PropSumLeq(x, b, solver, this));
-                break;
-            case GEQ:
-                setPropagators(new PropSumGeq(x, b, solver, this));
-                break;
-            case EQ:
-                setPropagators(new PropSumEq(x, b, solver, this));
-                break;
-        }
-
-    }
-
-    public static Sum leq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.LEQ, c, solver);
-    }
-
-    public static Sum leq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.LEQ, 0, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.GEQ, c, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.GEQ, 0, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.EQ, c, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.EQ, c, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.EQ, 0, solver);
-    }
-
-    public static Sum eq(IntVar[] vars, IntVar b, Solver solver) {
+	/**
+	 * Ensures that sum{vars[i]} = b
+	 * @param vars
+	 * @param b
+	 * @param solver
+	 * @return a sum constraint
+	 */
+    public static Sum buildSum(IntVar[] vars, IntVar b, Solver solver) {
         int[] cs = new int[vars.length + 1];
         Arrays.fill(cs, 1);
         cs[vars.length] = -1;
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
         x[vars.length] = b;
-        return build(x, cs, Type.EQ, 0, solver);
+        return build(x, cs, solver);
     }
 
-    public static Sum leq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.LEQ, c, solver);
+	/**
+	 * Ensures that sum{vars[i]*coreffs[i]} = b*c
+	 * @param vars
+	 * @param coeffs
+	 * @param b
+	 * @param c
+	 * @param solver
+	 * @return a scalar product constraint
+	 */
+    public static Sum buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
+        IntVar[] x = new IntVar[vars.length + 1];
+        System.arraycopy(vars, 0, x, 0, vars.length);
+        x[x.length - 1] = b;
+        int[] cs = new int[coeffs.length + 1];
+        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
+        cs[cs.length - 1] = -c;
+        return build(x, cs, solver);
     }
 
-    public static Sum geq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.GEQ, c, solver);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static IntVar var(IntVar a, IntVar b) {
+        if (a.instantiated()) {
+            if (b.instantiated()) {
+                return VariableFactory.fixed(a.getValue() + b.getValue(), a.getSolver());
+            } else {
+                return VariableFactory.offset(b, a.getValue());
+            }
+        } else if (b.instantiated()) {
+            return VariableFactory.offset(a, b.getValue());
+        } else {
+            Solver solver = a.getSolver();
+            IntVar z;
+            //TODO: add a more complex analysis of the build domain
+            if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
+                int lbA = a.getLB();
+                int ubA = a.getUB();
+                int lbB = b.getLB();
+                int ubB = b.getUB();
+                int OFFSET = lbA + lbB;
+                IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
+                DisposableRangeIterator itA = a.getRangeIterator(true);
+                DisposableRangeIterator itB = b.getRangeIterator(true);
+                while (itA.hasNext()) {
+                    itB.bottomUpInit();
+                    while (itB.hasNext()) {
+                        VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
+                        itB.next();
+                    }
+                    itB.dispose();
+                    itA.next();
+                }
+                itA.dispose();
+                z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
+            } else {
+                z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
+            }
+            solver.post(IntConstraintFactory.sum(new IntVar[]{a, b},z));
+            return z;
+        }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public ESat isSatisfied(int[] tuple) {
@@ -220,90 +189,39 @@ public class Sum extends IntConstraint<IntVar> {
         for (int i = 0; i < tuple.length; i++) {
             sum += coeffs[i] * tuple[i];
         }
-        switch (op) {
-            case EQ:
-                return ESat.eval(sum == b);
-            case GEQ:
-                return ESat.eval(sum >= b);
-            case LEQ:
-                return ESat.eval(sum <= b);
-        }
-        return ESat.UNDEFINED;
+		return ESat.eval(sum == b);
     }
 
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(coeffs[0]).append('*').append(vars[0].getName());
-        for (int i = 1; i < coeffs.length; i++) {
-            linComb.append(coeffs[i] >= 0 ? " +" : " ").append(coeffs[i]).append('*').append(vars[i].getName());
+        for (int i = 0; i < coeffs.length; i++) {
+            linComb.append(coeffs[i]).append('*').append(vars[i].getName()).append(coeffs[i] < coeffs.length ? " +" : " ");
         }
-        switch (op) {
-            case EQ:
-                linComb.append(" = ");
-                break;
-            case GEQ:
-                linComb.append(" >= ");
-                break;
-            case LEQ:
-                linComb.append(" <= ");
-                break;
-        }
+		linComb.append(" = ");
         linComb.append(b);
         return linComb.toString();
     }
 
-    @Override
-    public AbstractSorter<IntVar> getComparator(String name) {
-        if (name.equals(VAR_DECRCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Decr<IntVar>(new Coeffs(this)));
-        } else if (name.equals(VAR_DOMOVERCOEFFS)) {
-            return new Seq<IntVar>(
-                    super.getComparator(VAR_DEFAULT),
-                    new Incr<IntVar>(
-                            Div.<IntVar>build(DomSize.build(), new Coeffs(this)))
-            );
-        }
-        return super.getComparator(name);
-    }
+	public static int[] getScalarBounds(IntVar[] vars, int[] coefs){
+		int[] ext = new int[2];
+		for(int i=0;i<vars.length;i++){
+			int min = Math.min(0,vars[i].getLB()*coefs[i]);
+				min = Math.min(min,vars[i].getUB()*coefs[i]);
+			int max = Math.max(0,vars[i].getLB()*coefs[i]);
+				max = Math.max(max,vars[i].getUB()*coefs[i]);
+			ext[0] += min;
+			ext[1] += max;
+		}
+		return ext;
+	};
 
-    @Override
-    public HeuristicVal getIterator(String name, IntVar var) {
-        if (name.equals(VAL_TOTO)) {
-            return HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB());
-        }
-        return super.getIterator(name, var);
-    }
-
-
-    @Override
-    public IMetric<IntVar> getMetric(String name) {
-        if (name.equals(METRIC_COEFFS)) {
-            //TODO: must be composed with BELONG
-            return new Coeffs(this);//Belong.build(this);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-    static class Coeffs implements IMetric<IntVar> {
-
-        TObjectIntHashMap<IntVar> map;
-
-        public Coeffs(Sum sum) {
-            if (sum.shared_map == null) {
-                sum.shared_map = new TObjectIntHashMap<IntVar>(sum.coeffs.length);
-                for (int i = 0; i < sum.vars.length; i++) {
-                    sum.shared_map.put(sum.vars[i], sum.coeffs[i]);
-                }
-            }
-            map = sum.shared_map;
-        }
-
-        @Override
-        public int eval(IntVar var) {
-            return map.get(var);
-        }
-    }
+	public static int[] getSumBounds(IntVar[] vars){
+		int[] ext = new int[2];
+		for(int i=0;i<vars.length;i++){
+			ext[0] += vars[i].getLB();
+			ext[1] += vars[i].getUB();
+		}
+		return ext;
+	};
 }

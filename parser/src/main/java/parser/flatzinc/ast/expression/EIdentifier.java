@@ -32,7 +32,7 @@ import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
+import solver.variables.VariableFactory;
 
 /*
 * User : CPRUDHOM
@@ -85,14 +85,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 IntVar[] vars = new IntVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = Views.fixed(values[i], solver);
+                    vars[i] = VariableFactory.fixed(values[i], solver);
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 IntVar[] vars = new IntVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = Views.fixed(values[i], solver);
+                    vars[i] = VariableFactory.fixed(values[i], solver);
                 }
                 return vars;
             }
@@ -100,6 +100,16 @@ public final class EIdentifier extends Expression {
         }
         Exit.log();
         return null;
+    }
+
+    @Override
+    public boolean boolValue() {
+        return (Boolean) object;
+    }
+
+    @Override
+    public boolean[] toBoolArray() {
+        return (boolean[]) object;
     }
 
     @Override
@@ -115,14 +125,14 @@ public final class EIdentifier extends Expression {
                 int[] values = (int[]) object;
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = (BoolVar) Views.fixed(values[i], solver);
+                    vars[i] = (BoolVar) VariableFactory.fixed(values[i], solver);
                 }
                 return vars;
             } else if (bool_arr.isInstance(object)) {
                 int[] values = bools_to_ints((boolean[]) object);
                 BoolVar[] vars = new BoolVar[values.length];
                 for (int i = 0; i < values.length; i++) {
-                    vars[i] = (BoolVar) Views.fixed(values[i], solver);
+                    vars[i] = (BoolVar) VariableFactory.fixed(values[i], solver);
                 }
                 return vars;
             }

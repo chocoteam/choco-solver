@@ -35,76 +35,63 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <br/>
+ * A factory to define solution pool (extending {@link ISolutionPool}).
+ * A solution pool stores solutions found during the resolution process.
+ * <p/>
+ * There are 3 of them:
+ * <br/>- {@link #NO_SOLUTION}: no solution is <b>stored</b> during the resolution process.
+ * So, found solutions cannot be explored nor restored once the search ends.
+ * <br/>- {@link #LAST_ONE}: stores the <b>last</b> solution found. Previous ones are erased.
+ * <br/>- {@link #ALL}: stores all solutions found during the resolution process. If a objective value is declared,
+ * the last solution corresponds to the best solution found so far.
  *
  * @author Arnaud Malapert
  * @author Charles Prud'homme
+ * @see ISolutionPool
  * @since 19 juil. 2010
  */
-public class SolutionPoolFactory {
+public enum SolutionPoolFactory {
 
-    private SolutionPoolFactory() {}
-
-    public static ISolutionPool makeNoSolutionPool(){
-        return NoSolutionPool.SINGLETON;
-    }
-
-    public static ISolutionPool makeOneSolutionPool(){
-        return new OneSolutionPool();
-    }
-
-    public static ISolutionPool makeInfiniteSolutionPool(){
-        return new InfiniteSolutionPool();
-    }
-
-    public static ISolutionPool makeSolutionPool(int capacity){
-        switch (capacity){
-            case 0:
-                return makeNoSolutionPool();
-            case 1:
-                return makeOneSolutionPool();
-            default:
-                return makeInfiniteSolutionPool();
+    NO_SOLUTION {
+        @Override
+        public ISolutionPool make() {
+            return NoSolutionPool.SINGLETON;
         }
+    },
+    LAST_ONE {
+        @Override
+        public ISolutionPool make() {
+            return new OneSolutionPool();
+        }
+    },
+    ALL {
+        @Override
+        public ISolutionPool make() {
+            return new InfiniteSolutionPool();
+        }
+    };
+
+    public abstract ISolutionPool make();
+}
+
+final class NoSolutionPool implements ISolutionPool {
+
+    protected final static NoSolutionPool SINGLETON = new NoSolutionPool();
+
+
+    protected NoSolutionPool() {
+        super();
     }
-}
-
-abstract class AbstractSolutionPool implements ISolutionPool {
-
-	protected AbstractSolutionPool() {
-		super();
-	}
-
-	@Override
-	public final boolean isEmpty() {
-		return size() == 0;
-	}
 
 
-	@Override
-	public void clear() {}
+    @Override
+    public List<Solution> asList() {
+        return Collections.emptyList();
+    }
 
-}
-
-
-final class NoSolutionPool extends AbstractSolutionPool {
-
-	protected final static NoSolutionPool SINGLETON = new NoSolutionPool();
-
-
-
-	protected NoSolutionPool() {
-		super();
-	}
-
-
-	@Override
-	public List<Solution> asList() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void recordSolution(Solver solver) {}
+    @Override
+    public void recordSolution(Solver solver) {
+    }
 
     @Override
     public Solution getBest() {
@@ -112,79 +99,103 @@ final class NoSolutionPool extends AbstractSolutionPool {
     }
 
     @Override
-	public long size() {
-		return 0;
-	}
+    public void clear() {
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public long size() {
+        return 0;
+    }
 
 
 }
 
-final class OneSolutionPool extends AbstractSolutionPool {
+final class OneSolutionPool implements ISolutionPool {
 
-	private Solution solution;
+    private Solution solution;
 
-	protected OneSolutionPool() {
-		super();
-	}
+    protected OneSolutionPool() {
+        super();
+    }
 
-	@Override
-	public List<Solution> asList() {
-		return isEmpty() ? Collections.<Solution>emptyList() : Arrays.asList(solution);
-	}
+    @Override
+    public List<Solution> asList() {
+        return isEmpty() ? Collections.<Solution>emptyList() : Arrays.asList(solution);
+    }
 
-	@Override
-	public Solution getBest() {
-		return isEmpty() ? null : solution;
-	}
+    @Override
+    public Solution getBest() {
+        return isEmpty() ? null : solution;
+    }
 
-	@Override
-	public void recordSolution(Solver solver) {
-        try{
+    @Override
+    public void recordSolution(Solver solver) {
+        try {
             solution.replace(solver);
-        }catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             solution = new Solution(solver);
         }
-	}
+    }
+
+    @Override
+    public void clear() {
+        solution = null;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return solution == null;
+    }
 
     @Override
     public long size() {
-        return solution == null?0:1;
+        return solution == null ? 0 : 1;
     }
 }
 
 
-class InfiniteSolutionPool extends AbstractSolutionPool {
+class InfiniteSolutionPool implements ISolutionPool {
 
-	/**
-	 * The historical record of solutions that were found
-	 */
-	protected final LinkedList<Solution> solutions = new LinkedList<Solution>();
+    /**
+     * The historical record of solutions that were found
+     */
+    protected final LinkedList<Solution> solutions = new LinkedList<Solution>();
 
 
-	protected InfiniteSolutionPool() {
-		super();
-	}
+    protected InfiniteSolutionPool() {
+        super();
+    }
 
-	@Override
-	public final List<Solution> asList() {
-		return Collections.unmodifiableList(solutions);
-	}
+    @Override
+    public final List<Solution> asList() {
+        return Collections.unmodifiableList(solutions);
+    }
 
-	@Override
-	public void clear() {
-		solutions.clear();
-	}
+    @Override
+    public void clear() {
+        solutions.clear();
+    }
 
-	@Override
-	public Solution getBest() {
-		return solutions.peekFirst();
-	}
+    @Override
+    public boolean isEmpty() {
+        return solutions.isEmpty();
+    }
 
-	@Override
-	public void recordSolution(Solver solver) {
-		final Solution sol = new Solution(solver);
-		solutions.addFirst(sol);
-	}
+    @Override
+    public Solution getBest() {
+        return solutions.peekFirst();
+    }
+
+    @Override
+    public void recordSolution(Solver solver) {
+        final Solution sol = new Solution(solver);
+        solutions.addFirst(sol);
+    }
 
     @Override
     public long size() {

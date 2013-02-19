@@ -26,8 +26,8 @@
  */
 package solver.constraints.binary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.binary.PropAbsolute;
@@ -44,7 +44,7 @@ public class Absolute extends IntConstraint<IntVar> {
 
     public Absolute(IntVar X, IntVar Y, Solver solver) {
         super(ArrayUtils.toArray(X, Y), solver);
-        setPropagators(new PropAbsolute(X, Y, solver, this));
+        setPropagators(new PropAbsolute(X, Y));
     }
 
     @Override

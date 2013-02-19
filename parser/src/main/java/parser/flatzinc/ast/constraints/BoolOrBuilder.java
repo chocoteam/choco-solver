@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
+ * (a &#8744; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,11 +47,13 @@ import java.util.List;
  */
 public class BoolOrBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-
-        return new ConjunctiveNormalForm(Node.reified(Literal.pos(r), Node.or(Literal.pos(a), Literal.pos(b))), solver);
+        solver.post(IntConstraintFactory.clauses(
+				Node.reified(Literal.pos(r),
+						Node.or(Literal.pos(a),
+								Literal.pos(b))), solver));
     }
 }

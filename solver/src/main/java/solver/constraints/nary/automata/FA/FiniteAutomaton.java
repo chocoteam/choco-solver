@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.automata.FA;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import dk.brics.automaton.*;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -701,4 +701,8 @@ public class FiniteAutomaton implements IAutomaton {
     }
 
 
+    @Override
+    public String toString() {
+        return representedBy.toString();
+    }
 }

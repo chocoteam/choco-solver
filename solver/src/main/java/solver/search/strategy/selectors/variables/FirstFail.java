@@ -27,8 +27,6 @@
 
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -46,37 +44,42 @@ public class FirstFail implements VariableSelector<IntVar> {
     IntVar[] variables;
 
     /* index of the smallest domain variable */
-    IStateInt small_idx;
+    int small_idx;
 
-    public FirstFail(IntVar[] variables, IEnvironment environment) {
+    public FirstFail(IntVar[] variables) {
         this.variables = variables.clone();
-        small_idx = environment.makeInt(0);
+        small_idx = 0;
 
+    }
+
+    @Override
+    public IntVar[] getScope() {
+        return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
     @Override
     public void advance() {
-        int small_idx = 0;
+        small_idx = 0;
         int small_dsize = Integer.MAX_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
-            if(dsize > 1 && dsize < small_dsize){
-               small_dsize = dsize;
-               small_idx = idx;
+            if (dsize > 1 && dsize < small_dsize) {
+                small_dsize = dsize;
+                small_idx = idx;
             }
         }
-        this.small_idx.set(small_idx);
     }
 
     @Override
     public IntVar getVariable() {
-        return variables[small_idx.get()];
+        return variables[small_idx];
     }
 }

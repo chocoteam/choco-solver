@@ -28,149 +28,197 @@ package solver.search.loop.monitors;
 
 import solver.exception.ContradictionException;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public final class SearchMonitorList implements ISearchMonitor {
-    ISearchMonitor[] searchMonitors = new ISearchMonitor[4];
-    int size = 0;
+public final class SearchMonitorList implements IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
+        IMonitorInitialize, IMonitorInitPropagation, IMonitorInterruption, IMonitorOpenNode, IMonitorRestart,
+        IMonitorSolution, IMonitorUpBranch {
+
+    List<IMonitorClose> mclos = new LinkedList<IMonitorClose>();
+    List<IMonitorContradiction> mcont = new LinkedList<IMonitorContradiction>();
+    List<IMonitorDownBranch> mdbra = new LinkedList<IMonitorDownBranch>();
+    List<IMonitorInitialize> minit = new LinkedList<IMonitorInitialize>();
+    List<IMonitorInitPropagation> mipro = new LinkedList<IMonitorInitPropagation>();
+    List<IMonitorInterruption> minte = new LinkedList<IMonitorInterruption>();
+    List<IMonitorOpenNode> mopno = new LinkedList<IMonitorOpenNode>();
+    List<IMonitorRestart> mrest = new LinkedList<IMonitorRestart>();
+    List<IMonitorSolution> msolu = new LinkedList<IMonitorSolution>();
+    List<IMonitorUpBranch> mubra = new LinkedList<IMonitorUpBranch>();
+
 
     @Override
     public void beforeInitialize() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeInitialize();
+        for (int i = 0; i < minit.size(); i++) {
+            minit.get(i).beforeInitialize();
         }
     }
 
     @Override
     public void afterInitialize() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterInitialize();
+        for (int i = 0; i < minit.size(); i++) {
+            minit.get(i).afterInitialize();
         }
     }
 
     @Override
     public void beforeInitialPropagation() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeInitialPropagation();
+        for (int i = 0; i < mipro.size(); i++) {
+            mipro.get(i).beforeInitialPropagation();
         }
     }
 
     @Override
     public void afterInitialPropagation() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterInitialPropagation();
+        for (int i = 0; i < mipro.size(); i++) {
+            mipro.get(i).afterInitialPropagation();
         }
     }
 
     @Override
     public void beforeOpenNode() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeOpenNode();
+        for (int i = 0; i < mopno.size(); i++) {
+            mopno.get(i).beforeOpenNode();
         }
     }
 
     @Override
     public void afterOpenNode() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterOpenNode();
+        for (int i = 0; i < mopno.size(); i++) {
+            mopno.get(i).afterOpenNode();
         }
     }
 
     @Override
     public void onSolution() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].onSolution();
+        for (int i = 0; i < msolu.size(); i++) {
+            msolu.get(i).onSolution();
         }
     }
 
     @Override
     public void beforeDownLeftBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeDownLeftBranch();
+        for (int i = 0; i < mdbra.size(); i++) {
+            mdbra.get(i).beforeDownLeftBranch();
         }
     }
 
     @Override
     public void afterDownLeftBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterDownLeftBranch();
+        for (int i = 0; i < mdbra.size(); i++) {
+            mdbra.get(i).afterDownLeftBranch();
         }
     }
 
     @Override
     public void beforeDownRightBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeDownRightBranch();
+        for (int i = 0; i < mdbra.size(); i++) {
+            mdbra.get(i).beforeDownRightBranch();
         }
     }
 
     @Override
     public void afterDownRightBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterDownRightBranch();
+        for (int i = 0; i < mdbra.size(); i++) {
+            mdbra.get(i).afterDownRightBranch();
         }
     }
 
     @Override
     public void beforeUpBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeUpBranch();
+        for (int i = 0; i < mubra.size(); i++) {
+            mubra.get(i).beforeUpBranch();
         }
     }
 
     @Override
     public void afterUpBranch() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterUpBranch();
+        for (int i = 0; i < mubra.size(); i++) {
+            mubra.get(i).afterUpBranch();
         }
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].onContradiction(cex);
+        for (int i = 0; i < mcont.size(); i++) {
+            mcont.get(i).onContradiction(cex);
         }
     }
 
     @Override
     public void beforeRestart() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeRestart();
+        for (int i = 0; i < mrest.size(); i++) {
+            mrest.get(i).beforeRestart();
         }
     }
 
     @Override
     public void afterRestart() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterRestart();
+        for (int i = 0; i < mrest.size(); i++) {
+            mrest.get(i).afterRestart();
+        }
+    }
+
+    @Override
+    public void afterInterrupt() {
+        for (int i = 0; i < minte.size(); i++) {
+            minte.get(i).afterInterrupt();
         }
     }
 
     @Override
     public void beforeClose() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].beforeClose();
+        for (int i = 0; i < mclos.size(); i++) {
+            mclos.get(i).beforeClose();
         }
     }
 
     @Override
     public void afterClose() {
-        for (int i = 0; i < size; i++) {
-            searchMonitors[i].afterClose();
+        for (int i = 0; i < mclos.size(); i++) {
+            mclos.get(i).afterClose();
         }
     }
 
     public void add(ISearchMonitor sm) {
-        if (size >= searchMonitors.length) {
-            ISearchMonitor[] tmp = searchMonitors;
-            searchMonitors = new ISearchMonitor[tmp.length * 2];
-            System.arraycopy(tmp, 0, searchMonitors, 0, tmp.length);
+        if (sm != null) {
+            if (sm instanceof IMonitorClose) {
+                mclos.add((IMonitorClose) sm);
+            }
+            if (sm instanceof IMonitorContradiction) {
+                mcont.add((IMonitorContradiction) sm);
+            }
+            if (sm instanceof IMonitorDownBranch) {
+                mdbra.add((IMonitorDownBranch) sm);
+            }
+            if (sm instanceof IMonitorInitialize) {
+                minit.add((IMonitorInitialize) sm);
+            }
+            if (sm instanceof IMonitorInitPropagation) {
+                mipro.add((IMonitorInitPropagation) sm);
+            }
+            if (sm instanceof IMonitorInterruption) {
+                minte.add((IMonitorInterruption) sm);
+            }
+            if (sm instanceof IMonitorOpenNode) {
+                mopno.add((IMonitorOpenNode) sm);
+            }
+            if (sm instanceof IMonitorRestart) {
+                mrest.add((IMonitorRestart) sm);
+            }
+            if (sm instanceof IMonitorSolution) {
+                msolu.add((IMonitorSolution) sm);
+            }
+            if (sm instanceof IMonitorUpBranch) {
+                mubra.add((IMonitorUpBranch) sm);
+            }
         }
-        searchMonitors[size++] = sm;
     }
 
 }

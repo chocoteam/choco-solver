@@ -1,39 +1,41 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.propagators;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.Procedure;
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import com.sun.istack.internal.Nullable;
+
+import common.ESat;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import memory.IEnvironment;
+import memory.structure.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Identity;
 import solver.Solver;
@@ -42,11 +44,11 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.IEventRecorder;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.VariableFactory;
 
 import java.io.Serializable;
 
@@ -83,81 +85,113 @@ import java.io.Serializable;
  * @see solver.constraints.Constraint
  * @since 0.01
  */
-public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity {
+public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
     private static final long serialVersionUID = 2L;
-
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
-
     private final int ID; // unique id of this
+
     /**
      * List of <code>variable</code> objects
      */
     protected V[] vars;
+    private int[] vindices;  // index of this within the list of propagator of the i^th variable
+
+    protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
+    private Operation[] operations;
 
     /**
-     * List of records of <code>this</code>
+     * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected AbstractFineEventRecorder[] fineER;
-
-    protected int lastER;
-
-    protected AbstractCoarseEventRecorder coarseER;
+    private short state; // 0 : new -- 1 : active -- 2 : passive
+    private int nbPendingEvt = 0; // counter of enqued records -- usable as trigger for complex algorithm
+    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
+    protected int fails;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
      */
     public IEnvironment environment;
-
-    protected static final int NEW = 0, ACTIVE = 1, PASSIVE = 2;
-
-    /**
-     * Backtrackable boolean indicating wether <code>this</code> is active
-     */
-    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
-
-    protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
-
-    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
-
-    protected final IStateInt arity; // arity of this -- number of uninstantiated variables
-
-    protected int fails;
-
     /**
      * Declaring constraint
      */
-    protected Constraint constraint;
-
+    protected Constraint<V, Propagator<V>> constraint;
     protected final PropagatorPriority priority;
-
     protected final boolean reactOnPromotion;
-
     protected final Solver solver;
+    private TIntSet set = new TIntHashSet();
 
-    @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
-        this.vars = vars;
-        this.solver = solver;
-        this.environment = solver.getEnvironment();
-        this.state = environment.makeInt(NEW);
-        this.constraint = constraint;
-        this.priority = priority;
-        this.reactOnPromotion = reactOnPromotion;
-        int nbNi = 0;
-        for (int v = 0; v < vars.length; v++) {
-            vars[v].attach(this, v);
-            vars[v].analyseAndAdapt(getPropagationConditions(v));
-            if (!vars[v].instantiated()) {
-                nbNi++;
+    // cause of variable modifications. The default value is 'this"
+    protected Propagator aCause;
+
+    // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
+    private <V extends Variable> void checkVariable(V[] vars) {
+        set.clear();
+        for (int i = 0; i < vars.length; i++) {
+            Variable v = vars[i];
+            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
+                if (set.contains(v.getId())) {
+                    if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                        vars[i] = (V) VariableFactory.eq((IntVar) v);
+                    } else {
+                        throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                "This is forbidden; you must consider using a View or a EQ constraint.");
+                    }
+                }
+                set.add(vars[i].getId());
             }
         }
-        arity = environment.makeInt(nbNi);
+    }
+
+
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
+        this(vars[0].getSolver(), vars, priority, reactOnPromotion);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
+        checkVariable(vars);
+        this.vars = vars.clone();
+        this.solver = solver;
+        this.vindices = new int[vars.length];
+        this.environment = solver.getEnvironment();
+        this.state = NEW;
+        this.priority = priority;
+        this.reactOnPromotion = reactOnPromotion;
+        this.aCause = this;
+        for (int v = 0; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
+            /*if (!vars[v].instantiated()) {
+                nbNi++;
+            }*/
+        }
         fails = 0;
-        fineER = new AbstractFineEventRecorder[vars.length];
-        lastER = 0;
         ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = REIFIED;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
+    }
+
+    protected Propagator(V[] vars, PropagatorPriority priority) {
+        this(vars, priority, true);
     }
 
     @Override
@@ -165,13 +199,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return ID;
     }
 
-    /**
-     * Return the specific mask indicating the <b>propagation events</b> on which <code>this</code> can react. <br/>
-     *
-     * @return
-     */
-    public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
+    public Solver getSolver() {
+        return solver;
+    }
+
+    public void defineIn(Constraint c) {
+        this.constraint = c;
     }
 
     /**
@@ -199,55 +232,93 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public abstract void propagate(int evtmask) throws ContradictionException;
 
     /**
+     * Advise a propagator of a modification occurring on one of its variables,
+     * and decide if <code>this</code> should be scheduled.
+     * At least, this method SHOULD check the propagation condition of the event received.
+     * In addition, this method can be used to update internal state of <code>this</code>.
+     * This method can returns <code>true</code> even if the propagator is already scheduled.
+     *
+     * @param idxVarInProp index of the modified variable
+     * @param mask         modification event mask
+     * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
+     */
+    public boolean advise(int idxVarInProp, int mask) {
+        return (mask & getPropagationConditions(idxVarInProp)) != 0;
+    }
+
+    /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param eventRecorder a fine event recorder
-     * @param idxVarInProp  index of the variable <code>var</code> in <code>this</code>
-     * @param mask          type of event
+     * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
+     * @param mask         type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
-    public abstract void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException;
+    public abstract void propagate(int idxVarInProp, int mask) throws ContradictionException;
 
     /**
      * Add the coarse event recorder into the engine
      *
      * @param evt event type
      */
-    public final void forcePropagate(EventType evt) {
-        coarseER.update(evt);
+    public final void forcePropagate(EventType evt) throws ContradictionException {
+        if (nbPendingEvt == 0) {
+            if (Configuration.PRINT_PROPAGATION) {
+                IPropagationEngine.Trace.printPropagation(null, this);
+            }
+            coarseERcalls++;
+            propagate(evt.getStrengthenedMask());
+        }
     }
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
-        state.set(ACTIVE);
-        //then notify the linked variables
-        for (int i = 0; i < lastER; i++) {
-            fineER[i].activate(this);
+        state = ACTIVE;
+        environment.save(operations[NEW]);
+        // update activity mask of variables
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].recordMask(getPropagationConditions(v));
         }
+    }
+
+    public void setReifiedTrue() {
+        assert isReifiedAndSilent() : "the propagator was not in a silent reified state";
+        state = ACTIVE;
+        environment.save(operations[REIFIED]);
+        // update activity mask of variables
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].recordMask(getPropagationConditions(v));
+        }
+    }
+
+    public void setReifiedSilent() {
+        assert isStateLess() : "the propagator was not stateless";
+        state = REIFIED;
     }
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-        assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
-        state.set(PASSIVE);
-        //then notify the linked variables
-        for (int i = 0; i < lastER; i++) {
-            fineER[i].desactivate(this);
-        }
-        coarseER.getScheduler().remove(coarseER);
+        assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+        state = PASSIVE;
+        environment.save(operations[ACTIVE]);
+        //TODO: update var mask back
+        solver.getEngine().desactivatePropagator(this);
     }
 
     public boolean isStateLess() {
-        return state.get() == NEW;
+        return state == NEW;
+    }
+
+    public boolean isReifiedAndSilent() {
+        return state == REIFIED;
     }
 
     public boolean isActive() {
-        return state.get() == ACTIVE;
+        return state == ACTIVE;
     }
 
     public boolean isPassive() {
-        return state.get() == PASSIVE;
+        return state == PASSIVE;
     }
 
     /**
@@ -273,6 +344,26 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * index of the propagator within its variables
+     *
+     * @return
+     */
+    public int[] getVIndices() {
+        return vindices;
+    }
+
+    public void setVIndices(int idx, int val) {
+        vindices[idx] = val;
+    }
+
+//    public void unlink() {
+//        for (int v = 0; v < vars.length; v++) {
+//            vars[v].unlink(this, vindices[v]);
+//            vindices[v] = -1;
+//        }
+//    }
+
+    /**
      * Returns the number of variables involved in <code>this</code>.
      *
      * @return number of variables
@@ -281,46 +372,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars.length;
     }
 
-    public int nbRecorders() {
-        return lastER;
-    }
-
-    public void forEachFineEvent(Procedure<AbstractFineEventRecorder<V>> procedure) throws ContradictionException {
-        for (int i = 0; i < lastER; i++) { // could be improved by storing active fine ER
-            procedure.execute(fineER[i]);
-        }
-    }
-
-    public IEventRecorder getRecorder(int i) {
-        if (i >= 0 && i < lastER) {
-            return fineER[i];
-        } else if (i == -1) {
-            return coarseER;
-        }
-        throw new IndexOutOfBoundsException();
-    }
-
-    public void addRecorder(IEventRecorder recorder) {
-        if (recorder instanceof AbstractFineEventRecorder) {
-            if (lastER >= fineER.length) {
-                AbstractFineEventRecorder[] tmp = fineER;
-                fineER = new AbstractFineEventRecorder[tmp.length * 3 / 2 + 1];
-                System.arraycopy(tmp, 0, fineER, 0, tmp.length);
-            }
-            fineER[lastER++] = (AbstractFineEventRecorder) recorder;
-        } else {
-            coarseER = (AbstractCoarseEventRecorder) recorder;
-        }
-    }
-
     /**
      * Returns the constraint including this propagator
      *
      * @return Constraint
      */
     @Override
-    public final Constraint getConstraint
-    () {
+    public final Constraint getConstraint() {
         return constraint;
     }
 
@@ -336,22 +394,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * returns a explanation for the decision mentionned in parameters
      *
      * @param d : a <code>Deduction</code> to explain
+     * @param e
      * @return a set of constraints and past decisions
      */
-
     @Override
-    public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+    public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(VariableState.DOM));
+            v.explain(VariableState.DOM, e);
         }
         // and the application of the current propagator
-        expl.add(this);
-        return expl;
+        e.add(this);
     }
 
-    protected boolean isCompletelyInstantiated() {
+    public boolean isCompletelyInstantiated() {
         for (int i = 0; i < vars.length; i++) {
             if (!vars[i].instantiated()) {
                 return false;
@@ -360,18 +416,28 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    public int getNbPendingER() {
-        return nbPendingER;
+    public int getNbPendingEvt() {
+        return nbPendingEvt;
     }
 
-    public void incNbRecorderEnqued() {
-        assert (nbPendingER >= 0) : "number of enqued records is < 0";
-        nbPendingER++;
+    public void incNbPendingEvt() {
+        assert (nbPendingEvt >= 0) : "number of enqued records is < 0 " + this;
+        nbPendingEvt++;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[I]{}:{}", nbPendingEvt, this);
     }
 
-    public void decNbRecrodersEnqued() {
-        assert (nbPendingER > 0) : "number of enqued records is < 0";
-        nbPendingER--;
+    public void decNbPendingEvt() {
+        assert (nbPendingEvt > 0) : "number of enqued records is < 0 " + this;
+        nbPendingEvt--;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[D]{}:{}", nbPendingEvt, this);
+    }
+
+    public void flushPendingEvt() {
+        nbPendingEvt = 0;
+        //if(LoggerFactory.getLogger("solver").isDebugEnabled())
+        //    LoggerFactory.getLogger("solver").debug("[F]{}:{}", nbPendingEvt, this);
     }
 
     /**
@@ -380,20 +446,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return number of uninstanciated variables
      */
     public int arity() {
-        return arity.get();
+        int arity = 0;
+        for (int i = 0; i < vars.length; i++) {
+            arity += vars[i].instantiated() ? 0 : 1;
+        }
+        return arity;
     }
 
-    public void decArity() {
-//        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
-        arity.add(-1);
-    }
-
-    public void incFail() {
-        fails++;
-    }
-
-    public long getFails() {
-        return fails;
+    public int dynPriority() {
+        int arity = 0;
+        for (int i = 0; i < vars.length && arity <= 3; i++) {
+            arity += vars[i].instantiated() ? 0 : 1;
+        }
+        if (arity > 3) {
+            return priority.priority;
+        } else return arity;
     }
 
     /**
@@ -403,7 +470,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(this, variable, message);
+    public void contradiction(Variable variable, String message) throws ContradictionException {
+        solver.getEngine().fails(aCause, variable, message);
+    }
+
+    @Override
+    public int compareTo(Propagator o) {
+        return this.ID - o.ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
     }
 }

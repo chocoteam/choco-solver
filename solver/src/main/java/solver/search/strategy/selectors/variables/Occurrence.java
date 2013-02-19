@@ -27,8 +27,6 @@
 
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -47,18 +45,24 @@ public class Occurrence implements VariableSelector<IntVar> {
     IntVar[] variables;
 
     /* index of the smallest domain variable */
-    IStateInt large_idx;
+    int large_idx;
 
-    public Occurrence(IntVar[] variables, IEnvironment environment) {
+    public Occurrence(IntVar[] variables) {
         this.variables = variables.clone();
-        large_idx = environment.makeInt(0);
+        large_idx = 0;
 
+    }
+
+    @Override
+    public IntVar[] getScope() {
+        return variables;
     }
 
     @Override
     public boolean hasNext() {
         int idx = 0;
-        for(; idx < variables.length && variables[idx].getDomainSize() == 1; idx ++){}
+        for (; idx < variables.length && variables[idx].getDomainSize() == 1; idx++) {
+        }
         return idx < variables.length;
     }
 
@@ -66,19 +70,19 @@ public class Occurrence implements VariableSelector<IntVar> {
     public void advance() {
         int large_idx = 0;
         int large_nb_cstrs = Integer.MIN_VALUE;
-        for(int idx = 0; idx < variables.length; idx ++){
+        for (int idx = 0; idx < variables.length; idx++) {
             int dsize = variables[idx].getDomainSize();
             int nb_cstrs = variables[idx].nbConstraints();
-            if(dsize > 1 && nb_cstrs > large_nb_cstrs){
-               large_nb_cstrs = nb_cstrs;
-               large_idx = idx;
+            if (dsize > 1 && nb_cstrs > large_nb_cstrs) {
+                large_nb_cstrs = nb_cstrs;
+                large_idx = idx;
             }
         }
-        this.large_idx.set(large_idx);
+        this.large_idx = large_idx;
     }
 
     @Override
     public IntVar getVariable() {
-        return variables[large_idx.get()];
+        return variables[large_idx];
     }
 }

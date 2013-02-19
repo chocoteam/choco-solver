@@ -1,37 +1,40 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.search.loop;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
+import solver.variables.VariableFactory;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -54,16 +57,30 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            propEngine.propagate();
+            solver.getEngine().propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
-            solver.setFeasible(Boolean.FALSE);
-            propEngine.flush();
+            solver.setFeasible(ESat.FALSE);
+            solver.getEngine().flush();
             interrupt();
+            return;
         }
+        this.env.worldPush(); // push another wolrd to recover the state after initial propagation
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
-        strategy.init();
+        if (strategy == null) {
+            //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
+            solver.set(IntStrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars())));
+//            set(StrategyFactory.firstFail_InDomainMin(VariableFactory.castToIntVar(solver.getVars()), solver.getEnvironment()));
+        }
+        try {
+            strategy.init(); // the initialisation of the strategy can detect inconsistency
+        } catch (ContradictionException cex) {
+            this.env.worldPop();
+            solver.setFeasible(ESat.FALSE);
+            solver.getEngine().flush();
+            interrupt();
+        }
         moveTo(OPEN_NODE);
     }
 
@@ -78,7 +95,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void openNode() {
         Decision tmp = decision;
         decision = strategy.getDecision();
-        if (decision != null) {
+        if (decision != null) { // null means there is no more decision
             decision.setPrevious(tmp);
             moveTo(DOWN_LEFT_BRANCH);
         } else {
@@ -88,13 +105,12 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     }
 
     protected void recordSolution() {
-        //todo: checker d'Žtat
-        solver.setFeasible(Boolean.TRUE);
+        //todo: checker d'etat
+        solver.setFeasible(ESat.TRUE);
+        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         solutionpool.recordSolution(solver);
         objectivemanager.update();
-        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         if (stopAtFirstSolution) {
-            moveTo(RESUME);
             interrupt();
         } else {
             moveTo(stateAfterSolution);
@@ -106,18 +122,15 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public Boolean resume() {
+    public void resume() {
         if (nextState == INIT) {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed. \n" +
-                    "Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+            throw new SolverException("The search cannot be resumed.");
         }
-        previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);
-        return this.loop();
+        loop();
     }
 
     /**
@@ -142,18 +155,18 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         downBranch();
     }
 
-    private void downBranch() {
+    protected void downBranch() {
         env.worldPush();
         try {
             decision.buildNext();
             objectivemanager.apply(decision);
             objectivemanager.postDynamicCut();
 
-            propEngine.propagate();
+            solver.getEngine().propagate();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flush();
-            moveTo(UP_BRANCH);
+            solver.getEngine().flush();
+            moveTo(stateAfterFail);
             jumpTo = 1;
             smList.onContradiction(e);
         }
@@ -169,7 +182,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void upBranch() {
         env.worldPop();
-        if (env.getWorldIndex() == rootWorldIndex) {
+        //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
+        if (decision == RootDecision.ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt();
         } else {
@@ -188,12 +202,12 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public final void restartSearch() {
+    public void restartSearch() {
         restaureRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {
             objectivemanager.postDynamicCut();
-            propEngine.propagate();
+            solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
             interrupt();
@@ -209,7 +223,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      *
      * @param to
      */
-    void moveTo(int to) {
+    public void moveTo(int to) {
         if ((nextState & RESTART) == 0) {
             nextState = to;
         }

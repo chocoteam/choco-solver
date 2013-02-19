@@ -26,10 +26,9 @@
  */
 package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -99,8 +98,8 @@ public class XplusC_Leq_Y_Int extends GraphRelation<IntVar> {
         return true;
     }
 
-    @Override
-    public GraphProperty[] getGraphProperties() {
-        return new GraphProperty[]{GraphProperty.TRANSITIVITY, GraphProperty.REFLEXIVITY, GraphProperty.ANTI_SYMMETRY};
-    }
+//    @Override
+//    public GraphProperty[] getGraphProperties() {
+//        return new GraphProperty[]{GraphProperty.TRANSITIVITY, GraphProperty.REFLEXIVITY, GraphProperty.ANTI_SYMMETRY};
+//    }
 }

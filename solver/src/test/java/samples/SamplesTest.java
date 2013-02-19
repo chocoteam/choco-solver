@@ -27,6 +27,7 @@
 package samples;
 
 import org.testng.annotations.Test;
+import samples.integer.*;
 
 /**
  * <br/>
@@ -62,13 +63,12 @@ public class SamplesTest {
     };
 
 
-    @Test
-    public void testAll(){
-        for(AbstractProblem pb : problems){
+    @Test(groups = ">30m")
+    public void testAll() {
+        for (AbstractProblem pb : problems) {
             pb.execute(new String[]{});
         }
     }
-
 
 
 }

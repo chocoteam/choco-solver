@@ -27,11 +27,12 @@
 
 package solver.search.limits;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.Solver;
 
-/**Set a limit over the number of found solutions allowed during the search.
+/**
+ * Set a limit over the number of found solutions allowed during the search.
  * When this limit is reached, the search loop is informed and the resolution is stopped.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -41,14 +42,14 @@ public class SolutionLimit extends ALimit {
 
     private long solutionlimit;
 
-    protected SolutionLimit(AbstractSearchLoop searchLoop, long solutionlimit) {
-        super(searchLoop.getMeasures());
+    public SolutionLimit(Solver solver, long solutionlimit) {
+        super(solver.getSearchLoop().getMeasures());
         this.solutionlimit = solutionlimit;
     }
 
     @Override
     public boolean isReached() {
-        final long diff = solutionlimit - measures.getSolutionCount() ;
+        final long diff = solutionlimit - measures.getSolutionCount();
         return diff <= 0;
     }
 

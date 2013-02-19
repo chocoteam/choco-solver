@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
+ * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i]) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,20 +47,18 @@ import java.util.List;
  */
 public class BoolClauseBuilder implements IBuilder {
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar[] bs = exps.get(1).toBoolVarArray(solver);
 
-        Literal[] poss = new Literal[as.length];
+        Literal[] lits = new Literal[as.length + bs.length];
         for (int i = 0; i < as.length; i++) {
-            poss[i] = Literal.pos(as[i]);
+            lits[i] = Literal.pos(as[i]);
         }
-
-        Literal[] negs = new Literal[bs.length];
+        int al = as.length;
         for (int i = 0; i < bs.length; i++) {
-            negs[i] = Literal.neg(bs[i]);
+            lits[i + al] = Literal.neg(bs[i]);
         }
-
-        return new ConjunctiveNormalForm(Node.or(Node.or(poss), Node.or(negs)), solver);
+		solver.post(IntConstraintFactory.clauses(Node.or(lits), solver));
     }
 }

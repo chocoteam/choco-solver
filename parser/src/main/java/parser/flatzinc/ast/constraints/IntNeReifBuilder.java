@@ -31,14 +31,15 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
 /**
+ * (a &#8800; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -47,15 +48,15 @@ import java.util.List;
 public class IntNeReifBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] ivars = new IntVar[2];
-        for (int i = 0; i < ivars.length; i++) {
-            ivars[i] = exps.get(i).intVarValue(solver);
-        }
-        BoolVar bvar = exps.get(2).boolVarValue(solver);
-        return new ReifiedConstraint(bvar,
-                ConstraintFactory.neq(ivars[0], ivars[1], solver),
-                ConstraintFactory.eq(ivars[0], ivars[1], solver),
-                solver);
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        BoolVar r = exps.get(2).boolVarValue(solver);
+
+        Constraint c = IntConstraintFactory.arithm(a, "!=", b);
+        Constraint oc = IntConstraintFactory.arithm(a, "=", b);
+
+        solver.post(IntConstraintFactory.implies(r, c));
+        solver.post(IntConstraintFactory.implies(VariableFactory.not(r), oc));
     }
 }

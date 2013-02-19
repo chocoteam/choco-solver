@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.cnf;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import solver.variables.BoolVar;
 
 /**
@@ -264,10 +264,18 @@ public final class Node extends ALogicTree {
 
     @Override
     public BoolVar[] flattenBoolVar() {
-        if (varsAsArray == null) {
-            buildVarsArray();
-        }
+//        if (varsAsArray == null) {
+        buildVarsArray();
+//        }
         return varsAsArray;
+    }
+
+    @Override
+    public void cleanFlattenBoolVar() {
+        for (int i = 0; i < children.length; i++) {
+            children[i].cleanFlattenBoolVar();
+        }
+        varsAsArray = null;
     }
 
     private void buildVarsArray() {

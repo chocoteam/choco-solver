@@ -1,44 +1,45 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.explanations;
 
-import choco.kernel.common.util.iterators.DisposableValueIterator;
+import common.util.iterators.DisposableValueIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
+import solver.exception.SolverException;
+import solver.explanations.antidom.AntiDomain;
+import solver.propagation.queues.CircularQueue;
+import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -50,202 +51,266 @@ import java.util.Set;
  * Here we just record the explanations in a HashMap ...
  * <p/>
  */
-public class RecorderExplanationEngine extends ExplanationEngine {
+public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation {
 
-    HashMap<Variable, OffsetIStateBitset> removedvalues; // maintien du domaine courant
-    HashMap<IntVar, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
-    HashMap<Deduction, Explanation> database; // base d'explications
+    TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
+    TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
+    TIntObjectHashMap<Explanation> database; // base d'explications
 
-    HashMap<Variable, HashMap<Integer, VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
-    HashMap<Variable, HashMap<Integer, VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
+    TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>> leftbranchdecisions; // maintien de la base de left BranchingDecision
+    TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>> rightbranchdecisions; // maintien de la base de right BranchingDecision
 
+    protected TIntHashSet expanded = new TIntHashSet();
+    protected TIntHashSet toexpand = new TIntHashSet();
+    protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
-        removedvalues = new HashMap<Variable, OffsetIStateBitset>();
-        valueremovals = new HashMap<IntVar, HashMap<Integer, ValueRemoval>>();
-        database = new HashMap<Deduction, Explanation>();
-        variableassignments = new HashMap<Variable, HashMap<Integer, VariableAssignment>>();
-        variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
+        if (!Configuration.PLUG_EXPLANATION) {
+            throw new SolverException("\nExplanations are not plugged in.\n" +
+                    "To activate explanations, create a user.property file at project root directory " +
+                    "which contains the following two lines:\n" +
+                    "# Enabling explanations:\n" +
+                    "PLUG_EXPLANATION=true\n");
+        }
+        removedvalues = new TIntObjectHashMap<AntiDomain>();
+        valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
+        database = new TIntObjectHashMap<Explanation>();
+        leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
+        rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
+    }
+
+    @Override
+    public boolean isActive() {
+        return true;
     }
 
     @Override
     public void beforeInitialPropagation() {
-        for(Variable v : solver.getVars()) {
+        for (Variable v : solver.getVars()) {
             getRemovedValues((IntVar) v);
         }
     }
 
     @Override
-    public OffsetIStateBitset getRemovedValues(IntVar v) {
-        OffsetIStateBitset toreturn = removedvalues.get(v);
+    public void afterInitialPropagation() {
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public AntiDomain getRemovedValues(IntVar v) {
+        int vid = v.getId();
+        AntiDomain toreturn = removedvalues.get(vid);
         if (toreturn == null) {
-            toreturn = new OffsetIStateBitset(v); // .getSolver().getEnvironment().makeBitSet(v.getUB());
-            removedvalues.put(v, toreturn);
-            valueremovals.put(v, new HashMap<Integer, ValueRemoval>());
+            toreturn = v.antiDomain();
+            removedvalues.put(vid, toreturn);
+            valueremovals.put(vid, new TIntObjectHashMap<ValueRemoval>());
         }
         return toreturn;
     }
 
     @Override
     public Explanation retrieve(IntVar var, int val) {
-        return database.get(getValueRemoval(var, val));
+        return database.get(getValueRemoval(var, val).id);
     }
 
-    protected ValueRemoval getValueRemoval(IntVar var, int val) {
+    public ValueRemoval getValueRemoval(IntVar var, int val) {
+        int vid = var.getId();
         ValueRemoval vr;
-        HashMap<Integer, ValueRemoval> hm = valueremovals.get(var);
+        TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
         if (hm == null) {
-            valueremovals.put(var, new HashMap<Integer, ValueRemoval>());
+            hm = new TIntObjectHashMap<ValueRemoval>();
+            valueremovals.put(vid, hm);
         }
-        vr = valueremovals.get(var).get(val);
+        vr = hm.get(val);
         if (vr == null) {
             vr = new ValueRemoval(var, val);
-            valueremovals.get(var).put(val, vr);
+            valueremovals.get(vid).put(val, vr);
         }
         return vr;
     }
 
     @Override
-    public int getWorldIndex(Variable var, int val) {
-        int wi = solver.getEnvironment().getWorldIndex();
-        Decision dec = solver.getSearchLoop().decision;
-        while (! dec.getPositiveDeduction().getVar().equals(var)) {
-            dec = dec.getPrevious();
-            wi--;
-        }
-//        if ( ((VariableAssignment) dec.getPositiveDeduction()).val != val) {
-//            throw new UnsupportedOperationException("hohoho");
-//        }
-
-        return wi;
-    }
-
-    @Override
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {
-        HashMap mapvar = variableassignments.get(var);
+    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
+        int vid = decision.getDecisionVariable().getId();
+        TIntObjectHashMap<BranchingDecision> mapvar = isLeft ? leftbranchdecisions.get(vid) : rightbranchdecisions.get(vid);
+        BranchingDecision vr;
         if (mapvar == null) {
-            variableassignments.put(var, new HashMap<Integer, VariableAssignment>());
-            variableassignments.get(var).put(val, new VariableAssignment(var, val));
+            mapvar = new TIntObjectHashMap<BranchingDecision>();
+            if (isLeft) {
+                leftbranchdecisions.put(vid, mapvar);
+            } else {
+                rightbranchdecisions.put(vid, mapvar);
+            }
         }
-        VariableAssignment vr = variableassignments.get(var).get(val);
+        vr = mapvar.get(decision.getId());
         if (vr == null) {
-            vr = new VariableAssignment(var, val);
-            variableassignments.get(var).put(val, vr);
+            vr = new BranchingDecision(decision, isLeft);
+            mapvar.put(decision.getId(), vr);
         }
         return vr;
     }
 
     @Override
-    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
-        HashMap mapvar = variablerefutations.get(var);
-        if (mapvar == null) {
-            variablerefutations.put(var, new HashMap<Integer, VariableRefutation>());
-            variablerefutations.get(var).put(val, new VariableRefutation(var, val, dec));
-        }
-        VariableRefutation vr = variablerefutations.get(var).get(val);
-        if (vr == null) {
-            vr = new VariableRefutation(var, val, dec);
-            variablerefutations.get(var).put(val, vr);
-        }
-        vr.decision = dec;
-        return vr;
+    public void store(Deduction deduction, Explanation explanation) {
+        database.put(deduction.id, explanation);
     }
 
+    @Override
+    public void delete(Deduction deduction) {
+        database.remove(deduction.id);
+    }
+
+    @Override
+    public void removeLeftDecisionFrom(Decision decision, Variable var) {
+        leftbranchdecisions.get(var.getId()).remove(decision.getId());
+    }
 
     @Override
     public void removeValue(IntVar var, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        assert cause != null;
+        // 1. get the deduction
         Deduction vr = getValueRemoval(var, val);
-        Explanation expl = cause.explain(vr);
-        database.put(vr, expl);
+        // 2. explain the deduction
+        Explanation expl = database.get(vr.id);
+        if (expl == null) {
+            expl = new Explanation();
+            database.put(vr.id, expl);
+        } else {
+            expl.reset();
+        }
+        cause.explain(vr, expl);
+        // 3. store it within the database
+
+        // 4. store the removed value withing the inverse domain
+        AntiDomain invdom = getRemovedValues(var);
         invdom.set(val);
-        emList.onRemoveValue(var, val, cause, expl);
+
+        // 5. explanations monitoring
+        if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+            onRemoveValue(var, val, cause, expl);
+        }
     }
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
-        Explanation explanation = new Explanation();
-        for (int v = old; v < val; v++) {    // itŽration explicite des valeurs retirŽes
-            Deduction vr = getValueRemoval(var, v);
-            Explanation expl = cause.explain(vr);
-            if (! invdom.get(v)) {
-                database.put(vr, expl);
+        assert cause != null;
+        AntiDomain invdom = getRemovedValues(var);
+//        Explanation explanation = new Explanation();
+        for (int v = old; v < val; v++) {    // iteration explicite des valeurs retirees
+            if (!invdom.get(v)) {
+                Deduction vr = getValueRemoval(var, v);
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
+                cause.explain(vr, expl);
                 invdom.set(v);
-                explanation.add(expl);
+//                explanation.add(expl);
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, val, cause, expl);
+                }
             }
         }
-        emList.onUpdateLowerBound(var, old, val, cause, explanation);
     }
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
-        Explanation explanation = new Explanation();
-        for (int v = old; v > val; v--) {    // itŽration explicite des valeurs retirŽes
-            Deduction vr = getValueRemoval(var, v);
-            Explanation explain = cause.explain(vr);
-            if ( ! invdom.get(v)) {
-                database.put(vr, explain);
+        assert cause != null;
+        AntiDomain invdom = getRemovedValues(var);
+//        Explanation explanation = new Explanation();
+        for (int v = old; v > val; v--) {    // iteration explicite des valeurs retirees
+            if (!invdom.get(v)) {
+                Deduction vr = getValueRemoval(var, v);
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
+                cause.explain(vr, expl);
                 invdom.set(v);
-                explanation.add(explain);
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, val, cause, expl);
+                }
             }
         }
-        emList.onUpdateUpperBound(var, old, val, cause, explanation);
+//        emList.onUpdateUpperBound(var, old, val, cause, explanation);
     }
 
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
-        OffsetIStateBitset invdom = getRemovedValues(var);
+        assert cause != null;
+        AntiDomain invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
-        Explanation explanation = new Explanation();
+//        Explanation explanation = new Explanation();
         while (it.hasNext()) {
             int v = it.next();
-            if ( v != val ) {
-                Deduction vr = getValueRemoval(var,v);
-                Explanation explain = cause.explain(vr);
-                database.put(vr, explain);
+            if (v != val) {
+                Deduction vr = getValueRemoval(var, v);
+                Explanation expl = database.get(vr.id);
+                if (expl == null) {
+                    expl = new Explanation();
+                    database.put(vr.id, expl);
+                } else {
+                    expl.reset();
+                }
+                cause.explain(vr, expl);
                 invdom.set(v);
-                explanation.add(explain);
+                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
+                    onRemoveValue(var, v, cause, expl);
+                }
             }
         }
-        emList.onInstantiateTo(var, val, cause, explanation);
+//        emList.onInstantiateTo(var, val, cause, explanation);
     }
 
     @Override
     public Explanation flatten(Explanation expl) {
-        Explanation toreturn = new Explanation(null, null);
+        Explanation toreturn = new Explanation();
 
-        Set<Deduction> toexpand = new HashSet<Deduction>();
-        Set<Deduction> expanded = new HashSet<Deduction>();
 
-        if (expl.deductions != null) {
-            toexpand = new HashSet<Deduction>(expl.deductions); //
+        expanded.clear();
+        toexpand.clear();
+        pending.clear();
+
+        Deduction ded;
+        int nbd = expl.nbDeductions();
+        for (int i = 0; i < nbd; i++) {
+            ded = expl.getDeduction(i);
+            pending.addLast(ded);
+            toexpand.add(ded.id);
         }
-        while (!toexpand.isEmpty()) {
-            Deduction d = toexpand.iterator().next();
-            toexpand.remove(d);
-            expanded.add(d);
-            Explanation e = database.get(d);
+
+
+        while (!pending.isEmpty()) {
+            ded = pending.pollFirst();
+            toexpand.remove(ded.id);
+            expanded.add(ded.id);
+
+            Explanation e = database.get(ded.id);
 
             if (e != null) {
-                if (e.contraintes != null) {
-                    for (Propagator prop : e.contraintes) {
-                        toreturn.add(prop);
-                    }
+                int nbp = e.nbPropagators();
+                for (int i = 0; i < nbp; i++) {
+                    toreturn.add(e.getPropagator(i));
                 }
-                if (e.deductions != null) {
-
-                    for (Deduction ded : e.deductions) {
-                        if (!expanded.contains(ded)) {
-                            toexpand.add(ded);
-                        }
+                nbd = e.nbDeductions();
+                for (int i = 0; i < nbd; i++) {
+                    ded = e.getDeduction(i);
+                    if (!expanded.contains(ded.id) && toexpand.add(ded.id)) {
+                        pending.addLast(ded);
                     }
                 }
             } else {
-                toreturn.add(d);
+                toreturn.add(ded);
             }
         }
         return toreturn;
@@ -259,7 +324,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public Explanation flatten(Deduction deduction) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = new Explanation();
         expl.add(deduction);
         return flatten(expl);
     }
@@ -273,104 +338,5 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public Deduction explain(Deduction deduction) {
         return deduction;
     }
-
-
-    private Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
-        Decision dec = solver.getSearchLoop().decision; // the current decision to undo
-        while (dec != null && nworld > 1) {
-            dec = dec.getPrevious();
-            nworld--;
-        }
-        if (dec != null) {
-            if (! dec.hasNext())  throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if  (assign instanceof  VariableAssignment) {
-                VariableAssignment va = (VariableAssignment) assign;
-                variableassignments.get(va.var).remove(va.val);
-            }
-            database.put(vr, flatten(expl));
-        }
-        return dec;
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
-            Solver solver = (cex.v != null) ? cex.v.getSolver() : cex.c.getConstraint().getVariables()[0].getSolver();
-            Explanation complete = flatten(expl);
-            int upto = complete.getMostRecentWorldToBacktrack(this);
-            solver.getSearchLoop().overridePreviousWorld(upto);
-            Decision dec = updateVRExplainUponbacktracking(upto, complete);
-            emList.onContradiction(cex, complete, upto, dec);
-        } else {
-            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherent state");
-        }
-    }
-
-    @Override
-    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: INST to " + val + " FOR " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
-        }
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision) {
-        if (LOGGER.isInfoEnabled()) {
-            if (cex.v != null) {
-                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-            }
-            else if (cex.c != null) {
-                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
-            }
-            LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
-        }
-    }
-
-    @Override
-    public void onSolution() {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = solver.getSearchLoop().decision;
-        while ((dec != null) && (! dec.hasNext())) {
-            dec = dec.getPrevious();
-        }
-        if (dec != null) {
-            Explanation explanation = new Explanation();
-            Decision d = dec.getPrevious();
-            while ( (d != null) ) {
-                if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
-                }
-                d = d.getPrevious();
-            }
-            database.put(dec.getNegativeDeduction(), explanation);
-        }
-    }
-
 
 }

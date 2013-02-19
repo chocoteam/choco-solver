@@ -31,12 +31,13 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ternary.Times;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
 
 /**
+ * a &#215; b = c
  * <br/>
  *
  * @author Charles Prud'homme
@@ -45,11 +46,10 @@ import java.util.List;
 public class IntTimesBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] vars = new IntVar[3];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = exps.get(i).intVarValue(solver);
-        }
-        return new Times(vars[0], vars[1], vars[2], solver);
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        solver.post(IntConstraintFactory.times(a, b, c));
     }
 }

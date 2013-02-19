@@ -1,46 +1,41 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package parser.flatzinc.ast.searches;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.comparators.Distance;
-import solver.search.strategy.enumerations.values.heuristics.nary.Join;
-import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
-import solver.search.strategy.enumerations.values.metrics.Median;
-import solver.search.strategy.enumerations.values.metrics.Metric;
+import solver.search.strategy.assignments.DecisionOperator;
+import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.values.*;
+import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 
 /**
@@ -51,96 +46,79 @@ import solver.variables.IntVar;
  */
 public class IntSearch {
 
+    private static long seed = 29091981;
+
     private IntSearch() {
     }
 
-    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignmennt, Strategy strategy, Solver solver) {
-        valueIterator(variables, assignmennt);
-        return variableSelector(variables, varChoice, solver);
+    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Strategy strategy, Solver solver) {
+        VariableSelector<IntVar> varsel = variableSelector(variables, varChoice, solver);
+        if (varsel == null) { // free search
+            return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 2.0d, 1, seed);
+        }
+        return valueIterator(variables, varsel, assignment);
     }
 
-    private static StrategyVarValAssign variableSelector(IntVar[] variables, VarChoice varChoice, Solver solver) {
+    private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice, Solver solver) {
         IEnvironment environment = solver.getEnvironment();
         switch (varChoice) {
             case input_order:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.inputOrder(variables), ValidatorFactory.instanciated, environment);
+                return new InputOrder(variables);
             case first_fail:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.minDomain(), ValidatorFactory.instanciated, environment);
+                return new FirstFail(variables);
             case anti_first_fail:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.maxDomain(), ValidatorFactory.instanciated, environment);
+                return new AntiFirstFail(variables);
             case smallest:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.smallest(), ValidatorFactory.instanciated, environment);
+                return new Smallest(variables);
             case largest:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.largest(), ValidatorFactory.instanciated, environment);
+                return new Largest(variables);
             case occurrence:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.mostConstrained(), ValidatorFactory.instanciated, environment);
+                return new Occurrence(variables);
             case most_constrained:
-                return StrategyVarValAssign.sta(variables,
-                        new Seq<IntVar>(SorterFactory.smallest(), SorterFactory.mostConstrained()),
-                        ValidatorFactory.instanciated, environment);
+                return new MostConstrained(variables);
             case max_regret:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.maxRegret(), ValidatorFactory.instanciated, environment);
+                return new MaxRegret(variables);
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + varChoice.name() + ". Set default.");
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.domOverWDeg(solver), ValidatorFactory.instanciated, environment);
+                return null;
         }
     }
 
-    private static void valueIterator(IntVar[] variables, Assignment assignmennt) {
+    private static solver.search.strategy.strategy.Assignment valueIterator(IntVar[] variables, VariableSelector<IntVar> variableSelector,
+                                                                            Assignment assignmennt) {
+        InValueIterator valSelector = null;
+        DecisionOperator assgnt = DecisionOperator.int_eq;
         switch (assignmennt) {
             case indomain:
             case indomain_min:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i], variables[i].getLB(), 1, variables[i].getUB()));
-                }
+                valSelector = new InDomainMin();
                 break;
             case indomain_max:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i], variables[i].getUB(), -1, variables[i].getLB()));
-                }
+                valSelector = new InDomainMax();
                 break;
             case indomain_middle:
-                for (int i = 0; i < variables.length; i++) {
-                    //TODO: EnumVal with Metric as paramater (bounds and delta)
-                    Metric median = new Median(variables[i]);
-                    variables[i].setHeuristicVal(
-                            new Join(new Distance(median),
-                                    HeuristicValFactory.enumVal(variables[i], median.getValue() + 1, 1, variables[i].getUB()),
-                                    HeuristicValFactory.enumVal(variables[i], median.getValue(), -1, variables[i].getLB())
-                            ));
-                }
+                valSelector = new InDomainMiddle();
                 break;
             case indomain_median:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(
-                            new DropN(HeuristicValFactory.enumVal(variables[i]),
-                                    new solver.search.strategy.enumerations.values.metrics.Middle(variables[i]))
-                    );
-                }
+                valSelector = new InDomainMedian();
                 break;
             case indomain_random:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(new solver.search.strategy.enumerations.values.heuristics.zeroary.Random(variables[i]));
-                }
+                valSelector = new InDomainRandom(seed);
                 break;
             case indomain_split:
-            case indomain_reverse_split:
             case indomain_interval:
+                valSelector = new InDomainMiddle();
+                assgnt = DecisionOperator.int_split;
+                break;
+            case indomain_reverse_split:
+                valSelector = new InDomainMiddle();
+                assgnt = DecisionOperator.int_reverse_split;
+                break;
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i]));
-                }
-
+                valSelector = new InDomainMin();
         }
+        return new solver.search.strategy.strategy.Assignment(variableSelector, valSelector, assgnt);
     }
 
 

@@ -26,7 +26,7 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -42,10 +42,10 @@ import java.lang.management.ManagementFactory;
 public abstract class AbstractBenchmarking {
 
     @Option(name = "-loop", usage = "Number of time a sample should be run", required = false)
-    int loop = 10;
+    int loop = 1;
 
     @Option(name = "-warmUp", usage = "JVM warm up loop", required = false)
-    int warmUp = 5;
+    int warmUp = 0;
 
     @Option(name = "-noJVMclean", usage = "Disable JVM cleaning", required = false)
     boolean noJVMcleaning = false;
@@ -105,14 +105,14 @@ public abstract class AbstractBenchmarking {
             String[] _args = args.clone();
             boolean found = false;
             for (int i = 0; i < args.length; i++) {
-                if (_args[i].equals("-log")) {
+                if (_args[i].equals("-l")) {
                     _args[i + 1] = "SILENT";
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                _args = ArrayUtils.append(_args, new String[]{"-log", "SILENT"});
+                _args = ArrayUtils.append(_args, new String[]{"-l", "SILENT"});
             }
             for (int i = warmUp; i >= 0; i--) {
                 pb.execute(_args);

@@ -53,6 +53,16 @@ public class DomainBuilder {
         return domains;
     }
 
+    public static int[][] buildFullDomains(int nbVar, int size, int range, Random rand) {
+        int[][] domains = new int[nbVar][];
+        for (int v = 0; v < nbVar; v++) {
+            domains[v] = new int[2];
+            domains[v][0] = -rand.nextInt(range) + rand.nextInt(range);
+            domains[v][1] = domains[v][0] + (size - 1);
+        }
+        return domains;
+    }
+
     public static int[][] buildFullDomains(int nbVar, int minV, int maxV, Random r, double density, boolean homogeneous) {
         int sizeMax = maxV - minV + 1;
         int[] values = new int[sizeMax];
@@ -67,6 +77,25 @@ public class DomainBuilder {
                 _size = r.nextInt(size) + 1;  // 1<= _size <= size
             }
             domains[v] = cutAndSort(_size, randomPermutations(values, r));
+        }
+        return domains;
+    }
+
+
+    public static int[][] buildFullDomains2(int nbVar, int size, int range, Random rand, double density, boolean homogeneous) {
+        int[] values = new int[size];
+        int minV = -rand.nextInt(range) + rand.nextInt(range);
+        for (int k = 0; k < size; k++) {
+            values[k] = k + minV;
+        }
+        size = Math.max(1, (int) (size * density));
+        int[][] domains = new int[nbVar][];
+        for (int v = 0; v < nbVar; v++) {
+            int _size = size;
+            if (!homogeneous) {
+                _size = rand.nextInt(size) + 1;  // 1<= _size <= size
+            }
+            domains[v] = cutAndSort(_size, randomPermutations(values, rand));
         }
         return domains;
     }

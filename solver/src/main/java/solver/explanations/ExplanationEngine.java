@@ -1,40 +1,39 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.explanations;
 
-import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -49,20 +48,37 @@ import java.io.Serializable;
  * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine extends VoidSearchMonitor implements Serializable, ISearchMonitor, IExplanationMonitor {
+public class ExplanationEngine implements Serializable {
     static Logger LOGGER = LoggerFactory.getLogger("explainer");
-    ExplanationMonitorList emList;
     Solver solver;
 
-    public void removeValue(IntVar var, int val, @NotNull ICause cause) {   }
+    /**
+     * Builds an ExplanationEngine
+     *
+     * @param slv associated solver's environment
+     */
+    public ExplanationEngine(Solver slv) {
+        this.solver = slv;
+    }
 
-    public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {   }
+    public boolean isActive() {
+        return false;
+    }
 
-    public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {    }
 
-    public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {    }
+    public void removeValue(IntVar var, int val, ICause cause) {
+    }
 
-    public OffsetIStateBitset getRemovedValues(IntVar v) {
+    public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
+    }
+
+    public void updateUpperBound(IntVar intVar, int old, int value, ICause cause) {
+    }
+
+    public void instantiateTo(IntVar var, int val, ICause cause) {
+    }
+
+    public AntiDomain getRemovedValues(IntVar v) {
         return null;
     }
 
@@ -92,7 +108,6 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
         return null;
     }
 
-
     /**
      * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
      * <code>var</code>
@@ -113,7 +128,6 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
         return null;
     }
 
-
     /**
      * Provides the recorded explanation in database for the removal of value <code>val</code>
      * from variable <code>var</code>
@@ -127,71 +141,64 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
         return null;
     }
 
-
     /**
-     * Builds an ExplanationEngine
+     * provides a BranchingDecision associated to a decision
      *
-     * @param slv associated solver's environment
+     * @param decision an integer variable
+     * @param isLeft   is left branch decision
+     * @return the associated right BranchingDecision
      */
-    public ExplanationEngine(Solver slv) {
-        this.solver = slv;
-        slv.getSearchLoop().plugSearchMonitor(this);
-        emList = new ExplanationMonitorList();
-    }
-
-
-    /**
-     * provides a VariableAssignment associated to a pair variable-value
-     *
-     * @param var an integer variable
-     * @param val an integer value
-     * @return the associated VariableAssignment
-     */
-
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {
+    public BranchingDecision getDecision(Decision decision, boolean isLeft) {
         return null;
     }
 
     /**
-     * provides a ValueRefutation associated to a pair variable-value
+     * Store the <code>explanation</code> of the <code>deduction</code>
      *
-     * @param var an integer variable
-     * @param val an integer value
-     * @param dec the associated decision
-     * @return the associated VariableRefutation
+     * @param deduction   deduction to explain
+     * @param explanation explanation of the deduction
      */
+    public void store(Deduction deduction, Explanation explanation) {
 
-    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
-        return null;
     }
 
+    public void delete(Deduction deduction) {
+
+    }
 
     /**
-     * adds a ExplanationMonitor to the explainer in order to catch explanation-related events
-     * @param mon the monitor to be added
+     * Remove the <code>decision</code> from the set of left decisions over <code>var</code>
+     *
+     * @param decision a left decision over <code>var</code>
+     * @param var      a variable
      */
-    public void addExplanationMonitor(IExplanationMonitor mon) {
-        emList.add(mon);
+    public void removeLeftDecisionFrom(Decision decision, Variable var) {
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public int getWorldIndex(Variable va, int val) {
-        return 0;
+
+    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
+        LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
     }
 
+    public void onContradiction(ContradictionException cex, Explanation explanation) {
+        if (cex.v != null) {
+            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
+        } else if (cex.c != null) {
+            LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
+        }
+    }
 
-    @Override
-    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {}
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {}
 
-    @Override
-    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {}
+    public Solver getSolver() {
+        return solver;
+    }
 
-    @Override
-    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {}
-
-    @Override
-    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision) {}
+    public boolean isTraceOn() {
+        return Configuration.PRINT_EXPLANATION;
+    }
 }

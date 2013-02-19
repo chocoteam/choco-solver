@@ -26,7 +26,7 @@
  */
 package solver.search.restart;
 
-import choco.kernel.common.util.tools.MathUtils;
+import common.util.tools.MathUtils;
 
 /**
  * Restart strategy based on:
@@ -45,7 +45,7 @@ public class LubyRestartStrategy extends AbstractRestartStrategy {
 
     private int divFactor;
 
-    protected LubyRestartStrategy(int scaleFactor, int geometricalFactor) {
+    public LubyRestartStrategy(int scaleFactor, int geometricalFactor) {
         super("LUBY", scaleFactor, geometricalFactor);
     }
 

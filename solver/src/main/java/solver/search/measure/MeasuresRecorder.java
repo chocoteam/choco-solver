@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.search.measure;
@@ -32,9 +32,11 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.loop.monitors.*;
 
-public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasures {
+public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonitorContradiction, IMonitorDownBranch,
+        IMonitorInitialize, IMonitorInitPropagation, IMonitorOpenNode, IMonitorRestart,
+        IMonitorSolution, IMonitorUpBranch {
 
     private static final float IN_MS = 1000 * 1000f;
 
@@ -68,6 +70,8 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
 
     public long usedMemory;
 
+    public long maxDepth, depth;
+
     protected Solver solver;
 
     protected long startingTime, startingMemory;
@@ -85,6 +89,16 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         backtrackCount = 0;
         restartCount = 0;
         failCount = 0;
+        solutionCount = 0;
+        objectiveIntValue = Integer.MAX_VALUE;
+        hasObjective = false;
+        readingTimeCount = 0;
+        initialisationTimeCount = 0;
+        initialPropagationTimeCount = 0;
+        propagationCount = 0;
+        eventCount = 0;
+        maxDepth = 0;
+        cstrs = null;
     }
 
 
@@ -179,6 +193,16 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public long getMaxDepth() {
+        return maxDepth;
+    }
+
+    @Override
+    public long getCurrentDepth() {
+        return depth;
+    }
+
+    @Override
     public long getPropagationsCount() {
         return propagationCount;
     }
@@ -246,7 +270,6 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
 
     @Override
     public void beforeInitialize() {
-        reset();
         startingMemory = memoryUsedInMB();
         startingTime = System.nanoTime();
     }
@@ -254,6 +277,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     @Override
     public void afterInitialize() {
         initialisationTimeCount = System.nanoTime() - startingTime;
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
     }
 
     @Override
@@ -265,6 +292,13 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     public void beforeOpenNode() {
 //        updateTimeCount();
         nodeCount++;
+        if (depth > maxDepth) {
+            maxDepth = depth;
+        }
+    }
+
+    @Override
+    public void afterOpenNode() {
     }
 
     @Override
@@ -275,8 +309,31 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void beforeDownLeftBranch() {
+        depth++;
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+        depth++;
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+    }
+
+    @Override
     public void beforeUpBranch() {
         backtrackCount++;
+        depth--;
+    }
+
+    @Override
+    public void afterUpBranch() {
     }
 
     @Override
@@ -285,8 +342,13 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void beforeRestart() {
+    }
+
+    @Override
     public void afterRestart() {
         restartCount++;
+        depth = 0;
     }
 
     @Override
@@ -296,10 +358,31 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         updatePropagationCount();
     }
 
+    @Override
+    public void afterClose() {
+    }
+
     //****************************************************************************************************************//
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
+    public double[] toArray() {
+        return new double[]{
+                solutionCount,
+                readingTimeCount / IN_MS,
+                initialisationTimeCount / IN_MS,
+                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
+                (timeCount - initialPropagationTimeCount) / IN_MS,
+                timeCount / IN_SEC,
+                hasObjective() ? objectiveIntValue : 0,
+                nodeCount,
+                backtrackCount,
+                failCount,
+                restartCount,
+                eventCount,
+                propagationCount
+        };
+    }
 
     @Override
     public String toOneLineString() {
@@ -324,6 +407,21 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public String toOneShortLineString() {
+        StringBuilder st = new StringBuilder(256);
+        st.append(String.format("%d Solutions, Resolution %.3fs (%.6fms), Objective: %d , %d Nodes, %d Backtracks, %d Fails, %d Restarts",
+                solutionCount,
+                (timeCount - initialPropagationTimeCount) / IN_SEC,
+                (timeCount - initialPropagationTimeCount) / IN_MS,
+                hasObjective() ? objectiveIntValue : 0,
+                nodeCount,
+                backtrackCount,
+                failCount,
+                restartCount));
+        return st.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
         st.append("- Search statistics\n");
@@ -333,7 +431,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
+                "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
                 readingTimeCount / IN_MS,
                 initialisationTimeCount / IN_MS,
                 initialPropagationTimeCount / IN_MS,
@@ -343,6 +441,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
                 backtrackCount,
                 failCount,
                 restartCount,
+                maxDepth,
                 eventCount,
                 propagationCount,
                 usedMemory,
@@ -350,8 +449,28 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
                 solver.getCstrs().length,
 //                solver.getEngine().getNbRequests()
                 0
-                ));
+        ));
 
+        return st.toString();
+    }
+
+    public String toCSV() {
+        StringBuilder st = new StringBuilder(256);
+        // solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+        st.append(String.format("%d;%.3f;%.3f;%.3f;%.6f;%.3f;%d;%d;%d;%d;%d;%d;%d;",
+                solutionCount,
+                readingTimeCount / IN_MS,
+                initialisationTimeCount / IN_MS,
+                (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
+                (timeCount - initialPropagationTimeCount) / IN_MS,
+                timeCount / IN_SEC,
+                hasObjective() ? objectiveIntValue : 0,
+                nodeCount,
+                backtrackCount,
+                failCount,
+                restartCount,
+                eventCount,
+                propagationCount));
         return st.toString();
     }
 

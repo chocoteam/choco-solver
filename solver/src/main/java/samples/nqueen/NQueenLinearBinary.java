@@ -27,9 +27,7 @@
 
 package samples.nqueen;
 
-import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -43,8 +41,6 @@ public class NQueenLinearBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
@@ -53,9 +49,9 @@ public class NQueenLinearBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], solver));
-                solver.post(ConstraintFactory.scalar(new IntVar[]{vars[i], vars[j]}, new int[]{1, -1}, IntLinComb.Operator.NEQ, -k, solver));
-                solver.post(ConstraintFactory.scalar(new IntVar[]{vars[i], vars[j]}, new int[]{1, -1}, IntLinComb.Operator.NEQ, k, solver));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j]));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
     }

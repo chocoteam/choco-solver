@@ -27,13 +27,13 @@
 
 package choco.explanations;
 
-import choco.kernel.memory.IEnvironment;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -46,68 +46,109 @@ import solver.variables.VariableFactory;
  */
 public class SimpleExplanationTest {
 
-    static Solver s;
-    static IEnvironment env;
-    static IntVar[] vars;
-    static Constraint[] lcstrs;
-
-
-    public static void init() {
-        s = new Solver();
-        env = s.getEnvironment();
-
-    }
-
-    public static void setvars(boolean enumerated) {
-        vars = new IntVar[3];
+    /**
+     * Refactored by JG to have no static fields (for parallel execution)
+     *
+     * @param enumerated
+     */
+    public static void test(boolean enumerated) {
+        // initialize
+        Solver s = new Solver();
+        IEnvironment env = s.getEnvironment();
+        // set varriables
+        IntVar[] vars = new IntVar[3];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = enumerated ? VariableFactory.enumerated("x" + i, 1, vars.length, s)
                     : VariableFactory.bounded("x" + i, 1, vars.length + 1, s);
         }
-
-    }
-
-    public static void constraints() {
-
-        lcstrs = new Constraint[3];
-
-        lcstrs[0] = ConstraintFactory.lt(vars[0], vars[1], s);
-        lcstrs[1] = ConstraintFactory.lt(vars[1], vars[2], s);
-        lcstrs[2] = ConstraintFactory.neq(vars[0], vars[1], s);
-    }
-
-    private static void solve() {
-
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-
+        // post constraints
+        Constraint[] lcstrs = new Constraint[3];
+        lcstrs[0] = IntConstraintFactory.arithm(vars[0], "<", vars[1]);
+        lcstrs[1] = IntConstraintFactory.arithm(vars[1], "<", vars[2]);
+        lcstrs[2] = IntConstraintFactory.arithm(vars[0], "!=", vars[1]);
+        // configure Solver
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
         s.post(lcstrs);
         s.set(strategy);
-
+        // solve
         s.findSolution();
-
-
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 1, "nb sol incorrect");
-
     }
 
 
     @Test(groups = "1s")
     public void test1() {
-        init();
-        setvars(true);
-        constraints();
-        solve();
+        test(true);
     }
-
 
     @Test(groups = "1s")
     public void test2() {
-        init();
-        setvars(false);
-        constraints();
-        solve();
+        test(false);
     }
+
+//	static Solver s;
+//    static IEnvironment env;
+//    static IntVar[] vars;
+//    static Constraint[] lcstrs;
+//
+//
+//    public static void init() {
+//        s = new Solver();
+//        env = s.getEnvironment();
+//
+//    }
+//
+//    public static void setvars(boolean enumerated) {
+//        vars = new IntVar[3];
+//        for (int i = 0; i < vars.length; i++) {
+//            vars[i] = enumerated ? VariableFactory.enumerated("x" + i, 1, vars.length, s)
+//                    : VariableFactory.bounded("x" + i, 1, vars.length + 1, s);
+//        }
+//
+//    }
+//
+//    public static void constraints() {
+//
+//        lcstrs = new Constraint[3];
+//
+//        lcstrs[0] = ConstraintFactory.lt(vars[0], vars[1], s);
+//        lcstrs[1] = ConstraintFactory.lt(vars[1], vars[2], s);
+//        lcstrs[2] = ConstraintFactory.neq(vars[0], vars[1], s);
+//    }
+//
+//    private static void solve() {
+//
+//        AbstractStrategy strategy = StrategyFactory.inputOrder_InDomainMin(vars);
+//
+//        s.post(lcstrs);
+//        s.set(strategy);
+//
+//        s.findSolution();
+//
+//
+//        long sol = s.getMeasures().getSolutionCount();
+//        Assert.assertEquals(sol, 1, "nb sol incorrect");
+//
+//    }
+//
+//
+//    @Test(groups = "1s")
+//    public void test1() {
+//        init();
+//        setvars(true);
+//        constraints();
+//        solve();
+//    }
+//
+//
+//    @Test(groups = "1s")
+//    public void test2() {
+//        init();
+//        setvars(false);
+//        constraints();
+//        solve();
+//    }
 
 
 }

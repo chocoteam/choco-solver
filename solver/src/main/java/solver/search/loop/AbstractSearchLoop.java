@@ -1,49 +1,48 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.search.loop;
 
-import choco.kernel.memory.IEnvironment;
+import common.ESat;
+import memory.IEnvironment;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.objective.IObjectiveManager;
-import solver.objective.NoObjectiveManager;
-import solver.propagation.IPropagationEngine;
-import solver.search.limits.LimitBox;
+import solver.objective.ObjectiveManager;
+import solver.search.limits.LimitChecker;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
 import solver.search.solution.ISolutionPool;
 import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
-
-import java.util.Properties;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -80,7 +79,8 @@ import java.util.Properties;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
-    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
+    //    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
+    public int timeStamp;
 
     static final int INIT = 0;
     static final int INITIAL_PROPAGATION = 1;
@@ -98,10 +98,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IEnvironment env;
 
     /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
-    int stateAfterSolution = UP_BRANCH;
+    public int stateAfterSolution = UP_BRANCH;
 
-    /* Reference to the propagation pilot */
-    protected IPropagationEngine propEngine;
+    /* Define the state to move to once a fail occured : UP_BRANCH or RESTART */
+    public int stateAfterFail = UP_BRANCH;
 
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
@@ -111,7 +111,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* initila world index, before initial propagation (can be different from 0) */
     int rootWorldIndex;
 
-    /* world index just after initial propagation (commonly rootWorldIndex + 1) */
+    /* world index just after initial propagation (commonly rootWorldIndex + 2) */
     int searchWorldIndex;
 
     /* store the next state of the search loop.
@@ -126,48 +126,45 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-
-    /* Previous solution count, to inform on state*/
-    long previousSolutionCount = 0;
-
     /* factory for limits management */
-    LimitBox limitsfactory;
+    LimitChecker limitchecker;
 
 
-    protected int solutionPoolCapacity;
     /**
-     * Solution pool -- way to record solutions. Default object is no solution recorded.
+     * Solution pool -- way to record solutions. Default object is last solution recorded.
      */
-    ISolutionPool solutionpool;
+    ISolutionPool solutionpool = SolutionPoolFactory.LAST_ONE.make();
 
-    SearchMonitorList smList;
+    public SearchMonitorList smList;
 
     /**
      * Objective manager. Default object is no objective.
      */
-    IObjectiveManager objectivemanager = NoObjectiveManager.get();
+    ObjectiveManager objectivemanager;
 
     private boolean alive;
-    public Decision decision;
+    public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
+        objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
         smList = new SearchMonitorList();
         smList.add(this.measures);
         this.nextState = INIT;
-        this.limitsfactory = new LimitBox(this);
-        loadProperties(solver.properties);
+        this.limitchecker = new LimitChecker(this);
+        rootWorldIndex = -1;
+        solutionpool = SolutionPoolFactory.NO_SOLUTION.make();
     }
 
-    public void setPropEngine(IPropagationEngine propEngine) {
-        this.propEngine = propEngine;
-    }
-
-    protected void loadProperties(Properties properties) {
-        solutionPoolCapacity = Integer.parseInt((String) properties.get("solver.solution.capacity"));
+    private void reset() {
+        this.nextState = INIT;
+        restaureRootNode();
+        rootWorldIndex = -1;
+        searchWorldIndex = -1;
+        this.measures.reset();
     }
 
     @SuppressWarnings({"unchecked"})
@@ -180,17 +177,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      *
      * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
-    public Boolean launch() {
+    public void launch(boolean stopatfirst) {
         if (nextState != INIT) {
             throw new SolverException("!! The search has not been initialized.\n" +
                     "!! Be sure you are respecting one of these call configurations :\n " +
                     "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
-        if (strategy == null) {
-            throw new SolverException("!! The search strategy is not defined.\n" +
-                    "!! Please set a predefined one using StrategyFactory or build your own.");
-        }
-        return loop();
+        this.stopAtFirstSolution = stopatfirst;
+        loop();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +194,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      *
      * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
-    Boolean loop() {
+    void loop() {
         alive = true;
         while (alive) {
             switch (nextState) {
@@ -251,9 +245,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             }
         }
         smList.beforeClose();
-        Boolean close = close();
+        close();
         smList.afterClose();
-        return close;
     }
 
     /**
@@ -261,8 +254,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
-        previousSolutionCount = 0;
-        propEngine.init(solver);
         this.nextState = INITIAL_PROPAGATION;
     }
 
@@ -293,45 +284,55 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     protected abstract void restartSearch();
 
+    public abstract void moveTo(int to);
+
     /**
      * Close the search
      *
-     * @return <code>true</code> if at least one solution has been found, <br/>
+     * @return <code>true</code> if at least one more solution has been found, <br/>
      *         <code>null</code> if a limit has been reached before finding one solution, <br/>
      *         <code>false</code> otherwise
      */
-    public Boolean close() {
+    public void close() {
+        ESat sat = ESat.FALSE;
         if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {
             restaureRootNode();
             solutionpool.getBest().restore();
         }
-//            return existsSolution() && !stopAtFirstSolution && !isEncounteredLimit();
-        measures.setObjectiveOptimal(measures.getSolutionCount() > previousSolutionCount
-                && stopAtFirstSolution && limitsfactory.isReached());
-        if (measures.getSolutionCount() > previousSolutionCount) {
-            return true;
-        } else if (limitsfactory.isReached()) {
+        measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
+        if (measures.getSolutionCount() > 0) {
+            sat = ESat.TRUE;
+        } else if (limitchecker.isReached()) {
             measures.setObjectiveOptimal(false);
-            return null;
+            sat = ESat.UNDEFINED;
         }
-        return false;
+        solver.setFeasible(sat);
     }
 
     public void restaureRootNode() {
-        env.worldPopUntil(searchWorldIndex);
+        env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
+        timeStamp++; // to force clear delta, on solution recording
+        Decision tmp;
+        while (decision != RootDecision.ROOT) {
+            tmp = decision;
+            decision = tmp.getPrevious();
+            tmp.free();
+        }
     }
-
-    /**
-     * Resume the search
-     */
-    public abstract Boolean resume();
 
     /**
      * Force the search to stop
      */
     public final void interrupt() {
+        nextState = RESUME;
         alive = false;
+        smList.afterInterrupt();
     }
+
+    public final void forceAlive(boolean bvalue) {
+        alive = bvalue;
+    }
+
 
     /**
      * Sets the following action in the search to be a restart instruction.
@@ -341,22 +342,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setup() {
-        this.solutionpool = SolutionPoolFactory.makeSolutionPool(solutionPoolCapacity);
-    }
-
-
-    public void stopAtFirstSolution(boolean value) {
-        this.stopAtFirstSolution = value;
-    }
-
     /**
-     * Gets the limit factory in order to define limits.
-     *
-     * @return the limit factory
+     * Gets the list of limits over the search loop.
      */
-    public LimitBox getLimitsBox() {
-        return limitsfactory;
+    public LimitChecker getLimits() {
+        return limitchecker;
     }
 
 
@@ -369,15 +359,28 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setObjectivemanager(IObjectiveManager objectivemanager) {
+    public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
+        if (objectivemanager.isOptimization()) {
+            plugSearchMonitor(objectivemanager);
+        }
         this.measures.declareObjective();
     }
 
+    /**
+     * Return the set of solution found during resolution.
+     * Depending on the choice made, the set of solution can be empty even if some solutions has been found.
+     */
     public ISolutionPool getSolutionpool() {
         return solutionpool;
     }
 
+    /**
+     * Override the default pool of solutions.
+     *
+     * @param solutionpool a pool of solutions
+     * @see SolutionPoolFactory
+     */
     public void setSolutionpool(ISolutionPool solutionpool) {
         this.solutionpool = solutionpool;
     }
@@ -386,10 +389,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         stateAfterSolution = does ? RESTART : UP_BRANCH;
     }
 
-    public void setSolutionPoolCapacity(int solutionPoolCapacity) {
-        this.solutionPoolCapacity = solutionPoolCapacity;
+    public void restartAfterEachFail(boolean does) {
+        stateAfterFail = does ? RESTART : UP_BRANCH;
     }
-
 
     public void overridePreviousWorld(int gap) {
         this.jumpTo = gap;
@@ -403,7 +405,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         return measures;
     }
 
-    public IObjectiveManager getObjectivemanager() {
+    public ObjectiveManager getObjectivemanager() {
         return objectivemanager;
     }
 
@@ -417,7 +419,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public abstract String decisionToString();
 
-    public int getSolutionPoolCapacity() {
-        return solutionPoolCapacity;
+    public int getCurrentDepth() {
+        int d = 0;
+        Decision tmp = decision;
+        while (tmp != RootDecision.ROOT) {
+            tmp = tmp.getPrevious();
+            d++;
+        }
+        return d;
     }
 }

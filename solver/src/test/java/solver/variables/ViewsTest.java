@@ -30,17 +30,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.binary.Absolute;
-import solver.constraints.binary.EqualXY_C;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
-import solver.constraints.ternary.MaxXYZ;
-import solver.constraints.ternary.Times;
+import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
+import solver.search.strategy.IntStrategyFactory;
 
 /**
  * <br/>
@@ -53,17 +47,17 @@ public class ViewsTest {
     public static void check(Solver ref, Solver solver, long seed, boolean strict, boolean solveAll) {
 //        SearchMonitorFactory.log(ref, true, true);
 //        SearchMonitorFactory.log(solver, true, true);
-        if(solveAll){
+        if (solveAll) {
             ref.findAllSolutions();
             solver.findAllSolutions();
-        }else{
+        } else {
 //            System.out.printf("%s\n", ref.toString());
             ref.findSolution();
 //            System.out.printf("%s\n", solver.toString());
             solver.findSolution();
         }
         Assert.assertEquals(solver.getMeasures().getSolutionCount(),
-                ref.getMeasures().getSolutionCount(), "solutions ("+seed + ")");
+                ref.getMeasures().getSolutionCount(), "solutions (" + seed + ")");
 //        System.out.printf("%d : %d vs. %d  -- ", seed, ref.getMeasures().getNodeCount(),
 //                solver.getMeasures().getNodeCount());
         if (strict) {
@@ -82,22 +76,22 @@ public class ViewsTest {
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 0, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.sum(x, y);
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = Sum.var(x, y);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -108,22 +102,22 @@ public class ViewsTest {
     public void test1a() {
         // Z = X + Y (bounded)
 //        int seed = 5;
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, ref);
                 IntVar y = VariableFactory.bounded("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 4, ref);
-                ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, 1, -1}, 0, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, 1}, z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, solver);
                 IntVar y = VariableFactory.bounded("y", 0, 2, solver);
-                IntVar z = Views.sum(x, y);
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = Sum.var(x, y);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -140,15 +134,15 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 2, ref);
-                ref.post(new MaxXYZ(z, x, y, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.maximum(z, x, y));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.max(x, y);
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = Max.var(x, y);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -158,20 +152,20 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1b() {
         // Z = |X|
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 2, ref);
 
-                ref.post(new Absolute(z, x, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.absolute(z, x));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.abs(x);
-                solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.abs(x);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -181,20 +175,20 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1bb() {
         // Z = X + c
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -1, 3, ref);
 
-                ref.post(new EqualX_YC(z, x, 1, solver));
-                ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.arithm(z, "=", x, "+", 1));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.offset(x, 1);
-                solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.offset(x, 1);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -204,20 +198,20 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1bbb() {
         // Z = X * c
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -4, 4, ref);
 
-                ref.post(new Times(x, Views.fixed(2, solver), z, solver));
-                ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.times(x, VariableFactory.fixed(2, ref), z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.scale(x, 2);
-                solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.scale(x, 2);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, false, true);
@@ -227,27 +221,27 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test1c() {
         // Z = -X
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
-                ref.post(new EqualXY_C(x, z, 0, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.arithm(z, "+", x, "=", 0));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
-                IntVar z = Views.minus(x);
-                solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.minus(x);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test1d() {
         // Z = X + Y + ...
         for (int seed = 2; seed < 9; seed += 1) {
@@ -256,18 +250,18 @@ public class ViewsTest {
             int n = seed * 2;
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
-                ref.post(Sum.eq(x, n, ref));
-                ref.set(StrategyFactory.minDomMinVal(x, ref.getEnvironment()));
+                ref.post(IntConstraintFactory.sum(x, VariableFactory.fixed(n,solver)));
+                ref.set(IntStrategyFactory.firstFail_InDomainMin(x));
             }
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
                 IntVar[] y = new IntVar[seed];
                 for (int i = 0; i < seed; i++) {
-                    y[i] = Views.sum(x[i], x[i + seed]);
+                    y[i] = Sum.var(x[i], x[i + seed]);
                 }
-                solver.post(Sum.eq(y, n, solver));
+                solver.post(IntConstraintFactory.sum(y, VariableFactory.fixed(n,solver)));
 
-                solver.set(StrategyFactory.minDomMinVal(x, solver.getEnvironment()));
+                solver.set(IntStrategyFactory.firstFail_InDomainMin(x));
 
             }
             check(ref, solver, seed, true, true);
@@ -275,28 +269,28 @@ public class ViewsTest {
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "30s")
     public void test1e() {
         // Z = X^2
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(new Times(x, x, z, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.times(x, x, z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             {
-                IntVar x = VariableFactory.enumerated("x", -2, 2, solver);
-                IntVar z = Views.sqr(x);
-                solver.set(StrategyFactory.random(new IntVar[]{x, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
+                IntVar x = VariableFactory.sqr(z);
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
             }
             check(ref, solver, seed, false, true);
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "30s")
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();
@@ -305,39 +299,39 @@ public class ViewsTest {
             IntVar x = VariableFactory.enumerated("x", 160, 187, ref);
             IntVar y = VariableFactory.enumerated("y", -999, 999, ref);
             IntVar z = VariableFactory.enumerated("z", -9999, 9999, ref);
-            ref.post(Sum.eq(new IntVar[]{z, x}, new int[]{1, 1}, 180, ref));
-            ref.post(new MaxXYZ(y, Views.fixed(0, ref), z, ref));
+            ref.post(IntConstraintFactory.arithm(z,"+",x,"=",180));
+            ref.post(IntConstraintFactory.maximum(y, VariableFactory.fixed(0, ref), z));
         }
         {
             IntVar x = VariableFactory.enumerated("x", 160, 187, solver);
             IntVar y = VariableFactory.enumerated("y", -999, 999, solver);
-            IntVar z = Views.offset(Views.minus(x), 180);
-            solver.post(new MaxXYZ(y, Views.fixed(0, solver), z, solver));
+            IntVar z = VariableFactory.offset(VariableFactory.minus(x), 180);
+            solver.post(IntConstraintFactory.maximum(y, VariableFactory.fixed(0, solver), z));
 
             check(ref, solver, 0, false, true);
         }
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "1m")
     public void test2() {
         // Z = X - Y
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
-                ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.sum(x, Views.minus(y));
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = Sum.var(x, VariableFactory.minus(y));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
 
             }
             check(ref, solver, seed, true, true);
@@ -347,7 +341,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test3() {
         // Z = |X - Y|
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -355,15 +349,15 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(new Absolute(az, z, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(IntConstraintFactory.absolute(az, z));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.abs(Views.sum(x, Views.minus(y)));
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.abs(Sum.var(x, VariableFactory.minus(y)));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
             }
             check(ref, solver, seed, true, true);
         }
@@ -372,7 +366,7 @@ public class ViewsTest {
     @Test(groups = "1m")
     public void test4() {
         // Z = |X - Y| + AllDiff
-        for (int seed = 0; seed < 99999; seed ++) {
+        for (int seed = 0; seed < 99999; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -380,27 +374,27 @@ public class ViewsTest {
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 2, ref);
                 IntVar az = VariableFactory.enumerated("az", 0, 2, ref);
-                ref.post(Sum.eq(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 0, ref));
-                ref.post(new Absolute(az, z, ref));
-                ref.post(new AllDifferent(new IntVar[]{x, y, az}, ref));
-                ref.set(StrategyFactory.random(new IntVar[]{x, y, az}, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(new IntVar[]{x, y}, new int[]{1, -1}, z));
+                ref.post(IntConstraintFactory.absolute(az, z));
+                ref.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, az}, "BC"));
+                ref.set(IntStrategyFactory.random(new IntVar[]{x, y, az}, seed));
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.abs(Views.sum(x, Views.minus(y)));
-                solver.post(new AllDifferent(new IntVar[]{x, y, z}, solver));
-                solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
+                IntVar z = VariableFactory.abs(Sum.var(x, VariableFactory.minus(y)));
+                solver.post(IntConstraintFactory.alldifferent(new IntVar[]{x, y, z}, "BC"));
+                solver.set(IntStrategyFactory.random(new IntVar[]{x, y, z}, seed));
             }
             check(ref, solver, seed, true, true);
         }
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "1s")
     public void test5() {
         // ~all-interval series
         int k = 5;
-        for (int seed = 0; seed < 99; seed ++) {
+        for (int seed = 0; seed < 99; seed++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -408,38 +402,38 @@ public class ViewsTest {
                 IntVar[] y = VariableFactory.enumeratedArray("y", k - 1, -(k - 1), k - 1, ref);
                 IntVar[] t = VariableFactory.enumeratedArray("t", k - 1, 0, k - 1, ref);
                 for (int i = 0; i < k - 1; i++) {
-                    ref.post(Sum.eq(new IntVar[]{x[i + 1], x[i], y[i]}, new int[]{1, -1, -1}, 0, ref));
-                    ref.post(new Absolute(t[i], y[i], ref));
+                    ref.post(IntConstraintFactory.scalar(new IntVar[]{x[i + 1], x[i]}, new int[]{1, -1}, y[i]));
+                    ref.post(IntConstraintFactory.absolute(t[i], y[i]));
                 }
-                ref.post(new AllDifferent(x, ref));
-                ref.post(new AllDifferent(t, ref));
-                ref.post(new GreaterOrEqualX_YC(x[1], x[0], 1, ref));
-                ref.post(new GreaterOrEqualX_YC(t[0], t[k - 2], 1, ref));
-                ref.set(StrategyFactory.random(x, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.alldifferent(x, "BC"));
+                ref.post(IntConstraintFactory.alldifferent(t, "BC"));
+                ref.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
+                ref.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
+                ref.set(IntStrategyFactory.random(x, seed));
             }
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", k, 0, k - 1, solver);
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
-                    t[i] = Views.abs(Views.sum(x[i + 1], Views.minus(x[i])));
+                    t[i] = VariableFactory.abs(Sum.var(x[i + 1], VariableFactory.minus(x[i])));
                 }
-                solver.post(new AllDifferent(x, solver));
-                solver.post(new AllDifferent(t, solver));
-                solver.post(new GreaterOrEqualX_YC(x[1], x[0], 1, solver));
-                solver.post(new GreaterOrEqualX_YC(t[0], t[k - 2], 1, solver));
-                solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
+                solver.post(IntConstraintFactory.alldifferent(x, "BC"));
+                solver.post(IntConstraintFactory.alldifferent(t, "BC"));
+                solver.post(IntConstraintFactory.arithm(x[1], ">", x[0]));
+                solver.post(IntConstraintFactory.arithm(t[0], ">", t[k - 2]));
+                solver.set(IntStrategyFactory.random(x, seed));
             }
             check(ref, solver, k, true, true);
         }
     }
 
 
-    @Test(groups = "10m")
+    @Test(groups = "1s")
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);
-        IntVar y = Views.abs(x);
-        IntVar z = Views.abs(Views.abs(x));
+        IntVar y = VariableFactory.abs(x);
+        IntVar z = VariableFactory.abs(VariableFactory.abs(x));
 
         for (int j = 0; j < 200; j++) {
             long t = -System.nanoTime();

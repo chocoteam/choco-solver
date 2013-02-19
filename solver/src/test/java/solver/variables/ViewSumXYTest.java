@@ -30,10 +30,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
+import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Random;
 
@@ -52,7 +52,7 @@ public class ViewSumXYTest {
 
         IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
         IntVar Y = VariableFactory.enumerated("Y", 3, 8, solver);
-        IntVar Z = Views.sum(X, Y);
+        IntVar Z = Sum.var(X, Y);
 
         try {
             solver.propagate();
@@ -119,21 +119,21 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.bounded("x", 1, 5, ref);
                 xs[1] = VariableFactory.bounded("y", 1, 5, ref);
                 xs[2] = VariableFactory.bounded("z", 2, 10, ref);
-                ref.post(Sum.eq(xs, new int[]{1, 1, -1}, 0, ref));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0,ref)));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 5, solver);
                 xs[1] = VariableFactory.bounded("y", 1, 5, solver);
-                IntVar sum = Views.sum(xs[0], xs[1]);
+                IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }
@@ -149,21 +149,21 @@ public class ViewSumXYTest {
                 xs[0] = VariableFactory.enumerated("x", 1, 5, ref);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
                 xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
-                ref.post(Sum.eq(xs, new int[]{1, 1, -1}, 0, ref));
-                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+                ref.post(IntConstraintFactory.scalar(xs, new int[]{1, 1, -1}, VariableFactory.fixed(0,ref)));
+                ref.set(IntStrategyFactory.random(xs, seed));
             }
             Solver solver = new Solver();
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 5, solver);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
-                IntVar sum = Views.sum(xs[0], xs[1]);
+                IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
-                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+                solver.set(IntStrategyFactory.random(xs, seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:" + seed);
 
         }
     }

@@ -26,10 +26,6 @@
  */
 package solver.search.loop.monitors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.exception.ContradictionException;
-
 import java.io.Serializable;
 
 /**
@@ -38,65 +34,5 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 06/05/11
  */
-public interface ISearchMonitor extends Serializable{
-
-    static Logger LOGGER = LoggerFactory.getLogger(ISearchMonitor.class);
-
-//    static int
-//            beforeInitialize = 1 << 1,
-//            afterInitialize = 1 << 2,
-//            beforeInitialPropagation = 1 << 3,
-//            afterInitialPropagation = 1 << 4,
-//            beforeOpenNode = 1 << 5,
-//            afterOpenNode = 1 << 6,
-//            onSolution = 1 << 7,
-//            beforeDownLeftBranch = 1 << 8,
-//            afterDownLeftBranch = 1 << 9,
-//            beforeDownRightBranch = 1 << 10,
-//            afterDownRightBranch = 1 << 11,
-//            beforeUpBranch = 1 << 12,
-//            afterUpBranch = 1 << 13,
-//            onContradiction = 1 << 14,
-//            beforeRestart = 1 << 15,
-//            afterRestart = 1 << 16,
-//            beforeClose = 1 << 17,
-//            afterClose = 1 << 18;
-
-//    int getMonitorMask();
-
-    void beforeInitialize();
-
-    void afterInitialize();
-
-    void beforeInitialPropagation();
-
-    void afterInitialPropagation();
-
-    void beforeOpenNode();
-
-    void afterOpenNode();
-
-    void onSolution();
-
-    void beforeDownLeftBranch();
-
-    void afterDownLeftBranch();
-
-    void beforeDownRightBranch();
-
-    void afterDownRightBranch();
-
-    void beforeUpBranch();
-
-    void afterUpBranch();
-
-    void onContradiction(ContradictionException cex);
-
-    void beforeRestart();
-
-    void afterRestart();
-
-    void beforeClose();
-
-    void afterClose();
+public interface ISearchMonitor extends Serializable {
 }

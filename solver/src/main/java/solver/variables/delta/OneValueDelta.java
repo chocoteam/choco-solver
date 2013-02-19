@@ -27,10 +27,9 @@
 
 package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.OneIntDeltaMonitor;
 
 /**
  * <br/>
@@ -38,34 +37,33 @@ import solver.variables.delta.monitor.OneIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class OneValueDelta implements IntDelta {
+public final class OneValueDelta implements IEnumDelta {
 
 
     int value;
-	ICause cause;
+    ICause cause;
     boolean set;
     int timestamp = -1;
+    final AbstractSearchLoop loop;
 
+    public OneValueDelta(AbstractSearchLoop loop) {
+        this.loop = loop;
+    }
 
     public void lazyClear() {
-        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+        if (timestamp - loop.timeStamp != 0) {
             set = false;
-            timestamp = AbstractSearchLoop.timeStamp;
+            timestamp = loop.timeStamp;
         }
     }
 
     @Override
-    public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
-        return new OneIntDeltaMonitor(this,propagator);
-    }
-
-    @Override
     public void add(int value, ICause cause) {
-		if(IEventRecorder.LAZY){
-       		lazyClear();
-		}
+        if (Configuration.LAZY_UPDATE) {
+            lazyClear();
+        }
         this.value = value;
-		this.cause = cause;
+        this.cause = cause;
         set = true;
     }
 
@@ -78,7 +76,7 @@ public final class OneValueDelta implements IntDelta {
         }
     }
 
-	@Override
+    @Override
     public ICause getCause(int idx) {
         if (idx < 1) {
             return cause;
@@ -92,8 +90,19 @@ public final class OneValueDelta implements IntDelta {
         return set ? 1 : 0;
     }
 
-	@Override
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
+    }
+
 }

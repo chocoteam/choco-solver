@@ -26,20 +26,15 @@
  */
 package solver.constraints.nary.automata;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import common.ESat;
+import common.util.iterators.DisposableIntIterator;
+import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.nary.automata.FA.CostAutomaton;
-import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.nary.automaton.PropMultiCostRegular;
-import solver.exception.SolverException;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.variables.IntVar;
 
 /**
@@ -66,47 +61,19 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
 
     private final int offset;
 
-
-    private MultiCostRegular(final IntVar[] vars, final IntVar[] counterVars, final Solver solver) {
-        super(ArrayUtils.<IntVar>append(vars, counterVars), solver);
-        this.offset = vars.length;
-    }
-
-
     /**
      * Constructs a multi-cost-regular constraint propagator
      *
      * @param vars   decision variables
      * @param CR     cost variables
-     * @param auto   finite automaton
-     * @param costs  assignment cost arrays
+     * @param pi     finite automaton
      * @param solver solver
      */
-    public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][] costs, Solver solver) {
-        this(vars, CR, solver);
-        this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
-    }
-
-    /**
-     * Constructs a multi-cost-regular constraint propagator
-     *
-     * @param vars   decision variables
-     * @param CR     cost variables
-     * @param auto   finite automaton
-     * @param costs  assignment cost arrays
-     * @param solver solver
-     */
-    public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][][] costs, final Solver solver) {
-        this(vars, CR, solver);
-        this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
-    }
-
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
-        this(vars, CR, solver);
+        super(ArrayUtils.append(vars, CR), solver);
+		this.offset = vars.length;
         this.pi = pi;
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
+        setPropagators(new PropMultiCostRegular(vars, CR, pi));
     }
 
     @Override
@@ -154,40 +121,6 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
 
     public void setGraph(StoredDirectedMultiGraph graph) {
         this.graph = graph;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////// SORTERS and ITERATORS ////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public IMetric<IntVar> getMetric(String name) {
-        if (name.equals(MIN_SP)) {
-            //TODO: must be composed with BELONG
-            return new MinSP((PropMultiCostRegular) propagators[0]);//Belong.build(this);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-    static class MinSP implements IMetric<IntVar> {
-
-        final PropMultiCostRegular pmcr;
-        final TObjectIntHashMap<IntVar> map2idx;
-
-        MinSP(PropMultiCostRegular pmcr) {
-            this.pmcr = pmcr;
-            this.map2idx = new TObjectIntHashMap<IntVar>();
-            for (int i = 0; i < pmcr.getNbVars(); i++) {
-                map2idx.put(pmcr.getVar(i), i);
-            }
-        }
-
-        @Override
-        public int eval(IntVar var) {
-            // getGraph().GArcs.values[cons.lastSp[col]];
-            int idx = map2idx.get(var);
-            return pmcr.getGraph().GArcs.values[pmcr.lastSp[idx]];
-        }
     }
 
 }

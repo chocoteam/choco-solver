@@ -26,7 +26,7 @@
  */
 package solver.search.loop.monitors;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -39,7 +39,7 @@ import solver.constraints.propagators.Propagator;
  * @author Charles Prud'homme
  * @since 30/01/12
  */
-public class LogPropagationCount extends VoidSearchMonitor implements ISearchMonitor {
+public class LogPropagationCount implements IMonitorClose {
 
     final Solver solver;
 
@@ -47,6 +47,10 @@ public class LogPropagationCount extends VoidSearchMonitor implements ISearchMon
         this.solver = solver;
     }
 
+
+    @Override
+    public void beforeClose() {
+    }
 
     @Override
     public void afterClose() {
@@ -72,15 +76,15 @@ public class LogPropagationCount extends VoidSearchMonitor implements ISearchMon
         for (int i = 0; i < classes.length; i++) {
             st.append("| ").append(StringUtils.pad("" + classes[i], 30, " "));
             st.append("| ").append(StringUtils.pad("" + fcounter.get((classes[i])), -7, " "));
-            fsum+=fcounter.get((classes[i]));
+            fsum += fcounter.get((classes[i]));
             st.append("| ").append(StringUtils.pad("" + ccounter.get((classes[i])), -7, " "));
-            csum+=ccounter.get((classes[i]));
+            csum += ccounter.get((classes[i]));
             st.append("|\n");
         }
         st.append(StringUtils.pad(" ", 50, "-")).append("\n");
         st.append("| ").append(StringUtils.pad("", 30, " "));
-        st.append("| ").append(StringUtils.pad(""+fsum, -7, " "));
-        st.append("| ").append(StringUtils.pad(""+csum, -7, " "));
+        st.append("| ").append(StringUtils.pad("" + fsum, -7, " "));
+        st.append("| ").append(StringUtils.pad("" + csum, -7, " "));
         st.append("|\n");
         st.append(StringUtils.pad(" ", 50, "-")).append("\n");
         LoggerFactory.getLogger("solver").info(st.toString());

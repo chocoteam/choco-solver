@@ -27,10 +27,9 @@
 
 package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 public class GraphDelta implements IGraphDelta {
 
@@ -38,24 +37,21 @@ public class GraphDelta implements IGraphDelta {
     // VARIABLES
     //***********************************************************************************
 
-	private IntDelta[] deltaOfType;
-	private long timestamp;
+    private IEnumDelta[] deltaOfType;
+    private long timestamp;
+    private final AbstractSearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public GraphDelta() {
-		deltaOfType = new IntDelta[4];
-		for(int i=0;i<4;i++){
-			deltaOfType[i] = new Delta();
-		}
-		timestamp = AbstractSearchLoop.timeStamp;
-    }
-
-    @Override
-    public GraphDeltaMonitor getMonitor(ICause propagator) {
-        return new GraphDeltaMonitor(this,propagator);
+    public GraphDelta(AbstractSearchLoop loop) {
+        deltaOfType = new IEnumDelta[NB];
+        this.loop = loop;
+        for (int i = 0; i < NB; i++) {
+            deltaOfType[i] = new EnumDelta(loop);
+        }
+        timestamp = loop.timeStamp;
     }
 
     //***********************************************************************************
@@ -71,40 +67,50 @@ public class GraphDelta implements IGraphDelta {
     // ACCESSORS
     //***********************************************************************************
 
-	@Override
+    @Override
     public void clear() {
-		for(int i=0;i<4;i++){
-			deltaOfType[i].clear();
-		}
-		timestamp = AbstractSearchLoop.timeStamp;
+        for (int i = 0; i < NB; i++) {
+            deltaOfType[i].clear();
+        }
+        timestamp = loop.timeStamp;
     }
 
-	@Override
-	public int getSize(int i) {
-		return deltaOfType[i].size();
-	}
+    @Override
+    public int getSize(int i) {
+        return deltaOfType[i].size();
+    }
 
-	@Override
-	public void add(int element, int type, ICause cause) {
-		if(IEventRecorder.LAZY){
-			lazyClear();
-		}
-		deltaOfType[type].add(element,cause);
-	}
+    @Override
+    public void add(int element, int type, ICause cause) {
+        if (Configuration.LAZY_UPDATE) {
+            lazyClear();
+        }
+        deltaOfType[type].add(element, cause);
+    }
 
-	public void lazyClear() {
-		if(timestamp!=AbstractSearchLoop.timeStamp){
-			clear();
-		}
-	}
+    public void lazyClear() {
+        if (timestamp != loop.timeStamp) {
+            clear();
+        }
+    }
 
-	@Override
-	public int get(int index, int type) {
-		return deltaOfType[type].get(index);
-	}
+    @Override
+    public int get(int index, int type) {
+        return deltaOfType[type].get(index);
+    }
 
-	@Override
-	public ICause getCause(int index, int type) {
-		return deltaOfType[type].getCause(index);
-	}
+    @Override
+    public ICause getCause(int index, int type) {
+        return deltaOfType[type].getCause(index);
+    }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
+    }
 }

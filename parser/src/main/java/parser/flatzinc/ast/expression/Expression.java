@@ -85,6 +85,26 @@ public abstract class Expression {
     }
 
     /**
+     * Get the boolean value of the {@link Expression}
+     *
+     * @return boolean
+     */
+    public boolean boolValue() {
+        Exit.log();
+        return true;
+    }
+
+    /**
+     * Get array of int of the {@link Expression}
+     *
+     * @return int[]
+     */
+    public boolean[] toBoolArray() {
+        Exit.log();
+        return null;
+    }
+
+    /**
      * Get the {@link BoolVar} of the {@link Expression}
      *
      * @param solver the Solver

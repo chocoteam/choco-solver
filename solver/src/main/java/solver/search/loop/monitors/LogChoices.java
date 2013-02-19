@@ -26,36 +26,46 @@
  */
 package solver.search.loop.monitors;
 
-import choco.kernel.common.util.tools.StringUtils;
+import common.util.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.Variable;
 
 /**
  * A search monitor logger which prints choices during the search.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public final class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
+public class LogChoices implements IMonitorDownBranch {
+
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     final Solver solver;
     final AbstractSearchLoop searchLoop;
+    final IMessage message;
 
-    public LogChoices(Solver solver) {
+    public LogChoices(Solver solver, IMessage message) {
         this.solver = solver;
         this.searchLoop = solver.getSearchLoop();
+        this.message = message;
     }
+
 
     @Override
     public void beforeDownLeftBranch() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[L]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), print(searchLoop.getStrategy().vars)});
+                    searchLoop.decisionToString(), message.print()});
         }
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
     }
 
     @Override
@@ -63,17 +73,11 @@ public final class LogChoices extends VoidSearchMonitor implements ISearchMonito
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("{}[R]{} //{}", new Object[]{
                     StringUtils.pad("", solver.getEnvironment().getWorldIndex(), "."),
-                    searchLoop.decisionToString(), print(searchLoop.getStrategy().vars)});
+                    searchLoop.decisionToString(), message.print()});
         }
     }
 
-
-    static String print(Variable[] vars) {
-        StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
-        }
-        return s.toString();
-
+    @Override
+    public void afterDownRightBranch() {
     }
 }

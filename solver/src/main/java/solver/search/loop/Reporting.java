@@ -26,11 +26,12 @@
  */
 package solver.search.loop;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
+import common.ESat;
+import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.search.strategy.decision.Decision;
+import solver.variables.Variable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -56,6 +57,19 @@ public enum Reporting {
         while (!stack.isEmpty()) {
             sb.append(stack.removeFirst().toString()).append(" & ");
         }
+        sb.append("\n").append(solver.getSearchLoop().getObjectivemanager().toString());
+        return sb.toString();
+    }
+
+    public static String onUninstiatedVariables(Solver solver) {
+        Variable[] variables = solver.getVars();
+        StringBuilder sb = new StringBuilder();
+        for (int c = 0; c < variables.length; c++) {
+            boolean insV = variables[c].instantiated();
+            if (!insV) {
+                sb.append("FAILURE >> ").append(variables[c].toString()).append("\n");
+            }
+        }
         return sb.toString();
     }
 
@@ -65,19 +79,22 @@ public enum Reporting {
         for (int c = 0; c < constraints.length; c++) {
             ESat satC = constraints[c].isSatisfied();
             if (!ESat.TRUE.equals(satC)) {
-                sb.append("FAILURE >> ").append(constraints[c].toString());
+                sb.append("FAILURE >> ").append(constraints[c].toString()).append("\n");
             }
         }
         return sb.toString();
     }
 
     public static String fullReport(Solver solver) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(StringUtils.pad("", 50, "#"));
-        sb.append(onUnsatisfiedConstraints(solver));
-        sb.append(StringUtils.pad("", 50, "="));
-        sb.append(onDecisions(solver));
-        sb.append(StringUtils.pad("", 50, "#"));
+        StringBuilder sb = new StringBuilder("\n");
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
+        sb.append(onUninstiatedVariables(solver)).append("\n");
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
+        sb.append(onUnsatisfiedConstraints(solver)).append("\n");
+        sb.append(StringUtils.pad("", 50, "=")).append("\n");
+        sb.append(onDecisions(solver)).append("\n");
+        sb.append(solver.getMeasures().toOneShortLineString());
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }
 }

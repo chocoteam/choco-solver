@@ -30,12 +30,8 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
-import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.Member;
-import solver.constraints.unary.NotMember;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -56,10 +52,14 @@ public class DecomposedAllDifferent extends AbstractProblem {
     IntVar[] X;
     BoolVar[] B;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("Decomp allDiff");
+    }
+
 
     @Override
     public void buildModel() {
-        solver = new Solver("Decomp allDiff " + m);
         int i = m;
         X = VariableFactory.enumeratedArray("v", m, 0, m, solver);
         int[] union = new int[m];
@@ -87,10 +87,11 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     mA[j][p - l][q - p] = a;
                     listA.add(a);
 
-                    Constraint cA = new Member(X[j], p, q, solver);
-                    Constraint ocA = new NotMember(X[j], p, q, solver);
+                    Constraint cA = IntConstraintFactory.member(X[j], p, q);
+                    Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(new ReifiedConstraint(a, cA, ocA, solver));
+                    solver.post(IntConstraintFactory.implies(a, cA));
+                    solver.post(IntConstraintFactory.implies(VariableFactory.not(a), ocA));
                 }
             }
         }
@@ -115,15 +116,15 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(ConstraintFactory.sum(ai, IntLinComb.Operator.LEQ, q - p + 1, solver));
+                solver.post(IntConstraintFactory.sum(ai, VariableFactory.bounded("scal", 0, q - p + 1, solver)));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);
     }
 
     @Override
-    public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
+    public void configureSearch() {
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(X));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(

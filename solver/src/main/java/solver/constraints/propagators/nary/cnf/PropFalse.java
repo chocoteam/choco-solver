@@ -27,9 +27,8 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import choco.kernel.ESat;
+import common.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 
@@ -41,8 +40,8 @@ import solver.variables.EventType;
  */
 public class PropFalse extends PropClause {
 
-    public PropFalse(Solver solver, Constraint constraint) {
-        super(solver, constraint);
+    public PropFalse(Solver solver) {
+        super(solver);
     }
 
     @Override

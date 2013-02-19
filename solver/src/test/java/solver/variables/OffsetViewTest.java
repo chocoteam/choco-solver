@@ -27,17 +27,17 @@
 
 package solver.variables;
 
-import choco.kernel.memory.IEnvironment;
+import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.EqualX_YC;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -55,15 +55,15 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = Views.offset(X, 2);
+        IntVar Y = VariableFactory.offset(X, 2);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, 4, s)
+                IntConstraintFactory.arithm(Y, "!=", 4)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -78,15 +78,15 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = Views.offset(X, 3);
+        IntVar Y = VariableFactory.offset(X, 3);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, -2, s)
+                IntConstraintFactory.arithm(Y, "!=", -2)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -99,16 +99,16 @@ public class OffsetViewTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = Views.offset(X, coeff);
+        IntVar Y = VariableFactory.offset(X, coeff);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s)
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -125,12 +125,12 @@ public class OffsetViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.geq(Y, low + coeff - 1, s),
-                ConstraintFactory.leq(Y, upp - coeff - 1, s),
-                new EqualX_YC(X, Y, coeff, s)
+                IntConstraintFactory.arithm(Y, ">=", low + coeff - 1),
+                IntConstraintFactory.arithm(Y, "<=", upp - coeff - 1),
+                IntConstraintFactory.arithm(X, "=", Y, "+", coeff)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
 
         s.post(cstrs);
         s.set(strategy);
@@ -179,5 +179,73 @@ public class OffsetViewTest {
             Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
         }
 
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.offset(o, 2);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(vit.next() - 2));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(vit.previous() - 2));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(rit.min() - 2));
+                Assert.assertTrue(o.contains(rit.max() - 2));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(rit.min() - 2));
+                Assert.assertTrue(o.contains(rit.max() - 2));
+                rit.previous();
+            }
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.offset(o, 2);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                Assert.assertTrue(o.contains(vit.next() - 2));
+            }
+            vit.dispose();
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                Assert.assertTrue(o.contains(vit.previous() - 2));
+            }
+            vit.dispose();
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                Assert.assertTrue(o.contains(rit.min() - 2));
+                Assert.assertTrue(o.contains(rit.max() - 2));
+                rit.next();
+            }
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                Assert.assertTrue(o.contains(rit.min() - 2));
+                Assert.assertTrue(o.contains(rit.max() - 2));
+                rit.previous();
+            }
+        }
     }
 }

@@ -1,36 +1,35 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.MathUtils;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import common.util.tools.MathUtils;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -39,8 +38,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.monitor.IntDeltaMonitor;
-import solver.variables.delta.view.ViewDelta;
+import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * declare an IntVar based on X and C, such as X * C
@@ -52,75 +52,61 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends View<IntVar> {
+public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
 
-    final int cste;
-    DisposableValueIterator _viterator;
-    DisposableRangeIterator _riterator;
+    public final int cste;
 
     public ScaleView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "*" + cste + ")", var, solver);
+        assert (cste > 0) : "view cste must be >0";
         this.cste = cste;
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(),this) {
-                @Override
-                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                    if (EventType.isRemove(eventType.mask)) {
-                        for (int i = frozenFirst; i < frozenLast; i++) {
-							if(propagator!=delta.getCause(i)){
-                            	proc.execute(delta.get(i) * cste);
-							}
-                        }
-                    }
-                }
-            });
-            reactOnRemoval = true;
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        var.createDelta();
+        if (var.getDelta() == NoDelta.singleton) {
+            return IIntDeltaMonitor.Default.NONE;
+//            throw new UnsupportedOperationException();
         }
+        return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
+            @Override
+            protected int transform(int value) {
+                return -value;
+            }
+        };
     }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-//        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
+        assert cause != null;
         if (value % cste == 0) {
             int inf = getLB();
             int sup = getUB();
-            if (value == inf && value == sup) {
-                solver.getExplainer().removeValue(this, value, cause);
-                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
-            } else {
-                if (inf <= value && value <= sup) {
-                    EventType e = EventType.REMOVE;
+            if (inf <= value && value <= sup) {
+                EventType e = EventType.REMOVE;
 
-                    boolean done = var.removeValue(value / cste, this);
-                    if (done) {
-                        if (value == inf) {
-                            e = EventType.INCLOW;
-                            if (cause.reactOnPromotion()) {
-                                cause = Cause.Null;
-                            }
-                        } else if (value == sup) {
-                            e = EventType.DECUPP;
-                            if (cause.reactOnPromotion()) {
-                                cause = Cause.Null;
-                            }
+                boolean done = var.removeValue(value / cste, this);
+                if (done) {
+                    if (value == inf) {
+                        e = EventType.INCLOW;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
                         }
-                        if (this.instantiated()) {
-                            e = EventType.INSTANTIATE;
-                            if (cause.reactOnPromotion()) {
-                                cause = Cause.Null;
-                            }
+                    } else if (value == sup) {
+                        e = EventType.DECUPP;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
                         }
-                        this.notifyMonitors(e, cause);
-                        solver.getExplainer().removeValue(this, value, cause);
-                        return true;
                     }
+                    if (this.instantiated()) {
+                        e = EventType.INSTANTIATE;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
+                    }
+                    this.notifyPropagators(e, cause);
+                    return true;
                 }
             }
         }
@@ -129,7 +115,7 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-//        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
+        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
@@ -137,7 +123,7 @@ public final class ScaleView extends View<IntVar> {
         } else {
             boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -145,49 +131,31 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-//        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
-        solver.getExplainer().instantiateTo(this, value, cause);
-        if (this.instantiated()) {
-            if (value != this.getValue()) {
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
-            }
-            return false;
-        }
-        if (contains(value)) {
-            boolean done = var.instantiateTo(value / cste, this);
-            if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
-                return true;
-            }
-        } else {
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+        assert cause != null;
+        boolean done = var.instantiateTo(value / cste, this);
+        if (done) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, cause);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-            } else {
-                EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
+            EventType e = EventType.INCLOW;
+            boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
-                if (done) {
-                    this.notifyMonitors(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
-                    return true;
-                }
+            }
+            if (done) {
+                this.notifyPropagators(e, cause);
+                return true;
             }
         }
         return false;
@@ -195,27 +163,20 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-//        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
+        assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, cause);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-            } else {
-                EventType e = EventType.DECUPP;
-                boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
+            EventType e = EventType.DECUPP;
+            boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
-                if (done) {
-                    this.notifyMonitors(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
-                    return true;
-                }
+            }
+            if (done) {
+                this.notifyPropagators(e, cause);
+                return true;
             }
         }
         return false;
@@ -270,30 +231,25 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public int getType() {
-        return INTEGER;
-    }
-
-
-    @Override
-    public Explanation explain(VariableState what, int val) {
-        Explanation expl = new Explanation();
-        expl.add(var.explain(what, val / cste));
-        return expl;
+    public void explain(VariableState what, int val, Explanation to) {
+        var.explain(what, val / cste, to);
     }
 
     @Override
-    public Explanation explain(VariableState what) {
+    public void explain(VariableState what, Explanation to) {
         if (cste > 0) {
-            return var.explain(what);
+            var.explain(what, to);
         } else {
             switch (what) {
                 case UB:
-                    return var.explain(VariableState.LB);
+                    var.explain(VariableState.LB, to);
+                    break;
                 case LB:
-                    return var.explain(VariableState.UB);
+                    var.explain(VariableState.UB, to);
+                    break;
                 default:
-                    return var.explain(what);
+                    var.explain(what, to);
+                    break;
             }
         }
     }
@@ -359,90 +315,67 @@ public final class ScaleView extends View<IntVar> {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeIterator() {
 
-                DisposableRangeIterator vir;
-                int bound;
-                int value;
+
+                DisposableValueIterator vit;
+                int min
+                        ,
+                        max;
 
                 @Override
                 public void bottomUpInit() {
-                    super.bottomUpInit();
-                    vir = var.getRangeIterator(true);
-                    value = vir.min() - 1; // -1 for the first call to hasNext
-                    bound = vir.max();
-                    vir.next();
+                    vit = getValueIterator(true);
+                    if (vit.hasNext()) {
+                        min = vit.next();
+                    }
+                    max = min;
                 }
 
                 @Override
                 public void topDownInit() {
-                    super.topDownInit();
-                    vir = var.getRangeIterator(false);
-                    bound = vir.min();
-                    value = vir.max() + 1;// +1 for the first call to hasNext
-                    vir.previous();
+                    vit = getValueIterator(false);
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
+                    }
+                    min = max;
                 }
 
                 @Override
                 public boolean hasNext() {
-                    if (value < bound) {
-                        value++;
-                    }
-                    return value < Integer.MAX_VALUE;
+                    return min != Integer.MAX_VALUE;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    if (value > bound) {
-                        value--;
-                    }
-                    return value > Integer.MIN_VALUE;
+                    return max != -Integer.MAX_VALUE;
                 }
 
                 @Override
                 public void next() {
-                    if (value >= bound) {
-                        _next();
-                    }
-                }
-
-                private void _next() {
-                    value = bound = Integer.MAX_VALUE;
-                    if (vir.hasNext()) {
-                        value = vir.min() - 1;
-                        bound = vir.max();
-                        vir.next();
+                    if (vit.hasNext()) {
+                        min = max = vit.next();
+                    } else {
+                        min = Integer.MAX_VALUE;
                     }
                 }
 
                 @Override
                 public void previous() {
-                    if (value <= bound) {
-                        _previous();
-                    }
-                }
-
-                private void _previous() {
-                    value = bound = Integer.MIN_VALUE;
-                    if (vir.hasPrevious()) {
-                        value = vir.max() + 1;
-                        bound = vir.min();
-                        vir.previous();
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
+                        min = max;
+                    } else {
+                        max = -Integer.MAX_VALUE;
                     }
                 }
 
                 @Override
                 public int min() {
-                    return value * cste;
+                    return min;
                 }
 
                 @Override
                 public int max() {
-                    return value * cste;
-                }
-
-                @Override
-                public void dispose() {
-                    super.dispose();
-                    vir.dispose();
+                    return max;
                 }
             };
         }

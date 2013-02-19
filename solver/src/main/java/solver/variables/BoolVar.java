@@ -27,10 +27,10 @@
 
 package solver.variables;
 
-import choco.kernel.ESat;
-import com.sun.istack.internal.NotNull;
+import common.ESat;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -39,11 +39,11 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface BoolVar extends IntVar {
+public interface BoolVar<ID extends IntDelta> extends IntVar<ID> {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(@NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean setToTrue(ICause cause) throws ContradictionException;
 
-    boolean setToFalse(@NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean setToFalse(ICause cause) throws ContradictionException;
 }

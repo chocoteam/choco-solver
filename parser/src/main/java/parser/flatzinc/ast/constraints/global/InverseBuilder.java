@@ -32,7 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.InverseChanneling;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -46,9 +46,9 @@ import java.util.List;
 public class InverseBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         IntVar[] y = exps.get(1).toIntVarArray(solver);
-        return new InverseChanneling(x, y, solver);
+        solver.post(IntConstraintFactory.inverse_channeling(x, y, 1, 1));
     }
 }

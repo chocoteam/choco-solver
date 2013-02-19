@@ -26,34 +26,41 @@
  */
 package solver.search.loop.monitors;
 
-import solver.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
 
 /**
  * Basic search monitor logger, which prints welcome message at the beginning od the search and
  * search statistics at the end of the search.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public final class LogBasic extends VoidSearchMonitor implements ISearchMonitor{
+public final class LogBasic implements IMonitorInitialize, IMonitorClose {
+
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+
 
     final Solver solver;
-    final String version;
+
     public LogBasic(Solver solver) {
         this.solver = solver;
-        this.version = (String) solver.properties.get("solver.version");
     }
 
     @Override
     public void beforeInitialize() {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(Constant.WELCOME_TITLE);
-            LOGGER.info(Constant.WELCOME_VERSION, version);
-            LOGGER.info(Constant.CALLER, solver.getName());
+            LOGGER.info(Configuration.WELCOME_TITLE);
+            LOGGER.info(Configuration.CALLER, solver.getName());
         }
+    }
+
+    @Override
+    public void afterInitialize() {
     }
 
     @Override
@@ -61,5 +68,9 @@ public final class LogBasic extends VoidSearchMonitor implements ISearchMonitor{
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(solver.getSearchLoop().getMeasures().toString());
         }
+    }
+
+    @Override
+    public void afterClose() {
     }
 }

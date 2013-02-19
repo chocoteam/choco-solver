@@ -27,15 +27,14 @@
 
 package choco;
 
-import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -52,38 +51,41 @@ import java.util.List;
  */
 public class SolverTest {
 
-    static int[] capacites = {0, 34};
-    static int[] energies = {6, 4, 3};
-    static int[] volumes = {7, 5, 2};
-    static int[] nbOmax = {4, 6, 17};
-    static int n = 3;
+    final static int[] capacites = {0, 34};
+    final static int[] energies = {6, 4, 3};
+    final static int[] volumes = {7, 5, 2};
+    final static int[] nbOmax = {4, 6, 17};
+    final static int n = 3;
 
-    static IntVar power;
+    //static IntVar power; // remove static for parallel solving
 
     public static Solver knapsack() {
         Solver s = new Solver();
-        choco.kernel.memory.IEnvironment env = s.getEnvironment();
+        memory.IEnvironment env = s.getEnvironment();
+
+        IntVar power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
 
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            objects[i] = VariableFactory.enumerated("v_"+i, 0, nbOmax[i], s);
+            objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
         }
-
-        power = VariableFactory.enumerated("v_"+n, 0, 999999, s);
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(3);
 
-        lcstrs.add(ConstraintFactory.scalar(objects, volumes, IntLinComb.Operator.GEQ, capacites[0], s));
-        lcstrs.add(ConstraintFactory.scalar(objects, volumes, IntLinComb.Operator.LEQ, capacites[1], s));
-        lcstrs.add(ConstraintFactory.scalar(objects, energies, IntLinComb.Operator.EQ, power, 1, s));
+        lcstrs.add(IntConstraintFactory.scalar(objects, volumes, VariableFactory.bounded("capa",capacites[0],capacites[1],s)));
+        lcstrs.add(IntConstraintFactory.scalar(objects, energies, power));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(objects, env);
+        AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(objects);
 
 
         s.post(cstrs);
         s.set(strategy);
+
+        if (s.getVar(0) != power) {
+            throw new UnsupportedOperationException();
+        }
 
         return s;
     }
@@ -105,7 +107,7 @@ public class SolverTest {
                     s.findAllSolutions();
                     break;
                 case OPT:
-                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+                    s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, (IntVar) s.getVar(0));
                     break;
                 default:
                     Assert.fail("unknonw case");
@@ -137,6 +139,12 @@ public class SolverTest {
                         break;
                     case 5:
                         conf(s, OPT);
+                        break;
+                    case 6:
+                        conf(s, ALL, NEXT);
+                        break;
+                    case 7:
+                        conf(s, OPT, NEXT);
                         break;
                     default:
                         alive = false;
@@ -174,24 +182,18 @@ public class SolverTest {
                         conf(s, ALL, ONE);
                         break;
                     case 6:
-                        conf(s, ALL, NEXT);
-                        break;
-                    case 7:
                         conf(s, ALL, ALL);
                         break;
-                    case 8:
+                    case 7:
                         conf(s, ALL, OPT);
                         break;
-                    case 9:
+                    case 8:
                         conf(s, OPT, ONE);
                         break;
-                    case 10:
-                        conf(s, OPT, NEXT);
-                        break;
-                    case 11:
+                    case 9:
                         conf(s, OPT, ALL);
                         break;
-                    case 12:
+                    case 10:
                         conf(s, OPT, OPT);
                         break;
                     default:

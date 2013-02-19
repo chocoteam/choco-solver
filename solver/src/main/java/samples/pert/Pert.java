@@ -27,14 +27,13 @@
 
 package samples.pert;
 
-import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
+import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.constraints.IntConstraintFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -51,17 +50,17 @@ import java.util.Deque;
  */
 public class Pert extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Number of nodes.", required = true)
-    int n = 10;
+    @Option(name = "-n", usage = "Number of nodes.", required = false)
+    int n = 1000;
 
-    @Option(name = "-l", usage = "Number of layers.", required = true)
-    int layers;
+    @Option(name = "-l", usage = "Number of layers.", required = false)
+    int layers = 200;
 
-    @Option(name = "-d", usage = "Number of layers in disjunction.", required = true)
-    int disjunctions;
+    @Option(name = "-d", usage = "Number of layers in disjunction.", required = false)
+    int disjunctions = 2;
 
-    @Option(name = "-s", usage = "Random seed.", required = true)
-    long seed;
+    @Option(name = "-s", usage = "Random seed.", required = false)
+    long seed = 0;
 
     int horizon;
     IntVar[] vars;
@@ -76,9 +75,13 @@ public class Pert extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Pert");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
 
@@ -96,17 +99,17 @@ public class Pert extends AbstractProblem {
             for (int k = 0, j = disjoint.nextSetBit(0); j >= 0; j = disjoint.nextSetBit(j + 1), k++) {
                 tvars[k] = vars[j];
             }
-            solver.post(new AllDifferent(tvars, solver));
+            solver.post(IntConstraintFactory.alldifferent(tvars, "BC"));
         }
     }
 
     static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return IntConstraintFactory.arithm(x, "<=", y, "-", duration);
     }
 
     @Override
-    public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+    public void configureSearch() {
+        solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];
@@ -126,26 +129,8 @@ public class Pert extends AbstractProblem {
                 }
             }
         }
-
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.priority(PropagatorPriority.TERNARY),
-                        new Cond(
-                                Predicates.lhs(),
-                                new MappingV(vars, rank),
-                                new Decr(new MappingV(vars, rank))),
-                        Policy.ITERATE
-                ));
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.FIXPOINT
-                ));*/
-
-
     }
+
 
     @Override
     public void solve() {

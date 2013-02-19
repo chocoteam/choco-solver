@@ -27,9 +27,7 @@
 
 package samples.nqueen;
 
-import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -43,8 +41,6 @@ public class NQueenDualBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         IntVar[] dualvars = new IntVar[n];
 
@@ -56,18 +52,18 @@ public class NQueenDualBinary extends AbstractNQueen {
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
             }
         }
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
+                solver.post(IntConstraintFactory.arithm(dualvars[i], "!=", dualvars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(dualvars[i], "!=", dualvars[j], "+", k));
             }
         }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
+        solver.post(IntConstraintFactory.inverse_channeling(vars, dualvars, 1, 1));
     }
 
 

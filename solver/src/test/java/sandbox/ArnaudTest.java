@@ -27,9 +27,9 @@
 package sandbox;
 
 import solver.Solver;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -66,10 +66,10 @@ public class ArnaudTest {
         }
         //create constraints
         for (int i = 0; i < nv; i++) {
-            s.post(new Element(vars[2 * i + 1], values[i % 5], vars[2 * i], s));
+            s.post(IntConstraintFactory.element(vars[2 * i + 1], values[i % 5], vars[2 * i],0,"detect"));
         }
         long t2 = System.currentTimeMillis();
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
         System.out.println("build solver: " + (t2 - t1) + " ms");
         t1 = System.currentTimeMillis();
         s.propagate();

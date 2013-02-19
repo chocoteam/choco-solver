@@ -27,7 +27,7 @@
 
 package solver.constraints.nary.automata.structure.regular;
 
-import choco.kernel.memory.structure.IndexedObject;
+import memory.structure.IndexedObject;
 import org.jgrapht.EdgeFactory;
 import solver.constraints.nary.automata.structure.Node;
 
@@ -63,7 +63,7 @@ public class Arc implements IndexedObject {
     }
 
 
-    public static class ArcFacroty implements EdgeFactory<Node, Arc> {
+    public static class ArcFactory implements EdgeFactory<Node, Arc> {
 
         public Arc createEdge(Node node, Node node1) {
             return new Arc(node, node1, 0, 0);

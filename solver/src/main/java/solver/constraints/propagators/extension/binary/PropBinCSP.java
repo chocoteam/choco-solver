@@ -26,10 +26,8 @@
  */
 package solver.constraints.propagators.extension.binary;
 
-import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
-import solver.Solver;
-import solver.constraints.Constraint;
+import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.variables.IntVar;
@@ -44,9 +42,9 @@ public abstract class PropBinCSP extends Propagator<IntVar> {
 
     protected BinRelation relation;
 
-    protected PropBinCSP(IntVar x, IntVar y, BinRelation relation,
-                         Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.toArray(x, y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
+    protected PropBinCSP(IntVar x, IntVar y, BinRelation relation) {
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
+        this.relation = relation;
     }
 
     public final BinRelation getRelation() {

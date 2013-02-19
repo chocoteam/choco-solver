@@ -27,24 +27,17 @@
 
 package solver.constraints;
 
-import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
-import com.sun.istack.internal.Nullable;
+
+import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.propagation.IPriority;
-import solver.propagation.IPropagationEngine;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Incr;
-import solver.search.strategy.enumerations.sorters.metrics.Belong;
-import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.Variable;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * A class can extend <code>Constraint</code> interface and specifies a list of <code>Variable</code> objects
@@ -81,7 +74,7 @@ import java.io.Serializable;
  * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
-public abstract class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {
+public class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {
 
     private static final long serialVersionUID = 1L;
 
@@ -93,38 +86,26 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     public V[] vars;
     public P[] propagators;
-    protected final IStateInt lastPropagatorActive;
 
     protected int staticPropagationPriority;
-
-    protected final IPropagationEngine engine;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
         this.solver = solver;
-        this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        this.engine = solver.getEngine();
     }
 
-
-    //BEWARE : ONLY FOR GRAPH CONSTRAINTS
     public Constraint(Solver solver) {
         this.solver = solver;
-        this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        this.engine = solver.getEngine();
+        this.vars = (V[]) new Variable[0];
     }
 
     public V[] getVariables() {
         return vars;
     }
 
-    /**
-     * Test if this <code>Constraint</code> object is active, i.e. at least one propagator is active.
-     *
-     * @return <code>true</code> if this <code>Constraint</code> object is active, <code>false</code> otherwise.
-     */
-    public final boolean isActive() {
-        return (lastPropagatorActive.get() == 0);
+
+    public Solver getSolver() {
+        return solver;
     }
 
     /**
@@ -133,7 +114,9 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      * @return <code>ESat.UNDEFINED</code> if at least one variable is not instantiated,
      *         <code>ESat.TRUE</code> if this <code>this</code> is satisfied, <code>ESat.FALSE</code> otherwise.
      */
-    public abstract ESat isSatisfied();
+    public ESat isSatisfied() {
+        return isEntailed();
+    }
 
 
     /**
@@ -149,18 +132,21 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      * @return the satisfaction of the constraint
      */
     public ESat isEntailed() {
-        int last = lastPropagatorActive.get();
         int sat = 0;
-        for (int i = 0; i < last; i++) {
-            ESat entail = propagators[i].isEntailed();
-//			System.out.println(propagators[i]+" => "+entail);
-            if (entail.equals(ESat.FALSE)) {
-                return entail;
-            } else if (entail.equals(ESat.TRUE)) {
+        for (int i = 0; i < propagators.length; i++) {
+            if (!propagators[i].isStateLess()) { // we only count constraints with active propagator
+                ESat entail = propagators[i].isEntailed();
+                //System.out.println(propagators[i]+" => "+entail);
+                if (entail.equals(ESat.FALSE)) {
+                    return entail;
+                } else if (entail.equals(ESat.TRUE)) {
+                    sat++;
+                }
+            } else {
                 sat++;
             }
         }
-        if (sat == last) {
+        if (sat == propagators.length) {
             return ESat.TRUE;
         }
         // No need to check if FALSE, must have been returned before
@@ -170,38 +156,15 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     }
 
     /**
-     * Move the new entailed propagator from its position to the position of the first entailed propagators
-     * (right side of the lastPropagatorActive)
-     * BEWARE: do not preserve order of the propagators
-     *
-     * @param prop newly entailed propagator
-     */
-    public void updateActivity(P prop) {
-        int last = lastPropagatorActive.get();
-        if (propagators.length > 1) {
-            // get the index of the propagator within the list of propagators
-            int i = 0;
-            for (; i < last; i++) {
-                if (prop == propagators[i]) {
-                    break;
-                }
-            }
-            // move propagators[i] at the right side of lastPropagatorActive
-            P tmp = propagators[--last];
-            propagators[last] = prop;
-            propagators[i] = tmp;
-        }
-        lastPropagatorActive.add(-1);
-    }
-
-    /**
      * Define the list of <code>Propagator</code> objects of this <code>Constraint</code> object.
      *
      * @param propagators list of <code>Propagator</code> objects.
      */
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
-        this.lastPropagatorActive.set(propagators.length);
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].defineIn(this);
+        }
     }
 
     /**
@@ -211,22 +174,29 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      */
     @SuppressWarnings({"unchecked"})
     public final void addPropagators(P... mPropagators) {
-        // add the new propagators at the end of the current array
-        P[] tmp = this.propagators;
-        this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
-        System.arraycopy(tmp, 0, propagators, 0, tmp.length);
-        System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
-
-        this.lastPropagatorActive.add(mPropagators.length);
+        if (propagators == null) {
+            setPropagators(mPropagators);
+        } else {
+            // add the new propagators at the end of the current array
+            P[] tmp = this.propagators;
+            this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
+            System.arraycopy(tmp, 0, propagators, 0, tmp.length);
+            System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
+            for (int i = tmp.length; i < tmp.length + mPropagators.length; i++) {
+                propagators[i].defineIn(this);
+            }
+        }
     }
 
     /**
      * Link propagators with variables.
      */
     public void declare() {
-        int last = lastPropagatorActive.get();
-        for (int p = 0; p < last; p++) {
+        for (int p = 0; p < propagators.length; p++) {
             staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
+        }
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].declareIn(this);
         }
     }
 
@@ -241,30 +211,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     }
 
     /**
-     * Returns an <code>this</code>-adapted comparator.
-     *
-     * @param name name of comparator (if overrides the default one)
-     * @return a comparator
-     */
-    @SuppressWarnings({"unchecked"})
-    public AbstractSorter<V> getComparator(String name) {
-        if (name.equals(VAR_DEFAULT)) {
-            return new Incr<V>(Belong.build(this));
-        }
-        throw new SolverException("Unknown comparator name :" + name);
-    }
-
-    public abstract HeuristicVal getIterator(String name, V var);
-
-    @SuppressWarnings({"unchecked"})
-    public IMetric<V> getMetric(String name) {
-        if (name.equals(METRIC_DEFAULT)) {
-            return Belong.build(this);
-        }
-        throw new SolverException("Unknown metric name :" + name);
-    }
-
-    /**
      * Throws a contradiction exception based on <variable, message>
      *
      * @param cause    ICause object causes the exception
@@ -272,7 +218,11 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
-        engine.fails(cause, variable, message);
+    protected void contradiction(ICause cause,  Variable variable, String message) throws ContradictionException {
+        solver.getEngine().fails(cause, variable, message);
+    }
+
+    public String toString() {
+        return "Cstr(" + Arrays.toString(propagators) + ")";
     }
 }

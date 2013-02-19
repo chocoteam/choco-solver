@@ -26,12 +26,9 @@
  */
 package solver.propagation.generator;
 
-import solver.Solver;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * An abstract class to help defining a propagation strategy,
@@ -41,28 +38,10 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 15/12/11
  */
-public abstract class Generator<S extends ISchedulable> {
+public interface Generator<S extends ISchedulable> extends Serializable{
 
-    protected final List<? extends Generator> generators;
+    S[] getElements();
 
-    public Generator() {
-        this.generators = Collections.singletonList(this);
-    }
-
-    public <G extends Generator> Generator(List<G> generators) {
-        this.generators = generators;
-    }
-
-    public List<? extends Generator> getGenerators() {
-        return generators;
-    }
-
-    /**
-     * Create explicitly elements
-     *
-     * @param propagationEngine a propagation engine
-     * @param solver            a solver
-     */
-    public abstract <E extends ISchedulable> List<E> populate(PropagationEngine propagationEngine, Solver solver);
+    boolean isEmpty();
 
 }

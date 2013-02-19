@@ -44,7 +44,7 @@ public class ValidityChecker implements Comparator<IntVar> {
 
     //variables sorted from the minimum domain to the max
     protected IntVar[] sortedvs;
-    protected int[] position;
+    public int[] position;
     protected TObjectIntHashMap<IntVar> mapinit;
     protected int arity;
 

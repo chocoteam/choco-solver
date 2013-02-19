@@ -27,7 +27,6 @@
 
 package solver.exception;
 
-import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.variables.Variable;
@@ -38,9 +37,9 @@ import solver.variables.Variable;
  * A contradiction appears when at least one <code>Variable</code> object is not coherent
  * regarding all or part of <code>Constraint</code> network.
  * Empty domain, instantiation to an out-of-domain value, etc. throws contradiction.
- * <p>
- * For performance consideration, a <code>ContradictionException</code> is created everytime a contradiction
- * occurs. A unique object is build and set with specific case informations.
+ * <p/>
+ * For performance consideration, a <code>ContradictionException</code> is created every time a contradiction
+ * occurs. A unique object is build and set with specific case information.
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
@@ -51,7 +50,6 @@ public final class ContradictionException extends Exception {
 
     private static final long serialVersionUID = 2L;
 
-    @NotNull
     public ICause c = Cause.Null;
     public Variable v = null;
     public String s;
@@ -61,13 +59,15 @@ public final class ContradictionException extends Exception {
     }
 
     /**
-     * Throws the unique <code>ContradictionException</code> filled with the specified paramaters.
+     * Throws the unique <code>ContradictionException</code> filled with the specified parameters.
+     *
      * @param c the constraint at the origin of the contradiction
      * @param v the variable concerned by the contradiction
      * @param s the message to print
      * @return ContradictionException the filled exception
      */
     public ContradictionException set(ICause c, Variable v, String s) {
+        assert c != null;
         this.c = c;
         this.v = v;
         this.s = s;
@@ -78,7 +78,7 @@ public final class ContradictionException extends Exception {
      * {@inheritDoc}
      */
     public String toString() {
-        return "fail : " + (c == null ?c : c.getConstraint()) + "  " + v + "  " + s;
+        return "CONTRADICTION (" + (c == null ? "" : c.getConstraint() + ", ") + v + ") : " + s;
     }
 
     /**

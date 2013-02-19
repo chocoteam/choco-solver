@@ -56,9 +56,4 @@ public class SolverException extends RuntimeException{
 //		super(message);
         LoggerFactory.getLogger("solver").error(message);
     }
-
-    @Override
-    public Throwable fillInStackTrace() {
-        return this;
-    }
 }

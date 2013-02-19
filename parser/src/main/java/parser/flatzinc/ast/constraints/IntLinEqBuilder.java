@@ -30,13 +30,13 @@ package parser.flatzinc.ast.constraints;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
 
 /**
+ * &#8721; i &#8712; 1..n: as[i].bs[i] = c where n is the common length of as and bs
  * <br/>
  *
  * @author Charles Prud'homme
@@ -45,11 +45,10 @@ import java.util.List;
 public class IntLinEqBuilder implements IBuilder {
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        int[] coeffs = exps.get(0).toIntArray();
-        IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        int result = exps.get(2).intValue();
-//        return scalar(vars, coeffs, IntLinComb.Operator.EQ, result, solver);
-        return Sum.eq(vars, coeffs, result, solver);
+    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        int[] as = exps.get(0).toIntArray();
+        IntVar[] bs = exps.get(1).toIntVarArray(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        solver.post(IntConstraintFactory.scalar(bs, as, c));
     }
 }

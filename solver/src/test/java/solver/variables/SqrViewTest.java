@@ -26,12 +26,16 @@
  */
 package solver.variables;
 
+import choco.checker.DomainBuilder;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.variables.view.Views;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -47,10 +51,10 @@ public class SqrViewTest {
         Solver solver = new Solver();
 
         IntVar X = VariableFactory.enumerated("X", -4, 12, solver);
-        IntVar Z = Views.sqr(X);
+        IntVar Z = VariableFactory.sqr(X);
 
         try {
-            solver.propagate();
+//            solver.propagate();
             Assert.assertFalse(Z.instantiated());
             Assert.assertEquals(Z.getLB(), 0);
             Assert.assertEquals(Z.getUB(), 144);
@@ -90,6 +94,100 @@ public class SqrViewTest {
 
         } catch (ContradictionException ex) {
             Assert.fail();
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.sqr(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = (int) Math.sqrt(vit.next());
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = (int) Math.sqrt(vit.previous());
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = (int) Math.sqrt(rit.min());
+                int max = (int) Math.sqrt(rit.max());
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = (int) Math.sqrt(rit.min());
+                int max = (int) Math.sqrt(rit.max());
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.sqr(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = (int) Math.sqrt(vit.next());
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = (int) Math.sqrt(vit.previous());
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = (int) Math.sqrt(rit.min());
+                int max = (int) Math.sqrt(rit.max());
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = (int) Math.sqrt(rit.min());
+                int max = (int) Math.sqrt(rit.max());
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
         }
     }
 }

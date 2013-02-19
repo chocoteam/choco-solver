@@ -26,7 +26,6 @@
  */
 package solver.constraints.gary.relations;
 
-import solver.constraints.gary.GraphProperty;
 import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 
@@ -49,8 +48,8 @@ public class Eq_IntVector extends MetaRelation {
 		return false;
 	}
 	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};
-	}
+//	@Override
+//	public GraphProperty[] getGraphProperties() {
+//		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};
+//	}
 }

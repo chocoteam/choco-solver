@@ -27,16 +27,16 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.common.util.tools.ArrayUtils;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
+import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.binary.Absolute;
-import solver.constraints.unary.Member;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
+import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -51,19 +51,18 @@ public class AbsViewTest {
     private int[][] bounded(int xl, int xu, int yl, int yu) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
         X.updateLowerBound(xl, Cause.Null);
         X.updateUpperBound(xu, Cause.Null);
-        solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
     }
 
     private int[][] enumerated(int[] x, int[] y) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
 
-        solver.post(new Member(X, x, solver));
+        solver.post(IntConstraintFactory.member(X, x));
         solver.propagate();
 
         int[] xs = new int[X.getDomainSize()];
@@ -88,8 +87,8 @@ public class AbsViewTest {
         IntVar X = VariableFactory.enumerated("X", x, solver);
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
 
-        solver.post(new Absolute(X, Y, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.absolute(X, Y));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -98,8 +97,8 @@ public class AbsViewTest {
         IntVar X = VariableFactory.bounded("X", lbx, ubx, solver);
         IntVar Y = VariableFactory.bounded("Y", lby, uby, solver);
 
-        solver.post(new Absolute(X, Y, solver));
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.post(IntConstraintFactory.absolute(X, Y));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         return solver;
     }
 
@@ -241,11 +240,11 @@ public class AbsViewTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
-        IntVar X = Views.abs(Y);
+        IntVar X = VariableFactory.abs(Y);
 
-        solver.post(new Member(X, minX, maxX, solver));
+        solver.post(IntConstraintFactory.member(X, minX, maxX));
 //        SearchMonitorFactory.log(solver, true, false);
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));
@@ -283,10 +282,10 @@ public class AbsViewTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
-        IntVar X = Views.abs(Y);
-        solver.post(new Member(X, domains[0], solver));
+        IntVar X = VariableFactory.abs(Y);
+        solver.post(IntConstraintFactory.member(X, domains[0]));
         //SearchMonitorFactory.log(solver, true, true);
-        solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
+        solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {
                 Assert.assertTrue(X.getValue() == Math.abs(Y.getValue()));
@@ -297,6 +296,100 @@ public class AbsViewTest {
                 message);
         Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(),
                 message + " node:" + solver.getMeasures().getNodeCount() + " <= " + ref.getMeasures().getNodeCount());
+    }
+
+    @Test(groups = "10s")
+    public void testIt1() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
+            IntVar v = VariableFactory.abs(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = vit.next();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = vit.previous();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testIt2() {
+        Random random = new Random();
+        for (int seed = 0; seed < 200; seed++) {
+            random.setSeed(seed);
+            Solver solver = new Solver();
+            int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
+            IntVar o = VariableFactory.enumerated("o", domains[0], solver);
+            IntVar v = VariableFactory.abs(o);
+            DisposableValueIterator vit = v.getValueIterator(true);
+            while (vit.hasNext()) {
+                int va = vit.next();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            vit = v.getValueIterator(false);
+            while (vit.hasPrevious()) {
+                int va = vit.previous();
+                Assert.assertTrue(o.contains(va) || o.contains(-va), "seed:" + seed);
+            }
+            vit.dispose();
+
+            DisposableRangeIterator rit = v.getRangeIterator(true);
+            while (rit.hasNext()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.next();
+            }
+            rit.dispose();
+
+            rit = v.getRangeIterator(false);
+            while (rit.hasPrevious()) {
+                int min = rit.min();
+                int max = rit.max();
+
+                Assert.assertTrue(o.contains(min) || o.contains(-min), "seed:" + seed);
+                Assert.assertTrue(o.contains(max) || o.contains(-max), "seed:" + seed);
+                rit.previous();
+            }
+            rit.dispose();
+        }
     }
 
 }

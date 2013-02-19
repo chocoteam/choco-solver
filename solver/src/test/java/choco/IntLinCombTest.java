@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package choco;
@@ -34,12 +34,11 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
-import solver.constraints.nary.Sum;
+import solver.constraints.IntConstraintFactory;
+import solver.constraints.Operator;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
-import solver.search.strategy.StrategyFactory;
+import solver.propagation.PropagationStrategies;
+import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
@@ -50,12 +49,37 @@ import java.util.Random;
  * User : cprudhom<br/>
  * Mail : cprudhom(a)emn.fr<br/>
  * Date : 23 avr. 2010<br/>
- * Since : Galak 0.1<br/>
  */
 public class IntLinCombTest {
 
+    private static String operatorToString(Operator operator) {
+        String opSt;
+        switch (operator) {
+            case EQ:
+                opSt = "=";
+                break;
+            case NQ:
+                opSt = "!=";
+                break;
+            case GE:
+                opSt = ">=";
+                break;
+            case GT:
+                opSt = ">";
+                break;
+            case LE:
+                opSt = "<=";
+                break;
+            case LT:
+                opSt = "<";
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return opSt;
+    }
 
-    public static void testOp(int n, int min, int max, int cMax, int seed, IntLinComb.Operator operator) {
+    public static void testOp(int n, int min, int max, int cMax, int seed, Operator operator) {
         Random random = new Random(seed);
         Solver s = new Solver();
         IntVar[] vars = new IntVar[n];
@@ -66,83 +90,84 @@ public class IntLinCombTest {
         }
         int constant = -random.nextInt(cMax);
 
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, s);
+
+
         Constraint[] cstrs = new Constraint[]{
-                new IntLinComb(vars, coeffs, n, operator, constant, s)
+                IntConstraintFactory.scalar(vars, coeffs, sum),
+                IntConstraintFactory.arithm(sum, operatorToString(operator), constant)
         };
 
         s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        s.set(IntStrategyFactory.presetI(vars));
 
         s.findAllSolutions();
     }
 
     @Test(groups = "1s")
     public void testEq() {
-        testOp(2, 0, 5, 5, 29091982, IntLinComb.Operator.EQ);
+        testOp(2, 0, 5, 5, 29091982, Operator.EQ);
     }
 
     @Test(groups = "1s")
     public void testGeq() {
-        testOp(2, 0, 5, 5, 29091981, IntLinComb.Operator.GEQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.GE);
     }
 
     @Test(groups = "1s")
     public void testLeq() {
-        testOp(2, 0, 5, 5, 29091981, IntLinComb.Operator.LEQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.LE);
     }
 
     @Test(groups = "1s")
     public void testNeq() {
-        testOp(2, 0, 5, 5, 29091981, IntLinComb.Operator.NEQ);
+        testOp(2, 0, 5, 5, 29091981, Operator.NQ);
     }
 
 
     protected Solver sum(int[][] domains, int[] coeffs, int b, int op) {
         Solver solver = new Solver();
-
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-
-        Constraint cons;
+        String opname = "=";
         if (op == 0) {
-            cons = Sum.eq(bins, coeffs, b, solver);
         } else if (op > 0) {
-            cons = Sum.geq(bins, coeffs, b, solver);
+            opname = ">=";
         } else {
-            cons = Sum.leq(bins, coeffs, b, solver);
+            opname = "<=";
         }
-
-
-        Constraint[] cstrs = new Constraint[]{cons};
-
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
+        Constraint[] cstrs = new Constraint[]{
+                IntConstraintFactory.scalar(bins, coeffs, sum),
+                IntConstraintFactory.arithm(sum, opname, b)
+        };
         solver.post(cstrs);
-        solver.set(StrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins));
         return solver;
     }
 
     protected Solver intlincomb(int[][] domains, int[] coeffs, int b, int op) {
         Solver solver = new Solver();
-
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], solver);
         }
-
-        Constraint cons;
+        String opname = "=";
         if (op == 0) {
-            cons = ConstraintFactory.scalar(bins, coeffs, IntLinComb.Operator.EQ, b, solver);
         } else if (op > 0) {
-            cons = ConstraintFactory.scalar(bins, coeffs, IntLinComb.Operator.GEQ, b, solver);
+            opname = ">=";
         } else {
-            cons = ConstraintFactory.scalar(bins, coeffs, IntLinComb.Operator.LEQ, b, solver);
+            opname = "<=";
         }
-
-        Constraint[] cstrs = new Constraint[]{cons};
-
+        IntVar sum = VariableFactory.bounded("scal", -99999999, 99999999, solver);
+        Constraint[] cstrs = new Constraint[]{
+                IntConstraintFactory.scalar(bins, coeffs, sum),
+                IntConstraintFactory.arithm(sum, opname, b)
+        };
         solver.post(cstrs);
-        solver.set(StrategyFactory.presetI(bins, solver.getEnvironment()));
+        solver.set(IntStrategyFactory.presetI(bins));
         return solver;
     }
 
@@ -188,11 +213,12 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testUSum2() throws ContradictionException {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
+        PropagationStrategies.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
         sum.propagate();
-        AbstractSearchLoop.timeStamp++;
+        sum.getSearchLoop().timeStamp++;
         ((IntVar) vars[2]).removeValue(-2, Cause.Null);
         sum.propagate();
         Assert.assertTrue(vars[2].instantiated());
