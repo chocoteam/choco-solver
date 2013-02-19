@@ -27,6 +27,8 @@
 
 package solver.search.solution;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -36,6 +38,7 @@ import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.IntVar;
+import solver.variables.RealVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
@@ -55,7 +58,10 @@ public class Solution implements ICause {
     private Solver solver;
 
     /* Values of integer variables, in Solver internal order */
-    private int[] intvalues;
+    private TIntArrayList intvalues;
+
+    /* Values of double variables, in Solver internal order */
+    private TDoubleArrayList realvalues;
 
     /* Values of graph variables, in Solver internal order */
     private LinkedList<boolean[][]> graphValues;
@@ -77,7 +83,8 @@ public class Solution implements ICause {
     public void replace(Solver solver) {
         this.solver = solver;
         Variable[] vars = solver.getVars();
-        intvalues = new int[vars.length];
+        intvalues = new TIntArrayList();
+        realvalues = new TDoubleArrayList();
         graphValues = new LinkedList<boolean[][]>();
         for (int i = 0; i < vars.length; i++) {
             assert (vars[i].instantiated()) : vars[i] + " is not instantiated"; // BEWARE only decision variables should be instantiated
@@ -85,7 +92,11 @@ public class Solution implements ICause {
             switch (kind) {
                 case Variable.INT:
                 case Variable.BOOL:
-                    intvalues[i] = ((IntVar) vars[i]).getValue();
+                    intvalues.add(((IntVar) vars[i]).getValue());
+                    break;
+                case Variable.REAL:
+                    realvalues.add(((RealVar) vars[i]).getLB());
+                    realvalues.add(((RealVar) vars[i]).getUB());
                     break;
                 case Variable.GRAPH:
                     if (!vars[i].instantiated()) {
@@ -103,12 +114,16 @@ public class Solution implements ICause {
         try {
             Variable[] vars = solver.getVars();
             int nbGV = 0;
+            int nbi = 0, nbr = 0;
             for (int i = 0; i < vars.length; i++) {
                 int kind = vars[i].getTypeAndKind() & Variable.KIND;
                 switch (kind) {
                     case Variable.INT:
                     case Variable.BOOL:
-                        ((IntVar) vars[i]).instantiateTo(intvalues[i], this);
+                        ((IntVar) vars[i]).instantiateTo(intvalues.get(nbi++), this);
+                        break;
+                    case Variable.REAL:
+                        ((RealVar) vars[i]).updateBounds(realvalues.get(nbr++), realvalues.get(nbr++), this);
                         break;
                     case Variable.GRAPH:
                         boolean[][] gv = graphValues.get(nbGV);

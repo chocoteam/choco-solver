@@ -37,6 +37,13 @@ import org.testng.annotations.Test;
  */
 public class RealTest {
 
+    public void cmpDomains(double[] a1, double[] a2) {
+        double DELTA = 1e-10;
+        for (int i = 0; i < a1.length; i++)
+            Assert.assertEquals(a1[i], a2[i], DELTA);
+    }
+
+
     @Test(groups = "1s")
     public void test1() {
 
@@ -64,7 +71,7 @@ public class RealTest {
     @Test(groups = "1s")
     public void test2() {
         Ibex ibex = new Ibex();
-        ibex.add_ctr(2, "{0}^2+{1}^<=1");
+        ibex.add_ctr(2, "{0}^2+{1}^2<=1");
 
         double[] domains;
         double vv = Math.sqrt(2.) / 2.;
@@ -74,26 +81,25 @@ public class RealTest {
         Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE), Ibex.ENTAILED);
         domains = new double[]{-2., 1., -2., 1.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
-        Assert.assertEquals(domains, new double[]{-1., 1., -1., 1.});
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOT_SIGNIFICANT);
+        cmpDomains(domains, new double[]{-1., 1., -1., 1.});
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
 
 
         // CASE 2: the boolean is set to FALSE
         Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE), Ibex.FAIL);
         Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE), Ibex.ENTAILED);
-        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOTHING);
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
-        Assert.assertEquals(domains, new double[]{vv, 2., -vv, vv});
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.CONTRACT);
+        cmpDomains(domains, new double[]{vv, 2., -vv, vv});
 
-        // CASE 2: the boolean is set to UNKNOWN
+        // CASE 3: the boolean is set to UNKNOWN
         Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
         Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
-        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOT_SIGNIFICANT);
+        Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
         domains = new double[]{0., 2., -vv, vv};
-        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOT_SIGNIFICANT);
-        Assert.assertEquals(domains, new double[]{0., 2., -vv, vv});
-
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+        cmpDomains(domains, new double[]{0., 2., -vv, vv});
 
         ibex.release();
     }
@@ -101,7 +107,7 @@ public class RealTest {
     @Test(groups = "1s")
     public void test3() {
         Ibex ibex = new Ibex();
-        ibex.add_ctr(2, "{0}^2+{1}^<=1");
+        ibex.add_ctr(2, "{0}^2+{1}^2<=1");
 
         double[] domains;
 
@@ -120,7 +126,6 @@ public class RealTest {
         Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
         domains = new double[]{0., 1.01, -1., 0.};
         Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
-
 
         ibex.release();
     }

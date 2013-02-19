@@ -52,15 +52,14 @@ public class Ibex {
     public static final int FAIL = 0;
     public static final int ENTAILED = 1;
     public static final int CONTRACT = 2;
-
-    /* Constant for both contraction & inflation. */
-    public static final int NOT_SIGNIFICANT = 3;
+    public static final int NOTHING = 3;
 
     /* Constants for the status of a inflation. */
-    public static final int INFLATE = 4;
-    public static final int FULL_INFLATE = 5;
-    public static final int BAD_POINT = 6;
-    public static final int UNKNOWN_POINT = 7;
+    public static final int NOT_SIGNIFICANT = 4;
+    public static final int INFLATE = 5;
+    public static final int FULL_INFLATE = 6;
+    public static final int BAD_POINT = 7;
+    public static final int UNKNOWN_POINT = 8;
 
     /* Constants for describing a boolean domain (by an integer). */
     public static final int FALSE = 0;
@@ -136,7 +135,7 @@ public class Ibex {
      *         removed part of the domain is inside c. If reif==TRUE, the removed part
      *         is outside.
      *         <p/>
-     *         NOT_SIGNIFICANT - No bound has been reduced and nothing could be proven.
+     *         NOTHING         - No bound has been reduced and nothing could be proven.
      */
     public native int contract(int i, double bounds[], int reif);
 
@@ -157,6 +156,7 @@ public class Ibex {
      * If in==TRUE, y must be inside c. Otherwise, it must be outside.
      *
      * @param i      - Number of the constraint c (in the order of creation)
+     * @param p      - The coordinates of the point to inflate: (p1,...pn)
      * @param bounds - The bounds of the enclosing box x under the following form:
      *               (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
      *               lower (resp. upper) bound of the domain of x_i.
@@ -193,5 +193,5 @@ public class Ibex {
      * Free IBEX structures from memory
      */
     public native void release();
-};
+}
 
