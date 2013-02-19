@@ -37,7 +37,7 @@ import org.kohsuke.args4j.Option;
 public class FrontEndBenchmarking extends AbstractBenchmarking {
 
     @Option(name = "-args", usage = "Command arguments", required = false)
-    String parameters = "samples.basics.Alpha -log QUIET";
+    String parameters = "samples.integer.Alpha";
 
     @Override
     protected void run() {

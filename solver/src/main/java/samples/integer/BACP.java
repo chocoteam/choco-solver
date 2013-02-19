@@ -30,7 +30,6 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -198,7 +197,6 @@ public class BACP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override

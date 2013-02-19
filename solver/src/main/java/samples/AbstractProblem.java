@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.PropagatorEngine;
-import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
  * <br/>
@@ -46,7 +45,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 public abstract class AbstractProblem {
 
     enum Level {
-        SILENT(-10), QUIET(0), VERBOSE(10), SOLUTIONS(20), SEARCH(30);
+        SILENT(-10), QUIET(0), VERBOSE(10);
 
         int level;
 
@@ -134,11 +133,6 @@ public abstract class AbstractProblem {
 
             solver.set(new PropagatorEngine(solver));
 
-            if (level.getLevel() > Level.QUIET.getLevel()) {
-                SearchMonitorFactory.log(solver,
-                        level.getLevel() > Level.VERBOSE.getLevel(),
-                        level.getLevel() > Level.SOLUTIONS.getLevel());
-            }
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     if (level.getLevel() > Level.QUIET.getLevel()) {

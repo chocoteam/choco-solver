@@ -33,7 +33,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -108,7 +107,6 @@ public class GolombRuler extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(ticks));
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override

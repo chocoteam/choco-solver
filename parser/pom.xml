@@ -29,17 +29,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>choco</groupId>
-        <artifactId>choco3</artifactId>
+        <artifactId>choco</artifactId>
         <version>13.02-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>parser</artifactId>
+    <artifactId>choco-parser</artifactId>
     <packaging>jar</packaging>
-    <name>A FlatZinc parser for Choco3</name>
+    <name>A FlatZinc parser for Choco-${project.version}</name>
     <dependencies>
         <dependency>
             <groupId>choco</groupId>
-            <artifactId>solver</artifactId>
+            <artifactId>choco-solver</artifactId>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
@@ -53,16 +53,19 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>choco3-${project.version}-parser</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2.1</version>
                 <configuration>
-                    <finalName>choco3-${project.version}-parser</finalName>
-                    <descriptors>
-                        <descriptor>src/main/assembly/with-dep.xml</descriptor>
-                    </descriptors>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>parser.flatzinc.ParseAndSolve</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
                 <executions>
                     <execution>
