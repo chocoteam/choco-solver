@@ -301,7 +301,7 @@ public class AbsViewTest {
     @Test(groups = "10s")
     public void testIt1() {
         Random random = new Random();
-        for (int seed = 5; seed < 200; seed++) {
+        for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
@@ -348,7 +348,7 @@ public class AbsViewTest {
     @Test(groups = "10s")
     public void testIt2() {
         Random random = new Random();
-        for (int seed = 5; seed < 200; seed++) {
+        for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());

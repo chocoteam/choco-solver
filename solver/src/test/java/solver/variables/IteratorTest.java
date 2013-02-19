@@ -626,8 +626,10 @@ public class IteratorTest {
     @Test
     public void testSqr1() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(true);
+        Assert.assertTrue(vit.hasNext());
+        Assert.assertEquals(0, vit.next());
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
         Assert.assertTrue(vit.hasNext());
@@ -640,7 +642,7 @@ public class IteratorTest {
     @Test
     public void testSqr2() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(16, vit.previous());
@@ -648,16 +650,18 @@ public class IteratorTest {
         Assert.assertEquals(4, vit.previous());
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(1, vit.previous());
+        Assert.assertTrue(vit.hasPrevious());
+        Assert.assertEquals(0, vit.previous());
         Assert.assertFalse(vit.hasPrevious());
     }
 
     @Test
     public void testSqr3() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(1, vit.min());
+        Assert.assertEquals(0, vit.min());
         Assert.assertEquals(1, vit.max());
         vit.next();
         Assert.assertTrue(vit.hasNext());
@@ -674,7 +678,7 @@ public class IteratorTest {
     @Test
     public void testSqr4() {
         Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(16, vit.min());
@@ -685,7 +689,7 @@ public class IteratorTest {
         Assert.assertEquals(4, vit.max());
         vit.previous();
         Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(1, vit.min());
+        Assert.assertEquals(0, vit.min());
         Assert.assertEquals(1, vit.max());
         vit.previous();
         Assert.assertFalse(vit.hasPrevious());

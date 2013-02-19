@@ -169,7 +169,7 @@ public class ScaleViewTest {
     @Test(groups = "10s")
     public void testIt1() {
         Random random = new Random();
-        for (int seed = 0; seed < 20; seed++) {
+        for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
@@ -203,7 +203,7 @@ public class ScaleViewTest {
     @Test(groups = "10s")
     public void testIt2() {
         Random random = new Random();
-        for (int seed = 0; seed < 40; seed++) {
+        for (int seed = 0; seed < 200; seed++) {
             random.setSeed(seed);
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());

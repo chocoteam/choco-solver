@@ -395,13 +395,11 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                     u2l = var.getValueIterator(false);
 
                     super.topDownInit();
-                    while (l2u.hasNext()) {
+                    if (l2u.hasNext()) {
                         this.vl2u = l2u.next();
-                        if (this.vl2u >= 0) break;
                     }
-                    while (u2l.hasPrevious()) {
+                    if (u2l.hasPrevious()) {
                         this.vu2l = u2l.previous();
-                        if (this.vu2l <= 0) break;
                     }
                 }
 
@@ -442,14 +440,14 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
                         if (this.l2u.hasNext()) {
                             this.vl2u = this.l2u.next();
                         } else {
-                            this.vl2u = Integer.MAX_VALUE;
+                            this.vl2u = 1;
                         }
                     }
                     if (this.vu2l == max) {
                         if (this.u2l.hasPrevious()) {
                             this.vu2l = u2l.previous();
                         } else {
-                            this.vu2l = -Integer.MAX_VALUE;
+                            this.vu2l = -1;
                         }
                     }
                     return max * max;
@@ -476,264 +474,79 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (_riterator == null || !_riterator.isReusable()) {
             _riterator = new DisposableRangeIterator() {
 
-                DisposableRangeIterator u2l;
-                DisposableRangeIterator l2u;
-                int ml2u;
-                int Ml2u;
-                int mu2l;
-                int Mu2l;
-                int min;
-                int max;
+                DisposableValueIterator vit;
+                int min
+                        ,
+                        max;
 
                 @Override
                 public void bottomUpInit() {
-                    l2u = var.getRangeIterator(true);
-                    u2l = var.getRangeIterator(false);
-
-                    super.bottomUpInit();
-                    ml2u = Ml2u = mu2l = Mu2l = Integer.MAX_VALUE;
-
-                    while (l2u.hasNext()) {
-                        if (l2u.min() >= 0) {
-                            ml2u = l2u.min();
-                            Ml2u = l2u.max();
-                            l2u.next();
-                            break;
-                        }
-                        if (l2u.max() >= 0) {
-                            ml2u = 0;
-                            Ml2u = l2u.max();
-                            l2u.next();
-                            break;
-                        }
-                        l2u.next();
+                    vit = getValueIterator(true);
+                    if (vit.hasNext()) {
+                        min = vit.next();
                     }
-                    while (u2l.hasPrevious()) {
-                        if (u2l.max() <= 0) {
-                            Mu2l = -u2l.min();
-                            mu2l = -u2l.max();
-                            u2l.previous();
-                            break;
-                        }
-                        if (u2l.min() <= 0) {
-                            mu2l = 0;
-                            Mu2l = -u2l.min();
-                            u2l.previous();
-                            break;
-                        }
-                        u2l.previous();
+                    if (min == 0 && vit.hasNext() && contains(1)) {
+                        max = vit.next();
+                    } else {
+                        max = min;
                     }
-                    next();
+
                 }
 
                 @Override
                 public void topDownInit() {
-                    l2u = var.getRangeIterator(true);
-                    u2l = var.getRangeIterator(false);
-
-                    super.topDownInit();
-                    ml2u = Ml2u = mu2l = Mu2l = Integer.MAX_VALUE;
-
-                    if (l2u.hasNext()) {
-                        if (l2u.max() <= 0) {
-                            this.ml2u = -l2u.max();
-                            this.Ml2u = -l2u.min();
-                        } else if (l2u.min() <= 0) {
-                            this.ml2u = 0;
-                            this.Ml2u = -l2u.min();
-                        }
-                        l2u.next();
+                    vit = getValueIterator(false);
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
                     }
-                    if (u2l.hasPrevious()) {
-                        if (u2l.min() >= 0) {
-                            this.mu2l = u2l.min();
-                            this.Mu2l = u2l.max();
-                        } else if (u2l.max() >= 0) {
-                            this.mu2l = 0;
-                            this.Mu2l = u2l.max();
-                        }
-                        u2l.previous();
+                    if (max == 1 && vit.hasPrevious() && contains(0)) {
+                        min = vit.previous();
+                    } else {
+                        min = max;
                     }
-                    previous();
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return min < Integer.MAX_VALUE;
+                    return min != Integer.MAX_VALUE;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return min < Integer.MAX_VALUE;
+                    return max != -Integer.MAX_VALUE;
                 }
 
                 @Override
                 public void next() {
-                    min = max = Integer.MAX_VALUE;
-                    // disjoint ranges
-                    if (Ml2u < mu2l - 1) {
-                        min = ml2u;
-                        max = Ml2u;
-                        if (l2u.hasNext()) {
-                            ml2u = l2u.min();
-                            Ml2u = l2u.max();
-                            l2u.next();
-                        } else {
-                            ml2u = Integer.MAX_VALUE;
-                            Ml2u = Integer.MAX_VALUE;
-                        }
-                    } else if (Mu2l < ml2u - 1) {
-                        min = mu2l;
-                        max = Mu2l;
-                        if (u2l.hasPrevious()) {
-                            Mu2l = -u2l.min();
-                            mu2l = -u2l.max();
-                            u2l.previous();
-                        } else {
-                            mu2l = Integer.MAX_VALUE;
-                            Mu2l = Integer.MAX_VALUE;
-                        }
+                    if (vit.hasNext()) {
+                        min = max = vit.next();
                     } else {
-                        // we build the current range
-                        if (Ml2u + 1 == mu2l) {
-                            min = ml2u;
-                            max = Mu2l;
-                        } else if (Mu2l + 1 == ml2u) {
-                            min = mu2l;
-                            max = Ml2u;
-                        } else {
-                            min = ml2u < mu2l ? ml2u : mu2l;
-                            max = Ml2u < Mu2l ? Ml2u : Mu2l;
-                        }
-                        boolean change;
-                        do {
-                            change = false;
-                            if (min <= ml2u && ml2u <= max) {
-                                max = max > Ml2u ? max : Ml2u;
-                                if (l2u.hasNext()) {
-                                    ml2u = l2u.min();
-                                    Ml2u = l2u.max();
-                                    l2u.next();
-                                    change = true;
-                                } else {
-                                    ml2u = Integer.MAX_VALUE;
-                                    Ml2u = Integer.MAX_VALUE;
-                                }
-                            }
-                            if (min <= mu2l && mu2l <= max) {
-                                max = max > Mu2l ? max : Mu2l;
-                                if (u2l.hasPrevious()) {
-                                    Mu2l = -u2l.min();
-                                    mu2l = -u2l.max();
-                                    u2l.previous();
-                                    change = true;
-                                } else {
-                                    mu2l = Integer.MAX_VALUE;
-                                    Mu2l = Integer.MAX_VALUE;
-                                }
-                            }
-                        } while (change);
+                        min = Integer.MAX_VALUE;
                     }
                 }
 
                 @Override
                 public void previous() {
-                    min = max = Integer.MAX_VALUE;
-                    // disjoint ranges
-                    if (ml2u > Mu2l + 1) {
-                        min = ml2u;
-                        max = Ml2u;
-                        ml2u = Integer.MAX_VALUE;
-                        Ml2u = Integer.MAX_VALUE;
-                        if (l2u.hasNext()) {
-                            //la: gerer le 0 et les autres cas
-                            if (l2u.max() <= 0) {
-                                this.ml2u = -l2u.max();
-                                this.Ml2u = -l2u.min();
-                            } else if (l2u.min() <= 0) {
-                                this.ml2u = 0;
-                                this.Ml2u = -l2u.min();
-                            }
-                            l2u.next();
-                        }
-                    } else if (Mu2l < ml2u - 1) {
-                        min = mu2l;
-                        max = Mu2l;
-                        mu2l = Integer.MAX_VALUE;
-                        Mu2l = Integer.MAX_VALUE;
-                        if (u2l.min() >= 0) {
-                            this.mu2l = u2l.min();
-                            this.Mu2l = u2l.max();
-                        } else if (u2l.max() >= 0) {
-                            this.mu2l = 0;
-                            this.Mu2l = u2l.max();
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
+                        if (max == 1 && vit.hasPrevious() && contains(0)) {
+                            min = vit.previous();
+                        } else {
+                            min = max;
                         }
                     } else {
-                        // we build the current range
-                        if (Ml2u + 1 == mu2l) {
-                            min = ml2u;
-                            max = Mu2l;
-                        } else if (Mu2l + 1 == ml2u) {
-                            min = mu2l;
-                            max = Ml2u;
-                        } else {
-                            min = ml2u > mu2l ? ml2u : mu2l;
-                            max = Ml2u > Mu2l ? Ml2u : Mu2l;
-                        }
-                        boolean change;
-                        do {
-                            change = false;
-                            if (min <= Ml2u && Ml2u <= max) {
-                                min = min < ml2u ? min : ml2u;
-                                ml2u = Integer.MAX_VALUE;
-                                Ml2u = Integer.MAX_VALUE;
-                                if (l2u.hasNext()) {
-                                    if (l2u.max() <= 0) {
-                                        this.ml2u = -l2u.max();
-                                        this.Ml2u = -l2u.min();
-                                    } else if (l2u.min() <= 0) {
-                                        this.ml2u = 0;
-                                        this.Ml2u = -l2u.min();
-                                    }
-                                    l2u.next();
-                                    change = true;
-                                }
-                            }
-                            if (min <= mu2l && mu2l <= max) {
-                                min = min < mu2l ? min : mu2l;
-                                mu2l = Integer.MAX_VALUE;
-                                Mu2l = Integer.MAX_VALUE;
-                                if (u2l.hasPrevious()) {
-                                    if (u2l.min() >= 0) {
-                                        this.mu2l = u2l.min();
-                                        this.Mu2l = u2l.max();
-                                    } else if (u2l.max() >= 0) {
-                                        this.mu2l = 0;
-                                        this.Mu2l = u2l.max();
-                                    }
-                                    u2l.previous();
-                                    change = true;
-                                }
-                            }
-                        } while (change);
+                        max = -Integer.MAX_VALUE;
                     }
                 }
 
                 @Override
                 public int min() {
-                    return min * min;
+                    return min;
                 }
 
                 @Override
                 public int max() {
-                    return max * max;
-                }
-
-                @Override
-                public void dispose() {
-                    super.dispose();
-                    l2u.dispose();
-                    u2l.dispose();
+                    return max;
                 }
             };
         }
