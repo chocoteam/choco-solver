@@ -27,12 +27,12 @@
 package solver.constraints.propagators.nary.globalcardinality;
 
 import common.ESat;
-import common.util.tools.ArrayUtils;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetFactory;
 import common.util.objects.setDataStructures.SetType;
+import common.util.tools.ArrayUtils;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,7 +53,6 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     private int n, n2;
     private int[] values;
-    private IntVar[] cards;
     private ISet[] possibles, mandatories;
     private ISet valueToCompute;
     private TIntIntHashMap map;
@@ -78,7 +77,6 @@ public class PropFastGCC extends Propagator<IntVar> {
             throw new UnsupportedOperationException();
         }
         this.values = restrictedValues;
-        this.cards = valueCardinalities;
         this.n = decvars.length;
         this.n2 = values.length;
         this.possibles = new ISet[n2];
@@ -88,10 +86,10 @@ public class PropFastGCC extends Propagator<IntVar> {
             mandatories[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
             possibles[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
         }
-        this.valueToCompute = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n2, environment);
+        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, n2, environment);
         this.boundVar = new TIntArrayList();
-        for (int i = 0; i < decvars.length; i++) {
-            if (!decvars[i].hasEnumeratedDomain()) {
+        for (int i = 0; i < n; i++) {
+            if (!vars[i].hasEnumeratedDomain()) {
                 boundVar.add(i);
             }
         }
@@ -160,16 +158,16 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     private void filter() throws ContradictionException {
         boolean again = false;
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-            cards[i].updateLowerBound(mandatories[i].getSize(), aCause);
-            cards[i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
-            if (cards[i].instantiated()) {
-                if (possibles[i].getSize() + mandatories[i].getSize() == cards[i].getLB()) {
+            vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
+            vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
+            if (vars[i].instantiated()) {
+                if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
                         if (vars[j].instantiateTo(values[i], aCause)) {
@@ -178,7 +176,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
-                } else if (mandatories[i].getSize() == cards[i].getUB()) {
+                } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
                     for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
                         if (vars[var].removeValue(values[i], aCause)) {
                             again = true;
@@ -287,12 +285,12 @@ public class PropFastGCC extends Propagator<IntVar> {
             }
         }
         for (int i = 0; i < n2; i++) {
-            if (cards[i].getLB() > max[i] || cards[i].getUB() < min[i]) {
+            if (vars[n + i].getLB() > max[i] || vars[n + i].getUB() < min[i]) {
                 return ESat.FALSE;
             }
         }
         for (int i = 0; i < n2; i++) {
-            if (!(cards[i].instantiated() && max[i] == min[i])) {
+            if (!(vars[n + i].instantiated() && max[i] == min[i])) {
                 return ESat.UNDEFINED;
             }
         }
