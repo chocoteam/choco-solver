@@ -77,7 +77,7 @@ public enum Configuration {
     public static final boolean PRINT_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PRINT_EXPLANATION"));
 
     // Set to true to print propagation information
-    public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));
+    public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_PROPAGATION"));
 
     // Set to true to print event occurring on variables
     public static final boolean PRINT_VAR_EVENT = Boolean.parseBoolean(properties.getProperty("PRINT_VAR_EVENT"));

@@ -141,7 +141,7 @@ public class PropFastCount extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        filter();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     private void filter() throws ContradictionException {
