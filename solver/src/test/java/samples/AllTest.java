@@ -37,7 +37,7 @@ import solver.Configuration;
 import solver.ISolverProperties;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -56,7 +56,7 @@ public class AllTest {
     long nbSol;
     IEnvironment environment;
     ISolverProperties properties;
-    PropagationStrategies strat;
+    PropagationEngineFactory strat;
 
 
     public AllTest() {
@@ -66,13 +66,13 @@ public class AllTest {
                 new AllSolverProp(
                         SearchLoops.BINARY,
                         ExplanationFactory.CBJ, false),
-                PropagationStrategies.CONSTRAINT, 6);
+                PropagationEngineFactory.PROPAGATORDRIVEN, 6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
                    IEnvironment env,
                    ISolverProperties properties,
-                   PropagationStrategies strat,
+                   PropagationEngineFactory strat,
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;

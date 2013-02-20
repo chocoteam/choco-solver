@@ -71,7 +71,6 @@ public class PropagatorEngine implements IPropagationEngine {
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected boolean[] schedule;
     protected IBitset[] eventsets;
-    protected int[][] eventmasks;
 
     private boolean init; // is ready to propagate?
 
@@ -106,11 +105,9 @@ public class PropagatorEngine implements IPropagationEngine {
         pro_queue_f = new CircularQueue<Propagator>(propagators.length / 2 + 1);
 
         schedule = new boolean[nbProp];
-        eventmasks = new int[nbProp][];
         eventsets = new IBitset[nbProp];
         for (int i = 0; i < nbProp; i++) {
             int nbv = propagators[i].getNbVars();
-            eventmasks[i] = new int[nbv];
             eventsets[i] = BitsetFactory.make(nbv);
         }
         init = true;
@@ -152,8 +149,8 @@ public class PropagatorEngine implements IPropagationEngine {
                 }
                 // clear event
                 evtset.clear(v);
-                mask = eventmasks[aid][v];
-                eventmasks[aid][v] = 0;
+                mask = lastProp.getMask(v);
+                lastProp.clearMask(v);
                 lastProp.decNbPendingEvt();
                 // run propagation on the specific event
                 lastProp.fineERcalls++;
@@ -170,7 +167,7 @@ public class PropagatorEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             evtset = eventsets[aid];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-                eventmasks[aid][p] = 0;
+                lastProp.clearMask(p);
             }
             evtset.clear();
             schedule[aid] = false;
@@ -182,7 +179,7 @@ public class PropagatorEngine implements IPropagationEngine {
             aid = p2i.get(lastProp.getId());
             evtset = eventsets[aid];
             for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-                eventmasks[aid][p] = 0;
+                lastProp.clearMask(p);
             }
             evtset.clear();
             schedule[aid] = false;
@@ -201,7 +198,7 @@ public class PropagatorEngine implements IPropagationEngine {
             int pindice = variable.getIndiceInPropagator(p);
             if (cause != prop && prop.isActive() && prop.advise(pindice, type.mask)) {
                 int aid = p2i.get(prop.getId());
-                if (eventmasks[aid][pindice] == 0) { // not scheduled yet
+                if (prop.updateMask(pindice, type)) { // not scheduled yet
                     assert !eventsets[aid].get(pindice);
                     if (Configuration.PRINT_SCHEDULE) {
                         IPropagationEngine.Trace.printSchedule(prop);
@@ -211,7 +208,6 @@ public class PropagatorEngine implements IPropagationEngine {
                 } else if (Configuration.PRINT_SCHEDULE) {
                     IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
-                eventmasks[aid][pindice] |= type.strengthened_mask;
                 if (!schedule[aid]) {
                     pro_queue_f.addLast(prop);
                     schedule[aid] = true;
@@ -235,7 +231,7 @@ public class PropagatorEngine implements IPropagationEngine {
         // we don't remove the element from its master to avoid costly operations
         IBitset evtset = eventsets[aid];
         for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-            eventmasks[aid][p] = 0;
+            propagator.clearMask(p);
         }
         evtset.clear();
         propagator.flushPendingEvt();
@@ -264,16 +260,11 @@ public class PropagatorEngine implements IPropagationEngine {
         schedule = new boolean[nsize];
         System.arraycopy(_schedule, 0, schedule, 0, osize);
 
-        int[][] _eventmasks = eventmasks;
-        eventmasks = new int[nsize][];
-        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
-
         IBitset[] _eventsets = eventsets;
         eventsets = new IBitset[nsize];
         System.arraycopy(_eventsets, 0, eventsets, 0, osize);
         for (int i = osize; i < nsize; i++) {
             int nbv = propagators[i].getNbVars();
-            eventmasks[i] = new int[nbv];
             eventsets[i] = BitsetFactory.make(nbv);
         }
     }

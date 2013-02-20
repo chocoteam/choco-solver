@@ -91,11 +91,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
     private final int ID; // unique id of this
 
-    /**
-     * List of <code>variable</code> objects
-     */
+    // List of <code>variable</code> objects -- a variable can occur more than once, but it could not have the same index
     protected V[] vars;
-    private int[] vindices;  // index of this within the list of propagator of the i^th variable
+    // index of this within the list of propagator of the i^th variable
+    private int[] vindices;
+    // the i^th event mask stores modification events on the i^th variable, since the last propagation
+    protected int[] eventmasks;
+
 
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
     private Operation[] operations;
@@ -152,10 +154,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
-        checkVariable(vars);
+//        checkVariable(vars);
         this.vars = vars.clone();
         this.solver = solver;
         this.vindices = new int[vars.length];
+        this.eventmasks = new int[vars.length];
         this.environment = solver.getEnvironment();
         this.state = NEW;
         this.priority = priority;
@@ -206,6 +209,27 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void defineIn(Constraint c) {
         this.constraint = c;
+    }
+
+    /**
+     * Update the mask of the vidx^th variable, and return true if the variable was not modify before.
+     *
+     * @param vidx    index of the modified variable
+     * @param evtType type of event occurring on the variable
+     * @return true if this the first modification recording since last propagation
+     */
+    public final boolean updateMask(int vidx, EventType evtType) {
+        boolean needSched = eventmasks[vidx] == 0;
+        eventmasks[vidx] |= evtType.strengthened_mask;
+        return needSched;
+    }
+
+    public final int getMask(int vidx) {
+        return eventmasks[vidx];
+    }
+
+    public final void clearMask(int vidx) {
+        eventmasks[vidx] = 0;
     }
 
     /**
@@ -356,13 +380,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setVIndices(int idx, int val) {
         vindices[idx] = val;
     }
-
-//    public void unlink() {
-//        for (int v = 0; v < vars.length; v++) {
-//            vars[v].unlink(this, vindices[v]);
-//            vindices[v] = -1;
-//        }
-//    }
 
     /**
      * Returns the number of variables involved in <code>this</code>.

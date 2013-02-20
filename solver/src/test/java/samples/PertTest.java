@@ -34,7 +34,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -99,13 +99,13 @@ public class PertTest {
         if (Configuration.PLUG_EXPLANATION) {
             Solver sol;
             sol = modeler();
-            PropagationStrategies.values()[0].make(sol);
+            PropagationEngineFactory.values()[0].make(sol);
             sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 1; t < PropagationStrategies.values().length; t++) {
+            for (int t = 1; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler();
-                PropagationStrategies.values()[t].make(sol);
+                PropagationEngineFactory.values()[t].make(sol);
                 sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

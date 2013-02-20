@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -271,7 +271,7 @@ public class TestSolveur {
         solver.post(IntConstraintFactory.arithm(vars[0], "=", vars[n - 1]));
 
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(vars));
-        PropagationStrategies.CONSTRAINT.make(solver);
+        PropagationEngineFactory.PROPAGATORDRIVEN.make(solver);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

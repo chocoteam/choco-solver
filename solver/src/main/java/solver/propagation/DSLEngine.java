@@ -72,10 +72,13 @@ public class DSLEngine implements IPropagationEngine {
 
     private boolean init;
 
+    final PropagationTrigger trigger; // an object that starts the propagation
+
 
     public DSLEngine(Solver solver) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
+        this.trigger = new PropagationTrigger(this, solver);
 
         variables = solver.getVars();
         int nbVar = 0;
@@ -108,6 +111,8 @@ public class DSLEngine implements IPropagationEngine {
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+        trigger.addAll(propagators);
+
         p2i = new AId2AbId(m, M, -1);
         //        p2i = new MId2AbId(M - m + 1, -1);
         fines_p = new Arc[nbProp][];
@@ -138,6 +143,9 @@ public class DSLEngine implements IPropagationEngine {
 
     @Override
     public void propagate() throws ContradictionException {
+        if (trigger.needToRun()) {
+            trigger.propagate();
+        }
         propagationStrategy.execute();
         assert propagationStrategy.isEmpty();
     }

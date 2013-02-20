@@ -37,7 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.Operator;
 import solver.exception.ContradictionException;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -213,7 +213,7 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testUSum2() throws ContradictionException {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
-        PropagationStrategies.DEFAULT.make(sum);
+        PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);

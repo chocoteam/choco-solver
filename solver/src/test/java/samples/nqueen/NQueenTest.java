@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -154,9 +154,9 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < PropagationStrategies.values().length; t++) {
+            for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                PropagationStrategies.values()[t].make(sol);
+                PropagationEngineFactory.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -173,10 +173,10 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < PropagationStrategies.values().length; t++) {
+            for (int t = 0; t < PropagationEngineFactory.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
-                PropagationStrategies.values()[t].make(sol);
+                PropagationEngineFactory.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

@@ -35,7 +35,7 @@ import solver.Configuration;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.propagation.PropagationStrategies;
+import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -89,13 +89,13 @@ public class CycleLtTest {
             st.append(StringUtils.pad("POPPED ", -15, " "));
             st.append(StringUtils.pad("(DIFF)", -15, " "));
             float[] times = new float[nbIt];
-            for (int j = 0; j < PropagationStrategies.values().length; j++) {
+            for (int j = 0; j < PropagationEngineFactory.values().length; j++) {
                 log.info(st.toString());
                 st.setLength(0);
                 st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
                 for (int i = 0; i < nbIt; i++) {
                     Solver rand = modeler(n);
-                    PropagationStrategies.values()[j].make(rand);
+                    PropagationEngineFactory.values()[j].make(rand);
                     rand.findAllSolutions();
                     st.append(StringUtils.pad(String.format("%.3f ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
                     times[i] = rand.getMeasures().getInitialPropagationTimeCount();

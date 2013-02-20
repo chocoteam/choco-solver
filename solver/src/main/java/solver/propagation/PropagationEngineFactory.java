@@ -40,7 +40,6 @@ import solver.propagation.hardcoded.VariableEngine;
  * The second type enable to declare a specific behavior: a propagation strategy
  *
  * @author Charles Prud'homme
- * @see PropagationStrategies
  * @since 05/07/12
  */
 public enum PropagationEngineFactory {
