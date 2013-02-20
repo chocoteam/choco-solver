@@ -26,120 +26,98 @@
  */
 package solver.variables.view;
 
-import common.ESat;
+import common.util.iterators.DisposableRangeIterator;
+import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.BoolVar;
-import solver.variables.delta.IEnumDelta;
+import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
-import solver.variables.delta.NoDelta;
+import solver.variables.delta.IntDelta;
 
 /**
- * A view for boolean variable, that enforce not(b).
+ * A specific view for equality on bool var
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/07/12
+ * @since 23/07/12
  */
-public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
+public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
 
-    public BoolNotView(BoolVar var, Solver solver) {
-        super("not(" + var.getName() + ")", var, solver);
+    public EqView(IV var, Solver solver) {
+        super("eq(" + var.getName() + ")", var, solver);
     }
 
     @Override
-    public ESat getBooleanValue() {
-        return ESat.not(var.getBooleanValue());
-    }
-
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        return var.setToFalse(this);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        return var.setToTrue(this);
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        return var.monitorDelta(propagator);
     }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return var.removeValue(1 - value, this);
+        return var.removeValue(value, this);
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
-        else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
-        else if (hasEnumeratedDomain()) {
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
-            }
-            return anyChange;
-        } else {
-            return false;
-        }
+        return var.removeInterval(from, to, this);
     }
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return var.instantiateTo(1 - value, this);
+        return var.instantiateTo(value, this);
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && var.instantiateTo(1 - value, this);
+        return var.updateLowerBound(value, this);
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return value < 1 && var.instantiateTo(1 - value, this);
+        return var.updateUpperBound(value, this);
     }
 
     @Override
     public boolean contains(int value) {
-        return var.contains(1 - value);
+        return var.contains(value);
     }
 
     @Override
     public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(1 - value);
+        return var.instantiatedTo(value);
     }
 
     @Override
     public int getValue() {
-        int v = var.getValue();
-        return 1 - v;
+        return var.getValue();
     }
 
     @Override
     public int getLB() {
-        if (var.instantiated()) {
-            return getValue();
-        } else return 0;
+        return var.getLB();
     }
 
     @Override
     public int getUB() {
-        if (var.instantiated()) {
-            return getValue();
-        } else return 1;
+        return var.getUB();
     }
 
     @Override
     public int nextValue(int v) {
-        return var.previousValue(1 - v);
+        return var.nextValue(v);
     }
 
     @Override
     public int previousValue(int v) {
-        return var.nextValue(1 - v);
+        return var.previousValue(v);
+    }
+
+    @Override
+    public String toString() {
+        return "eq(" + this.var.toString() + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
@@ -148,21 +126,12 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     }
 
     @Override
-    public IIntDeltaMonitor monitorDelta(ICause propagator) {
-        var.createDelta();
-        if (var.getDelta() == NoDelta.singleton) {
-            return IIntDeltaMonitor.Default.NONE;
-        }
-        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator), propagator) {
-
-            @Override
-            protected int transform(int value) {
-                return 1 - value;
-            }
-        };
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        return var.getValueIterator(bottomUp);
     }
 
-    public String toString() {
-        return "not(" + var.getName() + ")";
+    @Override
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        return var.getRangeIterator(bottomUp);
     }
 }

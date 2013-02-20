@@ -111,11 +111,6 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
-    public IntView[] getViews() {
-        return new IntView[0];
-    }
-
-    @Override
     public int getId() {
         return ID;
     }
@@ -311,11 +306,11 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event) throws ContradictionException {
     }
 
     @Override
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event) throws ContradictionException {
         //void
     }
 

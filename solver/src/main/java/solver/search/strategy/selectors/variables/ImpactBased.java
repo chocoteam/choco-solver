@@ -34,7 +34,6 @@ import memory.IStateDouble;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -454,11 +453,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
     public void explain(Deduction d, Explanation e) {
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
@@ -469,11 +463,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     @Override
     public boolean reactOnPromotion() {
         return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 
     @Override

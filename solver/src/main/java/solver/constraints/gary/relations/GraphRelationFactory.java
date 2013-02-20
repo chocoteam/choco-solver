@@ -27,7 +27,6 @@
 package solver.constraints.gary.relations;
 
 import solver.variables.IntVar;
-import solver.variables.MetaVariable;
 import solver.variables.Variable;
 
 
@@ -45,9 +44,6 @@ public class GraphRelationFactory {
     public static GraphRelation equivalence(Variable[] vars) {
         if (vars instanceof IntVar[]) {
             return new Eq_Int((IntVar[]) vars);
-        }
-        if (vars instanceof MetaVariable[]) {
-            return new Eq_IntVector((MetaVariable[]) vars);
         }
         throw new UnsupportedOperationException("you must define the equivalence relationship for this kind of variable");
     }

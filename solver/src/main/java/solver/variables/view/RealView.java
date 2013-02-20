@@ -28,7 +28,6 @@ package solver.variables.view;
 
 
 import solver.ICause;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -63,13 +62,13 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt) throws ContradictionException {
         if (evt == EventType.INSTANTIATE) {
             evt = EventType.BOUND;
         } else if (evt == EventType.REMOVE) {
             return;
         }
-        notifyPropagators(evt, cause);
+        notifyPropagators(evt, this);
     }
 
     @Override
@@ -79,16 +78,6 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
-
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
 
     @Override
     public boolean reactOnPromotion() {
@@ -107,20 +96,17 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        return var.updateLowerBound((int) value, cause);
+        return var.updateLowerBound((int) value, this);
     }
 
     @Override
     public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
-        assert cause != null;
-        return var.updateUpperBound((int) value, cause);
+        return var.updateUpperBound((int) value, this);
     }
 
     @Override
     public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
-        assert cause != null;
-        return var.updateLowerBound((int) lowerbound, cause) & var.updateUpperBound((int) upperbound, cause);
+        return var.updateLowerBound((int) lowerbound, this) & var.updateUpperBound((int) upperbound, this);
     }
 
     @Override
@@ -159,17 +145,16 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        notifyMonitors(event, cause);
+        notifyMonitors(event);
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event, cause);
+        notifyViews(event);
     }
 
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
+    public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event, cause);
+            monitors[i].onUpdate(this, event);
         }
     }
 

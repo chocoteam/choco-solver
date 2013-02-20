@@ -32,7 +32,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
@@ -145,11 +144,6 @@ public class Solution implements ICause {
     }
 
     @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
     public void explain(Deduction d, Explanation e) {
         e.add(Explanation.SYSTEM);
     }
@@ -157,11 +151,6 @@ public class Solution implements ICause {
     @Override
     public boolean reactOnPromotion() {
         return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 
     @Override

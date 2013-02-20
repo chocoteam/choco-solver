@@ -54,11 +54,11 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<ID, IV> {
+public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     public final int cste;
 
-    public OffsetView(final IV var, final int cste, Solver solver) {
+    public OffsetView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "+" + cste + ")", var, solver);
         this.cste = cste;
     }
@@ -68,7 +68,6 @@ public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntV
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
-//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
@@ -120,7 +119,7 @@ public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntV
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(from - cste, to - cste, cause);
+            boolean done = var.removeInterval(from - cste, to - cste, this);
             if (done) {
                 notifyPropagators(EventType.REMOVE, cause);
             }
@@ -168,7 +167,7 @@ public class OffsetView<ID extends IntDelta, IV extends IntVar<ID>> extends IntV
         int old = this.getUB();
         if (old > value) {
             EventType e = EventType.DECUPP;
-            boolean done = var.updateUpperBound(value - cste, cause);
+            boolean done = var.updateUpperBound(value - cste, this);
             if (instantiated()) {
                 e = EventType.INSTANTIATE;
                 if (cause.reactOnPromotion()) {

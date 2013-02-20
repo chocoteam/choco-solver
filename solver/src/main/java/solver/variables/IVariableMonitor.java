@@ -33,21 +33,28 @@ import java.io.Serializable;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
- * or instantiation.
+ * or instantiation) and do something right after the modification.
+ * <p/>
+ * This differs from {@link solver.constraints.propagators.Propagator} because it is not scheduled in the propagation engine.
+ * However, it assumes that <code>this</code> executes fast and low complexity operations.
+ * Otherwise, it should be a propagator.
+ * <p/>
+ * This also differs from {@link solver.variables.view.IView} because it is not a specific variable, and can connect
+ * two or more variables together. For instance, this can be used for logging issue.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends Serializable{
+public interface IVariableMonitor<V extends Variable> extends Serializable, ICause {
 
     /**
      * Operations to execute after updating the domain variable
      *
-     * @param var   variable concerned
-     * @param evt   modification event
-     * @param cause origin of the modification
+     * @param var variable concerned
+     * @param evt modification event
      */
-    void onUpdate(V var, EventType evt, ICause cause) throws ContradictionException;
+    void onUpdate(V var, EventType evt) throws ContradictionException;
 
 }

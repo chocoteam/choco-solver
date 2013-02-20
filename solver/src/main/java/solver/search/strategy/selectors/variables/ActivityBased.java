@@ -35,8 +35,10 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ICause;
 import solver.Solver;
+import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.search.limits.FailLimit;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -300,8 +302,19 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
 
     @Override
-    public void onUpdate(IntVar var, EventType evt, ICause cause) {
+    public void onUpdate(IntVar var, EventType evt) {
         affected.set(v2i.get(var.getId()));
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        throw new SolverException("Activity does not modify variables on IVariableMonitor.onUpdate.\n" +
+                "So it cannot explain value removals.");
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
     }
 
     private void beforeDownBranch() {

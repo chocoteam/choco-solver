@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.globalcardinality.PropFastCount;
+import solver.constraints.propagators.nary.globalcardinality.PropFastGCC;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -68,8 +68,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
                 throw new UnsupportedOperationException("ERROR: multiple occurrences of value: " + v);
             }
         }
-//        this.setPropagators(new PropFastGCC(vars, values, map, cards));
-        this.setPropagators(new PropFastCount(vars, values[0], cards[0]));
+        this.setPropagators(new PropFastGCC(vars, values, map, cards));
+//        this.setPropagators(new PropFastCount(vars, values[0], cards[0]));
 //        this.setPropagators(new PropCount(values[0], ArrayUtils.append(vars, new IntVar[]{cards[0]}), true, true));
     }
 

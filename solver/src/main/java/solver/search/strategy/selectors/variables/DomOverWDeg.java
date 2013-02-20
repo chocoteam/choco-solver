@@ -29,9 +29,11 @@ package solver.search.strategy.selectors.variables;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.IStateInt;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.search.loop.monitors.FailPerPropagator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.EventType;
@@ -138,7 +140,7 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
     }
 
     @Override
-    public void onUpdate(IntVar var, EventType evt, ICause cause) {
+    public void onUpdate(IntVar var, EventType evt) {
         if (evt == EventType.INSTANTIATE) {
             Propagator[] props = var.getPropagators();
             for (int i = 0; i < props.length; i++) {
@@ -146,5 +148,16 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
                 pid2ari.get(pid).add(-1);
             }
         }
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        throw new SolverException("DomOverWDeg does not modify variables on IVariableMonitor.onUpdate.\n" +
+                "So it cannot explain value removals.");
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
     }
 }

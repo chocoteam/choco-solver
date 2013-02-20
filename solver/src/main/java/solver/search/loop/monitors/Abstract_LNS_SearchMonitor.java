@@ -36,7 +36,6 @@ package solver.search.loop.monitors;
 
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -150,10 +149,6 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
      */
     protected abstract void restrictLess();
 
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
 
     @Override
     public void explain(Deduction d, Explanation e) {
@@ -164,8 +159,4 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
         return false;
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
 }

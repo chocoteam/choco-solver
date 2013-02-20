@@ -133,6 +133,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
                     if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                        LOGGER.debug("The variable " + v + " appears twice in the propagator, it is then duplicated, BE CAREFUL!");
                         vars[i] = (V) VariableFactory.eq((IntVar) v);
                     } else {
                         throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
@@ -373,11 +374,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * Returns the promomotion policy of <code>this</code>.
+     * If <code>this</code> reacts on promotion, it must be informed of the promotion of an event it created.
+     * (example: removing the lower bound of a variable is promoted in lower-bound modification)
+     *
+     * @return <code>true</code> if <code>this</code> must be informed of promotion
+     */
+    public final boolean reactOnPromotion() {
+        return reactOnPromotion;
+    }
+
+    /**
      * Returns the constraint including this propagator
      *
      * @return Constraint
      */
-    @Override
     public final Constraint getConstraint() {
         return constraint;
     }
@@ -386,9 +397,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return priority;
     }
 
-    public final boolean reactOnPromotion() {
-        return reactOnPromotion;
-    }
 
     /**
      * returns a explanation for the decision mentionned in parameters

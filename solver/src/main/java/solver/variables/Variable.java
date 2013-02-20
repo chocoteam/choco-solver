@@ -120,8 +120,6 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      */
     int getIndiceInPropagator(int pidx);
 
-    IView[] getViews();
-
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
      * The monitor is inactive at the creation and must be activated (by the engine propagation).
@@ -203,9 +201,21 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      */
     void notifyPropagators(EventType event, ICause cause) throws ContradictionException;
 
-    void notifyViews(EventType event, ICause cause) throws ContradictionException;
+    /**
+     * Notify views of observed variable modifications
+     *
+     * @param event the event which occurred on the variable
+     * @throws ContradictionException
+     */
+    void notifyViews(EventType event) throws ContradictionException;
 
-    void notifyMonitors(EventType event, ICause cause) throws ContradictionException;
+    /**
+     * Notify monitors of observed variable modifications
+     *
+     * @param event the event which occurred on the variable
+     * @throws ContradictionException
+     */
+    void notifyMonitors(EventType event) throws ContradictionException;
 
     /**
      * Throws a contradiction exception based on <cause, message>

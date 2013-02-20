@@ -33,6 +33,11 @@ import solver.variables.Variable;
 import solver.variables.delta.IDelta;
 
 /**
+ * An interface to define views.
+ * A view is a specific variable that does not declare any domain but relies on another variable.
+ * It converts getters and setters to ensure that the semantic of the view is respected.
+ * <p/>
+ * This is intend to replace very specific propagator such as equality.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -50,9 +55,8 @@ public interface IView<D extends IDelta> extends ICause, Variable<D> {
     /**
      * Transform the original event wrt the view
      *
-     * @param evt   original event
-     * @param cause cause of the modification
+     * @param evt original event
      * @throws ContradictionException can encounter a contradiction
      */
-    void transformEvent(EventType evt, ICause cause) throws ContradictionException;
+    void transformEvent(EventType evt) throws ContradictionException;
 }

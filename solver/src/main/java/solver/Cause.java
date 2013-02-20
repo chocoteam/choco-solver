@@ -26,7 +26,6 @@
  */
 package solver;
 
-import solver.constraints.Constraint;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 
@@ -40,21 +39,10 @@ public enum Cause implements ICause {
     Null;
 
     @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
     public void explain(Deduction d, Explanation e) {
     }
 
-    @Override
     public boolean reactOnPromotion() {
         return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 }

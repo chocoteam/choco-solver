@@ -27,8 +27,6 @@
 
 package solver.variables;
 
-import solver.Cause;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -206,18 +204,9 @@ public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
-        if (cause == Cause.Null) {
-            for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].transformEvent(event, cause);
-            }
-        } else {
-            for (int i = vIdx - 1; i >= 0; i--) {
-                if (views[i] != cause) { // reference is enough
-                    views[i].transformEvent(event, cause);
-                }
-            }
+    public void notifyViews(EventType event) throws ContradictionException {
+        for (int i = vIdx - 1; i >= 0; i--) {
+            views[i].transformEvent(event);
         }
     }
 

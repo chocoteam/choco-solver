@@ -28,7 +28,6 @@
 package solver;
 
 
-import solver.constraints.Constraint;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 
@@ -48,38 +47,21 @@ import java.io.Serializable;
 public interface ICause extends Serializable {
 
     /**
-     * returns the constraint associated to <code>this</code>, if any.
-     *
-     * @return a constraint or null
-     */
-    Constraint getConstraint();
-
-    /**
      * Feeds an explanation based on <code>this</code>.
      *
      * @param d the deduction
      * @param e explanation to feed
      */
-    void explain( Deduction d, Explanation e);
+    void explain(Deduction d, Explanation e);
 
 
     /**
-     * Returns the promomotion policy of <code>this</code>.
+     * Returns the promotion policy of <code>this</code>.
      * If <code>this</code> reacts on promotion, it must be informed of the promotion of an event it created.
      * (example: removing the lower bound of a variable is promoted in lower-bound modification)
      *
      * @return <code>true</code> if <code>this</code> must be informed of promotion
      */
     boolean reactOnPromotion();
-
-    /**
-     * Gets the propagation conditions of <code>this</code> on the variable at position <code>vIdx</code> in its internal
-     * structure. A propagation condition defines on which event occurring on the <code>vIdx</code>^th
-     * variable <code>this</code> can do filter values.
-     *
-     * @param vIdx index of the variable
-     * @return a mask
-     */
-    int getPropagationConditions(int vIdx);
 
 }

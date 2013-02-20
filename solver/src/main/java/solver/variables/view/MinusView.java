@@ -75,14 +75,8 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
-//        if (value == inf && value == sup) {
-//            solver.getExplainer().removeValue(this, value, cause);
-//            this.contradiction(this, EventType.REMOVE, MSG_REMOVE);
-//        } else {
         if (inf <= value && value <= sup) {
             EventType e = EventType.REMOVE;
 
@@ -107,7 +101,6 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
                     }
                 }
                 this.notifyPropagators(e, cause);
-//                    solver.getExplainer().removeValue(this, value, cause);
                 return true;
             }
         }
@@ -117,13 +110,12 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(-to, -from, cause);
+            boolean done = var.removeInterval(-to, -from, this);
             if (done) {
                 notifyPropagators(EventType.REMOVE, cause);
             }
@@ -133,8 +125,6 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         boolean done = var.instantiateTo(-value, this);
         if (done) {
             notifyPropagators(EventType.INSTANTIATE, cause);
@@ -145,14 +135,8 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
-//            if (this.getUB() < value) {
-//                solver.getExplainer().updateLowerBound(this, -old, -value, cause);
-//                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-//            } else {
             EventType e = EventType.INCLOW;
             boolean done = var.updateUpperBound(-value, this);
             if (instantiated()) {
@@ -163,24 +147,16 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
             }
             if (done) {
                 this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, -old, -value, cause);
                 return true;
             }
         }
-//        }
         return false;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        assert cause != null;
-//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > value) {
-//            if (this.getLB() > value) {
-//                solver.getExplainer().updateUpperBound(this, old, value, cause);
-//                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-//            } else {
             EventType e = EventType.DECUPP;
             boolean done = var.updateLowerBound(-value, this);
             if (instantiated()) {
@@ -191,7 +167,6 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
             }
             if (done) {
                 this.notifyPropagators(e, cause);
-//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 return true;
             }
         }
@@ -382,12 +357,12 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt) throws ContradictionException {
         if (evt == EventType.INCLOW) {
             evt = EventType.DECUPP;
         } else if (evt == EventType.DECUPP) {
             evt = EventType.INCLOW;
         }
-        notifyPropagators(evt, cause);
+        notifyPropagators(evt, this);
     }
 }

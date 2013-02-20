@@ -27,9 +27,9 @@
 
 package solver.variables.graph;
 
-import memory.IEnvironment;
 import common.util.objects.graphs.IGraph;
 import common.util.objects.setDataStructures.ISet;
+import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -269,17 +269,16 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        notifyMonitors(event, cause);
+        notifyMonitors(event);
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event, cause);
+        notifyViews(event);
     }
 
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
+    public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event, cause);
+            monitors[i].onUpdate(this, event);
         }
     }
 

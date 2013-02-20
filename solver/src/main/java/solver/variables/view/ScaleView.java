@@ -121,7 +121,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
+            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), this);
             if (done) {
                 notifyPropagators(EventType.REMOVE, cause);
             }

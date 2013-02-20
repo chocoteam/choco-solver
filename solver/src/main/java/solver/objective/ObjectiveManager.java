@@ -30,7 +30,6 @@ package solver.objective;
 import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -38,7 +37,6 @@ import solver.explanations.VariableState;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.decision.Decision;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
@@ -195,20 +193,9 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
         }
     }
 
-    // ICause methods (useless)
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
     @Override
     public boolean reactOnPromotion() {
         return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.getMask();
     }
 
     @Override

@@ -78,7 +78,7 @@ public final class ContradictionException extends Exception {
      * {@inheritDoc}
      */
     public String toString() {
-        return "CONTRADICTION (" + (c == null ? "" : c.getConstraint() + ", ") + v + ") : " + s;
+        return "CONTRADICTION (" + (c == null ? "" : c.toString() + ", ") + v + ") : " + s;
     }
 
     /**

@@ -36,7 +36,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ExplanationEngine;
-import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -159,16 +158,11 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     @Override
     public final boolean reactOnPromotion() {
         return false;
     }
 
-    @Override
-    public final int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
 
     @Override
     public void explain(Deduction d, Explanation e) {

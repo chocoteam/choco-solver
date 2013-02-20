@@ -34,7 +34,6 @@ import common.util.iterators.DisposableValueBoundIterator;
 import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -67,8 +66,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
 
     protected ID delta;
 
-    protected boolean reactOnRemoval;
-
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
@@ -77,7 +74,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
         super(name, solver);
         this.var = var;
         this.delta = (ID) NoDelta.singleton;
-        this.reactOnRemoval = false;
         this.var.subscribeView(this);
         this.solver.associates(this);
     }
@@ -129,24 +125,28 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     @Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        notifyMonitors(event, cause);
+        notifyMonitors(event);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event, cause);
+        notifyViews(event);
     }
 
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        assert cause != null;
+    public void notifyMonitors(EventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event, cause);
+            monitors[i].onUpdate(this, event);
         }
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyPropagators(evt, cause);
+    public void transformEvent(EventType evt) throws ContradictionException {
+        notifyPropagators(evt, this);
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return true;
     }
 
     @Override
@@ -157,11 +157,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     @Override
     public void explain(Deduction d, Explanation e) {
         var.explain(VariableState.DOM, e);
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return reactOnRemoval;
     }
 
     @Override
@@ -200,17 +195,6 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
     }
 
     @Override

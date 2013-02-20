@@ -31,7 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.delta.OneValueDelta;
+import solver.variables.delta.IEnumDelta;
 
 /**
  * A specific view for equality on bool var
@@ -40,10 +40,10 @@ import solver.variables.delta.OneValueDelta;
  * @author Charles Prud'homme
  * @since 23/07/12
  */
-public class BoolEqView extends OffsetView<OneValueDelta, BoolVar<OneValueDelta>> implements BoolVar<OneValueDelta> {
+public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> implements BoolVar<IEnumDelta> {
 
-    public BoolEqView(BoolVar var, Solver solver) {
-        super(var, 0, solver);
+    public BoolEqView(BoolVar<IEnumDelta> var, Solver solver) {
+        super(var, solver);
     }
 
     @Override
@@ -53,13 +53,11 @@ public class BoolEqView extends OffsetView<OneValueDelta, BoolVar<OneValueDelta>
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(1, cause);
+        return var.setToTrue(this);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(0, cause);
+        return var.setToFalse(this);
     }
 }

@@ -41,7 +41,7 @@ import solver.variables.IntVar;
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} <= or >= or = occVar
  * assumes the occVar variable to be the last of the variables of the constraint:
  * vars = [lvars | occVar]
- * with  lvars = list of variables for which the occurence of occval in their domain is constrained
+ * with  lvars = list of variables for which the occurrence of occval in their domain is constrained
  * <br/>
  *
  * @author Jean-Guillaume Fages
@@ -54,7 +54,6 @@ public class PropFastCount extends Propagator<IntVar> {
 
     private int n;
     private int value;
-    private IntVar card;
     private ISet possibles, mandatories;
 
     //***********************************************************************************
@@ -72,7 +71,6 @@ public class PropFastCount extends Propagator<IntVar> {
     public PropFastCount(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
         super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, false);
         this.value = restrictedValue;
-        this.card = valueCardinality;
         this.n = decvars.length;
         this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
         this.mandatories = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
@@ -96,6 +94,28 @@ public class PropFastCount extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
+
+
+    @Override
+    public boolean advise(int varIdx, int mask) {
+        if (super.advise(varIdx, mask)) {
+            if (varIdx < n) {
+                if (possibles.contain(varIdx)) {
+                    if (!vars[varIdx].contains(value)) {
+                        possibles.remove(varIdx);
+                        return true;
+                    } else if (vars[varIdx].instantiated()) {
+                        possibles.remove(varIdx);
+                        mandatories.add(varIdx);
+                        return true;
+                    }
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -121,40 +141,24 @@ public class PropFastCount extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        //forcePropagate(EventType.CUSTOM_PROPAGATION);
-        if (varIdx < n) {
-            if (possibles.contain(varIdx)) {
-                if (!vars[varIdx].contains(value)) {
-                    possibles.remove(varIdx);
-                    filter();
-                } else if (vars[varIdx].instantiated()) {
-                    possibles.remove(varIdx);
-                    mandatories.add(varIdx);
-                    filter();
-                }
-            }
-        } else {
-            filter();
-        }
-//        forcePropagate(EventType.FULL_PROPAGATION);
+        filter();
     }
 
     private void filter() throws ContradictionException {
-        card.updateLowerBound(mandatories.getSize(), aCause);
-        card.updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
-        if (card.instantiated()) {
-            int nb = card.getValue();
+        vars[n].updateLowerBound(mandatories.getSize(), aCause);
+        vars[n].updateUpperBound(mandatories.getSize() + possibles.getSize(), aCause);
+        if (vars[n].instantiated()) {
+            int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    mandatories.add(j);
                     vars[j].instantiateTo(value, aCause);
                 }
-                possibles.clear();
+                setPassive();
             } else if (mandatories.getSize() == nb) {
                 for (int var = possibles.getFirstElement(); var >= 0; var = possibles.getNextElement()) {
                     vars[var].removeValue(value, aCause);
                 }
-                possibles.clear();
+                setPassive();
             }
         }
     }
@@ -166,9 +170,9 @@ public class PropFastCount extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        // if (vIdx >= n) {// cardinality variables
-        //     return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-        // }
+        if (vIdx >= n) {// cardinality variables
+            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        }
         return EventType.INT_ALL_MASK();
     }
 
@@ -176,11 +180,9 @@ public class PropFastCount extends Propagator<IntVar> {
     public ESat isEntailed() {
         int min = 0;
         int max = 0;
-        int j, k, ub;
         IntVar v;
         for (int i = 0; i < n; i++) {
             v = vars[i];
-            ub = v.getUB();
             if (v.instantiatedTo(value)) {
                 min++;
                 max++;
@@ -190,10 +192,10 @@ public class PropFastCount extends Propagator<IntVar> {
                 }
             }
         }
-        if (card.getLB() > max || card.getUB() < min) {
+        if (vars[n].getLB() > max || vars[n].getUB() < min) {
             return ESat.FALSE;
         }
-        if (!(card.instantiated() && max == min)) {
+        if (!(vars[n].instantiated() && max == min)) {
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;

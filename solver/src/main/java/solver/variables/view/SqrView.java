@@ -159,8 +159,8 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
         } else {
             from = floor_sqrt(from);
             to = floor_sqrt(to);
-            boolean done = var.removeInterval(-to, -from, cause);
-            done |= var.removeInterval(from, to, cause);
+            boolean done = var.removeInterval(-to, -from, this);
+            done |= var.removeInterval(from, to, this);
             if (done) {
                 notifyPropagators(EventType.REMOVE, cause);
             }
@@ -177,7 +177,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
             done |= var.updateUpperBound(v, this);
             EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
-                done |= var.removeInterval(-v + 1, v - 1, cause);
+                done |= var.removeInterval(-v + 1, v - 1, this);
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
@@ -560,15 +560,15 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyPropagators(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, this);
             } else { // otherwise, we do not know the previous values, so its hard to tell whether it is LB or UB mod
-                notifyPropagators(EventType.BOUND, cause);
+                notifyPropagators(EventType.BOUND, this);
             }
         } else {
-            notifyPropagators(evt, cause);
+            notifyPropagators(evt, this);
         }
     }
 }

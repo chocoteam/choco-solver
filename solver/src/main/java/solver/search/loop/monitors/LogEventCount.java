@@ -29,9 +29,11 @@ package solver.search.loop.monitors;
 import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.LoggerFactory;
-import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
@@ -80,7 +82,18 @@ public class LogEventCount implements IVariableMonitor, IMonitorClose {
     }
 
     @Override
-    public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+    public void onUpdate(Variable var, EventType evt) throws ContradictionException {
         countPerEvent.adjustOrPutValue(evt, 1, 1);
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        throw new SolverException("LogEventCount does not modify variables on IVariableMonitor.onUpdate.\n" +
+                "So it cannot explain value removals.");
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
     }
 }

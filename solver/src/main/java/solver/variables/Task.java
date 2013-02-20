@@ -34,9 +34,10 @@
 
 package solver.variables;
 
-import solver.Cause;
-import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 
 /**
  * Container representing a task:
@@ -73,34 +74,54 @@ public class Task {
         if (s.hasEnumeratedDomain() || d.hasEnumeratedDomain() || e.hasEnumeratedDomain()) {
             update = new IVariableMonitor() {
                 @Override
-                public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                public void onUpdate(Variable var, EventType evt) throws ContradictionException {
                     boolean fixpoint = true;
                     while (fixpoint) {
                         // start
-                        fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-                        fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                        fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), this);
+                        fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), this);
                         // end
-                        fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-                        fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                        fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), this);
+                        fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), this);
                         // duration
-                        fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-                        fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+                        fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), this);
+                        fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), this);
                     }
+                }
+
+                @Override
+                public void explain(Deduction d, Explanation e) {
+                    throw new SolverException("A task cannot explain itself yet.");
+                }
+
+                @Override
+                public boolean reactOnPromotion() {
+                    return false;
                 }
             };
         } else {
             update = new IVariableMonitor() {
                 @Override
-                public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                public void onUpdate(Variable var, EventType evt) throws ContradictionException {
                     // start
-                    start.updateLowerBound(end.getLB() - duration.getUB(), cause);
-                    start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                    start.updateLowerBound(end.getLB() - duration.getUB(), this);
+                    start.updateUpperBound(end.getUB() - duration.getLB(), this);
                     // end
-                    end.updateLowerBound(start.getLB() + duration.getLB(), cause);
-                    end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                    end.updateLowerBound(start.getLB() + duration.getLB(), this);
+                    end.updateUpperBound(start.getUB() + duration.getUB(), this);
                     // duration
-                    duration.updateLowerBound(end.getLB() - start.getUB(), cause);
-                    duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+                    duration.updateLowerBound(end.getLB() - start.getUB(), this);
+                    duration.updateUpperBound(end.getUB() - start.getLB(), this);
+                }
+
+                @Override
+                public void explain(Deduction d, Explanation e) {
+                    throw new SolverException("A task cannot explain itself yet.");
+                }
+
+                @Override
+                public boolean reactOnPromotion() {
+                    return false;
                 }
             };
         }
@@ -119,7 +140,7 @@ public class Task {
      * @throws ContradictionException
      */
     public void ensureBoundConsistency() throws ContradictionException {
-        update.onUpdate(start, EventType.REMOVE, Cause.Null);
+        update.onUpdate(start, EventType.REMOVE);
     }
 
     //***********************************************************************************

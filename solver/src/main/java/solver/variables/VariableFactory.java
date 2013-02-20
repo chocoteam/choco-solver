@@ -560,15 +560,6 @@ public enum VariableFactory {
         if (CSTE == 0) {
             return VAR;
         }
-        IView[] views = VAR.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof OffsetView) {
-                OffsetView ov = (OffsetView) views[i];
-                if (VAR == ov.getVariable() && ov.cste == CSTE) {
-                    return ov;
-                }
-            }
-        }
         return new OffsetView(VAR, CSTE, VAR.getSolver());
     }
 
@@ -589,28 +580,10 @@ public enum VariableFactory {
     }
 
     private static IntVar eqint(IntVar ivar) {
-        IView[] views = ivar.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof OffsetView) {
-                OffsetView ov = (OffsetView) views[i];
-                if (ivar == ov.getVariable() && ov.cste == 0) {
-                    return ov;
-                }
-            }
-        }
-        return new OffsetView(ivar, 0, ivar.getSolver());
+        return new EqView(ivar, ivar.getSolver());
     }
 
     private static BoolVar eqbool(BoolVar boolVar) {
-        IView[] views = boolVar.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof BoolEqView) {
-                BoolEqView ov = (BoolEqView) views[i];
-                if (boolVar == ov.getVariable() && ov.cste == 0) {
-                    return ov;
-                }
-            }
-        }
         return new BoolEqView(boolVar, boolVar.getSolver());
     }
 
@@ -623,15 +596,6 @@ public enum VariableFactory {
      * @param BOOL a boolean variable.
      */
     public static BoolVar not(BoolVar BOOL) {
-        IView[] views = BOOL.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof BoolEqView) {
-                BoolNotView ov = (BoolNotView) views[i];
-                if (BOOL == ov.getVariable()) {
-                    return ov;
-                }
-            }
-        }
         return new BoolNotView(BOOL, BOOL.getSolver());
     }
 
@@ -645,15 +609,6 @@ public enum VariableFactory {
      * @param VAR an integer variable
      */
     public static IntVar minus(IntVar VAR) {
-        IView[] views = VAR.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof MinusView) {
-                MinusView mv = (MinusView) views[i];
-                if (VAR == mv.getVariable()) {
-                    return mv;
-                }
-            }
-        }
         return new MinusView(VAR, VAR.getSolver());
     }
 
@@ -685,15 +640,6 @@ public enum VariableFactory {
             } else if (CSTE == 1) {
                 var = VAR;
             } else {
-                IView[] views = VAR.getViews();
-                for (int i = 0; i < views.length; i++) {
-                    if (views[i] instanceof ScaleView) {
-                        ScaleView sv = (ScaleView) views[i];
-                        if (VAR == sv.getVariable() && sv.cste == CSTE) {
-                            return sv;
-                        }
-                    }
-                }
                 var = new ScaleView(VAR, CSTE, VAR.getSolver());
             }
             return var;
@@ -721,15 +667,6 @@ public enum VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            IView[] views = VAR.getViews();
-            for (int i = 0; i < views.length; i++) {
-                if (views[i] instanceof AbsView) {
-                    AbsView av = (AbsView) views[i];
-                    if (VAR == av.getVariable()) {
-                        return av;
-                    }
-                }
-            }
             return new AbsView(VAR, VAR.getSolver());
         }
     }
@@ -750,15 +687,6 @@ public enum VariableFactory {
             int value = VAR.getValue();
             return fixed(value * value, VAR.getSolver());
         }
-        IView[] views = VAR.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof SqrView) {
-                SqrView sv = (SqrView) views[i];
-                if (VAR == sv.getVariable()) {
-                    return sv;
-                }
-            }
-        }
         return new SqrView(VAR, VAR.getSolver());
     }
 
@@ -771,15 +699,6 @@ public enum VariableFactory {
      * @param PRECISION used to evaluate the instantiation of the view.
      */
     public static RealVar real(IntVar VAR, double PRECISION) {
-        IView[] views = VAR.getViews();
-        for (int i = 0; i < views.length; i++) {
-            if (views[i] instanceof RealView) {
-                RealView mv = (RealView) views[i];
-                if (VAR == mv.getVariable()) {
-                    return mv;
-                }
-            }
-        }
         return new RealView(VAR, PRECISION);
     }
 

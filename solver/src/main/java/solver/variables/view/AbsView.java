@@ -29,7 +29,6 @@ package solver.variables.view;
 
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueIterator;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -125,9 +124,6 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
         done |= var.removeValue(value, this);
         if (instantiated()) {
             evt = EventType.INSTANTIATE;
-            if (cause.reactOnPromotion()) {
-                cause = Cause.Null;
-            }
         }
         if (done) {
             notifyPropagators(evt, cause);
@@ -162,9 +158,6 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
         if (var.hasEnumeratedDomain()) {
             done |= var.removeInterval(-v + 1, v - 1, this);
             evt = EventType.INSTANTIATE;
-            if (cause.reactOnPromotion()) {
-                cause = Cause.Null;
-            }
         }
         if (done) {
             notifyPropagators(evt, cause);
@@ -183,9 +176,6 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
             EventType evt = EventType.INCLOW;
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             notifyPropagators(evt, cause);
         }
@@ -201,9 +191,6 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
             EventType evt = EventType.DECUPP;
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             notifyPropagators(evt, cause);
         }
@@ -691,15 +678,15 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyPropagators(EventType.INSTANTIATE, cause);
-            } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyPropagators(EventType.BOUND, cause);
+                notifyPropagators(EventType.INSTANTIATE, this);
+            } else { // otherwise, we do not know the previous values, so its hard to tell whether it is LB or UB mod
+                notifyPropagators(EventType.BOUND, this);
             }
         } else {
-            notifyPropagators(evt, cause);
+            notifyPropagators(evt, this);
         }
     }
 }
