@@ -83,8 +83,8 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.mandatories = new ISet[n2];
         this.map = map;
         for (int idx = 0; idx < n2; idx++) {
-            mandatories[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
-            possibles[idx] = SetFactory.makeStoredSet(SetType.LINKED_LIST, n, environment);
+            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
+            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, n, environment);
         }
         this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, n2, environment);
         this.boundVar = new TIntArrayList();

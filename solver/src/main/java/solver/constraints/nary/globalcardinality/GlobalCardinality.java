@@ -69,8 +69,6 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             }
         }
         this.setPropagators(new PropFastGCC(vars, values, map, cards));
-//        this.setPropagators(new PropFastCount(vars, values[0], cards[0]));
-//        this.setPropagators(new PropCount(values[0], ArrayUtils.append(vars, new IntVar[]{cards[0]}), true, true));
     }
 
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, Solver solver) {

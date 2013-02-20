@@ -521,8 +521,8 @@ public enum IntConstraintFactory {
      * @param VARS  a vector of variables
      * @param LIMIT a variable
      */
-    public static GlobalCardinality count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
-        return global_cardinality(VARS, new int[]{VALUE}, new IntVar[]{LIMIT}, false);
+    public static Count count(int VALUE, IntVar[] VARS, IntVar LIMIT) {
+        return new Count(VALUE, VARS, LIMIT, VARS[0].getSolver());
     }
 
     /**
