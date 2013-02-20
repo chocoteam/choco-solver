@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -46,19 +47,19 @@ import java.util.List;
  * @since 26/01/11
  */
 public class ArrayBoolAndBuilder implements IBuilder {
-	@Override
-	public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-		BoolVar[] as = exps.get(0).toBoolVarArray(solver);
-		BoolVar r = exps.get(1).boolVarValue(solver);
-		if (as.length == 0){
-			solver.post(IntConstraintFactory.clauses(Literal.pos(r), solver));
-		}else{
-			Literal[] l_as = new Literal[as.length];
-			for (int i = 0; i < as.length; i++) {
-				l_as[i] = Literal.pos(as[i]);
-			}
-			Literal l_r = Literal.pos(r);
-			solver.post(IntConstraintFactory.clauses(Node.reified(l_r, Node.and(l_as)), solver));
-		}
-	}
+    @Override
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
+        BoolVar r = exps.get(1).boolVarValue(solver);
+        if (as.length == 0) {
+            return new Constraint[]{IntConstraintFactory.clauses(Literal.pos(r), solver)};
+        } else {
+            Literal[] l_as = new Literal[as.length];
+            for (int i = 0; i < as.length; i++) {
+                l_as[i] = Literal.pos(as[i]);
+            }
+            Literal l_r = Literal.pos(r);
+            return new Constraint[]{IntConstraintFactory.clauses(Node.reified(l_r, Node.and(l_as)), solver)};
+        }
+    }
 }

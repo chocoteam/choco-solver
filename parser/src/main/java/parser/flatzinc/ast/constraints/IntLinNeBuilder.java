@@ -28,9 +28,11 @@
 package parser.flatzinc.ast.constraints;
 
 import common.util.tools.StringUtils;
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.variables.IntVar;
@@ -48,13 +50,15 @@ import java.util.List;
 public class IntLinNeBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
         int[] bounds = Sum.getScalarBounds(bs, as);
         IntVar scalar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        solver.post(IntConstraintFactory.arithm(scalar, "!=", c));
-        solver.post(IntConstraintFactory.scalar(bs, as, scalar));
+        return new Constraint[]{
+                IntConstraintFactory.arithm(scalar, "!=", c),
+                IntConstraintFactory.scalar(bs, as, scalar)
+        };
     }
 }

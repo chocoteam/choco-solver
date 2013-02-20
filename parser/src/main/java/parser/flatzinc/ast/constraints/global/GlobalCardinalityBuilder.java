@@ -27,10 +27,12 @@
 
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -45,11 +47,11 @@ import java.util.List;
 public class GlobalCardinalityBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
         IntVar[] cards = exps.get(2).toIntVarArray(solver);
         boolean closed = exps.get(3).boolValue();
-        solver.post(IntConstraintFactory.global_cardinality(vars, values, cards, closed));
+        return new Constraint[]{IntConstraintFactory.global_cardinality(vars, values, cards, closed)};
     }
 }

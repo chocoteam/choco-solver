@@ -89,8 +89,9 @@ public final class FConstraint {
             builder = (IBuilder) loadManager(name);
             builders.put(id, builder);
         }
-        builder.build(aSolver, id, exps, annotations);
-//        readAnnotations(map, annotations, cstr);
+        Constraint[] c = builder.build(aSolver, id, exps, annotations, map);
+        aSolver.post(c);
+        FConstraint.readAnnotations(map, annotations, c);
     }
 
 
@@ -106,17 +107,18 @@ public final class FConstraint {
         }
     }
 
-    private static void readAnnotations(THashMap<String, Object> map, List<EAnnotation> annotations, Constraint cstr) {
-        if (annotations.size() > 0) {
-            LOGGER.trace("% unsupported operation: annotation");
-        }
+    public static void readAnnotations(THashMap<String, Object> map, List<EAnnotation> annotations, Constraint[] cstr) {
         for (int i = 0; i < annotations.size(); i++) {
             EAnnotation eanno = annotations.get(i);
             try {
                 Annotation varanno = Annotation.valueOf(eanno.id.value);
                 switch (varanno) {
                     case name:
-                        map.put(eanno.exps.get(0).toString(), cstr);
+                        String name = eanno.exps.get(0).toString();
+                        if (name.startsWith("\"") && name.endsWith("\"")) {
+                            name = name.substring(1, name.length() - 1);
+                        }
+                        map.put(name, cstr);
                         break;
                     default:
                         //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());

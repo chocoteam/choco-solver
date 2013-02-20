@@ -26,6 +26,7 @@
  */
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
@@ -47,17 +48,18 @@ import java.util.List;
 public class SetInBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar var = exps.get(0).intVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            solver.post(IntConstraintFactory.member(var, values));
+            return new Constraint[]{IntConstraintFactory.member(var, values)};
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            solver.post(IntConstraintFactory.member(var, low, upp));
-        }else{
-			Exit.log("SetVar unavailable");
-		}
+            return new Constraint[]{IntConstraintFactory.member(var, low, upp)};
+        } else {
+            Exit.log("SetVar unavailable");
+        }
+        return new Constraint[0];
     }
 }

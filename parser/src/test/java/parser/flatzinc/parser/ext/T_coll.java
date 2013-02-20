@@ -35,6 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
+import parser.flatzinc.ast.ext.Attribute;
 import parser.flatzinc.ast.ext.CombinedAttribute;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -133,7 +134,10 @@ public class T_coll extends GrammarExtTest {
 
     @Test(groups = "1s")
     public void test4() throws IOException, RecognitionException {
-        FlatzincFullExtParser fp = parser("min heap(one)");
+        for (ISchedulable a : arcs) {
+            a.attachEvaluator(Attribute.PPRIO);
+        }
+        FlatzincFullExtParser fp = parser("heap(one)");
 
         ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();
         elements.addAll(Arrays.asList(arcs));
@@ -145,6 +149,9 @@ public class T_coll extends GrammarExtTest {
 
     @Test(groups = "1s")
     public void test5() throws IOException, RecognitionException {
+        for (ISchedulable a : arcs) {
+            a.attachEvaluator(Attribute.PPRIO);
+        }
         FlatzincFullExtParser fp = parser("max heap(one)");
 
         ArrayList<ISchedulable> elements = new ArrayList<ISchedulable>();

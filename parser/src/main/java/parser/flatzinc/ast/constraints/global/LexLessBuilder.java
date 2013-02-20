@@ -26,10 +26,12 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -43,14 +45,14 @@ import java.util.List;
  */
 public class LexLessBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] xs = exps.get(0).toIntVarArray(solver);
         IntVar[] ys = exps.get(1).toIntVarArray(solver);
         boolean strict = exps.get(2).boolValue();
         if (strict) {
-            solver.post(IntConstraintFactory.lex_less(xs, ys));
+            return new Constraint[]{IntConstraintFactory.lex_less(xs, ys)};
         } else {
-            solver.post(IntConstraintFactory.lex_less_eq(xs, ys));
+            return new Constraint[]{IntConstraintFactory.lex_less_eq(xs, ys)};
         }
     }
 }

@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -46,10 +47,10 @@ import java.util.List;
 public class IntDivBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        solver.post(IntConstraintFactory.eucl_div(a, b, c));
+        return new Constraint[]{IntConstraintFactory.eucl_div(a, b, c)};
     }
 }

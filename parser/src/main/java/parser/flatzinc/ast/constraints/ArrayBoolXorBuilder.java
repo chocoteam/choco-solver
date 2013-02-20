@@ -28,9 +28,11 @@
 package parser.flatzinc.ast.constraints;
 
 import common.util.tools.StringUtils;
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -47,11 +49,12 @@ import java.util.List;
  */
 public class ArrayBoolXorBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
         IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
-        solver.post(IntConstraintFactory.sum(as, res));
-        solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
+        return new Constraint[]{
+                IntConstraintFactory.sum(as, res),
+                IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver))};
     }
 }

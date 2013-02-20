@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -46,9 +47,9 @@ import java.util.List;
 public class NValueBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar nValues = exps.get(0).intVarValue(solver);
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        solver.post(IntConstraintFactory.nvalues(vars, nValues, "at_most_BC", "at_least_AC", "at_most_greedy"));
+        return new Constraint[]{IntConstraintFactory.nvalues(vars, nValues, "at_most_BC", "at_least_AC", "at_most_greedy")};
     }
 }

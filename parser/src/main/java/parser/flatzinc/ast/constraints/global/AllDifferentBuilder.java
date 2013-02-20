@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -46,10 +47,11 @@ import java.util.List;
 public class AllDifferentBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         if (vars.length > 1) {
-			solver.post(IntConstraintFactory.alldifferent(vars, "AC"));
+            return new Constraint[]{IntConstraintFactory.alldifferent(vars, "AC")};
         }
+        return new Constraint[0];
     }
 }

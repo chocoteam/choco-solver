@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -48,7 +49,7 @@ import java.util.List;
 public class IntNeReifBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
@@ -56,7 +57,7 @@ public class IntNeReifBuilder implements IBuilder {
         Constraint c = IntConstraintFactory.arithm(a, "!=", b);
         Constraint oc = IntConstraintFactory.arithm(a, "=", b);
 
-        solver.post(IntConstraintFactory.implies(r, c));
-        solver.post(IntConstraintFactory.implies(VariableFactory.not(r), oc));
+        return new Constraint[]{IntConstraintFactory.implies(r, c),
+                IntConstraintFactory.implies(VariableFactory.not(r), oc)};
     }
 }

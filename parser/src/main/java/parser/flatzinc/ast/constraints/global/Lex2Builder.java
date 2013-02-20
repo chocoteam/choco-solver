@@ -26,10 +26,12 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
@@ -44,7 +46,7 @@ import java.util.List;
  */
 public class Lex2Builder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] xs = exps.get(0).toIntVarArray(solver);
         boolean strict = exps.get(1).boolValue();
         int le = (int) Math.sqrt(xs.length);
@@ -54,9 +56,9 @@ public class Lex2Builder implements IBuilder {
             ys[i] = Arrays.copyOfRange(xs, le * i, le * (i + 1));
         }
         if (strict) {
-            solver.post(IntConstraintFactory.lex_chain_less(ys));
+            return new Constraint[]{IntConstraintFactory.lex_chain_less(ys)};
         } else {
-            solver.post(IntConstraintFactory.lex_chain_less_eq(ys));
+            return new Constraint[]{IntConstraintFactory.lex_chain_less_eq(ys)};
         }
     }
 }

@@ -26,6 +26,7 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -52,7 +53,7 @@ import java.util.List;
  */
 public class TableBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         // array[int] of var int: x, array[int, int] of int: t
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         int[] f_t = exps.get(1).toIntArray();
@@ -87,7 +88,7 @@ public class TableBuilder implements IBuilder {
                             new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
                 }
             }
-            solver.post(IntConstraintFactory.table(x[0], x[1], relation, "AC2001"));
+            return new Constraint[]{IntConstraintFactory.table(x[0], x[1], relation, "AC2001")};
         } else {
             int[] o = new int[x.length];
             int[] d = new int[x.length];
@@ -96,7 +97,7 @@ public class TableBuilder implements IBuilder {
                 d[i] = x[i].getUB() - o[i] + 1;
             }
             LargeRelation list_t = new IterTuplesTable(t, o, d);
-            solver.post(IntConstraintFactory.table(x, list_t, "AC2001"));
+            return new Constraint[]{IntConstraintFactory.table(x, list_t, "AC2001")};
         }
     }
 

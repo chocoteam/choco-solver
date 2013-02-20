@@ -26,11 +26,13 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.EInt;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -45,27 +47,30 @@ import java.util.List;
  */
 public class CountEqBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         IntVar c = exps.get(2).intVarValue(solver);
         if (exps.get(1) instanceof EInt) {
             int y = exps.get(1).intValue();
-            solver.post(IntConstraintFactory.count(y, x, c));
-            return;
+            return new Constraint[]{IntConstraintFactory.count(y, x, c)};
         }
         IntVar y = exps.get(1).intVarValue(solver);
         if (y.instantiated()) {
-            solver.post(IntConstraintFactory.count(y.getValue(), x, c));
+            return new Constraint[]{IntConstraintFactory.count(y.getValue(), x, c)};
         } else {
             int ylb = y.getLB();
             int yub = y.getUB();
             int nb = yub - ylb + 1;
 
             IntVar[] cs = VariableFactory.boundedArray("cs", nb, c.getLB(), c.getUB(), solver);
+
+            Constraint[] cstrs = new Constraint[yub - ylb + 2];
+            int k = 0;
             for (int i = ylb; i <= yub; i++) {
-                solver.post(IntConstraintFactory.count(i, x, cs[i - ylb]));
+                cstrs[k++] = IntConstraintFactory.count(i, x, cs[i - ylb]);
             }
-            solver.post(IntConstraintFactory.element(c, cs, y, ylb));
+            cstrs[k] = IntConstraintFactory.element(c, cs, y, ylb);
+            return cstrs;
         }
     }
 }

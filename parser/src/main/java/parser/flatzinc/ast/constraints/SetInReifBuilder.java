@@ -26,6 +26,7 @@
  */
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
@@ -49,7 +50,7 @@ import java.util.List;
 public class SetInReifBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar a = exps.get(0).intVarValue(solver);
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
@@ -63,11 +64,11 @@ public class SetInReifBuilder implements IBuilder {
             cs[1] = IntConstraintFactory.not_member(a, low, upp);
         } else {
             Exit.log("SetVar unavailable");
-            return;
+            return new Constraint[0];
         }
         BoolVar r = exps.get(2).boolVarValue(solver);
-		solver.post(IntConstraintFactory.implies(r, cs[0]));
-		solver.post(IntConstraintFactory.implies(VariableFactory.not(r), cs[1]));
+        return new Constraint[]{IntConstraintFactory.implies(r, cs[0]),
+                IntConstraintFactory.implies(VariableFactory.not(r), cs[1])};
 
     }
 }

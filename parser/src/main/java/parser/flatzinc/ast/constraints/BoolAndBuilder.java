@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -47,13 +48,13 @@ import java.util.List;
  */
 public class BoolAndBuilder implements IBuilder {
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-        solver.post(IntConstraintFactory.clauses(
-				Node.reified(Literal.pos(r),
-						Node.and(Literal.pos(a),
-								Literal.pos(b))), solver));
-	}
+        return new Constraint[]{IntConstraintFactory.clauses(
+                Node.reified(Literal.pos(r),
+                        Node.and(Literal.pos(a),
+                                Literal.pos(b))), solver)};
+    }
 }

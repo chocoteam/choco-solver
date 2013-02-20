@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints.global;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -48,7 +49,7 @@ import java.util.List;
 public class CumulativeBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         final IntVar[] starts = exps.get(0).toIntVarArray(solver);
         final IntVar[] durations = exps.get(1).toIntVarArray(solver);
         final IntVar[] resources = exps.get(2).toIntVarArray(solver);
@@ -62,6 +63,6 @@ public class CumulativeBuilder implements IBuilder {
                     solver);
             tasks[i] = new Task(starts[i], durations[i], ends[i]);
         }
-        solver.post(IntConstraintFactory.cumulative(tasks, resources, limit));
+        return new Constraint[]{IntConstraintFactory.cumulative(tasks, resources, limit)};
     }
 }

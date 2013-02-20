@@ -27,6 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -46,11 +47,11 @@ import java.util.List;
 public class IntPlusBuilder implements IBuilder {
 
     @Override
-    public void build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] vars = new IntVar[2];
         vars[0] = exps.get(0).intVarValue(solver);
         vars[1] = exps.get(1).intVarValue(solver);
         IntVar c = exps.get(2).intVarValue(solver);
-        solver.post(IntConstraintFactory.sum(vars, c));
+        return new Constraint[]{IntConstraintFactory.sum(vars, c)};
     }
 }
