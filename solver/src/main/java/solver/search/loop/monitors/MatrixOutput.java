@@ -73,7 +73,7 @@ public class MatrixOutput implements IMonitorClose {
         Constraint[] cstrs = solver.getCstrs();
         int N_PROP = 0;
         for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] props = cstrs[i].propagators;
+            Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
                 p2idx.put(props[j].getId(), N_PROP++);
             }
@@ -87,7 +87,7 @@ public class MatrixOutput implements IMonitorClose {
 
         int[][] matrix = new int[N_PROP][N_VARS];
         for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] props = cstrs[i].propagators;
+            Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
                 int pidx = props[j].getId();
                 int prio = props[j].getPriority().priority;

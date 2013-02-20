@@ -58,7 +58,7 @@ public class LogPropagationCount implements IMonitorClose {
         TObjectLongHashMap<String> fcounter = new TObjectLongHashMap<String>();
         TObjectLongHashMap<String> ccounter = new TObjectLongHashMap<String>();
         for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] props = cstrs[i].propagators;
+            Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
                 String clazz = props[j].getClass().getSimpleName();
                 fcounter.adjustOrPutValue(clazz, props[j].fineERcalls, props[j].fineERcalls);

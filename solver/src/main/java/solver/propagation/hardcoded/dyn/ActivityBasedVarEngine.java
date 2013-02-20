@@ -159,7 +159,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
         List<Propagator> _propagators = new ArrayList();
         int mp = Integer.MAX_VALUE, Mp = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
-            Propagator[] cprops = constraints[c].propagators;
+            Propagator[] cprops = constraints[c].getPropagators();
             for (int j = 0; j < cprops.length; j++) {
                 _propagators.add(cprops[j]);
                 int id = cprops[j].getId();

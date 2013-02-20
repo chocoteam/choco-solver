@@ -96,7 +96,7 @@ public class VariableEngine implements IPropagationEngine {
         Constraint[] constraints = solver.getCstrs();
         List<Propagator> _propagators = new ArrayList<Propagator>();
         for (int c = 0; c < constraints.length; c++) {
-            _propagators.addAll(Arrays.asList(constraints[c].propagators));
+            _propagators.addAll(Arrays.asList(constraints[c].getPropagators()));
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
         trigger.addAll(propagators);
@@ -268,12 +268,12 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void dynamicAddition(Constraint c, boolean cut) {
         int osize = propagators.length;
-        int nbp = c.propagators.length;
+        int nbp = c.getPropagators().length;
         int nsize = osize + nbp;
         Propagator[] _propagators = propagators;
         propagators = new Propagator[nsize];
         System.arraycopy(_propagators, 0, propagators, 0, osize);
-        System.arraycopy(c.propagators, 0, propagators, osize, nbp);
+        System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             trigger.add(propagators[j], cut);
             Variable[] vars = propagators[j].getVars();

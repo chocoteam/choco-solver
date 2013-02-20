@@ -157,7 +157,7 @@ public class Arc<V extends Variable> implements Serializable, ISchedulable<Propa
         Constraint[] cstrs = solver.getCstrs();
         for (int i = 0; i < cstrs.length; i++) {
             Constraint c = cstrs[i];
-            Propagator[] props = c.propagators;
+            Propagator[] props = c.getPropagators();
             for (int j = 0; j < props.length; j++) {
                 Propagator prop = props[j];
                 Variable[] vars = prop.getVars();

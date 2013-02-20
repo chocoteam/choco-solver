@@ -67,7 +67,7 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
         targetCons = constraint;
         bool = bVar;
         PropImplied reifProp = new PropImplied(bVar, this, targetCons);
-        setPropagators(ArrayUtils.append(new Propagator[]{reifProp}, targetCons.propagators.clone()));
+        setPropagators(ArrayUtils.append(new Propagator[]{reifProp}, targetCons.getPropagators().clone()));
         for (int i = 1; i < propagators.length; i++) {
             propagators[i].setReifiedSilent();
         }

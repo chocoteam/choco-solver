@@ -161,7 +161,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
         int nbProp = 0;
         int mp = Integer.MAX_VALUE, Mp = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
-            Propagator[] cprops = constraints[c].propagators;
+            Propagator[] cprops = constraints[c].getPropagators();
             for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
                 int id = cprops[j].getId();

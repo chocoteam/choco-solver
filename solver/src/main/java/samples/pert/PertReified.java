@@ -81,15 +81,15 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-					Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m], solver));
-					Constraint c2 = IntConstraintFactory.implies(VariableFactory.not(bvar),precedence(_vars[m], _durs[m], _vars[l], solver));
-					solver.post(c1);
-					solver.post(c2);
-                    for (int k = 0; k < c1.propagators.length; k++) {
-                        reifieds.add(c1.propagators[k]);
+                    Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m], solver));
+                    Constraint c2 = IntConstraintFactory.implies(VariableFactory.not(bvar), precedence(_vars[m], _durs[m], _vars[l], solver));
+                    solver.post(c1);
+                    solver.post(c2);
+                    for (int k = 0; k < c1.getPropagators().length; k++) {
+                        reifieds.add(c1.getPropagator(k));
                     }
-					for (int k = 0; k < c2.propagators.length; k++) {
-                        reifieds.add(c2.propagators[k]);
+                    for (int k = 0; k < c2.getPropagators().length; k++) {
+                        reifieds.add(c2.getPropagator(k));
                     }
                 }
             }

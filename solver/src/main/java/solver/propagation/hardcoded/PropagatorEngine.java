@@ -88,7 +88,7 @@ public class PropagatorEngine implements IPropagationEngine {
         int nbProp = 0;
         int m = Integer.MAX_VALUE, M = 0;
         for (int c = 0; c < constraints.length; c++) {
-            Propagator[] cprops = constraints[c].propagators;
+            Propagator[] cprops = constraints[c].getPropagators();
             for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
                 int id = cprops[j].getId();
@@ -249,12 +249,12 @@ public class PropagatorEngine implements IPropagationEngine {
     @Override
     public void dynamicAddition(Constraint c, boolean cut) {
         int osize = propagators.length;
-        int nbp = c.propagators.length;
+        int nbp = c.getPropagators().length;
         int nsize = osize + nbp;
         Propagator[] _propagators = propagators;
         propagators = new Propagator[nsize];
         System.arraycopy(_propagators, 0, propagators, 0, osize);
-        System.arraycopy(c.propagators, 0, propagators, osize, nbp);
+        System.arraycopy(c.getPropagators(), 0, propagators, osize, nbp);
         for (int j = osize; j < nsize; j++) {
             p2i.set(propagators[j].getId(), j);
             trigger.add(propagators[j], cut);

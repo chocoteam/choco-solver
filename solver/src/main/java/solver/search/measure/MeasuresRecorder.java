@@ -246,7 +246,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         propagationCount = 0;
         eventCount = 0;
         for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] propagators = cstrs[i].propagators;
+            Propagator[] propagators = cstrs[i].getPropagators();
             for (int j = 0; j < propagators.length; j++) {
                 propagationCount += propagators[j].coarseERcalls;
                 eventCount += propagators[j].fineERcalls;

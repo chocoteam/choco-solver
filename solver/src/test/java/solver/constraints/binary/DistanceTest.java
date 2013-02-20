@@ -89,7 +89,7 @@ public class DistanceTest {
                 vs1 = new IntVar[]{X, Y};
                 Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s1.post(c);
-                p1 = c.propagators[0];
+                p1 = c.getPropagator(0);
             }
             {
                 IntVar X = VariableFactory.enumerated("X", 1, k, s2);
@@ -97,7 +97,7 @@ public class DistanceTest {
                 vs2 = new IntVar[]{X, Y};
                 Constraint c = IntConstraintFactory.distance(X, Y, "=", k / 2);
                 s2.post(c);
-                p2 = c.propagators[0];
+                p2 = c.getPropagator(0);
             }
 
             try {

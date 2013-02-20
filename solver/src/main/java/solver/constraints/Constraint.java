@@ -78,14 +78,10 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
     private static final long serialVersionUID = 1L;
 
-    public static final String VAR_DEFAULT = "var_default";
-    public static final String VAL_DEFAULT = "val_default";
-    public static final String METRIC_DEFAULT = "met_default";
-
     protected final Solver solver;
 
-    public V[] vars;
-    public P[] propagators;
+    protected V[] vars;
+    protected P[] propagators;
 
     protected int staticPropagationPriority;
 
@@ -99,10 +95,27 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
         this.vars = (V[]) new Variable[0];
     }
 
+    /**
+     * Return an array of variables involved in <code>this</code>.
+     *
+     * @return an array of {@link V}
+     */
     public V[] getVariables() {
         return vars;
     }
 
+    /**
+     * Return an array which contains the propagators declared in <code>this</code>.
+     *
+     * @return an array of {@link Propagator}.
+     */
+    public Propagator<V>[] getPropagators() {
+        return propagators;
+    }
+
+    public Propagator<V> getPropagator(int i) {
+        return propagators[i];
+    }
 
     public Solver getSolver() {
         return solver;
@@ -218,7 +231,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    protected void contradiction(ICause cause,  Variable variable, String message) throws ContradictionException {
+    protected void contradiction(ICause cause, Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(cause, variable, message);
     }
 
