@@ -55,8 +55,9 @@ public interface IView<D extends IDelta> extends ICause, Variable<D> {
     /**
      * Transform the original event wrt the view
      *
-     * @param evt original event
+     * @param evt   original event
+     * @param cause cause of the modification
      * @throws ContradictionException can encounter a contradiction
      */
-    void transformEvent(EventType evt) throws ContradictionException;
+    void transformEvent(EventType evt, ICause cause) throws ContradictionException;
 }

@@ -512,7 +512,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
             //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
 

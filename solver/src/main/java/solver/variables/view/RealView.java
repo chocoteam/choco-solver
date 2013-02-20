@@ -62,7 +62,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
-    public void transformEvent(EventType evt) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if (evt == EventType.INSTANTIATE) {
             evt = EventType.BOUND;
         } else if (evt == EventType.REMOVE) {
@@ -149,7 +149,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {

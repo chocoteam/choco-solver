@@ -130,7 +130,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
             //records.forEach(afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {
@@ -140,8 +140,8 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
     }
 
     @Override
-    public void transformEvent(EventType evt) throws ContradictionException {
-        notifyPropagators(evt, this);
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+        notifyPropagators(evt, cause);
     }
 
     @Override

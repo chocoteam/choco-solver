@@ -310,7 +310,7 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
-    public void notifyViews(EventType event) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         //void
     }
 

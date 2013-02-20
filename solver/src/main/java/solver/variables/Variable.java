@@ -207,7 +207,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @param event the event which occurred on the variable
      * @throws ContradictionException
      */
-    void notifyViews(EventType event) throws ContradictionException;
+    void notifyViews(EventType event, ICause cause) throws ContradictionException;
 
     /**
      * Notify monitors of observed variable modifications

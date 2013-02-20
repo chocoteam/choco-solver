@@ -560,7 +560,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
 
     @Override
-    public void transformEvent(EventType evt) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
                 notifyPropagators(EventType.INSTANTIATE, this);

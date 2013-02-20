@@ -426,7 +426,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
             //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {

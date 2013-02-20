@@ -46,9 +46,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 
 import java.io.Serializable;
 
@@ -134,13 +132,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
-                    if ((v.getTypeAndKind() & Variable.INT) != 0) {
-                        LOGGER.debug("The variable " + v + " appears twice in the propagator, it is then duplicated, BE CAREFUL!");
-                        vars[i] = (V) VariableFactory.eq((IntVar) v);
-                    } else {
-                        throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                "This is forbidden; you must consider using a View or a EQ constraint.");
-                    }
+                    LOGGER.warn("The variable " + v + " appears twice in a propagator, consider using a view instead.\n" +
+                            "See solver.variables.VariableFactory for more details.");
                 }
                 set.add(vars[i].getId());
             }
@@ -154,7 +147,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
-//        checkVariable(vars);
+        checkVariable(vars);
         this.vars = vars.clone();
         this.solver = solver;
         this.vindices = new int[vars.length];

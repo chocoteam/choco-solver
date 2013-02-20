@@ -91,7 +91,7 @@ public final class FConstraint {
         }
         Constraint[] c = builder.build(aSolver, id, exps, annotations, map);
         aSolver.post(c);
-        FConstraint.readAnnotations(map, annotations, c);
+        readAnnotations(map, annotations, c);
     }
 
 

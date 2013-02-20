@@ -233,7 +233,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
             //records.forEach(afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {

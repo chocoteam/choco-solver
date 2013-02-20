@@ -357,7 +357,7 @@ public class MinusView extends IntView<IntDelta, IntVar<IntDelta>> {
     }
 
     @Override
-    public void transformEvent(EventType evt) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if (evt == EventType.INCLOW) {
             evt = EventType.DECUPP;
         } else if (evt == EventType.DECUPP) {

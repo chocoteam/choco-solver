@@ -182,7 +182,7 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {

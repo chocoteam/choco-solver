@@ -273,7 +273,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
         if ((modificationEvents & event.mask) != 0) {
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
-        notifyViews(event);
+        notifyViews(event, cause);
     }
 
     public void notifyMonitors(EventType event) throws ContradictionException {
