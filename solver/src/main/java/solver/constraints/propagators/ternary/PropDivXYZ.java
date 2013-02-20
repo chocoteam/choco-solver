@@ -50,9 +50,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
     public PropDivXYZ(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
-        this.X = x;
-        this.Y = y;
-        this.Z = z;
+        this.X = vars[0];
+        this.Y = vars[1];
+        this.Z = vars[2];
         this.absX = VariableFactory.abs(X);
         this.absY = VariableFactory.abs(Y);
         this.absZ = VariableFactory.abs(Z);

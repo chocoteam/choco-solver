@@ -48,9 +48,9 @@ public class PropMaxBC extends Propagator<IntVar> {
 
     public PropMaxBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
-        this.MAX = X;
-        this.v1 = Y;
-        this.v2 = Z;
+        this.MAX = vars[0];
+        this.v1 = vars[1];
+        this.v2 = vars[2];
     }
 
     @Override

@@ -55,9 +55,9 @@ public class PropMax extends Propagator<IntVar> {
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
-        this.MAX = X;
-        this.v1 = Y;
-        this.v2 = Z;
+        this.MAX = vars[0];
+        this.v1 = vars[1];
+        this.v2 = vars[2];
         rem_proc = new RemProc(this);
     }
 

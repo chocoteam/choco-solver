@@ -67,14 +67,14 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {
         super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false);
-        this.x = x;
-        this.y = y;
+        this.x = vars[0];
+        this.y = vars[1];
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
         //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
-		//Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
+        //Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
         if (vars[vIdx].hasEnumeratedDomain()) {
             return EventType.INSTANTIATE.mask;
         }
@@ -94,22 +94,22 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-		// typical case: A=[1,4], B=[1,4] (bounded domains)
-		// A instantiated to 3 => nothing can be done on B
-		// then B dec supp to 3 => 3 can also be removed du to A = 3.
-		propagate(0);
+        // typical case: A=[1,4], B=[1,4] (bounded domains)
+        // A instantiated to 3 => nothing can be done on B
+        // then B dec supp to 3 => 3 can also be removed du to A = 3.
+        propagate(0);
     }
 
     private void removeValV0() throws ContradictionException {
         if (x.removeValue(y.getValue(), aCause)
-		|| !x.contains(y.getValue())) {
+                || !x.contains(y.getValue())) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
         if (y.removeValue(x.getValue(), aCause)
-		|| !y.contains(x.getValue())) {
+                || !y.contains(x.getValue())) {
             this.setPassive();
         }
     }

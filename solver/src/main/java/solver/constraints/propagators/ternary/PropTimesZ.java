@@ -45,14 +45,15 @@ public class PropTimesZ extends Propagator<IntVar> {
     IntVar X, Y, Z;
 
     public PropTimesZ(IntVar x, IntVar y, IntVar z) {
-        super(new IntVar[]{z}, PropagatorPriority.UNARY, false);
-        this.X = x;
-        this.Y = y;
-        this.Z = z;
+        super(new IntVar[]{x, y, z}, PropagatorPriority.UNARY, false);
+        this.X = vars[0];
+        this.Y = vars[1];
+        this.Z = vars[2];
     }
 
     @Override
     public final int getPropagationConditions(int vIdx) {
+        if (vIdx != 2) return 0;
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 

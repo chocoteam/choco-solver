@@ -54,132 +54,132 @@ import solver.variables.delta.IIntDeltaMonitor;
 @PropAnn(tested = {PropAnn.Status.CORRECTION, PropAnn.Status.EXPLAINED})
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
-	private IntVar x,y;
-	// enumerated domains
-	private boolean bothEnumerated;
-	private IIntDeltaMonitor[] idms;
-	private RemProc rem_proc;
-	private int indexToFilter;
+    private IntVar x, y;
+    // enumerated domains
+    private boolean bothEnumerated;
+    private IIntDeltaMonitor[] idms;
+    private RemProc rem_proc;
+    private int indexToFilter;
 
-	public PropEqualX_Y(IntVar x, IntVar y) {
-		super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
-		this.x = x;
-		this.y = y;
-		if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()){
-			bothEnumerated = true;
-			idms = new IIntDeltaMonitor[2];
-			idms[0] = vars[0].monitorDelta(this);
-			idms[1] = vars[1].monitorDelta(this);
-			rem_proc = new RemProc();
-		}
-	}
+    public PropEqualX_Y(IntVar x, IntVar y) {
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
+        this.x = vars[0];
+        this.y = vars[1];
+        if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+            bothEnumerated = true;
+            idms = new IIntDeltaMonitor[2];
+            idms[0] = vars[0].monitorDelta(this);
+            idms[1] = vars[1].monitorDelta(this);
+            rem_proc = new RemProc();
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if(bothEnumerated)
-			return EventType.INT_ALL_MASK();
-		else
-			return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (bothEnumerated)
+            return EventType.INT_ALL_MASK();
+        else
+            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+    }
 
-	private void updateBounds() throws ContradictionException {
-		x.updateLowerBound(y.getLB(), aCause);
-		x.updateUpperBound(y.getUB(), aCause);
-		y.updateLowerBound(x.getLB(), aCause);
-		y.updateUpperBound(x.getUB(), aCause);
-		if(y.getLB()!=x.getLB() || y.getUB()!=x.getUB()){
-			updateBounds();
-		}
-	}
+    private void updateBounds() throws ContradictionException {
+        x.updateLowerBound(y.getLB(), aCause);
+        x.updateUpperBound(y.getUB(), aCause);
+        y.updateLowerBound(x.getLB(), aCause);
+        y.updateUpperBound(x.getUB(), aCause);
+        if (y.getLB() != x.getLB() || y.getUB() != x.getUB()) {
+            updateBounds();
+        }
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		updateBounds();
-		// ensure that, in case of enumerated domains,  holes are also propagated
-		if (bothEnumerated) {
-			int ub = x.getUB();
-			for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-				if (!(y.contains(val))) {
-					x.removeValue(val, aCause);
-				}
-			}
-			ub = y.getUB();
-			for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
-				if (!(x.contains(val))) {
-					y.removeValue(val, aCause);
-				}
-			}
-			idms[0].unfreeze();
-			idms[1].unfreeze();
-		}
-		if (x.instantiated()) {
-			assert (y.instantiated());
-			// no more test should be done on the value,
-			// filtering algo ensures that both are assigned to the same value
-			setPassive();
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        updateBounds();
+        // ensure that, in case of enumerated domains,  holes are also propagated
+        if (bothEnumerated) {
+            int ub = x.getUB();
+            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                if (!(y.contains(val))) {
+                    x.removeValue(val, aCause);
+                }
+            }
+            ub = y.getUB();
+            for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                if (!(x.contains(val))) {
+                    y.removeValue(val, aCause);
+                }
+            }
+            idms[0].unfreeze();
+            idms[1].unfreeze();
+        }
+        if (x.instantiated()) {
+            assert (y.instantiated());
+            // no more test should be done on the value,
+            // filtering algo ensures that both are assigned to the same value
+            setPassive();
+        }
+    }
 
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		updateBounds();
-		if(x.instantiated()){
-			assert (y.instantiated());
-			setPassive();
-		}else if(bothEnumerated){
-			indexToFilter = 1-varIdx;
-			idms[varIdx].freeze();
-			idms[varIdx].forEach(rem_proc, EventType.REMOVE);
-			idms[varIdx].unfreeze();
-		}
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        updateBounds();
+        if (x.instantiated()) {
+            assert (y.instantiated());
+            setPassive();
+        } else if (bothEnumerated) {
+            indexToFilter = 1 - varIdx;
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+            idms[varIdx].unfreeze();
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if ((x.getUB() < y.getLB()) ||
-				(x.getLB() > y.getUB()))
-			return ESat.FALSE;
-		else if (x.instantiated() &&
-				y.instantiated() &&
-				(x.getValue() == y.getValue()))
-			return ESat.TRUE;
-		else
-			return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        if ((x.getUB() < y.getLB()) ||
+                (x.getLB() > y.getUB()))
+            return ESat.FALSE;
+        else if (x.instantiated() &&
+                y.instantiated() &&
+                (x.getValue() == y.getValue()))
+            return ESat.TRUE;
+        else
+            return ESat.UNDEFINED;
+    }
 
-	private class RemProc implements IntProcedure {
-		@Override
-		public void execute(int i) throws ContradictionException {
-			vars[indexToFilter].removeValue(i, aCause);
-		}
-	}
+    private class RemProc implements IntProcedure {
+        @Override
+        public void execute(int i) throws ContradictionException {
+            vars[indexToFilter].removeValue(i, aCause);
+        }
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
-		return bf.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
+        return bf.toString();
+    }
 
-	@Override
-	public void explain(Deduction d, Explanation e) {
-		if (d.getVar() == x) {
-			e.add(aCause);
-			if (d instanceof ValueRemoval) {
-				y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
-			} else {
-				throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-			}
-		} else if (d.getVar() == y) {
-			e.add(aCause);
-			if (d instanceof ValueRemoval) {
-				x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
-			} else {
-				throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
-			}
-		} else {
-			super.explain(d, e);
-		}
-	}
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        if (d.getVar() == x) {
+            e.add(aCause);
+            if (d instanceof ValueRemoval) {
+                y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+            } else {
+                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
+            }
+        } else if (d.getVar() == y) {
+            e.add(aCause);
+            if (d instanceof ValueRemoval) {
+                x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
+            } else {
+                throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
+            }
+        } else {
+            super.explain(d, e);
+        }
+    }
 }

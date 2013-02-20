@@ -48,9 +48,9 @@ public class PropMinBC extends Propagator<IntVar> {
 
     public PropMinBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
-        this.MIN = X;
-        this.v1 = Y;
-        this.v2 = Z;
+        this.MIN = vars[0];
+        this.v1 = vars[1];
+        this.v2 = vars[2];
     }
 
     @Override
