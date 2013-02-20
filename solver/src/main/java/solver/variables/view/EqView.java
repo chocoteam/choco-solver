@@ -28,11 +28,13 @@ package solver.variables.view;
 
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueIterator;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
@@ -57,27 +59,107 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return var.removeValue(value, this);
+        assert cause != null;
+        int inf = getLB();
+        int sup = getUB();
+        if (inf <= value && value <= sup) {
+            EventType e = EventType.REMOVE;
+
+            boolean done = var.removeValue(value, this);
+            if (done) {
+                if (value == inf) {
+                    e = EventType.INCLOW;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
+                } else if (value == sup) {
+                    e = EventType.DECUPP;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
+                }
+                if (this.instantiated()) {
+                    e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
+                }
+                this.notifyPropagators(e, cause);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        return var.removeInterval(from, to, this);
+        assert cause != null;
+        if (from <= getLB()) {
+            return updateLowerBound(to + 1, cause);
+        } else if (getUB() <= to) {
+            return updateUpperBound(from - 1, cause);
+        } else {
+            boolean done = var.removeInterval(from, to, this);
+            if (done) {
+                notifyPropagators(EventType.REMOVE, cause);
+            }
+            return done;
+        }
     }
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return var.instantiateTo(value, this);
+        assert cause != null;
+        boolean done = var.instantiateTo(value, this);
+        if (done) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound(value, this);
+        assert cause != null;
+        int old = this.getLB();
+        if (old < value) {
+            EventType e = EventType.INCLOW;
+            boolean done = var.updateLowerBound(value, this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            if (done) {
+                this.notifyPropagators(e, cause);
+                return true;
+            }
+        }
+        //        }
+        return false;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound(value, this);
+        assert cause != null;
+        int old = this.getUB();
+        if (old > value) {
+            EventType e = EventType.DECUPP;
+            boolean done = var.updateUpperBound(value, this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            if (done) {
+                this.notifyPropagators(e, cause);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

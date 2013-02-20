@@ -53,11 +53,11 @@ public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> im
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
-        return var.setToTrue(this);
+        return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
-        return var.setToFalse(this);
+        return instantiateTo(0, cause);
     }
 }
