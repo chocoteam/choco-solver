@@ -241,7 +241,7 @@ public class VariableEngine implements IPropagationEngine {
             if (vi > -1) {// constants and reified propagators have a negative index
                 assert variables[i].getPropagator(vi) == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = v2i.get(variables[i].getId());
-                propagator.clearMask(vi);
+                propagator.clearMask(i);
                 eventsets[vid].clear(vi);
             }
         }
