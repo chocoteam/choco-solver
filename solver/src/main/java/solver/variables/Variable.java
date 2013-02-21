@@ -55,7 +55,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
     public static final int TYPE = (1 << 3) - 1;
     // KIND (exclusive)
     public static final int INT = 1 << 3;
-    public static final int BOOL = INT + 1 << 4;
+    public static final int BOOL = INT + (1 << 4);
     public static final int GRAPH = 1 << 5;
     public static final int SET = 1 << 6;
     public static final int REAL = 1 << 7;
@@ -63,7 +63,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
     public static final int KIND = (1 << 8) - 1 - TYPE;
 
     /**
-     * Indicates wether <code>this</code> is instantiated (see implemetations to know what instantiation means).
+     * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
      *
      * @return <code>true</code> if <code>this</code> is instantiated
      */
