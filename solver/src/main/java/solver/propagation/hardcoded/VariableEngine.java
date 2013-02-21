@@ -26,8 +26,6 @@
  */
 package solver.propagation.hardcoded;
 
-import common.util.objects.BitsetFactory;
-import common.util.objects.IBitset;
 import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
@@ -45,6 +43,7 @@ import solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -72,7 +71,7 @@ public class VariableEngine implements IPropagationEngine {
     protected final IId2AbId v2i; // mapping between propagator ID and its absolute index
     protected final boolean[] schedule;
 
-    protected final IBitset[] eventsets;
+    protected final BitSet[] eventsets;
 
     private boolean init;
 
@@ -108,10 +107,10 @@ public class VariableEngine implements IPropagationEngine {
         }
 
         schedule = new boolean[variables.length];
-        eventsets = new IBitset[maxID + 1];
+        eventsets = new BitSet[maxID + 1];
         for (int i = 0; i < variables.length; i++) {
             int nbp = variables[i].getNbProps();
-            eventsets[i] = BitsetFactory.make(nbp);
+            eventsets[i] = new BitSet(nbp);
         }
         init = true;
     }
@@ -135,7 +134,7 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int id, mask, vIp;
-        IBitset evtset;
+        BitSet evtset;
         if (trigger.needToRun()) {
             trigger.propagate();
         }
@@ -167,7 +166,7 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void flush() {
         int id;
-        IBitset evtset;
+        BitSet evtset;
         if (lastVar != null) {
             id = v2i.get(lastVar.getId());
             // explicit iteration is mandatory to dec nb pending evt
@@ -269,7 +268,7 @@ public class VariableEngine implements IPropagationEngine {
             for (int k = 0; k < vars.length; k++) {
                 nbp = vars[k].getNbProps();
                 int i = v2i.get(vars[k].getId());
-                eventsets[i] = BitsetFactory.make(nbp);
+                eventsets[i] = new BitSet(nbp);
 
             }
         }

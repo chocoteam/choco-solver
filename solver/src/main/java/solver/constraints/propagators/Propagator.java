@@ -69,15 +69,20 @@ import java.io.Serializable;
  * This method is called through <code>Constraint</code> observers when an event occurs on a scoped <code>Variable</code>
  * object. <code>propagate</code> method can throw a <code>ContradictionException</code>
  * when this <code>Propagator</code> object detects a contradiction, within its filtering algorithm, like domain wipe out,
- * out of domain value instantiation or other incoherencies.
+ * out of domain value instantiation or other incoherence.
  * <br/>
  * Furthermore, a <code>Propagator</code> object can be <i>entailed</i> : considering the current state of its <code>Variable</code>
  * objects, the internal filtering algorithm becomes useless (for example: NEQ propagator and a couple of <code>Variable</code>
  * objects with disjoint domains). In other words, whatever are the future events occurring on <code>Variable</code> objects,
  * new calls to <code>propagate</code> method would be useless.
  * <br/>
- * <code>this</code> can be desactivate using the <code>setPassive</code>method.
+ * <code>this</code> can be deactivated using the <code>setPassive</code>method.
  * It automatically informs <code>Constraint</code> observers of this new "state".
+ * <p/>
+ * The developer of a propagator must respect some rules to create a efficient propagator:
+ * <br/>- internal references to variables must be achieved referencing the <code>this.vars</code> after the call to super,
+ * this prevents from wrong references when a variable occurs more than once in the scope (See {@link solver.constraints.propagators.nary.globalcardinality.PropFastCount} for instance).
+ * <br/>- //to complete
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme

@@ -27,8 +27,6 @@
 
 package solver.propagation.hardcoded;
 
-import common.util.objects.BitsetFactory;
-import common.util.objects.IBitset;
 import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
@@ -45,6 +43,7 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -70,7 +69,7 @@ public class PropagatorEngine implements IPropagationEngine {
     protected Propagator lastProp;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected boolean[] schedule;
-    protected IBitset[] eventsets;
+    protected BitSet[] eventsets;
 
     private boolean init; // is ready to propagate?
 
@@ -105,10 +104,10 @@ public class PropagatorEngine implements IPropagationEngine {
         pro_queue_f = new CircularQueue<Propagator>(propagators.length / 2 + 1);
 
         schedule = new boolean[nbProp];
-        eventsets = new IBitset[nbProp];
+        eventsets = new BitSet[nbProp];
         for (int i = 0; i < nbProp; i++) {
             int nbv = propagators[i].getNbVars();
-            eventsets[i] = BitsetFactory.make(nbv);
+            eventsets[i] = new BitSet(nbv);
         }
         init = true;
     }
@@ -132,7 +131,7 @@ public class PropagatorEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
-        IBitset evtset;
+        BitSet evtset;
         if (trigger.needToRun()) {
             trigger.propagate();
         }
@@ -166,7 +165,7 @@ public class PropagatorEngine implements IPropagationEngine {
     @Override
     public void flush() {
         int aid;
-        IBitset evtset;
+        BitSet evtset;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
             evtset = eventsets[aid];
@@ -233,7 +232,7 @@ public class PropagatorEngine implements IPropagationEngine {
         //if (aid > -1) {
         assert aid > -1 : "try to desactivate an unknown constraint";
         // we don't remove the element from its master to avoid costly operations
-        IBitset evtset = eventsets[aid];
+        BitSet evtset = eventsets[aid];
         for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
             propagator.clearMask(p);
         }
@@ -264,12 +263,12 @@ public class PropagatorEngine implements IPropagationEngine {
         schedule = new boolean[nsize];
         System.arraycopy(_schedule, 0, schedule, 0, osize);
 
-        IBitset[] _eventsets = eventsets;
-        eventsets = new IBitset[nsize];
+        BitSet[] _eventsets = eventsets;
+        eventsets = new BitSet[nsize];
         System.arraycopy(_eventsets, 0, eventsets, 0, osize);
         for (int i = osize; i < nsize; i++) {
             int nbv = propagators[i].getNbVars();
-            eventsets[i] = BitsetFactory.make(nbv);
+            eventsets[i] = new BitSet(nbv);
         }
     }
 }
