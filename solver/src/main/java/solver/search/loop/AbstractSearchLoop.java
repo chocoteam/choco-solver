@@ -156,7 +156,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.nextState = INIT;
         this.limitchecker = new LimitChecker(this);
         rootWorldIndex = -1;
-        solutionpool = SolutionPoolFactory.NO_SOLUTION.make();
     }
 
     private void reset() {

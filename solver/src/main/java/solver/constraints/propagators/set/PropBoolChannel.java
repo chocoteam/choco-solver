@@ -78,9 +78,9 @@ public class PropBoolChannel extends Propagator<Variable> {
      */
     public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, final int offSet) {
         super(ArrayUtils.append(boolVars, new Variable[]{setVar}), PropagatorPriority.UNARY);
-        this.n = bools.length;
-        this.bools = new BoolVar[boolVars.length];
-        for (int i = 0; i < boolVars.length; i++) {
+        this.n = boolVars.length;
+        this.bools = new BoolVar[n];
+        for (int i = 0; i < n; i++) {
             this.bools[i] = (BoolVar) vars[i];
         }
         this.set = (SetVar) vars[n];

@@ -78,26 +78,21 @@ public class PropIntChannel extends Propagator<Variable> {
      */
     public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2) {
         super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR);
-        this.sets = new SetVar[setsV.length];
-        for (int i = 0; i < setsV.length; i++) {
-            this.sets[i] = (SetVar) vars[i];
-        }
-        nSets = sets.length;
-        this.ints = new IntVar[intsV.length];
-        for (int i = 0; i < intsV.length; i++) {
-            this.ints[i] = (IntVar) vars[i + nSets];
-        }
-        this.offSet1 = offSet1;
-        this.offSet2 = offSet2;
-        nInts = intsV.length;
-        // delta monitors
-        sdm = new SetDeltaMonitor[nSets];
-        for (int i = 0; i < nSets; i++) {
-            sdm[i] = setsV[i].monitorDelta(this);
-        }
-        idm = new IIntDeltaMonitor[nInts];
+		this.nSets = setsV.length;
+		this.nInts = intsV.length;
+		this.sets = new SetVar[nSets];
+        this.ints = new IntVar[nInts];
+		this.idm = new IIntDeltaMonitor[nInts];
+		this.sdm = new SetDeltaMonitor[nSets];
+		this.offSet1 = offSet1;
+		this.offSet2 = offSet2;
         for (int i = 0; i < nInts; i++) {
-            idm[i] = intsV[i].monitorDelta(this);
+            this.ints[i] = (IntVar) vars[i + nSets];
+			this.idm[i] = this.ints[i].monitorDelta(this);
+        }
+        for (int i = 0; i < nSets; i++) {
+            this.sdm[i] = this.sets[i].monitorDelta(this);
+			this.sets[i] = (SetVar) vars[i];
         }
         // procedures
         elementForced = new IntProcedure() {
