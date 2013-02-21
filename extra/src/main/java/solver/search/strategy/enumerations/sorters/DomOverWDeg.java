@@ -30,10 +30,11 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.IStateInt;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.search.loop.monitors.FailPerPropagator;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
@@ -75,7 +76,7 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
         }
         Constraint[] cstrs = solver.getCstrs();
         for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] props = cstrs[i].propagators;
+            Propagator[] props = cstrs[i].getPropagators();
             for (int j = 0; j < props.length; j++) {
                 pid2ari.put(props[j].getId(), solver.getEnvironment().makeInt(props[j].arity()));
             }
@@ -131,7 +132,7 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
     }
 
     @Override
-    public void onUpdate(Variable var, EventType evt, ICause cause) {
+    public void onUpdate(Variable var, EventType evt) {
         if (evt == EventType.INSTANTIATE) {
             int nbp = var.getNbProps();
             for (int p = 0; p < nbp; p++) {
@@ -140,5 +141,14 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
                 pid2ari.get(pid).add(-1);
             }
         }
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
     }
 }
