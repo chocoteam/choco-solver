@@ -87,8 +87,8 @@ public class PropBigSum extends Propagator<IntVar> {
         this.coeffs = coeffs;
         this.pos = pos;
         this.sum = sum;
-        int nbLayers = computeNbLayers(vars.length);
-        this.leafs = new Node[vars.length];
+        int nbLayers = computeNbLayers(this.vars.length);
+        this.leafs = new Node[this.vars.length];
         this.root = new Node(nbLayers, null);
     }
 
@@ -122,21 +122,21 @@ public class PropBigSum extends Propagator<IntVar> {
             }
         }
         // filter
-		int max = root.oldUB.get();
-		filter_min(root, max);
-		int min = root.oldLB.get();
-		filter_max(root, root.oldLB.get());
-		while (max != root.oldUB.get() || min != root.oldLB.get()) {
-			if (max != root.oldUB.get()) {
-				max = root.oldUB.get();
-				filter_min(root, max);
-			}
-			if (min != root.oldLB.get()) {
-				min = root.oldLB.get();
-				filter_max(root, root.oldLB.get());
-			}
-		}
-	}
+        int max = root.oldUB.get();
+        filter_min(root, max);
+        int min = root.oldLB.get();
+        filter_max(root, root.oldLB.get());
+        while (max != root.oldUB.get() || min != root.oldLB.get()) {
+            if (max != root.oldUB.get()) {
+                max = root.oldUB.get();
+                filter_min(root, max);
+            }
+            if (min != root.oldLB.get()) {
+                min = root.oldLB.get();
+                filter_max(root, root.oldLB.get());
+            }
+        }
+    }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
@@ -174,12 +174,12 @@ public class PropBigSum extends Propagator<IntVar> {
             lb += vars[i].getUB() * coeffs[i];
             ub += vars[i].getLB() * coeffs[i];
         }
-		if (ub == sum && lb == sum) {
-			return ESat.TRUE;
-		} else if (lb > sum || ub < sum) {
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
+        if (ub == sum && lb == sum) {
+            return ESat.TRUE;
+        } else if (lb > sum || ub < sum) {
+            return ESat.FALSE;
+        }
+        return ESat.UNDEFINED;
     }
 
     private void filter_min(Node node, int rootub) throws ContradictionException {

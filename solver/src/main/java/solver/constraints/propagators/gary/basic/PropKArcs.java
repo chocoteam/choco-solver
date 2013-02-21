@@ -28,9 +28,9 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
+import common.util.objects.setDataStructures.ISet;
 import common.util.procedure.PairProcedure;
 import memory.IStateInt;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -63,9 +63,9 @@ public class PropKArcs extends Propagator {
 
     public PropKArcs(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
-        g = graph;
+        g = (GraphVar) vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        this.k = k;
+        this.k = (IntVar) vars[1];
         nbInEnv = environment.makeInt();
         nbInKer = environment.makeInt();
         arcEnforced = new EnfArc();

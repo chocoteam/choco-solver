@@ -28,12 +28,12 @@
 package solver.constraints.propagators.gary.arborescences;
 
 import common.ESat;
-import gnu.trove.list.array.TIntArrayList;
-import common.util.objects.graphs.DirectedGraph;
 import common.util.graphOperations.connectivity.StrongConnectivityFinder;
 import common.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import common.util.graphOperations.dominance.AlphaDominatorsFinder;
+import common.util.objects.graphs.DirectedGraph;
 import common.util.objects.setDataStructures.ISet;
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -63,8 +63,8 @@ public class PropNTree extends Propagator {
 
     public PropNTree(DirectedGraphVar graph, IntVar nT) {
         super(new Variable[]{graph, nT}, PropagatorPriority.QUADRATIC);
-        g = graph;
-        nTree = nT;
+        g = (DirectedGraphVar) vars[0];
+        nTree = (IntVar) vars[1];
         SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
         nonSinks = new TIntArrayList();
         n = g.getEnvelopGraph().getNbNodes();

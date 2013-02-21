@@ -28,6 +28,7 @@ package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import common.ESat;
 import common.util.procedure.IntProcedure;
+import common.util.tools.ArrayUtils;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -92,22 +93,12 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     protected final IIntDeltaMonitor[] idms;
 
-    static IntVar[] makeVarTable(IntVar[] vars, IntVar[] card) {
-        if (card != null) {
-            IntVar[] allvars = new IntVar[vars.length + card.length];
-            System.arraycopy(vars, 0, allvars, 0, vars.length);
-            System.arraycopy(card, 0, allvars, vars.length, card.length);
-            return allvars;
-        } else {
-            return vars;
-        }
-    }
 
-    public PropBoundGlobalCardinality(IntVar[] vars, IntVar[] card, int firstCardValue, int lastCardValue) {
-        super(makeVarTable(vars, card), PropagatorPriority.LINEAR, false);
-        this.card = card;
+    public PropBoundGlobalCardinality(IntVar[] variables, IntVar[] cardinalities, int firstCardValue, int lastCardValue) {
+        super(ArrayUtils.append(variables, cardinalities == null ? new IntVar[0] : cardinalities), PropagatorPriority.LINEAR, false);
+        this.card = Arrays.copyOfRange(vars, variables.length, vars.length);
         this.range = lastCardValue - firstCardValue + 1;
-        int n = vars.length;
+        int n = variables.length;
         this.nbVars = n;
         this.idms = new IIntDeltaMonitor[n];
         for (int i = 0; i < n; i++) {
@@ -146,6 +137,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         minOccurrences = new int[range];
         maxOccurrences = new int[range];
     }
+
 
     int getMaxOcc(int i) {
         return card[i].getUB();

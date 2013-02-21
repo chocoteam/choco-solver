@@ -73,9 +73,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     protected boolean needFilter;
 
-    public PropAmongGAC(IntVar[] vars, int[] values) {
-        super(vars, PropagatorPriority.LINEAR, false);
-        nb_vars = vars.length - 1;
+    public PropAmongGAC(IntVar[] variables, int[] values) {
+        super(variables, PropagatorPriority.LINEAR, false);
+        nb_vars = variables.length - 1;
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;

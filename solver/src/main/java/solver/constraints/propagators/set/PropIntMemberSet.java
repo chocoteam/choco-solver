@@ -35,8 +35,8 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
-import common.util.procedure.IntProcedure;
 import common.util.objects.setDataStructures.ISet;
+import common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -75,9 +75,9 @@ public class PropIntMemberSet extends Propagator<Variable> {
      */
     public PropIntMemberSet(SetVar setVar, IntVar intVar) {
         super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY);
-        this.iv = intVar;
-        this.set = setVar;
-        this.sdm = setVar.monitorDelta(this);
+        this.iv = (IntVar) vars[1];
+        this.set = (SetVar) vars[0];
+        this.sdm = set.monitorDelta(this);
         elemRem = new IntProcedure() {
             @Override
             public void execute(int i) throws ContradictionException {

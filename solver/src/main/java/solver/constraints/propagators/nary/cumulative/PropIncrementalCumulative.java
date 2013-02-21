@@ -27,16 +27,18 @@
 package solver.constraints.propagators.nary.cumulative;
 
 import common.ESat;
-import common.util.tools.ArrayUtils;
 import common.util.objects.graphs.UndirectedGraph;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetFactory;
 import common.util.objects.setDataStructures.SetType;
+import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+
+import java.util.Arrays;
 
 /**
  * Graph based cumulative
@@ -60,12 +62,12 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
         if (!(n == d.length && n == e.length && n == h.length)) {
             throw new UnsupportedOperationException();
         }
-        this.s = s;
-        this.d = d;
-        this.e = e;
-        this.h = h;
+        this.s = Arrays.copyOfRange(vars, 0, s.length);
+        this.d = Arrays.copyOfRange(vars, s.length, s.length + d.length);
+        this.e = Arrays.copyOfRange(vars, s.length + d.length, s.length + d.length + e.length);
+        this.h = Arrays.copyOfRange(vars, s.length + d.length + e.length, s.length + d.length + e.length + h.length);
         this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
-        this.capa = capa;
+        this.capa = this.vars[vars.length - 1];
         this.tasks = SetFactory.makeLinkedList(false);
         this.toCompute = SetFactory.makeSwap(n, false);
     }
@@ -161,7 +163,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
             for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
                 for (int t = s[i].getUB(); t < e[i].getLB(); t++) {
                     time[t - min] += h[i].getLB();
-					capa.updateLowerBound(time[t - min],aCause);
+                    capa.updateLowerBound(time[t - min], aCause);
                 }
             }
             for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {

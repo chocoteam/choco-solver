@@ -27,13 +27,13 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import common.ESat;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateInt;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -80,12 +80,12 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
      * AllDifferent constraint for integer variables
      * enables to control the cardinality of the matching
      *
-     * @param vars
+     * @param variables
      */
-    public PropAllDiffAC_Fast(IntVar[] vars) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
-		n = vars.length;
-		matching = new IStateInt[n];
+    public PropAllDiffAC_Fast(IntVar[] variables) {
+        super(variables, PropagatorPriority.QUADRATIC, true);
+        n = vars.length;
+        matching = new IStateInt[n];
         for (int i = 0; i < n; i++) {
             matching[i] = environment.makeInt(-1);
         }
@@ -123,26 +123,26 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		if (n2 < n * 2) {
-			contradiction(null, "not enough values");
-		}
-		findMaximumMatching();
+        if (n2 < n * 2) {
+            contradiction(null, "not enough values");
+        }
+        findMaximumMatching();
         filter();
     }
 
-	private TIntArrayStack toCheck = new TIntArrayStack();
-	
+    private TIntArrayStack toCheck = new TIntArrayStack();
+
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-		if ((mask & EventType.INSTANTIATE.mask) != 0) {
-			toCheck.clear();
+        if ((mask & EventType.INSTANTIATE.mask) != 0) {
+            toCheck.clear();
             toCheck.push(varIdx);
             fixpoint();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
-	private void fixpoint() throws ContradictionException {
+    private void fixpoint() throws ContradictionException {
         try {
             while (toCheck.size() > 0) {
                 int vidx = toCheck.pop();
@@ -168,18 +168,18 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
     //***********************************************************************************
     @Override
     public ESat isEntailed() {
-		int nbInst = 0;
-		for (int i = 0; i < n; i++) {
-			if(vars[i].instantiated()){
-				nbInst++;
-				for (int j = i + 1; j < n; j++) {
-					if (vars[j].instantiated() && vars[i].getValue()==vars[j].getValue()) {
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if(nbInst==vars.length){
+        int nbInst = 0;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].instantiated()) {
+                nbInst++;
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (nbInst == vars.length) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
@@ -215,11 +215,11 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             v = vars[i];
             ub = v.getUB();
-			int mate = matching[i].get();
+            int mate = matching[i].get();
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 int j = map.get(k);
                 if (mate == j) {
-					assert free.get(i) && free.get(j);
+                    assert free.get(i) && free.get(j);
                     digraph.addArc(j, i);
                     free.clear(i);
                     free.clear(j);

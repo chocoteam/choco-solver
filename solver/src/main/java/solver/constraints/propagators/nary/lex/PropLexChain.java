@@ -63,12 +63,17 @@ public class PropLexChain extends Propagator<IntVar> {
     // array of vectors in the lex chain constraint
     public IntVar[][] x;
 
-    public PropLexChain(IntVar[][] vars, boolean strict) {
-        super(ArrayUtils.flatten(vars), PropagatorPriority.LINEAR, false);
-        this.x = vars.clone();
+    public PropLexChain(IntVar[][] variables, boolean strict) {
+        super(ArrayUtils.flatten(variables), PropagatorPriority.LINEAR, false);
+        M = variables.length;
+        this.N = variables[0].length;
+        this.x = new IntVar[M][N];
+        int p = 0;
+        for (int i = 0; i < M; i++) {
+            System.arraycopy(vars, p, x[i], 0, N);
+            p += N;
+        }
         this.strict = strict;
-        this.N = vars[0].length;
-        M = vars.length;
         UB = new int[M][N];
         LB = new int[M][N];
     }

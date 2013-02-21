@@ -66,13 +66,13 @@ public class PropBoolSum extends Propagator<IntVar> {
      * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
      * Works in O(1) per instantiation event
      *
-     * @param vars
+     * @param variables
      * @param sum
      */
-    public PropBoolSum(BoolVar[] vars, IntVar sum) {
-        super(ArrayUtils.append(vars, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
-        this.sum = sum;
-        n = vars.length;
+    public PropBoolSum(BoolVar[] variables, IntVar sum) {
+        super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
+        n = variables.length;
+        this.sum = vars[n];
         min = environment.makeInt();
         max = environment.makeInt();
     }
@@ -154,15 +154,15 @@ public class PropBoolSum extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-	@Override
-	public String toString(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("PropBoolSum(");
-		for(int i =0;i<vars.length-2;i++){
-			sb.append(vars[i]+"+");
-		}
-		sb.append(vars[vars.length-2]+")");
-		sb.append(" = "+vars[vars.length-1]);
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PropBoolSum(");
+        for (int i = 0; i < vars.length - 2; i++) {
+            sb.append(vars[i] + "+");
+        }
+        sb.append(vars[vars.length - 2] + ")");
+        sb.append(" = " + vars[vars.length - 1]);
+        return sb.toString();
+    }
 }

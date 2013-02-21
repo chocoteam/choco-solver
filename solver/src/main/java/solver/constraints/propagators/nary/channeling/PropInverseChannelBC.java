@@ -35,6 +35,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -62,8 +63,8 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
 
     public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
-        this.X = X;
-        this.Y = Y;
+        this.X = Arrays.copyOfRange(this.vars, 0, X.length);
+        this.Y = Arrays.copyOfRange(this.vars, X.length, vars.length);
         n = Y.length;
         this.minX = minX;
         this.minY = minY;

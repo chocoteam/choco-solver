@@ -28,9 +28,9 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import common.util.procedure.PairProcedure;
 import common.util.objects.graphs.IGraph;
 import common.util.objects.setDataStructures.ISet;
+import common.util.procedure.PairProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +60,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 
     public PropTransitivity(V graph) {
         super((V[]) new GraphVar[]{graph}, PropagatorPriority.LINEAR, false);
-        g = graph;
+        g = vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         arcEnforced = new PairProcedure() {
             @Override

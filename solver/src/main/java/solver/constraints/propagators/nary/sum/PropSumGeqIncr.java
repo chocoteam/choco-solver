@@ -45,8 +45,8 @@ import solver.variables.IntVar;
  */
 public final class PropSumGeqIncr extends PropSumEqIncr {
 
-    public PropSumGeqIncr(IntVar[] vars, int b) {
-        super(vars, b);
+    public PropSumGeqIncr(IntVar[] variables, int b) {
+        super(variables, b);
     }
 
 
@@ -66,8 +66,8 @@ public final class PropSumGeqIncr extends PropSumEqIncr {
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < l; i++) {
-            sumLB += x[i].getLB();
-            sumUB += x[i].getUB();
+            sumLB += vars[i].getLB();
+            sumUB += vars[i].getUB();
         }
         if (sumLB >= b) {
             return ESat.TRUE;

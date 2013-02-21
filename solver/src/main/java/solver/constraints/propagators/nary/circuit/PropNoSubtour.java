@@ -77,11 +77,11 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
      * runs incrementally in O(1) per instantiation event
      *
-     * @param vars
+     * @param variables
      * @param offset
      */
-    public PropNoSubtour(V[] vars, int offset) {
-        super(vars, PropagatorPriority.UNARY, true);
+    public PropNoSubtour(V[] variables, int offset) {
+        super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];
         end = new IStateInt[n];

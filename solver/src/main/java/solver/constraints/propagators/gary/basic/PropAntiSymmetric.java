@@ -28,8 +28,8 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import common.util.procedure.PairProcedure;
 import common.util.objects.setDataStructures.ISet;
+import common.util.procedure.PairProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -61,7 +61,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
 
     public PropAntiSymmetric(DirectedGraphVar graph) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY);
-        g = graph;
+        g = vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         enf = new EnfProc();
         n = g.getEnvelopGraph().getNbNodes();

@@ -35,10 +35,10 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
+import common.util.objects.setDataStructures.ISet;
 import common.util.procedure.IntProcedure;
 import common.util.procedure.PairProcedure;
 import common.util.tools.ArrayUtils;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -82,9 +82,12 @@ public class PropGraphChannel extends Propagator<Variable> {
      */
     public PropGraphChannel(SetVar[] setsV, GraphVar gV) {
         super(ArrayUtils.append(setsV, new Variable[]{gV}), PropagatorPriority.LINEAR);
-        this.sets = setsV;
-        this.g = gV;
+        this.sets = new SetVar[setsV.length];
+        for (int i = 0; i < setsV.length; i++) {
+            this.sets[i] = (SetVar) vars[i];
+        }
         n = sets.length;
+        this.g = (GraphVar) vars[n];
         assert (n == g.getEnvelopGraph().getNbNodes());
         sdm = new SetDeltaMonitor[n];
         for (int i = 0; i < n; i++) {

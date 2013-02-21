@@ -66,18 +66,21 @@ public class RealReifiedPropagator extends Propagator<Variable> {
      * @param ibex      continuous solver
      * @param functions list of functions, separated by a semi-colon
      * @param bvar      a boolean variable
-     * @param vars      array of real variables
+     * @param variables array of real variables
      * @param options   list of options to give to IBEX
      */
-    public RealReifiedPropagator(Ibex ibex, int cIdx, String functions, BoolVar bvar, RealVar[] vars, int options) {
-        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, vars), PropagatorPriority.LINEAR, false);
+    public RealReifiedPropagator(Ibex ibex, int cIdx, String functions, BoolVar bvar, RealVar[] variables, int options) {
+        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, variables), PropagatorPriority.LINEAR, false);
         this.contractorIdx = cIdx;
         this.ibex = ibex;
         this.functions = functions;
         this.option = options;
         this.ibex.add_ctr(vars.length, functions, option);
-        this.rvars = vars.clone();
-        this.bvar = bvar;
+        rvars = new RealVar[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            rvars[i] = (RealVar) vars[i + 1];
+        }
+        this.bvar = (BoolVar) vars[0];
     }
 
     @Override

@@ -28,10 +28,10 @@
 package solver.constraints.propagators.gary.arborescences;
 
 import common.ESat;
-import common.util.objects.graphs.DirectedGraph;
 import common.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import common.util.graphOperations.dominance.AlphaDominatorsFinder;
 import common.util.graphOperations.dominance.SimpleDominatorsFinder;
+import common.util.objects.graphs.DirectedGraph;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
@@ -66,7 +66,7 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
 
     public PropAntiArborescences(DirectedGraphVar graph, boolean simple) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
-        g = graph;
+        g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
         if (simple) {

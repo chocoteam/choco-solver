@@ -27,19 +27,20 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import common.ESat;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+
 import java.util.BitSet;
 
 /**
@@ -84,10 +85,10 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      * AllDifferent constraint for integer variables
      * enables to control the cardinality of the matching
      *
-     * @param vars
+     * @param variables
      */
-    public PropAllDiffAC(IntVar[] vars) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
+    public PropAllDiffAC(IntVar[] variables) {
+        super(variables, PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
@@ -135,8 +136,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 ISet nei = digraph.getPredecessorsOf(j);
                 for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
                     if (i != varIdx) {
-						digraph.removeArc(i, j);
-						digraph.removeArc(j, i);
+                        digraph.removeArc(i, j);
+                        digraph.removeArc(j, i);
                     }
                 }
                 int i = digraph.getSuccessorsOf(j).getFirstElement();
@@ -226,17 +227,17 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         int nbInst = 0;
-		for (int i = 0; i < n; i++) {
-			if(vars[i].instantiated()){
-				nbInst++;
-				for (int j = i + 1; j < n; j++) {
-					if (vars[j].instantiated() && vars[i].getValue()==vars[j].getValue()) {
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if(nbInst==vars.length){
+        for (int i = 0; i < n; i++) {
+            if (vars[i].instantiated()) {
+                nbInst++;
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (nbInst == vars.length) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
@@ -407,7 +408,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
         public void execute(int i) {
             digraph.removeArc(idx, map.get(i));
-            digraph.removeArc(map.get(i),idx);
+            digraph.removeArc(map.get(i), idx);
         }
 
         @Override

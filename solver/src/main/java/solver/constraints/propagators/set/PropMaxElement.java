@@ -86,8 +86,8 @@ public class PropMaxElement extends Propagator<Variable> {
      */
     public PropMaxElement(SetVar setVar, int[] weights, int offset, IntVar max) {
         super(new Variable[]{setVar, max}, PropagatorPriority.BINARY);
-        this.max = max;
-        this.set = setVar;
+        this.max = (IntVar) vars[1];
+        this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offset;
     }

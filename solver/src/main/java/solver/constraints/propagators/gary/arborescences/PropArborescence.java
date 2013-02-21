@@ -72,7 +72,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
      */
     public PropArborescence(DirectedGraphVar graph, int source, boolean simple) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
-        g = graph;
+        g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         this.source = source;
         successors = new ISet[n];

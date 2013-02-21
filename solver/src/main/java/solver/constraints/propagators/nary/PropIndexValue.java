@@ -38,8 +38,6 @@ import common.ESat;
 import common.util.tools.ArrayUtils;
 import memory.IStateBool;
 import memory.IStateInt;
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,7 +45,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * PropIndexValue(vars,nb) ensures that the number of variable such that vars[i] = i is equal to nb
+ * PropIndexValue(vars,nb) ensures that the number of variable such that vars[i] = i + offset is equal to nb
  * <p/>
  * can be used within the SubCircuit constraint for instance: a subcircuit of length k involves n-k loops
  *
@@ -69,14 +67,10 @@ public class PropIndexValue extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropIndexValue(IntVar[] vars, IntVar nb, Constraint constraint, Solver solver) {
-        this(vars, 0, nb);
-    }
-
-    public PropIndexValue(IntVar[] vars, int offset, IntVar nb) {
-        super(ArrayUtils.append(vars, new IntVar[]{nb}), PropagatorPriority.LINEAR, true);
-        n = vars.length;
-        this.nb = nb;
+    public PropIndexValue(IntVar[] variables, int offset, IntVar nb) {
+        super(ArrayUtils.append(variables, new IntVar[]{nb}), PropagatorPriority.LINEAR, true);
+        n = variables.length;
+        this.nb = vars[n];
         this.offset = offset;
         minLoops = environment.makeInt();
         maxLoops = environment.makeInt();

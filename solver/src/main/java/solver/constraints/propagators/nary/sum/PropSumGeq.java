@@ -42,8 +42,8 @@ import solver.variables.IntVar;
  */
 public final class PropSumGeq extends PropSumEq {
 
-    public PropSumGeq(IntVar[] vars, int[] coeffs, int pos, int b) {
-        super(vars, coeffs, pos, b);
+    public PropSumGeq(IntVar[] variables, int[] coeffs, int pos, int b) {
+        super(variables, coeffs, pos, b);
     }
 
 

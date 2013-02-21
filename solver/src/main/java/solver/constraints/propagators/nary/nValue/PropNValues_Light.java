@@ -48,7 +48,6 @@ public class PropNValues_Light extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar nValues;
     private TIntArrayList concernedValues;
     private int n;
     private int[] unusedValues, mate;
@@ -62,16 +61,15 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * The number of distinct values among concerned values in the set of variables vars is exactly equal to nValues
      * No level of consistency for the filtering
      *
-     * @param vars
+     * @param variables
      * @param concernedValues will be sorted!
      * @param nValues
      */
-    public PropNValues_Light(IntVar[] vars, TIntArrayList concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
-        n = vars.length;
+    public PropNValues_Light(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        n = variables.length;
         concernedValues.sort();
         this.concernedValues = concernedValues;
-        this.nValues = nValues;
         unusedValues = new int[concernedValues.size()];
         mate = new int[concernedValues.size()];
     }
@@ -82,8 +80,8 @@ public class PropNValues_Light extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        nValues.updateLowerBound(0, aCause);
-        nValues.updateUpperBound(n, aCause);
+        vars[n].updateLowerBound(0, aCause);
+        vars[n].updateUpperBound(n, aCause);
         filter();
     }
 
@@ -100,7 +98,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
             boolean possible = false;
             boolean mandatory = false;
             mate[i] = -1;
-			int value = concernedValues.get(i);
+            int value = concernedValues.get(i);
             for (int v = 0; v < n; v++) {
                 if (vars[v].contains(value)) {
                     possible = true;
@@ -108,9 +106,9 @@ public class PropNValues_Light extends Propagator<IntVar> {
                         mate[i] = v;
                     } else {
                         mate[i] = -2;
-						if(mandatory){
-							break;
-						}
+                        if (mandatory) {
+                            break;
+                        }
                     }
                     if (vars[v].instantiated()) {
                         mandatory = true;
@@ -130,33 +128,33 @@ public class PropNValues_Light extends Propagator<IntVar> {
             }
         }
         // filtering cardinality variable
-        nValues.updateLowerBound(count, aCause);
-        nValues.updateUpperBound(countMax, aCause);
+        vars[n].updateLowerBound(count, aCause);
+        vars[n].updateUpperBound(countMax, aCause);
         // filtering decision variables
-		if(count!=countMax && nValues.instantiated())
-        if (count == nValues.getUB()) {
-            int val;
-            for (int i = 0; i < idx; i++) {
-                val = unusedValues[i];
-                for (int v = 0; v < n; v++) {
-                    vars[v].removeValue(val, aCause);
+        if (count != countMax && vars[n].instantiated())
+            if (count == vars[n].getUB()) {
+                int val;
+                for (int i = 0; i < idx; i++) {
+                    val = unusedValues[i];
+                    for (int v = 0; v < n; v++) {
+                        vars[v].removeValue(val, aCause);
+                    }
                 }
-            }
-            for (int i = idx - 1; i >= 0; i--) {
-                val = unusedValues[i];
-                for (int v = 0; v < n; v++) {
-                    vars[v].removeValue(val, aCause);
+                for (int i = idx - 1; i >= 0; i--) {
+                    val = unusedValues[i];
+                    for (int v = 0; v < n; v++) {
+                        vars[v].removeValue(val, aCause);
+                    }
                 }
-            }
-            setPassive();
-        } else if (countMax == nValues.getLB()) {
-            for (int i = concernedValues.size() - 1; i >= 0; i--) {
-                if (mate[i] >= 0) {
-                    vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
+                setPassive();
+            } else if (countMax == vars[n].getLB()) {
+                for (int i = concernedValues.size() - 1; i >= 0; i--) {
+                    if (mate[i] >= 0) {
+                        vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
+                    }
                 }
+                setPassive();
             }
-			setPassive();
-        }
     }
 
     //***********************************************************************************
@@ -191,13 +189,13 @@ public class PropNValues_Light extends Propagator<IntVar> {
                 count++;
             }
         }
-        if (count > nValues.getUB()) {
+        if (count > vars[n].getUB()) {
             return ESat.FALSE;
         }
-        if (countMax < nValues.getLB()) {
+        if (countMax < vars[n].getLB()) {
             return ESat.FALSE;
         }
-        if (count == countMax && nValues.instantiated()) {
+        if (count == countMax && vars[n].instantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

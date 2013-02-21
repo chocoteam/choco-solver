@@ -70,7 +70,7 @@ public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar> {
      */
     public PropArborescence_NaiveForm(DirectedGraphVar graph, int source) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
-        g = graph;
+        g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         this.source = source;
         list = new LinkedList<Integer>();

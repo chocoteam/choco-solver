@@ -35,15 +35,17 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
+import common.util.objects.setDataStructures.ISet;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+
+import java.util.Arrays;
 
 /**
  * Inverse set propagator
@@ -77,8 +79,8 @@ public class PropInverse extends Propagator<SetVar> {
         n2 = invsets.length;
         this.offSet1 = offSet1;
         this.offSet2 = offSet2;
-        this.sets = sets;
-        this.invsets = invsets;
+        this.sets = Arrays.copyOfRange(vars, 0, sets.length);
+        this.invsets = Arrays.copyOfRange(vars, sets.length, vars.length);
         // delta monitors
         sdm = new SetDeltaMonitor[n + n2];
         for (int i = 0; i < n + n2; i++) {

@@ -52,10 +52,10 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * AllDifferent constraint for integer variables
      * enables to control the cardinality of the matching
      *
-     * @param vars
+     * @param variables
      */
-    public PropAllDiffInst(IntVar[] vars) {
-        super(vars, PropagatorPriority.UNARY, true);
+    public PropAllDiffInst(IntVar[] variables) {
+        super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
     }
 

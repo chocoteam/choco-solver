@@ -72,7 +72,7 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
      */
     public PropAntiArborescence(DirectedGraphVar graph, int sink, boolean simple) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
-        g = graph;
+        g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         this.sink = sink;
         if (simple) {

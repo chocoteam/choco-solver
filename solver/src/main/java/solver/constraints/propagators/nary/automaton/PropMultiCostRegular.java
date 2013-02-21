@@ -55,10 +55,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -208,20 +205,21 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     /**
      * Constructs a multi-cost-regular propagator
      *
-     * @param vars        decision variables
-     * @param counterVars cost variables
-     * @param cauto       finite automaton with costs
+     * @param variables     decision variables
+     * @param costvariables cost variables
+     * @param cauto         finite automaton with costs
      */
-    public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto) {
-        super(ArrayUtils.<IntVar>append(vars, counterVars), PropagatorPriority.CUBIC, false);
-        this.vs = vars;
+    public PropMultiCostRegular(IntVar[] variables, final IntVar[] costvariables, ICostAutomaton cauto) {
+        super(ArrayUtils.<IntVar>append(variables, costvariables), PropagatorPriority.CUBIC, false);
+        this.vs = Arrays.copyOfRange(vars, 0, variables.length);
+        this.offset = vs.length;
+        this.z = Arrays.copyOfRange(vars, offset, vars.length);
+        this.nbR = this.z.length - 1;
+
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
-        this.offset = vars.length;
-        this.z = counterVars;
-        this.nbR = this.z.length - 1;
         this.modifiedBound = new boolean[]{true, true};
 
         this.uUb = new double[2 * nbR];
@@ -247,8 +245,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-//TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
-        return EventType.INT_ALL_MASK();
+        return (vIdx < vs.length ?
+                EventType.INT_ALL_MASK() :
+                EventType.BOUND.mask + EventType.INSTANTIATE.mask);
     }
 
     /**
@@ -298,7 +297,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             idms[varIdx].freeze();
             idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
             idms[varIdx].unfreeze();
-        } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
+        } else {// if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(varIdx - offset);
             computed = false;
         }

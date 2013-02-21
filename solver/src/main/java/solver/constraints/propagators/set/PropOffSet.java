@@ -28,8 +28,8 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
-import common.util.procedure.IntProcedure;
 import common.util.objects.setDataStructures.ISet;
+import common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -62,8 +62,8 @@ public class PropOffSet extends Propagator<SetVar> {
         super(new SetVar[]{set1, set2}, PropagatorPriority.UNARY);
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[2];
-        sdm[0] = set1.monitorDelta(this);
-        sdm[1] = set2.monitorDelta(this);
+        sdm[0] = vars[0].monitorDelta(this);
+        sdm[1] = vars[1].monitorDelta(this);
         this.forced = new IntProcedure() {
             @Override
             public void execute(int i) throws ContradictionException {

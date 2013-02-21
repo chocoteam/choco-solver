@@ -27,19 +27,20 @@
 package solver.constraints.propagators.nary.nValue;
 
 import common.ESat;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import common.util.procedure.UnaryIntProcedure;
 import common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+
 import java.util.BitSet;
 
 /**
@@ -59,7 +60,6 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar nValues;
     private int n, n2;
     private DirectedGraph digraph;
     private int[] nodeSCC;
@@ -84,17 +84,16 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * The worst case time complexity is O(nm) but this is very pessimistic
      * In practice it is more like O(m) where m is the number of variable-value pairs
      *
-     * @param vars
+     * @param variables
      * @param nValues
      */
-    public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+    public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
-        n = vars.length;
-        this.nValues = nValues;
+        n = variables.length;
         map = new TIntIntHashMap();
         IntVar v;
         int ub;
@@ -276,8 +275,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            if (n2 < n + nValues.getLB()) {
-                contradiction(nValues, "");
+            if (n2 < n + vars[n].getLB()) {
+                contradiction(vars[n], "");
             }
             buildDigraph();
         }
@@ -295,8 +294,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             }
         }
         int card = repairMatching();
-        nValues.updateUpperBound(card, aCause);
-        if (nValues.getLB() == card) {
+        vars[n].updateUpperBound(card, aCause);
+        if (vars[n].getLB() == card) {
             filter();
         }
         for (int i = 0; i < idms.length; i++) {
@@ -353,8 +352,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         int idx;
 
         public void execute(int i) throws ContradictionException {
-			digraph.removeArc(idx,map.get(i));
-			digraph.removeArc(map.get(i),idx);
+            digraph.removeArc(idx, map.get(i));
+            digraph.removeArc(map.get(i), idx);
         }
 
         @Override

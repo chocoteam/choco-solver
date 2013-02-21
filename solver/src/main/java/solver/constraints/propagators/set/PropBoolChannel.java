@@ -35,9 +35,9 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
+import common.util.objects.setDataStructures.ISet;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -79,8 +79,11 @@ public class PropBoolChannel extends Propagator<Variable> {
     public PropBoolChannel(SetVar setVar, BoolVar[] boolVars, final int offSet) {
         super(ArrayUtils.append(boolVars, new Variable[]{setVar}), PropagatorPriority.UNARY);
         this.n = bools.length;
-        this.bools = boolVars;
-        this.set = setVar;
+        this.bools = new BoolVar[boolVars.length];
+        for (int i = 0; i < boolVars.length; i++) {
+            this.bools[i] = (BoolVar) vars[i];
+        }
+        this.set = (SetVar) vars[n];
         this.sdm = this.set.monitorDelta(this);
         this.offSet = offSet;
         // PROCEDURES

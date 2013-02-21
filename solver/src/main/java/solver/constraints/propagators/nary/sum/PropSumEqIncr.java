@@ -50,7 +50,6 @@ import solver.variables.IntVar;
  */
 public class PropSumEqIncr extends Propagator<IntVar> {
 
-    final IntVar[] x; // list of variable -- probably IntVarTimePosCste
     final IStateInt[] oldx;
     final IStateInt[] I; // variability of each variable -- domain amplitude
     final int l; // number of variables
@@ -72,10 +71,9 @@ public class PropSumEqIncr extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEqIncr(IntVar[] vars, int b) {
-        super(vars, computePriority(vars.length), false);
-        this.x = vars.clone();
-        l = x.length;
+    public PropSumEqIncr(IntVar[] variables, int b) {
+        super(variables, computePriority(variables.length), false);
+        l = vars.length;
         this.b = b;
         I = new IStateInt[l];
         oldx = new IStateInt[l];
@@ -97,9 +95,9 @@ public class PropSumEqIncr extends Propagator<IntVar> {
             int idx = -1;
             int lb, ub;
             for (; i < l; i++) {
-                lb = x[i].getLB();
+                lb = vars[i].getLB();
                 oldx[i].set(lb);
-                ub = x[i].getUB();
+                ub = vars[i].getUB();
                 f += lb;
                 e += ub;
                 I[i].set(ub - lb);
@@ -154,8 +152,8 @@ public class PropSumEqIncr extends Propagator<IntVar> {
                 if (Ii - (b - sumLB_) > 0) {
                     lb = oldx[i].get();
                     ub = lb + Ii;
-                    if (x[i].updateUpperBound(b - sumLB_ + lb, aCause)) {
-                        int nub = x[i].getUB();
+                    if (vars[i].updateUpperBound(b - sumLB_ + lb, aCause)) {
+                        int nub = vars[i].getUB();
                         sumUB.add(nub - ub);
                         I[i].set(nub - lb);
                         if (idxMaxI.get() == i) {
@@ -186,8 +184,8 @@ public class PropSumEqIncr extends Propagator<IntVar> {
                 if (Ii > -(b - sumUB_)) {
                     lb = oldx[i].get();
                     ub = lb + Ii;
-                    if (x[i].updateLowerBound(b - sumUB_ + ub, aCause)) {
-                        int nlb = x[i].getLB();
+                    if (vars[i].updateLowerBound(b - sumUB_ + ub, aCause)) {
+                        int nlb = vars[i].getLB();
                         sumLB.add(nlb - lb);
                         I[i].set(ub - nlb);
                         oldx[i].set(nlb);
@@ -216,8 +214,8 @@ public class PropSumEqIncr extends Propagator<IntVar> {
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
-        int lb = x[i].getLB();
-        int ub = x[i].getUB();
+        int lb = vars[i].getLB();
+        int ub = vars[i].getUB();
         int olb = oldx[i].get();
         int Ii = I[i].get();
         int oub = olb + Ii;
@@ -252,8 +250,8 @@ public class PropSumEqIncr extends Propagator<IntVar> {
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
         for (; i < l; i++) {
-            sumLB += x[i].getLB();
-            sumUB += x[i].getUB();
+            sumLB += vars[i].getLB();
+            sumUB += vars[i].getUB();
         }
         if (sumUB == b && sumLB == b) {
             return ESat.TRUE;

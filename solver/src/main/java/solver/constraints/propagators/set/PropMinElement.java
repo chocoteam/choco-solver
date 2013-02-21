@@ -86,10 +86,10 @@ public class PropMinElement extends Propagator<Variable> {
      */
     public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min) {
         super(new Variable[]{setVar, min}, PropagatorPriority.BINARY);
-        this.min = min;
-        this.set = setVar;
+        this.min = (IntVar) vars[1];
+        this.set = (SetVar) vars[0];
         this.weights = weights;
-        this.min = min;
+        this.offSet = offSet;
     }
 
     //***********************************************************************************

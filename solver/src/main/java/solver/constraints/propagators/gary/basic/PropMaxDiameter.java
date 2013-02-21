@@ -28,13 +28,14 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import gnu.trove.list.array.TIntArrayList;
 import common.util.objects.setDataStructures.ISet;
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.UndirectedGraphVar;
+
 import java.util.BitSet;
 
 public class PropMaxDiameter extends Propagator<UndirectedGraphVar> {
@@ -55,7 +56,7 @@ public class PropMaxDiameter extends Propagator<UndirectedGraphVar> {
 
     public PropMaxDiameter(UndirectedGraphVar graph, int maxDiam) {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
-        this.g = graph;
+        this.g = vars[0];
         this.maxDiam = maxDiam;
         n = g.getEnvelopGraph().getNbNodes();
         visited = new BitSet(n);

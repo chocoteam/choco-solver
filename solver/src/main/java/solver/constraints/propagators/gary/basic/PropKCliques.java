@@ -28,9 +28,9 @@
 package solver.constraints.propagators.gary.basic;
 
 import common.ESat;
-import gnu.trove.list.array.TIntArrayList;
 import common.util.graphOperations.connectivity.ConnectivityFinder;
 import common.util.objects.setDataStructures.ISet;
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -38,6 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
+
 import java.util.BitSet;
 
 /**
@@ -66,8 +67,8 @@ public class PropKCliques extends Propagator {
 
     public PropKCliques(UndirectedGraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
-        g = graph;
-        this.k = k;
+        g = (UndirectedGraphVar) vars[0];
+        this.k = (IntVar) vars[1];
         n = g.getEnvelopGraph().getNbNodes();
         in = new BitSet(n);
         inMIS = new BitSet(n);

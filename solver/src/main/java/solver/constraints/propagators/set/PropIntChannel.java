@@ -35,9 +35,9 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
+import common.util.objects.setDataStructures.ISet;
 import common.util.procedure.IntProcedure;
 import common.util.tools.ArrayUtils;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -78,11 +78,17 @@ public class PropIntChannel extends Propagator<Variable> {
      */
     public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2) {
         super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR);
-        this.sets = setsV;
-        this.ints = intsV;
+        this.sets = new SetVar[setsV.length];
+        for (int i = 0; i < setsV.length; i++) {
+            this.sets[i] = (SetVar) vars[i];
+        }
+        nSets = sets.length;
+        this.ints = new IntVar[intsV.length];
+        for (int i = 0; i < intsV.length; i++) {
+            this.ints[i] = (IntVar) vars[i + nSets];
+        }
         this.offSet1 = offSet1;
         this.offSet2 = offSet2;
-        nSets = sets.length;
         nInts = intsV.length;
         // delta monitors
         sdm = new SetDeltaMonitor[nSets];

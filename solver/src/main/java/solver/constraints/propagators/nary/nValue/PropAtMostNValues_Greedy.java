@@ -27,11 +27,11 @@
 package solver.constraints.propagators.nary.nValue;
 
 import common.ESat;
-import common.util.tools.ArrayUtils;
-import gnu.trove.list.array.TIntArrayList;
 import common.util.objects.graphs.UndirectedGraph;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetType;
+import common.util.tools.ArrayUtils;
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,7 +53,6 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar nValues;
     // graph model
     private int n;
     private UndirectedGraph cliques;
@@ -71,13 +70,12 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
      * The number of distinct values in the set of variables vars is at most equal to nValues
      * No level of consistency but better than BC in general (for enumerated domains with holes)
      *
-     * @param vars
+     * @param variables
      * @param nValues
      */
-    public PropAtMostNValues_Greedy(IntVar[] vars, IntVar nValues) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
-        n = vars.length;
-        this.nValues = nValues;
+    public PropAtMostNValues_Greedy(IntVar[] variables, IntVar nValues) {
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        n = variables.length;
         cliques = new UndirectedGraph(solver.getEnvironment(), n, SetType.LINKED_LIST, false);
         in = new BitSet(n);
         inMIS = new BitSet(n);
@@ -238,8 +236,8 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
             buildDigraph();
         }
         int min = findMIS();
-        nValues.updateLowerBound(min, aCause);
-        if (min == nValues.getUB()) {
+        vars[n].updateLowerBound(min, aCause);
+        if (min == vars[n].getUB()) {
             filter();
         }
     }

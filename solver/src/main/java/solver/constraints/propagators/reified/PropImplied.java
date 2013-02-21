@@ -28,6 +28,7 @@
 package solver.constraints.propagators.reified;
 
 import common.ESat;
+import common.util.tools.ArrayUtils;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -39,7 +40,7 @@ import solver.variables.Variable;
 
 /**
  * Implication propagator
- *
+ * <p/>
  * <br/>
  *
  * @author Jean-Guillaume Fages
@@ -47,61 +48,68 @@ import solver.variables.Variable;
  */
 public class PropImplied extends Propagator<Variable> {
 
-	// boolean variable of the reification
-	private final BoolVar bVar;
-	// constraint to apply if bVar = true
-	private final Constraint impliedCons;
-	// constraint of this propagator
-	private final ImplicationConstraint reifCons;
+    // boolean variable of the reification
+    private final BoolVar bVar;
+    // constraint to apply if bVar = true
+    private final Constraint impliedCons;
+    // constraint of this propagator
+    private final ImplicationConstraint reifCons;
 
-	public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue) {
-		super(reifCons.getVariables(), PropagatorPriority.LINEAR, false);
-		this.bVar = bool;
-		this.impliedCons = consIfBoolTrue;
-		this.reifCons = reifCons;
-	}
+    public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue) {
+        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false);
+        this.bVar = (BoolVar) vars[0];
+        this.impliedCons = consIfBoolTrue;
+        this.reifCons = reifCons;
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if (bVar.instantiated()) {
-			if(bVar.getBooleanValue()==ESat.TRUE){
-				reifCons.activate();
-			}
-			setPassive();
-		}else{
-			ESat sat = impliedCons.isEntailed();
-			if(sat==ESat.FALSE){
-				bVar.setToFalse(aCause);
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if (bVar.instantiated()) {
+            if (bVar.getBooleanValue() == ESat.TRUE) {
+                reifCons.activate();
+            }
+            setPassive();
+        } else {
+            ESat sat = impliedCons.isEntailed();
+            if (sat == ESat.FALSE) {
+                bVar.setToFalse(aCause);
+                setPassive();
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int varIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.FULL_PROPAGATION);
-	}
+    @Override
+    public void propagate(int varIdx, int mask) throws ContradictionException {
+        if (varIdx == 0) {
+            if (bVar.getBooleanValue() == ESat.TRUE) {
+                reifCons.activate();
+            }
+            setPassive();
+        } else {
+            forcePropagate(EventType.FULL_PROPAGATION);
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		// we do not known which kind of variables are involved in the target constraint
-		return EventType.ALL_FINE_EVENTS.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        // we do not known which kind of variables are involved in the target constraint
+        return EventType.ALL_FINE_EVENTS.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if (bVar.instantiated()) {
-			if (bVar.getValue() == 1) {
-				return impliedCons.isEntailed();
-			} else {
-				return ESat.TRUE;
-			}
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (bVar.instantiated()) {
+            if (bVar.getValue() == 1) {
+                return impliedCons.isEntailed();
+            } else {
+                return ESat.TRUE;
+            }
+        }
+        return ESat.UNDEFINED;
+    }
 
-	@Override
-	public String toString() {
-		return bVar.toString() + "=>" + impliedCons.toString();
-	}
+    @Override
+    public String toString() {
+        return bVar.toString() + "=>" + impliedCons.toString();
+    }
 }

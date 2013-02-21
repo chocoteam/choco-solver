@@ -45,10 +45,6 @@ import solver.variables.IntVar;
  */
 public class MultiCostRegular extends IntConstraint<IntVar> {
 
-    public static final String
-            MIN_SP = "min_mcr_sol" // minimal solution of the mcr
-            ;
-
     /**
      * The finite automaton which defines the regular language the variable sequence must belong
      */
@@ -71,7 +67,7 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
      */
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
         super(ArrayUtils.append(vars, CR), solver);
-		this.offset = vars.length;
+        this.offset = vars.length;
         this.pi = pi;
         setPropagators(new PropMultiCostRegular(vars, CR, pi));
     }

@@ -63,13 +63,13 @@ public class PropSubcircuit extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropSubcircuit(IntVar[] vars, IntVar length) {
-        this(vars, 0, length);
+    public PropSubcircuit(IntVar[] variables, IntVar length) {
+        this(variables, 0, length);
     }
 
-    public PropSubcircuit(IntVar[] vars, int offset, IntVar length) {
-        super(vars, PropagatorPriority.UNARY, true);
-        n = vars.length;
+    public PropSubcircuit(IntVar[] variables, int offset, IntVar length) {
+        super(variables, PropagatorPriority.UNARY, true);
+        n = variables.length;
         this.offset = offset;
         this.length = length;
         origin = new IStateInt[n];

@@ -36,6 +36,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+import java.util.Arrays;
+
 /**
  * Enforce a lexicographic ordering on two vectors of integer
  * variables x <_lex y with x = <x_0, ..., x_n>, and y = <y_0, ..., y_n>.
@@ -59,8 +61,8 @@ public class PropLex extends Propagator<IntVar> {
 
     public PropLex(IntVar[] X, IntVar[] Y, boolean strict) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false);
-        this.x = X.clone();
-        this.y = Y.clone();
+        this.x = Arrays.copyOfRange(vars, 0, X.length);
+        this.y = Arrays.copyOfRange(vars, X.length, vars.length);
 
         this.strict = strict;
         this.n = X.length;

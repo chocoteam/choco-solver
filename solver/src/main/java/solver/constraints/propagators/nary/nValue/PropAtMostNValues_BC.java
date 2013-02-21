@@ -78,12 +78,12 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
      * => very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
      * =>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
      *
-     * @param vars
+     * @param variables
      * @param nValues
      */
-    public PropAtMostNValues_BC(IntVar[] vars, IntVar nValues) {
-        super(ArrayUtils.append(vars, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC);
-        n = vars.length;
+    public PropAtMostNValues_BC(IntVar[] variables, IntVar nValues) {
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC);
+        n = variables.length;
         minValue = vars[0].getLB();
         int maxValue = vars[0].getUB();
         for (int i = 1; i < n; i++) {

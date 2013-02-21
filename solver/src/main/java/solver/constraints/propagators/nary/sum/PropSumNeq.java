@@ -66,8 +66,8 @@ public class PropSumNeq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumNeq(IntVar[] vars, int[] coeffs, int pos, int b) {
-        super(vars, computePriority(vars.length), false);
+    public PropSumNeq(IntVar[] variables, int[] coeffs, int pos, int b) {
+        super(variables, computePriority(variables.length), false);
         this.c = coeffs;
         this.pos = pos;
         l = vars.length;

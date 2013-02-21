@@ -57,8 +57,8 @@ public class PropKNodes extends Propagator {
 
     public PropKNodes(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
-        this.g = graph;
-        this.k = k;
+        this.g = (GraphVar) vars[0];
+        this.k = (IntVar) vars[1];
     }
 
     //***********************************************************************************

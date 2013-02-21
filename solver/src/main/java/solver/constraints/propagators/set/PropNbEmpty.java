@@ -28,11 +28,11 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
-import common.util.tools.ArrayUtils;
-import memory.IStateInt;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetFactory;
 import common.util.objects.setDataStructures.SetType;
+import common.util.tools.ArrayUtils;
+import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -68,9 +68,12 @@ public class PropNbEmpty extends Propagator<Variable> {
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
         super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY);
-        this.nbEmpty = nbEmpty;
-        this.sets = sets;
         this.n = sets.length;
+        this.sets = new SetVar[sets.length];
+        for (int i = 0; i < sets.length; i++) {
+            this.sets[i] = (SetVar) vars[i];
+        }
+        this.nbEmpty = (IntVar) vars[n];
         this.canBeEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
         this.isEmpty = SetFactory.makeStoredSet(SetType.SWAP_ARRAY, n, environment);
         this.nbAlreadyEmpty = environment.makeInt();

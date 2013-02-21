@@ -27,18 +27,20 @@
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
 import common.ESat;
+import common.util.graphOperations.connectivity.StrongConnectivityFinder;
+import common.util.objects.graphs.DirectedGraph;
+import common.util.objects.setDataStructures.ISet;
+import common.util.objects.setDataStructures.SetType;
 import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -81,18 +83,18 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
      * Global Cardinality Constraint (GCC) for integer variables
      * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
      *
-     * @param vars
+     * @param variables
      * @param value
-     * @param cards
+     * @param cardinalities
      */
-    public PropGCC_AC_Cards_AC(IntVar[] vars, int[] value, IntVar[] cards) {
-        super(ArrayUtils.append(vars, cards), PropagatorPriority.QUADRATIC, false);
+    public PropGCC_AC_Cards_AC(IntVar[] variables, int[] value, IntVar[] cardinalities) {
+        super(ArrayUtils.append(variables, cardinalities), PropagatorPriority.QUADRATIC, false);
         if (value.length != cards.length) {
             throw new UnsupportedOperationException();
         }
         values = value;
-        n = vars.length;
-        this.cards = cards;
+        n = variables.length;
+        this.cards = Arrays.copyOfRange(vars, variables.length, vars.length);
         map = new TIntIntHashMap();
         IntVar v;
         int ubtmp;

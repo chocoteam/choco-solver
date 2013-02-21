@@ -35,9 +35,9 @@
 package solver.constraints.propagators.set;
 
 import common.ESat;
-import common.util.tools.ArrayUtils;
 import common.util.objects.setDataStructures.ISet;
 import common.util.objects.setDataStructures.SetFactory;
+import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -80,9 +80,12 @@ public class PropElement extends Propagator<Variable> {
      */
     public PropElement(IntVar index, SetVar[] array, int offSet, SetVar set) {
         super(ArrayUtils.append(array, new Variable[]{set, index}), PropagatorPriority.LINEAR);
-        this.index = index;
-        this.array = array;
-        this.set = set;
+        this.index = (IntVar) vars[vars.length - 1];
+        this.set = (SetVar) vars[vars.length - 2];
+        this.array = new SetVar[array.length];
+        for (int i = 0; i < array.length; i++) {
+            this.array[i] = (SetVar) vars[i];
+        }
         this.offSet = offSet;
         constructiveDisjunction = SetFactory.makeLinkedList(false);
     }

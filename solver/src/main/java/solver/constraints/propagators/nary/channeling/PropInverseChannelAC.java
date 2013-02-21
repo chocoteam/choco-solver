@@ -37,6 +37,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 
+import java.util.Arrays;
+
 /**
  * X[i] = j+Ox <=> Y[j] = i+Oy
  * <p/>
@@ -61,8 +63,8 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("this propagator should be used with enumerated domain variables");
             }
         }
-        this.X = X;
-        this.Y = Y;
+        this.X = Arrays.copyOfRange(this.vars, 0, X.length);
+        this.Y = Arrays.copyOfRange(this.vars, X.length, vars.length);
         n = Y.length;
         this.minX = minX;
         this.minY = minY;
