@@ -38,6 +38,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
+import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
@@ -48,6 +49,7 @@ import java.util.LinkedList;
  *
  * @author Arnaud Malapert
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @since 19 juil. 2010
  */
 public class Solution implements ICause {
@@ -64,6 +66,9 @@ public class Solution implements ICause {
 
     /* Values of graph variables, in Solver internal order */
     private LinkedList<boolean[][]> graphValues;
+
+    /* Values of set variables, in Solver internal order */
+    private LinkedList<int[]> setValues;
 
     /* Statistics of the current solution (time, nodes, etc.) */
     private long[] measures;
@@ -85,6 +90,7 @@ public class Solution implements ICause {
         intvalues = new TIntArrayList();
         realvalues = new TDoubleArrayList();
         graphValues = new LinkedList<boolean[][]>();
+		setValues = new LinkedList<int[]>();
         for (int i = 0; i < vars.length; i++) {
             assert (vars[i].instantiated()) : vars[i] + " is not instantiated"; // BEWARE only decision variables should be instantiated
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
@@ -97,12 +103,14 @@ public class Solution implements ICause {
                     realvalues.add(((RealVar) vars[i]).getLB());
                     realvalues.add(((RealVar) vars[i]).getUB());
                     break;
-                case Variable.GRAPH:
-                    if (!vars[i].instantiated()) {
-                        throw new UnsupportedOperationException("solution graph not instantiated");
-                    }
-                    graphValues.add(((GraphVar) vars[i]).getValue());
-                    break;
+				case Variable.SET:
+					assert vars[i].instantiated(): vars[i]+" is not instantiated when recording a solution";
+					setValues.add(((SetVar) vars[i]).getValue());
+					break;
+				case Variable.GRAPH:
+					assert vars[i].instantiated(): vars[i]+" is not instantiated when recording a solution";
+					graphValues.add(((GraphVar) vars[i]).getValue());
+					break;
             }
         }
 //        measures = solver.getSearchLoop().getMeasures().
@@ -113,6 +121,7 @@ public class Solution implements ICause {
         try {
             Variable[] vars = solver.getVars();
             int nbGV = 0;
+			int nbSets = 0;
             int nbi = 0, nbr = 0;
             for (int i = 0; i < vars.length; i++) {
                 int kind = vars[i].getTypeAndKind() & Variable.KIND;
@@ -124,11 +133,16 @@ public class Solution implements ICause {
                     case Variable.REAL:
                         ((RealVar) vars[i]).updateBounds(realvalues.get(nbr++), realvalues.get(nbr++), this);
                         break;
-                    case Variable.GRAPH:
-                        boolean[][] gv = graphValues.get(nbGV);
-                        ((GraphVar) vars[i]).instantiateTo(gv, this);
-                        nbGV++;
-                        break;
+					case Variable.SET:
+						int[] sv = setValues.get(nbSets);
+						((SetVar) vars[i]).instantiateTo(sv, this);
+						nbSets++;
+						break;
+					case Variable.GRAPH:
+						boolean[][] gv = graphValues.get(nbGV);
+						((GraphVar) vars[i]).instantiateTo(gv, this);
+						nbGV++;
+						break;
                 }
 
             }
