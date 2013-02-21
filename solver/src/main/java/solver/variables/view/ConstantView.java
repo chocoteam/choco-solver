@@ -336,6 +336,11 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
+    public IntVar duplicate() {
+        throw new UnsupportedOperationException("Cannot duplicate a constant view");
+    }
+
+    @Override
     public int compareTo(Variable o) {
         return this.getId() - o.getId();
     }

@@ -33,6 +33,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
@@ -164,5 +165,10 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
 
     public String toString() {
         return "not(" + var.getName() + ")";
+    }
+
+    @Override
+    public BoolVar duplicate() {
+        return VariableFactory.not(this.var);
     }
 }

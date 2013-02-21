@@ -208,6 +208,11 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     }
 
     @Override
+    public SetVar duplicate() {
+        throw new UnsupportedOperationException("Cannot duplicate SetVar");
+    }
+
+    @Override
     public String toString() {
         return getName();
     }

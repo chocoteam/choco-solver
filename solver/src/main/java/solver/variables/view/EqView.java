@@ -36,6 +36,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
@@ -200,6 +201,11 @@ public class EqView<ID extends IntDelta, IV extends IntVar<ID>> extends IntView<
     @Override
     public String toString() {
         return "eq(" + this.var.toString() + ") = [" + getLB() + "," + getUB() + "]";
+    }
+
+    @Override
+    public IntVar duplicate() {
+        return VariableFactory.eq(this.var);
     }
 
     @Override

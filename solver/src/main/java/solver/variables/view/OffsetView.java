@@ -37,6 +37,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -228,6 +229,11 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
     @Override
     public String toString() {
         return "(" + this.var.toString() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
+    }
+
+    @Override
+    public IntVar duplicate() {
+        return VariableFactory.offset(this.var, this.cste);
     }
 
     @Override

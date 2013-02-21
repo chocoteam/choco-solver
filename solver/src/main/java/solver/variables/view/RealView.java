@@ -169,6 +169,11 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     }
 
     @Override
+    public RealVar duplicate() {
+        return VariableFactory.real(this.var, this.precision);
+    }
+
+    @Override
     public void explain(Deduction d, Explanation e) {
     }
 

@@ -29,6 +29,7 @@ package solver.variables.fast;
 
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueIterator;
+import common.util.tools.StringUtils;
 import memory.IEnvironment;
 import memory.IStateBitSet;
 import memory.IStateInt;
@@ -563,6 +564,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
     @Override
     public int getTypeAndKind() {
         return VAR + INT;
+    }
+
+    @Override
+    public IntVar duplicate() {
+        return new BitsetIntVarImpl(StringUtils.randomName(this.name), this.OFFSET, this.VALUES.copy(), this.getSolver());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

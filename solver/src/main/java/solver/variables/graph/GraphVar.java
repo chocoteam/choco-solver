@@ -243,6 +243,11 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     }
 
     @Override
+    public GraphVar duplicate() {
+        throw new UnsupportedOperationException("Cannot duplicate GraphVar");
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());

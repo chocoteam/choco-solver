@@ -37,6 +37,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -350,6 +351,10 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
         return var.getDomainSize();
     }
 
+    @Override
+    public IntVar duplicate() {
+        return VariableFactory.sqr(this.var);
+    }
 
     @Override
     public void explain(VariableState what, Explanation to) {

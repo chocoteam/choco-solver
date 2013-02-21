@@ -40,13 +40,16 @@ import solver.ICause;
 import solver.Identity;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.VariableFactory;
 
 import java.io.Serializable;
 
@@ -132,8 +135,35 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
-                    LOGGER.warn("The variable " + v + " appears twice in a propagator, consider using a view instead.\n" +
-                            "See solver.variables.VariableFactory for more details.");
+                    switch (Configuration.MUL_OCC_VAR_PROP) {
+                        case disabled:
+                            throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator.\n" +
+                                    "See configurations.property to change this policy.");
+                        case warn:
+                            LOGGER.warn(v.toString() + " occurs more than one time in this propagator.");
+                            break;
+                        case view:
+                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                                vars[i] = (V) VariableFactory.eq((IntVar) v);
+                            } else {
+                                throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                        "However, this type of variable cannot be declared in a view.");
+                            }
+                            break;
+                        case duplicate:
+                            if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                                Solver solver = v.getSolver();
+                                vars[i] = (V) v.duplicate();
+                                solver.post(IntConstraintFactory.arithm((IntVar) v, "=", (IntVar) vars[i]));
+                            } else {
+                                throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                        "However, this type of variable does not allow to post an EQ constraint over it.");
+                            }
+                            break;
+                        case silent:
+                        default:
+                    }
+
                 }
                 set.add(vars[i].getId());
             }

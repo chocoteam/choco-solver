@@ -26,6 +26,7 @@
  */
 package solver.variables;
 
+import common.util.tools.StringUtils;
 import memory.IStateDouble;
 import solver.ICause;
 import solver.Solver;
@@ -200,6 +201,11 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
     @Override
     public int getTypeAndKind() {
         return VAR + REAL;
+    }
+
+    @Override
+    public RealVar duplicate() {
+        return new RealVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.precision, this.getSolver());
     }
 
     public String toString() {

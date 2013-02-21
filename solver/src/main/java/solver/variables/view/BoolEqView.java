@@ -60,4 +60,9 @@ public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> im
     public boolean setToFalse(ICause cause) throws ContradictionException {
         return instantiateTo(0, cause);
     }
+
+    @Override
+    public BoolVar duplicate() {
+        return new BoolEqView(this.var, this.getSolver());
+    }
 }

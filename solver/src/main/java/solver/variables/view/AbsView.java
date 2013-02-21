@@ -36,6 +36,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -303,6 +304,11 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
             d++;
         }
         return d;
+    }
+
+    @Override
+    public IntVar duplicate() {
+        return VariableFactory.abs(this.var);
     }
 
     @Override

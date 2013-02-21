@@ -258,4 +258,12 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      * @return an int representing the type and kind of the variable
      */
     int getTypeAndKind();
+
+    /**
+     * Duplicate <code>this</code>.
+     *
+     * @param <V> the copy
+     * @return a copy of <code>this</code>
+     */
+    <V extends Variable> V duplicate();
 }

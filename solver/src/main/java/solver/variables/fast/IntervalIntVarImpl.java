@@ -31,6 +31,7 @@ import common.util.iterators.DisposableRangeBoundIterator;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueBoundIterator;
 import common.util.iterators.DisposableValueIterator;
+import common.util.tools.StringUtils;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.Cause;
@@ -475,6 +476,12 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
     public int getTypeAndKind() {
         return VAR + INT;
     }
+
+    @Override
+    public IntVar duplicate() {
+        return new IntervalIntVarImpl(StringUtils.randomName(this.name), this.LB.get(), this.UB.get(), this.getSolver());
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -32,6 +32,7 @@ import common.util.iterators.DisposableRangeBoundIterator;
 import common.util.iterators.DisposableRangeIterator;
 import common.util.iterators.DisposableValueBoundIterator;
 import common.util.iterators.DisposableValueIterator;
+import common.util.tools.StringUtils;
 import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
@@ -44,6 +45,7 @@ import solver.explanations.antidom.AntiDomain;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
@@ -430,6 +432,11 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     @Override
     public int getTypeAndKind() {
         return VAR + BOOL;
+    }
+
+    @Override
+    public BoolVar duplicate() {
+        return VariableFactory.bool(StringUtils.randomName(this.name), this.getSolver());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
