@@ -86,7 +86,7 @@ public abstract class IntView<ID extends IntDelta, IV extends IntVar<ID>> extend
 
     @Override
     public final int getTypeAndKind() {
-        return Variable.VIEW + var.getTypeAndKind();
+        return Variable.VIEW | var.getTypeAndKind();
     }
 
     public IntVar getVariable() {

@@ -52,7 +52,7 @@ public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> 
 
     @Override
     public int getTypeAndKind() {
-        return Variable.BOOL + Variable.CSTE;
+        return Variable.BOOL | Variable.CSTE;
     }
 
     @Override

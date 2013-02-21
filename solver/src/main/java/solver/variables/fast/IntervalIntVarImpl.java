@@ -474,7 +474,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
     @Override
     public int getTypeAndKind() {
-        return VAR + INT;
+        return VAR | INT;
     }
 
     @Override

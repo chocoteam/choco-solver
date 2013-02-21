@@ -563,7 +563,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
 
     @Override
     public int getTypeAndKind() {
-        return VAR + INT;
+        return VAR | INT;
     }
 
     @Override

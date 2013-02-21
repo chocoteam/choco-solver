@@ -29,7 +29,6 @@ package solver.constraints.propagators;
 
 
 import common.ESat;
-import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import memory.structure.Operation;
@@ -128,18 +127,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected final PropagatorPriority priority;
     protected final boolean reactOnPromotion;
     protected final Solver solver;
-    private TIntSet set = new TIntHashSet();
+
+    private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
+        @Override
+        protected TIntHashSet initialValue() {
+            return new TIntHashSet();
+        }
+    };
 
     // cause of variable modifications. The default value is 'this"
     protected Propagator aCause;
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private <V extends Variable> void checkVariable(V[] vars) {
-        set.clear();
+        set.get().clear();
         for (int i = 0; i < vars.length; i++) {
             Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                if (set.contains(v.getId())) {
+                if (set.get().contains(v.getId())) {
                     switch (Configuration.MUL_OCC_VAR_PROP) {
                         case disabled:
                             throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator.\n" +
@@ -170,7 +175,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     }
 
                 }
-                set.add(vars[i].getId());
+                set.get().add(vars[i].getId());
             }
         }
     }

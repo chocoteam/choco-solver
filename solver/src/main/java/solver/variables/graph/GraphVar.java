@@ -239,7 +239,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
 
     @Override
     public int getTypeAndKind() {
-        return VAR + GRAPH;
+        return VAR | GRAPH;
     }
 
     @Override

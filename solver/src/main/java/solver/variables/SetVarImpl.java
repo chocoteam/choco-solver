@@ -204,7 +204,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
     @Override
     public int getTypeAndKind() {
-        return VAR + SET;
+        return VAR | SET;
     }
 
     @Override

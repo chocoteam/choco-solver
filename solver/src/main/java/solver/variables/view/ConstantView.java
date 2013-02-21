@@ -332,7 +332,7 @@ public class ConstantView implements IntVar<IntDelta> {
 
     @Override
     public int getTypeAndKind() {
-        return Variable.INT + Variable.CSTE;
+        return Variable.INT | Variable.CSTE;
     }
 
     @Override

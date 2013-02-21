@@ -200,7 +200,7 @@ public class RealVarImpl extends AbstractVariable<NoDelta, RealVar> implements R
 
     @Override
     public int getTypeAndKind() {
-        return VAR + REAL;
+        return VAR | REAL;
     }
 
     @Override
