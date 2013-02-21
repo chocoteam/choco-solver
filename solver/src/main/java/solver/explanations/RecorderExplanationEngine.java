@@ -214,7 +214,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 invdom.set(v);
 //                explanation.add(expl);
                 if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, val, cause, expl);
+                    onRemoveValue(var, v, cause, expl);
                 }
             }
         }
@@ -238,7 +238,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 cause.explain(vr, expl);
                 invdom.set(v);
                 if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, val, cause, expl);
+                    onRemoveValue(var, v, cause, expl);
                 }
             }
         }
