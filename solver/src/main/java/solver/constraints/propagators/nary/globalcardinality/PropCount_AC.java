@@ -151,13 +151,9 @@ public class PropCount_AC extends Propagator<IntVar> {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    if(vars[j].instantiateTo(value, aCause)){
-						possibles.remove(j);
-					}
+                    vars[j].instantiateTo(value, aCause);
                 }
-				if(possibles.isEmpty()){
-					setPassive();
-				}
+				setPassive();
             } else if (mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
                     if(vars[j].removeValue(value, aCause)){
