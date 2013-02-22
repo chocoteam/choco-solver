@@ -46,6 +46,7 @@ public class TestCorrectnessFactory {
         List<Object> lresult = new ArrayList<Object>(12);
 
         for (SearchLoops sl : SearchLoops.values()) {
+			System.out.println("CORRECTNESS : "+sl.name());
             lresult.add(new TestCorrectness(sl));
         }
         return lresult.toArray();

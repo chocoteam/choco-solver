@@ -23,7 +23,7 @@
 
     <logger name="bench" level="error"/>
 
-    <logger name="solver" level="info"/>
+    <logger name="solver" level="error"/>
 
     <logger name="explainer" level="error"/>
 
