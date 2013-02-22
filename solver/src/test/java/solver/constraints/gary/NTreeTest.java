@@ -72,29 +72,25 @@ public class NTreeTest {
         assertTrue(s.getMeasures().getSolutionCount() > 0);
     }
 
-    @Test(groups = "10m")
+    @Test(groups = "30s")
     public static void debug() {
-        for (int seed = 0; seed < 5; seed++) {
-            for (int n = 5; n < 7; n++) {
-                for (int t1 = 1; t1 < n; t1++) {
-                    for (int t2 = t1; t2 < n; t2++) {
-                        System.out.println("tree : n=" + n + " nbTrees = [" + t1 + "," + t2 + "]");
-                        model(n, t1, t2, seed);
-                    }
-                }
-            }
-        }
+		for (int n = 5; n < 7; n++) {
+			for (int t1 = 1; t1 < n; t1++) {
+				for (int t2 = t1; t2 < n; t2++) {
+					System.out.println("tree : n=" + n + " nbTrees = [" + t1 + "," + t2 + "]");
+					model(n, t1, t2, (int)System.currentTimeMillis());
+				}
+			}
+		}
     }
 
-    @Test(groups = "30m")
+    @Test(groups = "30s")
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;
-            for (SetType gk : SetType.values()) {
-                graphTypeKer = gk;
-                System.out.println("env:" + ge + " ker :" + gk);
-                debug();
-            }
+			graphTypeKer = ge;
+			System.out.println("env:" + ge + " ker :" + ge);
+			debug();
         }
     }
 }

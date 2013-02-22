@@ -118,11 +118,9 @@ public class ArborescenceTest {
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;
-            for (SetType gk : SetType.values()) {
-                graphTypeKer = gk;
-                System.out.println("env:" + ge + " ker :" + gk);
-                smallTrees();
-            }
+			graphTypeKer = ge;
+			System.out.println("env:" + ge + " ker :" + ge);
+			smallTrees();
         }
     }
 }

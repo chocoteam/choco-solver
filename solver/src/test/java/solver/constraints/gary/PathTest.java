@@ -41,6 +41,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -132,10 +133,8 @@ public class PathTest {
     public static void testAllDataStructure() {
         for (SetType ge : SetType.values()) {
             graphTypeEnv = ge;
-            for (SetType gk : SetType.values()) {
-                graphTypeKer = gk;
-                smallTrees();
-            }
+			graphTypeKer = ge;
+			smallTrees();
         }
     }
 }
