@@ -229,8 +229,8 @@ public abstract class AbstractVariable<D extends IDelta, V extends Variable<D>>
         // 2. then add the monitor
         if (mIdx == monitors.length) {
             IVariableMonitor<V>[] tmp = monitors;
-            monitors = (IVariableMonitor<V>[]) new IView[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, monitors, 0, vIdx);
+            monitors = (IVariableMonitor<V>[]) new IVariableMonitor[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, monitors, 0, mIdx);
         }
         monitors[mIdx++] = monitor;
     }

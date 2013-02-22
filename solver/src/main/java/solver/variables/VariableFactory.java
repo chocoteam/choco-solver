@@ -572,7 +572,7 @@ public enum VariableFactory {
      * @param VAR an integer variable
      */
     public static IntVar eq(IntVar VAR) {
-        if ((VAR.getTypeAndKind() & Variable.BOOL) != 0) {
+        if ((VAR.getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
             return eqbool((BoolVar) VAR);
         } else {
             return eqint(VAR);
