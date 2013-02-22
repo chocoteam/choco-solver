@@ -46,12 +46,12 @@ import java.util.Random;
  */
 public class SumTests {
 
-    @Test(groups = "1s")
+    @Test(groups = "1m")
     public void testBound() {
         Random random = new Random();
         int m = 6;
         int b = 14;
-        for (int seed = 0; seed < 2000; seed++) {
+        for (int seed = 0; seed < 20; seed++) {
             random.setSeed(seed);
             int[][] dom = DomainBuilder.buildFullDomains(random.nextInt(m) + 2, -random.nextInt(b), random.nextInt(b) + 1);
             Sum.BIG_SUM_SIZE = 100;
@@ -80,7 +80,7 @@ public class SumTests {
             x[i - 1] = VariableFactory.bounded("x_" + i, dom[i][0], dom[i][n - 1], solver);
             coeffs[i - 1] = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
         }
-		int fact = (rand.nextBoolean() ? -1 : 1) * rand.nextInt(n);
+		int fact = (rand.nextBoolean() ? -1 : 1) * (1+rand.nextInt(n));
 		for (int i = 1; i < dom.length; i++) {
 			coeffs[i-1] /= (fact);
 		}
