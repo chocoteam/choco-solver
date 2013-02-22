@@ -38,15 +38,16 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * Define a COUNT constraint setting size{forall v in lvars | v = occval} <= or >= or = occVar
+ * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar
  * assumes the occVar variable to be the last of the variables of the constraint:
  * vars = [lvars | occVar]
+ * Arc Consistent algorithm
  * with  lvars = list of variables for which the occurrence of occval in their domain is constrained
  * <br/>
  *
  * @author Jean-Guillaume Fages
  */
-public class PropFastCount extends Propagator<IntVar> {
+public class PropCount_AC extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -62,13 +63,13 @@ public class PropFastCount extends Propagator<IntVar> {
 
     /**
      * Propagator for Count Constraint for integer variables
-     * Basic filter: no particular consistency but fast and with a correct checker
+     * Performs Arc Consistency
      *
      * @param decvars
      * @param restrictedValue
      * @param valueCardinality
      */
-    public PropFastCount(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
+    public PropCount_AC(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
         super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, false);
         this.value = restrictedValue;
         this.n = decvars.length;
@@ -94,7 +95,6 @@ public class PropFastCount extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
-
 
     @Override
     public boolean advise(int varIdx, int mask) {
@@ -151,14 +151,22 @@ public class PropFastCount extends Propagator<IntVar> {
             int nb = vars[n].getValue();
             if (possibles.getSize() + mandatories.getSize() == nb) {
                 for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
-                    vars[j].instantiateTo(value, aCause);
+                    if(vars[j].instantiateTo(value, aCause)){
+						possibles.remove(j);
+					}
                 }
-                setPassive();
+				if(possibles.isEmpty()){
+					setPassive();
+				}
             } else if (mandatories.getSize() == nb) {
-                for (int var = possibles.getFirstElement(); var >= 0; var = possibles.getNextElement()) {
-                    vars[var].removeValue(value, aCause);
+                for (int j = possibles.getFirstElement(); j >= 0; j = possibles.getNextElement()) {
+                    if(vars[j].removeValue(value, aCause)){
+						possibles.remove(j);
+					}
                 }
-                setPassive();
+				if(possibles.isEmpty()){
+					setPassive();
+				}
             }
         }
     }

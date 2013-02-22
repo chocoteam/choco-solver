@@ -30,7 +30,7 @@ import common.ESat;
 import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.globalcardinality.PropFastCount;
+import solver.constraints.propagators.nary.globalcardinality.PropCount_AC;
 import solver.variables.IntVar;
 
 /**
@@ -51,7 +51,7 @@ public class Count extends IntConstraint<IntVar> {
     public Count(int value, IntVar[] vars, IntVar limit, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         this.occval = value;
-        setPropagators(new PropFastCount(vars, value, limit));
+        setPropagators(new PropCount_AC(vars, value, limit));
     }
 
 
