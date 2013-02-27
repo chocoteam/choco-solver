@@ -109,7 +109,7 @@ public class TSPslave extends AbstractParallelSlave {
         solver.post(GraphConstraintFactory.tsp(undi, totalCost, distMatrix, 1));
         // config
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
-        strategy.configure(10, true);
+        strategy.configure(GraphStrategies.MAX_COST, true);
         solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
         solver.set(SolutionPoolFactory.LAST_ONE.make());
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
