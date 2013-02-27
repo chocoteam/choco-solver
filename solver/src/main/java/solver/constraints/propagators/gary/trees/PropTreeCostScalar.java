@@ -29,41 +29,59 @@ package solver.constraints.propagators.gary.trees;
 
 import common.ESat;
 import common.util.objects.setDataStructures.ISet;
+import common.util.procedure.PairProcedure;
+import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
+import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
 
 /**
  * Compute the cost of the graph by summing edge costs
  * - For minimization problem
  */
-public class PropTreeEvalObj extends Propagator {
+public class PropTreeCostScalar extends Propagator<UndirectedGraphVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     protected UndirectedGraphVar g;
+	private IGraphDeltaMonitor gdm;
+	private PairProcedure edgeEnf, edgeRem;
     protected int n;
     protected IntVar sum;
     protected int[][] distMatrix;
-    protected int[] lowestUnused;
+	private IStateInt minSum,maxSum;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropTreeEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
-        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
+    public PropTreeCostScalar(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();
         distMatrix = costMatrix;
-        lowestUnused = new int[n];
+		minSum = environment.makeInt(0);
+		maxSum = environment.makeInt(0);
+		gdm = g.monitorDelta(this);
+		edgeEnf = new PairProcedure() {
+			@Override
+			public void execute(int i, int j) throws ContradictionException {
+				minSum.add(distMatrix[i][j]);
+			}
+		};
+		edgeRem = new PairProcedure() {
+			@Override
+			public void execute(int i, int j) throws ContradictionException {
+				maxSum.add(-distMatrix[i][j]);
+			}
+		};
     }
 
     //***********************************************************************************
@@ -74,64 +92,60 @@ public class PropTreeEvalObj extends Propagator {
     public void propagate(int evtmask) throws ContradictionException {
         int min = 0;
         int max = 0;
-        int ce = 0;
-        int ck = 0;
-        int minCost = 1000000;
-        int maxCost = 0;
         for (int i = 0; i < n; i++) {
             ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (i < j) {
-                    ce++;
+                if (i <= j) {
                     max += distMatrix[i][j];
                     if (g.getKernelGraph().edgeExists(i, j)) {
                         min += distMatrix[i][j];
-                        ck++;
-                    } else {
-                        if (distMatrix[i][j] > maxCost) {
-                            maxCost = distMatrix[i][j];
-                        }
-                        if (distMatrix[i][j] < minCost) {
-                            minCost = distMatrix[i][j];
-                        }
                     }
                 }
             }
         }
-        int max2 = min + (n - 1 - ck) * maxCost;
-        min += (n - 1 - ck) * minCost;
+		minSum.set(min);
+		maxSum.set(max);
         sum.updateLowerBound(min, aCause);
         sum.updateUpperBound(max, aCause);
-        sum.updateUpperBound(max2, aCause);
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
+        gdm.freeze();
+		gdm.forEachArc(edgeEnf, EventType.ENFORCEARC);
+		gdm.forEachArc(edgeRem, EventType.REMOVEARC);
+		gdm.unfreeze();
+		sum.updateLowerBound(minSum.get(), aCause);
+		sum.updateUpperBound(maxSum.get(), aCause);
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
     }
 
     @Override
     public ESat isEntailed() {
-        return ESat.TRUE; // not implemented
-    }
-
-    protected void filter(int minSum) throws ContradictionException {
-        ISet succs;
-        int delta = sum.getUB() - minSum;
-        for (int i = 0; i < n; i++) {
-            succs = g.getEnvelopGraph().getNeighborsOf(i);
-            for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-                if (i < j && !g.getKernelGraph().edgeExists(i, j)) {
-                    if (distMatrix[i][j] - lowestUnused[i] > delta) {
-                        g.removeArc(i, j, aCause);
-                    }
-                }
-            }
-        }
+		int min = 0;
+		int max = 0;
+		for (int i = 0; i < n; i++) {
+			ISet nei = g.getEnvelopGraph().getNeighborsOf(i);
+			for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+				if (i <= j) {
+					max += distMatrix[i][j];
+					if (g.getKernelGraph().edgeExists(i, j)) {
+						min += distMatrix[i][j];
+					}
+				}
+			}
+		}
+		if(min>sum.getUB() || max<sum.getLB()){
+			return ESat.FALSE;
+		}
+		if(min == max){
+			return ESat.TRUE;
+		}else{
+			return ESat.UNDEFINED;
+		}
     }
 }

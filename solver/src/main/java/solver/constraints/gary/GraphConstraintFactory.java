@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.basic.PropConnected;
 import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.basic.PropKCliques;
 import solver.constraints.propagators.gary.basic.PropTransitivity;
@@ -46,7 +47,6 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 
@@ -132,7 +132,7 @@ public class GraphConstraintFactory {
 		gc.setPropagators(
 				new PropNodeDegree_AtLeast(GRAPHVAR, 1),
 				new PropTreeNoSubtour(GRAPHVAR),
-				new PropKCC(GRAPHVAR, VariableFactory.fixed(1, solver))
+				new PropConnected(GRAPHVAR)
 		);
 		return gc;
 	}

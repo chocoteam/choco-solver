@@ -37,7 +37,7 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
-import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
+import solver.constraints.propagators.gary.trees.PropTreeCostScalar;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropLagr_DCMST;
 import solver.exception.ContradictionException;
 import solver.objective.ObjectiveStrategy;
@@ -67,25 +67,23 @@ public class DCMST extends AbstractProblem {
 	// BENCHMARK
 	//***********************************************************************************
 
-	private static String dir = "/Users/jfages07/Desktop/work/CPAIOR13/instances";
-
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
+		String dir = "/Users/jfages07/Desktop/work/CPAIOR13/instances";
 		DCMST.TIMELIMIT = 300000;
 		String suffix = "_choco";
 		execute(dir+"/DR", "DR"+suffix+".csv");
 		execute(dir+"/ANDINST", "ANDINST"+suffix+".csv");
-		//		execute(dir, "DE", "DE"+suffix+".csv"); //(much harder to solver, a cutting plane propagator is advised)
+//		execute(dir+"/DE", "DE"+suffix+".csv"); //(much harder to solver, a cutting plane propagator is advised)
 	}
 
 	public static void execute(String dir, String output) {
-		DCMST.dir = dir;
 		TextWriter.clearFile(output);
 		TextWriter.writeTextInto("instance;sols;fails;nodes;time;obj;\n", output);
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int nMin = 100;
-		int nMax = 600;
+		int nMax = 1000;
 		for (String s : list) {
 			File file = new File(dir + "/" + s);
 			if ((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))) {
@@ -157,7 +155,7 @@ public class DCMST extends AbstractProblem {
 		// tree constraint
 		Constraint gc = new GraphConstraintFactory().spanning_tree(graph);
 		// cost constraint
-		gc.addPropagators(new PropTreeEvalObj(graph, totalCost, dist));
+		gc.addPropagators(new PropTreeCostScalar(graph, totalCost, dist));
 		// max degree constraint
 		gc.addPropagators(new PropNodeDegree_AtMost(graph, dMax));
 		gc.addPropagators(new PropLowDegrees(graph, dMax));
