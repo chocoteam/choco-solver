@@ -83,7 +83,7 @@ public class DCMST extends AbstractProblem {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int nMin = 100;
-		int nMax = 1000;
+		int nMax = 2000;
 		for (String s : list) {
 			File file = new File(dir + "/" + s);
 			if ((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))) {
