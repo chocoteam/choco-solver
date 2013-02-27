@@ -40,11 +40,13 @@ import solver.constraints.propagators.gary.path.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.path.PropPathNoCycle;
 import solver.constraints.propagators.gary.path.PropReducedPath;
 import solver.constraints.propagators.gary.path.PropSCCDoorsRules;
+import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation.PropLagr_OneTree;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 
@@ -54,6 +56,10 @@ import solver.variables.graph.UndirectedGraphVar;
  * @author Jean-Guillaume Fages
  */
 public class GraphConstraintFactory {
+
+	//***********************************************************************************
+	// UNDIRECTED GRAPHS
+	//***********************************************************************************
 
     /**
      * partition a graph variable into nCliques cliques
@@ -99,7 +105,7 @@ public class GraphConstraintFactory {
 	 * <p/> Subtour elimination is an undirected adaptation of the
 	 * nocycle constraint of Caseau & Laburthe in Solving small TSPs with Constraints.
      *
-     * @param GRAPHVAR
+     * @param GRAPHVAR  graph variable representing a Hamiltonian cycle
      * @return a hamiltonian cycle constraint
      */
     public static Constraint hamiltonianCycle(UndirectedGraphVar GRAPHVAR) {
@@ -110,6 +116,30 @@ public class GraphConstraintFactory {
         gc.addPropagators(new PropCycleNoSubtour(GRAPHVAR));
         return gc;
     }
+
+	/**
+	 * GRAPHVAR must form a spanning tree, i.e. an acyclic and connected undirected graph
+	 * <p/> Incremental degree constraint, runs in O(1) time per force/removed edge
+	 * <p/> Connectivity checker and bridge detection in O(n+m) time (Tarjan's algorithm)
+	 * <p/> Subtour elimination in O(n) worst case time per enforced edge
+	 *
+	 * @param GRAPHVAR  graph variable forming a tree
+	 * @return	a constraint ensuring that GRAPHVAR is a spanning tree
+	 */
+	public static Constraint spanning_tree(UndirectedGraphVar GRAPHVAR){
+		Solver solver = GRAPHVAR.getSolver();
+		Constraint gc = new Constraint(new Variable[]{GRAPHVAR}, solver);
+		gc.setPropagators(
+				new PropNodeDegree_AtLeast(GRAPHVAR, 1),
+				new PropTreeNoSubtour(GRAPHVAR),
+				new PropKCC(GRAPHVAR, VariableFactory.fixed(1, solver))
+		);
+		return gc;
+	}
+
+	//***********************************************************************************
+	// DIRECTED GRAPHS
+	//***********************************************************************************
 
     /**
      * GRAPHVAR must form a Hamiltonian path from ORIGIN to DESTINATION.
