@@ -34,6 +34,7 @@
 
 package solver.search.strategy.strategy.graph;
 
+import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
@@ -55,16 +56,14 @@ public class GraphStrategies extends GraphStrategy {
     public static final int MAX_M_DEGREE = 4;
     public static final int MIN_DELTA_DEGREE = 5;
     public static final int MAX_DELTA_DEGREE = 6;
-    public static final int MIN_COMMON = 7;
-    public static final int MAX_COMMON = 8;
-    public static final int MIN_COST = 9;
-    public static final int MAX_COST = 10;
-    public static final int IN_SUPPORT_LEX = 11;
-    public static final int OUT_SUPPORT_LEX = 12;
-    public static final int MIN_REDUCED_COST = 13;
-    public static final int MAX_REDUCED_COST = 14;
-    public static final int MIN_REPLACEMENT_COST = 15;
-    public static final int MAX_REPLACEMENT_COST = 16;
+    public static final int MIN_COST = 7;
+    public static final int MAX_COST = 8;
+    public static final int IN_SUPPORT_LEX = 9;
+    public static final int OUT_SUPPORT_LEX = 10;
+    public static final int MIN_REDUCED_COST = 11;
+    public static final int MAX_REDUCED_COST = 12;
+    public static final int MIN_REPLACEMENT_COST = 13;
+    public static final int MAX_REPLACEMENT_COST = 14;
 
     // variables
     private int n;
@@ -133,8 +132,12 @@ public class GraphStrategies extends GraphStrategy {
     }
 
     private boolean evaluateNeighbors(int i) {
-        for (int j = 0; j < n; j++) {
-            if (g.getEnvelopGraph().isArcOrEdge(i, j) && !g.getKernelGraph().isArcOrEdge(i, j)) {
+		ISet set = g.getEnvelopGraph().getSuccsOrNeigh(i);
+		if(set.getSize()==g.getKernelGraph().getSuccsOrNeigh(i).getSize()){
+			return false;
+		}
+		for (int j=set.getFirstElement(); j>=0; j=set.getNextElement()) {
+            if (!g.getKernelGraph().isArcOrEdge(i, j)) {
                 int v = -1;
                 switch (mode) {
                     case LEX:
@@ -157,18 +160,6 @@ public class GraphStrategies extends GraphStrategy {
                                 + g.getEnvelopGraph().getPredsOrNeigh(j).getSize()
                                 - g.getKernelGraph().getSuccsOrNeigh(i).getSize()
                                 - g.getKernelGraph().getPredsOrNeigh(j).getSize();
-                        break;
-                    case MIN_COMMON:
-                    case MAX_COMMON:
-                        v = 0;
-                        for (int k = 0; k < n; k++) {
-                            if (g.getEnvelopGraph().getSuccsOrNeigh(k).contain(i)) {
-                                v++;
-                            }
-                            if (g.getEnvelopGraph().getSuccsOrNeigh(k).contain(j)) {
-                                v++;
-                            }
-                        }
                         break;
                     case MIN_COST:
                     case MAX_COST:
@@ -200,8 +191,9 @@ public class GraphStrategies extends GraphStrategy {
                         throw new UnsupportedOperationException("mode " + mode + " does not exist");
                 }
                 if (select(v)) {
-                    if (mode < 11 || (mode >= 13
-                            && ((mode <= 14 && !relax.contains(i, j)) || (mode > 14 && relax.contains(i, j))))) {
+					if(mode < MIN_REDUCED_COST
+							|| (mode < MIN_REPLACEMENT_COST && !relax.contains(i, j))
+							|| relax.contains(i, j)){
                         value = v;
                         from = i;
                         to = j;
