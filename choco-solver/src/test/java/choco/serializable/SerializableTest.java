@@ -29,7 +29,6 @@ package choco.serializable;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.nqueen.NQueenBinary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -162,13 +161,24 @@ public class SerializableTest {
 
     @Test(groups = {"1s"})
     public void testNQueen() {
-        NQueenBinary pb = new NQueenBinary();
-        pb.readArgs("-q", "8");
-        pb.createSolver();
-        pb.buildModel();
-        pb.configureSearch();
+        Solver s = new Solver();
+        int n = 12;
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, s);
+        }
 
-        Solver s = pb.getSolver();
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                s.post(neq);
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                s.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+
 
         File file = null;
         try {

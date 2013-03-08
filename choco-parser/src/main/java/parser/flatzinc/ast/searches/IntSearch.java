@@ -33,6 +33,8 @@ import solver.Solver;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.values.*;
+import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 

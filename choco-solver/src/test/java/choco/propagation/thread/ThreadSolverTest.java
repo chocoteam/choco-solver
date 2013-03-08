@@ -29,11 +29,12 @@ package choco.propagation.thread;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.nqueen.NQueenBinary;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.thread.ThreadSolver;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -44,13 +45,23 @@ import solver.variables.IntVar;
 public class ThreadSolverTest {
 
     protected Solver modeler(int n) {
-        NQueenBinary pb = new NQueenBinary();
-        pb.readArgs("-q", Integer.toString(n));
-        pb.createSolver();
-        pb.buildModel();
-        pb.configureSearch();
+        Solver solver = new Solver();
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+        }
 
-        return pb.getSolver();
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        return solver;
     }
 
 

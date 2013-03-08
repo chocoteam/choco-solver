@@ -28,10 +28,13 @@ package solver.search.restart;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.nqueen.NQueenBinary;
 import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.search.limits.NodeLimit;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -41,13 +44,24 @@ import solver.search.loop.monitors.SearchMonitorFactory;
  */
 public class RestartTest {
 
-    static Solver buildQ(int n) {
-        NQueenBinary nq = new NQueenBinary();
-        nq.readArgs("-q", "" + n);
-        nq.createSolver();
-        nq.buildModel();
-        nq.configureSearch();
-        return nq.getSolver();
+    protected static Solver buildQ(int n) {
+        Solver solver = new Solver();
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+        }
+
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        return solver;
     }
 
     @Test(groups = "1s")

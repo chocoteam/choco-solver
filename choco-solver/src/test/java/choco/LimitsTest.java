@@ -29,9 +29,12 @@ package choco;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.nqueen.NQueenBinary;
 import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -42,12 +45,24 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 public class LimitsTest {
 
     protected static Solver modelit() {
-        NQueenBinary pb = new NQueenBinary();
-        pb.readArgs("-q", "12");
-        pb.createSolver();
-        pb.buildModel();
-        pb.configureSearch();
-        return pb.getSolver();
+        Solver solver = new Solver();
+        int n = 12;
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
+        }
+
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                Constraint neq = IntConstraintFactory.arithm(vars[i], "!=", vars[j]);
+                solver.post(neq);
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", -k));
+                solver.post(IntConstraintFactory.arithm(vars[i], "!=", vars[j], "+", k));
+            }
+        }
+        return solver;
     }
 
 

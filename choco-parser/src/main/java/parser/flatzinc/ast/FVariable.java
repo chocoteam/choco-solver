@@ -35,6 +35,10 @@ import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.SetVar;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -135,12 +139,12 @@ public final class FVariable {
 
 
     /**
-     * Build a {@link Variable} named {@code name}.
+     * Build a {@link solver.variables.Variable} named {@code name}.
      *
      * @param name   name of the boolean variable
      * @param map
      * @param solver
-     * @return {@link Variable}
+     * @return {@link solver.variables.Variable}
      */
 
     private static BoolVar buildWithBool(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
@@ -155,12 +159,12 @@ public final class FVariable {
     }
 
     /**
-     * Build an unbounded {@link Variable} named {@code name}, defined by {@code type}.
+     * Build an unbounded {@link solver.variables.Variable} named {@code name}, defined by {@code type}.
      *
      * @param name       name of the variable
      * @param expression
      * @param map
-     * @param solver     @return {@link Variable}
+     * @param solver     @return {@link solver.variables.Variable}
      */
     private static IntVar buildWithInt(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
@@ -174,13 +178,13 @@ public final class FVariable {
     }
 
     /**
-     * Build a {@link Variable} named {@code name}, defined by {@code type}.
+     * Build a {@link solver.variables.Variable} named {@code name}, defined by {@code type}.
      *
      * @param name   name of the variable
      * @param type   {@link parser.flatzinc.ast.declaration.DInt2} object
      * @param map
      * @param solver
-     * @return {@link Variable}
+     * @return {@link solver.variables.Variable}
      */
     private static IntVar buildWithInt2(String name, DInt2 type, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
@@ -203,14 +207,14 @@ public final class FVariable {
     }
 
     /**
-     * Build a {@link Variable} named {@code name}, defined by {@code type}.
+     * Build a {@link solver.variables.Variable} named {@code name}, defined by {@code type}.
      * {@code type} is expected to be a {@link parser.flatzinc.ast.declaration.DManyInt} object.
      *
      * @param name   name of the variable
      * @param type   {@link parser.flatzinc.ast.declaration.DManyInt} object.
      * @param map
      * @param solver
-     * @return {@link Variable}
+     * @return {@link solver.variables.Variable}
      */
     private static IntVar buildWithManyInt(String name, DManyInt type, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
@@ -250,12 +254,12 @@ public final class FVariable {
     }
 
     /**
-     * Build a {@link Variable} named {@code name}, defined by {@code type}.
+     * Build a {@link solver.variables.Variable} named {@code name}, defined by {@code type}.
      *
      * @param name name of the variable
      * @param type {@link parser.flatzinc.ast.declaration.DSet} object.
      * @param map
-     * @return {@link Variable}.
+     * @return {@link solver.variables.Variable}.
      */
     private static SetVar buildWithSet(String name, DSet type, THashMap<String, Object> map) {
 //        final Declaration what = type.getWhat();
@@ -282,7 +286,7 @@ public final class FVariable {
 
 
     /**
-     * Build an array of <? extends {@link Variable}>.
+     * Build an array of <? extends {@link solver.variables.Variable}>.
      * </br>WARNING: array's indice are from 1 to n.
      *
      * @param name   name of the array of variables.</br> Each variable is named like {@code name}_i.
@@ -367,7 +371,7 @@ public final class FVariable {
     }
 
     /**
-     * Build an array of <? extends {@link Variable}>.
+     * Build an array of <? extends {@link solver.variables.Variable}>.
      * </br>WARNING: array's indice are from 1 to n.
      *
      * @param name   name of the array of variables.</br> Each variable is named like {@code name}_i.

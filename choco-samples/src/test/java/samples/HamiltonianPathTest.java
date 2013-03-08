@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.recorder;
+package samples;
 
 import common.util.objects.setDataStructures.SetType;
 import org.testng.Assert;

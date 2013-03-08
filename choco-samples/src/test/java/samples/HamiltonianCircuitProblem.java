@@ -25,12 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco;
+package samples;
 
 import common.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.AbstractProblem;
 import samples.graph.input.GraphGenerator;
 import solver.Cause;
 import solver.Solver;

@@ -29,7 +29,6 @@ package solver.constraints.nary;
 import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.integer.MagicSeries;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -53,26 +52,34 @@ import java.util.Random;
  */
 public class CountTest {
 
+    protected static Solver modelit(int n) {
+        Solver solver = new Solver();
+        IntVar[] vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
+        for (int i = 0; i < n; i++) {
+            solver.post(IntConstraintFactory.count(i, vars, VariableFactory.eq(vars[i])));
+        }
+        solver.post(IntConstraintFactory.sum(vars, VariableFactory.fixed(n, solver))); // cstr redundant 1
+        int[] coeff2 = new int[n - 1];
+        IntVar[] vs2 = new IntVar[n - 1];
+        for (int i = 1; i < n; i++) {
+            coeff2[i - 1] = i;
+            vs2[i - 1] = vars[i];
+        }
+        solver.post(IntConstraintFactory.scalar(vs2, coeff2, VariableFactory.fixed(n, solver))); // cstr redundant 1
+        return solver;
+    }
+
+
     @Test(groups = "1s")
     public void testMS4() {
-        MagicSeries pb = new MagicSeries();
-        pb.readArgs("-n", Integer.toString(4));
-        pb.createSolver();
-        pb.buildModel();
-        pb.configureSearch();
-        Solver solver = pb.getSolver();
+        Solver solver = modelit(4);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
 
     @Test(groups = "1s")
-    public void testMS6() {
-        MagicSeries pb = new MagicSeries();
-        pb.readArgs("-n", Integer.toString(8));
-        pb.createSolver();
-        pb.buildModel();
-        pb.configureSearch();
-        Solver solver = pb.getSolver();
+    public void testMS8() {
+        Solver solver = modelit(8);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
     }
