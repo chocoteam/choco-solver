@@ -43,7 +43,7 @@
         <dependency>
             <groupId>choco</groupId>
             <artifactId>choco-environment</artifactId>
-            <version>${project.version}</version>
+            <version>13.02-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

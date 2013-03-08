@@ -40,6 +40,14 @@
     <name>Samples based on Choco-${project.version}</name>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>choco</groupId>
+            <artifactId>choco-solver</artifactId>
+            <version>13.02-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
