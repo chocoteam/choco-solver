@@ -34,9 +34,6 @@
 
 package samples.sandbox;
 
-import common.ESat;
-import common.util.procedure.IntProcedure;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -56,6 +53,9 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.procedure.IntProcedure;
+import util.tools.ArrayUtils;
 
 /**
  * Dobble problem (card game)

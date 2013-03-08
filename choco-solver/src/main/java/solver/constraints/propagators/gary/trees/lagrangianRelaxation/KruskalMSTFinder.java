@@ -27,14 +27,14 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
-import common.util.graphOperations.dominance.LCAGraphManager;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.graphs.UndirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
+import util.graphOperations.dominance.LCAGraphManager;
+import util.objects.graphs.DirectedGraph;
+import util.objects.graphs.UndirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
 import java.util.BitSet;

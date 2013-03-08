@@ -27,8 +27,6 @@
 
 package samples.graph;
 
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.graph.input.HCP_Utils;
@@ -39,6 +37,8 @@ import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Solves the Hamiltonian Cycle Problem

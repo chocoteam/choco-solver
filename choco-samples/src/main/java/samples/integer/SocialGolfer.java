@@ -26,8 +26,6 @@
  */
 package samples.integer;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
@@ -37,6 +35,8 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * CSPLib prob010:<br/>

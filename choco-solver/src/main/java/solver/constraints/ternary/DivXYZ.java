@@ -26,11 +26,11 @@
  */
 package solver.constraints.ternary;
 
-import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.ternary.PropDivXYZ;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * Z = X/Y

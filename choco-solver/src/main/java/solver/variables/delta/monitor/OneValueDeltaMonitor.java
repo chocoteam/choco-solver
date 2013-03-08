@@ -26,13 +26,13 @@
  */
 package solver.variables.delta.monitor;
 
-import common.util.procedure.IntProcedure;
-import common.util.procedure.SafeIntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.procedure.IntProcedure;
+import util.procedure.SafeIntProcedure;
 
 /**
  * A monitor for OneValueDelta

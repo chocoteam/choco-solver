@@ -27,7 +27,6 @@
 
 package solver.search.loop;
 
-import common.ESat;
 import memory.IEnvironment;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -43,6 +42,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
+import util.ESat;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object

@@ -34,13 +34,13 @@
 
 package solver.constraints.propagators.set;
 
-import common.ESat;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
+import util.ESat;
 
 /**
  * At most one set can be empty

@@ -27,8 +27,8 @@
 
 package solver.search.strategy.enumerations.values.heuristics;
 
-import common.util.iterators.IntIterator;
 import gnu.trove.map.hash.THashMap;
+import util.iterators.IntIterator;
 
 public abstract class HeuristicVal implements IntIterator {
 

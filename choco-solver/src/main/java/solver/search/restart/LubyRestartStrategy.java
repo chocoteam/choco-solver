@@ -26,7 +26,7 @@
  */
 package solver.search.restart;
 
-import common.util.tools.MathUtils;
+import util.tools.MathUtils;
 
 /**
  * Restart strategy based on:

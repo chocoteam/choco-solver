@@ -27,13 +27,13 @@
 
 package samples.nqueen;
 
-import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
+import util.tools.ArrayUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

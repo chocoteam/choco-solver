@@ -34,11 +34,11 @@
 
 package solver.constraints.propagators.gary.degree;
 
-import common.util.objects.graphs.IGraph;
-import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphVar;
+import util.objects.graphs.IGraph;
+import util.objects.setDataStructures.ISet;
 
 interface IncidentSet {
 

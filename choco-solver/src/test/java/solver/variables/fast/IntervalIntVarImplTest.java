@@ -26,14 +26,14 @@
  */
 package solver.variables.fast;
 
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import junit.framework.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.variables.Variable;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

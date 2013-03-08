@@ -26,12 +26,6 @@
  */
 package solver.constraints.propagators.gary.path;
 
-import common.ESat;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
-import common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -40,6 +34,12 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
+import util.ESat;
+import util.graphOperations.connectivity.StrongConnectivityFinder;
+import util.objects.graphs.DirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
+import util.procedure.PairProcedure;
 
 import java.util.BitSet;
 

@@ -26,7 +26,6 @@
  */
 package solver.variables;
 
-import common.util.tools.StringUtils;
 import memory.IStateDouble;
 import solver.ICause;
 import solver.Solver;
@@ -35,6 +34,7 @@ import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.NoDelta;
+import util.tools.StringUtils;
 
 /**
  * An implementation of RealVar, variable for continuous constraints (solved using IBEX).

@@ -27,7 +27,6 @@
 
 package solver.constraints.binary;
 
-import common.util.tools.ArrayUtils;
 import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,6 +38,7 @@ import solver.explanations.ExplanationFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -27,9 +27,6 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -39,6 +36,9 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 /**
  * Propagator that ensures that K arcs/edges belong to the final graph

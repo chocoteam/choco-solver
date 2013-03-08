@@ -28,7 +28,6 @@
 package solver.constraints.propagators;
 
 
-import common.ESat;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
 import memory.structure.Operation;
@@ -49,6 +48,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 import java.io.Serializable;
 

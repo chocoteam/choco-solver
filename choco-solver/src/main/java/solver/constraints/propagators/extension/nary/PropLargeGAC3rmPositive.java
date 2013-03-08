@@ -26,7 +26,6 @@
  */
 package solver.constraints.propagators.extension.nary;
 
-import common.ESat;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.extension.FastBooleanValidityChecker;
@@ -35,6 +34,7 @@ import solver.constraints.propagators.extension.ValidityChecker;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * <br/>

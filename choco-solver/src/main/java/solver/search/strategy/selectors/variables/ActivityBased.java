@@ -27,8 +27,6 @@
 package solver.search.strategy.selectors.variables;
 
 
-import common.util.PoolManager;
-import common.util.iterators.DisposableValueIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
@@ -50,6 +48,8 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
+import util.PoolManager;
+import util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
 import java.util.BitSet;

@@ -27,7 +27,6 @@
 
 package samples.graph;
 
-import common.util.objects.setDataStructures.SetType;
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import samples.graph.input.TSP_Utils;
@@ -42,6 +41,7 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Solves the Traveling Salesman Problem

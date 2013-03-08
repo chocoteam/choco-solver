@@ -26,8 +26,6 @@
  */
 package solver.constraints.nary.globalcardinality;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -37,6 +35,8 @@ import solver.constraints.propagators.nary.globalcardinality.PropFastGCC;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;

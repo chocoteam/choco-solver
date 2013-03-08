@@ -26,13 +26,13 @@
  */
 package solver.variables.delta.monitor;
 
-import common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.SetDelta;
+import util.procedure.IntProcedure;
 
 /**
  * @author Jean-Guillaume Fages

@@ -26,13 +26,9 @@
  */
 package solver.constraints.propagators.nary.automaton;
 
-import common.ESat;
-import common.util.iterators.DisposableIntIterator;
-import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateBool;
-import memory.structure.StoredIndexedBipartiteSet;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
@@ -42,6 +38,10 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.iterators.DisposableIntIterator;
+import util.objects.StoredIndexedBipartiteSet;
+import util.procedure.UnaryIntProcedure;
 
 /**
  * <br/>

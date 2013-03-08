@@ -26,13 +26,13 @@
  */
 package solver.variables.view;
 
-import common.util.procedure.IntProcedure;
-import common.util.procedure.SafeIntProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.procedure.IntProcedure;
+import util.procedure.SafeIntProcedure;
 
 import java.util.ArrayList;
 

@@ -26,7 +26,7 @@
  */
 package solver.explanations.antidom;
 
-import common.util.iterators.DisposableValueIterator;
+import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

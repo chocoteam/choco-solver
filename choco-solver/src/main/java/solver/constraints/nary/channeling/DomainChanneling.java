@@ -26,13 +26,13 @@
  */
 package solver.constraints.nary.channeling;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.channeling.PropDomainChanneling;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).

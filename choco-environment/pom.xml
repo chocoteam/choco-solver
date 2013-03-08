@@ -39,5 +39,11 @@
     <packaging>jar</packaging>
     <name>Choco-${project.version} backtrackable environment</name>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>choco</groupId>
+            <artifactId>PropAnn</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 </project>

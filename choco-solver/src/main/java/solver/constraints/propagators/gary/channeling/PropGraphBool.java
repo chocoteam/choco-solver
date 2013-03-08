@@ -27,8 +27,6 @@
 
 package solver.constraints.propagators.gary.channeling;
 
-import common.ESat;
-import common.util.procedure.PairProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -36,6 +34,8 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
+import util.ESat;
+import util.procedure.PairProcedure;
 
 /**
  * Propagator channeling between arcs of a graph and a boolean matrix

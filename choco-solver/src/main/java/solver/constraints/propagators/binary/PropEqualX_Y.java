@@ -28,9 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.procedure.IntProcedure;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,6 +38,9 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.procedure.IntProcedure;
+import util.tools.ArrayUtils;
 
 /**
  * X = Y

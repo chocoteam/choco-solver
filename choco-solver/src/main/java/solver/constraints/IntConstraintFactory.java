@@ -26,7 +26,6 @@
  */
 package solver.constraints;
 
-import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -75,6 +74,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Task;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 /**
  * A Factory to declare constraint based on integer variables (only).

@@ -27,8 +27,6 @@
 
 package solver.constraints.gary;
 
-import common.util.objects.graphs.Orientation;
-import common.util.objects.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -41,6 +39,8 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.DirectedGraphVar;
+import util.objects.graphs.Orientation;
+import util.objects.setDataStructures.SetType;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

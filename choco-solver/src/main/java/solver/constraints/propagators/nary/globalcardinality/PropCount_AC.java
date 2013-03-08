@@ -26,16 +26,16 @@
  */
 package solver.constraints.propagators.nary.globalcardinality;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetFactory;
-import common.util.objects.setDataStructures.SetType;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
+import util.objects.setDataStructures.SetType;
+import util.tools.ArrayUtils;
 
 /**
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar

@@ -28,13 +28,13 @@
 
 package solver.constraints.set;
 
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.set.*;
 import solver.variables.*;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
+import util.tools.ArrayUtils;
 
 /**
  * Constraints over set variables

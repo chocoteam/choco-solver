@@ -35,8 +35,6 @@ package solver.constraints.nary;
  * LexChain test file
  */
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -52,6 +50,8 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 import java.util.Random;
 

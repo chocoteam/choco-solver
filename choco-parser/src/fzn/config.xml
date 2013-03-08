@@ -43,7 +43,7 @@
     </appender>-->
 
     <logger name="choco" level="off"/>
-    <logger name="choco.common.util" level="off"/>
+    <logger name="choco.util" level="off"/>
 
 
     <logger name="bench" level="off"/>

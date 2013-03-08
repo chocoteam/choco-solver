@@ -27,8 +27,6 @@
 
 package solver.constraints.propagators.reified;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -37,6 +35,8 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Implication propagator

@@ -27,7 +27,6 @@
 
 package samples.integer;
 
-import common.ESat;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
@@ -51,6 +50,7 @@ import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 import java.util.*;
 import java.util.regex.Pattern;

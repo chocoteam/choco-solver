@@ -27,7 +27,6 @@
 
 package solver;
 
-import common.ESat;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.Environments;
 import memory.IEnvironment;
@@ -51,6 +50,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
+import util.ESat;
 
 import java.io.*;
 import java.util.Arrays;

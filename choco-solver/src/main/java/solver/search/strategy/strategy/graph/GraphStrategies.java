@@ -34,12 +34,12 @@
 
 package solver.search.strategy.strategy.graph;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.variables.graph.GraphVar;
+import util.objects.setDataStructures.ISet;
 
 public class GraphStrategies extends GraphStrategy {
 

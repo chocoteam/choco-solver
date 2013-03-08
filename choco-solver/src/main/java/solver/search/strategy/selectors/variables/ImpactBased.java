@@ -26,8 +26,6 @@
  */
 package solver.search.strategy.selectors.variables;
 
-import common.util.PoolManager;
-import common.util.iterators.DisposableValueIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateDouble;
@@ -47,6 +45,8 @@ import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.PoolManager;
+import util.iterators.DisposableValueIterator;
 
 import java.util.Arrays;
 import java.util.Random;

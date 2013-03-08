@@ -34,7 +34,6 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import common.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
@@ -42,6 +41,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 import java.util.BitSet;
 

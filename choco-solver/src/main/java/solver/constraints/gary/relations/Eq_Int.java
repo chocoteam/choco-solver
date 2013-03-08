@@ -26,12 +26,12 @@
  */
 package solver.constraints.gary.relations;
 
-import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 public class Eq_Int extends GraphRelation<IntVar> {
 

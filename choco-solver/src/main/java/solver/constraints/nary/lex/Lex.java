@@ -26,12 +26,12 @@
  */
 package solver.constraints.nary.lex;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.lex.PropLex;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Enforce a lexicographic ordering on two vectors of integer

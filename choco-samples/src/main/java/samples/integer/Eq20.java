@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import common.ESat;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -34,6 +33,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 import java.util.Arrays;
 

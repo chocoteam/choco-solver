@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import common.ESat;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -39,6 +38,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>

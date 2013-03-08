@@ -27,19 +27,19 @@
 
 package solver.constraints.nary.automata.structure.regular;
 
-import common.util.iterators.DisposableIntIterator;
-import common.util.iterators.DisposableRangeIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IEnvironment;
-import memory.structure.StoredIndexedBipartiteSet;
-import memory.structure.StoredIndexedBipartiteSetWithOffset;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.iterators.DisposableIntIterator;
+import util.iterators.DisposableRangeIterator;
+import util.objects.StoredIndexedBipartiteSet;
+import util.objects.StoredIndexedBipartiteSetWithOffset;
 
 import java.util.Set;
 

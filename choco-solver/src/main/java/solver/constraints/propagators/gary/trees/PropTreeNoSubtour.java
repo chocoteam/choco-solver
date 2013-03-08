@@ -35,9 +35,6 @@
 package solver.constraints.propagators.gary.trees;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -45,6 +42,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 import java.util.BitSet;
 

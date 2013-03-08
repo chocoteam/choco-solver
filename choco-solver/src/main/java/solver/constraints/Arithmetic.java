@@ -26,7 +26,6 @@
  */
 package solver.constraints;
 
-import common.ESat;
 import solver.Solver;
 import solver.constraints.propagators.binary.*;
 import solver.constraints.propagators.unary.PropEqualXC;
@@ -35,6 +34,7 @@ import solver.constraints.propagators.unary.PropLessOrEqualXC;
 import solver.constraints.propagators.unary.PropNotEqualXC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * A constraint dedicated to arithmetic operations.

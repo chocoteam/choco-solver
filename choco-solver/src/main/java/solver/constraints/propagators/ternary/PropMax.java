@@ -27,14 +27,14 @@
 
 package solver.constraints.propagators.ternary;
 
-import common.ESat;
-import common.util.procedure.UnaryIntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.procedure.UnaryIntProcedure;
 
 /**
  * X = MAX(Y,Z)

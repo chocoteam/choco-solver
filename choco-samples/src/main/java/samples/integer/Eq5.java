@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import common.ESat;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -36,6 +35,7 @@ import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 /**
  * A system of equations provided by N. Beldiceanu.

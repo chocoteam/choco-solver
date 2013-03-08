@@ -26,8 +26,8 @@
  */
 package solver.search.strategy.strategy.graph;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.variables.graph.GraphVar;
+import util.objects.setDataStructures.ISet;
 
 public abstract class NodeStrategy<G extends GraphVar> {
 

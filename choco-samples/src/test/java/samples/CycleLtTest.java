@@ -27,7 +27,6 @@
 
 package samples;
 
-import common.util.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -39,8 +38,9 @@ import solver.propagation.PropagationEngineFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
-import static common.util.tools.StatisticUtils.*;
+import static util.tools.StatisticUtils.*;
 
 /**
  * <br/>

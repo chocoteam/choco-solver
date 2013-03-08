@@ -27,12 +27,6 @@
 
 package solver.variables.fast;
 
-import common.ESat;
-import common.util.iterators.DisposableRangeBoundIterator;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueBoundIterator;
-import common.util.iterators.DisposableValueIterator;
-import common.util.tools.StringUtils;
 import memory.structure.IndexedBipartiteSet;
 import solver.Configuration;
 import solver.ICause;
@@ -51,6 +45,12 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
 import solver.variables.delta.monitor.OneValueDeltaMonitor;
+import util.ESat;
+import util.iterators.DisposableRangeBoundIterator;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueBoundIterator;
+import util.iterators.DisposableValueIterator;
+import util.tools.StringUtils;
 
 /**
  * <br/>

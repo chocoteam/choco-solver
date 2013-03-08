@@ -27,7 +27,6 @@
 
 package solver.constraints.nary.alldifferent;
 
-import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -36,6 +35,7 @@ import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_Fast;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
 
 /**
  * Standard alldiff constraint with generalized AC

@@ -27,11 +27,6 @@
 
 package solver.constraints.propagators.set;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetFactory;
-import common.util.objects.setDataStructures.SetType;
-import common.util.tools.ArrayUtils;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -40,6 +35,11 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
+import util.objects.setDataStructures.SetType;
+import util.tools.ArrayUtils;
 
 /**
  * Restricts the number of empty sets

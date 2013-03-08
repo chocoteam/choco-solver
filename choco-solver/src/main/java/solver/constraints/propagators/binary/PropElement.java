@@ -28,9 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.iterators.DisposableValueIterator;
-import common.util.tools.ArrayUtils;
 import memory.structure.Operation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -41,6 +38,9 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.iterators.DisposableValueIterator;
+import util.tools.ArrayUtils;
 
 /**
  * VALUE = TABLE[INDEX]

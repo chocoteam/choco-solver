@@ -27,7 +27,6 @@
 
 package solver.search.strategy.strategy;
 
-import common.util.PoolManager;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import memory.IEnvironment;
 import memory.IStateBool;
@@ -38,6 +37,7 @@ import solver.search.strategy.enumerations.SortConductor;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.validators.IValid;
 import solver.variables.IntVar;
+import util.PoolManager;
 
 /**
  * A specific class to build a decision based on :

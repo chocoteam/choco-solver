@@ -34,13 +34,13 @@
 
 package solver.constraints.propagators;
 
-import common.ESat;
-import common.util.procedure.UnaryIntProcedure;
 import memory.IStateInt;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.procedure.UnaryIntProcedure;
 
 public class PropDomSize extends Propagator<IntVar> {
 

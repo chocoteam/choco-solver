@@ -28,10 +28,6 @@
 package solver.variables.view;
 
 
-import common.util.iterators.DisposableRangeBoundIterator;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueBoundIterator;
-import common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -46,6 +42,10 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import util.iterators.DisposableRangeBoundIterator;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueBoundIterator;
+import util.iterators.DisposableValueIterator;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.

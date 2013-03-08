@@ -27,7 +27,6 @@
 
 package solver.constraints.gary;
 
-import common.util.objects.setDataStructures.SetType;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
@@ -38,6 +37,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
+import util.objects.setDataStructures.SetType;
 
 import static org.testng.Assert.assertTrue;
 

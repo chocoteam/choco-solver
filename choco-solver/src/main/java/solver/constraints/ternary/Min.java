@@ -27,14 +27,14 @@
 
 package solver.constraints.ternary;
 
-import common.ESat;
-import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.propagators.ternary.PropMinBC;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
+import util.ESat;
+import util.tools.StringUtils;
 
 /**
  * X = MIN(Y,Z)

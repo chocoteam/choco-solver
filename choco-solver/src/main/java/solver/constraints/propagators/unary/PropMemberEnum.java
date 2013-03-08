@@ -28,7 +28,6 @@
 package solver.constraints.propagators.unary;
 
 import choco.annotations.PropAnn;
-import common.ESat;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -37,6 +36,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 import java.util.Arrays;
 

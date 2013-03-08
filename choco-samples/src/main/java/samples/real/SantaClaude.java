@@ -26,7 +26,6 @@
  */
 package samples.real;
 
-import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -37,6 +36,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.RealVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 import java.util.Random;
 

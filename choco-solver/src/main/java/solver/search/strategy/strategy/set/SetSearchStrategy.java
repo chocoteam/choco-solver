@@ -34,13 +34,13 @@
 
 package solver.search.strategy.strategy.set;
 
-import common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecisionSet;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.SetVar;
+import util.PoolManager;
 
 /**
  * Strategy for branching on set variables

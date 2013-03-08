@@ -26,9 +26,6 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import common.ESat;
-import common.util.procedure.IntProcedure;
-import common.util.tools.ArrayUtils;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -36,6 +33,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.procedure.IntProcedure;
+import util.tools.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;

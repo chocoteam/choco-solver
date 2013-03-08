@@ -27,7 +27,6 @@
 
 package parser.flatzinc.ast;
 
-import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.expression.EAnnotation;
@@ -53,6 +52,7 @@ import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.tools.ArrayUtils;
 
 import java.util.List;
 

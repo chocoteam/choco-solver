@@ -27,13 +27,13 @@
 
 package solver.search.strategy.strategy;
 
-import common.util.PoolManager;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
+import util.PoolManager;
 
 /**
  * <br/>

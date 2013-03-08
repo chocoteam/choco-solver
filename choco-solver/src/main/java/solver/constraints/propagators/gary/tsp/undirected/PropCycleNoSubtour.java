@@ -35,10 +35,6 @@
 package solver.constraints.propagators.gary.tsp.undirected;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.graphOperations.connectivity.ConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -46,6 +42,10 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.graphOperations.connectivity.ConnectivityFinder;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 /**
  * Simple NoSubtour of Caseau-Laburthe adapted to the undirected case

@@ -26,13 +26,12 @@
  */
 package solver.propagation.generator;
 
-import common.util.objects.BitsetFactory;
-import common.util.objects.IBitset;
-import common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
+import util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 
 /**
@@ -53,14 +52,14 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     };
     protected S lastPopped;
 
-    protected IBitset toPropagate;
+    protected BitSet toPropagate;
 
     private Sort(S[] schedulables) {
         super(schedulables);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = BitsetFactory.make(elements.length);
+        this.toPropagate = new BitSet(elements.length);
     }
 
     public Sort(boolean order, boolean reverse, S[] schedulables) {
@@ -74,7 +73,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = BitsetFactory.make(elements.length);
+        this.toPropagate = new BitSet(elements.length);
     }
 
 

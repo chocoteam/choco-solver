@@ -27,7 +27,6 @@
 
 package samples;
 
-import common.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.graph.input.GraphGenerator;
@@ -40,6 +39,7 @@ import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.DirectedGraphVar;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Find a Hamiltonian path in a sparse graph with incremental algorithm

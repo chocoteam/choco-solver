@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.real;
 
-import common.ESat;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.real.Ibex;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * <br/>

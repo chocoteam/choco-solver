@@ -27,9 +27,6 @@
 
 package solver.variables;
 
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetFactory;
-import common.util.objects.setDataStructures.SetType;
 import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
@@ -38,6 +35,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Set variable to represent a set of integers in the range [0,n-1]

@@ -26,7 +26,6 @@
  */
 package solver.search.loop;
 
-import common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -35,6 +34,7 @@ import solver.search.loop.monitors.cpviz.visualizers.*;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>

@@ -28,8 +28,6 @@
 package solver.constraints.nary;
 
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -40,6 +38,8 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 
 /**

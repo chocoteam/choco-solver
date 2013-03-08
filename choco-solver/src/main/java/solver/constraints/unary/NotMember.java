@@ -27,13 +27,13 @@
 
 package solver.constraints.unary;
 
-import common.ESat;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.unary.PropNotMemberBound;
 import solver.constraints.propagators.unary.PropNotMemberEnum;
 import solver.variables.IntVar;
+import util.ESat;
 
 import java.util.Arrays;
 

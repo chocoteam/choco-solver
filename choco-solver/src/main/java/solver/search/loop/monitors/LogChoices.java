@@ -26,11 +26,11 @@
  */
 package solver.search.loop.monitors;
 
-import common.util.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
+import util.tools.StringUtils;
 
 /**
  * A search monitor logger which prints choices during the search.

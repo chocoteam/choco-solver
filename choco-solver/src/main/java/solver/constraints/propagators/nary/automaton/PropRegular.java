@@ -26,12 +26,9 @@
  */
 package solver.constraints.propagators.nary.automaton;
 
-import common.ESat;
-import common.util.procedure.UnaryIntProcedure;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
-import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.structure.Node;
@@ -44,6 +41,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.objects.StoredIndexedBipartiteSet;
+import util.procedure.UnaryIntProcedure;
 
 import java.util.ArrayList;
 import java.util.BitSet;

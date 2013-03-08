@@ -27,8 +27,6 @@
 
 package solver.variables.view;
 
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import memory.IStateBool;
 import solver.Configuration;
 import solver.ICause;
@@ -48,6 +46,8 @@ import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
 
 /**
  * A IntVar with one domain value.

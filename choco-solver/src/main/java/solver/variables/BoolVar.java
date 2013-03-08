@@ -27,10 +27,10 @@
 
 package solver.variables;
 
-import common.ESat;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IntDelta;
+import util.ESat;
 
 /**
  * <br/>

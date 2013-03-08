@@ -27,16 +27,16 @@
 
 package solver.constraints.propagators.gary.arborescences;
 
-import common.ESat;
-import common.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
-import common.util.graphOperations.dominance.AlphaDominatorsFinder;
-import common.util.graphOperations.dominance.SimpleDominatorsFinder;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraphVar;
+import util.ESat;
+import util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import util.graphOperations.dominance.AlphaDominatorsFinder;
+import util.graphOperations.dominance.SimpleDominatorsFinder;
+import util.objects.setDataStructures.ISet;
 
 /**
  * AntiArborescence constraint (simplification from tree constraint)

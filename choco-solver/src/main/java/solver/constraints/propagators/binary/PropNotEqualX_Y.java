@@ -28,8 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -39,6 +37,8 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:

@@ -26,7 +26,6 @@
  */
 package solver.constraints.gary;
 
-import common.util.objects.graphs.Orientation;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
@@ -49,6 +48,7 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.graphs.Orientation;
 
 /**
  * Some usual graph constraints

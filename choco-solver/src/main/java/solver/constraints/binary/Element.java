@@ -27,13 +27,13 @@
 
 package solver.constraints.binary;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.binary.PropElement;
 import solver.constraints.propagators.nary.channeling.PropElementV;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * VALUE = TABLE[INDEX]

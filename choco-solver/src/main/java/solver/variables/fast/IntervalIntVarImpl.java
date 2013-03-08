@@ -27,11 +27,6 @@
 
 package solver.variables.fast;
 
-import common.util.iterators.DisposableRangeBoundIterator;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueBoundIterator;
-import common.util.iterators.DisposableValueIterator;
-import common.util.tools.StringUtils;
 import memory.IEnvironment;
 import memory.IStateInt;
 import solver.Cause;
@@ -51,6 +46,11 @@ import solver.variables.delta.IIntervalDelta;
 import solver.variables.delta.IntervalDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntervalDeltaMonitor;
+import util.iterators.DisposableRangeBoundIterator;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueBoundIterator;
+import util.iterators.DisposableValueIterator;
+import util.tools.StringUtils;
 
 /**
  * <br/>

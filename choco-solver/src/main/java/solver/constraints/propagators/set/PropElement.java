@@ -34,10 +34,6 @@
 
 package solver.constraints.propagators.set;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetFactory;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -45,6 +41,10 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetFactory;
+import util.tools.ArrayUtils;
 
 /**
  * Propagator for element constraint over sets

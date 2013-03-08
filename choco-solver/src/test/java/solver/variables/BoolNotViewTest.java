@@ -26,13 +26,13 @@
  */
 package solver.variables;
 
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
 
 import java.util.Random;
 

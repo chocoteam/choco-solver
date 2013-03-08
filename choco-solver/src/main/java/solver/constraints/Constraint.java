@@ -28,13 +28,13 @@
 package solver.constraints;
 
 
-import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
 import solver.variables.Variable;
+import util.ESat;
 
 import java.io.Serializable;
 import java.util.Arrays;

@@ -26,7 +26,6 @@ package samples.graph.dcmstp;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import common.util.objects.setDataStructures.SetType;
 import samples.AbstractProblem;
 import samples.graph.input.DCMST_Utils;
 import samples.graph.output.TextWriter;
@@ -52,6 +51,7 @@ import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.setDataStructures.SetType;
 
 import java.io.File;
 

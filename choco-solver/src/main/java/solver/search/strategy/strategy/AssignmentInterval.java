@@ -27,12 +27,12 @@
 
 package solver.search.strategy.strategy;
 
-import common.util.PoolManager;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecisionReal;
 import solver.search.strategy.selectors.RealValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.RealVar;
+import util.PoolManager;
 
 /**
  * <br/>

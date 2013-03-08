@@ -64,7 +64,7 @@
     </appender>-->
 
     <logger name="choco" level="WARN"/>
-    <logger name="choco.common.util" level="INFO"/>
+    <logger name="choco.util" level="INFO"/>
 
 
     <logger name="bench" level="info"/>

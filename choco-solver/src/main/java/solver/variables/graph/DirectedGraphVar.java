@@ -27,13 +27,13 @@
 
 package solver.variables.graph;
 
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDelta;
+import util.objects.graphs.DirectedGraph;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Created by IntelliJ IDEA.

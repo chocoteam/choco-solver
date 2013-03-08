@@ -27,8 +27,6 @@
 
 package solver.constraints.ternary;
 
-import common.ESat;
-import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.sum.PropSumEq;
@@ -36,6 +34,8 @@ import solver.constraints.propagators.ternary.PropDivXYZ;
 import solver.constraints.propagators.ternary.PropTimesXY;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.StringUtils;
 
 /**
  * X mod Y = Z

@@ -26,7 +26,6 @@
  */
 package samples.integer;
 
-import common.ESat;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
@@ -41,6 +40,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 import java.io.BufferedReader;
 import java.io.File;

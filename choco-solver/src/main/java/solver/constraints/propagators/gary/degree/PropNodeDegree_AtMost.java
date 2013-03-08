@@ -27,11 +27,6 @@
 
 package solver.constraints.propagators.gary.degree;
 
-import common.ESat;
-import common.util.objects.graphs.IGraph;
-import common.util.objects.graphs.Orientation;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -41,6 +36,11 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.objects.graphs.IGraph;
+import util.objects.graphs.Orientation;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 /**
  * Propagator that ensures that a node has at most N successors/predecessors/neighbors

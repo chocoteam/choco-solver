@@ -27,10 +27,10 @@
 
 package solver.search.strategy.strategy;
 
-import common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
+import util.tools.ArrayUtils;
 
 /**
  * A <code>StrategiesSequencer</code> is class for <code>AbstractStrategy</code> composition.

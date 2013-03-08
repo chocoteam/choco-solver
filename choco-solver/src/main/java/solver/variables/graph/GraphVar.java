@@ -27,8 +27,6 @@
 
 package solver.variables.graph;
 
-import common.util.objects.graphs.IGraph;
-import common.util.objects.setDataStructures.ISet;
 import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
@@ -42,6 +40,8 @@ import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
+import util.objects.graphs.IGraph;
+import util.objects.setDataStructures.ISet;
 
 
 /**

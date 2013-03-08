@@ -27,13 +27,13 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
 
 import java.util.Random;
 

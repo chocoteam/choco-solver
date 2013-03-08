@@ -27,16 +27,16 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import common.ESat;
-import common.util.objects.graphs.IGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
+import util.ESat;
+import util.objects.graphs.IGraph;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 /**
  * Propagator that ensures that the relation of the graph is transitive : (a,b) + (b,c) => (a,c)

@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary;
 
-import common.ESat;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * <br/>

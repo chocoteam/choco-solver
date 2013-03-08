@@ -26,7 +26,6 @@
  */
 package samples;
 
-import common.util.tools.ArrayUtils;
 import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
@@ -40,6 +39,7 @@ import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import util.tools.ArrayUtils;
 
 import java.util.Arrays;
 

@@ -27,10 +27,10 @@
 
 package solver.search.strategy.decision.fast;
 
-import common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.RealVar;
+import util.PoolManager;
 
 /**
  * <br/>

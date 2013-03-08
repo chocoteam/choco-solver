@@ -27,7 +27,6 @@
 
 package parser.flatzinc.ast.constraints;
 
-import common.util.tools.StringUtils;
 import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -37,6 +36,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
 import java.util.List;
 

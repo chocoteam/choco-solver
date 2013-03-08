@@ -26,9 +26,9 @@
  */
 package generator;
 
-import common.util.objects.IntCircularQueue;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import util.objects.IntCircularQueue;
 
 import java.util.BitSet;
 

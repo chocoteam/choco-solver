@@ -27,8 +27,6 @@
 package solver.constraints.binary;
 
 import choco.checker.DomainBuilder;
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -42,6 +40,8 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.Random;

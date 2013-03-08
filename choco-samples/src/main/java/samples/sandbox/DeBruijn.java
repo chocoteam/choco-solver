@@ -34,13 +34,13 @@
 
 package samples.sandbox;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 public class DeBruijn {
 

@@ -27,13 +27,13 @@
 
 package solver.variables.view;
 
-import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
+import util.ESat;
 
 /**
  * A constant view specific to boolean variable

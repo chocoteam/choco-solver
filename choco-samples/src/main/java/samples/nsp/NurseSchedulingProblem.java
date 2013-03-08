@@ -6,10 +6,10 @@
 
 package samples.nsp;
 
-import common.ESat;
 import solver.Solver;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 import java.util.HashMap;
 import java.util.Map;

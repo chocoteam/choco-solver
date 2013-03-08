@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.ternary;
 
-import common.util.tools.MathUtils;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import util.tools.MathUtils;
 
 /**
  * V0 * V1 = V2

@@ -34,11 +34,6 @@
 
 package solver.constraints.propagators.gary.path;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.IntProcedure;
-import common.util.procedure.PairProcedure;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,6 +43,11 @@ import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.procedure.IntProcedure;
+import util.procedure.PairProcedure;
+import util.tools.ArrayUtils;
 
 /**
  * Links intVars and the graph

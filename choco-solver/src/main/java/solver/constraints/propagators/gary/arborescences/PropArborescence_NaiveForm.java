@@ -27,15 +27,15 @@
 
 package solver.constraints.propagators.gary.arborescences;
 
-import common.ESat;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.DirectedGraphVar;
+import util.ESat;
+import util.objects.graphs.DirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
 import java.util.LinkedList;

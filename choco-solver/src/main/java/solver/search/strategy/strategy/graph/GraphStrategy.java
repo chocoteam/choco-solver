@@ -27,7 +27,6 @@
 
 package solver.search.strategy.strategy.graph;
 
-import common.util.PoolManager;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -35,6 +34,7 @@ import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphVar;
+import util.PoolManager;
 
 /**
  * <br/>

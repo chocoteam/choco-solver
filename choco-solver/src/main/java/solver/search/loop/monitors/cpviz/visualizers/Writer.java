@@ -26,14 +26,14 @@
  */
 package solver.search.loop.monitors.cpviz.visualizers;
 
-import common.util.iterators.DisposableIntIterator;
-import common.util.iterators.DisposableValueIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.search.loop.monitors.cpviz.CPVizConstant;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
+import util.iterators.DisposableIntIterator;
+import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

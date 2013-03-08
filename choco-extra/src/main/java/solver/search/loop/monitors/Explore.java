@@ -26,7 +26,6 @@
  */
 package solver.search.loop.monitors;
 
-import common.ESat;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -37,6 +36,7 @@ import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;

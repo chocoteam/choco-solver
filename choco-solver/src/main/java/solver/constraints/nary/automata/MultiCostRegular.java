@@ -26,9 +26,6 @@
  */
 package solver.constraints.nary.automata;
 
-import common.ESat;
-import common.util.iterators.DisposableIntIterator;
-import common.util.tools.ArrayUtils;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -36,6 +33,9 @@ import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.nary.automaton.PropMultiCostRegular;
 import solver.variables.IntVar;
+import util.ESat;
+import util.iterators.DisposableIntIterator;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>

@@ -27,9 +27,6 @@
 
 package solver.constraints.nary;
 
-import common.ESat;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import memory.IStateBitSet;
 import solver.Solver;
@@ -41,6 +38,9 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
+import util.ESat;
+import util.iterators.DisposableRangeIterator;
+import util.tools.StringUtils;
 
 import java.util.Arrays;
 

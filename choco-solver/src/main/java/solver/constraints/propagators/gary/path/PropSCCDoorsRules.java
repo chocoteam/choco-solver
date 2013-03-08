@@ -35,10 +35,6 @@
 package solver.constraints.propagators.gary.path;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.PairProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
@@ -47,6 +43,10 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.DirectedGraphVar;
+import util.ESat;
+import util.objects.graphs.DirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.procedure.PairProcedure;
 
 import java.util.BitSet;
 

@@ -26,7 +26,6 @@
  */
 package solver.constraints.nary;
 
-import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
@@ -37,6 +36,7 @@ import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 import java.util.Random;
 

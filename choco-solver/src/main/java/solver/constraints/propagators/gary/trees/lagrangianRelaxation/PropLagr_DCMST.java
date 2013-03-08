@@ -26,10 +26,6 @@ package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import common.ESat;
-import common.util.objects.graphs.UndirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -39,6 +35,10 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.objects.graphs.UndirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Lagrangian relaxation of the DCMST problem

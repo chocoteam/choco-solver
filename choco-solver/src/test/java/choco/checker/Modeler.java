@@ -27,7 +27,6 @@
 
 package choco.checker;
 
-import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
 import memory.IEnvironment;
@@ -41,6 +40,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Task;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>

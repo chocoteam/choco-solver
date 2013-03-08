@@ -26,9 +26,9 @@
  */
 package solver.explanations.antidom;
 
-import common.util.iterators.DisposableValueIterator;
 import memory.structure.IndexedBipartiteSet;
 import solver.variables.fast.BooleanBoolVarImpl;
+import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>

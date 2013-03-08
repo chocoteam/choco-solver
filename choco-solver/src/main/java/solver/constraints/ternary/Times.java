@@ -27,7 +27,6 @@
 
 package solver.constraints.ternary;
 
-import common.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -35,6 +34,7 @@ import solver.constraints.propagators.ternary.PropTimesXY;
 import solver.constraints.propagators.ternary.PropTimesZ;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * X*Y = Z

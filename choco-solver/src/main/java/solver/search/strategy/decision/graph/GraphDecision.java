@@ -27,13 +27,13 @@
 
 package solver.search.strategy.decision.graph;
 
-import common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.variables.graph.GraphVar;
+import util.PoolManager;
 
 public class GraphDecision extends Decision<GraphVar> {
 

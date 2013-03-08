@@ -6,13 +6,13 @@
 
 package samples.nsp;
 
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.tools.ArrayUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;

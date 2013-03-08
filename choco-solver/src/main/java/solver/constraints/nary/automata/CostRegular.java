@@ -26,14 +26,10 @@
  */
 package solver.constraints.nary.automata;
 
-import common.ESat;
-import common.util.iterators.DisposableIntIterator;
-import common.util.tools.ArrayUtils;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IEnvironment;
-import memory.structure.StoredIndexedBipartiteSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -45,6 +41,10 @@ import solver.constraints.propagators.nary.automaton.PropCostRegular;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.iterators.DisposableIntIterator;
+import util.objects.StoredIndexedBipartiteSet;
+import util.tools.ArrayUtils;
 
 import java.util.*;
 

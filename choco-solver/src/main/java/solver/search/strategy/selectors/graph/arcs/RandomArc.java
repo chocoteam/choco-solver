@@ -26,10 +26,10 @@
  */
 package solver.search.strategy.selectors.graph.arcs;
 
-import common.util.objects.setDataStructures.ISet;
 import gnu.trove.list.array.TIntArrayList;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;
+import util.objects.setDataStructures.ISet;
 
 import java.util.Random;
 

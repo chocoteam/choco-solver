@@ -27,10 +27,10 @@
 
 package samples.graph.dcmstp;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.IGraphRelaxation;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.setDataStructures.ISet;
 
 /**
  * Heuristic for failing soon to prove optimality

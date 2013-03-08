@@ -27,8 +27,6 @@
 
 package solver.constraints.reified;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.reified.PropImplied;
@@ -36,6 +34,8 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Implication constraint: boolean b => constraint c

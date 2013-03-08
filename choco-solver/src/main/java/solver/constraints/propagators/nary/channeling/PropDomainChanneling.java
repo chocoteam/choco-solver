@@ -26,9 +26,6 @@
  */
 package solver.constraints.propagators.nary.channeling;
 
-import common.ESat;
-import common.util.procedure.IntProcedure;
-import common.util.tools.ArrayUtils;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -37,6 +34,9 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.procedure.IntProcedure;
+import util.tools.ArrayUtils;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).

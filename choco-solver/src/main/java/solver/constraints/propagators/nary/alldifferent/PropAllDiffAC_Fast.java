@@ -26,11 +26,6 @@
  */
 package solver.constraints.propagators.nary.alldifferent;
 
-import common.ESat;
-import common.util.graphOperations.connectivity.StrongConnectivityFinder;
-import common.util.objects.graphs.DirectedGraph;
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateInt;
@@ -39,6 +34,11 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.graphOperations.connectivity.StrongConnectivityFinder;
+import util.objects.graphs.DirectedGraph;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 import java.util.BitSet;
 

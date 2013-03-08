@@ -26,14 +26,14 @@
  */
 package solver.constraints.binary;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;
 import solver.constraints.propagators.binary.PropDistanceXYC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Ensures: <br/>

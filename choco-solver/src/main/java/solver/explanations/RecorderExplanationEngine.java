@@ -27,7 +27,6 @@
 
 package solver.explanations;
 
-import common.util.iterators.DisposableValueIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
@@ -40,6 +39,7 @@ import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.iterators.DisposableValueIterator;
 
 /**
  * Created by IntelliJ IDEA.

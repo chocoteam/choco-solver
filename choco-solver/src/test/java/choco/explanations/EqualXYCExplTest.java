@@ -27,7 +27,6 @@
 
 package choco.explanations;
 
-import common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Configuration;
@@ -38,6 +37,7 @@ import solver.explanations.ExplanationFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;

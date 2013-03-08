@@ -26,9 +26,6 @@
  */
 package solver.constraints.propagators.nary;
 
-import common.ESat;
-import common.util.iterators.DisposableValueIterator;
-import common.util.procedure.UnarySafeIntProcedure;
 import gnu.trove.set.hash.TIntHashSet;
 import memory.IStateBitSet;
 import memory.IStateInt;
@@ -38,6 +35,9 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.iterators.DisposableValueIterator;
+import util.procedure.UnarySafeIntProcedure;
 
 import java.util.Arrays;
 

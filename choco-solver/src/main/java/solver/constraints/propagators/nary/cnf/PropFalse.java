@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import common.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import util.ESat;
 
 /**
  * <br/>

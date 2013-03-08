@@ -27,9 +27,9 @@
 
 package solver.explanations.antidom;
 
-import common.util.iterators.DisposableValueIterator;
 import memory.IStateBitSet;
 import solver.variables.IntVar;
+import util.iterators.DisposableValueIterator;
 
 /**
  * Created by IntelliJ IDEA.

@@ -27,8 +27,6 @@
 
 package samples.sandbox.lns.parallel;
 
-import common.util.objects.setDataStructures.ISet;
-import common.util.objects.setDataStructures.SetType;
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
 import samples.sandbox.parallelism.AbstractParallelMaster;
@@ -39,6 +37,8 @@ import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
+import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 import java.io.File;
 

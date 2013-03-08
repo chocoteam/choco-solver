@@ -34,11 +34,6 @@
 
 package solver.constraints.propagators.set;
 
-import common.ESat;
-import common.util.objects.setDataStructures.ISet;
-import common.util.procedure.IntProcedure;
-import common.util.procedure.PairProcedure;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,6 +43,11 @@ import solver.variables.Variable;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import solver.variables.graph.GraphVar;
+import util.ESat;
+import util.objects.setDataStructures.ISet;
+import util.procedure.IntProcedure;
+import util.procedure.PairProcedure;
+import util.tools.ArrayUtils;
 
 /**
  * Channeling between a graph variable and set variables

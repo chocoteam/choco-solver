@@ -27,8 +27,6 @@
 
 package solver.constraints.nary.channeling;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
@@ -36,6 +34,8 @@ import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.constraints.propagators.nary.channeling.PropInverseChannelAC;
 import solver.constraints.propagators.nary.channeling.PropInverseChannelBC;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * X[i] = j+Ox <=> Y[j] = i+Oy

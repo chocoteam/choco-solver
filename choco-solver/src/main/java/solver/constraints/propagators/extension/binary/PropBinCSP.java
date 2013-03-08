@@ -26,11 +26,11 @@
  */
 package solver.constraints.propagators.extension.binary;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>

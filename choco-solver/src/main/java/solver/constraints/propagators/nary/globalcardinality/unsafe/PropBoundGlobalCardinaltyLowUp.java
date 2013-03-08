@@ -26,10 +26,10 @@
  */
 package solver.constraints.propagators.nary.globalcardinality.unsafe;
 
-import common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.procedure.IntProcedure;
 
 /**
  * A constraint to enforce BoundConsistency on a global cardinality

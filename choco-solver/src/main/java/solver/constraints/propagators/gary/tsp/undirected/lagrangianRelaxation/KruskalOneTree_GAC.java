@@ -27,11 +27,11 @@
 
 package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
-import common.util.objects.graphs.UndirectedGraph;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.KruskalMSTFinder;
 import solver.exception.ContradictionException;
+import util.objects.graphs.UndirectedGraph;
+import util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
 import java.util.Comparator;

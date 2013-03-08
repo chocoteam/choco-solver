@@ -27,7 +27,6 @@
 
 package samples;
 
-import common.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.graph.input.GraphGenerator;
@@ -43,6 +42,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
+import util.objects.setDataStructures.SetType;
 
 /**
  * Parse and solve a Hamiltonian Cycle Problem instance of the TSPLIB

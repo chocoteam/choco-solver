@@ -28,14 +28,14 @@
 package solver.constraints.nary.automata.structure.multicostregular;
 
 
-import common.util.iterators.DisposableIntIterator;
 import gnu.trove.stack.TIntStack;
 import memory.IStateIntVector;
-import memory.structure.StoredIndexedBipartiteSet;
 import solver.Configuration;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import util.iterators.DisposableIntIterator;
+import util.objects.StoredIndexedBipartiteSet;
 
 import java.util.Arrays;
 

@@ -27,14 +27,14 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import common.ESat;
-import common.util.graphOperations.connectivity.ConnectivityFinder;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.graphOperations.connectivity.ConnectivityFinder;
+import util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 

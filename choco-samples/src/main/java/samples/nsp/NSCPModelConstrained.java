@@ -26,7 +26,6 @@
  */
 package samples.nsp;
 
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.automata.CostRegular;
@@ -38,6 +37,7 @@ import solver.constraints.nary.cnf.Node;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.ArrayUtils;
 
 /*
 * Created by IntelliJ IDEA.

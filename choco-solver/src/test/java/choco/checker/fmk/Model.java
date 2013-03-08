@@ -27,7 +27,6 @@
 
 package choco.checker.fmk;
 
-import common.util.tools.ArrayUtils;
 import memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
@@ -41,6 +40,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.*;
+import util.tools.ArrayUtils;
 
 /**
  * @author Jean-Guillaume Fages

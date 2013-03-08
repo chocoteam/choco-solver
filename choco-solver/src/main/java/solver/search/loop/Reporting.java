@@ -26,12 +26,12 @@
  */
 package solver.search.loop;
 
-import common.ESat;
-import common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.StringUtils;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

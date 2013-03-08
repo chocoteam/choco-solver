@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetIntVarImpl;
@@ -36,6 +35,7 @@ import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
+import util.objects.setDataStructures.ISet;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).

@@ -27,14 +27,14 @@
 
 package solver.constraints.propagators.ternary;
 
-import common.ESat;
-import common.util.tools.MathUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.MathUtils;
 
 /**
  * V0 * V1 = V2

@@ -26,10 +26,10 @@
  */
 package solver.variables.delta;
 
-import common.util.procedure.IntProcedure;
-import common.util.procedure.PairProcedure;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import util.procedure.IntProcedure;
+import util.procedure.PairProcedure;
 
 /**
  * <br/>

@@ -27,7 +27,6 @@
 
 package solver.search.loop;
 
-import common.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -35,6 +34,7 @@ import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.variables.VariableFactory;
+import util.ESat;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.

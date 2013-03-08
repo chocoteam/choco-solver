@@ -27,9 +27,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
-import common.ESat;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.procedure.UnaryIntProcedure;
 import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -42,6 +39,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
+import util.ESat;
+import util.iterators.DisposableRangeIterator;
+import util.procedure.UnaryIntProcedure;
 
 /**
  * | X - Y | op C <br/> op = {"==", "<", ">", "=/="} <br/>

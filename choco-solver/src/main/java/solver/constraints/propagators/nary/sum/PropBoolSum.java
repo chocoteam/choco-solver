@@ -34,8 +34,6 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -43,6 +41,8 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum

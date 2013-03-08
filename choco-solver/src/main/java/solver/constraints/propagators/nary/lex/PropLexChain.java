@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary.lex;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * Solver constraint of the LexChain constraint.

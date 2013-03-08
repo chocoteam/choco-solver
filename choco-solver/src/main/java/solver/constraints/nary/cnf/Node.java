@@ -27,8 +27,8 @@
 
 package solver.constraints.nary.cnf;
 
-import common.util.tools.ArrayUtils;
 import solver.variables.BoolVar;
+import util.tools.ArrayUtils;
 
 /**
  * <br/>

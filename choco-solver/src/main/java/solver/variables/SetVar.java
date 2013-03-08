@@ -27,11 +27,11 @@
 
 package solver.variables;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
+import util.objects.setDataStructures.ISet;
 
 /**
  * A Set Variable is defined by a domain which is a set interval [S_low,S_up]

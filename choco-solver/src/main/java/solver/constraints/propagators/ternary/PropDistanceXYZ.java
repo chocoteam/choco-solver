@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.ternary;
 
-import common.ESat;
 import solver.constraints.Operator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -35,6 +34,7 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * A constraint to state |x0 - x1| operator x2

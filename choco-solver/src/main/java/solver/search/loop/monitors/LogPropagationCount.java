@@ -26,12 +26,12 @@
  */
 package solver.search.loop.monitors;
 
-import common.util.tools.StringUtils;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import util.tools.StringUtils;
 
 /**
  * <br/>

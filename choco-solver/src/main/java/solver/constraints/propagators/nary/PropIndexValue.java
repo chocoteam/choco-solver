@@ -34,8 +34,6 @@
 
 package solver.constraints.propagators.nary;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import memory.IStateBool;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
@@ -43,6 +41,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * PropIndexValue(vars,nb) ensures that the number of variable such that vars[i] = i + offset is equal to nb

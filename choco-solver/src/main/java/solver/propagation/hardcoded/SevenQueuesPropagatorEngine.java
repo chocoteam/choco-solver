@@ -26,8 +26,6 @@
  */
 package solver.propagation.hardcoded;
 
-import common.util.objects.BitsetFactory;
-import common.util.objects.IBitset;
 import memory.IEnvironment;
 import solver.Configuration;
 import solver.ICause;
@@ -70,7 +68,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final IBitset notEmpty; // point out the no empty queues
+    protected final BitSet notEmpty; // point out the no empty queues
     protected short[] scheduled; // also maintains the index of the queue!
     protected BitSet[] eventsets;
     private boolean init;
@@ -115,7 +113,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             int nbv = propagators[i].getNbVars();
             eventsets[i] = new BitSet(nbv);
         }
-        notEmpty = BitsetFactory.make(8);
+        notEmpty = new BitSet(8);
         init = true;
     }
 

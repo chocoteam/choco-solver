@@ -27,12 +27,12 @@
 
 package solver.constraints.nary;
 
-import common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.nary.PropKnapsack;
 import solver.variables.IntVar;
+import util.tools.ArrayUtils;
 
 /**
  * A knapsack constraint

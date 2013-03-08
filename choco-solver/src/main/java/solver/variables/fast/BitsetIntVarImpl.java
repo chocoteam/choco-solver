@@ -27,9 +27,6 @@
 
 package solver.variables.fast;
 
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
-import common.util.tools.StringUtils;
 import memory.IEnvironment;
 import memory.IStateBitSet;
 import memory.IStateInt;
@@ -50,6 +47,9 @@ import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.EnumDeltaMonitor;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
+import util.tools.StringUtils;
 
 /**
  * <br/>

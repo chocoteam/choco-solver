@@ -27,10 +27,10 @@
 
 package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PrimMSTFinder;
 import solver.exception.ContradictionException;
+import util.objects.setDataStructures.ISet;
 
 public class PrimOneTreeFinder extends PrimMSTFinder {
 

@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import common.ESat;
 import solver.Solver;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.propagators.Propagator;
@@ -35,6 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import util.ESat;
 
 /**
  * <br/>

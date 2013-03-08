@@ -27,8 +27,6 @@
 
 package solver.constraints.nary;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -38,6 +36,8 @@ import solver.constraints.propagators.nary.nValue.PropAtMostNValues_Greedy;
 import solver.constraints.propagators.nary.nValue.PropNValues_Light;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 import java.util.BitSet;
 

@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
-import common.util.objects.graphs.UndirectedGraph;
-import common.util.objects.setDataStructures.ISet;
 import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastSimpleHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.ISimpleHeap;
 import solver.exception.ContradictionException;
+import util.objects.graphs.UndirectedGraph;
+import util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 

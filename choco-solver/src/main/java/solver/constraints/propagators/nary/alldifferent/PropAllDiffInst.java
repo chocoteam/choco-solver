@@ -26,13 +26,13 @@
  */
 package solver.constraints.propagators.nary.alldifferent;
 
-import common.ESat;
 import gnu.trove.stack.array.TIntArrayStack;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * Propagator for AllDifferent that only reacts on instantiation

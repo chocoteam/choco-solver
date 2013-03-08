@@ -34,7 +34,6 @@
 
 package solver.objective;
 
-import common.util.PoolManager;
 import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -44,6 +43,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
+import util.PoolManager;
 
 /**
  * Class that defines a branching strategy over the objective variable

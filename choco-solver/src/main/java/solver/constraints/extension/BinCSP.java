@@ -26,11 +26,11 @@
  */
 package solver.constraints.extension;
 
-import common.ESat;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.binary.PropBinAC2001;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * <br/>

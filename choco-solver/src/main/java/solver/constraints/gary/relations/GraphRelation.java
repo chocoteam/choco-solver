@@ -26,8 +26,6 @@
  */
 package solver.constraints.gary.relations;
 
-import common.ESat;
-import common.util.objects.setDataStructures.SetType;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -35,6 +33,8 @@ import solver.variables.Variable;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
+import util.ESat;
+import util.objects.setDataStructures.SetType;
 
 public abstract class GraphRelation<V extends Variable> {
 

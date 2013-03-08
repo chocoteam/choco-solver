@@ -27,12 +27,12 @@
 
 package solver.constraints.propagators.nary.sum;
 
-import common.ESat;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import util.ESat;
 
 /**
  * A propagator for SUM(x_i) = b

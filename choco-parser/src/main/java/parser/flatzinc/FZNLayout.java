@@ -27,7 +27,6 @@
 
 package parser.flatzinc;
 
-import common.ESat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
@@ -42,6 +41,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
+import util.ESat;
 
 import java.util.ArrayList;
 import java.util.List;

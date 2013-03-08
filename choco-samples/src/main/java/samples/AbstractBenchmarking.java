@@ -26,10 +26,10 @@
  */
 package samples;
 
-import common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import util.tools.ArrayUtils;
 
 import java.lang.management.ManagementFactory;
 

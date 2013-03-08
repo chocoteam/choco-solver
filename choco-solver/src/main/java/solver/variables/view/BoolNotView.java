@@ -26,7 +26,6 @@
  */
 package solver.variables.view;
 
-import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -37,6 +36,7 @@ import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
+import util.ESat;
 
 /**
  * A view for boolean variable, that enforce not(b).

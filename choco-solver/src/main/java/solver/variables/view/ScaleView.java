@@ -27,9 +27,6 @@
 
 package solver.variables.view;
 
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
-import common.util.tools.MathUtils;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -42,6 +39,9 @@ import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
+import util.tools.MathUtils;
 
 /**
  * declare an IntVar based on X and C, such as X * C

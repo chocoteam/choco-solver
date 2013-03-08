@@ -28,8 +28,6 @@
 package solver.variables;
 
 import choco.checker.DomainBuilder;
-import common.util.iterators.DisposableRangeIterator;
-import common.util.iterators.DisposableValueIterator;
 import memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -38,6 +36,8 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import util.iterators.DisposableRangeIterator;
+import util.iterators.DisposableValueIterator;
 
 import java.util.Random;
 

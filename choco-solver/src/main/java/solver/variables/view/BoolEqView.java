@@ -26,12 +26,12 @@
  */
 package solver.variables.view;
 
-import common.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.delta.IEnumDelta;
+import util.ESat;
 
 /**
  * A specific view for equality on bool var

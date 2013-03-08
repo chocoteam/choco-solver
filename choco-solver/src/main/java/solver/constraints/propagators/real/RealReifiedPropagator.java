@@ -26,8 +26,6 @@
  */
 package solver.constraints.propagators.real;
 
-import common.ESat;
-import common.util.tools.ArrayUtils;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.real.Ibex;
@@ -36,6 +34,8 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.RealVar;
 import solver.variables.Variable;
+import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
  * A propagator for real variable.
