@@ -1,9 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
-<suite name="Propagation" verbose="1" >
-  <test name="All" >
-    <classes>
-        <class name="samples.AllTestFactory" />
-    </classes>
-  </test>
-</suite>

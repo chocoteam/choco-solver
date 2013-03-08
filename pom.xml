@@ -13,29 +13,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>choco</groupId>
-                <artifactId>choco-solver</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>choco</groupId>
-                <artifactId>choco-parser</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>choco</groupId>
-                <artifactId>choco-extra</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <modules>
-        <module>solver</module>
-        <module>parser</module>
-        <module>extra</module>
+        <module>choco-environment</module>
+        <module>choco-solver</module>
+        <module>choco-samples</module>
+        <module>choco-parser</module>
+        <module>choco-extra</module>
     </modules>
     <dependencies>
         <dependency>
