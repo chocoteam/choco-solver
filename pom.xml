@@ -5,28 +5,20 @@
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>rocs-1.0-SNAPSHOT</version>
-    <name>CHOCO</name>
-    <url>http://maven.apache.org</url>
+    <version>13.02-SNAPSHOT</version>
+    <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
+    <url>http://www.emn.fr/z-info/choco-solver/</url>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>choco</groupId>
-                <artifactId>solver</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>choco</groupId>
-                <artifactId>parser</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <modules>
-        <module>solver</module>
-        <module>parser</module>
-        <module>contrib</module>
+        <module>choco-environment</module>
+        <module>choco-solver</module>
+        <module>choco-samples</module>
+        <module>choco-parser</module>
+        <module>choco-extra</module>
     </modules>
     <dependencies>
         <dependency>
@@ -78,7 +70,7 @@
         </repository>
         <repository>
             <id>choco.repo</id>
-            <url>http://www.emn.fr/z-info/choco-solver/mvn/repository/</url>
+            <url>http://www.emn.fr/z-info/choco-repo/mvn/repository/</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -95,11 +87,12 @@
 
     </pluginRepositories>
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -116,7 +109,7 @@
                     <aggregate>true</aggregate>
                     <properties>
                         <owner>Ecole des Mines de Nantes</owner>
-                        <year>2011</year>
+                        <year>2013</year>
                     </properties>
                     <strictCheck>true</strictCheck>
                     <includes>
@@ -134,6 +127,7 @@
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
+                <version>2.0.6</version>
                 <executions>
                     <execution>
                         <id>process</id>

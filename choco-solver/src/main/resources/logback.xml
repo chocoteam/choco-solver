@@ -1,0 +1,93 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONFIGURATION" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>pbid</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="CONFIGURATION-${pbid}" class="ch.qos.logback.core.FileAppender">
+                <file>configuration-${pbid}.xml</file>
+                <append>false</append>
+                <encoder>
+                    <pattern>%msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="TREE" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>pbid</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="TREE-${pbid}" class="ch.qos.logback.core.FileAppender">
+                <file>tree-${pbid}.xml</file>
+                <append>false</append>
+                <encoder>
+                    <pattern>%msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="VISUALIZATION" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>pbid</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="VISUALIZATION-${pbid}" class="ch.qos.logback.core.FileAppender">
+                <file>visualization-${pbid}.xml</file>
+                <append>false</append>
+                <encoder>
+                    <pattern>%msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
+
+    <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>CHOCO3.LOG</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>-->
+
+    <logger name="choco" level="WARN"/>
+    <logger name="choco.util" level="INFO"/>
+
+
+    <logger name="bench" level="info"/>
+
+    <logger name="solver" level="info"/>
+
+    <logger name="fzn" level="info"/>
+    <logger name="explainer" level="info"/>
+
+    <logger name="configuration" level="info">
+        <appender-ref ref="CONFIGURATION"/>
+    </logger>
+
+    <logger name="tree" level="info">
+        <appender-ref ref="TREE"/>
+    </logger>
+
+    <logger name="visualization" level="info">
+        <appender-ref ref="VISUALIZATION"/>
+    </logger>
+
+    <root level="error">
+        <appender-ref ref="STDOUT"/>
+        <!--<appender-ref ref="FILE"/>-->
+    </root>
+</configuration>
