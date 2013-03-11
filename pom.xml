@@ -14,9 +14,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git://github.com/chocoteam/choco3</connection>
-        <developerConnection>scm:git:git://github.com/chocoteam/choco3</developerConnection>
-        <url>git://github.com/chocoteam/choco3.git</url>
+        <connection>scm:git:git@github.com/chocoteam/choco3</connection>
+        <url>scm:git@github.com/chocoteam/choco3.git</url>
+        <developerConnection>scm:git:git@github.com/chocoteam/choco3</developerConnection>
     </scm>
 
     <modules>
@@ -65,6 +65,22 @@
             <version>1.7.5-SNAPSHOT</version>
         </dependency>-->
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>${mvn-releases-dir}</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>${mvn-snapshots-dir}</url>
+            <layout>default</layout>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>central.repos</id>

@@ -16,7 +16,7 @@ function getBranch {
 }
 
 
-MVN_ARGS="-DskipTests"
+MVN_ARGS="-P release"
 case $1 in
 request)
     VERSION=$(getVersionToRelease)
