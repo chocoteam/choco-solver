@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>13.03-SNAPSHOT</version>
+    <version>13.03</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://www.emn.fr/z-info/choco-solver/</url>
 
@@ -14,10 +13,11 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git://github.com/chocoteam/choco3</connection>
-        <developerConnection>scm:git:git://github.com/chocoteam/choco3</developerConnection>
-        <url>git://github.com/chocoteam/choco3.git</url>
-    </scm>
+        <connection>scm:git:git@github.com:chocoteam/choco3.git</connection>
+        <url>scm:git:git://github.com/chocoteam/choco3</url>
+        <developerConnection>scm:git:git@github.com:chocoteam/choco3.git</developerConnection>
+    <tag>choco-13.03</tag>
+  </scm>
 
     <modules>
         <module>choco-environment</module>
@@ -65,6 +65,22 @@
             <version>1.7.5-SNAPSHOT</version>
         </dependency>-->
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>choco-releases</id>
+            <name>Private Maven Repository</name>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
+            <layout>default</layout>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>central.repos</id>
@@ -95,6 +111,18 @@
     <build>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <arguments>-DskipTests</arguments>
+                    <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
+                    <!-- release.sh will perform the pushes -->
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
