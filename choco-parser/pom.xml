@@ -29,7 +29,7 @@
     <parent>
         <groupId>choco</groupId>
         <artifactId>choco</artifactId>
-        <version>13.03</version>
+        <version>13.04-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-parser</artifactId>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>choco</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>13.03</version>
+            <version>13.04-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
