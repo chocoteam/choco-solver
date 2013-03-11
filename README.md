@@ -4,7 +4,7 @@ Choco3 is an open-source Java library for Constraint Programming.
 
 Choco3 is not the continuation of Choco2, but a completly rewritten version and there is no backward compatibility.
 
-The release choco-13.02 is a beta version. 
+The actual release is a beta version.
 
 Choco3 comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -38,7 +38,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>choco</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>13.02</version>
+   <version>13.03</version>
 </dependency>
 ```
 
