@@ -42,6 +42,14 @@ Next, just declare the dependency:
 </dependency>
 ```
 
+## Downloading the jar ##
+
+The jar can be downloaded from this URL:
+
+    http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/13.03/choco-solver-13.03-jar-with-dependencies.jar
+
+The file contains `choco-environment`, `choco-solver`artifacts and their dependencies.
+
 ## Building from sources ##
 
 Requirements:
