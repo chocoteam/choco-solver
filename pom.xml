@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
@@ -17,7 +16,7 @@
         <connection>scm:git:git@github.com:chocoteam/choco3.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco3</url>
         <developerConnection>scm:git:git@github.com:chocoteam/choco3.git</developerConnection>
-    </scm>
+  </scm>
 
     <modules>
         <module>choco-environment</module>
@@ -116,6 +115,8 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
+                    <releaseProfiles>release</releaseProfiles>
+                    <!--<exec.additionalArguments>-P release</exec.additionalArguments>-->
                     <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
                     <!-- release.sh will perform the pushes -->
                     <pushChanges>false</pushChanges>
