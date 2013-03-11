@@ -71,11 +71,6 @@ perform)
 
     echo "-- Generate the javadoc for release ${VERSION} --"
     mvn javadoc:aggregate > /dev/null
-    APIDOC_ROOT="/usr/share/nginx/html/apidocs/releases/btrplace/solver/"
-    mkdir -p $APIDOC_ROOT > /dev/null
-    rm -rf ${APIDOC_ROOT}/${VERSION}
-    mv target/site/apidocs ${APIDOC_ROOT}/${VERSION}
-
 
     echo "-- Push the changes and the tags --"
     git checkout develop
@@ -83,9 +78,6 @@ perform)
     git push origin :release-$VERSION
     git push
     git push origin --tags
-
-    echo "-- Notify the website for release ${VERSION} --"
-    ./bump_release.sh site ${VERSION}
     ;;
     *)
         echo "Unsupported operation '$1'"
