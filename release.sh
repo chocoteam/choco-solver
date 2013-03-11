@@ -20,7 +20,7 @@ MVN_ARGS=""
 case $1 in
 request)
     VERSION=$(getVersionToRelease)
-    RELEASE_BRANCH="release/$VERSION"
+    RELEASE_BRANCH="release-$VERSION"
     git checkout -b ${RELEASE_BRANCH} || exit 1
 
     echo "-- Prepare the code for release ${VERSION} in branch ${RELEASE_BRANCH} --"
@@ -30,7 +30,7 @@ request)
 
     git commit -m "Prepare the code for release ${VERSION}" -a
     git push origin ${RELEASE_BRANCH} || exit 1
-    git checkout develop
+    git checkout master
     echo "Branch $RELEASE_BRANCH is ready for the releasing process"
     ;;
 perform)
@@ -52,7 +52,7 @@ perform)
     rm .version #To prevent for an infinite loop
 
     DEV_HEAD=$(git rev-parse HEAD)
-    RELEASE_BRANCH="release/${VERSION}"
+    RELEASE_BRANCH="release-${VERSION}"
     # The current tree looks like:
     # * HEAD -> next dev version, it is a detached head due to jenkins git plugin
     # * (tag ...) -> the tag made by maven release:prepare on the relased version == ${DEV_HEAD}~1
@@ -83,8 +83,8 @@ perform)
 
     echo "-- Push the changes and the tags --"
     git checkout develop
-    git branch -d release/$VERSION
-    git push origin :release/$VERSION
+    git branch -d release-$VERSION
+    git push origin :release-$VERSION
     git push
     git push origin --tags
 
