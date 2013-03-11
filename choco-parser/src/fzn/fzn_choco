@@ -102,7 +102,7 @@ done
 
 FILE=$*
 
-CHOCO_JAR=$CHOCO_PATH/Choco3-13.02.jar
+CHOCO_JAR=$CHOCO_PATH/Choco-13.02.jar
 LOG_FILE=$CHOCO_PATH/config.xml
 
 if test $# -eq 0
