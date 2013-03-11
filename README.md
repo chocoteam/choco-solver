@@ -19,6 +19,7 @@ Choco3 is distrubuted under BSD licence (Copyright (c) 1999-2013, Ecole des Mine
 Contact: choco@mines-nantes.fr
 
 ## Usage ##
+### Inside a maven project ###
 
 The maven artifact is available through a private repository
 so you have first to edit your `pom.xml` to declare it:
@@ -42,7 +43,7 @@ Next, just declare the dependency:
 </dependency>
 ```
 
-## Downloading the jar ##
+### Inside a non-maven project ###
 
 The jar can be downloaded from this URL:
 
