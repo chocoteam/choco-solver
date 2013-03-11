@@ -5,13 +5,19 @@
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
     <packaging>pom</packaging>
-    <version>13.02-SNAPSHOT</version>
+    <version>13.03-SNAPSHOT</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://www.emn.fr/z-info/choco-solver/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <scm>
+        <connection>scm:git:git://github.com/chocoteam/choco3</connection>
+        <developerConnection>scm:git:git://github.com/chocoteam/choco3</developerConnection>
+        <url>git://github.com/chocoteam/choco3.git</url>
+    </scm>
 
     <modules>
         <module>choco-environment</module>

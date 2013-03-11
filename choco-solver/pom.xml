@@ -32,7 +32,7 @@
     <parent>
         <artifactId>choco</artifactId>
         <groupId>choco</groupId>
-        <version>13.02-SNAPSHOT</version>
+        <version>13.03-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-solver</artifactId>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>choco</groupId>
             <artifactId>choco-environment</artifactId>
-            <version>13.02-SNAPSHOT</version>
+            <version>13.03-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

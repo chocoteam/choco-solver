@@ -61,7 +61,7 @@ public class SetFactory {
     // FACTORY - STORED SET
     //***********************************************************************************
 
-    public final static boolean HARD_CODED = true;
+    public static boolean HARD_CODED = true;
 
     /**
      * Make a stored set of integers in the range [0,maximumSize-1]
