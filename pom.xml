@@ -69,14 +69,14 @@
             <uniqueVersion>false</uniqueVersion>
             <id>choco-releases</id>
             <name>Private Maven Repository</name>
-            <url>${mvn-releases-dir}</url>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
             <layout>default</layout>
         </repository>
         <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
             <id>choco-releases</id>
             <name>Private Maven Repository</name>
-            <url>${mvn-snapshots-dir}</url>
+            <url>file:///Volumes/choco-repo/publish/mvn/repository</url>
             <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
@@ -115,8 +115,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <releaseProfiles>release</releaseProfiles>
-                    <!--<exec.additionalArguments>-P release</exec.additionalArguments>-->
+                    <arguments>-DskipTests</arguments>
                     <tagNameFormat>@{project.artifactId}-@{project.version}</tagNameFormat>
                     <!-- release.sh will perform the pushes -->
                     <pushChanges>false</pushChanges>

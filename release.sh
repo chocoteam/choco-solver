@@ -2,21 +2,19 @@
 #Script to notify the website about a release
 
 function getVersionToRelease {
-    CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
+    CURRENT_VERSION=`mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
     echo ${CURRENT_VERSION%%-SNAPSHOT}
 }
 
 
 
 function getVersion {
-    mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"
+    mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"
 }
 function getBranch {
     git symbolic-ref --short HEAD
 }
 
-
-MVN_ARGS="-Darguments=\"-DskipTests\""
 case $1 in
 request)
     VERSION=$(getVersionToRelease)
@@ -41,10 +39,10 @@ perform)
     VERSION=$(cat .version)
 
     echo "-- Prepare the release --"
-    mvn ${MVN_ARGS} -B release:prepare || exit 1
+    mvn -B release:prepare || exit 1
 
     echo "-- Perform the release --"
-    mvn ${MVN_ARGS} release:perform || exit 1
+    mvn release:perform || exit 1
     rm .version #To prevent for an infinite loop
 
     DEV_HEAD=$(git rev-parse HEAD)
