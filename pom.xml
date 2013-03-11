@@ -14,9 +14,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git@github.com/chocoteam/choco3</connection>
-        <url>scm:git@github.com/chocoteam/choco3.git</url>
-        <developerConnection>scm:git:git@github.com/chocoteam/choco3</developerConnection>
+        <connection>scm:git:git://github.com/chocoteam/choco3</connection>
+        <url>git://github.com/chocoteam/choco3.git</url>
+        <developerConnection>scm:git:git://github.com/chocoteam/choco3</developerConnection>
     </scm>
 
     <modules>
