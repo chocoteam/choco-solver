@@ -16,7 +16,7 @@ function getBranch {
 }
 
 
-MVN_ARGS=""
+MVN_ARGS="-DskipTests"
 case $1 in
 request)
     VERSION=$(getVersionToRelease)
@@ -26,18 +26,14 @@ request)
     echo "-- Prepare the code for release ${VERSION} in branch ${RELEASE_BRANCH} --"
     echo $VERSION > .version
     git add .version
-    ./bump_release.sh code $VERSION || exit 1
+    sh ./bump_release.sh code $VERSION || exit 1
 
     git commit -m "Prepare the code for release ${VERSION}" -a
     git push origin ${RELEASE_BRANCH} || exit 1
-    git checkout master
+    #git checkout master
     echo "Branch $RELEASE_BRANCH is ready for the releasing process"
     ;;
 perform)
-    if [ $(hostname) != "btrp" ]; then
-            echo "This script must be executed on btrp.inria.fr"
-            exit 1
-    fi
     if [ ! -f .version ]; then
         echo "Missing .version file"
         exit 1
@@ -45,10 +41,10 @@ perform)
     VERSION=$(cat .version)
 
     echo "-- Prepare the release --"
-    mvn -B release:prepare || exit 1
+    mvn ${MVN_ARGS} -B release:prepare || exit 1
 
     echo "-- Perform the release --"
-    mvn release:perform || exit 1
+    mvn ${MVN_ARGS} release:perform || exit 1
     rm .version #To prevent for an infinite loop
 
     DEV_HEAD=$(git rev-parse HEAD)
