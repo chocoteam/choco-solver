@@ -142,7 +142,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     PoolManager<FastDecision> decisionPool;
 
-    int currentVar, currentVal;
+    int currentVar = -1, currentVal = -1;
 
     TIntList bests = new TIntArrayList();
 
@@ -249,7 +249,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     @Override
-    public Decision getDecision() {
+    public Decision<IntVar> getDecision() {
         IntVar best = null;
         bests.clear();
         double bestVal = -1.0d;
@@ -317,45 +317,39 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         return false;
     }
 
-    private void beforeDownBranch() {
-        affected.clear();
-    }
-
-    private void afterDownBranch() {
-        for (int i = 0; i < A.length; i++) {
-            if (vars[i].getDomainSize() > 1) {
-                A[i] *= sampling ? ONE : g;
-            }
-            if (affected.get(i)) {
-                A[i] += 1;
-            }
-        }
-
-    }
 
     @Override
     public void beforeDownLeftBranch() {
-        beforeDownBranch();
-        double act = vAct[currentVar].activity(currentVal);
-        if (sampling)
-            vAct[currentVar].setactivity(currentVal, act + affected.cardinality());
-        else
-            vAct[currentVar].setactivity(currentVal, (act * (a - 1) + affected.cardinality()) / a);
+        affected.clear();
     }
 
     @Override
     public void beforeDownRightBranch() {
-        beforeDownBranch();
     }
 
     @Override
     public void afterDownLeftBranch() {
-        afterDownBranch();
+        if (currentVar > -1) {  // if the decision was computed by another strategy
+            for (int i = 0; i < A.length; i++) {
+                if (vars[i].getDomainSize() > 1) {
+                    A[i] *= sampling ? ONE : g;
+                }
+                if (affected.get(i)) {
+                    A[i] += 1;
+                }
+            }
+            double act = vAct[currentVar].activity(currentVal);
+            if (sampling) {
+                vAct[currentVar].setactivity(currentVal, act + affected.cardinality());
+            } else {
+                vAct[currentVar].setactivity(currentVal, (act * (a - 1) + affected.cardinality()) / a);
+            }
+            currentVar = -1;
+        }
     }
 
     @Override
     public void afterDownRightBranch() {
-        afterDownBranch();
     }
 
     @Override
