@@ -84,7 +84,7 @@ public class SetFactory {
                 case DOUBLE_LINKED_LIST:
                     return new Set_Std_2LinkedList(environment);
                 case BITSET:
-                    new Set_Std_BitSet(environment, maximumSize);
+                    return new Set_Std_BitSet(environment, maximumSize);
                 case BOOL_ARRAY:
                     return new Set_Std_Array(environment, maximumSize);
             }
