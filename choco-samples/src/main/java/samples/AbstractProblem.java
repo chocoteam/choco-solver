@@ -59,13 +59,13 @@ public abstract class AbstractProblem {
         }
     }
 
-    @Option(name = "-l", aliases = "--log", usage = "Quiet resolution", required = false)
+    @Option(name = "-log", usage = "Quiet resolution", required = false)
     Level level = Level.VERBOSE;
 
-    @Option(name = "-s", aliases = "--seed", usage = "Seed for Shuffle propagation engine.", required = false)
+    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
 
-    @Option(name = "-e", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
+    @Option(name = "-ee", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
     ExplanationFactory expeng = ExplanationFactory.NONE;
 
     @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
@@ -117,7 +117,7 @@ public abstract class AbstractProblem {
         }
     }
 
-    private final boolean userInterruption() {
+    private boolean userInterruption() {
         return userInterruption;
     }
 
