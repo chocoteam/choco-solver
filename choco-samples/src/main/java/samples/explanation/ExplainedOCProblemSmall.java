@@ -96,6 +96,6 @@ public class ExplainedOCProblemSmall extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new ExplainedOCProblem().execute(args);
+        new ExplainedOCProblemSmall().execute(args);
     }
 }

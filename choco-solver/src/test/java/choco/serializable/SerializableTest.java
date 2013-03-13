@@ -54,8 +54,8 @@ public class SerializableTest {
 
     private static File write(final Object o) throws IOException {
         final File file = create();
-        FileOutputStream fos = null;
-        ObjectOutputStream out = null;
+        FileOutputStream fos;
+        ObjectOutputStream out;
         fos = new FileOutputStream(file);
         out = new ObjectOutputStream(fos);
         out.writeObject(o);
@@ -65,8 +65,8 @@ public class SerializableTest {
 
 
     private static Object read(final File file) throws IOException, ClassNotFoundException {
-        FileInputStream fis = null;
-        ObjectInputStream in = null;
+        FileInputStream fis;
+        ObjectInputStream in;
         fis = new FileInputStream(file);
         in = new ObjectInputStream(fis);
         final Object o = in.readObject();
@@ -162,7 +162,7 @@ public class SerializableTest {
     @Test(groups = {"1s"})
     public void testNQueen() {
         Solver s = new Solver();
-        int n = 12;
+        int n = 8;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, s);
