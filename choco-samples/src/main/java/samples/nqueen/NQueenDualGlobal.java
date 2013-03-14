@@ -76,6 +76,6 @@ public class NQueenDualGlobal extends AbstractNQueen {
 
 
     public static void main(String[] args) {
-        new NQueenDualGlobal().execute("12");
+        new NQueenDualGlobal().execute(args);
     }
 }

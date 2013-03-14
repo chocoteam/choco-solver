@@ -47,8 +47,9 @@ import java.util.List;
  */
 public class DecomposedAllDifferent extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Number of variables.", required = true)
-    int m;
+    @Option(name = "-n", usage = "Number of variables.", required = false)
+    int n = 5;
+
     IntVar[] X;
     BoolVar[] B;
 
@@ -60,9 +61,9 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        int i = m;
-        X = VariableFactory.enumeratedArray("v", m, 0, m, solver);
-        int[] union = new int[m];
+        int i = n;
+        X = VariableFactory.enumeratedArray("v", n, 0, n, solver);
+        int[] union = new int[n];
         for (int j = 0; j < i; j++) {
             union[j] = j;
         }
@@ -153,6 +154,6 @@ public class DecomposedAllDifferent extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new DecomposedAllDifferent().execute();
+        new DecomposedAllDifferent().execute(args);
     }
 }

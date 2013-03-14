@@ -158,13 +158,15 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         rootWorldIndex = -1;
     }
 
+    /*
+    TODO: uncomment when necessary
     private void reset() {
         this.nextState = INIT;
-        restaureRootNode();
+        restoreRootNode();
         rootWorldIndex = -1;
         searchWorldIndex = -1;
         this.measures.reset();
-    }
+    }*/
 
     @SuppressWarnings({"unchecked"})
     public void set(AbstractStrategy strategy) {
@@ -173,8 +175,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Solves the problem states by the solver.
-     *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
     public void launch(boolean stopatfirst) {
         if (nextState != INIT) {
@@ -190,8 +190,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Main loop. Flatten representation of recursive tree search.
-     *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
      */
     void loop() {
         alive = true;
@@ -286,21 +284,20 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public abstract void moveTo(int to);
 
     /**
-     * Close the search
-     *
-     * @return <code>true</code> if at least one more solution has been found, <br/>
-     *         <code>null</code> if a limit has been reached before finding one solution, <br/>
-     *         <code>false</code> otherwise
+     * Close the search, restore the last solution if any,
+     * and set the feasibility and optimality variables.
      */
     public void close() {
         ESat sat = ESat.FALSE;
-        if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {
-            restaureRootNode();
-            solutionpool.getBest().restore();
-        }
-        measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
         if (measures.getSolutionCount() > 0) {
+            if (!stopAtFirstSolution) {
+                restoreRootNode();
+                solutionpool.getBest().restore();
+            }
             sat = ESat.TRUE;
+            if (objectivemanager.isOptimization()) {
+                measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
+            }
         } else if (limitchecker.isReached()) {
             measures.setObjectiveOptimal(false);
             sat = ESat.UNDEFINED;
@@ -308,7 +305,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         solver.setFeasible(sat);
     }
 
-    public void restaureRootNode() {
+    public void restoreRootNode() {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
         timeStamp++; // to force clear delta, on solution recording
         Decision tmp;

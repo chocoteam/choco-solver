@@ -216,12 +216,10 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void solve() {
         // -----
-        boolean lns = true;
+        boolean lns = false;
         SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
-        } else {
-            SearchMonitorFactory.log(solver, true, false);
         }
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }

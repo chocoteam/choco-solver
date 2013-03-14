@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.PropagatorEngine;
+import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
  * <br/>
@@ -45,7 +46,7 @@ import solver.propagation.hardcoded.PropagatorEngine;
 public abstract class AbstractProblem {
 
     enum Level {
-        SILENT(-10), QUIET(0), VERBOSE(10);
+        SILENT(-10), QUIET(0), VERBOSE(10), SOLUTION(20), SEARCH(30);
 
         int level;
 
@@ -60,7 +61,7 @@ public abstract class AbstractProblem {
     }
 
     @Option(name = "-log", usage = "Quiet resolution", required = false)
-    Level level = Level.VERBOSE;
+    Level level = Level.SOLUTION;
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
@@ -133,17 +134,18 @@ public abstract class AbstractProblem {
 
             solver.set(new PropagatorEngine(solver));
 
+            if (level.getLevel() > Level.SILENT.getLevel()) {
+                SearchMonitorFactory.log(solver,
+                        level.getLevel() > Level.VERBOSE.getLevel(),
+                        level.getLevel() > Level.SOLUTION.getLevel());
+            }
+
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    if (level.getLevel() > Level.QUIET.getLevel()) {
-                        prettyOut();
-                    }
-                    if (level.getLevel() > Level.QUIET.getLevel()) {
-                        log.info("{}", solver.getMeasures().toString());
-                    } else if (level.getLevel() > Level.SILENT.getLevel()) {
-                        log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
-                    }
                     if (userInterruption()) {
+                        if (level.getLevel() > Level.SILENT.getLevel()) {
+                            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                        }
                         if (level.getLevel() > Level.SILENT.getLevel()) {
                             log.info("Unexpected resolution interruption!");
                         }
@@ -153,6 +155,9 @@ public abstract class AbstractProblem {
             });
 
             this.solve();
+            if (level.getLevel() > Level.QUIET.getLevel()) {
+                prettyOut();
+            }
             userInterruption = false;
         }
     }

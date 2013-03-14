@@ -31,7 +31,6 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;
@@ -97,7 +96,6 @@ public class CliqueEnumeration extends AbstractProblem {
         // search strategy (lexicographic)
         solver.set(GraphStrategyFactory.graphLexico(graphvar));
         // log
-        SearchMonitorFactory.log(solver, true, false);
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             public void onSolution() {
                 System.out.println("solution found : " + graphvar.getEnvelopGraph().getNeighborsOf(1));
@@ -109,8 +107,6 @@ public class CliqueEnumeration extends AbstractProblem {
     public void solve() {
         // enumeration
         solver.findAllSolutions();
-        // log
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override

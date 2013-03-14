@@ -3,15 +3,16 @@
 STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
-CHOCO_PATH=/Users/cprudhom/Sources/Choco3/parser/src/fzn/
 TIME_LIMIT=900000
 ENGINE=-1
-CSV=/usr/local/minizinc-1.5.1/benchmarks/out.csv
+CSV=../out.csv
+JAVA_ARGS="-Xss64m -Xms64m -Xmx4096m"
 
 usage="\
-Usage: fzn_choco [<options>] [<file>]
 
-    Parse and solve <file> using Choco.
+Usage: fzn_choco.sh [<options>] [<jar>] [<file>]
+
+    Parse and solve <file> using Choco <jar>.
 
 OPTIONS:
 
@@ -30,9 +31,6 @@ OPTIONS:
         When invoked with this option the solver is free to use multiple threads and/or cores during search.
         The argument n specifies the number of cores that are available.  (The default is $NB_NODES.)
 
-    -c, --choco-path <path>
-        Specify the path to choco JAR file and configuration file.
-
     -e, --engine <e>
         Specify the type of propagation engine e to use.
 
@@ -41,6 +39,19 @@ OPTIONS:
 
     --time-limit <n>
         Limit the resolution time of each problem instance to n seconds.  (The default is $TIME_LIMIT.)
+		
+	--jargs <args>
+		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
+		
+EXAMPLES:
+	
+	Basic command to solve a fzn model with choco:
+	$> fzn_choco.sh ./choco-parser-13.03-jar-with-dependencies.jar ./alpha.fzn
+
+	Additionnal arguments:
+	$> fzn_choco.sh --jargs \"-Xmx128m\" --time-limit 100 \\ 
+		./choco-parser-13.03-jar-with-dependencies.jar ./alpha.fzn
+
 "
 
 while test $# -gt 0
@@ -66,11 +77,6 @@ do
             shift
         ;;
 
-        -c|--choco-path)
-            CHOCO_PATH="$2"
-            shift
-        ;;
-
         --time-limit)
             TIME_LIMIT="$2"
             shift
@@ -83,6 +89,11 @@ do
 
         --csv)
             CSV="$2"
+            shift
+        ;;
+
+		--jargs)
+            JAVA_ARGS="$2"
             shift
         ;;
 
@@ -100,10 +111,9 @@ do
     shift
 done
 
-FILE=$*
+CHOCO_JAR=$1
+FILE=$2
 
-CHOCO_JAR=$CHOCO_PATH/Choco-13.03.jar
-LOG_FILE=$CHOCO_PATH/config.xml
 
 if test $# -eq 0
 then
@@ -125,7 +135,4 @@ then
     ARGS=$ARGS" -i"
 fi
 
-
-
-#java -Xss64m -Xms64m -Xmx4096m -cp .:$CHOCO_JAR -Dlogback.configurationFile=$LOG_FILE parser.flatzinc.ParseAndSolve $ARGS
-java -Xss64m -Xms64m -Xmx4096m -cp .:$CHOCO_JAR parser.flatzinc.ParseAndSolve $ARGS
+java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ParseAndSolve ${ARGS}

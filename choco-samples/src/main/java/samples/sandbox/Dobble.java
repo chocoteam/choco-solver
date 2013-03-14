@@ -123,8 +123,6 @@ public class Dobble {
         }
         // search strategy
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(flatVars));
-        // output
-        SearchMonitorFactory.log(solver, true, false);
         // time limit
         SearchMonitorFactory.limitTime(solver, timeLimit);
         // run!

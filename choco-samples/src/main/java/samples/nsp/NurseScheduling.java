@@ -159,7 +159,6 @@ public class NurseScheduling {
         solver.set(strategy.getGoal(solver, vars));
 
         System.out.printf("%s\n", solver.toString());
-        SearchMonitorFactory.log(solver, false, false);
         if (Boolean.TRUE == solver.findSolution()) {
             NSChecker checker = new NSChecker(data);
             if (checker.checkSolution(m.getSolution(solver)))
