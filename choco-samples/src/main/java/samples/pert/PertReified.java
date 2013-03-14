@@ -37,7 +37,9 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * <br/>
@@ -106,50 +108,6 @@ public class PertReified extends Pert {
                         IntStrategyFactory.inputOrder_InDomainMin(vars)
                 )
         );
-
-        int[] rank = new int[n];
-        boolean[] treated = new boolean[n];
-        int i = 0;
-        Deque<Integer> toTreat = new ArrayDeque<Integer>();
-        toTreat.push(i);
-        rank[i] = 0;
-        while (!toTreat.isEmpty()) {
-            i = toTreat.pop();
-            treated[i] = true;
-            for (int j = 0; j < n; j++) {
-                if (graph[i][j] == 1) {
-                    rank[j] = Math.max(rank[i] + 1, rank[j]);
-                    if (!treated[j] && !toTreat.contains(j)) {
-                        toTreat.push(j);
-                    }
-                }
-            }
-        }
-
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.member(reifieds.toArray(new Propagator[reifieds.size()])),
-                        IncrArityP.get(),
-                        Policy.ITERATE
-                ));
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.priority(PropagatorPriority.TERNARY),
-                        new Cond(
-                                Predicates.lhs(),
-                                new MappingV(vars, rank),
-                                new Decr(new MappingV(vars, rank))
-                        ),
-                        Policy.ITERATE
-                ));
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.FIXPOINT
-                ));*/
     }
 
     public static void main(String[] args) {

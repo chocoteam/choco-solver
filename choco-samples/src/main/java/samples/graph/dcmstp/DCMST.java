@@ -175,7 +175,6 @@ public class DCMST extends AbstractProblem {
         solver.set(new StaticStrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strat));
         SearchMonitorFactory.limitSolution(solver, 2);
         SearchMonitorFactory.limitTime(solver, TIMELIMIT);
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override

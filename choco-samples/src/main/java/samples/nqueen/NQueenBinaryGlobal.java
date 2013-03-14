@@ -58,6 +58,6 @@ public class NQueenBinaryGlobal extends AbstractNQueen {
     }
 
     public static void main(String[] args) {
-        new NQueenBinaryGlobal().execute("12");
+        new NQueenBinaryGlobal().execute(args);
     }
 }

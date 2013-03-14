@@ -70,7 +70,7 @@ public class RLFAP extends AbstractProblem {
     private static String VAR = "var.txt";
     private static String CTR = "ctr.txt";
 
-    @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
+    @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory (see http://www.inra.fr/mia/T/schiex/Export/FullRLFAP.tgz).", required = true)
     String dir;
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
@@ -207,7 +207,7 @@ public class RLFAP extends AbstractProblem {
     /////////////////////
 
     protected int[][] readDOM(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntHashSet values = new TIntHashSet();
         try {
@@ -238,7 +238,7 @@ public class RLFAP extends AbstractProblem {
     }
 
     protected int[][] readVAR(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntList values = new TIntArrayList();
         try {
@@ -268,7 +268,7 @@ public class RLFAP extends AbstractProblem {
 
 
     protected int[][] readCTR(String filename) {
-        FileReader f = null;
+        FileReader f;
         String line;
         TIntList values = new TIntArrayList();
         try {

@@ -27,7 +27,6 @@
 
 package samples.integer;
 
-import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -49,9 +48,6 @@ import java.util.Random;
 public class AbsoluteEvaluation extends AbstractProblem {
 
     IntVar[] vars;
-
-    @Option(name = "-s", usage = "random seed", required = false)
-    private int seed = 1234;
 
     @Override
     public void createSolver() {
