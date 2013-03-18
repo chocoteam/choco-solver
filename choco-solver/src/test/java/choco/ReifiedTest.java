@@ -85,7 +85,7 @@ public class ReifiedTest {
             s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
-            Assert.assertEquals(sol, x.getDomainSize() * y.getDomainSize(), "nb sol incorrect");
+            Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -145,7 +145,7 @@ public class ReifiedTest {
             s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
-            Assert.assertEquals(sol, x.getDomainSize() * y.getDomainSize(), "nb sol incorrect");
+            Assert.assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
