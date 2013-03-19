@@ -43,7 +43,6 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 
 /**
@@ -102,10 +101,9 @@ public class PropIntMemberSet extends Propagator<Variable> {
             setPassive();
             return;
         }
-        ISet tmp = set.getEnvelope();
-        int maxVal = tmp.getFirstElement();
+        int maxVal = set.getEnvelopeFirstElement();
         int minVal = maxVal;
-        for (int j = maxVal; j >= 0; j = tmp.getNextElement()) {
+        for (int j = maxVal; j!=SetVar.END; j=set.getEnvelopeNextElement()) {
             if (maxVal < j) {
                 maxVal = j;
             }
@@ -118,7 +116,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
         minVal = iv.getLB();
         maxVal = iv.getUB();
         for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-            if (!set.getEnvelope().contain(i)) {
+            if (!set.envelopeContains(i)) {
                 iv.removeValue(i, aCause);
             }
         }
@@ -148,7 +146,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (iv.instantiated()) {
-            if (!set.getEnvelope().contain(iv.getValue())) {
+            if (!set.envelopeContains(iv.getValue())) {
                 return ESat.FALSE;
             } else {
                 if (set.instantiated()) {
@@ -162,7 +160,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             int maxVal = iv.getUB();
             boolean all = true;
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (!set.getKernel().contain(i)) {
+                if (!set.kernelContains(i)) {
                     all = false;
                     break;
                 }
@@ -171,7 +169,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
                 return ESat.TRUE;
             }
             for (int i = minVal; i <= maxVal; i = iv.nextValue(i)) {
-                if (set.getEnvelope().contain(i)) {
+                if (set.envelopeContains(i)) {
                     return ESat.UNDEFINED;
                 }
             }

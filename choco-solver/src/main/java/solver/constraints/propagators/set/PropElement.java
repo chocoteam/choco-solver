@@ -124,7 +124,7 @@ public class PropElement extends Propagator<Variable> {
                 if (disjoint(set, array[i - offSet]) || disjoint(array[i - offSet], set)) {// array[i] != set
                     index.removeValue(i, aCause);
                 } else {
-                    if (array[i - offSet].getKernel().getSize() == 0) {
+                    if (array[i - offSet].getKernelSize() == 0) {
                         noEmptyKer = false;
                     }
                 }
@@ -155,11 +155,10 @@ public class PropElement extends Propagator<Variable> {
                 }
             }
             if (!set.instantiated()) {// from env
-                ISet tmpSet = set.getEnvelope();
-                for (int j = tmpSet.getFirstElement(); j >= 0; j = tmpSet.getNextElement()) {
+                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
-                        if (array[i - offSet].getEnvelope().contain(j)) {
+                        if (array[i - offSet].envelopeContains(j)) {
                             valueExists = true;
                             break;
                         }
@@ -173,24 +172,19 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
-        ISet envset1 = s1.getEnvelope();
-        ISet envset2 = s2.getEnvelope();
-        ISet kerset2 = s2.getKernel();
-        for (int j = kerset2.getFirstElement(); j >= 0; j = kerset2.getNextElement()) {
+        for (int j=s2.getKernelFirstElement(); j!=SetVar.END; j=s2.getKernelNextElement()) {
             s1.addToKernel(j, aCause);
         }
-        for (int j = envset1.getFirstElement(); j >= 0; j = envset1.getNextElement()) {
-            if (!envset2.contain(j)) {
+        for (int j=s1.getEnvelopeFirstElement(); j!=SetVar.END; j=s1.getEnvelopeNextElement()) {
+            if (!s2.envelopeContains(j)) {
                 s1.removeFromEnvelope(j, aCause);
             }
         }
     }
 
     private boolean disjoint(SetVar s1, SetVar s2) {
-        ISet envset = s1.getEnvelope();
-        ISet kerset = s2.getKernel();
-        for (int j = kerset.getFirstElement(); j >= 0; j = kerset.getNextElement()) {
-            if (!envset.contain(j)) {
+        for (int j=s2.getKernelFirstElement(); j!=SetVar.END; j=s2.getKernelNextElement()) {
+            if (!s1.envelopeContains(j)) {
                 return true;
             }
         }

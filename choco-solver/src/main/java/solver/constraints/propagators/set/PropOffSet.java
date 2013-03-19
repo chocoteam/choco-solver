@@ -34,7 +34,6 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 
 /**
@@ -90,26 +89,20 @@ public class PropOffSet extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         // kernel
-        ISet s = vars[0].getKernel();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
             vars[1].addToKernel(j + offSet, aCause);
         }
-        s = vars[1].getKernel();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+        for (int j=vars[1].getKernelFirstElement(); j!=SetVar.END; j=vars[1].getKernelNextElement()) {
             vars[0].addToKernel(j - offSet, aCause);
         }
         // envelope
-        s = vars[0].getEnvelope();
-        ISet s2 = vars[1].getEnvelope();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-            if (!s2.contain(j + offSet)) {
+        for (int j = vars[0].getEnvelopeFirstElement(); j!=SetVar.END; j = vars[0].getEnvelopeNextElement()) {
+            if (!vars[1].envelopeContains(j + offSet)) {
                 vars[0].removeFromEnvelope(j, aCause);
             }
         }
-        s = vars[1].getEnvelope();
-        s2 = vars[0].getEnvelope();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-            if (!s2.contain(j - offSet)) {
+        for (int j=vars[1].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[1].getEnvelopeNextElement()) {
+            if (!vars[0].envelopeContains(j - offSet)) {
                 vars[1].removeFromEnvelope(j, aCause);
             }
         }
@@ -134,17 +127,13 @@ public class PropOffSet extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        ISet s = vars[0].getKernel();
-        ISet s2 = vars[1].getEnvelope();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-            if (!s2.contain(j + offSet)) {
+        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+            if (!vars[1].envelopeContains(j + offSet)) {
                 return ESat.FALSE;
             }
         }
-        s = vars[1].getKernel();
-        s2 = vars[0].getEnvelope();
-        for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-            if (!s2.contain(j - offSet)) {
+        for (int j=vars[1].getKernelFirstElement(); j!=SetVar.END; j=vars[1].getKernelNextElement()) {
+            if (!vars[0].envelopeContains(j - offSet)) {
                 return ESat.FALSE;
             }
         }

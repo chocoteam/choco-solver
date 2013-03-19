@@ -112,14 +112,12 @@ public class PropIntersection extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet set;
         SetVar intersection = vars[k];
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            set = vars[0].getKernel();
-            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+            for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].getKernel().contain(j)) {
+                    if (!vars[i].kernelContains(j)) {
                         all = false;
                         break;
                     }
@@ -128,15 +126,14 @@ public class PropIntersection extends Propagator<SetVar> {
                     intersection.addToKernel(j, aCause);
                 }
             }
-            set = intersection.getEnvelope();
-            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-                if (intersection.getKernel().contain(j)) {
+            for (int j=intersection.getEnvelopeFirstElement(); j!=SetVar.END; j=intersection.getEnvelopeNextElement()) {
+                if (intersection.kernelContains(j)) {
                     for (int i = 0; i < k; i++) {
                         vars[i].addToKernel(j, aCause);
                     }
                 } else {
                     for (int i = 0; i < k; i++)
-                        if (!vars[i].getEnvelope().contain(j)) {
+                        if (!vars[i].envelopeContains(j)) {
                             intersection.removeFromEnvelope(j, aCause);
                             break;
                         }
@@ -147,8 +144,8 @@ public class PropIntersection extends Propagator<SetVar> {
         for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
             boolean all = true;
             for (int i = 0; i < k; i++)
-                if (vars[i].getEnvelope().contain(j)) {
-                    all &= vars[i].getKernel().contain(j);
+                if (vars[i].envelopeContains(j)) {
+                    all &= vars[i].kernelContains(j);
                 } else {
                     all = false;
                     interRemToTreat.remove(j);
@@ -160,16 +157,16 @@ public class PropIntersection extends Propagator<SetVar> {
         }
         set = setAddToTreat;
         for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-            if (intersection.getEnvelope().contain(j) && !intersection.getKernel().contain(j)) {
+            if (intersection.envelopeContains(j) && !intersection.kernelContains(j)) {
                 boolean allKer = true;
                 for (int i = 0; i < k; i++) {
-                    if (!vars[i].getEnvelope().contain(j)) {
+                    if (!vars[i].envelopeContains(j)) {
                         setAddToTreat.remove(j);
                         intersection.removeFromEnvelope(j, aCause);
                         allKer = false;
                         break;
                     }
-                    if (!vars[i].getKernel().contain(j)) {
+                    if (!vars[i].kernelContains(j)) {
                         allKer = false;
                         break;
                     }
@@ -202,18 +199,15 @@ public class PropIntersection extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        ISet set;
-        set = vars[k].getKernel();
-        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
+        for (int j=vars[k].getKernelFirstElement(); j!=SetVar.END; j=vars[k].getKernelNextElement())
             for (int i = 0; i < k; i++)
-                if (!vars[i].getEnvelope().contain(j))
+                if (!vars[i].envelopeContains(j))
                     return ESat.FALSE;
-        set = vars[0].getKernel();
-        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-            if (!vars[k].getEnvelope().contain(j)) {
+        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+            if (!vars[k].envelopeContains(j)) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
-                    if (!vars[i].getKernel().contain(j)) {
+                    if (!vars[i].kernelContains(j)) {
                         all = false;
                         break;
                     }

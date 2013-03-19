@@ -43,7 +43,6 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
 
@@ -119,18 +118,16 @@ public class PropBoolChannel extends Propagator<Variable> {
                 } else {
                     set.addToKernel(i + offSet, aCause);
                 }
-            } else if (!set.getEnvelope().contain(i + offSet)) {
+            } else if (!set.envelopeContains(i + offSet)) {
                 bools[i].setToFalse(aCause);
             }
         }
-        ISet tmp = set.getEnvelope();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
             if (j < offSet || j >= n + offSet) {
                 set.removeFromEnvelope(j, aCause);
             }
         }
-        tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
             bools[j - offSet].setToTrue(aCause);
         }
         sdm.unfreeze();
@@ -154,15 +151,14 @@ public class PropBoolChannel extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        ISet tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
             if (bools[j - offSet].instantiatedTo(0)) {
                 return ESat.FALSE;
             }
         }
         for (int i = 0; i < n; i++) {
             if (bools[i].instantiatedTo(1)) {
-                if (!set.getEnvelope().contain(i + offSet)) {
+                if (!set.envelopeContains(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

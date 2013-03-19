@@ -38,9 +38,9 @@ import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
-import solver.variables.SetVarImpl;
 import solver.variables.VariableFactory;
 
 /**
@@ -65,25 +65,12 @@ public class SetUnion extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        x = new SetVarImpl("x", solver);
-        y = new SetVarImpl("y", solver);
-        z = new SetVarImpl("z", solver);
         // x initial domain
-        x.getEnvelope().add(2);
-        x.getEnvelope().add(1);
-        x.getKernel().add(1);
-        x.getEnvelope().add(3);
+		x = VariableFactory.set("x",new int[]{1,2,3},new int[]{1},solver);
         // y initial domain
-        y.getEnvelope().add(6);
-        y.getEnvelope().add(2);
-        y.getEnvelope().add(7);
+		y = VariableFactory.set("y",new int[]{6,2,7},solver);
         // z initial domain
-        z.getEnvelope().add(1);
-        z.getEnvelope().add(2);
-        z.getKernel().add(2);
-        z.getEnvelope().add(5);
-        z.getEnvelope().add(7);
-        z.getEnvelope().add(3);
+		z = VariableFactory.set("z",new int[]{1,2,5,7,3},new int[]{2},solver);
         // set-union constraint
         solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
@@ -94,13 +81,14 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
+		SearchMonitorFactory.log(solver,true,false);
         solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
                 System.out.println("solution found");
-                System.out.println("x : {" + x.getEnvelope() + "}");
-                System.out.println("y : {" + y.getEnvelope() + "}");
-                System.out.println("z : {" + z.getEnvelope() + "}");
+				System.out.println(x);
+				System.out.println(y);
+				System.out.println(z);
             }
         });
     }

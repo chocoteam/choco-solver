@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 
 /**
  * A propagator ensuring that |set| = card
@@ -86,22 +85,23 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int k = set.getKernel().getSize();
+        int k = set.getKernelSize();
         card.updateLowerBound(k, aCause);
-        int e = set.getEnvelope().getSize();
+        int e = set.getEnvelopeSize();
         card.updateUpperBound(e, aCause);
         if (card.instantiated()) {
             int c = card.getValue();
             ISet env = set.getEnvelope();
             if (c == k) {
+			// TODO CHECK BIZARE D'AVOIR KER = ENVELOPE
                 ISet ker = set.getEnvelope();
-                for (int j = env.getFirstElement(); j >= 0; j = env.getNextElement()) {
+                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
                     if (!ker.contain(j)) {
                         set.removeFromEnvelope(j, aCause);
                     }
                 }
             } else if (c == e) {
-                for (int j = env.getFirstElement(); j >= 0; j = env.getNextElement()) {
+                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
                     set.addToKernel(j, aCause);
                 }
             }

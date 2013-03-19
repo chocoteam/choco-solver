@@ -40,7 +40,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.SetVar;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 
 /**
  * Ensures that all sets are different
@@ -90,29 +89,29 @@ public class PropAllDiff extends Propagator<SetVar> {
     @Override
     public void propagate(int idx, int mask) throws ContradictionException {
         if (vars[idx].instantiated()) {
-            int s = vars[idx].getEnvelope().getSize();
-            ISet value = vars[idx].getKernel();
+            int s = vars[idx].getEnvelopeSize();
             for (int i = 0; i < n; i++) {
                 if (i != idx) {
-                    int sei = vars[i].getEnvelope().getSize();
-                    int ski = vars[i].getKernel().getSize();
+                    int sei = vars[i].getEnvelopeSize();
+                    int ski = vars[i].getKernelSize();
                     if (ski >= s - 1 && sei <= s + 1) {
                         int nbSameInKer = 0;
                         int diff = -1;
-                        for (int j = value.getFirstElement(); j >= 0; j = value.getNextElement())
-                            if (!vars[i].contains(j))
+                        for (int j=vars[idx].getKernelFirstElement(); j!=SetVar.END; j=vars[idx].getKernelNextElement())
+                            if (!vars[i].contains(j)){
                                 nbSameInKer++;
-                            else
+							}else{
                                 diff = j;
+							}
                         if (nbSameInKer == s) {
                             if (sei == s) { // check diff
                                 contradiction(vars[i], "");
                             } else if (sei == s + 1 && ski < sei) { // force other (if same elements in ker)
-                                for (int j = vars[i].getEnvelope().getFirstElement(); j >= 0; j = vars[i].getEnvelope().getNextElement())
+                                for (int j=vars[i].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[i].getEnvelopeNextElement())
                                     vars[i].addToKernel(j, aCause);
                             }
                         } else if (sei == s && nbSameInKer == s - 1) { // remove other (if same elements in ker)
-                            if (vars[i].getEnvelope().contain(diff)) {
+                            if (vars[i].envelopeContains(diff)) {
                                 vars[i].removeFromEnvelope(diff, aCause);
                             }
                         }
@@ -138,12 +137,11 @@ public class PropAllDiff extends Propagator<SetVar> {
     }
 
     private boolean same(int i, int i2) {
-        if (vars[i].getEnvelope().getSize() < vars[i2].getKernel().getSize()) return false;
-        if (vars[i2].getEnvelope().getSize() < vars[i].getKernel().getSize()) return false;
+        if (vars[i].getEnvelopeSize() < vars[i2].getKernelSize()) return false;
+        if (vars[i2].getEnvelopeSize() < vars[i].getKernelSize()) return false;
         if (vars[i].instantiated() && vars[i2].instantiated()) {
-            ISet value = vars[i].getKernel();
-            for (int j = value.getFirstElement(); j >= 0; j = value.getNextElement()) {
-                if (!vars[i2].getEnvelope().contain(j)) {
+            for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement()) {
+                if (!vars[i2].envelopeContains(j)) {
                     return false;
                 }
             }

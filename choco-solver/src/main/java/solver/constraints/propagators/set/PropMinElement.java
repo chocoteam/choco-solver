@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 
 /**
  * Retrieves the minimum element of the set
@@ -104,14 +103,12 @@ public class PropMinElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
             min.updateUpperBound(get(j), aCause);
         }
-        tmp = set.getEnvelope();
-        int minVal = get(tmp.getFirstElement());
+        int minVal = get(set.getEnvelopeFirstElement());
         int lb = min.getLB();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
             int k = get(j);
             if (k < lb) {
                 set.removeFromEnvelope(j, aCause);
@@ -133,15 +130,13 @@ public class PropMinElement extends Propagator<Variable> {
     public ESat isEntailed() {
         int lb = min.getLB();
         int ub = min.getUB();
-        ISet tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
             if (get(j) < lb) {
                 return ESat.FALSE;
             }
         }
-        tmp = set.getEnvelope();
-        int minVal = get(tmp.getFirstElement());
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        int minVal = get(set.getEnvelopeFirstElement());
+        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
             if (minVal > get(j)) {
                 minVal = get(j);
             }

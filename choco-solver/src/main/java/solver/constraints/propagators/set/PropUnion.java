@@ -119,26 +119,22 @@ public class PropUnion extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet set;
         SetVar union = vars[k];
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             for (int i = 0; i < k; i++) {
-                set = vars[i].getKernel();
-                for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
+                for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement())
                     union.addToKernel(j, aCause);
-                set = vars[i].getEnvelope();
-                for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
-                    if (!union.getEnvelope().contain(j))
+                for (int j=vars[i].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[i].getEnvelopeNextElement())
+                    if (!union.envelopeContains(j))
                         vars[i].removeFromEnvelope(j, aCause);
             }
-            set = union.getEnvelope();
-            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-                if (union.getKernel().contain(j)) {
+            for (int j=union.getEnvelopeFirstElement(); j!=SetVar.END; j=union.getEnvelopeNextElement()) {
+                if (union.kernelContains(j)) {
                     unionAddToTreat.add(j);
                 } else {
                     int mate = -1;
                     for (int i = 0; i < k; i++) {
-                        if (vars[i].getEnvelope().contain(j)) {
+                        if (vars[i].envelopeContains(j)) {
                             mate = i;
                             break;
                         }
@@ -151,7 +147,7 @@ public class PropUnion extends Propagator<SetVar> {
         for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].getEnvelope().contain(j))
+                if (vars[i].envelopeContains(j))
                     if (mate == -1) {
                         mate = i;
                     } else {
@@ -167,10 +163,10 @@ public class PropUnion extends Propagator<SetVar> {
         }
         set = setRemToTreat;
         for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-            if (union.getEnvelope().contain(j) && !union.getKernel().contain(j)) {
+            if (union.envelopeContains(j) && !union.kernelContains(j)) {
                 int mate = -1;
                 for (int i = 0; i < k; i++)
-                    if (vars[i].getEnvelope().contain(j)) {
+                    if (vars[i].envelopeContains(j)) {
                         mate = i;
                         break;
                     }
@@ -201,18 +197,15 @@ public class PropUnion extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        ISet set;
         for (int i = 0; i < k; i++) {
-            set = vars[i].getKernel();
-            for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement())
-                if (!vars[k].getEnvelope().contain(j))
+            for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement())
+                if (!vars[k].envelopeContains(j))
                     return ESat.FALSE;
         }
-        set = vars[k].getKernel();
-        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
+        for (int j=vars[k].getKernelFirstElement(); j!=SetVar.END; j=vars[k].getKernelNextElement()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
-                if (vars[i].getEnvelope().contain(j)) {
+                if (vars[i].envelopeContains(j)) {
                     mate = i;
                     break;
                 }
