@@ -33,12 +33,11 @@ import solver.variables.delta.SetDelta;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 
 /**
- * A Set Variable is defined by a domain which is a set interval [S_low,S_up]
- * S_low is the set of elements that must belong to every single solution. It is called the kernel.
- * S_up is the set of elements that may belong to at least one solution. It is called the envelope.
+ * A Set Variable is defined by a domain which is a set interval [kernel,envelope]
+ * The kernel is the set of elements that must belong to every single solution.
+ * The envelope is the set of elements that may belong to at least one solution.
  * <p/>
- * One must notice that in this context, a VALUE of the variable is a set of elements
- * (which are integers here).
+ * One must notice that in this context, a VALUE of the variable is a set of integers.
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 15 nov. 2012
