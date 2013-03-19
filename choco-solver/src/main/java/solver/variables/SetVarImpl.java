@@ -57,40 +57,13 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     protected ISet envelope, kernel;
     protected IEnvironment environment;
     protected SetDelta delta;
-	protected int offset;
+	protected int min, max;
     ///////////// Attributes related to Variable ////////////
     protected boolean reactOnModification;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
-
-//    /**
-//     * Set variable based on a linked list representation
-//     *
-//     * @param name
-//     * @param solver
-//     */
-//    public SetVarImpl(String name, Solver solver) {
-//        this(name, 0, SetType.LINKED_LIST, SetType.LINKED_LIST, solver);
-//    }
-//
-//    /**
-//     * Set variable
-//     *
-//     * @param name
-//     * @param maximalSize values will be in range [0, maximalSize-1]
-//     * @param envType     data structure of the envelope
-//     * @param kerType     data structure of the kernel
-//     * @param solver
-//     */
-//    public SetVarImpl(String name, int maximalSize, SetType envType, SetType kerType, Solver solver) {
-//        super(name, solver);
-//        solver.associates(this);
-//        this.environment = solver.getEnvironment();
-//        envelope = SetFactory.makeStoredSet(envType, maximalSize, environment);
-//        kernel = SetFactory.makeStoredSet(kerType, maximalSize, environment);
-//    }
 
 	/**
 	 * Creates a Set variable
@@ -102,7 +75,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 	 * @param kerType	data structure of the kernel
 	 * @param solver	solver of the variable.
 	 */
-	public SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
+	protected SetVarImpl(String name, int[] env, SetType envType, int[] ker, SetType kerType, Solver solver) {
 		super(name, solver);
 		solver.associates(this);
 		int min = Integer.MAX_VALUE;
@@ -117,14 +90,16 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 		}
 		check(env,ker,max,min);
 		this.environment = solver.getEnvironment();
-		envelope = SetFactory.makeStoredSet(envType, max-min, environment);
-		kernel = SetFactory.makeStoredSet(kerType, max-min, environment);
+		envelope = SetFactory.makeStoredSet(envType, max-min+1, environment);
+		kernel = SetFactory.makeStoredSet(kerType, max-min+1, environment);
 		for(int i:env){
 			envelope.add(i-min);
 		}
 		for(int i:ker){
 			kernel.add(i-min);
 		}
+		this.min = min;
+		this.max = max;
 	}
 
 	private static void check(int[] env, int[] ker, int max, int min) {
@@ -154,14 +129,14 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 	@Override
     public boolean addToKernel(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (!envelope.contain(element-offset)) {
+        if (element<min || element>max || !envelope.contain(element-min)) {
             contradiction(cause, null, "");
             return true;
         }
-        if (kernel.contain(element-offset)) {
+        if (kernel.contain(element-min)) {
             return false;
         }
-        kernel.add(element-offset);
+        kernel.add(element-min);
         if (reactOnModification) {
             delta.add(element, SetDelta.KERNEL, cause);
         }
@@ -173,11 +148,12 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     @Override
     public boolean removeFromEnvelope(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (kernel.contain(element-offset)) {
+		if(element<min || element>max)return false;
+        if (kernel.contain(element-min)) {
             contradiction(cause, EventType.REMOVE_FROM_ENVELOPE, "");
             return true;
         }
-        if (!envelope.remove(element-offset)) {
+        if (!envelope.remove(element-min)) {
             return false;
         }
         if (reactOnModification) {
@@ -192,7 +168,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
         boolean changed = !instantiated();
         for (int i : value) {
-            addToKernel(i-offset, cause);
+            addToKernel(i, cause);
         }
         if (kernel.getSize() != value.length) {
             contradiction(cause, null, "");
@@ -200,7 +176,7 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
         if (envelope.getSize() != value.length) {
             for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
                 if (!kernel.contain(i)) {
-                    removeFromEnvelope(i, cause);
+                    envelope.remove(i);
                 }
             }
         }
@@ -208,16 +184,11 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     }
 
     @Override
-    public boolean contains(int v) {
-        return envelope.contain(v-offset);
-    }
-
-    @Override
     public int[] getValue() {
         int[] lb = new int[kernel.getSize()];
         int k = 0;
         for (int i = kernel.getFirstElement(); i >= 0; i = kernel.getNextElement()) {
-            lb[k++] = i+offset;
+            lb[k++] = i+min;
         }
         return lb;
     }
@@ -229,13 +200,13 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 	@Override
 	public int getKernelFirstElement() {
 		int i = kernel.getFirstElement();
-		return (i==-1)?END:i+offset;
+		return (i==-1)?END:i+min;
 	}
 
 	@Override
 	public int getKernelNextElement() {
 		int i = kernel.getNextElement();
-		return (i==-1)?END:i+offset;
+		return (i==-1)?END:i+min;
 	}
 
 	@Override
@@ -245,19 +216,20 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
 	@Override
 	public boolean kernelContains(int i){
-		return kernel.contain(i);
+		if(i<min || i>max)return false;
+		return kernel.contain(i-min);
 	}
 
 	@Override
 	public int getEnvelopeFirstElement() {
 		int i = envelope.getFirstElement();
-		return (i==-1)?END:i+offset;
+		return (i==-1)?END:i+min;
 	}
 
 	@Override
 	public int getEnvelopeNextElement() {
 		int i = envelope.getNextElement();
-		return (i==-1)?END:i+offset;
+		return (i==-1)?END:i+min;
 	}
 
 	@Override
@@ -267,7 +239,8 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 
 	@Override
 	public boolean envelopeContains(int i){
-		return envelope.contain(i);
+		if(i<min || i>max)return false;
+		return envelope.contain(i-min);
 	}
 
 	//***********************************************************************************
@@ -303,10 +276,25 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getName());
-		sb.append(" Envelope : ");
-		sb.append(envelope);
-		sb.append(" Kernel : ");
-		sb.append(kernel);
+		sb.append(" Envelope : {");
+		int s = envelope.getSize();
+		for(int i=envelope.getFirstElement();i>=0;i=envelope.getNextElement()){
+			sb.append(i+min);
+			s--;
+			if(s>0){
+				sb.append(",");
+			}
+		}
+		sb.append("} Kernel : {");
+		s = kernel.getSize();
+		for(int i=kernel.getFirstElement();i>=0;i=kernel.getNextElement()){
+			sb.append(i+min);
+			s--;
+			if(s>0){
+				sb.append(",");
+			}
+		}
+		sb.append("}");
         return sb.toString();
     }
 

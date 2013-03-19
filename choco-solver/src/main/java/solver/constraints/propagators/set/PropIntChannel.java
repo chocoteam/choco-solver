@@ -134,7 +134,7 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
             for (int j = ints[i].getLB(); j >= ub; j = ints[i].nextValue(j)) {
-                if (!sets[j - offSet1].contains(i + offSet2)) {
+                if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
                     ints[i].removeValue(j, aCause);
                 }
             }

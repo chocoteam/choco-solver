@@ -45,6 +45,14 @@ import solver.variables.delta.monitor.SetDeltaMonitor;
  */
 public interface SetVar extends Variable<SetDelta> {
 
+	/**
+	 * Constant used for enumerating elements in the envelope or the kernel of a SetVar.
+	 * This value indicates that the iteration is over:
+	 *
+	 * <code>for(int e=getKernelFirstElement();e!=SetVar.END;e=getKernelNextElement()){
+	 *     // something
+	 * }</code>
+	 */
 	public final static int END = Integer.MIN_VALUE;
 
 	/**
@@ -157,14 +165,6 @@ public interface SetVar extends Variable<SetDelta> {
      * @throws ContradictionException
      */
     boolean instantiateTo(int[] value, ICause cause) throws ContradictionException;
-
-    /**
-     * Checks if an element <code>v</code> belongs to the domain of <code>this</code>
-     *
-     * @param v the element to check
-     * @return <code>true</code> if the element belongs to the domain of <code>this</code>, <code>false</code> otherwise.
-     */
-    boolean contains(int v);
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwier the lower bound.

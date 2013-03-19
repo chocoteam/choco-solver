@@ -52,7 +52,7 @@ import solver.variables.VariableFactory;
 public class SetUnion extends AbstractProblem {
 
     private SetVar x, y, z;
-    private boolean noEmptySet = false;
+    private boolean noEmptySet = true;
 
     public static void main(String[] args) {
         new SetUnion().execute(args);
@@ -72,7 +72,7 @@ public class SetUnion extends AbstractProblem {
         // z initial domain
 		z = VariableFactory.set("z",new int[]{1,2,5,7,3},new int[]{2},solver);
         // set-union constraint
-        solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
+		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
             solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z}, VariableFactory.fixed(0, solver)));
         }
@@ -81,16 +81,6 @@ public class SetUnion extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(SetStrategyFactory.setLex(new SetVar[]{x, y, z}));
-		SearchMonitorFactory.log(solver,true,false);
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                System.out.println("solution found");
-				System.out.println(x);
-				System.out.println(y);
-				System.out.println(z);
-            }
-        });
     }
 
     @Override

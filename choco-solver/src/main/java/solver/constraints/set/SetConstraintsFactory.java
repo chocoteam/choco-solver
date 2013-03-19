@@ -367,7 +367,6 @@ public final class SetConstraintsFactory {
      * @return a constraint which ensures that SETS form a partition of UNIVERSE
      */
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
-        Solver solver = SETS[0].getSolver();
         Constraint c = all_disjoint(SETS);
         c.addPropagators(new PropUnion(SETS, UNIVERSE));
         return c;

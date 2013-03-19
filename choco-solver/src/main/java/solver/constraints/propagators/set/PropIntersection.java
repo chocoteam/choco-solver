@@ -34,6 +34,7 @@
 
 package solver.constraints.propagators.set;
 
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,9 +42,6 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
-import util.objects.setDataStructures.SetFactory;
-import util.objects.setDataStructures.SetType;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
 
@@ -56,7 +54,6 @@ public class PropIntersection extends Propagator<SetVar> {
     private int k;
     private SetDeltaMonitor[] sdm;
     private IntProcedure intersectionForced, intersectionRemoved, setForced, setRemoved;
-    private ISet interRemToTreat, setAddToTreat;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -69,8 +66,6 @@ public class PropIntersection extends Propagator<SetVar> {
         for (int i = 0; i <= k; i++) {
             sdm[i] = this.vars[i].monitorDelta(this);
         }
-        interRemToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, environment);
-        setAddToTreat = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, environment);
         // PROCEDURES
         intersectionForced = new IntProcedure() {
             @Override
@@ -83,15 +78,45 @@ public class PropIntersection extends Propagator<SetVar> {
         intersectionRemoved = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-                interRemToTreat.add(element);
+				int mate = -1;
+				for (int i = 0; i < k; i++)
+					if (vars[i].envelopeContains(element)) {
+						if(!vars[i].kernelContains(element)){
+							if(mate == -1){
+								mate = i;
+							}else{
+								mate = -2;
+								break;
+							}
+						}
+					} else {
+						mate = -2;
+						break;
+					}
+				if (mate == -1) {
+					contradiction(vars[k], "");
+				}else if (mate != -2) {
+					vars[mate].removeFromEnvelope(element,aCause);
+				}
             }
         };
         setForced = new IntProcedure() {
             @Override
             public void execute(int element) throws ContradictionException {
-                if (!setAddToTreat.contain(element))
-                    setAddToTreat.add(element);
-            }
+				boolean allKer = true;
+				for (int i = 0; i < k; i++) {
+					if (!vars[i].envelopeContains(element)) {
+						vars[k].removeFromEnvelope(element, aCause);
+						allKer = false;
+						break;
+					}else if (!vars[i].kernelContains(element)) {
+						allKer = false;
+					}
+				}
+				if (allKer) {
+					vars[k].addToKernel(element, aCause);
+				}
+			}
         };
         setRemoved = new IntProcedure() {
             @Override
@@ -138,49 +163,12 @@ public class PropIntersection extends Propagator<SetVar> {
                             break;
                         }
                 }
-            }
-        }
-        set = interRemToTreat;
-        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-            boolean all = true;
-            for (int i = 0; i < k; i++)
-                if (vars[i].envelopeContains(j)) {
-                    all &= vars[i].kernelContains(j);
-                } else {
-                    all = false;
-                    interRemToTreat.remove(j);
-                    break;
-                }
-            if (all) {
-                contradiction(vars[k], "");
-            }
-        }
-        set = setAddToTreat;
-        for (int j = set.getFirstElement(); j >= 0; j = set.getNextElement()) {
-            if (intersection.envelopeContains(j) && !intersection.kernelContains(j)) {
-                boolean allKer = true;
-                for (int i = 0; i < k; i++) {
-                    if (!vars[i].envelopeContains(j)) {
-                        setAddToTreat.remove(j);
-                        intersection.removeFromEnvelope(j, aCause);
-                        allKer = false;
-                        break;
-                    }
-                    if (!vars[i].kernelContains(j)) {
-                        allKer = false;
-                        break;
-                    }
-                }
-                if (allKer) {
-                    intersection.addToKernel(j, aCause);
-                    setAddToTreat.remove(j);
-                }
-            }
-        }
-        // ------------------
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0)
-            for (int i = 0; i <= k; i++)
-                sdm[i].unfreeze();
+			}
+			// ------------------
+			if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0)
+				for (int i = 0; i <= k; i++)
+					sdm[i].unfreeze();
+		}
     }
 
     @Override
@@ -194,7 +182,6 @@ public class PropIntersection extends Propagator<SetVar> {
             sdm[idxVarInProp].forEach(intersectionRemoved, EventType.REMOVE_FROM_ENVELOPE);
         }
         sdm[idxVarInProp].unfreeze();
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

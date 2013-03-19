@@ -91,12 +91,9 @@ public class PropCardinality extends Propagator<Variable> {
         card.updateUpperBound(e, aCause);
         if (card.instantiated()) {
             int c = card.getValue();
-            ISet env = set.getEnvelope();
             if (c == k) {
-			// TODO CHECK BIZARE D'AVOIR KER = ENVELOPE
-                ISet ker = set.getEnvelope();
                 for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
-                    if (!ker.contain(j)) {
+                    if (!set.kernelContains(j)) {
                         set.removeFromEnvelope(j, aCause);
                     }
                 }
@@ -115,8 +112,8 @@ public class PropCardinality extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        int k = set.getKernel().getSize();
-        int e = set.getEnvelope().getSize();
+        int k = set.getKernelSize();
+        int e = set.getEnvelopeSize();
         if (k > card.getUB() || e < card.getLB()) {
             return ESat.FALSE;
         }

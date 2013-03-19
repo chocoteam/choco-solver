@@ -98,7 +98,7 @@ public class PropAllDiff extends Propagator<SetVar> {
                         int nbSameInKer = 0;
                         int diff = -1;
                         for (int j=vars[idx].getKernelFirstElement(); j!=SetVar.END; j=vars[idx].getKernelNextElement())
-                            if (!vars[i].contains(j)){
+                            if (!vars[i].envelopeContains(j)){
                                 nbSameInKer++;
 							}else{
                                 diff = j;
