@@ -104,7 +104,7 @@ public class PropSumOfElements extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (weights != null) {
-            for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+            for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                 if (j < offSet || j >= weights.length + offSet) {
                     set.removeFromEnvelope(j, aCause);
                 }
@@ -117,10 +117,10 @@ public class PropSumOfElements extends Propagator<Variable> {
     public void propagate(int i, int mask) throws ContradictionException {
         int sK = 0;
         int sE = 0;
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             sK += get(j);
         }
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             sE += get(j);
         }
         sum.updateLowerBound(sK, aCause);
@@ -129,7 +129,7 @@ public class PropSumOfElements extends Propagator<Variable> {
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (sE - get(j) < lb) {
                 if (set.addToKernel(j, aCause)) {
                     again = true;
@@ -149,10 +149,10 @@ public class PropSumOfElements extends Propagator<Variable> {
     public ESat isEntailed() {
         int sK = 0;
         int sE = 0;
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             sK += get(j);
         }
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             sE += get(j);
         }
         // filter set

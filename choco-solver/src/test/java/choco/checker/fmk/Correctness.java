@@ -210,7 +210,7 @@ public class Correctness {
     private static int[] getForcedElements(SetVar v, int[] d) {
         int[] _values = new int[v.getKernelSize()];
         int k = 0;
-        for (int j = v.getKernelFirstElement(); j!=SetVar.END; j = v.getKernelNextElement()) {
+        for (int j = v.getKernelFirst(); j!=SetVar.END; j = v.getKernelNext()) {
             boolean newEl = true;
             for (int i : d) {
                 if (i == j) {

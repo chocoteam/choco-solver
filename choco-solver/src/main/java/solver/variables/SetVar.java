@@ -49,7 +49,7 @@ public interface SetVar extends Variable<SetDelta> {
 	 * Constant used for enumerating elements in the envelope or the kernel of a SetVar.
 	 * This value indicates that the iteration is over:
 	 *
-	 * <code>for(int e=getKernelFirstElement();e!=SetVar.END;e=getKernelNextElement()){
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
 	 *     // something
 	 * }</code>
 	 */
@@ -60,25 +60,25 @@ public interface SetVar extends Variable<SetDelta> {
 	 * Returns <code>END</code> if the set is empty.
 	 * Note that elements are not sorted.
 	 * To iterate over elements that are present in the kernel, do the following loop:
-	 * <code>for(int e=getKernelFirstElement();e!=SetVar.END;e=getKernelNextElement()){
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
 	 *     // something
 	 * }</code>
 	 *
 	 * @return the first element in the kernel or <code>END</code> if it is empty.
 	 */
-	public int getKernelFirstElement();
+	public int getKernelFirst();
 
 	/**
 	 * Get the next element in the kernel domain of <code>this</code>.
 	 * Returns <code>END</code> once all elements have been visited.
 	 * To iterate over elements that are present in the kernel, do the following loop:
-	 * <code>for(int e=getKernelFirstElement();e!=SetVar.END;e=getKernelNextElement()){
+	 * <code>for(int e=getKernelFirst(); e!=SetVar.END; e=getKernelNext()){
 	 *     // something
 	 * }</code>
 	 *
 	 * @return the next element in the kernel, if any, or <code>END</code> otherwise.
 	 */
-	public int getKernelNextElement();
+	public int getKernelNext();
 
 	/**
 	 * Get the number of elements in the kernel domain of <code>this</code>.
@@ -99,27 +99,27 @@ public interface SetVar extends Variable<SetDelta> {
 	 * Returns <code>END</code> if the set is empty.
 	 * Note that elements are not sorted.
 	 * To iterate over elements that are present in the envelope, do the following loop:
-	 * <code>for(int e=getEnvelopeFirstElement();e!=SetVar.END;e=getEnvelopeNextElement()){
+	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
 	 *     // something
 	 * }</code>
 	 *
 	 *
 	 * @return the first element in the envelope or <code>END</code> if it is empty.
 	 */
-	public int getEnvelopeFirstElement();
+	public int getEnvelopeFirst();
 
 	/**
 	 * Get the next element in the envelope domain of <code>this</code>.
 	 * Returns <code>END</code> once all elements have been visited.
 	 * To iterate over elements that are present in the envelope, do the following loop:
-	 * <code>for(int e=getEnvelopeFirstElement();e!=SetVar.END;e=getEnvelopeNextElement()){
+	 * <code>for(int e=getEnvelopeFirst(); e!=SetVar.END; e=getEnvelopeNext()){
 	 *     // something
 	 * }</code>
 	 *
 	 *
 	 * @return the next element in the envelope, if any, or <code>END</code> otherwise.
 	 */
-	public int getEnvelopeNextElement();
+	public int getEnvelopeNext();
 
 	/**
 	 * Get the number of elements in the envelope domain of <code>this</code>.
@@ -167,9 +167,9 @@ public interface SetVar extends Variable<SetDelta> {
     boolean instantiateTo(int[] value, ICause cause) throws ContradictionException;
 
     /**
-     * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
+     * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
      *
-     * @return the current value (or lower bound if not yet instantiated).
+     * @return the current value (or kernel if not yet instantiated).
      */
     int[] getValue();
 

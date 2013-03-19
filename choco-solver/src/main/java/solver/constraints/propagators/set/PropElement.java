@@ -133,7 +133,7 @@ public class PropElement extends Propagator<Variable> {
             if (noEmptyKer) {// from ker
 				constructiveDisjunction.clear();
 				SetVar v = array[index.getLB() - offSet];
-                for (int j=v.getKernelFirstElement(); j!=SetVar.END; j=v.getKernelNextElement()) {
+                for (int j=v.getKernelFirst(); j!=SetVar.END; j=v.getKernelNext()) {
 					if(!set.kernelContains(j)){
 						constructiveDisjunction.add(j);
 					}
@@ -153,7 +153,7 @@ public class PropElement extends Propagator<Variable> {
                 }
             }
             if (!set.instantiated()) {// from env
-                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                     boolean valueExists = false;
                     for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
                         if (array[i - offSet].envelopeContains(j)) {
@@ -170,10 +170,10 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private void setEq(SetVar s1, SetVar s2) throws ContradictionException {
-        for (int j=s2.getKernelFirstElement(); j!=SetVar.END; j=s2.getKernelNextElement()) {
+        for (int j=s2.getKernelFirst(); j!=SetVar.END; j=s2.getKernelNext()) {
             s1.addToKernel(j, aCause);
         }
-        for (int j=s1.getEnvelopeFirstElement(); j!=SetVar.END; j=s1.getEnvelopeNextElement()) {
+        for (int j=s1.getEnvelopeFirst(); j!=SetVar.END; j=s1.getEnvelopeNext()) {
             if (!s2.envelopeContains(j)) {
                 s1.removeFromEnvelope(j, aCause);
             }
@@ -181,7 +181,7 @@ public class PropElement extends Propagator<Variable> {
     }
 
     private boolean disjoint(SetVar s1, SetVar s2) {
-        for (int j=s2.getKernelFirstElement(); j!=SetVar.END; j=s2.getKernelNextElement()) {
+        for (int j=s2.getKernelFirst(); j!=SetVar.END; j=s2.getKernelNext()) {
             if (!s1.envelopeContains(j)) {
                 return true;
             }

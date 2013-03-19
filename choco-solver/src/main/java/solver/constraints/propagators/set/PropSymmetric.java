@@ -101,12 +101,12 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=vars[i].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[i].getEnvelopeNextElement()) {
+            for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext()) {
                 if (j < offSet || j >= n + offSet || !vars[j - offSet].envelopeContains(i + offSet)) {
                     vars[i].removeFromEnvelope(j, aCause);
                 }
             }
-            for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement()) {
+            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
                 vars[j - offSet].addToKernel(i + offSet, aCause);
             }
         }
@@ -127,7 +127,7 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement()) {
+            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
                 if (!vars[j - offSet].envelopeContains(i + offSet)) {
                     return ESat.FALSE;
                 }

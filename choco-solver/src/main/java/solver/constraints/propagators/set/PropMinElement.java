@@ -103,12 +103,12 @@ public class PropMinElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             min.updateUpperBound(get(j), aCause);
         }
-        int minVal = get(set.getEnvelopeFirstElement());
+        int minVal = get(set.getEnvelopeFirst());
         int lb = min.getLB();
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             int k = get(j);
             if (k < lb) {
                 set.removeFromEnvelope(j, aCause);
@@ -130,13 +130,13 @@ public class PropMinElement extends Propagator<Variable> {
     public ESat isEntailed() {
         int lb = min.getLB();
         int ub = min.getUB();
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             if (get(j) < lb) {
                 return ESat.FALSE;
             }
         }
-        int minVal = get(set.getEnvelopeFirstElement());
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        int minVal = get(set.getEnvelopeFirst());
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (minVal > get(j)) {
                 minVal = get(j);
             }

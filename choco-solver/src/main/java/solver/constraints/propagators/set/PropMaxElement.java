@@ -103,12 +103,12 @@ public class PropMaxElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             max.updateLowerBound(get(j), aCause);
         }
-        int maxVal = get(set.getEnvelopeFirstElement());
+        int maxVal = get(set.getEnvelopeFirst());
         int ub = max.getUB();
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             int k = get(j);
             if (k > ub) {
                 set.removeFromEnvelope(j, aCause);
@@ -130,13 +130,13 @@ public class PropMaxElement extends Propagator<Variable> {
     public ESat isEntailed() {
         int lb = max.getLB();
         int ub = max.getUB();
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             if (get(j) > ub) {
                 return ESat.FALSE;
             }
         }
-        int maxVal = get(set.getEnvelopeFirstElement());
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        int maxVal = get(set.getEnvelopeFirst());
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (maxVal < get(j)) {
                 maxVal = get(j);
             }

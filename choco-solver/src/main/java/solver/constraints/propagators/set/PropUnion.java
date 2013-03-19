@@ -144,13 +144,13 @@ public class PropUnion extends Propagator<SetVar> {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			SetVar union = vars[k];
             for (int i = 0; i < k; i++) {
-                for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement())
+                for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext())
                     union.addToKernel(j, aCause);
-                for (int j=vars[i].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[i].getEnvelopeNextElement())
+                for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext())
                     if (!union.envelopeContains(j))
                         vars[i].removeFromEnvelope(j, aCause);
             }
-            for (int j=union.getEnvelopeFirstElement(); j!=SetVar.END; j=union.getEnvelopeNextElement()) {
+            for (int j=union.getEnvelopeFirst(); j!=SetVar.END; j=union.getEnvelopeNext()) {
                 if (union.kernelContains(j)) {
 					int mate = -1;
 					for(int i=0;i<k && mate!=-2;i++){
@@ -201,11 +201,11 @@ public class PropUnion extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < k; i++) {
-            for (int j=vars[i].getKernelFirstElement(); j!=SetVar.END; j=vars[i].getKernelNextElement())
+            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext())
                 if (!vars[k].envelopeContains(j))
                     return ESat.FALSE;
         }
-        for (int j=vars[k].getKernelFirstElement(); j!=SetVar.END; j=vars[k].getKernelNextElement()) {
+        for (int j=vars[k].getKernelFirst(); j!=SetVar.END; j=vars[k].getKernelNext()) {
             int mate = -1;
             for (int i = 0; i < k; i++)
                 if (vars[i].envelopeContains(j)) {

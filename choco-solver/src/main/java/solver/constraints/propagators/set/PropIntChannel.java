@@ -143,12 +143,12 @@ public class PropIntChannel extends Propagator<Variable> {
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j=sets[i].getEnvelopeFirstElement(); j!=SetVar.END; j=sets[i].getEnvelopeNextElement()) {
+            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
             }
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 ints[j - offSet2].instantiateTo(i + offSet1, aCause);
             }
         }
@@ -192,7 +192,7 @@ public class PropIntChannel extends Propagator<Variable> {
             }
         }
         for (int i = 0; i < nSets; i++) {
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 if (j < offSet2 || j >= nInts + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     return ESat.FALSE;
                 }

@@ -89,7 +89,7 @@ public class SetSearchStrategy extends AbstractStrategy<SetVar> {
     @Override
     public Decision<SetVar> computeDecision(SetVar s) {
         if (!s.instantiated()) {
-            for (int i=s.getEnvelopeFirstElement(); i!=SetVar.END; i=s.getEnvelopeNextElement()) {
+            for (int i=s.getEnvelopeFirst(); i!=SetVar.END; i=s.getEnvelopeNext()) {
                 if (!s.kernelContains(i)) {
                     FastDecisionSet d = pool.getE();
                     if (d == null) {

@@ -101,9 +101,9 @@ public class PropIntMemberSet extends Propagator<Variable> {
             setPassive();
             return;
         }
-        int maxVal = set.getEnvelopeFirstElement();
+        int maxVal = set.getEnvelopeFirst();
         int minVal = maxVal;
-        for (int j = maxVal; j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j = maxVal; j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (maxVal < j) {
                 maxVal = j;
             }

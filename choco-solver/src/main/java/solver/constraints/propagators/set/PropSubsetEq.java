@@ -102,10 +102,10 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             vars[1].addToKernel(j, aCause);
         }
-        for (int j=vars[0].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[0].getEnvelopeNextElement()) {
+        for (int j=vars[0].getEnvelopeFirst(); j!=SetVar.END; j=vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j))
                 vars[0].removeFromEnvelope(j, aCause);
         }
@@ -125,12 +125,12 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             if (!vars[1].envelopeContains(j)) {
                 return ESat.FALSE;
             }
         }
-        for (int j=vars[0].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[0].getEnvelopeNextElement()) {
+        for (int j=vars[0].getEnvelopeFirst(); j!=SetVar.END; j=vars[0].getEnvelopeNext()) {
             if (!vars[1].kernelContains(j)) {
                 return ESat.UNDEFINED;
             }

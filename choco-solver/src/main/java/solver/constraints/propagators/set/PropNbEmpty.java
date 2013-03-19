@@ -154,7 +154,7 @@ public class PropNbEmpty extends Propagator<Variable> {
         if (nbEmpty.instantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
-                    for (int j=sets[i].getEnvelopeFirstElement(); j!=SetVar.END; j=sets[i].getEnvelopeNextElement()) {
+                    for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                         sets[i].removeFromEnvelope(j, aCause);
                     }
                     canBeEmpty.remove(i);
@@ -166,7 +166,7 @@ public class PropNbEmpty extends Propagator<Variable> {
                 boolean allFixed = true;
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     if (sets[i].getEnvelopeSize() == 1) {
-						sets[i].addToKernel(sets[i].getEnvelopeFirstElement(), aCause);
+						sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
                         canBeEmpty.remove(i);
                     } else {
                         allFixed = false;

@@ -89,19 +89,19 @@ public class PropOffSet extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         // kernel
-        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             vars[1].addToKernel(j + offSet, aCause);
         }
-        for (int j=vars[1].getKernelFirstElement(); j!=SetVar.END; j=vars[1].getKernelNextElement()) {
+        for (int j=vars[1].getKernelFirst(); j!=SetVar.END; j=vars[1].getKernelNext()) {
             vars[0].addToKernel(j - offSet, aCause);
         }
         // envelope
-        for (int j = vars[0].getEnvelopeFirstElement(); j!=SetVar.END; j = vars[0].getEnvelopeNextElement()) {
+        for (int j = vars[0].getEnvelopeFirst(); j!=SetVar.END; j = vars[0].getEnvelopeNext()) {
             if (!vars[1].envelopeContains(j + offSet)) {
                 vars[0].removeFromEnvelope(j, aCause);
             }
         }
-        for (int j=vars[1].getEnvelopeFirstElement(); j!=SetVar.END; j=vars[1].getEnvelopeNextElement()) {
+        for (int j=vars[1].getEnvelopeFirst(); j!=SetVar.END; j=vars[1].getEnvelopeNext()) {
             if (!vars[0].envelopeContains(j - offSet)) {
                 vars[1].removeFromEnvelope(j, aCause);
             }
@@ -127,12 +127,12 @@ public class PropOffSet extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             if (!vars[1].envelopeContains(j + offSet)) {
                 return ESat.FALSE;
             }
         }
-        for (int j=vars[1].getKernelFirstElement(); j!=SetVar.END; j=vars[1].getKernelNextElement()) {
+        for (int j=vars[1].getKernelFirst(); j!=SetVar.END; j=vars[1].getKernelNext()) {
             if (!vars[0].envelopeContains(j - offSet)) {
                 return ESat.FALSE;
             }

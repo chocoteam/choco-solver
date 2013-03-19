@@ -122,12 +122,12 @@ public class PropBoolChannel extends Propagator<Variable> {
                 bools[i].setToFalse(aCause);
             }
         }
-        for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (j < offSet || j >= n + offSet) {
                 set.removeFromEnvelope(j, aCause);
             }
         }
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             bools[j - offSet].setToTrue(aCause);
         }
         sdm.unfreeze();
@@ -151,7 +151,7 @@ public class PropBoolChannel extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=set.getKernelFirstElement(); j!=SetVar.END; j=set.getKernelNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             if (bools[j - offSet].instantiatedTo(0)) {
                 return ESat.FALSE;
             }

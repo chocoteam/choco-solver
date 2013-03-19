@@ -34,7 +34,6 @@
 
 package solver.constraints.propagators.set;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -139,7 +138,7 @@ public class PropIntersection extends Propagator<SetVar> {
     public void propagate(int evtmask) throws ContradictionException {
         SetVar intersection = vars[k];
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+            for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {
                     if (!vars[i].kernelContains(j)) {
@@ -151,7 +150,7 @@ public class PropIntersection extends Propagator<SetVar> {
                     intersection.addToKernel(j, aCause);
                 }
             }
-            for (int j=intersection.getEnvelopeFirstElement(); j!=SetVar.END; j=intersection.getEnvelopeNextElement()) {
+            for (int j=intersection.getEnvelopeFirst(); j!=SetVar.END; j=intersection.getEnvelopeNext()) {
                 if (intersection.kernelContains(j)) {
                     for (int i = 0; i < k; i++) {
                         vars[i].addToKernel(j, aCause);
@@ -186,11 +185,11 @@ public class PropIntersection extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        for (int j=vars[k].getKernelFirstElement(); j!=SetVar.END; j=vars[k].getKernelNextElement())
+        for (int j=vars[k].getKernelFirst(); j!=SetVar.END; j=vars[k].getKernelNext())
             for (int i = 0; i < k; i++)
                 if (!vars[i].envelopeContains(j))
                     return ESat.FALSE;
-        for (int j=vars[0].getKernelFirstElement(); j!=SetVar.END; j=vars[0].getKernelNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             if (!vars[k].envelopeContains(j)) {
                 boolean all = true;
                 for (int i = 1; i < k; i++) {

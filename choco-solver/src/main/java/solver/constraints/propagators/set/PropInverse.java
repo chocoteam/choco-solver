@@ -111,22 +111,22 @@ public class PropInverse extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getEnvelopeFirstElement(); j!=SetVar.END; j=sets[i].getEnvelopeNextElement()) {
+            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (j < offSet1 || j >= n2 + offSet1 || !invsets[j - offSet2].envelopeContains(i + offSet1)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
             }
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 invsets[j - offSet2].addToKernel(i + offSet1, aCause);
             }
         }
         for (int i = 0; i < n2; i++) {
-            for (int j=invsets[i].getEnvelopeFirstElement(); j!=SetVar.END; j=invsets[i].getEnvelopeNextElement()) {
+            for (int j=invsets[i].getEnvelopeFirst(); j!=SetVar.END; j=invsets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j >= n + offSet2 || !sets[j - offSet1].envelopeContains(i + offSet2)) {
                     invsets[i].removeFromEnvelope(j, aCause);
                 }
             }
-            for (int j=invsets[i].getKernelFirstElement(); j!=SetVar.END; j=invsets[i].getKernelNextElement()) {
+            for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
                 sets[j - offSet1].addToKernel(i + offSet2, aCause);
             }
         }
@@ -157,14 +157,14 @@ public class PropInverse extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 if (!invsets[j - offSet2].envelopeContains(i + offSet1)) {
                     return ESat.FALSE;
                 }
             }
         }
         for (int i = 0; i < n2; i++) {
-            for (int j=invsets[i].getKernelFirstElement(); j!=SetVar.END; j=invsets[i].getKernelNextElement()) {
+            for (int j=invsets[i].getKernelFirst(); j!=SetVar.END; j=invsets[i].getKernelNext()) {
                 if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
                     return ESat.FALSE;
                 }

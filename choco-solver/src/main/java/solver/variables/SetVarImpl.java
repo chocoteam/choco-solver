@@ -198,13 +198,13 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
     //***********************************************************************************
 
 	@Override
-	public int getKernelFirstElement() {
+	public int getKernelFirst() {
 		int i = kernel.getFirstElement();
 		return (i==-1)?END:i+min;
 	}
 
 	@Override
-	public int getKernelNextElement() {
+	public int getKernelNext() {
 		int i = kernel.getNextElement();
 		return (i==-1)?END:i+min;
 	}
@@ -221,13 +221,13 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 	}
 
 	@Override
-	public int getEnvelopeFirstElement() {
+	public int getEnvelopeFirst() {
 		int i = envelope.getFirstElement();
 		return (i==-1)?END:i+min;
 	}
 
 	@Override
-	public int getEnvelopeNextElement() {
+	public int getEnvelopeNext() {
 		int i = envelope.getNextElement();
 		return (i==-1)?END:i+min;
 	}

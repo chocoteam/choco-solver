@@ -136,14 +136,14 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 g.enforceArc(i, j, aCause);
             }
             ISet tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 sets[i].addToKernel(j, aCause);
             }
-            for (int j=sets[i].getEnvelopeFirstElement(); j!=SetVar.END; j=sets[i].getEnvelopeNextElement()) {
+            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
@@ -180,7 +180,7 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            for (int j=sets[i].getKernelFirstElement(); j!=SetVar.END; j=sets[i].getKernelNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     return ESat.FALSE;
                 }

@@ -92,13 +92,13 @@ public class PropCardinality extends Propagator<Variable> {
         if (card.instantiated()) {
             int c = card.getValue();
             if (c == k) {
-                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                     if (!set.kernelContains(j)) {
                         set.removeFromEnvelope(j, aCause);
                     }
                 }
             } else if (c == e) {
-                for (int j=set.getEnvelopeFirstElement(); j!=SetVar.END; j=set.getEnvelopeNextElement()) {
+                for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                     set.addToKernel(j, aCause);
                 }
             }
