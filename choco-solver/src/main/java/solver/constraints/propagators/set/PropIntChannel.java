@@ -44,7 +44,6 @@ import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
 
@@ -135,7 +134,7 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
             for (int j = ints[i].getLB(); j >= ub; j = ints[i].nextValue(j)) {
-                if (!sets[j - offSet1].contains(i + offSet2)) {
+                if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
                     ints[i].removeValue(j, aCause);
                 }
             }
@@ -144,14 +143,12 @@ public class PropIntChannel extends Propagator<Variable> {
             }
         }
         for (int i = 0; i < nSets; i++) {
-            ISet tmp = sets[i].getEnvelope();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
             }
-            tmp = sets[i].getKernel();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 ints[j - offSet2].instantiateTo(i + offSet1, aCause);
             }
         }
@@ -189,14 +186,13 @@ public class PropIntChannel extends Propagator<Variable> {
         for (int i = 0; i < nInts; i++) {
             if (ints[i].instantiated()) {
                 int val = ints[i].getValue();
-                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].getEnvelope().contain(i + offSet2)) {
+                if (val < offSet1 || val >= nSets + offSet1 || !sets[val - offSet1].envelopeContains(i + offSet2)) {
                     return ESat.FALSE;
                 }
             }
         }
         for (int i = 0; i < nSets; i++) {
-            ISet tmp = sets[i].getKernel();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 if (j < offSet2 || j >= nInts + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     return ESat.FALSE;
                 }

@@ -320,7 +320,7 @@ public class Visualization implements IMonitorClose, IMonitorInitialize, IMonito
             } else if (bo instanceof SetVar) {
                 SetVar svar = (SetVar) bo;
                 name = svar.getName();
-                dsize = Integer.toString(svar.getEnvelope().getSize());
+                dsize = Integer.toString(svar.getEnvelopeSize());
             }
             if (hasFailed) {
                 hasFailed = false;

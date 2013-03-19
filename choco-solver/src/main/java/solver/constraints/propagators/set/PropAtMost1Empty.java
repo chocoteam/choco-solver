@@ -83,25 +83,25 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
 
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
-        if (vars[v].getEnvelope().getSize() == 0) {
+        if (vars[v].getEnvelopeSize() == 0) {
             if (emptySetIndex.get() != -1) {
                 contradiction(vars[v], "");
             } else {
                 emptySetIndex.set(v);
                 for (int i = 0; i < vars.length; i++) {
-                    int s = vars[i].getEnvelope().getSize();
-                    if (i != v && s != vars[i].getKernel().getSize()) {
+                    int s = vars[i].getEnvelopeSize();
+                    if (i != v && s != vars[i].getKernelSize()) {
                         if (s == 0) {
                             contradiction(vars[i], "");
                         } else if (s == 1) {
-                            vars[i].addToKernel(vars[i].getEnvelope().getFirstElement(), aCause);
+                            vars[i].addToKernel(vars[i].getEnvelopeFirst(), aCause);
                         }
                     }
                 }
             }
         }
-        if (vars[v].getEnvelope().getSize() == 1 && emptySetIndex.get() != -1) {
-            vars[v].addToKernel(vars[v].getEnvelope().getFirstElement(), aCause);
+        if (vars[v].getEnvelopeSize() == 1 && emptySetIndex.get() != -1) {
+            vars[v].addToKernel(vars[v].getEnvelopeFirst(), aCause);
         }
     }
 
@@ -110,7 +110,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
         boolean none = true;
         boolean allInstantiated = true;
         for (int i = 0; i < vars.length; i++) {
-            if (vars[i].getEnvelope().getSize() == 0) {
+            if (vars[i].getEnvelopeSize() == 0) {
                 if (!none) {
                     return ESat.FALSE;
                 }

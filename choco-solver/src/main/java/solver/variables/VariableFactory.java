@@ -36,6 +36,7 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
 import util.objects.setDataStructures.ISet;
+import util.objects.setDataStructures.SetType;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
@@ -347,40 +348,45 @@ public enum VariableFactory {
     // SET VARIABLES
     //*************************************************************************************
 
-
-    /**
-     * Builds a set variable with an empty domain.
-     * The set variable represents a set of positive integers
-     *
-     * @param NAME   name of the variable
-     * @param SOLVER solver involving the variable
-     * @return a set variable with an empty domain
-     */
-    public static SetVar set(String NAME, Solver SOLVER) {
-        return new SetVarImpl(NAME, SOLVER);
-    }
-
     /**
      * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
-     * BEWARE elements must be positive or null
      *
-     * @param NAME    name of the variable
-     * @param ENVELOP elements potentially in the set
-     * @param KERNEL  elements that must belong to the final set
-     * @param SOLVER  solver involving the variable
-     * @return a set variable
-     */
-    public static SetVar set(String NAME, ISet ENVELOP, ISet KERNEL, Solver SOLVER) {
-        SetVar s = set(NAME, SOLVER);
-        for (int i = ENVELOP.getFirstElement(); i >= 0; i = ENVELOP.getNextElement()) {
-            s.getEnvelope().add(i);
-        }
-        if (KERNEL != null)
-            for (int i = KERNEL.getFirstElement(); i >= 0; i = KERNEL.getNextElement()) {
-                s.getKernel().add(i);
-            }
-        return s;
+	 * @param NAME		name of the variable
+	 * @param ENVELOPE	elements potentially in the set
+	 * @param ENV_TYPE	type of data structure for storing the envelope
+	 * @param KERNEL	elements that must belong to the final set
+	 * @param KER_TYPE	type of data structure for storing the kernel
+	 * @param SOLVER	solver involving the variable
+	 * @return	a set variable
+	 */
+    public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Solver SOLVER) {
+        return new SetVarImpl(NAME,ENVELOPE,ENV_TYPE,KERNEL,KER_TYPE,SOLVER);
     }
+
+	/**
+	 * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
+	 *
+	 * @param NAME		name of the variable
+	 * @param ENVELOPE	elements potentially in the set
+	 * @param KERNEL	elements that must belong to the final set
+	 * @param SOLVER	solver involving the variable
+	 * @return	a set variable
+	 */
+	public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
+		return set(NAME,ENVELOPE,SetType.BITSET,KERNEL,SetType.BITSET,SOLVER);
+	}
+
+	/**
+	 * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
+	 *
+	 * @param NAME		name of the variable
+	 * @param ENVELOPE	elements potentially in the set
+	 * @param SOLVER	solver involving the variable
+	 * @return	a set variable
+	 */
+	public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
+		return set(NAME,ENVELOPE,SetType.BITSET,new int[]{},SetType.BITSET,SOLVER);
+	}
 
     //*************************************************************************************
     // GRAPH VARIABLES

@@ -41,7 +41,6 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 
 /**
@@ -103,13 +102,11 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet tmp = vars[0].getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
             vars[1].addToKernel(j, aCause);
         }
-        tmp = vars[0].getEnvelope();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-            if (!vars[1].getEnvelope().contain(j))
+        for (int j=vars[0].getEnvelopeFirst(); j!=SetVar.END; j=vars[0].getEnvelopeNext()) {
+            if (!vars[1].envelopeContains(j))
                 vars[0].removeFromEnvelope(j, aCause);
         }
         sdm[0].unfreeze();
@@ -128,15 +125,13 @@ public class PropSubsetEq extends Propagator<SetVar> {
 
     @Override
     public ESat isEntailed() {
-        ISet tmp = vars[0].getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-            if (!vars[1].getEnvelope().contain(j)) {
+        for (int j=vars[0].getKernelFirst(); j!=SetVar.END; j=vars[0].getKernelNext()) {
+            if (!vars[1].envelopeContains(j)) {
                 return ESat.FALSE;
             }
         }
-        tmp = vars[0].getEnvelope();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-            if (!vars[1].getKernel().contain(j)) {
+        for (int j=vars[0].getEnvelopeFirst(); j!=SetVar.END; j=vars[0].getEnvelopeNext()) {
+            if (!vars[1].kernelContains(j)) {
                 return ESat.UNDEFINED;
             }
         }
