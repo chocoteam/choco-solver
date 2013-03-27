@@ -90,8 +90,8 @@ public class PropIntChannel extends Propagator<Variable> {
             this.idm[i] = this.ints[i].monitorDelta(this);
         }
         for (int i = 0; i < nSets; i++) {
+			this.sets[i] = (SetVar) vars[i];
             this.sdm[i] = this.sets[i].monitorDelta(this);
-            this.sets[i] = (SetVar) vars[i];
         }
         // procedures
         elementForced = new IntProcedure() {
@@ -133,7 +133,7 @@ public class PropIntChannel extends Propagator<Variable> {
         }
         for (int i = 0; i < nInts; i++) {
             int ub = ints[i].getUB();
-            for (int j = ints[i].getLB(); j >= ub; j = ints[i].nextValue(j)) {
+            for (int j = ints[i].getLB(); j <= ub; j = ints[i].nextValue(j)) {
                 if (!sets[j - offSet1].envelopeContains(i + offSet2)) {
                     ints[i].removeValue(j, aCause);
                 }
@@ -175,9 +175,9 @@ public class PropIntChannel extends Propagator<Variable> {
                 sets[ints[idx].getValue() - offSet1].addToKernel(idx + offSet2, aCause);
             }
             idx += offSet2;
-            idm[idxVarInProp].freeze();
-            idm[idxVarInProp].forEach(valRem, EventType.REMOVE);
-            idm[idxVarInProp].unfreeze();
+            idm[idxVarInProp - nSets].freeze();
+            idm[idxVarInProp - nSets].forEach(valRem, EventType.REMOVE);
+            idm[idxVarInProp - nSets].unfreeze();
         }
     }
 
