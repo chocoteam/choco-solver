@@ -33,6 +33,7 @@ import solver.ICause;
 import solver.Identity;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ExplanationEngine;
@@ -44,7 +45,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public abstract class Decision<V extends Variable> implements Identity, ICause {
+public abstract class Decision<V extends Variable> implements Identity, ICause, Comparable<Decision<V>> {
 
     Logger LOGGER = LoggerFactory.getLogger(Decision.class);
 
@@ -54,8 +55,7 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
 
     protected V var;
 
-//    protected Decision<V> assignment; //WTF???
-
+    // 0: not applied yet, 1: applied once, 2: refute once
     protected int branch;
 
     long fails;
@@ -157,6 +157,10 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
         throw new UnsupportedOperationException();
     }
 
+    public Decision<V> duplicate() {
+        throw new UnsupportedOperationException();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public final boolean reactOnPromotion() {
@@ -167,10 +171,12 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
     @Override
     public void explain(Deduction d, Explanation e) {
         ExplanationEngine explainer = var.getSolver().getExplainer();
-        if (branch < 2) {
+        if (branch == 1) {
             e.add(explainer.explain(getPositiveDeduction()));
-        } else {
+        } else if (branch == 2) {
             e.add(explainer.explain(getNegativeDeduction()));
+        } else {
+            throw new SolverException("Cannot explain a decision which has not been applied or refuted");
         }
     }
 
@@ -194,4 +200,12 @@ public abstract class Decision<V extends Variable> implements Identity, ICause {
         return fails;
     }
 
+    @Override
+    public int compareTo(Decision<V> o) {
+        if (o.getDecisionVariable().getId() == this.getDecisionVariable().getId()
+                && o.getDecisionValue().equals(this.getDecisionValue())) {
+            return 0;
+        }
+        return 1;
+    }
 }

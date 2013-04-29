@@ -177,7 +177,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      * Rolls back the previous state.
      * Then, if it goes back to the base world, stop the search.
-     * Otherwise, gets the oppposite decision, applies it and calls the propagation.
+     * Otherwise, gets the opposite decision, applies it and calls the propagation.
      */
     @Override
     protected void upBranch() {

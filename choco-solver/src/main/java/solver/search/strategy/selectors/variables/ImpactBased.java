@@ -29,7 +29,6 @@ package solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import memory.IStateDouble;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -345,7 +344,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         solver.getEnvironment().worldPush();
         double after;
         try {
-            v.instantiateTo(a, Cause.Null);
+            v.instantiateTo(a, this);
             solver.getEngine().propagate();
             after = searchSpaceSize();
             solver.getEnvironment().worldPop();
@@ -355,7 +354,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             solver.getEnvironment().worldPop();
             // if the value leads to fail, then the value can be removed from the domain
             try {
-                v.removeValue(a, Cause.Null);
+                v.removeValue(a, this);
                 solver.getEngine().propagate();
             } catch (ContradictionException ex) {
                 learnsAndFails = true;

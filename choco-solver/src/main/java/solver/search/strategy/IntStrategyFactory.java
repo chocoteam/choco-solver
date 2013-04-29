@@ -156,7 +156,7 @@ public final class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMiddle());
+        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMin());
     }
 
     /**

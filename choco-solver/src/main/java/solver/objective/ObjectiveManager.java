@@ -51,6 +51,7 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
     final IntVar objective;
     private int bestKnownUpperBound;
     private int bestKnownLowerBound;
+    private final boolean strict;
 
     IMeasures measures;
 
@@ -61,8 +62,9 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
      * @param objective variable (represent the value of a solution)
      * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
      * @param solver
+     * @param strict set to false, enables to find same value solutions
      */
-    public ObjectiveManager(final IntVar objective, ResolutionPolicy policy, Solver solver) {
+    public ObjectiveManager(final IntVar objective, ResolutionPolicy policy, Solver solver, boolean strict) {
         this.policy = policy;
         this.measures = solver.getMeasures();
         this.objective = objective;
@@ -70,6 +72,19 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
             this.bestKnownLowerBound = objective.getLB();
             this.bestKnownUpperBound = objective.getUB();
         }
+        this.strict = strict;
+    }
+
+    /**
+     * Creates an optimization manager
+     * Enables to cut "worse" solutions
+     *
+     * @param objective variable (represent the value of a solution)
+     * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
+     * @param solver
+     */
+    public ObjectiveManager(final IntVar objective, ResolutionPolicy policy, Solver solver) {
+        this(objective, policy, solver, true);
     }
 
     /**
@@ -83,6 +98,10 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
             return bestKnownLowerBound;
         }
         throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
+    }
+
+    public IntVar getObjective() {
+        return objective;
     }
 
     /**
@@ -147,7 +166,7 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
      */
     public void postDynamicCut() throws ContradictionException {
         int offset = 0;
-        if (measures.getSolutionCount() > 0) {
+        if (measures.getSolutionCount() > 0 && strict) {
             offset = 1;
         }
         if (policy == ResolutionPolicy.MINIMIZE) {
@@ -207,4 +226,14 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
         updateLB(objective.getLB());
         updateUB(objective.getUB());
     }
+
+    public void relaxBestKnownBounds(int lb, int ub) {
+        if (policy == ResolutionPolicy.MINIMIZE) {
+            this.bestKnownUpperBound = ub;
+        } else if (policy == ResolutionPolicy.MAXIMIZE) {
+            this.bestKnownLowerBound = lb;
+        }
+    }
+
+
 }
