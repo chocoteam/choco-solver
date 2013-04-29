@@ -170,9 +170,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
-        if (Configuration.PLUG_EXPLANATION) solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
-            if (value != this.getValue()) {
+            int cvalue = this.getValue();
+            if (value != cvalue) {
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                }
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
@@ -185,9 +188,15 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                }
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
             }

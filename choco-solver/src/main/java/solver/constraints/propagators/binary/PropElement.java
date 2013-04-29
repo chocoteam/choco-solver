@@ -167,8 +167,9 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public void explain(Deduction d, Explanation e) {
-        Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
+        e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
+        Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
         reason.explain(VariableState.DOM, e);
     }
 

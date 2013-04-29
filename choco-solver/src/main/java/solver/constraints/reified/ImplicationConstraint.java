@@ -78,10 +78,11 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     //***********************************************************************************
 
     public void activate() throws ContradictionException {
-        assert bool.instantiated() && bool.getBooleanValue() == ESat.TRUE;
+        assert bool.instantiatedTo(1);
         for (int p = 1; p < propagators.length; p++) {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
+            solver.getExplainer().activePropagator(bool, propagators[p]);
             propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
             solver.getEngine().onPropagatorExecution(propagators[p]);
         }

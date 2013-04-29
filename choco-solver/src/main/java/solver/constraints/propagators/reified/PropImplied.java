@@ -32,6 +32,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.reified.ImplicationConstraint;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -106,6 +109,21 @@ public class PropImplied extends Propagator<Variable> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
+        e.add(this);
+        if (d.getVar() == bVar) {
+            // the current deduction is due to the current domain of the involved variables
+            for (Variable v : reifCons.getVariables()) {
+                v.explain(VariableState.DOM, e);
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        // and the application of the current propagator
     }
 
     @Override

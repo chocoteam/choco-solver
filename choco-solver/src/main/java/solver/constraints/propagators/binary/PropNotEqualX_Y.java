@@ -136,6 +136,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
         Variable var = d.getVar();
 
         if (var.equals(x)) {

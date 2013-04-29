@@ -115,6 +115,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
     }
 

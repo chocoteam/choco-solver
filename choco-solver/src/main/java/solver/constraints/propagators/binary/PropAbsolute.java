@@ -207,6 +207,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     @Override
     public void explain(Deduction d, Explanation e) {
         if (d.getVar() == vars[0]) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
@@ -215,6 +216,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == vars[1]) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal()), e);

@@ -24,60 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.explanations.antidom;
+package solver.explanations;
 
-import util.iterators.DisposableValueIterator;
+import solver.constraints.propagators.Propagator;
 
 /**
- * An interface for anti-domain, ie, values removed from a specific domain.
+ * A deduction dedicated to propagator activation.
+ * When a propagator activation is triggered by a variables, for instance on implication, it should be added
+ * to the explainer.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/12/12
+ * @since 13/03/13
  */
-public interface AntiDomain {
+public class PropagatorActivation extends Deduction {
 
-    /**
-     * Add a value to <code>this</code>
-     *
-     * @param outsideval value to add
-     */
-    void add(int outsideval);
+    private final Propagator propagator;
 
-    /**
-     * Update the lower bound
-     *
-     * @param oldLB the old lower bound value
-     * @param newLB the new lower bound value
-     */
-    void updateLowerBound(int oldLB, int newLB);
+    public PropagatorActivation(Propagator propagator) {
+        super(Type.PropAct);
+        this.propagator = propagator;
+    }
 
-    /**
-     * Update the upper bound
-     *
-     * @param oldUB the old upper bound value
-     * @param newUB the new upper bound value
-     */
-    void updateUpperBound(int oldUB, int newUB);
+    public Propagator getPropagator() {
+        return propagator;
+    }
 
-    /**
-     * Return whether or not a value appears in <code>this</code>
-     *
-     * @param outsideval value to check
-     * @return a boolean value
-     */
-    boolean get(int outsideval);
-
-    int getKeyValue(int outsideval);
-
-    /**
-     * Return an iterator over removed values
-     *
-     * @return an iterator
-     */
-    DisposableValueIterator getValueIterator();
-
-    boolean isEnumerated();
-
-    int size();
+    @Override
+    public String toString() {
+        return "PA:" + propagator.toString();
+    }
 }

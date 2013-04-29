@@ -128,7 +128,7 @@ public class ConflictBasedBackjumping implements IDynamicBacktrackingAlgorithm, 
         }
         if (dec != RootDecision.ROOT) {
             if (!dec.hasNext())
-                throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
+                throw new UnsupportedOperationException("RecorderExplanationEngine.updateVRExplain should get to a POSITIVE decision:" + dec);
             Deduction left = dec.getPositiveDeduction();
             expl.remove(left);
             assert left.getmType() == Deduction.Type.DecLeft;
