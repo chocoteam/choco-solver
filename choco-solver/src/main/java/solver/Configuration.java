@@ -76,6 +76,9 @@ public enum Configuration {
     // Set to true to print explanation information
     public static final boolean PRINT_EXPLANATION = Boolean.parseBoolean(properties.getProperty("PRINT_EXPLANATION"));
 
+    // Set to true to add propagators to explanation
+    public static final boolean PROP_IN_EXP = Boolean.parseBoolean(properties.getProperty("PROP_IN_EXP"));
+
     // Set to true to print propagation information
     public static final boolean PRINT_PROPAGATION = Boolean.parseBoolean(properties.getProperty("PRINT_PROPAGATION"));
 
