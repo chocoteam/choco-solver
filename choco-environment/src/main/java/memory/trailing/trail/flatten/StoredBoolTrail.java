@@ -25,24 +25,49 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail;
+package memory.trailing.trail.flatten;
 
-import memory.structure.Operation;
 import memory.trailing.EnvironmentTrailing;
+import memory.trailing.StoredBool;
+import memory.trailing.trail.ITrailStorage;
+
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 feb. 2011
+ * Implementing storage of historical values for backtrackable integers.
+ *
+ * @see memory.trailing.trail.ITrailStorage
  */
-public class OperationTrail implements ITrailStorage {
+public final class StoredBoolTrail implements ITrailStorage {
+
+
+    /**
+     * Reference towards the overall environment
+     * (responsible for all memory management).
+     */
+
+    private final EnvironmentTrailing environment;
+
+
+    /**
+     * Stack of backtrackable search variables.
+     */
+
+    private StoredBool[] variableStack;
 
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
 
-    private Operation[] valueStack;
+    private boolean[] valueStack;
+
+
+    /**
+     * Stack of timestamps indicating the world where the former value
+     * had been written.
+     */
+
+    private int[] stampStack;
 
 
     /**
@@ -71,10 +96,13 @@ public class OperationTrail implements ITrailStorage {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public OperationTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+    public StoredBoolTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+        environment = env;
         currentLevel = 0;
         maxUpdates = nUpdates;
-        valueStack = new Operation[maxUpdates];
+        variableStack = new StoredBool[maxUpdates];
+        valueStack = new boolean[maxUpdates];
+        stampStack = new int[maxUpdates];
         worldStartLevels = new int[nWorlds];
     }
 
@@ -100,7 +128,8 @@ public class OperationTrail implements ITrailStorage {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
             currentLevel--;
-            valueStack[currentLevel].undo();
+            final StoredBool v = variableStack[currentLevel];
+            v._set(valueStack[currentLevel], stampStack[currentLevel]);
         }
     }
 
@@ -119,14 +148,42 @@ public class OperationTrail implements ITrailStorage {
      */
 
     public void worldCommit() {
+        // principle:
+        //   currentLevel decreases to end of previous world
+        //   updates of the committed world are scanned:
+        //     if their stamp is the previous one (merged with the current one) -> remove the update (garbage collecting this position for the next update)
+        //     otherwise update the worldStamp
+        final int startLevel = worldStartLevels[environment.getWorldIndex()];
+        final int prevWorld = environment.getWorldIndex() - 1;
+        int writeIdx = startLevel;
+        for (int level = startLevel; level < currentLevel; level++) {
+            final StoredBool var = variableStack[level];
+            final boolean val = valueStack[level];
+            final int stamp = stampStack[level];
+            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            if (stamp != prevWorld) {
+                // shift the update if needed
+                if (writeIdx != level) {
+                    valueStack[writeIdx] = val;
+                    variableStack[writeIdx] = var;
+                    stampStack[writeIdx] = stamp;
+                }
+                writeIdx++;
+            }  //else:writeIdx is not incremented and the update will be discarded (since a good one is in prevWorld)
+        }
+        currentLevel = writeIdx;
     }
+
 
     /**
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-    public void savePreviousState(Operation oldValue) {
+
+    public void savePreviousState(StoredBool v, boolean oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
+        variableStack[currentLevel] = v;
+        stampStack[currentLevel] = oldStamp;
         currentLevel++;
         if (currentLevel == maxUpdates) {
             resizeUpdateCapacity();
@@ -135,10 +192,18 @@ public class OperationTrail implements ITrailStorage {
 
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
-        // First, copy the stack of former values
-        final Operation[] tmp2 = new Operation[newCapacity];
+        // first, copy the stack of variables
+        final StoredBool[] tmp1 = new StoredBool[newCapacity];
+        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
+        variableStack = tmp1;
+        // then, copy the stack of former values
+        final boolean[] tmp2 = new boolean[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
+        // then, copy the stack of world stamps
+        final int[] tmp3 = new int[newCapacity];
+        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
+        stampStack = tmp3;
         // last update the capacity
         maxUpdates = newCapacity;
     }
@@ -149,3 +214,4 @@ public class OperationTrail implements ITrailStorage {
         worldStartLevels = tmp;
     }
 }
+

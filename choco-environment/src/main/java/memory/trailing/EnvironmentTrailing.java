@@ -30,7 +30,9 @@ package memory.trailing;
 
 import memory.*;
 import memory.structure.Operation;
-import memory.trailing.trail.*;
+import memory.trailing.trail.AbstractStoredIntTrail;
+import memory.trailing.trail.ITrailStorage;
+import memory.trailing.trail.flatten.*;
 
 /**
  * The root class for managing memory and sessions.
@@ -55,7 +57,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     //Contains all the {@link ITrailStorage} trails for
     // storing different kinds of data.
-    private StoredIntTrail intTrail;
+    private AbstractStoredIntTrail intTrail;
     private StoredBoolTrail boolTrail;
     private StoredVectorTrail vectorTrail;
     private StoredLongTrail longTrail;
@@ -267,9 +269,10 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         System.arraycopy(tmp, 0, trails, 0, tmp.length);
     }
 
-    public StoredIntTrail getIntTrail() {
+    public AbstractStoredIntTrail getIntTrail() {
         if (intTrail == null) {
             intTrail = new StoredIntTrail(this, MaxHist, maxWorld);
+//            intTrail = new StoredIntChunckTrail(this, MaxHist, maxWorld);
             increaseTrail();
             trails[trailSize++] = intTrail;
         }

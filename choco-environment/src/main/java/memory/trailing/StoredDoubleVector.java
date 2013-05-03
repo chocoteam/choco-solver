@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateDoubleVector;
-import memory.trailing.trail.StoredDoubleVectorTrail;
+import memory.trailing.trail.flatten.StoredDoubleVectorTrail;
 
 /**
  * Implements a backtrackable search vector.

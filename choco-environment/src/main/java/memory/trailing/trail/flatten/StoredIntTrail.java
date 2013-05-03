@@ -25,26 +25,32 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail;
+package memory.trailing.trail.flatten;
 
-import memory.trailing.StoredLong;
+import memory.trailing.EnvironmentTrailing;
+import memory.trailing.StoredInt;
+import memory.trailing.trail.AbstractStoredIntTrail;
 
 
-public class StoredLongTrail implements ITrailStorage {
-
+/**
+ * Implementing storage of historical values for backtrackable integers.
+ *
+ * @see memory.trailing.trail.ITrailStorage
+ */
+public final class StoredIntTrail extends AbstractStoredIntTrail{
 
     /**
      * Stack of backtrackable search variables.
      */
 
-    private StoredLong[] variableStack;
+    private StoredInt[] variableStack;
 
 
     /**
      * Stack of values (former values that need be restored upon backtracking).
      */
 
-    private long[] valueStack;
+    private int[] valueStack;
 
 
     /**
@@ -81,11 +87,12 @@ public class StoredLongTrail implements ITrailStorage {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public StoredLongTrail(int nUpdates, int nWorlds) {
+    public StoredIntTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+        super(env);
         currentLevel = 0;
         maxUpdates = nUpdates;
-        variableStack = new StoredLong[maxUpdates];
-        valueStack = new long[maxUpdates];
+        variableStack = new StoredInt[maxUpdates];
+        valueStack = new int[maxUpdates];
         stampStack = new int[maxUpdates];
         worldStartLevels = new int[nWorlds];
     }
@@ -112,7 +119,7 @@ public class StoredLongTrail implements ITrailStorage {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
             currentLevel--;
-            final StoredLong v = variableStack[currentLevel];
+            final StoredInt v = variableStack[currentLevel];
             v._set(valueStack[currentLevel], stampStack[currentLevel]);
         }
     }
@@ -132,16 +139,37 @@ public class StoredLongTrail implements ITrailStorage {
      */
 
     public void worldCommit() {
-        // TODO
+        // principle:
+        //   currentLevel decreases to end of previous world
+        //   updates of the committed world are scanned:
+        //     if their stamp is the previous one (merged with the current one) -> remove the update (garbage collecting this position for the next update)
+        //     otherwise update the worldStamp
+        final int startLevel = worldStartLevels[environment.getWorldIndex()];
+        final int prevWorld = environment.getWorldIndex() - 1;
+        int writeIdx = startLevel;
+        for (int level = startLevel; level < currentLevel; level++) {
+            final StoredInt var = variableStack[level];
+            final int val = valueStack[level];
+            final int stamp = stampStack[level];
+            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            if (stamp != prevWorld) {
+                // shift the update if needed
+                if (writeIdx != level) {
+                    valueStack[writeIdx] = val;
+                    variableStack[writeIdx] = var;
+                    stampStack[writeIdx] = stamp;
+                }
+                writeIdx++;
+            }  //else:writeIdx is not incremented and the update will be discarded (since a good one is in prevWorld)
+        }
+        currentLevel = writeIdx;
     }
-
 
     /**
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-
-    public void savePreviousState(StoredLong v, long oldValue, int oldStamp) {
+    public void savePreviousState(StoredInt v, int oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
         variableStack[currentLevel] = v;
         stampStack[currentLevel] = oldStamp;
@@ -154,11 +182,11 @@ public class StoredLongTrail implements ITrailStorage {
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
         // first, copy the stack of variables
-        final StoredLong[] tmp1 = new StoredLong[newCapacity];
+        final StoredInt[] tmp1 = new StoredInt[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
         variableStack = tmp1;
         // then, copy the stack of former values
-        final long[] tmp2 = new long[newCapacity];
+        final int[] tmp2 = new int[newCapacity];
         System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
         valueStack = tmp2;
         // then, copy the stack of world stamps
@@ -174,5 +202,5 @@ public class StoredLongTrail implements ITrailStorage {
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;
     }
-
 }
+

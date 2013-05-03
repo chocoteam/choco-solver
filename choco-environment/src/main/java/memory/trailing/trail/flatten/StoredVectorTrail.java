@@ -25,59 +25,61 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail;
+package memory.trailing.trail.flatten;
 
 import memory.trailing.EnvironmentTrailing;
-import memory.trailing.StoredInt;
+import memory.trailing.StoredVector;
+import memory.trailing.trail.ITrailStorage;
 
 
 /**
- * Implementing storage of historical values for backtrackable integers.
- *
- * @see ITrailStorage
+ * Implements a trail with the history of all the stored search vectors.
  */
-public final class StoredIntTrail implements ITrailStorage {
-
+public class StoredVectorTrail implements ITrailStorage {
 
     /**
-     * Reference towards the overall environment
-     * (responsible for all memory management).
+     * The current environment.
      */
 
     private final EnvironmentTrailing environment;
 
 
     /**
-     * Stack of backtrackable search variables.
+     * All the stored search vectors.
      */
 
-    private StoredInt[] variableStack;
+    private StoredVector<?>[] vectorStack;
 
 
     /**
-     * Stack of values (former values that need be restored upon backtracking).
+     * Indices of the previous values in the stored vectors.
      */
 
-    private int[] valueStack;
+    private int[] indexStack;
 
 
     /**
-     * Stack of timestamps indicating the world where the former value
-     * had been written.
+     * Previous values of the stored vector elements.
+     */
+
+    private Object[] valueStack;
+
+
+    /**
+     * World stamps associated to the previous values
      */
 
     private int[] stampStack;
 
-
     /**
-     * Points the level of the last entry.
+     * The last world an search vector was modified in.
      */
 
     private int currentLevel;
 
 
     /**
-     * A stack of pointers (for each start of a world).
+     * Starts of levels in all the history arrays.
      */
 
     private int[] worldStartLevels;
@@ -89,22 +91,64 @@ public final class StoredIntTrail implements ITrailStorage {
 
 
     /**
-     * Constructs a trail with predefined size.
-     *
-     * @param nUpdates maximal number of updates that will be stored
-     * @param nWorlds  maximal number of worlds that will be stored
+     * Constructs a trail for the specified environment with the
+     * specified numbers of updates and worlds.
      */
 
-    public StoredIntTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
-        environment = env;
-        currentLevel = 0;
+    public StoredVectorTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+        this.environment = env;
+        this.currentLevel = 0;
         maxUpdates = nUpdates;
-        variableStack = new StoredInt[maxUpdates];
-        valueStack = new int[maxUpdates];
-        stampStack = new int[maxUpdates];
-        worldStartLevels = new int[nWorlds];
+        this.vectorStack = new StoredVector[nUpdates];
+        this.indexStack = new int[nUpdates];
+        this.valueStack = new Object[nUpdates];
+        this.stampStack = new int[nUpdates];
+        this.worldStartLevels = new int[nWorlds];
     }
 
+
+    /**
+     * Reacts on the modification of an element in a stored search vector.
+     */
+
+    public void savePreviousState(StoredVector<?> vect, int index, Object oldValue, int oldStamp) {
+        this.vectorStack[currentLevel] = vect;
+        this.indexStack[currentLevel] = index;
+        this.stampStack[currentLevel] = oldStamp;
+        this.valueStack[currentLevel] = oldValue;
+        currentLevel++;
+        if (currentLevel == maxUpdates)
+            resizeUpdateCapacity();
+    }
+
+    private void resizeUpdateCapacity() {
+        final int newCapacity = ((maxUpdates * 3) / 2);
+        // first, copy the stack of variables
+        final StoredVector<?>[] tmp1 = new StoredVector<?>[newCapacity];
+        System.arraycopy(vectorStack, 0, tmp1, 0, vectorStack.length);
+        vectorStack = tmp1;
+        // then, copy the stack of former values
+        final Object[] tmp2 = new Object[newCapacity];
+        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
+        valueStack = tmp2;
+        // then, copy the stack of world stamps
+        final int[] tmp3 = new int[newCapacity];
+        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
+        stampStack = tmp3;
+        // then, copy the stack of indices
+        final int[] tmp4 = new int[newCapacity];
+        System.arraycopy(indexStack, 0, tmp4, 0, indexStack.length);
+        indexStack = tmp4;
+
+        // last update the capacity
+        maxUpdates = newCapacity;
+    }
+
+    public void resizeWorldCapacity(int newWorldCapacity) {
+        final int[] tmp = new int[newWorldCapacity];
+        System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
+        worldStartLevels = tmp;
+    }
 
     /**
      * Moving up to the next world.
@@ -113,7 +157,7 @@ public final class StoredIntTrail implements ITrailStorage {
      */
 
     public void worldPush(int worldIndex) {
-        worldStartLevels[worldIndex] = currentLevel;
+        this.worldStartLevels[worldIndex] = currentLevel;
     }
 
 
@@ -127,18 +171,9 @@ public final class StoredIntTrail implements ITrailStorage {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
             currentLevel--;
-            final StoredInt v = variableStack[currentLevel];
-            v._set(valueStack[currentLevel], stampStack[currentLevel]);
+            final StoredVector<?> v = vectorStack[currentLevel];
+            v._set(indexStack[currentLevel], valueStack[currentLevel], stampStack[currentLevel]);
         }
-    }
-
-
-    /**
-     * Returns the current size of the stack.
-     */
-
-    public int getSize() {
-        return currentLevel;
     }
 
 
@@ -156,15 +191,17 @@ public final class StoredIntTrail implements ITrailStorage {
         final int prevWorld = environment.getWorldIndex() - 1;
         int writeIdx = startLevel;
         for (int level = startLevel; level < currentLevel; level++) {
-            final StoredInt var = variableStack[level];
-            final int val = valueStack[level];
+            final StoredVector<?> var = vectorStack[level];
+            final int idx = indexStack[level];
+            final Object val = valueStack[level];
             final int stamp = stampStack[level];
-            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            var.worldStamps[idx] = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
             if (stamp != prevWorld) {
                 // shift the update if needed
                 if (writeIdx != level) {
                     valueStack[writeIdx] = val;
-                    variableStack[writeIdx] = var;
+                    indexStack[writeIdx] = idx;
+                    vectorStack[writeIdx] = var;
                     stampStack[writeIdx] = stamp;
                 }
                 writeIdx++;
@@ -173,42 +210,12 @@ public final class StoredIntTrail implements ITrailStorage {
         currentLevel = writeIdx;
     }
 
+
     /**
-     * Reacts when a StoredInt is modified: push the former value & timestamp
-     * on the stacks.
+     * Returns the current size of the stack.
      */
-    public void savePreviousState(StoredInt v, int oldValue, int oldStamp) {
-        valueStack[currentLevel] = oldValue;
-        variableStack[currentLevel] = v;
-        stampStack[currentLevel] = oldStamp;
-        currentLevel++;
-        if (currentLevel == maxUpdates) {
-            resizeUpdateCapacity();
-        }
-    }
 
-    private void resizeUpdateCapacity() {
-        final int newCapacity = ((maxUpdates * 3) / 2);
-        // first, copy the stack of variables
-        final StoredInt[] tmp1 = new StoredInt[newCapacity];
-        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
-        variableStack = tmp1;
-        // then, copy the stack of former values
-        final int[] tmp2 = new int[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
-        // then, copy the stack of world stamps
-        final int[] tmp3 = new int[newCapacity];
-        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
-        stampStack = tmp3;
-        // last update the capacity
-        maxUpdates = newCapacity;
-    }
-
-    public void resizeWorldCapacity(int newWorldCapacity) {
-        final int[] tmp = new int[newWorldCapacity];
-        System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
-        worldStartLevels = tmp;
+    public int getSize() {
+        return currentLevel;
     }
 }
-

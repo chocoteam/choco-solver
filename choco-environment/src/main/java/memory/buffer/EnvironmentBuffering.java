@@ -39,6 +39,8 @@ import memory.buffer.type.unsafe.IntBufferingUnsafe;
 import memory.buffer.type.unsafe.LongBufferingUnsafe;
 import memory.structure.Operation;
 
+import java.util.LinkedList;
+
 /**
  * <br/>
  *
@@ -82,6 +84,7 @@ public class EnvironmentBuffering extends AbstractEnvironment {
     @Override
     public void worldPop() {
         final int wi = currentWorld;
+        restoreOperations(currentWorld);
         for (int i = bSize - 1; i >= 0; i--) {
             buffers[i].worldPop(wi);
         }
@@ -179,9 +182,30 @@ public class EnvironmentBuffering extends AbstractEnvironment {
         throw new UnsupportedOperationException();
     }
 
+    //***********************************************************************
+    // OPERATION MANAGEMENT
+    //***********************************************************************
+
+    private LinkedList<Operation> operations = new LinkedList<Operation>();
+    private LinkedList<Integer> operationWorlds = new LinkedList<Integer>();
+
     @Override
     public void save(Operation operation) {
-        throw new UnsupportedOperationException();
+        operations.addLast(operation);
+        operationWorlds.addLast(getWorldIndex());
+    }
+
+    private void restoreOperations(int wi) {
+        if (!operations.isEmpty()) {
+            int oi = operationWorlds.pollLast();
+            if (oi > wi) {
+                Operation op = operations.pollLast();
+                op.undo();
+                restoreOperations(wi);
+            } else {
+                operationWorlds.addLast(oi);
+            }
+        }
     }
 
     ///////////////////////////

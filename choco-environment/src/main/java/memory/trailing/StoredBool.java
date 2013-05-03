@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateBool;
-import memory.trailing.trail.StoredBoolTrail;
+import memory.trailing.trail.flatten.StoredBoolTrail;
 
 
 /**

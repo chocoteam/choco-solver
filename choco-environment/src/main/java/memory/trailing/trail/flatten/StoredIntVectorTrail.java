@@ -25,10 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package memory.trailing.trail;
+package memory.trailing.trail.flatten;
 
 import memory.trailing.EnvironmentTrailing;
 import memory.trailing.StoredIntVector;
+import memory.trailing.trail.ITrailStorage;
 
 
 /**

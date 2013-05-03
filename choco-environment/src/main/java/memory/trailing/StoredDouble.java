@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateDouble;
-import memory.trailing.trail.StoredDoubleTrail;
+import memory.trailing.trail.flatten.StoredDoubleTrail;
 
 
 /**

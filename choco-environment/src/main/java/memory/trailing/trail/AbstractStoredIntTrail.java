@@ -24,54 +24,29 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory;
+package memory.trailing.trail;
 
-import memory.buffer.EnvironmentBuffering;
-import memory.copy.EnvironmentCopying;
 import memory.trailing.EnvironmentTrailing;
+import memory.trailing.StoredInt;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 28/05/12
+ * @since 29/04/13
  */
-public enum Environments {
+public abstract class AbstractStoredIntTrail implements ITrailStorage {
 
-    TRAIL() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentTrailing();
-        }
-    },
-    COPY() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentCopying();
-        }
-    },
-    BUFFER() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentBuffering(false);
-        }
-    },
-    BUFFER_UNSAFE() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentBuffering(true);
-        }
-    },
-    DEFAULT() {
-        @Override
-        public IEnvironment make() {
-            return BUFFER.make();
-        }
-    };
+    /**
+     * Reference towards the overall environment
+     * (responsible for all memory management).
+     */
 
-    public abstract IEnvironment make();
+    protected final EnvironmentTrailing environment;
+
+    protected AbstractStoredIntTrail(EnvironmentTrailing environment) {
+        this.environment = environment;
+    }
+
+    public abstract void savePreviousState(StoredInt v, int oldValue, int oldStamp);
 }

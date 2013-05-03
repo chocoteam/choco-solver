@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateInt;
-import memory.trailing.trail.StoredIntTrail;
+import memory.trailing.trail.AbstractStoredIntTrail;
 
 
 /**
@@ -37,7 +37,7 @@ import memory.trailing.trail.StoredIntTrail;
 public class StoredInt extends AbstractStoredObject implements IStateInt {
 
     private int currentValue;
-    protected final StoredIntTrail myTrail;
+    protected final AbstractStoredIntTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.

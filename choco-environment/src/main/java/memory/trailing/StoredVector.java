@@ -28,7 +28,7 @@
 package memory.trailing;
 
 
-import memory.trailing.trail.StoredVectorTrail;
+import memory.trailing.trail.flatten.StoredVectorTrail;
 
 /**
  * <p>

@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateLong;
-import memory.trailing.trail.StoredLongTrail;
+import memory.trailing.trail.flatten.StoredLongTrail;
 
 public final class StoredLong extends AbstractStoredObject implements IStateLong {
 
