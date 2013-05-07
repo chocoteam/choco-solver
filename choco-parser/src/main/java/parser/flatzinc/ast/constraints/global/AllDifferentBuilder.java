@@ -50,7 +50,7 @@ public class AllDifferentBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         if (vars.length > 1) {
-            return new Constraint[]{IntConstraintFactory.alldifferent(vars, "BC")};
+            return new Constraint[]{IntConstraintFactory.alldifferent(vars, "DEFAULT")};
         }
         return new Constraint[0];
     }

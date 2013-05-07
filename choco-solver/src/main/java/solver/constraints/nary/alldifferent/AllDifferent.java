@@ -32,21 +32,21 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualX_Y;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_Fast;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_adaptive;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffInst;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.ESat;
 
 /**
- * Standard alldiff constraint with generalized AC
- * integer valued variables are used only for the left vertex set
- * no explicit variables are used for the right vertex set
- * the right vertex set is the interval (minValue .. maxValue)
+ * Ensures that all variables from VARS take a different value.
+ * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
  */
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, BC, NEQS
+        AC, BC, NEQS, DEFAULT
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
@@ -69,12 +69,29 @@ public class AllDifferent extends IntConstraint<IntVar> {
             }
             break;
             case AC:
-//                addPropagators(new PropAllDiffAC(this.vars));
                 addPropagators(new PropAllDiffAC_Fast(this.vars));
                 break;
             case BC:
+//				// TODO put it back (only for testing)
+//				setPropagators(new PropAllDiffBC(this.vars));
+//				break;
+			case DEFAULT:
             default:
-                setPropagators(new PropAllDiffBC(this.vars));
+                setPropagators(
+						// react on instantiation
+						new PropAllDiffInst(this.vars),
+						// BC filtering
+						new PropAllDiffBC(this.vars));
+				// adds a Probabilistic AC (only if at least some variables have an enumerated domain)
+				boolean enumDom = false;
+				for(int i=0; i<this.vars.length && !enumDom; i++){
+					if(this.vars[i].hasEnumeratedDomain()){
+						enumDom = true;
+					}
+				}
+				if(enumDom){
+					addPropagators(new PropAllDiffAC_adaptive(this.vars,0));
+				}
                 break;
         }
     }
