@@ -72,8 +72,9 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 addPropagators(new PropAllDiffAC_Fast(this.vars));
                 break;
             case BC:
-				setPropagators(new PropAllDiffBC(this.vars));
-				break;
+//				// TODO put it back (only for testing)
+//				setPropagators(new PropAllDiffBC(this.vars));
+//				break;
 			case DEFAULT:
             default:
                 setPropagators(
