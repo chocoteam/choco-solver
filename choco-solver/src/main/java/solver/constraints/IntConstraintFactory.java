@@ -548,10 +548,8 @@ public enum IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY),
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
+		c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
 

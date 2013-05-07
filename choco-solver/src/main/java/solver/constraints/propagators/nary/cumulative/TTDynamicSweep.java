@@ -4,7 +4,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.objects.setDataStructures.ISet;
-import java.util.BitSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +27,7 @@ public class TTDynamicSweep {
 	private DynamicSweepMinKDimRings sweepMin;
 	private DynamicSweepMaxKDimRings sweepMax;
 	private final Rings ring;
-	private int[] mapping; // mapping[relative id] = absolute id
+	private int[] mapping;
 	private int nbTasksInFilteringAlgo;
 	private int nbEventsToAdd;
 	private int[] datesAPEvents;
@@ -66,7 +65,6 @@ public class TTDynamicSweep {
 
 	public void set(ISet subsetOfTasks) {
 		this.nbTasksInFilteringAlgo = subsetOfTasks.getSize();
-		// todo reremplir vars`
 		int idx = 0;
 		for(int t=subsetOfTasks.getFirstElement();t>=0;t=subsetOfTasks.getNextElement()){
 			vars[idx] = allVars[t];
