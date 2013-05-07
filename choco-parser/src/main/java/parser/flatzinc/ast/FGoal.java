@@ -138,7 +138,7 @@ public class FGoal {
                     if (annotation.id.value.equals("seq_search")) {
                         EArray earray = (EArray) annotation.exps.get(0);
                         for (int i = 0; i < earray.what.size(); i++) {
-                            ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
+							dvars = ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
                         }
                     } else {
                         dvars = ArrayUtils.append(dvars, extractScope(annotation, aSolver));
