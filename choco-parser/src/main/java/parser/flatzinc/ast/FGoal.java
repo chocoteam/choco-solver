@@ -138,15 +138,17 @@ public class FGoal {
                     if (annotation.id.value.equals("seq_search")) {
                         EArray earray = (EArray) annotation.exps.get(0);
                         for (int i = 0; i < earray.what.size(); i++) {
-							dvars = ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
+                            dvars = ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
                         }
                     } else {
                         dvars = ArrayUtils.append(dvars, extractScope(annotation, aSolver));
                     }
                 }
-                ivars = new IntVar[dvars.length];
-                for (int i = 0; i < dvars.length; i++) {
-                    ivars[i] = (IntVar) dvars[i];
+                if (dvars.length > 0) {
+                    ivars = new IntVar[dvars.length];
+                    for (int i = 0; i < dvars.length; i++) {
+                        ivars[i] = (IntVar) dvars[i];
+                    }
                 }
             }
 
