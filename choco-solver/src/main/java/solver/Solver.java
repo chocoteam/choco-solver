@@ -296,9 +296,7 @@ public class Solver implements Serializable {
      * <b>BEWARE:</b> : should be set <b>BEFORE</b> setting the search strategy
      *
      * @param searchPattern a search pattern
-     * @deprecated
      */
-    @Deprecated
     public void set(ISearchPattern searchPattern) {
         this.searchPattern = searchPattern;
     }

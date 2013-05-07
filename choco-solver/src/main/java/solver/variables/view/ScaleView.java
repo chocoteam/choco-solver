@@ -73,7 +73,7 @@ public final class ScaleView extends IntView<IntDelta, IntVar<IntDelta>> {
         return new ViewDeltaMonitor(var.monitorDelta(propagator), propagator) {
             @Override
             protected int transform(int value) {
-                return -value;
+                return cste*value;
             }
         };
     }
