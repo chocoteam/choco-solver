@@ -27,6 +27,7 @@
 
 package parser.flatzinc;
 
+import database.MySQLAccess;
 import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -111,6 +112,9 @@ public class ParseAndSolve {
 
     @Option(name = "-l", aliases = {"--loop"}, usage = "Set the number of times a problem is solved (default: 1).", required = false)
     protected long l = 1;
+
+    @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
+    protected String dbproperties;
 
     private boolean userinterruption = true;
 
@@ -198,6 +202,12 @@ public class ParseAndSolve {
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
+                if(!dbproperties.equals("")){
+                    // query the database
+                    MySQLAccess sql = new MySQLAccess(new File(dbproperties));
+                    sql.connect();
+                    sql.compare(instance, solver);
+                }
             }
             if (!csv.equals("")) {
                 assert acsv != null;
