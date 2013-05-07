@@ -364,7 +364,7 @@ public enum IntConstraintFactory {
 
     /**
      * Ensures that all variables from VARS take a different value.
-     * The consistency level should be chosen among "BC" and "AC".
+     * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
      * <p/>
      * <b>BC</b>:
      * <br/>
@@ -376,7 +376,10 @@ public enum IntConstraintFactory {
      * Uses Regin algorithm
      * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      * per arc removed from the support.
-     * Has a good average behavior in practice
+	 * <p/>
+	 * <b>DEFAULT</b>:
+	 * <br/>
+	 * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      *
      * @param VARS        list of variables
      * @param CONSISTENCY consistency level, among {"BC", "AC"}
@@ -389,7 +392,10 @@ public enum IntConstraintFactory {
      *                    Uses Regin algorithm
      *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      *                    per arc removed from the support.
-     *                    Has a good average behavior in practice
+	 *                    <p/>
+	 *                    <b>DEFAULT</b>:
+	 *                    <br/>
+	 *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      */
     public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
         return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
