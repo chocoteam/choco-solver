@@ -101,10 +101,11 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
                     }
                 }
             }
-        }
-        for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
-            filterAround(i);
-        }
+        }else{
+			for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
+				filterAround(i);
+			}
+		}
         toCompute.clear();
     }
 
@@ -143,9 +144,15 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
         energyOn(tasks);
     }
 
+	TTDynamicSweep sweep;
     protected void sweepOn(ISet tasks) throws ContradictionException {
         // todo add sweep algorithm once fixed
-        naiveFilter(tasks);
+		if(sweep == null) {
+			sweep = new TTDynamicSweep(vars,n,1,aCause);
+		}
+		sweep.set(tasks);
+		sweep.mainLoop();
+//        naiveFilter(tasks);
     }
 
     private void naiveFilter(ISet tasks) throws ContradictionException {

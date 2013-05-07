@@ -61,7 +61,7 @@ import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering
 import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
-import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
+import solver.constraints.propagators.nary.cumulative.*;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
@@ -548,9 +548,10 @@ public enum IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.setPropagators(
+        c.addPropagators(
                 new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY),
                 new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
 
