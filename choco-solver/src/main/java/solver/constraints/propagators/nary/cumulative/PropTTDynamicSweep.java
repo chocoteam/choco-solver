@@ -170,7 +170,7 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
                 for(int is=0;is<nbTasksInFilteringAlgo;is++) {
                     vars[mapping[is]].updateLowerBound(ls[is],aCause);
                     vars[mapping[is]].updateUpperBound(us[is],aCause);
-                    vars[mapping[is]+nbTasks].updateLowerBound(ld[is],aCause);
+//                    vars[mapping[is]+nbTasks].updateLowerBound(ld[is],aCause);// (removed by JG)
                     vars[mapping[is]+2*nbTasks].updateLowerBound(le[is],aCause);
                     vars[mapping[is]+2*nbTasks].updateUpperBound(ue[is],aCause);
                     state = state + (us[is]-ls[is])+(ue[is]-le[is])+ld[is];
