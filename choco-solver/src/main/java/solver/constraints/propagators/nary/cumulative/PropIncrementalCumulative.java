@@ -72,7 +72,8 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
 		// only an energy checker (sweep is performed externally)
-		filters = new CumulFilter[]{new EnergyChecker()};
+		filters = new CumulFilter[]{new EnergyChecker(), new TimeBasedFilter()};
+//		filters = new CumulFilter[]{new EnergyChecker()};
 	}
 
 	@Override

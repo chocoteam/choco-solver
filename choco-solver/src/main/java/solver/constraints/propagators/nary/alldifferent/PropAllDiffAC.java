@@ -53,9 +53,11 @@ import java.util.BitSet;
  * <p/>
  * Runs incrementally for maintaining a matching
  * <p/>
+ * (this propagator is correct but not the fastest, use PropAllDiffAC_fast or the DEFAULT AllDifferent instead)
  *
  * @author Jean-Guillaume Fages
  */
+@Deprecated
 public class PropAllDiffAC extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -83,10 +85,11 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
     /**
      * AllDifferent constraint for integer variables
-     * enables to control the cardinality of the matching
-     *
+     *(this propagator is correct but not the fastest, use PropAllDiffAC_fast or the DEFAULT AllDifferent instead)
+	 *
      * @param variables
      */
+	@Deprecated
     public PropAllDiffAC(IntVar[] variables) {
         super(variables, PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];

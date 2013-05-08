@@ -49,7 +49,7 @@ import java.util.BitSet;
 /**
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  */
-public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
+public class PropNoSubtour extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
@@ -69,7 +69,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      *
      * @param vars
      */
-    public PropNoSubtour(V[] vars) {
+    public PropNoSubtour(IntVar[] vars) {
         this(vars, 0);
     }
 
@@ -80,7 +80,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * @param variables
      * @param offset
      */
-    public PropNoSubtour(V[] variables, int offset) {
+    public PropNoSubtour(IntVar[] variables, int offset) {
         super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];

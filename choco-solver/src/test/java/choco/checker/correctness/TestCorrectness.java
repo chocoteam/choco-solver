@@ -375,9 +375,14 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testCumulative() {
+		int nBugSweep = 32;
+		long seedBugSweep = 1368003588936l;
+		CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * nBugSweep + 1, 1, nBugSweep, seedBugSweep, true);
         for (int i = 0; i < 20; i++) {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < 60; n *= 2) {
+				System.out.println("n = "+n);
+				System.out.println("seed = "+seed);
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }

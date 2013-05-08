@@ -119,26 +119,27 @@ public class TestConsistency {
     }
 
     // InverseChanneling AC*******************************************************
-    @Test(groups = "10s")
-    public void testINVERSECHANNELING_AC1() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelInverseChannelingAC, 20, 0, 40, null, seed + i, "ac");
-    }
-
-    @Test(groups = "10s")
-    public void testINVERSECHANNELING_AC2() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelInverseChannelingAC, 10, 10, 120, null, seed + i, "ac");
-    }
-
-    @Test(groups = "10s")
-    public void testINVERSECHANNELING_AC3() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelInverseChannelingAC, 10, -10, 120, null, seed + i, "ac");
-    }
+//	// InverseChanneling no longer ensures AC but default (because it uses the allDifferent.DEFAULT, which is fast)
+//    @Test(groups = "10s")
+//    public void testINVERSECHANNELING_AC1() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelInverseChannelingAC, 20, 0, 40, null, seed + i, "ac");
+//    }
+//
+//    @Test(groups = "10s")
+//    public void testINVERSECHANNELING_AC2() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelInverseChannelingAC, 10, 10, 120, null, seed + i, "ac");
+//    }
+//
+//    @Test(groups = "10s")
+//    public void testINVERSECHANNELING_AC3() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 20; i++)
+//            checkConsistency(Modeler.modelInverseChannelingAC, 10, -10, 120, null, seed + i, "ac");
+//    }
 
     // AllDifferent BC *******************************************************
     @Test(groups = "1s")
