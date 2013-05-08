@@ -45,106 +45,103 @@ import util.ESat;
  */
 public class AllDifferent extends IntConstraint<IntVar> {
 
-    public static enum Type {
-        AC, BC, NEQS, DEFAULT
-    }
+	public static enum Type {
+		AC, BC, NEQS, DEFAULT
+	}
 
-    public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.BC);
-    }
+	public AllDifferent(IntVar[] vars, Solver solver) {
+		this(vars, solver, Type.BC);
+	}
 
-    public AllDifferent(IntVar[] vars, Solver solver, Type type) {
-        super(vars, solver);
-        switch (type) {
-            case NEQS: {
-                int s = vars.length;
-                int k = 0;
-                Propagator[] props = new Propagator[(s * s - s) / 2];
-                for (int i = 0; i < s - 1; i++) {
-                    for (int j = i + 1; j < s; j++) {
-                        props[k++] = new PropNotEqualX_Y(vars[i], vars[j]);
-                    }
-                }
-                setPropagators(props);
-            }
-            break;
-            case AC:
-                addPropagators(new PropAllDiffAC_Fast(this.vars));
-                break;
-            case BC:
-				setPropagators(new PropAllDiffBC(this.vars));
-				break;
+	public AllDifferent(IntVar[] vars, Solver solver, Type type) {
+		super(vars, solver);
+		setPropagators(createPropagators(vars,type));
+	}
+
+	public static Propagator<IntVar>[] createPropagators(IntVar[] VARS, Type consistency){
+		switch (consistency) {
+			case NEQS: {
+				int s = VARS.length;
+				int k = 0;
+				Propagator[] props = new Propagator[(s * s - s) / 2];
+				for (int i = 0; i < s - 1; i++) {
+					for (int j = i + 1; j < s; j++) {
+						props[k++] = new PropNotEqualX_Y(VARS[i], VARS[j]);
+					}
+				}
+				return props;
+			}
+			case AC:
+				return new Propagator[]{new PropAllDiffAC_Fast(VARS)};
+			case BC:
+				return new Propagator[]{new PropAllDiffBC(VARS)};
 			case DEFAULT:
-            default:
-                setPropagators(
-						// react on instantiation
-						new PropAllDiffInst(this.vars),
-						// BC filtering
-						new PropAllDiffBC(this.vars));
+			default:
 				// adds a Probabilistic AC (only if at least some variables have an enumerated domain)
 				boolean enumDom = false;
-				for(int i=0; i<this.vars.length && !enumDom; i++){
-					if(this.vars[i].hasEnumeratedDomain()){
+				for(int i=0; i<VARS.length && !enumDom; i++){
+					if(VARS[i].hasEnumeratedDomain()){
 						enumDom = true;
 					}
 				}
 				if(enumDom){
-					addPropagators(new PropAllDiffAC_adaptive(this.vars,0));
+					return new Propagator[]{new PropAllDiffInst(VARS),new PropAllDiffBC(VARS),new PropAllDiffAC_adaptive(VARS,0)};
+				}else{
+					return new Propagator[]{new PropAllDiffInst(VARS),new PropAllDiffBC(VARS)};
 				}
-                break;
-        }
-    }
+		}
+	}
 
-    /**
-     * Checks if the constraint is satisfied when all variables are instantiated.
-     *
-     * @param tuple an complete instantiation
-     * @return true iff a solution
-     */
-    @Override
-    public ESat isSatisfied(int[] tuple) {
-        for (int i = 0; i < vars.length; i++) {
-            for (int j = 0; j < i; j++) {
-                if (tuple[i] == tuple[j]) {
-                    return ESat.FALSE;
-                }
-            }
-        }
-        return ESat.TRUE;
-    }
+	/**
+	 * Checks if the constraint is satisfied when all variables are instantiated.
+	 *
+	 * @param tuple an complete instantiation
+	 * @return true iff a solution
+	 */
+	@Override
+	public ESat isSatisfied(int[] tuple) {
+		for (int i = 0; i < vars.length; i++) {
+			for (int j = 0; j < i; j++) {
+				if (tuple[i] == tuple[j]) {
+					return ESat.FALSE;
+				}
+			}
+		}
+		return ESat.TRUE;
+	}
 
-    @Override
-    public ESat isSatisfied() {
-        for (IntVar v : vars) {
-            if (v.instantiated()) {
-                int vv = v.getValue();
-                for (IntVar w : vars) {
-                    if (w != v) {
-                        if (w.instantiated()) {
-                            if (vv == w.getValue()) {
-                                return ESat.FALSE;
-                            }
-                        } else {
-                            return ESat.UNDEFINED;
-                        }
-                    }
-                }
-            } else {
-                return ESat.UNDEFINED;
-            }
-        }
-        return ESat.TRUE;
-    }
+	@Override
+	public ESat isSatisfied() {
+		for (IntVar v : vars) {
+			if (v.instantiated()) {
+				int vv = v.getValue();
+				for (IntVar w : vars) {
+					if (w != v) {
+						if (w.instantiated()) {
+							if (vv == w.getValue()) {
+								return ESat.FALSE;
+							}
+						} else {
+							return ESat.UNDEFINED;
+						}
+					}
+				}
+			} else {
+				return ESat.UNDEFINED;
+			}
+		}
+		return ESat.TRUE;
+	}
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("AllDifferent({");
-        for (int i = 0; i < vars.length; i++) {
-            if (i > 0) sb.append(", ");
-            Variable var = vars[i];
-            sb.append(var);
-        }
-        sb.append("})");
-        return sb.toString();
-    }
+	public String toString() {
+		StringBuilder sb = new StringBuilder(32);
+		sb.append("AllDifferent({");
+		for (int i = 0; i < vars.length; i++) {
+			if (i > 0) sb.append(", ");
+			Variable var = vars[i];
+			sb.append(var);
+		}
+		sb.append("})");
+		return sb.toString();
+	}
 }
