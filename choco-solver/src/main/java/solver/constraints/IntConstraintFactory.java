@@ -56,12 +56,11 @@ import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
 import solver.constraints.propagators.nary.circuit.PropNoSubtour;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit;
 import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
-import solver.constraints.propagators.nary.cumulative.*;
+import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
@@ -457,10 +456,9 @@ public enum IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        Solver solver = VARS[0].getSolver();
         Constraint c = alldifferent(VARS,"DEFAULT");
         c.setPropagators(
-                new PropNoSubtour<IntVar>(VARS, OFFSET),
+                new PropNoSubtour(VARS, OFFSET),
                 new PropCircuit_AntiArboFiltering(VARS, OFFSET));
         return c;
     }
