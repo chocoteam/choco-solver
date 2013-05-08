@@ -83,10 +83,16 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
             }
         }
         if (rd.nextBoolean()) {
-            for (int i = 0; i < n; i++) {
-                filterFromPostDom(i);
-            }
-        } else {
+			if(n<30){
+				for (int i = 0; i < n; i++) {
+					filterFromPostDom(i);
+				}
+			}else{
+				for (int i = 0; i < 30; i++) {
+					filterFromPostDom(rd.nextInt(n));
+				}
+			}
+		} else {
             filterFromPostDom(rd.nextInt(n));
         }
     }
