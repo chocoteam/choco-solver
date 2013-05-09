@@ -801,6 +801,7 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
 		c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
+		c.addPropagators(new PropSubCircuitSCC(VARS,OFFSET));
         return c;
     }
 
