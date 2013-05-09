@@ -34,7 +34,6 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,7 +68,6 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
-	private TIntArrayList outDoors;
 	private BitSet mandSCC;
 	private int[] possibleSources;
 
@@ -90,7 +88,6 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
 		rd = new Random(0);
-		outDoors = new TIntArrayList();
 		mandSCC = new BitSet(n2);
 		possibleSources = new int[n];
 	}
@@ -157,9 +154,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		// additional filter (based on instantiated arcs)
 		filterFromInst(source);
 		// ad hoc filtering rules
-		for (int i=G_R.getActiveNodes().getFirstElement(); i>=0; i=G_R.getActiveNodes().getNextElement()) {
-			checkSCCLink(i);
-		}
+		checkSCCLink();
 	}
 
 	public void rebuild(int source) {
@@ -228,6 +223,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		for(int i=SCCfinder.getSCCFirstNode(cc); i>=0; i=SCCfinder.getNextNode(i)){
 			vars[i].instantiateTo(i+offSet,aCause);
 		}
+		mates[cc].clear();
 		if(sink){
 			ISet ps = G_R.getPredecessorsOf(cc);
 			for(int p=ps.getFirstElement();p>=0;p=ps.getNextElement()){
@@ -274,22 +270,24 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 		}
 	}
 
-	private void checkSCCLink(int sccFrom) throws ContradictionException {
-		int door = -1;
-		for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
-			if(door == -1){
-				door = i/n2-1;
-			}else if(door!=i/n2-1){
-				return;
+	private void checkSCCLink() throws ContradictionException {
+		for (int sccFrom=G_R.getActiveNodes().getFirstElement(); sccFrom>=0; sccFrom=G_R.getActiveNodes().getNextElement()) {
+			int door = -1;
+			for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
+				if(door == -1){
+					door = i/n2-1;
+				}else if(door!=i/n2-1){
+					return;
+				}
 			}
-		}
-		if(door>=0){
-			int lb = vars[door].getLB();
-			int ub = vars[door].getUB();
-			for(int v=lb;v<=ub;v=vars[door].nextValue(v)){
-				if(sccOf[v-offSet]==sccFrom){
-					if(v-offSet!=door || mandSCC.get(sccFrom)){
-						vars[door].removeValue(v,aCause);
+			if(door>=0){
+				int lb = vars[door].getLB();
+				int ub = vars[door].getUB();
+				for(int v=lb;v<=ub;v=vars[door].nextValue(v)){
+					if(sccOf[v-offSet]==sccFrom){
+						if(v-offSet!=door || mandSCC.get(sccFrom)){
+							vars[door].removeValue(v,aCause);
+						}
 					}
 				}
 			}
