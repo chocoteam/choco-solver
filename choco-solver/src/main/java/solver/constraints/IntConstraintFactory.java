@@ -56,10 +56,7 @@ import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
-import solver.constraints.propagators.nary.circuit.PropNoSubtour;
-import solver.constraints.propagators.nary.circuit.PropSubcircuit;
-import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
+import solver.constraints.propagators.nary.circuit.*;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
@@ -449,6 +446,7 @@ public enum IntConstraintFactory {
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
@@ -457,9 +455,10 @@ public enum IntConstraintFactory {
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
         Constraint c = alldifferent(VARS,"DEFAULT");
-        c.setPropagators(
-                new PropNoSubtour(VARS, OFFSET),
-                new PropCircuit_AntiArboFiltering(VARS, OFFSET));
+        c.addPropagators(
+				new PropNoSubtour(VARS, OFFSET),
+				new PropCircuit_AntiArboFiltering(VARS, OFFSET),
+				new PropCircuitSCC(VARS,OFFSET));
         return c;
     }
 
@@ -802,6 +801,7 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
 		c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
+		c.addPropagators(new PropSubCircuitSCC(VARS,OFFSET));
         return c;
     }
 

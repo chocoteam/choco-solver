@@ -169,6 +169,7 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
 
     /**
      * When a node has more than N successors/predecessors/neighbors then it must be removed,
+	 * (which results in a failure)
      * If it has N successors/predecessors/neighbors in the kernel then other incident edges
      * should be removed
      */
