@@ -34,6 +34,7 @@
 
 package solver.constraints.propagators.nary.circuit;
 
+import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -50,9 +51,8 @@ import java.util.Random;
 
 /**
  * Filters circuit based on strongly connected components
- * (see )
+ * (see the TechReport "Improving the Asymmetric TSP by considering graph structure", Fages & Lorca, 2012)
  * @author Jean-Guillaume Fages
- * @since 2013
  */
 public class PropCircuitSCC extends Propagator<IntVar> {
 
@@ -69,6 +69,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
+	private TIntArrayList inDoors, outDoors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -94,6 +95,8 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
 		rd = new Random(0);
+		inDoors = new TIntArrayList();
+		outDoors = new TIntArrayList();
 	}
 
 	//***********************************************************************************
@@ -132,6 +135,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	}
 
 	public void filterFromSource(int source) throws ContradictionException {
+		// reset data structures
 		rebuild(source);
 		// find path endpoints
 		int first = -1;
@@ -140,13 +144,13 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		for (int i = 0; i < n_R; i++) {
 			if (G_R.getPredecessorsOf(i).isEmpty()) {
 				if(first!=-1){
-					contradiction(vars[SCCfinder.getSCCFirstNode(i)],"");
+					contradiction(vars[0],"");
 				}
 				first = i;
 			}
 			if (G_R.getSuccessorsOf(i).isEmpty()) {
 				if(last!=-1){
-					contradiction(vars[SCCfinder.getSCCFirstNode(i)],"");
+					contradiction(vars[0],"");
 				}
 				last = i;
 			}
@@ -160,6 +164,10 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		}
 		// additional filter (based on instantiated arcs)
 		filterFromInst(source);
+		// ad hoc filtering rules
+		for (int i=0; i<n_R; i++) {
+			checkSCCLink(i);
+		}
 	}
 
 	public void rebuild(int source) {
@@ -261,6 +269,64 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 					mates[x].clear();
 					mates[x].add(arc);
 				}
+			}
+		}
+	}
+
+	private void checkSCCLink(int sccFrom) throws ContradictionException {
+		if(mates[sccFrom].getSize()<=1)return;
+		inDoors.clear();
+		outDoors.clear();
+		for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
+			outDoors.add(i / n - 1);
+			inDoors.add(i % n);
+		}
+		if (inDoors.size() == 1) {
+			forceInDoor(inDoors.get(0));
+		}
+		if (outDoors.size() == 1) {
+			forceOutDoor(outDoors.get(0));
+			// If 1 in and 1 out and |scc| > 2 then forbid in->out
+			// Is only 1 in ?
+			int p = G_R.getPredecessorsOf(sccFrom).getFirstElement();
+			if (p != -1) {
+				int in = -1;
+				for (int i = mates[p].getFirstElement(); i >= 0; i = mates[p].getNextElement()) {
+					if (in == -1) {
+						in = i % n;
+					} else if (in != i % n) {
+						return;
+					}
+				}
+				assert (in!=-1);
+				assert (sccOf[in] == sccFrom);
+				// Is in->out possible?
+				if(vars[in].contains(outDoors.get(0)+offSet)){
+					// Is |scc| > 2 ?
+					if(vars[in].instantiated()){
+						vars[in].removeValue(outDoors.get(0)+offSet,aCause);
+					}
+				}
+			}
+		}
+	}
+
+	private void forceInDoor(int x) throws ContradictionException {
+		int sx = sccOf[x];
+		for(int i=0; i<n; i++){
+			if(sccOf[i]==sx){
+				vars[i].removeValue(x+offSet,aCause);
+			}
+		}
+	}
+
+	private void forceOutDoor(int x) throws ContradictionException {
+		int sx = sccOf[x];
+		int lb = vars[x].getLB();
+		int ub = vars[x].getUB();
+		for(int v=lb;v<=ub;v=vars[x].nextValue(v)){
+			if(sccOf[v-offSet]==sx){
+				vars[x].removeValue(v,aCause);
 			}
 		}
 	}

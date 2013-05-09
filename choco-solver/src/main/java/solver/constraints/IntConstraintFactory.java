@@ -446,6 +446,7 @@ public enum IntConstraintFactory {
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
@@ -456,8 +457,8 @@ public enum IntConstraintFactory {
         Constraint c = alldifferent(VARS,"DEFAULT");
         c.addPropagators(
 				new PropNoSubtour(VARS, OFFSET),
-				new PropCircuit_AntiArboFiltering(VARS, OFFSET));
-		c.addPropagators(new PropCircuitSCC(VARS,OFFSET));
+				new PropCircuit_AntiArboFiltering(VARS, OFFSET),
+				new PropCircuitSCC(VARS,OFFSET));
         return c;
     }
 
