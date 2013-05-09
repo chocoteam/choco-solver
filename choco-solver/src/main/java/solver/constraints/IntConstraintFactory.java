@@ -457,7 +457,7 @@ public enum IntConstraintFactory {
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
         Constraint c = alldifferent(VARS,"DEFAULT");
-        c.setPropagators(
+        c.addPropagators(
                 new PropNoSubtour(VARS, OFFSET),
                 new PropCircuit_AntiArboFiltering(VARS, OFFSET));
         return c;
