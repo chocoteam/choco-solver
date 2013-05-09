@@ -60,7 +60,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int n;
+	private int n,n2;
 	private DirectedGraph support;
 	private StrongConnectivityFinder SCCfinder;
 	private DirectedGraph G_R;
@@ -68,6 +68,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	private ISet[] mates;
 	// proba
 	private Random rd;
+	private int offSet;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -80,15 +81,16 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	 *
 	 * @param succs
 	 */
-	public PropCircuitSCC(IntVar[] succs) {
+	public PropCircuitSCC(IntVar[] succs, int offSet) {
 		super(succs, PropagatorPriority.LINEAR);
+		this.offSet = offSet;
 		n = vars.length;
-		support = new DirectedGraph(n+1,SetType.LINKED_LIST,true);
-		G_R = new DirectedGraph(n+1,SetType.LINKED_LIST,true);
+		n2 = n+1;
+		support = new DirectedGraph(n2,SetType.LINKED_LIST,true);
+		G_R = new DirectedGraph(n2,SetType.LINKED_LIST,false);
 		SCCfinder = new StrongConnectivityFinder(support);
-		sccOf = new int[n+1];
-		mates = new ISet[n+1];
-		for(int i=0;i<n;i++){
+		mates = new ISet[n2];
+		for(int i=0;i<n2;i++){
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
 		rd = new Random(0);
@@ -101,6 +103,11 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	@Override
 	public int getPropagationConditions(int vIdx) {
 		return EventType.INT_ALL_MASK();
+	}
+
+	@Override
+	public ESat isEntailed() {
+		return ESat.TRUE;// redundant propagator
 	}
 
 	public void propagate(int vIdx, int mask) throws ContradictionException {
@@ -119,6 +126,78 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			}else{
 				for(int i=0;i<30;i++){
 					filterFromSource(rd.nextInt(n));
+				}
+			}
+		}
+	}
+
+	public void filterFromSource(int source) throws ContradictionException {
+		rebuild(source);
+		// find path endpoints
+		int first = -1;
+		int last = -1;
+		int n_R = SCCfinder.getNbSCC();
+		for (int i = 0; i < n_R; i++) {
+			if (G_R.getPredecessorsOf(i).isEmpty()) {
+				if(first!=-1){
+					contradiction(vars[SCCfinder.getSCCFirstNode(i)],"");
+				}
+				first = i;
+			}
+			if (G_R.getSuccessorsOf(i).isEmpty()) {
+				if(last!=-1){
+					contradiction(vars[SCCfinder.getSCCFirstNode(i)],"");
+				}
+				last = i;
+			}
+		}
+		if (first == -1 || last == -1 || first == last) {
+			contradiction(vars[0], "");
+		}
+		// compute hamiltonian path and filter skiping arcs
+		if (visit(first, last, source) != n_R) {
+			contradiction(vars[0], "");
+		}
+		// additional filter (based on instantiated arcs)
+		filterFromInst(source);
+	}
+
+	public void rebuild(int source) {
+		for(int i=0;i<n2;i++){
+			mates[i].clear();
+			support.getSuccessorsOf(i).clear();
+			support.getPredecessorsOf(i).clear();
+			G_R.getPredecessorsOf(i).clear();
+			G_R.getSuccessorsOf(i).clear();
+		}
+		G_R.getActiveNodes().clear();
+		for(int i=0;i<n;i++){
+			IntVar v = vars[i];
+			int lb = v.getLB();
+			int ub = v.getUB();
+			for(int j=lb;j<=ub;j=v.nextValue(j)){
+				if(j-offSet==source){
+					support.addArc(i,n);
+				}else{
+					support.addArc(i,j-offSet);
+				}
+			}
+		}
+		SCCfinder.findAllSCC();
+		int n_R = SCCfinder.getNbSCC();
+		for (int i = 0; i < n_R; i++) {
+			G_R.getActiveNodes().add(i);
+		}
+		sccOf = SCCfinder.getNodesSCC();
+		ISet succs;
+		int x;
+		for (int i = 0; i < n; i++) {
+			x = sccOf[i];
+			succs = support.getSuccessorsOf(i);
+			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+				if (x != sccOf[j]) {
+					G_R.addArc(x, sccOf[j]);
+					mates[x].add((i + 1) * n2 + j);
 				}
 			}
 		}
@@ -146,106 +225,37 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		succs = mates[node];
 		int from, to;
 		for (int e = succs.getFirstElement(); e >= 0; e = succs.getNextElement()) {
-			to = e % n;
+			to = e % n2;
 			if (sccOf[to] != next) {
-				from = e / n - 1;
+				from = e / n2 - 1;
 				if(to==n){
 					to=source;
 				}
-				vars[from].removeValue(to,aCause);
+				vars[from].removeValue(to+offSet,aCause);
 				mates[node].remove(e);
 			}
 		}
 		return visit(next, last,source) + 1;
 	}
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.TRUE;// redundant propagator
-	}
-
-	public void rebuild(int source) {
-		for(int i=0;i<=n;i++){
-			mates[i].clear();
-			support.getSuccessorsOf(i).clear();
-			support.getPredecessorsOf(i).clear();
-			G_R.getPredecessorsOf(i).clear();
-			G_R.getSuccessorsOf(i).clear();
-		}
-		G_R.getActiveNodes().clear();
-		for(int i=0;i<n;i++){
-			IntVar v = vars[i];
-			int lb = v.getLB();
-			int ub = v.getUB();
-			for(int j=lb;j<=ub;j=v.nextValue(j)){
-				if(j==source){
-					support.addArc(i,n);
-				}else{
-					support.addArc(i,j);
-				}
-			}
-		}
-	}
-
-	public void filterFromSource(int source) throws ContradictionException {
-		rebuild(source);
-		SCCfinder.findAllSCC();
-		// filter
-		int n_R = SCCfinder.getNbSCC();
-		int j;
-		for (int i = 0; i < n_R; i++) {
-			G_R.getActiveNodes().add(i);
-			j = SCCfinder.getSCCFirstNode(i);
-			while (j != -1) {
-				sccOf[j]=i;
-				j = SCCfinder.getNextNode(j);
-			}
-		}
-		ISet succs;
-		int x;
-		for (int i = 0; i < n; i++) {
-			x = sccOf[i];
-			succs = support.getSuccessorsOf(i);
-			for (j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-				if (x != sccOf[j]) {
-					G_R.addArc(x, sccOf[j]);
-					mates[x].add((i + 1) * n + j);
-				}
-			}
-		}
-		int first = -1;
-		int last = -1;
-		for (int i = 0; i < n_R; i++) {
-			if (G_R.getPredecessorsOf(i).isEmpty()) {
-				first = i;
-			}
-			if (G_R.getSuccessorsOf(i).isEmpty()) {
-				last = i;
-			}
-		}
-		if (first == -1 || last == -1 || first == last) {
-			contradiction(vars[0], "");
-		}
-		if (visit(first, last, source) != n_R) {
-			contradiction(vars[0], "");
-		}
-		int to, arc;
+	private void filterFromInst(int source) throws ContradictionException {
+		int to, arc, x;
 		for (int i = 0; i < n; i++) {
 			if(vars[i].instantiated()){
-				to = vars[i].getValue();
+				to = vars[i].getValue()-offSet;
 				x = sccOf[i];
 				if(to==source){
 					to = n;
 				}
 				if (to != -1 && sccOf[to] != x && mates[x].getSize() > 1) {
-					arc = (i + 1) * n + to;
+					arc = (i + 1) * n2 + to;
 					for (int a = mates[x].getFirstElement(); a >= 0; a = mates[x].getNextElement()) {
 						if (a != arc) {
-							int val = a%n;
+							int val = a%n2;
 							if(val==n){
 								val = source;
 							}
-							vars[a/n-1].removeValue(val,aCause);
+							vars[a/n2-1].removeValue(val+offSet,aCause);
 						}
 					}
 					mates[x].clear();
