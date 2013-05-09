@@ -34,7 +34,6 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -69,19 +68,11 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
-	private TIntArrayList inDoors, outDoors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * Maintain incrementally the reduced graph and strongly connected components of a directed graph variable
-	 * Ensures that the reduced graph is a Hamiltonian path
-	 * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
-	 *
-	 * @param succs
-	 */
 	public PropCircuitSCC(IntVar[] succs, int offSet) {
 		super(succs, PropagatorPriority.LINEAR);
 		this.offSet = offSet;
@@ -95,8 +86,6 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			mates[i] = SetFactory.makeLinkedList(false);
 		}
 		rd = new Random(0);
-		inDoors = new TIntArrayList();
-		outDoors = new TIntArrayList();
 	}
 
 	//***********************************************************************************
@@ -158,7 +147,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		if (first == -1 || last == -1 || first == last) {
 			contradiction(vars[0], "");
 		}
-		// compute hamiltonian path and filter skiping arcs
+		// compute hamiltonian path and filter skipping arcs
 		if (visit(first, last, source) != n_R) {
 			contradiction(vars[0], "");
 		}
@@ -274,18 +263,25 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	}
 
 	private void checkSCCLink(int sccFrom) throws ContradictionException {
-		if(mates[sccFrom].getSize()<=1)return;
-		inDoors.clear();
-		outDoors.clear();
+		int inDoor = -1;
+		int outDoor = -1;
 		for (int i = mates[sccFrom].getFirstElement(); i >= 0; i = mates[sccFrom].getNextElement()) {
-			outDoors.add(i / n - 1);
-			inDoors.add(i % n);
+			if(inDoor==-1){
+				inDoor = i%n2;
+			}else if (inDoor!=i%n2){
+				inDoor = -2;
+			}
+			if(outDoor==-1){
+				outDoor = i/n2-1;
+			}else if (outDoor!=i/n2-1){
+				outDoor = -2;
+			}
 		}
-		if (inDoors.size() == 1) {
-			forceInDoor(inDoors.get(0));
+		if (inDoor>=0) {
+			forceInDoor(inDoor);
 		}
-		if (outDoors.size() == 1) {
-			forceOutDoor(outDoors.get(0));
+		if (outDoor>=0) {
+			forceOutDoor(outDoor);
 			// If 1 in and 1 out and |scc| > 2 then forbid in->out
 			// Is only 1 in ?
 			int p = G_R.getPredecessorsOf(sccFrom).getFirstElement();
@@ -293,18 +289,22 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 				int in = -1;
 				for (int i = mates[p].getFirstElement(); i >= 0; i = mates[p].getNextElement()) {
 					if (in == -1) {
-						in = i % n;
-					} else if (in != i % n) {
+						in = i % n2;
+					} else if (in != i % n2) {
 						return;
 					}
 				}
 				assert (in!=-1);
 				assert (sccOf[in] == sccFrom);
 				// Is in->out possible?
-				if(vars[in].contains(outDoors.get(0)+offSet)){
+				if(vars[in].contains(outDoor+offSet)){
 					// Is |scc| > 2 ?
-					if(vars[in].instantiated()){
-						vars[in].removeValue(outDoors.get(0)+offSet,aCause);
+					int size = 0;
+					for(int i=SCCfinder.getSCCFirstNode(sccFrom); i>=0 && size<3;i=SCCfinder.getNextNode(i)){
+						size++;
+					}
+					if(size>2){
+						vars[in].removeValue(outDoor+offSet,aCause);
 					}
 				}
 			}
