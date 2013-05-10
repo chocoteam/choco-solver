@@ -769,7 +769,20 @@ public enum IntConstraintFactory {
      * @param COEFFS a vector of int
      * @param SCALAR a variable
      */
-    public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
+    public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
+		// better to put an arithm constraint when possible
+		if(VARS.length==2 && SCALAR.instantiated() && (COEFFS[0]==1 || COEFFS[0]==-1) && (COEFFS[1]==1 || COEFFS[1]==-1)){
+			if(COEFFS[0]==1){
+				String op = (COEFFS[1]==1)?"+":"-";
+				return IntConstraintFactory.arithm(VARS[0],op,VARS[1],"=",SCALAR.getValue());
+			}else{
+				if(COEFFS[1]==1){
+					return IntConstraintFactory.arithm(VARS[1],"-",VARS[0],"=",SCALAR.getValue());
+				}else{
+					return IntConstraintFactory.arithm(VARS[0],"+",VARS[1],"=",-SCALAR.getValue());
+				}
+			}
+		}
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
     }
 
@@ -811,7 +824,11 @@ public enum IntConstraintFactory {
      * @param VARS a vector of variables
      * @param SUM  a variable
      */
-    public static Sum sum(IntVar[] VARS, IntVar SUM) {
+    public static Constraint sum(IntVar[] VARS, IntVar SUM) {
+		// better to put an arithm constraint when possible
+		if(VARS.length==2 && SUM.instantiated()){
+			return IntConstraintFactory.arithm(VARS[0],"+",VARS[1],"=",SUM.getValue());
+		}
         return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
     }
 
