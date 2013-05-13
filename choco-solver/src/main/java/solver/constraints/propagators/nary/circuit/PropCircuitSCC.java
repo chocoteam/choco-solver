@@ -68,6 +68,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
+	private final int NB_MAX_ITER = 15;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -111,12 +112,12 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		if(rd.nextBoolean()){
 			filterFromSource(rd.nextInt(n));
 		}else{
-			if(n<30){
+			if(n<NB_MAX_ITER){
 				for(int i=0;i<n;i++){
 					filterFromSource(i);
 				}
 			}else{
-				for(int i=0;i<30;i++){
+				for(int i=0;i<NB_MAX_ITER;i++){
 					filterFromSource(rd.nextInt(n));
 				}
 			}
