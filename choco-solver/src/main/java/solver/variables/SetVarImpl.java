@@ -174,9 +174,9 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
             contradiction(cause, null, "");
         }
         if (envelope.getSize() != value.length) {
-            for (int i = envelope.getFirstElement(); i >= 0; i = envelope.getNextElement()) {
-                if (!kernel.contain(i)) {
-                    envelope.remove(i);
+            for (int i = getEnvelopeFirst(); i != END; i = getEnvelopeNext()) {
+                if (!kernelContains(i)) {
+                    removeFromEnvelope(i, cause);
                 }
             }
         }
