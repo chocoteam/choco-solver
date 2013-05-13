@@ -265,6 +265,7 @@ public final class SetConstraintsFactory {
     public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, INTEGERS), SETS[0].getSolver());
         c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2));
+		c.addPropagators(new PropAllDisjoint(SETS));
         return c;
     }
 
