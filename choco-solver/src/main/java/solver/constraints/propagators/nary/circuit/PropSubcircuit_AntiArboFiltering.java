@@ -58,6 +58,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
     // random function
     private Random rd = new Random();
     private TIntArrayList rootCandidates = new TIntArrayList();
+	private final int NB_MAX_ITER = 15;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -91,12 +92,12 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
         }
         if (rootCandidates.size() > 0) {
             if (rd.nextBoolean()) {
-				if(rootCandidates.size()<30){
+				if(rootCandidates.size()<NB_MAX_ITER){
 					for (int i = rootCandidates.size() - 1; i >= 0; i--) {
 						filterFromPostDom(rootCandidates.get(i));
 					}
 				}else{
-					for(int k=30;k>=0;k--){
+					for(int k=NB_MAX_ITER;k>=0;k--){
 						filterFromPostDom(rootCandidates.get(rd.nextInt(rootCandidates.size())));
 					}
 				}
