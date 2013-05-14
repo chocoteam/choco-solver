@@ -28,7 +28,6 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IState#E#;
 
 /**
@@ -37,67 +36,20 @@ import memory.IState#E#;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class Rc#E# implements IState#E#, RecomputableElement {
-
-    private final EnvironmentCopying environment;
-    private #e# currentValue;
-    private int timeStamp;
+public class Rc#E# extends IState#E# {
 
     public Rc#E#(EnvironmentCopying env) {
-        this(env, #EMAX#);
+        this(env, #E#.MAX_VALUE);
     }
 
     public Rc#E#(EnvironmentCopying env, #e# i) {
-        environment = env;
-        currentValue = i;
-        environment.add#E#(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public #e# add(#e# delta) {
-        #e# res = currentValue + delta;
-        set(res);
-        return res;
+        super(env, i);
+        env.get#E#Copy().add(this);
     }
 
     @Override
-    public #e# get() {
-        return currentValue;
-    }
-
     public void set(#e# y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    protected void _set(final #e# y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public #e# deepCopy() {
-        return currentValue;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

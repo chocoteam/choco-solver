@@ -24,9 +24,10 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package memory.copy.store;
+package memory.copy.store.flatten;
 
 import memory.copy.Rc#E#;
+import memory.copy.store.IStored#E#Copy;
 
 /**
  * <br/>
@@ -34,7 +35,7 @@ import memory.copy.Rc#E#;
  * @author Charles Prud'homme
  * @since 14/05/13
  */
-public class Stored#E#Copy {
+public class Stored#E#Copy implements IStored#E#Copy {
 
     Rc#E#[] objects;
     #e#[][] values;
@@ -42,6 +43,7 @@ public class Stored#E#Copy {
 
     public Stored#E#Copy() {
         objects = new Rc#E#[64];
+        values = new #e#[64][];
     }
 
 
@@ -56,13 +58,13 @@ public class Stored#E#Copy {
     }
 
     public void worldPush(int worldIndex) {
-        if (values.length >= worldIndex) {
+        if (values.length <= worldIndex) {
             #e#[][] tmp = values;
-            values = new #e#[worldIndex * 3 / 2 + 1][];
-            System.arraycopy(tmp, 0, values, 0, worldIndex - 1);
+            values = new #e#[tmp.length * 3 / 2 + 1][];
+            System.arraycopy(tmp, 0, values, 0, tmp.length);
         }
-        #e#[] tmp#e# = new #e#[objects.length];
-        for (int i = objects.length; --i >= 0; ) {
+        #e#[] tmp#e# = new #e#[position];
+        for (int i = position; --i >= 0; ) {
             tmp#e#[i] = objects[i].deepCopy();
         }
         values[worldIndex] = tmp#e#;
@@ -72,5 +74,10 @@ public class Stored#E#Copy {
         #e#[] tmp#e# = values[worldIndex];
         for (int i = tmp#e#.length; --i >= 0; )
             objects[i]._set(tmp#e#[i], worldIndex);
+    }
+
+    @Override
+    public void worldCommit(int worldIndex) {
+        throw new UnsupportedOperationException();
     }
 }
