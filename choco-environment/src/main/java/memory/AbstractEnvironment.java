@@ -37,6 +37,12 @@ import memory.structure.S64BitSet;
  */
 public abstract class AbstractEnvironment implements IEnvironment {
 
+    protected enum Type {
+        FLAT, CHUNK, UNSAFE
+    }
+
+    protected final Type type;
+
     protected int currentWorld = 0;
 
     private static final int SIZE = 128;
@@ -49,6 +55,10 @@ public abstract class AbstractEnvironment implements IEnvironment {
      * Nex free bit in the shared BitSet
      */
     protected int nextOffset;
+
+    protected AbstractEnvironment(Type type) {
+        this.type = type;
+    }
 
     public final int getWorldIndex() {
         return currentWorld;
@@ -125,4 +135,5 @@ public abstract class AbstractEnvironment implements IEnvironment {
     public final int getNextOffset() {
         return nextOffset;
     }
+
 }

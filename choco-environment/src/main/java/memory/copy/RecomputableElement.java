@@ -40,7 +40,5 @@ public interface RecomputableElement {
 
     int NB_TYPE = 8;
 
-    int getType();
-
     int getTimeStamp();
 }

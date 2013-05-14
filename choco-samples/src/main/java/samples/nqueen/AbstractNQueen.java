@@ -28,13 +28,10 @@
 package samples.nqueen;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
-
-import java.text.MessageFormat;
 
 /**
  * <br/>
@@ -61,12 +58,12 @@ public abstract class AbstractNQueen extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findAllSolutions();
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        StringBuilder st = new StringBuilder();
+        /*StringBuilder st = new StringBuilder();
         String line = "+";
         for (int i = 0; i < n; i++) {
             line += "---+";
@@ -81,6 +78,6 @@ public abstract class AbstractNQueen extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger("bench").info(st.toString());
+        LoggerFactory.getLogger("bench").info(st.toString());*/
     }
 }

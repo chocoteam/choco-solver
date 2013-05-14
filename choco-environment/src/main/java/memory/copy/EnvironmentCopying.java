@@ -27,167 +27,33 @@
 
 package memory.copy;
 
-import gnu.trove.stack.TIntStack;
-import gnu.trove.stack.array.TIntArrayStack;
 import memory.*;
+import memory.copy.store.*;
+import memory.copy.store.flatten.StoredBoolCopy;
+import memory.copy.store.flatten.StoredDoubleCopy;
+import memory.copy.store.flatten.StoredIntCopy;
+import memory.copy.store.flatten.StoredLongCopy;
 import memory.structure.Operation;
-
-import java.util.LinkedList;
-
-import static memory.copy.RecomputableElement.*;
 
 public class EnvironmentCopying extends AbstractEnvironment {
 
+    private IStoredBoolCopy boolCopy;
+    private IStoredIntCopy intCopy;
+    private IStoredLongCopy longCopy;
+    private IStoredDoubleCopy doubleCopy;
+    private StoredOperationCopy operationCopy;
 
-    /**
-     * The current world number (should be less
-     * than <code>maxWorld</code>).
-     */
+    private StoredIntVectorCopy intVectorCopy;
+    private StoredDoubleVectorCopy doubleVectorCopy;
+    private StoredObjectCopy objectCopy;
 
-    private boolean newEl = false;
-
-    protected final static TIntStack clonedWorldIdxStack;
-
-    public static RcInt[] elementsI;
-    public static RcVector[] elementsV;
-    public static RcIntVector[] elementsIV;
-    public static RcBool[] elementsB;
-    public static RcLong[] elementsL;
-    public static RcDouble[] elementsD;
-    public static RcObject[] elementsO;
-
-    public static int[] indices;
-    private static RcSave save;
-
-    public int nbCopy = 0;
-
-
-    static {
-        elementsI = new RcInt[64];
-        elementsV = new RcVector[64];
-        elementsIV = new RcIntVector[64];
-        elementsB = new RcBool[64];
-        elementsL = new RcLong[64];
-        elementsD = new RcDouble[64];
-        elementsO = new RcObject[64];
-        indices = new int[NB_TYPE];
-        clonedWorldIdxStack = new TIntArrayStack();
-    }
-
+    private IStorage[] copies;
+    private int copySize;
 
     public EnvironmentCopying() {
-        for (int i = NB_TYPE; --i >= 0; ) indices[i] = 0;
-        clonedWorldIdxStack.clear();
-        save = new RcSave(this);
-    }
-
-    public int getNbCopy() {
-        return nbCopy;
-    }
-
-    public void add(RecomputableElement rc) {
-        switch (rc.getType()) {
-            case BOOL:
-                int nB = indices[BOOL] + 1;
-                if (nB > elementsB.length) {
-                    int newSize = elementsB.length * 3 / 2 + 1;
-                    while (nB >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcBool[] oldElements = elementsB;
-                    elementsB = new RcBool[newSize];
-                    System.arraycopy(oldElements, 0, elementsB, 0, oldElements.length);
-                }
-                elementsB[indices[BOOL]++] = (RcBool) rc;
-                newEl = true;
-                break;
-            case INT:
-                int nI = indices[INT] + 1;
-                if (nI > elementsI.length) {
-                    int newSize = elementsI.length * 3 / 2 + 1;
-                    while (nI >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcInt[] oldElements = elementsI;
-                    elementsI = new RcInt[newSize];
-                    System.arraycopy(oldElements, 0, elementsI, 0, oldElements.length);
-                }
-                elementsI[indices[INT]++] = (RcInt) rc;
-                newEl = true;
-                break;
-            case LONG:
-                int nL = indices[LONG] + 1;
-                if (nL > elementsL.length) {
-                    int newSize = elementsL.length * 3 / 2 + 1;
-                    while (nL >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcLong[] oldElements = elementsL;
-                    elementsL = new RcLong[newSize];
-                    System.arraycopy(oldElements, 0, elementsL, 0, oldElements.length);
-                }
-                elementsL[indices[LONG]++] = (RcLong) rc;
-                newEl = true;
-                break;
-            case DOUBLE:
-                int nD = indices[DOUBLE] + 1;
-                if (nD > elementsD.length) {
-                    int newSize = elementsD.length * 3 / 2 + 1;
-                    while (nD >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcDouble[] oldElements = elementsD;
-                    elementsD = new RcDouble[newSize];
-                    System.arraycopy(oldElements, 0, elementsD, 0, oldElements.length);
-                }
-                elementsD[indices[DOUBLE]++] = (RcDouble) rc;
-                newEl = true;
-                break;
-            case OBJECT:
-                int nO = indices[OBJECT] + 1;
-                if (nO > elementsO.length) {
-                    int newSize = elementsO.length * 3 / 2 + 1;
-                    while (nO >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcObject[] oldElements = elementsO;
-                    elementsO = new RcObject[newSize];
-                    System.arraycopy(oldElements, 0, elementsO, 0, oldElements.length);
-                }
-                elementsO[indices[OBJECT]++] = (RcObject) rc;
-                newEl = true;
-                break;
-            case VECTOR:
-                int nV = indices[VECTOR] + 1;
-                if (nV > elementsV.length) {
-                    int newSize = elementsV.length * 3 / 2 + 1;
-                    while (nV >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcVector[] oldElements = elementsV;
-                    elementsV = new RcVector[newSize];
-                    System.arraycopy(oldElements, 0, elementsV, 0, oldElements.length);
-                }
-                elementsV[indices[VECTOR]++] = (RcVector) rc;
-                newEl = true;
-                break;
-            case INTVECTOR:
-                int nIV = indices[INTVECTOR] + 1;
-                if (nIV > elementsIV.length) {
-                    int newSize = elementsIV.length * 3 / 2 + 1;
-                    while (nIV >= newSize) {
-                        newSize = (3 * newSize) / 2 + 1;
-                    }
-                    RcIntVector[] oldElements = elementsIV;
-                    elementsIV = new RcIntVector[newSize];
-                    System.arraycopy(oldElements, 0, elementsIV, 0, oldElements.length);
-                }
-                elementsIV[indices[INTVECTOR]++] = (RcIntVector) rc;
-                newEl = true;
-                break;
-
-        }
-
+        super(Type.FLAT);
+        copies = new IStorage[0];
+        copySize = 0;
     }
 
     /**
@@ -195,46 +61,11 @@ public class EnvironmentCopying extends AbstractEnvironment {
      */
     @Override
     public void worldPush() {
-        if (newEl) {
-            save.currentElementB = new RcBool[indices[BOOL]];
-            System.arraycopy(elementsB, 0, save.currentElementB, 0, indices[BOOL]);
-
-            save.currentElementI = new RcInt[indices[INT]];
-            System.arraycopy(elementsI, 0, save.currentElementI, 0, indices[INT]);
-
-            save.currentElementL = new RcLong[indices[LONG]];
-            System.arraycopy(elementsL, 0, save.currentElementL, 0, indices[LONG]);
-
-            save.currentElementV = new RcVector[indices[VECTOR]];
-            System.arraycopy(elementsV, 0, save.currentElementV, 0, indices[VECTOR]);
-
-            save.currentElementIV = new RcIntVector[indices[INTVECTOR]];
-            System.arraycopy(elementsIV, 0, save.currentElementIV, 0, indices[INTVECTOR]);
-
-            save.currentElementD = new RcDouble[indices[DOUBLE]];
-            System.arraycopy(elementsD, 0, save.currentElementD, 0, indices[DOUBLE]);
-
-            save.currentElementO = new RcObject[indices[OBJECT]];
-            System.arraycopy(elementsO, 0, save.currentElementO, 0, indices[OBJECT]);
-
-            newEl = false;
+        final int wi = currentWorld + 1;
+        for (int i = 0; i < copySize; i++) {
+            copies[i].worldPush(wi);
         }
-        this.saveEnv();
         currentWorld++;
-    }
-
-    private void saveEnv() {
-        if (!(currentWorld != 0 && currentWorld == clonedWorldIdxStack.peek())) {
-
-            nbCopy++;
-
-            if (clonedWorldIdxStack.size() == 0)
-                clonedWorldIdxStack.push(currentWorld);
-            else if (clonedWorldIdxStack.peek() < currentWorld)
-                clonedWorldIdxStack.push(currentWorld);
-
-            save.save(currentWorld);
-        }
     }
 
     /**
@@ -242,10 +73,18 @@ public class EnvironmentCopying extends AbstractEnvironment {
      */
     @Override
     public void worldPop() {
-        save.restore(--currentWorld);
-        restoreOperations(currentWorld);
-        clonedWorldIdxStack.pop();
+        final int wi = currentWorld;
+        for (int i = copySize - 1; i >= 0; i--) {
+            copies[i].worldPop(wi);
+        }
+        currentWorld--;
     }
+
+    @Override
+    public void save(Operation operation) {
+        getOperationCopy().savePreviousState(operation);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -276,25 +115,8 @@ public class EnvironmentCopying extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateInt makeIntProcedure(IStateIntProcedure procedure,
-                                      int initialValue) {
-        return new RcIntProcedure(this, procedure, initialValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateBool makeBool(boolean initialValue) {
         return new RcBool(this, initialValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateIntVector makeIntVector() {
-        return new RcIntVector(this);
     }
 
     /**
@@ -309,38 +131,9 @@ public class EnvironmentCopying extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateIntVector makeIntVector(int[] entries) {
-        return new RcIntVector(this, entries);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateDoubleVector makeDoubleVector() {
-        return new RcDoubleVector(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateDoubleVector makeDoubleVector(int size, double initialValue) {
         return new RcDoubleVector(this, size, initialValue);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateDoubleVector makeDoubleVector(double[] entries) {
-        return new RcDoubleVector(this, entries);
-    }
-
-//    @Override
-//	public IStateBitSet makeBitSet(int size) {
-//		return new RcBitSet(this,size);
-//	}
 
     /**
      * {@inheritDoc}
@@ -374,46 +167,112 @@ public class EnvironmentCopying extends AbstractEnvironment {
         return new RcLong(this, init);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> IStateVector<T> makeVector() {
-        return new RcVector<T>(this);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void increaseCopy() {// TODO check resizing
+        IStorage[] tmp = copies;
+        copies = new IStorage[tmp.length + 1];
+        System.arraycopy(tmp, 0, copies, 0, tmp.length);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateObject makeObject(Object obj) {
-        return new RcObject(this, obj);
-    }
-
-    //***********************************************************************
-    // OPERATION MANAGEMENT
-    //***********************************************************************
-
-    private LinkedList<Operation> operations = new LinkedList<Operation>();
-    private LinkedList<Integer> operationWorlds = new LinkedList<Integer>();
-
-    @Override
-    public void save(Operation operation) {
-        operations.addLast(operation);
-        operationWorlds.addLast(getWorldIndex());
-    }
-
-    private void restoreOperations(int wi) {
-        if (!operations.isEmpty()) {
-            int oi = operationWorlds.pollLast();
-            if (oi > wi) {
-                Operation op = operations.pollLast();
-                op.undo();
-                restoreOperations(wi);
-            } else {
-                operationWorlds.addLast(oi);
+    public IStoredIntCopy getIntCopy() {
+        if (intCopy == null) {
+            switch (type) {
+                case FLAT:
+                    intCopy = new StoredIntCopy();
+                    break;
             }
+            increaseCopy();
+            copies[copySize++] = intCopy;
         }
+        return intCopy;
     }
+
+    public IStoredLongCopy getLongCopy() {
+        if (longCopy == null) {
+            switch (type) {
+                case FLAT:
+                    longCopy = new StoredLongCopy();
+                    break;
+            }
+
+            increaseCopy();
+            copies[copySize++] = longCopy;
+        }
+        return longCopy;
+    }
+
+    public IStoredBoolCopy getBoolCopy() {
+        if (boolCopy == null) {
+            switch (type) {
+                case FLAT:
+                    boolCopy = new StoredBoolCopy();
+                    break;
+            }
+
+            increaseCopy();
+            copies[copySize++] = boolCopy;
+        }
+        return boolCopy;
+    }
+
+    public IStoredDoubleCopy getDoubleCopy() {
+        if (doubleCopy == null) {
+            switch (type) {
+                case FLAT:
+                    doubleCopy = new StoredDoubleCopy();
+                    break;
+            }
+            increaseCopy();
+            copies[copySize++] = doubleCopy;
+        }
+        return doubleCopy;
+    }
+
+    public StoredOperationCopy getOperationCopy() {
+        if (operationCopy == null) {
+            switch (type) {
+                case FLAT:
+                    operationCopy = new StoredOperationCopy();
+                    break;
+            }
+            increaseCopy();
+            copies[copySize++] = operationCopy;
+        }
+        return operationCopy;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // SPECIFIC DATA STRUCTURES                                                                                       //
+    // NOTE: this data structures should not be used...
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public StoredIntVectorCopy getIntVectorCopy() {
+        if (intVectorCopy == null) {
+            intVectorCopy = new StoredIntVectorCopy(currentWorld);
+            increaseCopy();
+            copies[copySize++] = intVectorCopy;
+        }
+        return intVectorCopy;
+    }
+
+    public StoredDoubleVectorCopy getDoubleVectorCopy() {
+        if (doubleVectorCopy == null) {
+            doubleVectorCopy = new StoredDoubleVectorCopy(currentWorld);
+            increaseCopy();
+            copies[copySize++] = doubleVectorCopy;
+        }
+        return doubleVectorCopy;
+    }
+
+    public StoredObjectCopy getObjectCopy() {
+        if (objectCopy == null) {
+            objectCopy = new StoredObjectCopy(currentWorld);
+            increaseCopy();
+            copies[copySize++] = objectCopy;
+        }
+        return objectCopy;
+    }
+
 }
 

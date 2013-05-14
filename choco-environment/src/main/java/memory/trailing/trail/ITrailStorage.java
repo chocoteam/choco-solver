@@ -24,59 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package memory.trailing.trail;
 
-import java.io.Serializable;
-
+import memory.IStorage;
 
 /**
- * An interface for classes implementing trails of modifications to objects.
- * <p/>
- * Toutes les classes doivent implementer les fonctions de l'interface pour
- * permettre a l'environnement de deleguer la gestion des mondes pour chaque type
- * de donnee.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 14/05/13
  */
-public interface ITrailStorage extends Serializable {
-
-    /**
-     * Moving up to the next world.
-     * <p/>
-     * Cette methode doit garder l'etat de la variable avant la modification
-     * de sorte a la remettre en etat le cas echeant.
-     *
-     * @param worldIndex
-     */
-
-    void worldPush(int worldIndex);
-
-
-    /**
-     * Moving down to the previous world.
-     * <p/>
-     * Cette methode reattribute a la variable ou l'element d'un tableau sa valeur
-     * precedente.
-     *
-     * @param worldIndex
-     */
-
-    void worldPop(int worldIndex);
-
-
-    /**
-     * Comitting the current world: merging it with the previous one.
-     * <p/>
-     * Not used yet.
-     */
-
-    void worldCommit();
-
-
-    /**
-     * Retrieving the size of the trail (number of saved past values).
-     */
-
-    int getSize();
+public interface ITrailStorage extends IStorage {
 
     /**
      * increase the capacity of the environment to a given number of worlds
@@ -85,6 +43,4 @@ public interface ITrailStorage extends Serializable {
      */
     void resizeWorldCapacity(int newWorldCapacity);
 
-
 }
-

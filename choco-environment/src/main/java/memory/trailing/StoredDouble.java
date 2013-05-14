@@ -28,75 +28,40 @@
 package memory.trailing;
 
 import memory.IStateDouble;
-import memory.trailing.trail.StoredDoubleTrail;
+import memory.trailing.trail.IStoredDoubleTrail;
 
 
 /**
- * A class implementing a backtrackable float variable.
+ * A class implementing backtrackable double.
  */
-public final class StoredDouble extends AbstractStoredObject implements IStateDouble {
+public class StoredDouble extends IStateDouble {
 
-
-    /**
-     * Current value of the search.
-     */
-
-    private double currentValue;
-
-    protected final StoredDoubleTrail myTrail;
+    protected final IStoredDoubleTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.
      * Note: this constructor should not be used directly: one should instead
      * use the IEnvironment factory
      */
-
-    public StoredDouble(EnvironmentTrailing env, double d) {
-        super(env);
-        currentValue = d;
-        worldStamp = env.getWorldIndex();
+    public StoredDouble(final EnvironmentTrailing env, final double i) {
+        super(env, i);
         myTrail = env.getDoubleTrail();
     }
 
-
-    public double get() {
-        return currentValue;
-    }
-
-
-    public void set(final double y) {
+    /**
+     * Modifies the value and stores if needed the former value on the
+     * trailing stack.
+     */
+    @Override
+    public final void set(final double y) {
         if (y != currentValue) {
-            if (this.worldStamp < environment.getWorldIndex()) {
-                myTrail.savePreviousState(this, currentValue, worldStamp);
-                worldStamp = environment.getWorldIndex();
+            final int wi = environment.getWorldIndex();
+            if (this.timeStamp < wi) {
+                myTrail.savePreviousState(this, currentValue, timeStamp);
+                timeStamp = wi;
             }
             currentValue = y;
         }
     }
-
-    public double add(final double delta) {
-        double r = delta + currentValue;
-        set(r);
-        return r;
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final double y, final int wstamp) {
-        currentValue = y;
-        worldStamp = wstamp;
-    }
-
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
-    }
-
-
 }
+
