@@ -42,7 +42,7 @@ import memory.IStateIntVector;
  * the index of the first element.
  * IT DOES NOT PRESERVE THE ORDER OF THE LIST
  */
-public class IndexedBipartiteSet implements IStateIntVector {
+public class IndexedBipartiteSet extends IStateIntVector {
 
     /**
      * The list of values
@@ -85,6 +85,7 @@ public class IndexedBipartiteSet implements IStateIntVector {
      * @param nbValues
      */
     public IndexedBipartiteSet(final IEnvironment environment, final int nbValues) {
+        super(environment);
         final int[] values = new int[nbValues];
         for (int i = 0; i < nbValues; i++) {
             values[i] = i;

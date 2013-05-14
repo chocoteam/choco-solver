@@ -34,9 +34,8 @@ import memory.trailing.trail.IStoredIntTrail;
 /**
  * A class implementing backtrackable int.
  */
-public class StoredInt extends AbstractStoredObject implements IStateInt {
+public class StoredInt extends IStateInt {
 
-    private int currentValue;
     protected final IStoredIntTrail myTrail;
 
     /**
@@ -45,23 +44,10 @@ public class StoredInt extends AbstractStoredObject implements IStateInt {
      * use the IEnvironment factory
      */
     public StoredInt(final EnvironmentTrailing env, final int i) {
-        super(env);
+        super(env, i);
         myTrail = env.getIntTrail();
         currentValue = i;
     }
-
-    @Override
-    public final int add(final int delta) {
-        int res = currentValue + delta;
-        set(currentValue + delta);
-        return res;
-    }
-
-    @Override
-    public final int get() {
-        return currentValue;
-    }
-
 
     /**
      * Modifies the value and stores if needed the former value on the
@@ -70,31 +56,12 @@ public class StoredInt extends AbstractStoredObject implements IStateInt {
     public final void set(final int y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();
-            if (this.worldStamp < wi) {
-                myTrail.savePreviousState(this, currentValue, worldStamp);
-                worldStamp = wi;
+            if (this.timeStamp < wi) {
+                myTrail.savePreviousState(this, currentValue, timeStamp);
+                timeStamp = wi;
             }
             currentValue = y;
         }
-    }
-
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final int y, final int wstamp) {
-        currentValue = y;
-        worldStamp = wstamp;
-    }
-
-
-    @Override
-    public final String toString() {
-        return String.valueOf(currentValue);
     }
 }
 

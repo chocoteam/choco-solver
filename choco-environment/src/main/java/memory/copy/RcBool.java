@@ -28,7 +28,6 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateBool;
 
 /**
@@ -37,59 +36,20 @@ import memory.IStateBool;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class RcBool implements IStateBool, RecomputableElement {
-
-    private final EnvironmentCopying environment;
-    private boolean currentValue;
-    private int timeStamp;
+public class RcBool extends IStateBool {
 
     public RcBool(EnvironmentCopying env) {
         this(env, false);
     }
 
     public RcBool(EnvironmentCopying env, boolean i) {
-        environment = env;
-        currentValue = i;
+        super(env, i);
         env.getBoolCopy().add(this);
-        timeStamp = environment.getWorldIndex();
     }
 
     @Override
-    public boolean get() {
-        return currentValue;
-    }
-
     public void set(boolean y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final boolean y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public boolean deepCopy() {
-        return currentValue;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

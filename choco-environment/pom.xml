@@ -46,7 +46,7 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <!--<build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -61,7 +61,7 @@
                         <configuration>
                             <mainClass>memory.generator.CodeGenerator</mainClass>
                             <arguments>
-                                <!--<argument>-c</argument>-->
+                                &lt;!&ndash;<argument>-c</argument>&ndash;&gt;
                                 <argument>${basedir}/src/main/resources/</argument>
                                 <argument>${basedir}/src/main/java/</argument>
                             </arguments>
@@ -70,5 +70,5 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
 </project>

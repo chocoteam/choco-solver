@@ -35,13 +35,24 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public interface IStateInt extends Serializable {
+public abstract class IStateInt implements Serializable {
+
+    protected final IEnvironment environment;
+    protected int currentValue;
+    protected int timeStamp;
+
+    public IStateInt(IEnvironment env, int i) {
+        environment = env;
+        currentValue = i;
+        timeStamp = environment.getWorldIndex();
+    }
 
     /**
      * Returns the current value.
      */
-
-    int get();
+    public final int get() {
+        return currentValue;
+    }
 
 
     /**
@@ -49,7 +60,7 @@ public interface IStateInt extends Serializable {
      * trailing stack.
      */
 
-    void set(int y);
+    public abstract void set(int y);
 
     /**
      * modifying a StoredInt by an increment
@@ -57,10 +68,51 @@ public interface IStateInt extends Serializable {
      * @param delta
      * @return the new value
      */
-    int add(int delta);
+    public final int add(int delta) {
+        int res = currentValue + delta;
+        set(res);
+        return res;
+    }
+
+    /**
+     * Modifies the value without storing the former value on the trailing stack.
+     *
+     * @param y      the new value
+     * @param wstamp the stamp of the world in which the update is performed
+     */
+
+    public void _set(final int y, final int wstamp) {
+        currentValue = y;
+        timeStamp = wstamp;
+    }
+
+    /**
+     * Make a deep copy of this.
+     *
+     * @return a long
+     */
+    public final int deepCopy() {
+        return currentValue;
+    }
+
+    public int getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void overrideTimeStamp(int aTimeStamp) {
+        this.timeStamp = aTimeStamp;
+    }
 
     /**
      * Retrieving the environment
      */
-    IEnvironment getEnvironment();
+    public IEnvironment getEnvironment() {
+        return environment;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.valueOf(currentValue);
+    }
 }

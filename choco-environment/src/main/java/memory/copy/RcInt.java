@@ -28,7 +28,6 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateInt;
 
 /**
@@ -37,67 +36,20 @@ import memory.IStateInt;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class RcInt implements IStateInt, RecomputableElement {
-
-    private final EnvironmentCopying environment;
-    private int currentValue;
-    private int timeStamp;
+public class RcInt extends IStateInt{
 
     public RcInt(EnvironmentCopying env) {
         this(env, Integer.MAX_VALUE);
     }
 
     public RcInt(EnvironmentCopying env, int i) {
-        environment = env;
-        currentValue = i;
+        super(env, i);
         env.getIntCopy().add(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public int add(int delta) {
-        int res = currentValue + delta;
-        set(res);
-        return res;
     }
 
     @Override
-    public int get() {
-        return currentValue;
-    }
-
     public void set(int y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final int y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public int deepCopy() {
-        return currentValue;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

@@ -28,7 +28,6 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateDouble;
 
 /**
@@ -37,67 +36,21 @@ import memory.IStateDouble;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class RcDouble implements IStateDouble, RecomputableElement {
+public class RcDouble extends IStateDouble {
 
-    private final EnvironmentCopying environment;
-    private double currentValue;
-    private int timeStamp;
 
     public RcDouble(EnvironmentCopying env) {
         this(env, Double.POSITIVE_INFINITY);
     }
 
     public RcDouble(EnvironmentCopying env, double i) {
-        environment = env;
-        currentValue = i;
+        super(env, i);
         env.getDoubleCopy().add(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public double add(double delta) {
-        double res = currentValue + delta;
-        set(res);
-        return res;
     }
 
     @Override
-    public double get() {
-        return currentValue;
-    }
-
     public void set(double y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final double y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public double deepCopy() {
-        return currentValue;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

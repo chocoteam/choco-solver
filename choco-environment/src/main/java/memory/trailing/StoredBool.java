@@ -34,9 +34,8 @@ import memory.trailing.trail.IStoredBoolTrail;
 /**
  * A class implementing backtrackable boolean.
  */
-public class StoredBool extends AbstractStoredObject implements IStateBool {
+public class StoredBool extends IStateBool {
 
-    private boolean currentValue;
     protected final IStoredBoolTrail myTrail;
 
     /**
@@ -45,16 +44,9 @@ public class StoredBool extends AbstractStoredObject implements IStateBool {
      * use the IEnvironment factory
      */
     public StoredBool(final EnvironmentTrailing env, final boolean i) {
-        super(env);
+        super(env, i);
         myTrail = env.getBoolTrail();
-        currentValue = i;
     }
-
-    @Override
-    public final boolean get() {
-        return currentValue;
-    }
-
 
     /**
      * Modifies the value and stores if needed the former value on the
@@ -63,31 +55,12 @@ public class StoredBool extends AbstractStoredObject implements IStateBool {
     public final void set(final boolean y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();
-            if (this.worldStamp < wi) {
-                myTrail.savePreviousState(this, currentValue, worldStamp);
-                worldStamp = wi;
+            if (this.timeStamp < wi) {
+                myTrail.savePreviousState(this, currentValue, timeStamp);
+                timeStamp = wi;
             }
             currentValue = y;
         }
-    }
-
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final boolean y, final int wstamp) {
-        currentValue = y;
-        worldStamp = wstamp;
-    }
-
-
-    @Override
-    public final String toString() {
-        return String.valueOf(currentValue);
     }
 }
 

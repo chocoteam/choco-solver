@@ -36,32 +36,7 @@ import memory.IStateDoubleVector;
  * Since : Choco 2.0.0
  *
  */
-public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
-
-
-    /**
-     * Minimal capacity of a vector
-     */
-    public static final int MIN_CAPACITY = 8;
-
-    /**
-     * Contains the elements of the vector.
-     */
-
-    private double[] elementData;
-
-    /**
-     * A backtrackable search with the size of the vector.
-     */
-
-    private RcInt size;
-
-
-    /**
-     * The current environment.
-     */
-
-    private final EnvironmentCopying environment;
+public class RcDoubleVector extends IStateDoubleVector {
 
     private int timeStamp;
 
@@ -75,69 +50,17 @@ public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
      */
 
     public RcDoubleVector(EnvironmentCopying env, int initialSize, double initialValue) {
-        int initialCapacity = MIN_CAPACITY;
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
+        super(env, initialSize, initialValue);
         timeStamp = environment.getWorldIndex();
-        this.elementData = new double[initialCapacity];
-        for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = initialValue;
-        }
-        this.size = new RcInt(env, initialSize);
         env.getDoubleVectorCopy().add(this);
     }
 
 
     public RcDoubleVector(EnvironmentCopying env, double[] entries) {
-        int initialCapacity = MIN_CAPACITY;
-        int initialSize = entries.length;
-
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new double[initialCapacity];
-        System.arraycopy(entries, 0, this.elementData, 0, initialSize);
-        this.size = new RcInt(env, initialSize);
+        super(env, entries);
         env.getDoubleVectorCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
-
-    /**
-     * Constructs an empty stored search vector.
-     *
-     * @param env The current environment.
-     */
-
-    public RcDoubleVector(EnvironmentCopying env) {
-        this(env, 0, 0);
-    }
-
-
-    /**
-     * Returns the current size of the stored search vector.
-     */
-
-    public int size() {
-        return size.get();
-    }
-
-
-    /**
-     * Checks if the vector is empty.
-     */
-
-    public boolean isEmpty() {
-        return (size.get() == 0);
-    }
-
-/*    public Object[] toArray() {
-        // TODO : voir ci c'est utile
-        return new Object[0];
-    }*/
-
 
     /**
      * Checks if the capacity is great enough, else the capacity
@@ -186,23 +109,6 @@ public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
     }
 
     /**
-     * Returns the <code>index</code>th element of the vector.
-     */
-
-    public double get(int index) {
-        if (index < size.get() && index >= 0) {
-            return elementData[index];
-        }
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
-    }
-
-    @Override
-    public final double quickGet(int index) {
-        return elementData[index];
-    }
-
-
-    /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
 
@@ -245,15 +151,6 @@ public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
         System.arraycopy(vals, 0, elementData, 0, vals.length);
     }
 
-    public double[] deepCopy() {
-        double[] ret = new double[size.get()];
-        System.arraycopy(elementData, 0, ret, 0, size.get());
-        return ret;
-    }
-
-    public int getType() {
-        return DOUBLEVECTOR;
-    }
 
     public int getTimeStamp() {
         return timeStamp;

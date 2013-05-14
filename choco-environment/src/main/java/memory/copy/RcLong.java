@@ -28,7 +28,6 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateLong;
 
 /**
@@ -37,67 +36,20 @@ import memory.IStateLong;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public class RcLong implements IStateLong, RecomputableElement {
-
-    private final EnvironmentCopying environment;
-    private long currentValue;
-    private int timeStamp;
+public class RcLong extends IStateLong {
 
     public RcLong(EnvironmentCopying env) {
         this(env, Long.MAX_VALUE);
     }
 
     public RcLong(EnvironmentCopying env, long i) {
-        environment = env;
-        currentValue = i;
+        super(env, i);
         env.getLongCopy().add(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public long add(long delta) {
-        long res = currentValue + delta;
-        set(res);
-        return res;
     }
 
     @Override
-    public long get() {
-        return currentValue;
-    }
-
     public void set(long y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final long y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public long deepCopy() {
-        return currentValue;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

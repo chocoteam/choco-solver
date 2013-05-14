@@ -36,38 +36,13 @@ import memory.trailing.trail.StoredDoubleVectorTrail;
  * Cette classe permet de stocker facilment des entiers dans un tableau
  * backtrackable d'entiers.
  */
-public final class StoredDoubleVector implements IStateDoubleVector {
-
-
-    /**
-     * Minimal capacity of a vector
-     */
-    public static final int MIN_CAPACITY = 8;
-
-    /**
-     * Contains the elements of the vector.
-     */
-
-    private double[] elementData;
+public final class StoredDoubleVector extends IStateDoubleVector {
 
     /**
      * Contains time stamps for all entries (the world index of the last update for each entry)
      */
 
     public int[] worldStamps;
-
-    /**
-     * A backtrackable search with the size of the vector.
-     */
-
-    private StoredInt size;
-
-
-    /**
-     * The current environment.
-     */
-
-    private final EnvironmentTrailing environment;
 
     protected final StoredDoubleVectorTrail myTrail;
 
@@ -80,79 +55,30 @@ public final class StoredDoubleVector implements IStateDoubleVector {
      */
 
     public StoredDoubleVector(EnvironmentTrailing env, int initialSize, double initialValue) {
+        super(env, initialSize, initialValue);
         int initialCapacity = MIN_CAPACITY;
         int w = env.getWorldIndex();
 
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new double[initialCapacity];
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = initialValue;
             this.worldStamps[i] = w;
         }
-        this.size = new StoredInt(env, initialSize);
         this.myTrail = env.getDoubleVectorTrail();
     }
 
 
     public StoredDoubleVector(EnvironmentTrailing env, double[] entries) {
+        super(env, entries);
         int initialCapacity = MIN_CAPACITY;
         int w = env.getWorldIndex();
         int initialSize = entries.length;
 
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new double[initialCapacity];
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = entries[i]; // could be a System.arrayCopy but since the loop is needed...
             this.worldStamps[i] = w;
         }
-        this.size = new StoredInt(env, initialSize);
         this.myTrail = env.getDoubleVectorTrail();
     }
-
-    /**
-     * Constructs an empty stored search vector.
-     *
-     * @param env The current environment.
-     */
-
-    public StoredDoubleVector(EnvironmentTrailing env) {
-        this(env, 0, 0);
-    }
-
-    private boolean rangeCheck(int index) {
-        return index < size.get() && index >= 0;
-    }
-
-    /**
-     * Returns the current size of the stored search vector.
-     */
-
-    public int size() {
-        return size.get();
-    }
-
-
-    /**
-     * Checks if the vector is empty.
-     */
-
-    public boolean isEmpty() {
-        return (size.get() == 0);
-    }
-
-	/*    public Object[] toArray() {
-        // TODO : voir ci c'est utile
-        return new Object[0];
-    }*/
-
 
     /**
      * Checks if the capacity is great enough, else the capacity
@@ -219,23 +145,6 @@ public final class StoredDoubleVector implements IStateDoubleVector {
         int newsize = size.get() - 1;
         if (newsize >= 0)
             size.set(newsize);
-    }
-
-    /**
-     * Returns the <code>index</code>th element of the vector.
-     */
-
-    public double get(int index) {
-        if (rangeCheck(index)) {
-            return elementData[index];
-        }
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
-    }
-
-    @Override
-    public double quickGet(int index) {
-        assert (rangeCheck(index));
-        return elementData[index];
     }
 
 

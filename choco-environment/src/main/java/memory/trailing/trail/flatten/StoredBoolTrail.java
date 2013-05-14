@@ -145,7 +145,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
             final StoredBool var = variableStack[level];
             final boolean val = valueStack[level];
             final int stamp = stampStack[level];
-            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            var.overrideTimeStamp(prevWorld);// update the stamp of the variable (current stamp refers to a world that no longer exists)
             if (stamp != prevWorld) {
                 // shift the update if needed
                 if (writeIdx != level) {

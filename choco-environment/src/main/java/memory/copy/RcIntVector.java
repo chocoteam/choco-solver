@@ -36,31 +36,8 @@ import memory.IStateIntVector;
  * Since : Choco 2.0.0
  *
  */
-public final class RcIntVector implements IStateIntVector, RecomputableElement {
+public final class RcIntVector extends IStateIntVector {
 
-    /**
-     * Minimal capacity of a vector
-     */
-    public static final int MIN_CAPACITY = 8;
-
-    /**
-     * Contains the elements of the vector.
-     */
-
-    private int[] elementData;
-
-    /**
-     * A backtrackable search with the size of the vector.
-     */
-
-    private RcInt size;
-
-
-    /**
-     * The current environment.
-     */
-
-    private final EnvironmentCopying environment;
     private int timeStamp;
 
 
@@ -73,72 +50,18 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
      */
 
     public RcIntVector(EnvironmentCopying env, int initialSize, int initialValue) {
+        super(env, initialSize, initialValue);
         int initialCapacity = MIN_CAPACITY;
-        int w = env.getWorldIndex();
-
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
         timeStamp = environment.getWorldIndex();
-        this.elementData = new int[initialCapacity];
-        for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = initialValue;
-        }
-        this.size = new RcInt(env, initialSize);
         env.getIntVectorCopy().add(this);
     }
 
 
     public RcIntVector(EnvironmentCopying env, int[] entries) {
-        int initialCapacity = MIN_CAPACITY;
-        int w = env.getWorldIndex();
-        int initialSize = entries.length;
-
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new int[initialCapacity];
-        System.arraycopy(entries, 0, this.elementData, 0, initialSize);
-        this.size = new RcInt(env, initialSize);
+        super(env, entries);
         env.getIntVectorCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
-
-    /**
-     * Constructs an empty stored search vector.
-     *
-     * @param env The current environment.
-     */
-
-    public RcIntVector(EnvironmentCopying env) {
-        this(env, 0, 0);
-    }
-
-
-    /**
-     * Returns the current size of the stored search vector.
-     */
-
-    public int size() {
-        return size.get();
-    }
-
-
-    /**
-     * Checks if the vector is empty.
-     */
-
-    public boolean isEmpty() {
-        return (size.get() == 0);
-    }
-
-/*    public Object[] toArray() {
-        // TODO : voir ci c'est utile
-        return new Object[0];
-    }*/
-
 
     /**
      * Checks if the capacity is great enough, else the capacity
@@ -187,30 +110,6 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
     }
 
     /**
-     * Returns the <code>index</code>th element of the vector.
-     */
-
-    public int get(int index) {
-        if (index < size.get() && index >= 0) {
-            return elementData[index];
-        }
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
-    }
-
-    @Override
-    public int quickGet(int index) {
-        return elementData[index];
-    }
-
-    public boolean contains(int val) {
-        int ssize = size.get();
-        for (int i = 0; i < ssize; i++) {
-            if (val == elementData[i]) return true;
-        }
-        return false;
-    }
-
-    /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
 
@@ -238,10 +137,6 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
         return oldValue;
     }
 
-    public static int[] toArray(int[] tab) {
-        return new int[0];
-    }
-
     public void remove(int i) {
 
     }
@@ -256,15 +151,6 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
         System.arraycopy(vals, 0, elementData, 0, vals.length);
     }
 
-    public int[] deepCopy() {
-        int[] ret = new int[size.get()];
-        System.arraycopy(elementData, 0, ret, 0, size.get());
-        return ret;
-    }
-
-    public int getType() {
-        return INTVECTOR;
-    }
 
     public int getTimeStamp() {
         return timeStamp;

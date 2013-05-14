@@ -35,13 +35,24 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29/04/13
  */
-public interface IStateBool extends Serializable {
+public abstract class IStateBool implements Serializable {
+
+    protected final IEnvironment environment;
+    protected boolean currentValue;
+    protected int timeStamp;
+
+    public IStateBool(IEnvironment env, boolean i) {
+        environment = env;
+        currentValue = i;
+        timeStamp = environment.getWorldIndex();
+    }
 
     /**
      * Returns the current value.
      */
-
-    boolean get();
+    public final boolean get() {
+        return currentValue;
+    }
 
 
     /**
@@ -49,10 +60,47 @@ public interface IStateBool extends Serializable {
      * trailing stack.
      */
 
-    void set(boolean y);
+    public abstract void set(boolean y);
+
+    /**
+     * Modifies the value without storing the former value on the trailing stack.
+     *
+     * @param y      the new value
+     * @param wstamp the stamp of the world in which the update is performed
+     */
+
+    public void _set(final boolean y, final int wstamp) {
+        currentValue = y;
+        timeStamp = wstamp;
+    }
+
+    /**
+     * Make a deep copy of this.
+     *
+     * @return a long
+     */
+    public final boolean deepCopy() {
+        return currentValue;
+    }
+
+    public int getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void overrideTimeStamp(int aTimeStamp) {
+        this.timeStamp = aTimeStamp;
+    }
 
     /**
      * Retrieving the environment
      */
-    IEnvironment getEnvironment();
+    public IEnvironment getEnvironment() {
+        return environment;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.valueOf(currentValue);
+    }
 }
