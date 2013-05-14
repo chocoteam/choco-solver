@@ -86,7 +86,7 @@ public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
             this.elementData[i] = initialValue;
         }
         this.size = new RcInt(env, initialSize);
-        env.add(this);
+        env.getDoubleVectorCopy().add(this);
     }
 
 
@@ -101,7 +101,7 @@ public class RcDoubleVector implements IStateDoubleVector, RecomputableElement {
         this.elementData = new double[initialCapacity];
         System.arraycopy(entries, 0, this.elementData, 0, initialSize);
         this.size = new RcInt(env, initialSize);
-        env.add(this);
+        env.getDoubleVectorCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
 

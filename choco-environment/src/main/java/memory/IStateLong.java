@@ -30,18 +30,12 @@ package memory;
 import java.io.Serializable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: julien
- * Date: 12 juil. 2007
- * Time: 10:24:12
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
 public interface IStateLong extends Serializable {
-
-    /**
-     * Value for an unknown integer.
-     */
-
-    long UNKNOWN_LONG = Long.MAX_VALUE;
 
     /**
      * Returns the current value.

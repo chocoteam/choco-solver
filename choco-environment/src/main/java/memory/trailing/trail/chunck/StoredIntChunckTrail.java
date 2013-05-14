@@ -27,19 +27,18 @@
 
 package memory.trailing.trail.chunck;
 
-import memory.trailing.EnvironmentTrailing;
 import memory.trailing.StoredInt;
-import memory.trailing.trail.AbstractStoredIntTrail;
+import memory.trailing.trail.IStoredIntTrail;
 
 
 /**
  * Implementing storage of historical values for backtrackable integers.
  *
- * @see memory.trailing.trail.ITrailStorage
+ * @see memory.IStorage
  */
-public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
+public class StoredIntChunckTrail implements IStoredIntTrail {
 
-    private static final int CHUNK_SIZE = 10000;
+    private static final int CHUNK_SIZE = 20000;
 
     /**
      * Stack of backtrackable search variables.
@@ -87,8 +86,7 @@ public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public StoredIntChunckTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
-        super(env);
+    public StoredIntChunckTrail(int nUpdates, int nWorlds) {
         curChunk = nextTop = 0;
 
         variableStack = new StoredInt[1][];
@@ -127,7 +125,8 @@ public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
         final int c = chunks[worldIndex];
         final int t = tops[worldIndex];
         StoredInt[] cvar;
-        int[] cval, cstmp;
+        int[] cval;
+        int[] cstmp;
         for (int cc = curChunk; cc >= c; cc--) {
             cvar = variableStack[cc];
             cval = valueStack[cc];
@@ -156,7 +155,7 @@ public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
+    public void worldCommit(int worldIndex) {
         throw new UnsupportedOperationException();
     }
 
@@ -180,6 +179,7 @@ public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
     }
 
     private void increase(int l) {
+        System.out.printf("resize %d \n",l + 1);
         StoredInt[][] varBigger = new StoredInt[l + 1][];
         System.arraycopy(variableStack, 0, varBigger, 0, l);
         varBigger[l] = new StoredInt[CHUNK_SIZE];
@@ -190,10 +190,10 @@ public final class StoredIntChunckTrail extends AbstractStoredIntTrail {
         valBigger[l] = new int[CHUNK_SIZE];
         valueStack = valBigger;
 
-        valBigger = new int[l + 1][];
-        System.arraycopy(stampStack, 0, valBigger, 0, l);
-        valBigger[l] = new int[CHUNK_SIZE];
-        stampStack = valBigger;
+        int[][] staBigger = new int[l + 1][];
+        System.arraycopy(stampStack, 0, staBigger, 0, l);
+        staBigger[l] = new int[CHUNK_SIZE];
+        stampStack = staBigger;
     }
 
     public void resizeWorldCapacity(int newWorldCapacity) {

@@ -28,45 +28,46 @@
 package memory.trailing;
 
 import memory.IStateLong;
-import memory.trailing.trail.flatten.StoredLongTrail;
+import memory.trailing.trail.IStoredLongTrail;
 
-public final class StoredLong extends AbstractStoredObject implements IStateLong {
 
+/**
+ * A class implementing backtrackable long.
+ */
+public class StoredLong extends AbstractStoredObject implements IStateLong {
 
     private long currentValue;
-    protected final StoredLongTrail myTrail;
-
-    /**
-     * Constructs a stored search with an unknown initial value.
-     * Note: this constructor should not be used directly: one should instead
-     * use the IEnvironment factory
-     */
-
-    public StoredLong(final EnvironmentTrailing env) {
-        this(env, 0);
-    }
-
+    protected final IStoredLongTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.
      * Note: this constructor should not be used directly: one should instead
      * use the IEnvironment factory
      */
-
-    public StoredLong(final EnvironmentTrailing env, final long d) {
+    public StoredLong(final EnvironmentTrailing env, final long i) {
         super(env);
         myTrail = env.getLongTrail();
-        currentValue = d;
+        currentValue = i;
     }
 
+    @Override
+    public final long add(final long delta) {
+        long res = currentValue + delta;
+        set(currentValue + delta);
+        return res;
+    }
 
     @Override
-    public long get() {
+    public final long get() {
         return currentValue;
     }
 
 
-    public void set(final long y) {
+    /**
+     * Modifies the value and stores if needed the former value on the
+     * trailing stack.
+     */
+    public final void set(final long y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();
             if (this.worldStamp < wi) {
@@ -77,11 +78,6 @@ public final class StoredLong extends AbstractStoredObject implements IStateLong
         }
     }
 
-    public long add(final long delta) {
-        long r = delta + currentValue;
-        set(r);
-        return r;
-    }
 
     /**
      * Modifies the value without storing the former value on the trailing stack.
@@ -97,9 +93,8 @@ public final class StoredLong extends AbstractStoredObject implements IStateLong
 
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.valueOf(currentValue);
     }
-
-
 }
+

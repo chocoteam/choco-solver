@@ -28,15 +28,14 @@
 package memory.trailing.trail.flatten;
 
 import memory.structure.Operation;
-import memory.trailing.EnvironmentTrailing;
-import memory.trailing.trail.ITrailStorage;
+import memory.trailing.trail.IOperationTrail;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 feb. 2011
  */
-public class OperationTrail implements ITrailStorage {
+public class OperationTrail implements IOperationTrail {
 
 
     /**
@@ -72,7 +71,7 @@ public class OperationTrail implements ITrailStorage {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public OperationTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
+    public OperationTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
         maxUpdates = nUpdates;
         valueStack = new Operation[maxUpdates];
@@ -119,7 +118,7 @@ public class OperationTrail implements ITrailStorage {
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
+    public void worldCommit(int worldIndex) {
     }
 
     /**

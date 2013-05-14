@@ -28,16 +28,16 @@
 package memory.trailing;
 
 import memory.IStateInt;
-import memory.trailing.trail.AbstractStoredIntTrail;
+import memory.trailing.trail.IStoredIntTrail;
 
 
 /**
- * A class implementing backtrackable integers.
+ * A class implementing backtrackable int.
  */
 public class StoredInt extends AbstractStoredObject implements IStateInt {
 
     private int currentValue;
-    protected final AbstractStoredIntTrail myTrail;
+    protected final IStoredIntTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.

@@ -114,7 +114,7 @@ public class ParseAndSolve {
     protected long l = 1;
 
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
-    protected String dbproperties;
+    protected String dbproperties="";
 
     private boolean userinterruption = true;
 

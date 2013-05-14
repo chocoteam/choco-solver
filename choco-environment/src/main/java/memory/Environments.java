@@ -26,7 +26,6 @@
  */
 package memory;
 
-import memory.buffer.EnvironmentBuffering;
 import memory.copy.EnvironmentCopying;
 import memory.trailing.EnvironmentTrailing;
 
@@ -52,24 +51,10 @@ public enum Environments {
                     new EnvironmentCopying();
         }
     },
-    BUFFER() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentBuffering(false);
-        }
-    },
-    BUFFER_UNSAFE() {
-        @Override
-        public IEnvironment make() {
-            return
-                    new EnvironmentBuffering(true);
-        }
-    },
     DEFAULT() {
         @Override
         public IEnvironment make() {
-            return BUFFER.make();
+            return TRAIL.make();
         }
     };
 

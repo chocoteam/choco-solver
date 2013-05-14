@@ -31,12 +31,11 @@ package memory.copy;
 import memory.IEnvironment;
 import memory.IStateInt;
 
-/* 
- * Created by IntelliJ IDEA.
- * User: Julien
- * Date: 29 mars 2007
- * Since : Choco 2.0.0
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
 public class RcInt implements IStateInt, RecomputableElement {
 
@@ -44,29 +43,31 @@ public class RcInt implements IStateInt, RecomputableElement {
     private int currentValue;
     private int timeStamp;
 
+    public RcInt(EnvironmentCopying env) {
+        this(env, Integer.MAX_VALUE);
+    }
 
     public RcInt(EnvironmentCopying env, int i) {
         environment = env;
         currentValue = i;
-        environment.add(this);
+        env.getIntCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
 
 
     @Override
-    public final int add(int delta) {
+    public int add(int delta) {
         int res = currentValue + delta;
         set(res);
         return res;
     }
 
     @Override
-    public final int get() {
+    public int get() {
         return currentValue;
     }
 
-    public final void set(int y) {
-        //if (y != currentValue)
+    public void set(int y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
     }
@@ -78,30 +79,25 @@ public class RcInt implements IStateInt, RecomputableElement {
      * @param wstamp the stamp of the world in which the update is performed
      */
 
-    protected void _set(final int y, final int wstamp) {
+    public void _set(final int y, final int wstamp) {
         currentValue = y;
         timeStamp = wstamp;
     }
 
-    public final IEnvironment getEnvironment() {
+    public IEnvironment getEnvironment() {
         return environment;
     }
 
-    public final int deepCopy() {
+    public int deepCopy() {
         return currentValue;
     }
 
-
-    public final int getType() {
-        return INT;
-    }
-
-    public final int getTimeStamp() {
+    public int getTimeStamp() {
         return timeStamp;
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return String.valueOf(currentValue);
     }
 }

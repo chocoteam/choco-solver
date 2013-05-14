@@ -27,25 +27,11 @@
 
 package memory.trailing.trail.flatten;
 
-import memory.trailing.EnvironmentTrailing;
 import memory.trailing.StoredBool;
-import memory.trailing.trail.ITrailStorage;
+import memory.trailing.trail.IStoredBoolTrail;
 
 
-/**
- * Implementing storage of historical values for backtrackable integers.
- *
- * @see memory.trailing.trail.ITrailStorage
- */
-public final class StoredBoolTrail implements ITrailStorage {
-
-
-    /**
-     * Reference towards the overall environment
-     * (responsible for all memory management).
-     */
-
-    private final EnvironmentTrailing environment;
+public class StoredBoolTrail implements IStoredBoolTrail {
 
 
     /**
@@ -96,8 +82,7 @@ public final class StoredBoolTrail implements ITrailStorage {
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public StoredBoolTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
-        environment = env;
+    public StoredBoolTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
         maxUpdates = nUpdates;
         variableStack = new StoredBool[maxUpdates];
@@ -147,14 +132,14 @@ public final class StoredBoolTrail implements ITrailStorage {
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
+    public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
         //   updates of the committed world are scanned:
         //     if their stamp is the previous one (merged with the current one) -> remove the update (garbage collecting this position for the next update)
         //     otherwise update the worldStamp
-        final int startLevel = worldStartLevels[environment.getWorldIndex()];
-        final int prevWorld = environment.getWorldIndex() - 1;
+        final int startLevel = worldStartLevels[worldIndex];
+        final int prevWorld = worldIndex - 1;
         int writeIdx = startLevel;
         for (int level = startLevel; level < currentLevel; level++) {
             final StoredBool var = variableStack[level];
@@ -213,5 +198,5 @@ public final class StoredBoolTrail implements ITrailStorage {
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;
     }
-}
 
+}

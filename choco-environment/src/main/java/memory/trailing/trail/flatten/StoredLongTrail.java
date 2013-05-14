@@ -28,10 +28,10 @@
 package memory.trailing.trail.flatten;
 
 import memory.trailing.StoredLong;
-import memory.trailing.trail.ITrailStorage;
+import memory.trailing.trail.IStoredLongTrail;
 
 
-public class StoredLongTrail implements ITrailStorage {
+public class StoredLongTrail implements IStoredLongTrail {
 
 
     /**
@@ -132,8 +132,31 @@ public class StoredLongTrail implements ITrailStorage {
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
-        // TODO
+    public void worldCommit(int worldIndex) {
+        // principle:
+        //   currentLevel decreases to end of previous world
+        //   updates of the committed world are scanned:
+        //     if their stamp is the previous one (merged with the current one) -> remove the update (garbage collecting this position for the next update)
+        //     otherwise update the worldStamp
+        final int startLevel = worldStartLevels[worldIndex];
+        final int prevWorld = worldIndex - 1;
+        int writeIdx = startLevel;
+        for (int level = startLevel; level < currentLevel; level++) {
+            final StoredLong var = variableStack[level];
+            final long val = valueStack[level];
+            final int stamp = stampStack[level];
+            var.worldStamp = prevWorld;// update the stamp of the variable (current stamp refers to a world that no longer exists)
+            if (stamp != prevWorld) {
+                // shift the update if needed
+                if (writeIdx != level) {
+                    valueStack[writeIdx] = val;
+                    variableStack[writeIdx] = var;
+                    stampStack[writeIdx] = stamp;
+                }
+                writeIdx++;
+            }  //else:writeIdx is not incremented and the update will be discarded (since a good one is in prevWorld)
+        }
+        currentLevel = writeIdx;
     }
 
 

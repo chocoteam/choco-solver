@@ -28,57 +28,56 @@
 package memory.trailing;
 
 import memory.IStateDouble;
-import memory.trailing.trail.flatten.StoredDoubleTrail;
+import memory.trailing.trail.IStoredDoubleTrail;
 
 
 /**
- * A class implementing a backtrackable float variable.
+ * A class implementing backtrackable double.
  */
-public final class StoredDouble extends AbstractStoredObject implements IStateDouble {
-
-
-    /**
-     * Current value of the search.
-     */
+public class StoredDouble extends AbstractStoredObject implements IStateDouble {
 
     private double currentValue;
-
-    protected final StoredDoubleTrail myTrail;
+    protected final IStoredDoubleTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.
      * Note: this constructor should not be used directly: one should instead
      * use the IEnvironment factory
      */
-
-    public StoredDouble(EnvironmentTrailing env, double d) {
+    public StoredDouble(final EnvironmentTrailing env, final double i) {
         super(env);
-        currentValue = d;
-        worldStamp = env.getWorldIndex();
         myTrail = env.getDoubleTrail();
+        currentValue = i;
     }
 
+    @Override
+    public final double add(final double delta) {
+        double res = currentValue + delta;
+        set(currentValue + delta);
+        return res;
+    }
 
-    public double get() {
+    @Override
+    public final double get() {
         return currentValue;
     }
 
 
-    public void set(final double y) {
+    /**
+     * Modifies the value and stores if needed the former value on the
+     * trailing stack.
+     */
+    public final void set(final double y) {
         if (y != currentValue) {
-            if (this.worldStamp < environment.getWorldIndex()) {
+            final int wi = environment.getWorldIndex();
+            if (this.worldStamp < wi) {
                 myTrail.savePreviousState(this, currentValue, worldStamp);
-                worldStamp = environment.getWorldIndex();
+                worldStamp = wi;
             }
             currentValue = y;
         }
     }
 
-    public double add(final double delta) {
-        double r = delta + currentValue;
-        set(r);
-        return r;
-    }
 
     /**
      * Modifies the value without storing the former value on the trailing stack.
@@ -94,9 +93,8 @@ public final class StoredDouble extends AbstractStoredObject implements IStateDo
 
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.valueOf(currentValue);
     }
-
-
 }
+

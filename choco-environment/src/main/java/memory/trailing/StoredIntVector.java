@@ -28,7 +28,7 @@
 package memory.trailing;
 
 import memory.IStateIntVector;
-import memory.trailing.trail.flatten.StoredIntVectorTrail;
+import memory.trailing.trail.StoredIntVectorTrail;
 
 /**
  * Implements a backtrackable search vector.

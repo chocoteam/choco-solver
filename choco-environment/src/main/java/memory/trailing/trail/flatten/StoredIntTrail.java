@@ -27,17 +27,12 @@
 
 package memory.trailing.trail.flatten;
 
-import memory.trailing.EnvironmentTrailing;
 import memory.trailing.StoredInt;
-import memory.trailing.trail.AbstractStoredIntTrail;
+import memory.trailing.trail.IStoredIntTrail;
 
 
-/**
- * Implementing storage of historical values for backtrackable integers.
- *
- * @see memory.trailing.trail.ITrailStorage
- */
-public final class StoredIntTrail extends AbstractStoredIntTrail{
+public class StoredIntTrail implements IStoredIntTrail {
+
 
     /**
      * Stack of backtrackable search variables.
@@ -87,8 +82,7 @@ public final class StoredIntTrail extends AbstractStoredIntTrail{
      * @param nWorlds  maximal number of worlds that will be stored
      */
 
-    public StoredIntTrail(EnvironmentTrailing env, int nUpdates, int nWorlds) {
-        super(env);
+    public StoredIntTrail(int nUpdates, int nWorlds) {
         currentLevel = 0;
         maxUpdates = nUpdates;
         variableStack = new StoredInt[maxUpdates];
@@ -138,14 +132,14 @@ public final class StoredIntTrail extends AbstractStoredIntTrail{
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
+    public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
         //   updates of the committed world are scanned:
         //     if their stamp is the previous one (merged with the current one) -> remove the update (garbage collecting this position for the next update)
         //     otherwise update the worldStamp
-        final int startLevel = worldStartLevels[environment.getWorldIndex()];
-        final int prevWorld = environment.getWorldIndex() - 1;
+        final int startLevel = worldStartLevels[worldIndex];
+        final int prevWorld = worldIndex - 1;
         int writeIdx = startLevel;
         for (int level = startLevel; level < currentLevel; level++) {
             final StoredInt var = variableStack[level];
@@ -165,10 +159,12 @@ public final class StoredIntTrail extends AbstractStoredIntTrail{
         currentLevel = writeIdx;
     }
 
+
     /**
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
+
     public void savePreviousState(StoredInt v, int oldValue, int oldStamp) {
         valueStack[currentLevel] = oldValue;
         variableStack[currentLevel] = v;
@@ -181,6 +177,7 @@ public final class StoredIntTrail extends AbstractStoredIntTrail{
 
     private void resizeUpdateCapacity() {
         final int newCapacity = ((maxUpdates * 3) / 2);
+        System.out.printf("resize "+ newCapacity);
         // first, copy the stack of variables
         final StoredInt[] tmp1 = new StoredInt[newCapacity];
         System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
@@ -202,5 +199,5 @@ public final class StoredIntTrail extends AbstractStoredIntTrail{
         System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
         worldStartLevels = tmp;
     }
-}
 
+}

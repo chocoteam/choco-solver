@@ -61,7 +61,6 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
      */
 
     private final EnvironmentCopying environment;
-
     private int timeStamp;
 
 
@@ -87,7 +86,7 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
             this.elementData[i] = initialValue;
         }
         this.size = new RcInt(env, initialSize);
-        env.add(this);
+        env.getIntVectorCopy().add(this);
     }
 
 
@@ -103,7 +102,7 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
         this.elementData = new int[initialCapacity];
         System.arraycopy(entries, 0, this.elementData, 0, initialSize);
         this.size = new RcInt(env, initialSize);
-        env.add(this);
+        env.getIntVectorCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
 

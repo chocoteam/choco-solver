@@ -31,27 +31,26 @@ package memory.copy;
 import memory.IEnvironment;
 import memory.IStateLong;
 
-/*
- * Created by IntelliJ IDEA.
- * User: Julien
- * Date: 29 mars 2007
- * Since : Choco 2.0.0
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
-public final class RcLong implements IStateLong, RecomputableElement {
+public class RcLong implements IStateLong, RecomputableElement {
 
     private final EnvironmentCopying environment;
     private long currentValue;
     private int timeStamp;
 
     public RcLong(EnvironmentCopying env) {
-        this(env, UNKNOWN_LONG);
+        this(env, Long.MAX_VALUE);
     }
 
     public RcLong(EnvironmentCopying env, long i) {
         environment = env;
         currentValue = i;
-        environment.add(this);
+        env.getLongCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
 
@@ -80,7 +79,7 @@ public final class RcLong implements IStateLong, RecomputableElement {
      * @param wstamp the stamp of the world in which the update is performed
      */
 
-    protected void _set(final long y, final int wstamp) {
+    public void _set(final long y, final int wstamp) {
         currentValue = y;
         timeStamp = wstamp;
     }
@@ -91,11 +90,6 @@ public final class RcLong implements IStateLong, RecomputableElement {
 
     public long deepCopy() {
         return currentValue;
-    }
-
-
-    public int getType() {
-        return LONG;
     }
 
     public int getTimeStamp() {

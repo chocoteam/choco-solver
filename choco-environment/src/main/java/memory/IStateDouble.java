@@ -30,12 +30,13 @@ package memory;
 import java.io.Serializable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: julien
- * Date: 12 juil. 2007
- * Time: 10:18:42
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
 public interface IStateDouble extends Serializable {
+
     /**
      * Returns the current value.
      */
