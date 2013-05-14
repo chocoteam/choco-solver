@@ -107,6 +107,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      */
     public boolean removeNode(int x, ICause cause) throws ContradictionException {
         assert cause != null;
+		assert (x>=0 && x<getEnvelopGraph().getNbNodes());
         if (kernel.getActiveNodes().contain(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
@@ -141,6 +142,7 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
      */
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         assert cause != null;
+		assert (x>=0 && x<getEnvelopGraph().getNbNodes());
         if (envelop.getActiveNodes().contain(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {

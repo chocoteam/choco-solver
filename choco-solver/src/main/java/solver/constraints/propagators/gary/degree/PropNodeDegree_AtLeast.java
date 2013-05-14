@@ -40,7 +40,6 @@ import util.ESat;
 import util.objects.graphs.IGraph;
 import util.objects.graphs.Orientation;
 import util.objects.setDataStructures.ISet;
-import util.procedure.IntProcedure;
 import util.procedure.PairProcedure;
 
 /**
@@ -56,7 +55,6 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
 
     private GraphVar g;
     GraphDeltaMonitor gdm;
-    private IntProcedure enf_nodes_proc;
     private PairProcedure rem_arc_proc;
     private int[] degrees;
     private IncidentSet target;
@@ -72,34 +70,17 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     public PropNodeDegree_AtLeast(DirectedGraphVar graph, Orientation setType, int[] degrees) {
         super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         g = graph;
-        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        this.degrees = degrees;
+		this.degrees = degrees;
         switch (setType) {
             case SUCCESSORS:
                 target = new SNIS();
-                rem_arc_proc = new PairProcedure() {
-                    public void execute(int i, int j) throws ContradictionException {
-                        checkAtLeast(i);
-                    }
-                };
                 break;
             case PREDECESSORS:
                 target = new PIS();
-                rem_arc_proc = new PairProcedure() {
-                    public void execute(int i, int j) throws ContradictionException {
-                        checkAtLeast(j);
-                    }
-                };
                 break;
             default:
-                throw new UnsupportedOperationException("");
+                throw new UnsupportedOperationException();
         }
-        enf_nodes_proc = new IntProcedure() {
-            @Override
-            public void execute(int i) throws ContradictionException {
-                enforceNode(i);
-            }
-        };
     }
 
     public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int degree) {
@@ -110,20 +91,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
         target = new SNIS();
         g = graph;
-        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
-        this.degrees = degrees;
-        rem_arc_proc = new PairProcedure() {
-            public void execute(int i, int j) throws ContradictionException {
-                checkAtLeast(i);
-                checkAtLeast(j);
-            }
-        };
-        enf_nodes_proc = new IntProcedure() {
-            @Override
-            public void execute(int i) throws ContradictionException {
-                enforceNode(i);
-            }
-        };
+		this.degrees = degrees;
     }
 
     private static int[] buildArray(int degree, int n) {
@@ -141,26 +109,14 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         ISet act = g.getEnvelopGraph().getActiveNodes();
-        ISet kerAct = g.getKernelGraph().getActiveNodes();
         for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
             checkAtLeast(node);
-            if (kerAct.contain(node)) {
-                enforceNode(node);
-            }
         }
-        gdm.unfreeze();
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        gdm.freeze();
-        if ((mask & EventType.REMOVEARC.mask) != 0) {
-            gdm.forEachArc(rem_arc_proc, EventType.REMOVEARC);
-        }
-        if ((mask & EventType.ENFORCENODE.mask) != 0) {
-            gdm.forEachNode(enf_nodes_proc, EventType.ENFORCENODE);
-        }
-        gdm.unfreeze();
+		propagate(0);
     }
 
     //***********************************************************************************
@@ -197,24 +153,6 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
         if (size < degrees[i]) {
             g.removeNode(i, aCause);
         } else if (size == degrees[i] && g.getKernelGraph().getActiveNodes().contain(i) && ker.getSize() < size) {
-            for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
-                target.enforce(g, i, s, aCause);
-            }
-        }
-    }
-
-    /**
-     * When a node is enforced,
-     * if it has less than N successors/predecessors/neighbors then a contradiction should be raised
-     * if it has N successors/predecessors/neighbors in the envelop then they must figure in the kernel
-     */
-    private void enforceNode(int i) throws ContradictionException {
-        ISet nei = target.getSet(g.getEnvelopGraph(), i);
-        ISet ker = target.getSet(g.getKernelGraph(), i);
-        int size = nei.getSize();
-        if (size < degrees[i]) {
-            contradiction(g, "");
-        } else if (size == degrees[i] && ker.getSize() < size) {
             for (int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()) {
                 target.enforce(g, i, s, aCause);
             }

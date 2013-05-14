@@ -56,6 +56,7 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
     private int offSet;
     // random function
     private Random rd = new Random();
+	private final int NB_MAX_ITER = 15;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -83,10 +84,16 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
             }
         }
         if (rd.nextBoolean()) {
-            for (int i = 0; i < n; i++) {
-                filterFromPostDom(i);
-            }
-        } else {
+			if(n<NB_MAX_ITER){
+				for (int i = 0; i < n; i++) {
+					filterFromPostDom(i);
+				}
+			}else{
+				for (int i = 0; i < NB_MAX_ITER; i++) {
+					filterFromPostDom(rd.nextInt(n));
+				}
+			}
+		} else {
             filterFromPostDom(rd.nextInt(n));
         }
     }

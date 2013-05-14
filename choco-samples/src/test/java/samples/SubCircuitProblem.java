@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -35,19 +35,30 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.propagators.gary.basic.PropConnected;
+import solver.constraints.propagators.gary.basic.PropKCC;
+import solver.constraints.propagators.gary.basic.PropKNodes;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtLeast;
+import solver.constraints.propagators.gary.degree.PropNodeDegree_AtMost;
 import solver.constraints.propagators.gary.path.PropIntVarChanneling;
+import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
+import solver.search.strategy.selectors.graph.arcs.RandomArc;
+import solver.search.strategy.selectors.graph.nodes.RandomNode;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.DirectedGraphVar;
+import util.objects.graphs.Orientation;
 import util.objects.setDataStructures.SetType;
 
-/**
- * Parse and solve a Hamiltonian Cycle Problem instance of the TSPLIB
- */
-public class HamiltonianCircuitProblem extends AbstractProblem {
+import java.util.Random;
+
+public class SubCircuitProblem extends AbstractProblem {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -57,13 +68,11 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
 	private int n;
 	private DirectedGraphVar graph;
-	private IntVar[] integers;
+	private IntVar circuitLength;
 	private boolean[][] adjacencyMatrix;
 	private Constraint gc;
 	// model parameters
 	private long seed;
-	private boolean strongFilter;
-	private int intAllDiff;//0=none; 1=NEQ; 2=BC; 3=AC;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -87,22 +96,15 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		basicModel();
-		Constraint[] cstrs = new Constraint[]{gc};
-		if (intAllDiff > 0) {
-			cstrs = new Constraint[]{gc, integerAllDiff()};
-		}
-		solver.post(cstrs);
-	}
-
-	private void basicModel() {
 		// create model
-		graph = new DirectedGraphVar("G", solver, n, gt, SetType.LINKED_LIST, true);
+		graph = new DirectedGraphVar("G", solver, n, gt, SetType.LINKED_LIST, false);
+		circuitLength = VariableFactory.bounded("length",0,n,solver);
 		try {
-			graph.getKernelGraph().activateNode(n - 1);
-			for (int i = 0; i < n - 1; i++) {
-				graph.getKernelGraph().activateNode(i);
-				for (int j = 1; j < n; j++) {
+			for (int i = 0; i < n; i++) {
+				if(!adjacencyMatrix[i][i]){
+					graph.getKernelGraph().getActiveNodes().add(i);
+				}
+				for (int j = 0; j < n; j++) {
 					if (adjacencyMatrix[i][j]) {
 						graph.getEnvelopGraph().addArc(i, j);
 					}
@@ -112,47 +114,16 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = GraphConstraintFactory.hamiltonianPath(graph, 0, n - 1, strongFilter);
-	}
-
-	private Constraint integerAllDiff() {
-		integers = new IntVar[n];
-		try {
-			int i = n - 1;
-			if (intAllDiff != 3)
-				integers[i] = VariableFactory.bounded("vlast", n, n, solver);
-			else
-				integers[i] = VariableFactory.enumerated("vlast", n, n, solver);
-			for (i = 0; i < n - 1; i++) {
-				if (intAllDiff != 3) {
-					integers[i] = VariableFactory.bounded("v" + i, 1, n - 1, solver);
-				} else {
-					integers[i] = VariableFactory.enumerated("v" + i, 1, n - 1, solver);
-				}
-				for (int j = 1; j < n; j++) {
-					if (!adjacencyMatrix[i][j]) {
-						integers[i].removeValue(j, Cause.Null);
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		gc.addPropagators(new PropIntVarChanneling(integers, graph));
-		String type = "AC";
-		if (intAllDiff == 2) {
-			type = "BC";
-		}
-		if (intAllDiff == 1) {
-			type = "NEQS";
-		}
-		return IntConstraintFactory.alldifferent(integers, type);
-	}
-
-	private void configParameters(int ad, boolean strong) {
-		intAllDiff = ad;
-		strongFilter = strong;
+		gc = new Constraint(new Variable[]{graph,circuitLength},solver);
+		gc.setPropagators(
+				new PropKNodes(graph, circuitLength),
+				new PropKCC(graph,VariableFactory.fixed(1,solver)),
+				new PropNodeDegree_AtLeast(graph, Orientation.SUCCESSORS, 1),
+				new PropNodeDegree_AtLeast(graph, Orientation.PREDECESSORS, 1),
+				new PropNodeDegree_AtMost(graph, Orientation.SUCCESSORS, 1),
+				new PropNodeDegree_AtMost(graph, Orientation.PREDECESSORS, 1)
+		);
+		solver.post(gc);
 	}
 
 	//***********************************************************************************
@@ -162,9 +133,11 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		AbstractStrategy strategy;
-		strategy = GraphStrategyFactory.graphRandom(graph, seed);
-		solver.set(strategy);
+		AbstractStrategy arcs = GraphStrategyFactory.graphStrategy(graph,null,new RandomArc(graph,seed), GraphStrategy.NodeArcPriority.ARCS);
+		AbstractStrategy nodes = GraphStrategyFactory.graphStrategy(graph,new RandomNode(graph,seed), null, GraphStrategy.NodeArcPriority.NODES_THEN_ARCS);
+		solver.set(new StaticStrategiesSequencer(arcs,nodes));
+//		solver.set(GraphStrategyFactory.graphRandom(graph,seed));
+//		solver.set(GraphStrategyFactory.graphLexico(graph));
 	}
 
 	@Override
@@ -173,8 +146,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 	}
 
 	@Override
-	public void prettyOut() {
-	}
+	public void prettyOut() {}
 
 	//***********************************************************************************
 	// TESTS
@@ -271,20 +243,22 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 	}
 
 	private static void testModels(boolean[][] m, long seed) {
+		Random rd = new Random(seed);
+		for(int i=0;i<m.length;i++){
+			m[i][i] = rd.nextBoolean();
+		}
 		long nbSols = referencemodel(m,0);
 		if (nbSols == -1) {
 			throw new UnsupportedOperationException();
 		}
 		assert nbSols == referencemodel(m,12);
 		System.out.println(nbSols + " sols expected");
-		boolean[][] matrix = transformMatrix(m);
 		boolean[] vls = new boolean[]{false, true};
 		gt = SetType.SWAP_ARRAY;
 		for (int i = 0; i < 4; i++) {
 			for (boolean p : vls) {
-				HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
-				hcp.set(matrix, seed);
-				hcp.configParameters(i, p);
+				SubCircuitProblem hcp = new SubCircuitProblem();
+				hcp.set(m, seed);
 				hcp.execute();
 				Assert.assertEquals(nbSols, hcp.solver.getMeasures().getSolutionCount(), "nb sol incorrect " + i + " ; " + p + " ; " + gt);
 			}
@@ -294,22 +268,11 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		System.gc();
 	}
 
-	private static boolean[][] transformMatrix(boolean[][] m) {
-		int n = m.length + 1;
-		boolean[][] matrix = new boolean[n][n];
-		for (int i = 0; i < n - 1; i++) {
-			for (int j = 1; j < n - 1; j++) {
-				matrix[i][j] = m[i][j];
-			}
-			matrix[i][n - 1] = m[i][0];
-		}
-		return matrix;
-	}
-
 	private static long referencemodel(boolean[][] matrix, int offset) {
 		int n = matrix.length;
 		Solver solver = new Solver();
 		IntVar[] vars = VariableFactory.enumeratedArray("", n, offset, n - 1 + offset, solver);
+		IntVar length = VariableFactory.bounded("length",0,n,solver);
 		try {
 			for (int i = 0; i < n; i++) {
 				for (int j = 0; j < n; j++) {
@@ -321,7 +284,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem {
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}
-		solver.post(IntConstraintFactory.circuit(vars, offset));
+		solver.post(IntConstraintFactory.subcircuit(vars, offset, length));
 		long nbsol = solver.findAllSolutions();
 		if (nbsol == 0) {
 			return -1;
