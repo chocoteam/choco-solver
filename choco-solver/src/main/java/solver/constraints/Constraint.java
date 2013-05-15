@@ -34,8 +34,8 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
 import solver.variables.BoolVar;
+import solver.variables.VF;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 import util.ESat;
 import util.tools.StringUtils;
 
@@ -252,8 +252,8 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 */
 	public BoolVar reif() {
 		if(boolReif==null){
-			boolReif = VariableFactory.bool(StringUtils.randomName(),getSolver());
-			getSolver().post(IntConstraintFactory.implies(boolReif,this,getOpposite()));
+			boolReif = VF.bool(StringUtils.randomName(), getSolver());
+			getSolver().post(ICF.implies(boolReif,this,getOpposite()));
 		}
 		return boolReif;
 	}
@@ -266,7 +266,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public Constraint getOpposite() {
 		reif();
 		if(opposite == null){
-			opposite = new DefaultOpposite(this,VariableFactory.not(boolReif));
+			opposite = new DefaultOpposite(this,boolReif.not());
 		}
 		return opposite;
 	}
