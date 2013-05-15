@@ -29,6 +29,7 @@ package solver.variables;
 
 import solver.Solver;
 import solver.exception.SolverException;
+import solver.variables.fast.BitsetArrayIntVarImpl;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
@@ -180,7 +181,14 @@ public enum VariableFactory {
         } else if (MIN == 0 && MAX == 1) {
             return new BooleanBoolVarImpl(NAME, SOLVER);
         } else {
-            return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
+//            return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
+			int[] vals = new int[MAX-MIN+1];
+			int val = MIN;
+			for(int i=0;i<vals.length;i++){
+				vals[i] = val;
+				val++;
+			}
+			return new BitsetArrayIntVarImpl(NAME,vals,SOLVER);
         }
     }
 
@@ -228,7 +236,7 @@ public enum VariableFactory {
      * Its initial domain is VALUES
      *
      * @param NAME   name of the variable
-     * @param VALUES initial domain
+     * @param VALUES initial domain (values must be sorted increasingly)
      * @param SOLVER solver involving the variable
      * @return an integer variable with an enumerated domain, initialized to VALUES
      */
@@ -237,7 +245,8 @@ public enum VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-            BitsetIntVarImpl var = new BitsetIntVarImpl(NAME, VALUES, SOLVER);
+//            BitsetIntVarImpl var = new BitsetIntVarImpl(NAME, VALUES, SOLVER);
+			BitsetArrayIntVarImpl var = new BitsetArrayIntVarImpl(NAME,VALUES,SOLVER);
             //var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }

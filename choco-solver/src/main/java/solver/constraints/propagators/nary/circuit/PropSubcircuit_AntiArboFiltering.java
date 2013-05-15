@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.nary.circuit;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,9 +55,8 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
     // offset (usually 0 but 1 with MiniZinc)
     private int offSet;
     // random function
-    private Random rd = new Random();
-    private TIntArrayList rootCandidates = new TIntArrayList();
-	private final int NB_MAX_ITER = 15;
+    private Random rd = new Random(0);
+    private int[] rootCandidates;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -70,6 +68,7 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);
         domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+		rootCandidates = new int[n];
     }
 
     //***********************************************************************************
@@ -84,26 +83,14 @@ public class PropSubcircuit_AntiArboFiltering extends Propagator<IntVar> {
                 vars[i].updateUpperBound(n - 1 + offSet, aCause);
             }
         }
-        rootCandidates.clear();
+        int size = 0;
         for (int i = 0; i < n; i++) {
             if (!vars[i].contains(i + offSet)) {
-                rootCandidates.add(i);
+                rootCandidates[size++] = i;
             }
         }
-        if (rootCandidates.size() > 0) {
-            if (rd.nextBoolean()) {
-				if(rootCandidates.size()<NB_MAX_ITER){
-					for (int i = rootCandidates.size() - 1; i >= 0; i--) {
-						filterFromPostDom(rootCandidates.get(i));
-					}
-				}else{
-					for(int k=NB_MAX_ITER;k>=0;k--){
-						filterFromPostDom(rootCandidates.get(rd.nextInt(rootCandidates.size())));
-					}
-				}
-            } else {
-                filterFromPostDom(rootCandidates.get(rd.nextInt(rootCandidates.size())));
-            }
+        if (size > 0) {
+			filterFromPostDom(rootCandidates[rd.nextInt(size)]);
         }
     }
 

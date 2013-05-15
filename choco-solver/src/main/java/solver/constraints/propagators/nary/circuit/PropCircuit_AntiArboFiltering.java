@@ -55,8 +55,8 @@ public class PropCircuit_AntiArboFiltering extends Propagator<IntVar> {
     // offset (usually 0 but 1 with MiniZinc)
     private int offSet;
     // random function
-    private Random rd = new Random();
-	private final int NB_MAX_ITER = 15;
+    private Random rd = new Random(0);
+	private final int NB_MAX_ITER = 10;
 
     //***********************************************************************************
     // CONSTRUCTORS

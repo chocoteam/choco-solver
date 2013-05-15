@@ -306,7 +306,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        boolean change;
         ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
@@ -328,23 +327,19 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
                 }
                 VALUES.clear(old - OFFSET, aValue);
                 LB.set(VALUES.nextSetBit(aValue));
-                int _size = SIZE.get();
-                int card = VALUES.cardinality();
-                SIZE.set(card);
-                change = _size - card > 0;
-
+				assert SIZE.get()>VALUES.cardinality();
+                SIZE.set(VALUES.cardinality());
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
                         cause = Cause.Null;
                     }
                 }
-                assert (change);
                 this.notifyPropagators(e, cause);
                 if (Configuration.PLUG_EXPLANATION){
                     solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 }
-                return change;
+                return true;
 
             }
         }
@@ -371,7 +366,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        boolean change;
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
@@ -392,23 +386,19 @@ public final class BitsetIntVarImpl extends AbstractVariable<IEnumDelta, IntVar<
                 }
                 VALUES.clear(aValue + 1, old - OFFSET + 1);
                 UB.set(VALUES.prevSetBit(aValue));
-                int _size = SIZE.get();
-                int card = VALUES.cardinality();
-                SIZE.set(card);
-                change = _size - card > 0;
-
-                if (card == 1) {
+				assert SIZE.get()>VALUES.cardinality();
+                SIZE.set(VALUES.cardinality());
+                if (instantiated()) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
                         cause = Cause.Null;
                     }
                 }
-                assert (change);
                 this.notifyPropagators(e, cause);
                 if (Configuration.PLUG_EXPLANATION){
                     solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 }
-                return change;
+                return true;
             }
         }
         return false;

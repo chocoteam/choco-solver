@@ -334,8 +334,8 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testTree() {
-		for (int n = 2; n < 25; n ++) {
-			for (int i = 0; i < 50; i++) {
+		for (int n = 2; n < 25; n += 5) {
+			for (int i = 0; i < 25; i++) {
 				long seed = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, true);
                 CorrectnessChecker.checkCorrectness(Modeler.modelTree, n, -n / 2, 2 * n, seed, false);
@@ -345,7 +345,7 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testCircuit() {
-		for (int n = 2; n < 25; n ++) {
+		for (int n = 2; n < 25; n +=5) {
 			for (int i = 0; i < 50; i++) {
 				long seed = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelCircuit, n, 0, n, seed, true);
@@ -355,7 +355,7 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testSubcircuit() {
-		for (int n = 2; n < 25; n ++) {
+		for (int n = 2; n < 25; n += 5) {
 			for (int i = 0; i < 50; i++) {
 				long seed = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelSubcircuit, n, 0, n - 1, seed, true);
@@ -365,8 +365,8 @@ public class TestCorrectness {
 
     @Test(groups = "1m")
     public void testDiffn() {
-		for (int n = 2; n < 25; n ++) {
-			for (int i = 0; i < 50; i++) {
+		for (int n = 2; n < 25; n += 5) {
+			for (int i = 0; i < 30; i++) {
 				long seed = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelDiffn, 4 * n, 1, n * 2, seed, true);
             }
@@ -378,8 +378,8 @@ public class TestCorrectness {
 		int nBugSweep = 32;
 		long seedBugSweep = 1368003588936l;
 		CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * nBugSweep + 1, 1, nBugSweep, seedBugSweep, true);
-		for (int n = 2; n < 25; n ++) {
-			for (int i = 0; i < 50; i++) {
+		for (int n = 2; n < 25; n += 5) {
+			for (int i = 0; i < 30; i++) {
 				long seed = System.currentTimeMillis();
 				System.out.println("n = "+n);
 				System.out.println("seed = "+seed);
