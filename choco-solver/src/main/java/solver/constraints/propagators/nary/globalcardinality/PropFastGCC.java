@@ -158,29 +158,25 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     private void filter() throws ContradictionException {
         boolean again = false;
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
-            vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
-            vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
+            again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
+            again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
             if (vars[i].instantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
-                        if (vars[j].instantiateTo(values[i], aCause)) {
-                            again = true;
-                        }
+                        again |= vars[j].instantiateTo(values[i], aCause);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].getSize() == vars[n + i].getUB()) {
                     for (int var = possibles[i].getFirstElement(); var >= 0; var = possibles[i].getNextElement()) {
-                        if (vars[var].removeValue(values[i], aCause)) {
-                            again = true;
-                        }
+                        again |= vars[var].removeValue(values[i], aCause);
                     }
                     possibles[i].clear();
                     valueToCompute.remove(i);//value[i] restriction entailed
@@ -189,9 +185,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         }
         // manage holes in bounded variables
         if (boundVar.size() > 0) {
-            if (filterBounds()) {
-                again = true;
-            }
+            again |= filterBounds();
         }
         if (again) {// fix point
             propagate(EventType.CUSTOM_PROPAGATION.mask);
