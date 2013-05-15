@@ -28,82 +28,29 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateDouble;
 
-/*
- * Created by IntelliJ IDEA.
- * User: Julien
- * Date: 29 mars 2007
- * Since : Choco 2.0.0
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
-public final class RcDouble implements IStateDouble, RecomputableElement {
+public class RcDouble extends IStateDouble {
 
-    private final EnvironmentCopying environment;
-    private double currentValue;
-    private int timeStamp;
 
     public RcDouble(EnvironmentCopying env) {
-        this(env, Double.MAX_VALUE);
+        this(env, Double.POSITIVE_INFINITY);
     }
 
     public RcDouble(EnvironmentCopying env, double i) {
-        environment = env;
-        currentValue = i;
-        environment.add(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public double add(double delta) {
-        double r = delta + currentValue;
-        set(r);
-        return r;
+        super(env, i);
+        env.getDoubleCopy().add(this);
     }
 
     @Override
-    public double get() {
-        return currentValue;
-    }
-
     public void set(double y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    protected void _set(final double y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public double deepCopy() {
-        return currentValue;
-    }
-
-
-    public int getType() {
-        return DOUBLE;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

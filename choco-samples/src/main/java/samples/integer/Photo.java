@@ -78,10 +78,7 @@ public class Photo extends AbstractProblem {
 
             solver.post(
                     IntConstraintFactory.implies(viols[i],
-                            IntConstraintFactory.arithm(dist[i], "<=", 2)));
-
-            solver.post(
-                    IntConstraintFactory.implies(VariableFactory.not(viols[i]),
+                            IntConstraintFactory.arithm(dist[i], "<=", 2),
                             IntConstraintFactory.arithm(dist[i], ">=", 1)));
         }
         solver.post(IntConstraintFactory.sum(viols, violations));

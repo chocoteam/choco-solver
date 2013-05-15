@@ -47,7 +47,7 @@ public class RcObject implements IStateObject, RecomputableElement {
     public RcObject(EnvironmentCopying env, Object obj) {
         environment = env;
         currentObject = obj;
-        environment.add(this);
+        env.getObjectCopy().add(this);
         timeStamp = environment.getWorldIndex();
     }
 
@@ -67,7 +67,7 @@ public class RcObject implements IStateObject, RecomputableElement {
      * @param wstamp the stamp of the world in which the update is performed
      */
 
-    protected void _set(final Object y, final int wstamp) {
+    public void _set(final Object y, final int wstamp) {
         currentObject = y;
         timeStamp = wstamp;
     }

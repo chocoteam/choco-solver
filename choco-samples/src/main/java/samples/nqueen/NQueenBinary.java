@@ -69,6 +69,7 @@ public class NQueenBinary extends AbstractNQueen {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
+//        SearchMonitorFactory.log(solver, true, false);
     }
 
     public static void main(String[] args) {

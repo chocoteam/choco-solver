@@ -30,64 +30,89 @@ package memory;
 import java.io.Serializable;
 
 /**
- * Describes an integer with states (describing some history of the data
- * structure).
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
-public interface IStateInt extends Serializable {
-    /**
-     * Value for an unknown integer.
-     */
+public abstract class IStateInt implements Serializable {
 
-    int UNKNOWN_INT = Integer.MAX_VALUE;
+    protected final IEnvironment environment;
+    protected int currentValue;
+    protected int timeStamp;
 
-
-    /**
-     * Minimum value an integer can be equal to.
-     */
-
-    int MININT = Integer.MIN_VALUE;
-
+    public IStateInt(IEnvironment env, int i) {
+        environment = env;
+        currentValue = i;
+        timeStamp = environment.getWorldIndex();
+    }
 
     /**
-     * Maximum value an integer can be equal to.
+     * Returns the current value.
      */
-
-    int MAXINT = Integer.MAX_VALUE - 1;
-
-
-    /**
-     * Returns the current value according to the current world.
-     *
-     * @return The current value of the storable variable.
-     */
-
-    int get();
+    public final int get() {
+        return currentValue;
+    }
 
 
     /**
      * Modifies the value and stores if needed the former value on the
      * trailing stack.
-     *
-     * @param y the new value of the variable.
      */
-    void set(int y);
+
+    public abstract void set(int y);
 
     /**
-     * Modifying a StoredInt by an increment.
+     * modifying a StoredInt by an increment
      *
-     * @param delta the value to add to the current value.
+     * @param delta
      * @return the new value
      */
-    int add(int delta);
+    public final int add(int delta) {
+        int res = currentValue + delta;
+        set(res);
+        return res;
+    }
 
     /**
-     * Retrieving the environment.
+     * Modifies the value without storing the former value on the trailing stack.
      *
-     * @return the environment associated to this variable (the object
-     *         responsible to manage worlds and storable variables).
+     * @param y      the new value
+     * @param wstamp the stamp of the world in which the update is performed
      */
 
-    IEnvironment getEnvironment();
+    public void _set(final int y, final int wstamp) {
+        currentValue = y;
+        timeStamp = wstamp;
+    }
 
+    /**
+     * Make a deep copy of this.
+     *
+     * @return a long
+     */
+    public final int deepCopy() {
+        return currentValue;
+    }
+
+    public int getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void overrideTimeStamp(int aTimeStamp) {
+        this.timeStamp = aTimeStamp;
+    }
+
+    /**
+     * Retrieving the environment
+     */
+    public IEnvironment getEnvironment() {
+        return environment;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.valueOf(currentValue);
+    }
 }
-

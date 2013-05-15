@@ -28,78 +28,39 @@
 package memory.trailing;
 
 import memory.IStateLong;
-import memory.trailing.trail.StoredLongTrail;
-
-public final class StoredLong extends AbstractStoredObject implements IStateLong {
+import memory.trailing.trail.IStoredLongTrail;
 
 
-    private long currentValue;
-    protected final StoredLongTrail myTrail;
+/**
+ * A class implementing backtrackable long.
+ */
+public class StoredLong extends IStateLong {
 
-    /**
-     * Constructs a stored search with an unknown initial value.
-     * Note: this constructor should not be used directly: one should instead
-     * use the IEnvironment factory
-     */
-
-    public StoredLong(final EnvironmentTrailing env) {
-        this(env, 0);
-    }
-
+    protected final IStoredLongTrail myTrail;
 
     /**
      * Constructs a stored search with an initial value.
      * Note: this constructor should not be used directly: one should instead
      * use the IEnvironment factory
      */
-
-    public StoredLong(final EnvironmentTrailing env, final long d) {
-        super(env);
+    public StoredLong(final EnvironmentTrailing env, final long i) {
+        super(env, i);
         myTrail = env.getLongTrail();
-        currentValue = d;
     }
 
-
-    @Override
-    public long get() {
-        return currentValue;
-    }
-
-
-    public void set(final long y) {
+    /**
+     * Modifies the value and stores if needed the former value on the
+     * trailing stack.
+     */
+    public final void set(final long y) {
         if (y != currentValue) {
             final int wi = environment.getWorldIndex();
-            if (this.worldStamp < wi) {
-                myTrail.savePreviousState(this, currentValue, worldStamp);
-                worldStamp = wi;
+            if (this.timeStamp < wi) {
+                myTrail.savePreviousState(this, currentValue, timeStamp);
+                timeStamp = wi;
             }
             currentValue = y;
         }
     }
-
-    public long add(final long delta) {
-        long r = delta + currentValue;
-        set(r);
-        return r;
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    public void _set(final long y, final int wstamp) {
-        currentValue = y;
-        worldStamp = wstamp;
-    }
-
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
-    }
-
-
 }
+

@@ -32,24 +32,75 @@ import java.io.Serializable;
 /**
  * Describes an search vector with states (describing some history of the data structure).
  */
-public interface IStateDoubleVector extends Serializable {
+public abstract class IStateDoubleVector implements Serializable {
 
     /**
      * Minimal capacity of a vector
      */
-    int MIN_CAPACITY = 8;
+    public static final int MIN_CAPACITY = 8;
+
+    /**
+     * Contains the elements of the vector.
+     */
+
+    protected double[] elementData;
+
+    /**
+     * A backtrackable search with the size of the vector.
+     */
+
+    protected IStateInt size;
+
+
+    /**
+     * The current environment.
+     */
+
+    protected final IEnvironment environment;
+
+
+    protected IStateDoubleVector(IEnvironment env, int initialSize, double initialValue) {
+        int initialCapacity = MIN_CAPACITY;
+        if (initialCapacity < initialSize)
+            initialCapacity = initialSize;
+
+        this.environment = env;
+        this.elementData = new double[initialCapacity];
+        for (int i = 0; i < initialSize; i++) {
+            this.elementData[i] = initialValue;
+        }
+        this.size = env.makeInt(initialSize);
+    }
+
+    protected IStateDoubleVector(IEnvironment env, double[] entries) {
+        int initialCapacity = MIN_CAPACITY;
+        int initialSize = entries.length;
+
+        if (initialCapacity < initialSize)
+            initialCapacity = initialSize;
+
+        this.environment = env;
+        this.elementData = new double[initialCapacity];
+        System.arraycopy(entries, 0, this.elementData, 0, initialSize);
+        this.size = env.makeInt(initialSize);
+    }
 
     /**
      * Returns the current size of the stored search vector.
      */
 
-    int size();
+    public final int size() {
+        return size.get();
+    }
+
 
     /**
      * Checks if the vector is empty.
      */
 
-    boolean isEmpty();
+    public final boolean isEmpty() {
+        return (size.get() == 0);
+    }
 
     /**
      * Adds a new search at the end of the vector.
@@ -57,7 +108,7 @@ public interface IStateDoubleVector extends Serializable {
      * @param i The search to add.
      */
 
-    void add(double i);
+    public abstract void add(double i);
 
 
     /**
@@ -66,7 +117,7 @@ public interface IStateDoubleVector extends Serializable {
      * @param i The search to remove.
      */
 
-    void remove(int i);
+    public abstract void remove(int i);
 
 
     /**
@@ -74,13 +125,19 @@ public interface IStateDoubleVector extends Serializable {
      * does nothing when called on an empty vector
      */
 
-    void removeLast();
+    public abstract void removeLast();
+
 
     /**
      * Returns the <code>index</code>th element of the vector.
      */
 
-    double get(int index);
+    public final double get(int index) {
+        if (rangeCheck(index)) {
+            return elementData[index];
+        }
+        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
+    }
 
     /**
      * return the indexth element of the vector without an bound check.
@@ -88,15 +145,21 @@ public interface IStateDoubleVector extends Serializable {
      * @param index index
      * @return the element
      */
-    double quickGet(int index);
+    public final double quickGet(int index) {
+        assert (rangeCheck(index));
+        return elementData[index];
+    }
 
+    protected boolean rangeCheck(int index) {
+        return index < size.get() && index >= 0;
+    }
 
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code> and returns
      * the old value
      */
 
-    double set(int index, double val);
+    public abstract double set(int index, double val);
 
     /**
      * Unsafe setter => don't do bound verification
@@ -105,5 +168,12 @@ public interface IStateDoubleVector extends Serializable {
      * @param val   the new value
      * @return the old value
      */
-    double quickSet(int index, double val);
+    public abstract double quickSet(int index, double val);
+
+
+    public double[] deepCopy() {
+        double[] ret = new double[size.get()];
+        System.arraycopy(elementData, 0, ret, 0, size.get());
+        return ret;
+    }
 }

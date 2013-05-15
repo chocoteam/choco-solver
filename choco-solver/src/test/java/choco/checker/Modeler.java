@@ -52,6 +52,7 @@ public interface Modeler {
 
     Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters);
 
+    String name();
 
     Modeler modelEqAC = new Modeler() {
         @Override
@@ -76,6 +77,11 @@ public interface Modeler {
             s.set(strategy);
 
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelEqAC";
         }
     };
 
@@ -103,6 +109,11 @@ public interface Modeler {
             s.set(strategy);
 
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelInverseChannelingAC";
         }
     };
 
@@ -140,6 +151,11 @@ public interface Modeler {
 
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelInverseChannelingBounds";
+        }
     };
 
     Modeler modelNeqAC = new Modeler() {
@@ -162,6 +178,11 @@ public interface Modeler {
 
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelNeqAC";
+        }
     };
 
     Modeler modelAllDiffAC = new Modeler() {
@@ -182,6 +203,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelAllDiffAC";
         }
     };
 
@@ -204,6 +230,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelAllDiffBC";
+        }
     };
 
     Modeler modelAllDiffGraph = new Modeler() {
@@ -225,6 +256,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelAllDiffGraph";
+        }
     };
 
     Modeler modelAllDiffGraphBc = new Modeler() {
@@ -245,6 +281,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelAllDiffGraphBc";
         }
     };
 
@@ -275,6 +316,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelGCC";
+        }
     };
 
     Modeler modelTimes = new Modeler() {
@@ -296,6 +342,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelTimes";
+        }
     };
 
     Modeler modelAbsolute = new Modeler() {
@@ -316,6 +367,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelAbsolute";
         }
     };
 
@@ -352,6 +408,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelCountBC";
+        }
     };
 
     Modeler modelCountAC = new Modeler() {
@@ -387,6 +448,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelCountAC";
+        }
     };
 
     Modeler modelLexAC = new Modeler() {
@@ -412,6 +478,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelLexAC";
         }
     };
 
@@ -443,6 +514,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelLexChainAC";
+        }
     };
 
     Modeler modelNthBC = new Modeler() {
@@ -463,6 +539,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelNthBC";
         }
     };
 
@@ -488,6 +569,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelAmongBC";
+        }
     };
 
     Modeler modelAmongAC = new Modeler() {
@@ -511,6 +597,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelAmongAC";
         }
     };
 
@@ -536,6 +627,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelNValues";
         }
     };
 
@@ -567,6 +663,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelGCC_alldiff";
+        }
     };
 
     Modeler modelTree = new Modeler() {
@@ -593,6 +694,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelTree";
+        }
     };
 
     Modeler modelCircuit = new Modeler() {
@@ -612,6 +718,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelCircuit";
+        }
     };
 
     Modeler modelSubcircuit = new Modeler() {
@@ -630,6 +741,11 @@ public interface Modeler {
             s.post(ctrs);
             s.set(strategy);
             return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelSubcircuit";
         }
     };
 
@@ -664,6 +780,11 @@ public interface Modeler {
             s.set(strategy);
             return s;
         }
+
+        @Override
+        public String name() {
+            return "modelDiffn";
+        }
     };
 
     Modeler modelCumulative = new Modeler() {
@@ -693,6 +814,11 @@ public interface Modeler {
             solver.post(ctrs);
             solver.set(strategy);
             return solver;
+        }
+
+        @Override
+        public String name() {
+            return "modelCumulative";
         }
     };
 }

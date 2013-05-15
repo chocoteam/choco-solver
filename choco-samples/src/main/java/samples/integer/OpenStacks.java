@@ -108,11 +108,13 @@ public class OpenStacks extends AbstractProblem {
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
-                solver.post(IntConstraintFactory.implies(btmp[0], IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver))));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[0]), IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
+                solver.post(IntConstraintFactory.implies(btmp[0],
+                        IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
+                        IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
 
-                solver.post(IntConstraintFactory.implies(btmp[1], IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver))));
-                solver.post(IntConstraintFactory.implies(VariableFactory.not(btmp[1]), IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
+                solver.post(IntConstraintFactory.implies(btmp[1],
+                        IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
+                        IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
                 solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
             }
         }

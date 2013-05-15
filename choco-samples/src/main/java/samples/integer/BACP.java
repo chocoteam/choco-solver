@@ -103,10 +103,7 @@ public class BACP extends AbstractProblem {
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
                         IntConstraintFactory.implies(x[i][j],
-                                IntConstraintFactory.arithm(course_period[j], "=", i))
-                );
-                solver.post(
-                        IntConstraintFactory.implies(VariableFactory.not(x[i][j]),
+                                IntConstraintFactory.arithm(course_period[j], "=", i),
                                 IntConstraintFactory.arithm(course_period[j], "!=", i))
                 );
             }
