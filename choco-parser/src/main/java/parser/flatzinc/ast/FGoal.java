@@ -41,7 +41,6 @@ import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.search.strategy.selectors.variables.DomOverWDeg;
@@ -121,9 +120,9 @@ public class FGoal {
 //                solver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
                 aSolver.set(
-                        new StrategiesSequencer(aSolver.getEnvironment(),
-                                strategy,
-                                IntStrategyFactory.random(ivars, gc.seed))
+//                        new StrategiesSequencer(aSolver.getEnvironment(),
+                                strategy
+//                                ,IntStrategyFactory.random(ivars, gc.seed))
                 );
 
                 System.out.println("% t:" + gc.seed);
