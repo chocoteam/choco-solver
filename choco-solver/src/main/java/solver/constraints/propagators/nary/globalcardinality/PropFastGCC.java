@@ -158,7 +158,7 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     private void filter() throws ContradictionException {
