@@ -46,4 +46,8 @@ public interface BoolVar<ID extends IntDelta> extends IntVar<ID> {
     boolean setToTrue(ICause cause) throws ContradictionException;
 
     boolean setToFalse(ICause cause) throws ContradictionException;
+
+    BoolVar<ID> not();
+
+    void _setNot(BoolVar<ID> not);
 }

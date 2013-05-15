@@ -46,9 +46,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 5 juil. 2010
  */
-public final class IntStrategyFactory {
+public class IntStrategyFactory {
 
-    private IntStrategyFactory() {
+    IntStrategyFactory() {
     }
 
     /**

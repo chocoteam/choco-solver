@@ -50,6 +50,7 @@ import solver.search.strategy.pattern.SearchPattern;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.view.BoolConstantView;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
 import util.ESat;
@@ -128,9 +129,15 @@ public class Solver implements Serializable {
 
     protected int id = 1;
 
-    public Constraint TRUE;
+    /**
+     * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
+     */
+    public final Constraint TRUE, FALSE;
 
-    public Constraint FALSE;
+    /**
+     * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
+     */
+    public final BoolConstantView ZERO, ONE;
 
     /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
@@ -164,6 +171,10 @@ public class Solver implements Serializable {
             }
         };
 
+        ZERO = new BoolConstantView("0", 0, this);
+        ONE = new BoolConstantView("1", 1, this);
+        ZERO._setNot(ONE);
+        ONE._setNot(ZERO);
     }
 
     /**

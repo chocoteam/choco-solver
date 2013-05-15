@@ -45,6 +45,7 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
 import solver.variables.delta.monitor.OneValueDeltaMonitor;
+import solver.variables.view.BoolNotView;
 import util.ESat;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
@@ -88,6 +89,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     private DisposableValueIterator _viterator;
 
     private DisposableRangeIterator _riterator;
+
+    private BoolVar<IEnumDelta> not;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -473,5 +476,19 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public void _setNot(BoolVar neg) {
+        this.not = neg;
+    }
+
+    @Override
+    public BoolVar<IEnumDelta> not() {
+        if (not == null) {
+            not = new BoolNotView(this, solver);
+            not._setNot(this);
+        }
+        return not;
     }
 }
