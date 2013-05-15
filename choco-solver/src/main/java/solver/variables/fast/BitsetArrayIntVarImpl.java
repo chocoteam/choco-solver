@@ -91,8 +91,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, In
 		this.values = sortedValues.clone();
 		this.indexes = env.makeBitSet(LENGTH);
 		this.indexes.set(0,LENGTH);
-		this.LB = env.makeInt(sortedValues[0]);
-		this.UB = env.makeInt(sortedValues[LENGTH - 1]);
+		this.LB = env.makeInt(0);
+		this.UB = env.makeInt(LENGTH-1);
 		this.SIZE = env.makeInt(LENGTH);
 	}
 
