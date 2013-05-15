@@ -56,7 +56,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
 
     public StoredDoubleVector(EnvironmentTrailing env, int initialSize, double initialValue) {
         super(env, initialSize, initialValue);
-        int initialCapacity = MIN_CAPACITY;
+        int initialCapacity = Math.max(MIN_CAPACITY, initialSize);
         int w = env.getWorldIndex();
 
         this.worldStamps = new int[initialCapacity];
@@ -69,9 +69,9 @@ public final class StoredDoubleVector extends IStateDoubleVector {
 
     public StoredDoubleVector(EnvironmentTrailing env, double[] entries) {
         super(env, entries);
-        int initialCapacity = MIN_CAPACITY;
-        int w = env.getWorldIndex();
         int initialSize = entries.length;
+        int initialCapacity = Math.max(MIN_CAPACITY, entries.length);
+        int w = env.getWorldIndex();
 
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {

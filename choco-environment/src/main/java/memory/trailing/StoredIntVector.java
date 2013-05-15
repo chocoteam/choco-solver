@@ -57,11 +57,8 @@ public final class StoredIntVector extends IStateIntVector {
 
     public StoredIntVector(EnvironmentTrailing env, int initialSize, int initialValue) {
         super(env, initialSize, initialValue);
-        int initialCapacity = MIN_CAPACITY;
+        int initialCapacity = Math.max(MIN_CAPACITY, initialSize);
         int w = env.getWorldIndex();
-
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
 
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {
@@ -73,7 +70,7 @@ public final class StoredIntVector extends IStateIntVector {
 
     public StoredIntVector(EnvironmentTrailing env, int[] entries) {
         super(env, entries);
-        int initialCapacity = MIN_CAPACITY;
+        int initialCapacity = Math.max(MIN_CAPACITY, entries.length);
         int w = env.getWorldIndex();
         int initialSize = entries.length;
 

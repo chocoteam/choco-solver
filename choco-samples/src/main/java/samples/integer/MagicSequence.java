@@ -47,7 +47,6 @@ import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -57,7 +56,7 @@ import util.tools.ArrayUtils;
 public class MagicSequence extends AbstractProblem {
 
     @Option(name = "-n", usage = "Size of problem (default 10).", required = false)
-    int n = 5;
+    int n = 10;
 
     IntVar[] x;
 
@@ -90,7 +89,6 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
     }
 

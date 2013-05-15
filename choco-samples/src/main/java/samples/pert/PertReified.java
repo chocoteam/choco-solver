@@ -30,7 +30,6 @@ package samples.pert;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.Propagator;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -50,7 +49,6 @@ import java.util.List;
 public class PertReified extends Pert {
 
     BoolVar[] bvars;
-    List<Propagator> reifieds;
 
     @Override
     public void createSolver() {
@@ -62,7 +60,6 @@ public class PertReified extends Pert {
         setUp();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
-        reifieds = new ArrayList<Propagator>();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
@@ -83,16 +80,8 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-                    Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m]));
-                    Constraint c2 = IntConstraintFactory.implies(VariableFactory.not(bvar), precedence(_vars[m], _durs[m], _vars[l]));
+                    Constraint[] c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                     solver.post(c1);
-                    solver.post(c2);
-                    for (int k = 0; k < c1.getPropagators().length; k++) {
-                        reifieds.add(c1.getPropagator(k));
-                    }
-                    for (int k = 0; k < c2.getPropagators().length; k++) {
-                        reifieds.add(c2.getPropagator(k));
-                    }
                 }
             }
         }

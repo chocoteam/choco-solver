@@ -35,7 +35,6 @@ import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
-import util.objects.setDataStructures.ISet;
 import util.objects.setDataStructures.SetType;
 
 /**
@@ -81,7 +80,7 @@ public enum VariableFactory {
     public static BoolVar[] boolArray(String NAME, int SIZE, Solver SOLVER) {
         BoolVar[] vars = new BoolVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bool(NAME + "_" + i, SOLVER);
+            vars[i] = bool(NAME + "[" + i + "]", SOLVER);
         }
         return vars;
     }
@@ -98,7 +97,7 @@ public enum VariableFactory {
     public static BoolVar[][] boolMatrix(String NAME, int DIM1, int DIM2, Solver SOLVER) {
         BoolVar[][] vars = new BoolVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boolArray(NAME + "_" + i, DIM2, SOLVER);
+            vars[i] = boolArray(NAME + "[" + i + "]", DIM2, SOLVER);
         }
         return vars;
     }
@@ -139,7 +138,7 @@ public enum VariableFactory {
     public static IntVar[] boundedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = bounded(NAME + "_" + i, MIN, MAX, SOLVER);
+            vars[i] = bounded(NAME + "[" + i + "]", MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -159,7 +158,7 @@ public enum VariableFactory {
     public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][DIM2];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = boundedArray(NAME + "_" + i, DIM2, MIN, MAX, SOLVER);
+            vars[i] = boundedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -198,7 +197,7 @@ public enum VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int MIN, int MAX, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "_" + i, MIN, MAX, SOLVER);
+            vars[i] = enumerated(NAME + "[" + i + "]", MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -218,7 +217,7 @@ public enum VariableFactory {
         IntVar[][] vars = new IntVar[DIM1][DIM2];
         for (int i = 0; i < DIM1; i++) {
             for (int j = 0; j < DIM2; j++) {
-                vars[i][j] = enumerated(NAME + "_" + i + "_" + j, MIN, MAX, SOLVER);
+                vars[i][j] = enumerated(NAME + "[" + i + "][" + j + "]", MIN, MAX, SOLVER);
             }
         }
         return vars;
@@ -257,7 +256,7 @@ public enum VariableFactory {
     public static IntVar[] enumeratedArray(String NAME, int SIZE, int[] VALUES, Solver SOLVER) {
         IntVar[] vars = new IntVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = enumerated(NAME + "_" + i, VALUES, SOLVER);
+            vars[i] = enumerated(NAME + "[" + i + "]", VALUES, SOLVER);
         }
         return vars;
     }
@@ -276,7 +275,7 @@ public enum VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int[] VALUES, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = enumeratedArray(NAME + "_" + i, DIM2, VALUES, SOLVER);
+            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, VALUES, SOLVER);
         }
         return vars;
     }
@@ -318,7 +317,7 @@ public enum VariableFactory {
     public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[] vars = new RealVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = real(NAME + "_" + i, MIN, MAX, PRECISION, SOLVER);
+            vars[i] = real(NAME + "[" + i + "]",  MIN, MAX, PRECISION, SOLVER);
         }
         return vars;
     }
@@ -339,7 +338,7 @@ public enum VariableFactory {
     public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[][] vars = new RealVar[DIM1][DIM2];
         for (int i = 0; i < DIM1; i++) {
-            vars[i] = realArray(NAME + "_" + i, DIM2, MIN, MAX, PRECISION, SOLVER);
+            vars[i] = realArray(NAME + "[" + i + "]", DIM2, MIN, MAX, PRECISION, SOLVER);
         }
         return vars;
     }

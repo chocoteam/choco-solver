@@ -64,7 +64,8 @@ public class IntLinEqReifBuilder implements IBuilder {
                 IntConstraintFactory.scalar(bs, as, scalarVar),
                 IntConstraintFactory.implies(
                         r,
-                        IntConstraintFactory.arithm(scalarVar, "=", c)), IntConstraintFactory.implies(
+                        IntConstraintFactory.arithm(scalarVar, "=", c)),
+                IntConstraintFactory.implies(
                 VariableFactory.not(r),
                 IntConstraintFactory.arithm(scalarVar, "!=", c))};
     }

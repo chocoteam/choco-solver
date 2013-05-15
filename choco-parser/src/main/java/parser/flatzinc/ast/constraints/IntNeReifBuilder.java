@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -57,7 +56,6 @@ public class IntNeReifBuilder implements IBuilder {
         Constraint c = IntConstraintFactory.arithm(a, "!=", b);
         Constraint oc = IntConstraintFactory.arithm(a, "=", b);
 
-        return new Constraint[]{IntConstraintFactory.implies(r, c),
-                IntConstraintFactory.implies(VariableFactory.not(r), oc)};
+        return IntConstraintFactory.implies(r, c, oc);
     }
 }
