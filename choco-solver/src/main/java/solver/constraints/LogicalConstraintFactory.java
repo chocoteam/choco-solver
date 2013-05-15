@@ -25,42 +25,85 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 15/05/13
- * Time: 16:48
- */
-
 package solver.constraints;
 
 import solver.Solver;
 import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
+/**
+ * Created by IntelliJ IDEA.
+ * @author Jean-Guillaume Fages
+ * @since 15/05/2013
+ */
 public class LogicalConstraintFactory {
 
 	//***********************************************************************************
-	// Boolean-based constraints
+	// BoolVar-based constraints
 	//***********************************************************************************
 
-	public static Constraint and(BoolVar[] bools, BoolVar and){
-		return IntConstraintFactory.minimum(and, bools);
+	/**
+	 * Make a and constraint
+	 * @param BOOLS an array of boolean variable
+	 * @return a constraint and ensuring that variables in BOOLS are all set to true
+	 */
+	public static Constraint and(BoolVar... BOOLS){
+		Solver s = BOOLS[0].getSolver();
+		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
+		s.post(IntConstraintFactory.sum(BOOLS,sum));
+		return IntConstraintFactory.arithm(sum,"=",BOOLS.length);
 	}
 
-	public static Constraint or(BoolVar[] bools, BoolVar or){
-		return IntConstraintFactory.maximum(or, bools);
+	/**
+	 * Make an or constraint
+	 * @param BOOLS an array of boolean variable
+	 * @return a constraint or ensuring that at least one variables in BOOLS is set to true
+	 */
+	public static Constraint or(BoolVar... BOOLS){
+		Solver s = BOOLS[0].getSolver();
+		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
+		s.post(IntConstraintFactory.sum(BOOLS,sum));
+		return IntConstraintFactory.arithm(sum,">=",1);
 	}
 
 	//***********************************************************************************
 	// Constraint-based constraints
 	//***********************************************************************************
 
-	public static Constraint and(IReifiableConstraint[] cons){
-		BoolVar[] bools = new BoolVar[cons.length];
-		for(int i=0;i<cons.length;i++){
-			bools[i] = cons[i].reif();
+	/**
+	 * Make a and constraint
+	 * @param CONS an array of constraints
+	 * @return a constraint and ensuring that constraints in CONS are all satisfied
+	 */
+	public static Constraint and(Constraint... CONS){
+		BoolVar[] bools = new BoolVar[CONS.length];
+		for(int i=0;i<CONS.length;i++){
+			bools[i] = CONS[i].reif();
 		}
-		return and(bools,bools[0]);//boolTrue
+		return and(bools);
 	}
 
+	/**
+	 * Make an or constraint
+	 * @param CONS an array of constraints
+	 * @return a constraint or ensuring that at least one constraint in CONS is satisfied
+	 */
+	public static Constraint or(Constraint... CONS){
+		BoolVar[] bools = new BoolVar[CONS.length];
+		for(int i=0;i<CONS.length;i++){
+			bools[i] = CONS[i].reif();
+		}
+		return or(bools);
+	}
+
+	/**
+	 * Get the opposite of a constraint
+	 * @param CONS a constraint
+	 * @return the opposite constraint of CONS
+	 */
+	public static Constraint not(Constraint CONS){
+		return CONS.getOpposite();
+	}
 }

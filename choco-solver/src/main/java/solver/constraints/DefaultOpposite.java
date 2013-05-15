@@ -29,14 +29,70 @@
  * Created by IntelliJ IDEA.
  * User: Jean-Guillaume Fages
  * Date: 15/05/13
- * Time: 17:02
+ * Time: 18:09
  */
 
 package solver.constraints;
 
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.EventType;
+import solver.variables.Variable;
+import solver.variables.VariableFactory;
+import util.ESat;
 
-public interface IReifiableConstraint {
+public class DefaultOpposite extends Constraint {
 
-	public BoolVar reif();
+	public DefaultOpposite(Constraint target) {
+		super(target.getVariables(),target.getSolver());
+		this.opposite = target;
+		setPropagators(new PropOpposite(vars));
+	}
+
+	@Override
+	public BoolVar reif() {
+		return VariableFactory.not(opposite.reif());
+	}
+
+	private class PropOpposite extends Propagator{
+
+		protected PropOpposite(Variable[] vars) {
+			super(vars, PropagatorPriority.LINEAR, false);
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.ALL_FINE_EVENTS.mask;
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			ESat op = opposite.isSatisfied();
+			if(op == ESat.TRUE){
+				contradiction(vars[0],"");
+			}
+			if(op == ESat.FALSE){
+				setPassive();
+			}
+		}
+
+		@Override
+		public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+			forcePropagate(EventType.CUSTOM_PROPAGATION);
+		}
+
+		@Override
+		public ESat isEntailed() {
+			ESat op = opposite.isSatisfied();
+			if(op == ESat.TRUE){
+				return ESat.FALSE;
+			}
+			if(op == ESat.FALSE){
+				return ESat.TRUE;
+			}
+			return ESat.UNDEFINED;
+		}
+	}
 }

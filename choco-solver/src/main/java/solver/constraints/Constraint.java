@@ -33,8 +33,11 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
+import solver.variables.BoolVar;
 import solver.variables.Variable;
+import solver.variables.VariableFactory;
 import util.ESat;
+import util.tools.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -84,6 +87,10 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     protected P[] propagators;
 
     protected int staticPropagationPriority;
+
+	// for reification
+	protected BoolVar boolReif;
+	protected Constraint opposite;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
@@ -238,4 +245,28 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     public String toString() {
         return "Cstr(" + Arrays.toString(propagators) + ")";
     }
+
+	/**
+	 * Get/make the boolean variable indicating whether the constraint is satisfied or not
+	 * @return the boolean reifying the constraint
+	 */
+	public BoolVar reif() {
+		if(boolReif==null){
+			boolReif = VariableFactory.bool(StringUtils.randomName(),getSolver());
+			getSolver().post(IntConstraintFactory.implies(boolReif,this,getOpposite()));
+		}
+		return boolReif;
+	}
+
+	/**
+	 * Get/make the opposite constraint of this
+	 * The default opposite constraint does not filter domains but fails if this constraint is satisfied
+	 * @return the opposite constraint of this
+	 */
+	public Constraint getOpposite() {
+		if(opposite == null){
+			opposite = new DefaultOpposite(this);
+		}
+		return opposite;
+	}
 }
