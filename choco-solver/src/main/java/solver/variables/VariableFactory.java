@@ -30,6 +30,7 @@ package solver.variables;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetArrayIntVarImpl;
+import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.graph.DirectedGraphVar;
@@ -183,14 +184,7 @@ public class VariableFactory {
         } else if (MIN == 0 && MAX == 1) {
             return new BooleanBoolVarImpl(NAME, SOLVER);
         } else {
-//            return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
-            int[] vals = new int[MAX - MIN + 1];
-            int val = MIN;
-            for (int i = 0; i < vals.length; i++) {
-                vals[i] = val;
-                val++;
-            }
-            return new BitsetArrayIntVarImpl(NAME, vals, SOLVER);
+            return new BitsetIntVarImpl(NAME, MIN, MAX, SOLVER);
         }
     }
 
@@ -247,10 +241,11 @@ public class VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-//            BitsetIntVarImpl var = new BitsetIntVarImpl(NAME, VALUES, SOLVER);
-            BitsetArrayIntVarImpl var = new BitsetArrayIntVarImpl(NAME, VALUES, SOLVER);
-            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
-            return var;
+			if((VALUES[VALUES.length-1]-VALUES[0])/VALUES.length>5){
+				return new BitsetArrayIntVarImpl(NAME,VALUES,SOLVER);
+			}else{
+				return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
+			}
         }
     }
 
