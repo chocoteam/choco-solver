@@ -24,65 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.variables.view;
-
-import solver.ICause;
-import solver.Solver;
-import solver.exception.ContradictionException;
-import solver.variables.BoolVar;
-import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
-import util.ESat;
+package solver.variables;
 
 /**
- * A constant view specific to boolean variable
- * <p/>
- * Based on "Views and Iterators for Generic Constraint Implementations",
- * C. Schulte and G. Tack
+ * A short-named version of {@code VariableFactory}
+ * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/02/11
+ * @since 15/05/13
  */
-public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
-
-    private BoolVar not;
-
-    public BoolConstantView(String name, int constant, Solver solver) {
-        super(name, constant, solver);
-    }
-
-    @Override
-    public int getTypeAndKind() {
-        return Variable.BOOL | Variable.CSTE;
-    }
-
-    @Override
-    public ESat getBooleanValue() {
-        return ESat.eval(constante == 1);
-    }
-
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        return false;
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        return false;
-    }
-
-    @Override
-    public BoolVar<IntDelta> not() {
-        if (not == null) {
-            not = new BoolNotView(this, solver);
-            not._setNot(this);
-        }
-        return not;
-    }
-
-    @Override
-    public void _setNot(BoolVar<IntDelta> not) {
-        this.not = not;
-    }
+public final class VF extends VariableFactory{
+    // SHOULD BE EMPTY, this is just syntactic sugar: avoiding long name in modeling step
 }

@@ -91,9 +91,9 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 21/01/13
  */
-public enum IntConstraintFactory {
-    ;
-
+public class IntConstraintFactory {
+    IntConstraintFactory() {
+    }
 
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
 

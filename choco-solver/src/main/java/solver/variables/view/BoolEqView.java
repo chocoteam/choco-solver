@@ -29,6 +29,7 @@ package solver.variables.view;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.variables.BoolVar;
 import solver.variables.delta.IEnumDelta;
 import util.ESat;
@@ -64,5 +65,15 @@ public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> im
     @Override
     public BoolVar duplicate() {
         return new BoolEqView(this.var, this.getSolver());
+    }
+
+    @Override
+    public BoolVar<IEnumDelta> not() {
+        return var.not();
+    }
+
+    @Override
+    public void _setNot(BoolVar<IEnumDelta> not) {
+        throw new SolverException("Unexpected call to BoolEqView._setNot()");
     }
 }

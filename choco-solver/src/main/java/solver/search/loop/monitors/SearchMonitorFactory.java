@@ -39,8 +39,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public enum SearchMonitorFactory {
-    ;
+public class SearchMonitorFactory {
+    SearchMonitorFactory() {
+    }
 
     private static class DefaultSolutionMessage implements IMessage {
 

@@ -41,9 +41,9 @@ import util.tools.ArrayUtils;
  *
  * @author Jean-Guillaume Fages
  */
-public final class SetConstraintsFactory {
+public class SetConstraintsFactory {
 
-    private SetConstraintsFactory() {
+    SetConstraintsFactory() {
     }
 
     //***********************************************************************************
