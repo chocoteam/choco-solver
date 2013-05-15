@@ -264,8 +264,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 * @return the opposite constraint of this
 	 */
 	public Constraint getOpposite() {
+		reif();
 		if(opposite == null){
-			opposite = new DefaultOpposite(this);
+			opposite = new DefaultOpposite(this,VariableFactory.not(boolReif));
 		}
 		return opposite;
 	}

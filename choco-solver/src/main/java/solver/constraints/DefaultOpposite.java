@@ -25,13 +25,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 15/05/13
- * Time: 18:09
- */
-
 package solver.constraints;
 
 import solver.constraints.propagators.Propagator;
@@ -40,20 +33,22 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 import util.ESat;
 
+/**
+ * Constraint representing the negation of a given constraint
+ * does not filter but fails if the given constraint is satisfied
+ * Can be used within any constraint
+ * @author Jean-Guillaume Fages
+ * @since 15/05/2013
+ */
 public class DefaultOpposite extends Constraint {
 
-	public DefaultOpposite(Constraint target) {
+	public DefaultOpposite(Constraint target, BoolVar activeIfTrue) {
 		super(target.getVariables(),target.getSolver());
 		this.opposite = target;
+		this.boolReif = activeIfTrue;
 		setPropagators(new PropOpposite(vars));
-	}
-
-	@Override
-	public BoolVar reif() {
-		return VariableFactory.not(opposite.reif());
 	}
 
 	private class PropOpposite extends Propagator{
