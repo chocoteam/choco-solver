@@ -98,6 +98,30 @@ public enum IntConstraintFactory {
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
 
     //##################################################################################################################
+    // ZEROARIES #########################################################################################################
+    //##################################################################################################################
+
+    /**
+     * Ensures the TRUE constraint
+     *
+     * @param solver a solver
+     * @return a true constraint
+     */
+    public static Constraint TRUE(Solver solver) {
+        return solver.TRUE;
+    }
+
+    /**
+     * Ensures the FALSE constraint
+     *
+     * @param solver a solver
+     * @return a false constraint
+     */
+    public static Constraint FALSE(Solver solver) {
+        return solver.FALSE;
+    }
+
+    //##################################################################################################################
     // UNARIES #########################################################################################################
     //##################################################################################################################
 
@@ -133,24 +157,27 @@ public enum IntConstraintFactory {
      * @param CSTR the constraint to be satisfied when BVAR = 1
      */
     public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
-        return new ImplicationConstraint(BVAR, CSTR);
+        return new ImplicationConstraint(BVAR, CSTR, CSTR.getSolver().TRUE);
     }
 
     /**
      * Implication constraint: BVAR => CSTR && not(B) => OPP_CSTR.
-     * Build two implies constraints ({@code IntConstraintFactory.implies}):
      * <br/>
-     * <p/>- BVAR => CSTR<br/>
-     * <p/>- not(BVAR) => OPP_CSTR<br/>
+     * Ensures:
+     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
+     * <p/>- BVAR = 0 =>  OPP_CSTR is satisfied, <br/>
+     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
+     * <p/>- OPP_CSTR is not satisfied => BVAR = 1 <br/>
      * <p/>
+     * <p/> In order to have BVAR <=> CSTR, make sure OPP_CSTR is the opposite constraint of CSTR
      *
      * @param BVAR     variable of reification
      * @param CSTR     the constraint to be satisfied when BVAR = 1
      * @param OPP_CSTR the constraint to be satisfied when BVAR = 0
      */
-    public static ImplicationConstraint[] implies(BoolVar BVAR, Constraint CSTR, Constraint OPP_CSTR) {
-        return new ImplicationConstraint[]{new ImplicationConstraint(BVAR, CSTR),
-                new ImplicationConstraint(VariableFactory.not(BVAR), OPP_CSTR)};
+    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR, Constraint OPP_CSTR) {
+        return new ImplicationConstraint(BVAR, CSTR, OPP_CSTR);
+
     }
 
     /**
