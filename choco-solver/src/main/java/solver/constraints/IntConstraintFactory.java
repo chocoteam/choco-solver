@@ -137,6 +137,23 @@ public enum IntConstraintFactory {
     }
 
     /**
+     * Implication constraint: BVAR => CSTR && not(B) => OPP_CSTR.
+     * Build two implies constraints ({@code IntConstraintFactory.implies}):
+     * <br/>
+     * <p/>- BVAR => CSTR<br/>
+     * <p/>- not(BVAR) => OPP_CSTR<br/>
+     * <p/>
+     *
+     * @param BVAR     variable of reification
+     * @param CSTR     the constraint to be satisfied when BVAR = 1
+     * @param OPP_CSTR the constraint to be satisfied when BVAR = 0
+     */
+    public static ImplicationConstraint[] implies(BoolVar BVAR, Constraint CSTR, Constraint OPP_CSTR) {
+        return new ImplicationConstraint[]{new ImplicationConstraint(BVAR, CSTR),
+                new ImplicationConstraint(VariableFactory.not(BVAR), OPP_CSTR)};
+    }
+
+    /**
      * Ensures VAR takes its values in TABLE
      *
      * @param VAR   an integer variable
@@ -372,10 +389,10 @@ public enum IntConstraintFactory {
      * Uses Regin algorithm
      * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      * per arc removed from the support.
-	 * <p/>
-	 * <b>DEFAULT</b>:
-	 * <br/>
-	 * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
+     * <p/>
+     * <b>DEFAULT</b>:
+     * <br/>
+     * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      *
      * @param VARS        list of variables
      * @param CONSISTENCY consistency level, among {"BC", "AC"}
@@ -388,10 +405,10 @@ public enum IntConstraintFactory {
      *                    Uses Regin algorithm
      *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      *                    per arc removed from the support.
-	 *                    <p/>
-	 *                    <b>DEFAULT</b>:
-	 *                    <br/>
-	 *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
+     *                    <p/>
+     *                    <b>DEFAULT</b>:
+     *                    <br/>
+     *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      */
     public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
         return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
@@ -446,7 +463,7 @@ public enum IntConstraintFactory {
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
-	 * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
+     * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
@@ -454,11 +471,11 @@ public enum IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        Constraint c = alldifferent(VARS,"DEFAULT");
+        Constraint c = alldifferent(VARS, "DEFAULT");
         c.addPropagators(
-				new PropNoSubtour(VARS, OFFSET),
-				new PropCircuit_AntiArboFiltering(VARS, OFFSET),
-				new PropCircuitSCC(VARS,OFFSET));
+                new PropNoSubtour(VARS, OFFSET),
+                new PropCircuit_AntiArboFiltering(VARS, OFFSET),
+                new PropCircuitSCC(VARS, OFFSET));
         return c;
     }
 
@@ -550,8 +567,8 @@ public enum IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-		c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-		c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
 //		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
@@ -770,19 +787,19 @@ public enum IntConstraintFactory {
      * @param SCALAR a variable
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
-		// better to put an arithm constraint when possible
-		if(VARS.length==2 && SCALAR.instantiated() && (COEFFS[0]==1 || COEFFS[0]==-1) && (COEFFS[1]==1 || COEFFS[1]==-1)){
-			if(COEFFS[0]==1){
-				String op = (COEFFS[1]==1)?"+":"-";
-				return IntConstraintFactory.arithm(VARS[0],op,VARS[1],"=",SCALAR.getValue());
-			}else{
-				if(COEFFS[1]==1){
-					return IntConstraintFactory.arithm(VARS[1],"-",VARS[0],"=",SCALAR.getValue());
-				}else{
-					return IntConstraintFactory.arithm(VARS[0],"+",VARS[1],"=",-SCALAR.getValue());
-				}
-			}
-		}
+        // better to put an arithm constraint when possible
+        if (VARS.length == 2 && SCALAR.instantiated() && (COEFFS[0] == 1 || COEFFS[0] == -1) && (COEFFS[1] == 1 || COEFFS[1] == -1)) {
+            if (COEFFS[0] == 1) {
+                String op = (COEFFS[1] == 1) ? "+" : "-";
+                return IntConstraintFactory.arithm(VARS[0], op, VARS[1], "=", SCALAR.getValue());
+            } else {
+                if (COEFFS[1] == 1) {
+                    return IntConstraintFactory.arithm(VARS[1], "-", VARS[0], "=", SCALAR.getValue());
+                } else {
+                    return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", -SCALAR.getValue());
+                }
+            }
+        }
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
     }
 
@@ -812,9 +829,9 @@ public enum IntConstraintFactory {
         c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
-		c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
+        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
-		c.addPropagators(new PropSubCircuitSCC(VARS,OFFSET));
+        c.addPropagators(new PropSubCircuitSCC(VARS, OFFSET));
         return c;
     }
 
@@ -825,10 +842,10 @@ public enum IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(IntVar[] VARS, IntVar SUM) {
-		// better to put an arithm constraint when possible
-		if(VARS.length==2 && SUM.instantiated()){
-			return IntConstraintFactory.arithm(VARS[0],"+",VARS[1],"=",SUM.getValue());
-		}
+        // better to put an arithm constraint when possible
+        if (VARS.length == 2 && SUM.instantiated()) {
+            return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", SUM.getValue());
+        }
         return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
     }
 
