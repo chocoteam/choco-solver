@@ -62,11 +62,8 @@ public class IntLinNeReifBuilder implements IBuilder {
         IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
         return new Constraint[]{
                 IntConstraintFactory.scalar(bs, as, scalarVar),
-                IntConstraintFactory.implies(
-                        r,
-                        IntConstraintFactory.arithm(scalarVar, "!=", c)),
-                IntConstraintFactory.implies(
-                        VariableFactory.not(r),
+                IntConstraintFactory.implies(r,
+                        IntConstraintFactory.arithm(scalarVar, "!=", c),
                         IntConstraintFactory.arithm(scalarVar, "=", c))
         };
     }

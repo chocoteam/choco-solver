@@ -56,6 +56,6 @@ public class IntLeReifBuilder implements IBuilder {
         Constraint c = IntConstraintFactory.arithm(a, "<=", b);
         Constraint oc = IntConstraintFactory.arithm(a, ">", b);
 
-        return IntConstraintFactory.implies(r, c, oc);
+        return new Constraint[]{IntConstraintFactory.implies(r, c, oc)};
     }
 }

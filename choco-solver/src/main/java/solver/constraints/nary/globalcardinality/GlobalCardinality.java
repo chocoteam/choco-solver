@@ -77,9 +77,8 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
             IntVar cste = VariableFactory.fixed(i, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
-                Constraint[] cs = IntConstraintFactory.implies(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste));
-                cstrs.add(cs[0]);
-                cstrs.add(cs[1]);
+                Constraint cs = IntConstraintFactory.implies(bs[j], IntConstraintFactory.arithm(vars[j], "=", cste), IntConstraintFactory.arithm(vars[j], "!=", cste));
+                cstrs.add(cs);
             }
             cstrs.add(IntConstraintFactory.sum(bs, card[i]));
         }

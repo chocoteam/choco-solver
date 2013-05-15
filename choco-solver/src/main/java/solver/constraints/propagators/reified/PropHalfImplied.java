@@ -49,23 +49,19 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
-public class PropImplied extends Propagator<Variable> {
+public class PropHalfImplied extends Propagator<Variable> {
 
     // boolean variable of the reification
     private final BoolVar bVar;
     // constraint to apply if bVar = true
-    private final Constraint trueCons;
+    private final Constraint impliedCons;
     // constraint of this propagator
-    // constraint to apply if bVar = false
-    private final Constraint falseCons;
-
     private final ImplicationConstraint reifCons;
 
-    public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+    public PropHalfImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue) {
         super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false);
         this.bVar = (BoolVar) vars[0];
-        this.trueCons = consIfBoolTrue;
-        this.falseCons = consIfBoolFalse;
+        this.impliedCons = consIfBoolTrue;
         this.reifCons = reifCons;
     }
 
@@ -74,19 +70,12 @@ public class PropImplied extends Propagator<Variable> {
         if (bVar.instantiated()) {
             if (bVar.getBooleanValue() == ESat.TRUE) {
                 reifCons.activate(0);
-            } else {
-                reifCons.activate(1);
             }
             setPassive();
         } else {
-            ESat sat = trueCons.isEntailed();
+            ESat sat = impliedCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToFalse(aCause);
-                setPassive();
-            }
-            sat = falseCons.isEntailed();
-            if (sat == ESat.FALSE) {
-                bVar.setToTrue(aCause);
                 setPassive();
             }
         }
@@ -97,8 +86,6 @@ public class PropImplied extends Propagator<Variable> {
         if (varIdx == 0) {
             if (bVar.getBooleanValue() == ESat.TRUE) {
                 reifCons.activate(0);
-            } else {
-                reifCons.activate(1);
             }
             setPassive();
         } else {
@@ -116,9 +103,9 @@ public class PropImplied extends Propagator<Variable> {
     public ESat isEntailed() {
         if (bVar.instantiated()) {
             if (bVar.getValue() == 1) {
-                return trueCons.isEntailed();
+                return impliedCons.isEntailed();
             } else {
-                return falseCons.isEntailed();
+                return ESat.TRUE;
             }
         }
         return ESat.UNDEFINED;
@@ -141,6 +128,6 @@ public class PropImplied extends Propagator<Variable> {
 
     @Override
     public String toString() {
-        return bVar.toString() + "=>" + trueCons.toString()+", !"+bVar.toString() + "=>" + falseCons.toString();
+        return bVar.toString() + "=>" + impliedCons.toString();
     }
 }
