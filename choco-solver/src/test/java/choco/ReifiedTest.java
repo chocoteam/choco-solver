@@ -76,9 +76,7 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "!=", y);
 
-            Constraint[] cstrs = IntConstraintFactory.implies(b, cons, oppCons);
-
-            s.post(cstrs);
+            s.post(IntConstraintFactory.implies(b, cons, oppCons));
             s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
@@ -126,9 +124,9 @@ public class ReifiedTest {
             Constraint cons = IntConstraintFactory.arithm(x, "!=", y);
             Constraint oppCons = IntConstraintFactory.arithm(x, "=", y);
 
-            Constraint[] cstrs = IntConstraintFactory.implies(b, cons, oppCons);
+            Constraint cstr = IntConstraintFactory.implies(b, cons, oppCons);
 
-            s.post(cstrs);
+            s.post(cstr);
             s.set(IntStrategyFactory.presetI(vars));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();

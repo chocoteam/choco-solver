@@ -32,6 +32,8 @@ import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.nary.cnf.PropFalse;
+import solver.constraints.propagators.nary.cnf.PropTrue;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -126,6 +128,10 @@ public class Solver implements Serializable {
 
     protected int id = 1;
 
+    public Constraint TRUE;
+
+    public Constraint FALSE;
+
     /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
@@ -146,6 +152,18 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
+
+        TRUE = new Constraint(this) {
+            {
+                setPropagators(new PropTrue(this.getSolver()));
+            }
+        };
+        FALSE = new Constraint(this) {
+            {
+                setPropagators(new PropFalse(this.getSolver()));
+            }
+        };
+
     }
 
     /**
