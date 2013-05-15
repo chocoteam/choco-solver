@@ -36,13 +36,11 @@ package samples.integer;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.*;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.ISF;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.VF;
 
 /**
  * Small example enumerating solutions of
@@ -62,22 +60,22 @@ public class ReifSample extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		x = VariableFactory.enumerated("x",0,3,solver);
-		y = VariableFactory.enumerated("y",0,3,solver);
-		z = VariableFactory.enumerated("z",0,3,solver);
-		Constraint imp = LogicalConstraintFactory.and(
-								IntConstraintFactory.arithm(x,">",y),
-								IntConstraintFactory.arithm(y,">",z),
-								IntConstraintFactory.arithm(z,">",x)
-						);
-		Constraint ad = IntConstraintFactory.alldifferent(new IntVar[]{x,y,z},"DEFAULT");
-		Constraint nad = LogicalConstraintFactory.not(ad);
-		solver.post(LogicalConstraintFactory.or(imp, nad));
+		x = VF.enumerated("x", 0, 3, solver);
+		y = VF.enumerated("y",0,3,solver);
+		z = VF.enumerated("z",0,3,solver);
+		Constraint imp = LCF.and(
+				ICF.arithm(x, ">", y),
+				ICF.arithm(y, ">", z),
+				ICF.arithm(z, ">", x)
+		);
+		Constraint ad = ICF.alldifferent(new IntVar[]{x, y, z}, "DEFAULT");
+		Constraint nad = LCF.not(ad);
+		solver.post(LCF.or(imp, nad));
 	}
 
 	@Override
 	public void configureSearch() {
-		solver.set(IntStrategyFactory.force_InputOrder_InDomainMin(new IntVar[]{x,y,z}));
+		solver.set(ISF.force_InputOrder_InDomainMin(new IntVar[]{x, y, z}));
 	}
 
 	@Override
