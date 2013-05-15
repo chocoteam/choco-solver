@@ -47,8 +47,11 @@ import util.objects.setDataStructures.SetType;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18 nov. 2010
  */
-public enum VariableFactory {
-    ;
+public class VariableFactory {
+
+    VariableFactory() {
+    }
+
     private static final String CSTE_NAME = "cste -- ";
 
     //TODO : build domain in Variable
@@ -320,7 +323,7 @@ public enum VariableFactory {
     public static RealVar[] realArray(String NAME, int SIZE, double MIN, double MAX, double PRECISION, Solver SOLVER) {
         RealVar[] vars = new RealVar[SIZE];
         for (int i = 0; i < SIZE; i++) {
-            vars[i] = real(NAME + "[" + i + "]",  MIN, MAX, PRECISION, SOLVER);
+            vars[i] = real(NAME + "[" + i + "]", MIN, MAX, PRECISION, SOLVER);
         }
         return vars;
     }
@@ -353,42 +356,42 @@ public enum VariableFactory {
     /**
      * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
      *
-	 * @param NAME		name of the variable
-	 * @param ENVELOPE	elements potentially in the set
-	 * @param ENV_TYPE	type of data structure for storing the envelope
-	 * @param KERNEL	elements that must belong to the final set
-	 * @param KER_TYPE	type of data structure for storing the kernel
-	 * @param SOLVER	solver involving the variable
-	 * @return	a set variable
-	 */
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param ENV_TYPE type of data structure for storing the envelope
+     * @param KERNEL   elements that must belong to the final set
+     * @param KER_TYPE type of data structure for storing the kernel
+     * @param SOLVER   solver involving the variable
+     * @return a set variable
+     */
     public static SetVar set(String NAME, int[] ENVELOPE, SetType ENV_TYPE, int[] KERNEL, SetType KER_TYPE, Solver SOLVER) {
-        return new SetVarImpl(NAME,ENVELOPE,ENV_TYPE,KERNEL,KER_TYPE,SOLVER);
+        return new SetVarImpl(NAME, ENVELOPE, ENV_TYPE, KERNEL, KER_TYPE, SOLVER);
     }
 
-	/**
-	 * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
-	 *
-	 * @param NAME		name of the variable
-	 * @param ENVELOPE	elements potentially in the set
-	 * @param KERNEL	elements that must belong to the final set
-	 * @param SOLVER	solver involving the variable
-	 * @return	a set variable
-	 */
-	public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
-		return set(NAME,ENVELOPE,SetType.BITSET,KERNEL,SetType.BITSET,SOLVER);
-	}
+    /**
+     * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
+     *
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param KERNEL   elements that must belong to the final set
+     * @param SOLVER   solver involving the variable
+     * @return a set variable
+     */
+    public static SetVar set(String NAME, int[] ENVELOPE, int[] KERNEL, Solver SOLVER) {
+        return set(NAME, ENVELOPE, SetType.BITSET, KERNEL, SetType.BITSET, SOLVER);
+    }
 
-	/**
-	 * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
-	 *
-	 * @param NAME		name of the variable
-	 * @param ENVELOPE	elements potentially in the set
-	 * @param SOLVER	solver involving the variable
-	 * @return	a set variable
-	 */
-	public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
-		return set(NAME,ENVELOPE,SetType.BITSET,new int[]{},SetType.BITSET,SOLVER);
-	}
+    /**
+     * Builds a set variable with an initial domain given by ENVELOP and KERNEL.
+     *
+     * @param NAME     name of the variable
+     * @param ENVELOPE elements potentially in the set
+     * @param SOLVER   solver involving the variable
+     * @return a set variable
+     */
+    public static SetVar set(String NAME, int[] ENVELOPE, Solver SOLVER) {
+        return set(NAME, ENVELOPE, SetType.BITSET, new int[]{}, SetType.BITSET, SOLVER);
+    }
 
     //*************************************************************************************
     // GRAPH VARIABLES
@@ -531,6 +534,27 @@ public enum VariableFactory {
     }
 
     /**
+     * Retrieve the specific zero/false boolvar.
+     * <p/>
+     *
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static BoolVar zero(Solver SOLVER) {
+        return SOLVER.ZERO;
+    }
+
+    /**
+     * Retrieve the specific one/true boolvar.
+     * <p/>
+     *
+     * @param SOLVER the solver to build the integer variable in.
+     */
+    public static BoolVar one(Solver SOLVER) {
+        return SOLVER.ONE;
+    }
+
+
+    /**
      * Create a specific integer variable, named NAME whom domain is reduced to the singleton {VALUE}.
      * <p/>
      * <b>Beware: if the name start with "cste --", the resulting variable will be cached.</b>
@@ -543,12 +567,7 @@ public enum VariableFactory {
         if (NAME.startsWith(CSTE_NAME) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
-        ConstantView cste;
-        if (VALUE == 0 || VALUE == 1) {
-            cste = new BoolConstantView(NAME, VALUE, SOLVER);
-        } else {
-            cste = new ConstantView(NAME, VALUE, SOLVER);
-        }
+        ConstantView cste = new ConstantView(NAME, VALUE, SOLVER);
         if (NAME.startsWith(CSTE_NAME)) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
