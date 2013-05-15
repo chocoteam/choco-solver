@@ -32,6 +32,7 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.ternary.PropDivXYZ;
 import solver.constraints.propagators.ternary.PropTimesXY;
+import solver.constraints.propagators.ternary.PropTimesZ;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;
@@ -56,6 +57,7 @@ public class ModXYZ extends IntConstraint<IntVar> {
         setPropagators(
                 new PropDivXYZ(X, Y, t1),
                 new PropTimesXY(t1, Y, t2),
+                new PropTimesZ(t1, Y, t2),
                 new PropSumEq(new IntVar[]{Z, t2, X}, new int[]{1, 1, -1}, 2, 0)
         );
     }

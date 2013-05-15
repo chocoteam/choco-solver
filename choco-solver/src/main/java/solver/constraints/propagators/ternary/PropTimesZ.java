@@ -75,6 +75,12 @@ public class PropTimesZ extends Propagator<IntVar> {
             instantiated(X, Y);
             instantiated(Y, X);
         }
+        if (X.instantiated()) {
+            instantiatedFromXY(X, Y);
+        }
+        if (Y.instantiated()) {
+            instantiatedFromXY(Y, X);
+        }
     }
 
     @Override
@@ -97,9 +103,13 @@ public class PropTimesZ extends Propagator<IntVar> {
     private void positiveOrNul() throws ContradictionException {
         if (X.getUB() < 0) {
             Y.updateUpperBound(0, aCause);
+        } else if (X.getLB() > 0) {
+            Y.updateLowerBound(0, aCause);
         } else {
             if (Y.getUB() < 0) {
                 X.updateUpperBound(0, aCause);
+            } else if (Y.getLB() > 0) {
+                X.updateLowerBound(0, aCause);
             }
         }
     }
@@ -198,5 +208,20 @@ public class PropTimesZ extends Propagator<IntVar> {
                 }
             }
         }
+    }
+
+    private void instantiatedFromXY(IntVar v1, IntVar v2) throws ContradictionException {
+        int value = v1.getValue();
+        int lb = v2.getLB();
+        int ub = v2.getUB();
+        while (lb <= ub && (!Z.contains(value * lb))) {
+            lb = v2.nextValue(lb);
+        }
+        v2.updateLowerBound(lb, aCause);
+        while (lb <= ub && (!Z.contains(value * ub))) {
+            ub = v2.previousValue(ub);
+        }
+        v2.updateUpperBound(ub, aCause);
+
     }
 }
