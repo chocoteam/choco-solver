@@ -68,7 +68,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// proba
 	private Random rd;
 	private int offSet;
-	private final int NB_MAX_ITER = 15;
+	private final int NB_MAX_ITER = 10;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

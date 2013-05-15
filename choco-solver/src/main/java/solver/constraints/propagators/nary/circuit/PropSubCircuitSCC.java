@@ -70,7 +70,6 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 	private int offSet;
 	private BitSet mandSCC;
 	private int[] possibleSources;
-	private final int NB_MAX_ITER = 15;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -120,19 +119,7 @@ public class PropSubCircuitSCC extends Propagator<IntVar> {
 			}
 		}
 		if(size>0){
-			if(rd.nextBoolean()){
-				filterFromSource(possibleSources[rd.nextInt(size)]);
-			}else{
-				if(size<NB_MAX_ITER){
-					for(int i=0;i<size;i++){
-						filterFromSource(possibleSources[i]);
-					}
-				}else{
-					for(int i=0;i<NB_MAX_ITER;i++){
-						filterFromSource(possibleSources[rd.nextInt(size)]);
-					}
-				}
-			}
+			filterFromSource(possibleSources[rd.nextInt(size)]);
 		}
 	}
 
