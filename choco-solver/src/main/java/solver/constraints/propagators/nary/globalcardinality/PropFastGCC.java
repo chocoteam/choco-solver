@@ -166,7 +166,7 @@ public class PropFastGCC extends Propagator<IntVar> {
         for (int i = valueToCompute.getFirstElement(); i >= 0; i = valueToCompute.getNextElement()) {
             again |= vars[n + i].updateLowerBound(mandatories[i].getSize(), aCause);
             again |= vars[n + i].updateUpperBound(mandatories[i].getSize() + possibles[i].getSize(), aCause);
-            if (vars[i].instantiated()) {
+            if (vars[n+i].instantiated()) {
                 if (possibles[i].getSize() + mandatories[i].getSize() == vars[n + i].getLB()) {
                     for (int j = possibles[i].getFirstElement(); j >= 0; j = possibles[i].getNextElement()) {
                         mandatories[i].add(j);
