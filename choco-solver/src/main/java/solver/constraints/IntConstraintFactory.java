@@ -464,24 +464,6 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Make an inverse channeling between VARS1 and VARS2:
-     * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
-     * Performs AC if domains are enumerated.
-     * If not, then it works on bounds without guaranteeing BC
-     * (enumerated domains are strongly recommended)
-     * <p/>
-     * Beware you should have |VARS1| = |VARS2|
-     *
-     * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
-     * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
-     * @param OFFSET1 lowest value in VARS1 (most often 0)
-     * @param OFFSET2 lowest value in VARS2 (most often 0)
-     */
-    public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
-        return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
-    }
-
-    /**
      * Creates a circuit constraint which ensures that
      * <p/> the elements of vars define a covering circuit
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
@@ -679,6 +661,24 @@ public class IntConstraintFactory {
             }
         }
     }
+
+	/**
+	 * Make an inverse channeling between VARS1 and VARS2:
+	 * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
+	 * Performs AC if domains are enumerated.
+	 * If not, then it works on bounds without guaranteeing BC
+	 * (enumerated domains are strongly recommended)
+	 * <p/>
+	 * Beware you should have |VARS1| = |VARS2|
+	 *
+	 * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
+	 * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
+	 * @param OFFSET1 lowest value in VARS1 (most often 0)
+	 * @param OFFSET2 lowest value in VARS2 (most often 0)
+	 */
+	public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
+		return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
+	}
 
     /**
      * Ensures that :
