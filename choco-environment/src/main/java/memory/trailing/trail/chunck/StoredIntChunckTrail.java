@@ -179,7 +179,6 @@ public class StoredIntChunckTrail implements IStoredIntTrail {
     }
 
     private void increase(int l) {
-        System.out.printf("resize %d \n",l + 1);
         StoredInt[][] varBigger = new StoredInt[l + 1][];
         System.arraycopy(variableStack, 0, varBigger, 0, l);
         varBigger[l] = new StoredInt[CHUNK_SIZE];
