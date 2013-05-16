@@ -25,35 +25,28 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package parser.flatzinc.ast.constraints;
-
-import gnu.trove.map.hash.THashMap;
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.LogOp;
-import solver.variables.BoolVar;
-
-import java.util.List;
+package solver.constraints.nary.cnf;
 
 /**
- * (a &#8800; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 23 nov. 2010
  */
-public class BoolXorBuilder implements IBuilder {
-    @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        return new Constraint[]{IntConstraintFactory.clauses(
-                LogOp.reified(r,
-                        LogOp.xor(a,
-                                b)), solver)};
-    }
+public interface ILogical extends Cloneable {
+
+    /**
+     * Current tree is a literal
+     *
+     * @return <code>true</code> if <code>this</code> is a literal
+     */
+    boolean isLit();
+
+    /**
+     * Current tree is rooted with NOT logical operator
+     *
+     * @return <code>true</code> if <code>this</code> is NOT
+     */
+    boolean isNot();
+
 }

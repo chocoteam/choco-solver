@@ -49,48 +49,60 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
 
     HashMap<BoolVar, HashSet<PropClause>> v2p = new HashMap<BoolVar, HashSet<PropClause>>();
 
-    protected ConjunctiveNormalForm(BoolVar[] nonRedundantVars, ALogicTree tree, Solver solver) {
+    protected ConjunctiveNormalForm(BoolVar[] nonRedundantVars, LogOp tree, Solver solver) {
         super(nonRedundantVars, solver);
-        setPropagators(build(tree));
+        setPropagators(build(tree, solver));
 
     }
 
-    public ConjunctiveNormalForm(ALogicTree tree, Solver solver) {
+    public ConjunctiveNormalForm(LogOp tree, Solver solver) {
         this(VariableUtilities.nonReundantVars(tree.flattenBoolVar()), tree, solver);
     }
 
-    private PropClause[] build(ALogicTree tree) {
-        tree = LogicTreeToolBox.toCNF(tree);
+    private PropClause[] build(LogOp logOp, Solver solver) {
+        ILogical tree = LogicTreeToolBox.toCNF(logOp, solver);
 
-        if (Singleton.TRUE.equals(tree)) {
+        if (solver.ONE.equals(tree)) {
             return new PropClause[]{new PropTrue(solver)};
-        } else if (Singleton.FALSE.equals(tree)) {
+        } else if (solver.ZERO.equals(tree)) {
             return new PropClause[]{new PropFalse(solver)};
         } else {
 
-            ALogicTree[] clauses;
-            if (tree.is(ALogicTree.Operator.AND)) {
-                clauses = tree.getChildren();
+            ILogical[] clauses;
+            if (!tree.isLit() && ((LogOp) tree).is(LogOp.Operator.AND)) {
+                clauses = ((LogOp) tree).getChildren();
             } else {
-                clauses = new ALogicTree[]{tree};
+                clauses = new ILogical[]{tree};
             }
             // init internal structures
             PropClause[] propClauses = new PropClause[clauses.length];
             for (int i = 0; i < clauses.length; i++) {
-                ALogicTree clause = clauses[i];
-                // create the propagator, based on the i^th clause
-                propClauses[i] = new PropClause(clause, solver);
-                // create the link between the variables and the propagator,
-                // required for #propagate() step
-                BoolVar[] bvars = clause.flattenBoolVar();
-                for (int j = 0; j < bvars.length; j++) {
-                    BoolVar v = bvars[j];
-                    HashSet<PropClause> indices = v2p.get(v);
-                    if (indices == null) {
-                        indices = new HashSet<PropClause>();
-                        v2p.put(v, indices);
+                ILogical clause = clauses[i];
+                if (clause.isLit()) {
+                    BoolVar bv = (BoolVar) clause;
+                    propClauses[i] = new PropClause(bv, solver);
+                } else {
+                    LogOp n = (LogOp) clause;
+//                    int nbPos = 0;
+                    // create the propagator, based on the i^th clause
+                    // create the link between the variables and the propagator,
+                    // required for #propagate() step
+                    BoolVar[] bvars = n.flattenBoolVar();
+//                    for (int j = 0; j < bvars.length; j++) {
+//                        BoolVar v = bvars[j];
+//                        nbPos += v.isNot() ? 0 : 1;
+//                    }
+                    propClauses[i] = new PropClause(n, solver);
+                    for (int j = 0; j < bvars.length; j++) {
+                        BoolVar v = bvars[j];
+                        HashSet<PropClause> indices = v2p.get(v);
+                        if (indices == null) {
+                            indices = new HashSet<PropClause>();
+                            v2p.put(v, indices);
+                        }
+                        indices.add(propClauses[i]);
                     }
-                    indices.add(propClauses[i]);
+
                 }
             }
             return propClauses;

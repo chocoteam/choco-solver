@@ -14,9 +14,7 @@ package samples.integer; /**
 import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -229,7 +227,7 @@ public class StableMarriage extends AbstractProblem {
         */
         
         // b1 -> b2
-        ALogicTree t = Node.implies(Literal.pos(b1),Literal.pos(b2));
+        LogOp t = LogOp.implies(b1, b2);
         solver.post(clauses(t, solver));
 
         // solver.post(IntConstraintFactory.arithm(b1, "<=", b2));
@@ -281,7 +279,7 @@ public class StableMarriage extends AbstractProblem {
         */
 
         // b1 -> b2
-        ALogicTree t = Node.implies(Literal.pos(b1),Literal.pos(b2));
+        LogOp t = LogOp.implies(b1, b2);
         solver.post(clauses(t, solver));
 
         // solver.post(IntConstraintFactory.arithm(b1, "<=", b2));

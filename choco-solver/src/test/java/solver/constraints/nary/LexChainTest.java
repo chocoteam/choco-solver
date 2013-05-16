@@ -41,9 +41,8 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.ILogical;
+import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.lex.LexChain;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
@@ -76,15 +75,15 @@ public class LexChainTest {
     }
 
 
-    private ALogicTree reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
+    private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
         solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
         if (i == X.length - 1) {
-            return Literal.pos(b1);
+            return b1;
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
             solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
-            return Node.or(Literal.pos(b1), Node.and(Literal.pos(b2), reformulate(i + 1, X, Y, solver)));
+            return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
         }
     }
 
@@ -96,13 +95,13 @@ public class LexChainTest {
                     VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
                     VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
         }
-        ALogicTree[] trees = new ALogicTree[n - 1];
+        ILogical[] trees = new ILogical[n - 1];
         for (int i = 0; i < n - 1; i++) {
             trees[i] = reformulate(0, X[i], X[i + 1], solver);
             //refor.post(new ConjunctiveNormalForm(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        solver.post(IntConstraintFactory.clauses(Node.and(trees), solver));
+        solver.post(IntConstraintFactory.clauses(LogOp.and(trees), solver));
         solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }

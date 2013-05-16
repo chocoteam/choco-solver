@@ -32,9 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -103,7 +101,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
         solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(X, "!=", Y)));
         solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(X, "+", Y, "=", 0), IntConstraintFactory.arithm(X, "+", Y, "!=", 0)));
-        ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
+        LogOp root = LogOp.or(b1, b2);
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
 //        SearchMonitorFactory.log(solver, true, true);
@@ -120,7 +118,7 @@ public class AbsoluteTest {
         solver.post(IntConstraintFactory.arithm(X, ">=", 0));
         solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(X, "!=", Y)));
         solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(X, "+", Y, "=", 0), IntConstraintFactory.arithm(X, "+", Y, "!=", 0)));
-        ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
+        LogOp root = LogOp.or(b1, b2);
         solver.post(IntConstraintFactory.clauses(root, solver));
         solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));
 //        SearchMonitorFactory.log(solver, true, true);
