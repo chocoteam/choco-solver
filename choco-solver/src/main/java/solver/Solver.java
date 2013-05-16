@@ -438,6 +438,13 @@ public class Solver implements Serializable {
             if (dynAdd) {
                 engine.dynamicAddition(cs[i], cut);
             }
+			if(cs[i].isReified()){
+				try {
+					cs[i].reif().setToTrue(Cause.Null);
+				} catch (ContradictionException e) {
+					throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
+				}
+			}
         }
     }
 

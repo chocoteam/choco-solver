@@ -247,6 +247,13 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     }
 
 	/**
+	 * @return true iff this constraint has been reified
+	 */
+	public boolean isReified(){
+		return boolReif != null;
+	}
+
+	/**
 	 * Get/make the boolean variable indicating whether the constraint is satisfied or not
 	 * @return the boolean reifying the constraint
 	 */
