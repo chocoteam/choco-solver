@@ -76,4 +76,14 @@ public final class BoolEqView extends EqView<IEnumDelta, BoolVar<IEnumDelta>> im
     public void _setNot(BoolVar<IEnumDelta> not) {
         throw new SolverException("Unexpected call to BoolEqView._setNot()");
     }
+
+    @Override
+    public boolean isLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isNot() {
+        return var.isNot();
+    }
 }

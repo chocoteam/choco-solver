@@ -36,16 +36,12 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.AbstractVariable;
-import solver.variables.BoolVar;
-import solver.variables.EventType;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
 import solver.variables.delta.monitor.OneValueDeltaMonitor;
-import solver.variables.view.BoolNotView;
 import util.ESat;
 import util.iterators.DisposableRangeBoundIterator;
 import util.iterators.DisposableRangeIterator;
@@ -486,9 +482,19 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     @Override
     public BoolVar<IEnumDelta> not() {
         if (not == null) {
-            not = new BoolNotView(this, solver);
+            not = VF.not(this);
             not._setNot(this);
         }
         return not;
+    }
+
+    @Override
+    public boolean isLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isNot() {
+        return false;
     }
 }

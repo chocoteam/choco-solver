@@ -28,6 +28,7 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.constraints.nary.cnf.ILogical;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IntDelta;
 import util.ESat;
@@ -39,7 +40,7 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface BoolVar<ID extends IntDelta> extends IntVar<ID> {
+public interface BoolVar<ID extends IntDelta> extends IntVar<ID>, ILogical {
 
     ESat getBooleanValue();
 

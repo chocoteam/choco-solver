@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.cnf;
 
 import solver.Solver;
-import solver.constraints.nary.cnf.ALogicTree;
+import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -44,27 +44,29 @@ import util.ESat;
  */
 public class PropClause extends Propagator<BoolVar> {
 
-    // index of the first not positive (resp. negative) literal.
-    final int firstNotPosLit;
-
     int watchLit1, watchLit2;
+    int nbvars;
 
     @SuppressWarnings({"unchecked"})
-    public PropClause(ALogicTree t, Solver solver) {
+    public PropClause(LogOp t, Solver solver) {
         super(solver, t.flattenBoolVar(), PropagatorPriority.LINEAR, false);
-        this.firstNotPosLit = t.getNbPositiveLiterals();
+        nbvars = vars.length;
+    }
+
+    public PropClause(BoolVar bv, Solver solver) {
+        super(solver, new BoolVar[]{bv}, PropagatorPriority.UNARY, false);
+        nbvars = 1;
     }
 
     @SuppressWarnings({"unchecked"})
     protected PropClause(Solver solver) {
         super(solver, new BoolVar[0], PropagatorPriority.UNARY, false);
-        this.firstNotPosLit = 0;
+        nbvars = 0;
     }
 
     void awakeOnInst(int index) throws ContradictionException {
         int val = vars[index].getValue();
-        if ((index < firstNotPosLit && val == 1)
-                || (index >= firstNotPosLit && val == 0)) {
+        if ((index < nbvars && val == 1)) {
             setPassive();
             return;
         }
@@ -90,25 +92,10 @@ public class PropClause extends Propagator<BoolVar> {
         int cnt = 0;
 
         BoolVar bv;
-        for (; i < firstNotPosLit; i++) {
+        for (; i < nbvars; i++) {
             bv = vars[i];
             if (bv.instantiated()) {
                 if (bv.getValue() == 1) {
-                    setPassive();
-                    return;
-                } else {
-                    cnt++;
-                }
-            } else if (i != otherWL) {
-                watchLit1 = i;
-                watchLit2 = otherWL;
-                return;
-            }
-        }
-        for (; i < vars.length; i++) {
-            bv = vars[i];
-            if (bv.instantiated()) {
-                if (bv.getValue() == 0) {
                     setPassive();
                     return;
                 } else {
@@ -124,11 +111,7 @@ public class PropClause extends Propagator<BoolVar> {
             this.contradiction(null, "Inconsistent");
         }
         if (i == vars.length) {
-            if (otherWL < firstNotPosLit) {
-                vars[otherWL].instantiateTo(1, aCause);
-            } else {
-                vars[otherWL].instantiateTo(0, aCause);
-            }
+            vars[otherWL].instantiateTo(1, aCause);
             setPassive();
         }
     }
@@ -136,11 +119,7 @@ public class PropClause extends Propagator<BoolVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (vars.length == 1) {
-            if (firstNotPosLit == 1) {
-                vars[0].instantiateTo(1, aCause);
-            } else {
-                vars[0].instantiateTo(0, aCause);
-            }
+            vars[0].instantiateTo(1, aCause);
             setPassive();
         } else {
             // search for watch literals and check the clause
@@ -149,20 +128,11 @@ public class PropClause extends Propagator<BoolVar> {
             while (i < n && wl < 2) {
                 BoolVar bv = vars[i];
                 if (bv.instantiated()) {
-                    if (i < firstNotPosLit) {
-                        if (bv.getValue() == 1) {
-                            setPassive();
-                            return;
-                        } else {
-                            cnt++;
-                        }
+                    if (bv.getValue() == 1) {
+                        setPassive();
+                        return;
                     } else {
-                        if (bv.getValue() == 0) {
-                            setPassive();
-                            return;
-                        } else {
-                            cnt++;
-                        }
+                        cnt++;
                     }
                 } else {
                     watchLit2 = watchLit1;
@@ -196,11 +166,8 @@ public class PropClause extends Propagator<BoolVar> {
     public String toString() {
         StringBuilder st = new StringBuilder();
         int i = 0;
-        for (; i < firstNotPosLit; i++) {
+        for (; i < nbvars; i++) {
             st.append(vars[i].getName()).append(" or ");
-        }
-        for (; i < vars.length; i++) {
-            st.append("not(").append(vars[i].getName()).append(") or ");
         }
         st.replace(st.length() - 4, st.length(), "");
         return st.toString();
@@ -208,20 +175,10 @@ public class PropClause extends Propagator<BoolVar> {
 
     @Override
     public ESat isEntailed() {
-        int i = 0;
-        int cnt = vars.length;
-        for (; i < firstNotPosLit; i++) {
+       int cnt = vars.length;
+        for (int i = 0; i < nbvars; i++) {
             if (vars[i].instantiated()) {
                 if (vars[i].getValue() == 1) {
-                    return ESat.TRUE;
-                } else {
-                    cnt--;
-                }
-            }
-        }
-        for (; i < vars.length; i++) {
-            if (vars[i].instantiated()) {
-                if (vars[i].getValue() == 0) {
                     return ESat.TRUE;
                 } else {
                     cnt--;

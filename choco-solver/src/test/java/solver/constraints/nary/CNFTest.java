@@ -29,8 +29,7 @@ package solver.constraints.nary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -54,14 +53,14 @@ public class CNFTest {
             IntVar y = VariableFactory.bounded("y", 0, 24, solver);
 
             if (i == 0) {
-                solver.post(IntConstraintFactory.clauses(Node.implies(
-                        Literal.pos(a),
-                        Literal.pos(b)
+                solver.post(IntConstraintFactory.clauses(LogOp.implies(
+                        a,
+                        b
                 ), solver));
             } else {
-                solver.post(IntConstraintFactory.clauses(Node.implies(
-                        Literal.neg(b),
-                        Literal.neg(a)
+                solver.post(IntConstraintFactory.clauses(LogOp.implies(
+                        b.not(),
+                        a.not()
                 ), solver));
             }
             solver.post(IntConstraintFactory.implies(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));

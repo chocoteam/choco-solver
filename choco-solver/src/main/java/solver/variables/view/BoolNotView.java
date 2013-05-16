@@ -181,4 +181,14 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
     public void _setNot(BoolVar<IEnumDelta> not) {
         assert not == var;
     }
+
+    @Override
+    public boolean isLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isNot() {
+        return !var.isNot();
+    }
 }

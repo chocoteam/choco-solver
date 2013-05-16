@@ -33,8 +33,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -115,7 +114,7 @@ public class OpenStacks extends AbstractProblem {
                 solver.post(IntConstraintFactory.implies(btmp[1],
                         IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
                         IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
-                solver.post(IntConstraintFactory.clauses(Node.ifOnlyIf(Literal.pos(o2b[j - 1][i]), Node.and(Literal.pos(btmp[0]), Literal.pos(btmp[1]))), solver));
+                solver.post(IntConstraintFactory.clauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver));
             }
         }
         open = VariableFactory.boundedArray("open", np, 0, nc + 1, solver);

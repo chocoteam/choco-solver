@@ -45,10 +45,8 @@ import solver.constraints.nary.automata.MultiCostRegular;
 import solver.constraints.nary.automata.Regular;
 import solver.constraints.nary.channeling.DomainChanneling;
 import solver.constraints.nary.channeling.InverseChanneling;
-import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
@@ -513,7 +511,7 @@ public class IntConstraintFactory {
      * @param SOLVER solver is required, as the TREE can be declared without any variables
      * @return
      */
-    public static ConjunctiveNormalForm clauses(ALogicTree TREE, Solver SOLVER) {
+    public static ConjunctiveNormalForm clauses(LogOp TREE, Solver SOLVER) {
         return new ConjunctiveNormalForm(TREE, SOLVER);
     }
 
@@ -530,15 +528,15 @@ public class IntConstraintFactory {
         } else {
             solver = NEGLITS[0].getSolver();
         }
-        Literal[] lits = new Literal[POSLITS.length + NEGLITS.length];
+        BoolVar[] lits = new BoolVar[POSLITS.length + NEGLITS.length];
         int i = 0;
         for (; i < POSLITS.length; i++) {
-            lits[i] = Literal.pos(POSLITS[i]);
+            lits[i] = POSLITS[i];
         }
         for (int j = 0; j < NEGLITS.length; j++) {
-            lits[j + i] = Literal.neg(NEGLITS[j]);
+            lits[j + i] = NEGLITS[j].not();
         }
-        ALogicTree tree = Node.or(lits);
+        LogOp tree = LogOp.or(lits);
         return new ConjunctiveNormalForm(tree, solver);
     }
 
