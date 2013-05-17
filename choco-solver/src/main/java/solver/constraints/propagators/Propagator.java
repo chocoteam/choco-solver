@@ -350,7 +350,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void setReifiedSilent() {
-        assert isStateLess() : "the propagator was not stateless";
+        assert isStateLess()||isReifiedAndSilent() : "the propagator was neither stateless nor reified";
         state = REIFIED;
     }
 
