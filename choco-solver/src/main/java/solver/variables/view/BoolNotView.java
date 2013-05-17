@@ -32,6 +32,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.BoolVar;
+import solver.variables.EventType;
 import solver.variables.VariableFactory;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -58,17 +59,29 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
-        return var.setToFalse(this);
+        if (var.setToFalse(this)) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
-        return var.setToTrue(this);
+        if (var.setToTrue(this)) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return var.removeValue(1 - value, this);
+        if (var.removeValue(1 - value, this)) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -90,17 +103,33 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return var.instantiateTo(1 - value, this);
+        if (var.instantiateTo(1 - value, this)) {
+            notifyPropagators(EventType.INSTANTIATE, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && var.instantiateTo(1 - value, this);
+        if (value > 0) {
+            if (var.instantiateTo(1 - value, this)) {
+                notifyPropagators(EventType.INSTANTIATE, cause);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return value < 1 && var.instantiateTo(1 - value, this);
+        if (value < 1) {
+            if (var.instantiateTo(1 - value, this)) {
+                notifyPropagators(EventType.INSTANTIATE, cause);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

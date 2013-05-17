@@ -34,12 +34,9 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.LCF;
 import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -80,29 +77,16 @@ public class ClauseTest {
 					}
 				}
 
-//                LogOp or = LogOp.or(bs);
-//                log.info(or.toString());
-//                Constraint cons = IntConstraintFactory.clauses(or, s);
-//                Constraint[] cstrs = new Constraint[]{cons};
-//                s.post(cstrs);
-
-				s.post(LCF.or(bs));
+                LogOp or = LogOp.or(bs);
+                log.info(or.toString());
+                Constraint cons = IntConstraintFactory.clauses(or, s);
+                Constraint[] cstrs = new Constraint[]{cons};
+                s.post(cstrs);
 
                 s.set(IntStrategyFactory.presetI(bs));
 
-				System.out.println("RESO");
-				s.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-					@Override
-					public void onSolution() {
-						System.out.println("SOL");
-						for (BoolVar b:bs){
-							System.out.println(b+" val : "+b.getValue());
-						}
-					}
-				});
 				s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
-				System.out.println(sol+" sols");
                 Assert.assertEquals(sol, nSol);
             }
             nSol = nSol * 2 + 1;
