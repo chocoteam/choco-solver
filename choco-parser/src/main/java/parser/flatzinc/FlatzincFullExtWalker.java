@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2013-05-17 14:25:02
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtWalker.g 2013-05-17 15:15:05
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -29,54 +29,28 @@
 
 package parser.flatzinc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
+import org.antlr.runtime.*;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.TreeNodeStream;
+import org.antlr.runtime.tree.TreeParser;
+import org.antlr.runtime.tree.TreeRuleReturnScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import parser.flatzinc.ast.*;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.FZNException;
-import parser.flatzinc.FZNLayout;
-import parser.flatzinc.ast.FConstraint;
-import parser.flatzinc.ast.FParameter;
-import parser.flatzinc.ast.FVariable;
-import parser.flatzinc.ast.FGoal;
-import parser.flatzinc.ast.Datas;
-
-
 import parser.flatzinc.ast.ext.*;
-
+import solver.ResolutionPolicy;
+import solver.Solver;
 import solver.propagation.DSLEngine;
-import solver.propagation.generator.Generator;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.SortDyn;
+import solver.propagation.ISchedulable;
 import solver.propagation.generator.*;
 
-import solver.propagation.ISchedulable;
-import solver.propagation.generator.Arc;
-
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.ResolutionPolicy;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.Arrays;
-
-
-import org.antlr.runtime.*;
-import org.antlr.runtime.tree.*;
-import java.util.Stack;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class FlatzincFullExtWalker extends TreeParser {

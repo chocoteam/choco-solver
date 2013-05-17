@@ -132,7 +132,7 @@ public final class FVariable {
                 case output_var:
                     datas.declareOutput(name, var, type);
                     break;
-                case is_defined_var:
+                case var_is_introduced:
                     is_introduced = true;
             }
         }
