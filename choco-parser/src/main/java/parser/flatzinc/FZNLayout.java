@@ -116,7 +116,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                     }
                 }
                 LOGGER.info("----------");
-                LOGGER.info("% " + searchLoop.getMeasures().getTimeCount());
+//                LOGGER.info("% " + searchLoop.getMeasures().getTimeCount());
             }
         } else {
             LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
