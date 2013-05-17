@@ -33,6 +33,7 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -62,8 +63,8 @@ public class IntLinEqReifBuilder implements IBuilder {
         IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
         return new Constraint[]{
                 IntConstraintFactory.scalar(bs, as, scalarVar),
-                IntConstraintFactory.implies(r,
-                        IntConstraintFactory.arithm(scalarVar, "=", c),
-                        IntConstraintFactory.arithm(scalarVar, "!=", c))};
+                LogicalConstraintFactory.ifThenElse(r,
+						IntConstraintFactory.arithm(scalarVar, "=", c),
+						IntConstraintFactory.arithm(scalarVar, "!=", c))};
     }
 }

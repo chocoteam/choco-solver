@@ -29,6 +29,7 @@ package solver.constraints.nary;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -63,7 +64,7 @@ public class CNFTest {
                         a.not()
                 ), solver));
             }
-            solver.post(IntConstraintFactory.implies(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+            solver.post(LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);
             solver.findAllSolutions();
             System.out.printf("%d\n", solver.getMeasures().getSolutionCount());

@@ -33,6 +33,7 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -56,6 +57,6 @@ public class IntNeReifBuilder implements IBuilder {
         Constraint c = IntConstraintFactory.arithm(a, "!=", b);
         Constraint oc = IntConstraintFactory.arithm(a, "=", b);
 
-        return new Constraint[]{IntConstraintFactory.implies(r, c, oc)};
+        return new Constraint[]{LogicalConstraintFactory.ifThenElse(r, c, oc)};
     }
 }

@@ -29,7 +29,7 @@ package samples.pert;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -80,7 +80,7 @@ public class PertReified extends Pert {
                 for (int m = l + 1; m < _vars.length; m++) {
                     BoolVar bvar = VariableFactory.bool("b" + l + "_" + m, solver);
                     lbvars.add(bvar);
-                    Constraint c1 = IntConstraintFactory.implies(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
+                    Constraint c1 = LogicalConstraintFactory.ifThenElse(bvar, precedence(_vars[l], _durs[l], _vars[m]), precedence(_vars[m], _durs[m], _vars[l]));
                     solver.post(c1);
                 }
             }

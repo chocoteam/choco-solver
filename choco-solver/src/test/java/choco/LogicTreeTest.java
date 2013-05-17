@@ -31,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.cnf.ILogical;
 import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.cnf.LogicTreeToolBox;
@@ -218,13 +219,13 @@ public class LogicTreeTest {
         BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
 
         solver.post(
-                IntConstraintFactory.implies(
-                        rows[0],
-                        IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2)));
+                LogicalConstraintFactory.ifThen(
+						rows[0],
+						IntConstraintFactory.arithm(rows[1], "+", rows[2], "=", 2)));
         solver.post(
-                IntConstraintFactory.implies(
-                        VariableFactory.not(rows[0]),
-                        IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1))
+                LogicalConstraintFactory.ifThen(
+						VariableFactory.not(rows[0]),
+						IntConstraintFactory.arithm(rows[1], "+", rows[2], "<=", 1))
         );
         //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();

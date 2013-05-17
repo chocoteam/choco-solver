@@ -31,6 +31,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -91,7 +92,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     Constraint cA = IntConstraintFactory.member(X[j], p, q);
                     Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(IntConstraintFactory.implies(a, cA, ocA));
+                    solver.post(LogicalConstraintFactory.ifThenElse(a, cA, ocA));
                 }
             }
         }

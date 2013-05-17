@@ -260,7 +260,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public BoolVar reif() {
 		if(boolReif==null){
 			boolReif = VF.bool(StringUtils.randomName(), getSolver());
-			getSolver().post(ICF.implies(boolReif,this,getOpposite()));
+			getSolver().post(LogicalConstraintFactory.ifThenElse(boolReif, this, getOpposite()));
 		}
 		return boolReif;
 	}
