@@ -29,6 +29,7 @@ package solver.search.strategy.pattern;
 
 import solver.Solver;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
 
 /**
  * Search Patterns: generic patterns to manage search
@@ -41,6 +42,12 @@ public enum SearchPattern implements ISearchPattern {
         public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
             return strategies;
         }
-    };
+    },
+    LASTCONFLICT_1 {
+        @Override
+        public AbstractStrategy makeSearch(Solver solver, AbstractStrategy strategies) {
+            return new StaticStrategiesSequencer(new LastConflict(solver, strategies, 1, false), strategies);
+        }
+    }
 
 }

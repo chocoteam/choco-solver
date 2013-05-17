@@ -136,23 +136,21 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            ISet tmp = sets[i].getKernel();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 g.enforceArc(i, j, aCause);
             }
-            tmp = g.getKernelGraph().getSuccsOrNeigh(i);
+            ISet tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
                 sets[i].addToKernel(j, aCause);
             }
-            tmp = sets[i].getEnvelope();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     sets[i].removeFromEnvelope(j, aCause);
                 }
             }
             tmp = g.getEnvelopGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-                if (!sets[i].getEnvelope().contain(j)) {
+                if (!sets[i].envelopeContains(j)) {
                     g.removeArc(i, j, aCause);
                 }
             }
@@ -182,15 +180,14 @@ public class PropGraphChannel extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            ISet tmp = sets[i].getKernel();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=sets[i].getKernelFirst(); j!=SetVar.END; j=sets[i].getKernelNext()) {
                 if (!g.getEnvelopGraph().isArcOrEdge(i, j)) {
                     return ESat.FALSE;
                 }
             }
-            tmp = g.getKernelGraph().getSuccsOrNeigh(i);
+            ISet tmp = g.getKernelGraph().getSuccsOrNeigh(i);
             for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-                if (!sets[i].getEnvelope().contain(j)) {
+                if (!sets[i].envelopeContains(j)) {
                     return ESat.FALSE;
                 }
             }

@@ -165,6 +165,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     @Override
     public void explain(Deduction d, Explanation e) {
         if (d.getVar() == x) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 y.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);
@@ -172,6 +173,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == y) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 x.explain(VariableState.REM, ((ValueRemoval) d).getVal(), e);

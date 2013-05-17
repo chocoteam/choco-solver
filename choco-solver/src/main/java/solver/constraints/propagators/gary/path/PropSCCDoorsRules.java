@@ -67,8 +67,6 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     private int n;
     private PairProcedure arcRemoved;
     private BitSet sccComputed;
-    private TIntArrayList inDoors;
-    private TIntArrayList outDoors;
     // rg data structures
     private IStateInt nR;
     IStateInt[] sccOf;
@@ -97,8 +95,6 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
         this.outArcs = outArcs;
         this.rg = rg;
         sccComputed = new BitSet(n);
-        inDoors = new TIntArrayList();
-        outDoors = new TIntArrayList();
     }
 
     public PropSCCDoorsRules(DirectedGraphVar graph,
@@ -144,17 +140,25 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     //***********************************************************************************
 
     private void checkSCCLink(int sccFrom) throws ContradictionException {
-        inDoors.clear();
-        outDoors.clear();
-        for (int i = outArcs[sccFrom].getFirstElement(); i >= 0; i = outArcs[sccFrom].getNextElement()) {
-            outDoors.add(i / n - 1);
-            inDoors.add(i % n);
-        }
-        if (inDoors.size() == 1) {
-            forceInDoor(inDoors.get(0));
-        }
-        if (outDoors.size() == 1) {
-            forceOutDoor(outDoors.get(0));
+		int inDoor = -1;
+		int outDoor = -1;
+		for (int i = outArcs[sccFrom].getFirstElement(); i >= 0; i = outArcs[sccFrom].getNextElement()) {
+			if(inDoor==-1){
+				inDoor = i%n;
+			}else if (inDoor!=i%n){
+				inDoor = -2;
+			}
+			if(outDoor==-1){
+				outDoor = i/n-1;
+			}else if (outDoor!=i/n-1){
+				outDoor = -2;
+			}
+		}
+		if (inDoor>=0) {
+			forceInDoor(inDoor);
+		}
+		if (outDoor>=0) {
+			forceOutDoor(outDoor);
             // if 1 in & 1 out and scc>2 forbid in->out
             if (sccFirst != null) {
                 int sizeSCC = 0;
@@ -177,7 +181,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
                         if (in == -1) {
                             throw new UnsupportedOperationException();
                         }
-                        g.removeArc(in, outDoors.get(0), aCause);
+                        g.removeArc(in, outDoor, aCause);
                     }
                 }
             }

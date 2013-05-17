@@ -29,12 +29,13 @@ package solver.explanations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.antidom.AntiDomain;
 import solver.search.strategy.decision.Decision;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -66,16 +67,61 @@ public class ExplanationEngine implements Serializable {
     }
 
 
+    /**
+     * Explain the activation of a propagator involved in a reified constraint
+     *
+     * @param var        the reified variable
+     * @param propagator the propagator to awake.
+     */
+    public void activePropagator(BoolVar var, Propagator propagator) {
+    }
+
+    /**
+     * Explain the removal of the <code>val</code> from <code>var</code>, due to <code>cause</code>.
+     *
+     * @param var   an integer variable
+     * @param val   a value
+     * @param cause a cause
+     */
     public void removeValue(IntVar var, int val, ICause cause) {
     }
 
+    /**
+     * Explain the removal of [<code>old</code>,<code>value</code>[ from <code>var</code>, due to <code>cause</code>.
+     * <p/>
+     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     *
+     * @param intVar an integer variable
+     * @param old    the previous lower bound
+     * @param value  the current lower bound
+     * @param cause  the cause
+     */
     public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {
     }
 
-    public void updateUpperBound(IntVar intVar, int old, int value, ICause cause) {
+    /**
+     * Explain the removal of ]<code>value</code>,<code>old</code>] from <code>var</code>, due to <code>cause</code>.
+     * <p/>
+     * Prerequisite: <code>value</code> should belong to <code>var</code>
+     *
+     * @param var   an integer variable
+     * @param old   the previous upper bound
+     * @param value the current upper bound
+     * @param cause the cause
+     */
+    public void updateUpperBound(IntVar var, int old, int value, ICause cause) {
     }
 
-    public void instantiateTo(IntVar var, int val, ICause cause) {
+    /**
+     * Explain the assignment to <code>val</code> of <code>var</code> due to <code>cause</code>.
+     *
+     * @param var   an integer variable
+     * @param val   the assignment value
+     * @param cause the cause
+     * @param oldLB the previous LB
+     * @param oldUB the previous UB
+     */
+    public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
     }
 
     public AntiDomain getRemovedValues(IntVar v) {
@@ -152,6 +198,10 @@ public class ExplanationEngine implements Serializable {
         return null;
     }
 
+    public PropagatorActivation getPropagatorActivation(Propagator propagator) {
+        return null;
+    }
+
     /**
      * Store the <code>explanation</code> of the <code>deduction</code>
      *
@@ -159,10 +209,6 @@ public class ExplanationEngine implements Serializable {
      * @param explanation explanation of the deduction
      */
     public void store(Deduction deduction, Explanation explanation) {
-
-    }
-
-    public void delete(Deduction deduction) {
 
     }
 
@@ -196,9 +242,5 @@ public class ExplanationEngine implements Serializable {
 
     public Solver getSolver() {
         return solver;
-    }
-
-    public boolean isTraceOn() {
-        return Configuration.PRINT_EXPLANATION;
     }
 }

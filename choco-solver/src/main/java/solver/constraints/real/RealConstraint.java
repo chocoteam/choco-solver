@@ -166,4 +166,10 @@ public class RealConstraint extends Constraint {
     public void discretize(IntVar... vars) {
         addPropagators(new IntToRealPropagator(ibex, contractors++, vars));
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        ibex.release();
+    }
 }

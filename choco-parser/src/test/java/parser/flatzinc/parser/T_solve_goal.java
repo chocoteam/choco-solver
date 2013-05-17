@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -35,6 +34,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.variables.VariableFactory;
 
@@ -49,12 +49,12 @@ import java.io.IOException;
 public class T_solve_goal extends GrammarTest {
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas datas;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
+        datas = new Datas();
     }
 
     public void solve_goal(FlatzincParser parser) throws RecognitionException {
@@ -63,7 +63,7 @@ public class T_solve_goal extends GrammarTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = datas;
         walker.solve_goal();
     }
 
@@ -79,7 +79,7 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testMaximize() throws IOException {
-        map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve maximize a;");
         try {
             solve_goal(fp);
@@ -90,7 +90,7 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testMinimize() throws IOException {
-        map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve minimize a;");
         try {
             solve_goal(fp);
@@ -101,7 +101,7 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testSatisfy2() throws IOException {
-        map.put("a", VariableFactory.bounded("a", 0, 10, mSolver));
+        datas.register("a", VariableFactory.bounded("a", 0, 10, mSolver));
         FlatzincParser fp = parser("solve ::int_search([a],input_order,indomain_min, complete) satisfy;");
         try {
             solve_goal(fp);
@@ -113,9 +113,9 @@ public class T_solve_goal extends GrammarTest {
 
     @Test(groups = "1s")
     public void testSatisfy3() throws IOException {
-        map.put("r", VariableFactory.boundedArray("r", 5, 0, 10, mSolver));
-        map.put("s", VariableFactory.boundedArray("s", 5, 0, 10, mSolver));
-        map.put("o", VariableFactory.bounded("o", 0, 10, mSolver));
+        datas.register("r", VariableFactory.boundedArray("r", 5, 0, 10, mSolver));
+        datas.register("s", VariableFactory.boundedArray("s", 5, 0, 10, mSolver));
+        datas.register("o", VariableFactory.bounded("o", 0, 10, mSolver));
         FlatzincParser fp = parser(
                 "solve\n" +
                         "  ::seq_search(\n" +

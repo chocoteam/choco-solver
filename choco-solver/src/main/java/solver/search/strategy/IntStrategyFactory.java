@@ -46,9 +46,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 5 juil. 2010
  */
-public final class IntStrategyFactory {
+public class IntStrategyFactory {
 
-    private IntStrategyFactory() {
+    IntStrategyFactory() {
     }
 
     /**
@@ -156,7 +156,7 @@ public final class IntStrategyFactory {
      * @return assignment strategy
      */
     public static AbstractStrategy<IntVar> domOverWDeg_InDomainMin(IntVar[] VARS, long SEED) {
-        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMiddle());
+        return new Assignment(new DomOverWDeg(VARS, SEED), new InDomainMin());
     }
 
     /**

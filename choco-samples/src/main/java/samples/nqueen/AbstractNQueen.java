@@ -28,16 +28,10 @@
 package samples.nqueen;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
-import util.tools.ArrayUtils;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br/>
@@ -48,7 +42,7 @@ import java.util.List;
 public abstract class AbstractNQueen extends AbstractProblem {
 
     @Option(name = "-q", usage = "Number of queens.", required = false)
-    int n = 12;
+    int n = 4;
     IntVar[] vars;
 
     @Override
@@ -59,81 +53,17 @@ public abstract class AbstractNQueen extends AbstractProblem {
     @Override
     public void configureSearch() {
         solver.set(IntStrategyFactory.firstFail_InDomainMin(vars));
-
-        IntVar[] orderedVars = orederIt2();
-        /*IPropagationEngine engine = solver.getEngine();
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        new IncrOrderV(orderedVars),
-                        Policy.ITERATE
-                ));*/
-    }
-
-    protected IntVar[] orederIt1() {
-        List<IntVar> odd = new ArrayList<IntVar>(), even = new ArrayList<IntVar>();
-        for (int i = 0; i < n; i += 2) {
-            odd.add(vars[i]);
-        }
-        for (int i = 1; i < n; i += 2) {
-            even.add(vars[i]);
-        }
-        int remainder = n % 6;
-        if (remainder == 2) {
-            IntVar tmp = odd.remove(1);
-            odd.add(0, tmp);
-            tmp = odd.remove(2);
-            odd.add(tmp);
-        }
-        if (remainder == 3) {
-            IntVar tmp = even.remove(0);
-            even.add(tmp);
-            tmp = odd.remove(0);
-            odd.add(tmp);
-            tmp = odd.remove(0);
-            odd.add(tmp);
-        }
-        IntVar[] orderedVars = new IntVar[n];
-        int k = 0;
-        for (int i = 0; i < even.size(); i++, k++) {
-            orderedVars[k] = even.get(i);
-        }
-        for (int i = 0; i < odd.size(); i++, k++) {
-            orderedVars[k] = odd.get(i);
-        }
-        return orderedVars;
-    }
-
-    protected IntVar[] orederIt2() {
-        IntVar[] orderedVars = new IntVar[n];
-        IntVar[] first = new IntVar[n / 2];
-        IntVar[] second = new IntVar[n / 2];
-        System.arraycopy(vars, 0, first, 0, n / 2);
-        System.arraycopy(vars, n - n / 2, second, 0, n / 2);
-        ArrayUtils.reverse(first);
-        int k = 0;
-        if (n % 2 == 1) {
-            orderedVars[k++] = vars[n / 2];
-        }
-        int i = 0;
-        for (; i < n / 2; i++, k += 2) {
-            orderedVars[k] = first[i];
-            orderedVars[k + 1] = second[i];
-        }
-
-        return orderedVars;
     }
 
 
     @Override
     public void solve() {
-        solver.findAllSolutions();
+        solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        StringBuilder st = new StringBuilder();
+        /*StringBuilder st = new StringBuilder();
         String line = "+";
         for (int i = 0; i < n; i++) {
             line += "---+";
@@ -148,7 +78,6 @@ public abstract class AbstractNQueen extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger("bench").info(st.toString());
-        st = null;
+        LoggerFactory.getLogger("bench").info(st.toString());*/
     }
 }

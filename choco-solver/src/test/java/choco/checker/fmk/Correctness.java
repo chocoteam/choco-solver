@@ -199,7 +199,7 @@ public class Correctness {
         int[] _values = new int[d.length];
         int k = 0;
         for (int i : d) {
-            if (!variable.getEnvelope().contain(i)) {
+            if (!variable.envelopeContains(i)) {
                 _values[k++] = i;
             }
         }
@@ -208,9 +208,9 @@ public class Correctness {
 
     ////////////////////////////////////////////////////////////////////////
     private static int[] getForcedElements(SetVar v, int[] d) {
-        int[] _values = new int[v.getKernel().getSize()];
+        int[] _values = new int[v.getKernelSize()];
         int k = 0;
-        for (int j = v.getKernel().getFirstElement(); j >= 0; j = v.getKernel().getNextElement()) {
+        for (int j = v.getKernelFirst(); j!=SetVar.END; j = v.getKernelNext()) {
             boolean newEl = true;
             for (int i : d) {
                 if (i == j) {

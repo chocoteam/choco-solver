@@ -50,24 +50,27 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     // boolean variable of the reification
     private final BoolVar bool;
     // constraint to apply if bool = true
-    private final Constraint targetCons;
+    private final Constraint trueCons;
+    // constraint to apply if bool = false
+    private final Constraint falseCons;
+    // indices of propagators
+    private int[] indices;
 
-    private static Variable[] extractVariable(BoolVar bVar, Constraint c) {
-        Variable[] varsC = c.getVariables();
-        for (int i = 0; i < varsC.length; i++) {
-            if (varsC[i] == bVar) {
-                return varsC;
-            }
-        }
-        return ArrayUtils.append(new Variable[]{bVar}, varsC);
-    }
-
-    public ImplicationConstraint(BoolVar bVar, Constraint constraint) {
-        super(extractVariable(bVar, constraint), bVar.getSolver());
-        targetCons = constraint;
+    public ImplicationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+        super(ArrayUtils.append(new Variable[]{bVar}, consIfBoolTrue.getVariables(), consIfBoolFalse.getVariables()),
+                bVar.getSolver());
+        trueCons = consIfBoolTrue;
+        falseCons = consIfBoolFalse;
         bool = bVar;
-        PropImplied reifProp = new PropImplied(bVar, this, targetCons);
-        setPropagators(ArrayUtils.append(new Propagator[]{reifProp}, targetCons.getPropagators().clone()));
+        indices = new int[3];
+        PropImplied reifProp = new PropImplied(bVar, this, trueCons, falseCons);
+        setPropagators(
+                ArrayUtils.append(new Propagator[]{reifProp},
+                        trueCons.getPropagators().clone(),
+                        falseCons.getPropagators().clone()));
+        indices[0] = 1;
+        indices[1] = indices[0] + trueCons.getPropagators().length;
+        indices[2] = indices[1] + falseCons.getPropagators().length;
         for (int i = 1; i < propagators.length; i++) {
             propagators[i].setReifiedSilent();
         }
@@ -77,11 +80,12 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     // METHODS
     //***********************************************************************************
 
-    public void activate() throws ContradictionException {
-        assert bool.instantiated() && bool.getBooleanValue() == ESat.TRUE;
-        for (int p = 1; p < propagators.length; p++) {
+    public void activate(int idx) throws ContradictionException {
+        assert bool.instantiatedTo(1 - idx);
+        for (int p = indices[idx]; p < indices[idx + 1]; p++) {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
+            solver.getExplainer().activePropagator(bool, propagators[p]);
             propagators[p].propagate(EventType.FULL_PROPAGATION.strengthened_mask);
             solver.getEngine().onPropagatorExecution(propagators[p]);
         }
@@ -91,9 +95,10 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     public ESat isSatisfied() {
         if (bool.instantiated()) {
             if (bool.getValue() == 1) {
-                return targetCons.isSatisfied();
+                return trueCons.isSatisfied();
+            } else {
+                return falseCons.isSatisfied();
             }
-            return ESat.TRUE;
         }
         return ESat.UNDEFINED;
     }
@@ -102,15 +107,16 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     public ESat isEntailed() {
         if (bool.instantiated()) {
             if (bool.getValue() == 1) {
-                return targetCons.isEntailed();
+                return trueCons.isEntailed();
+            } else {
+                return falseCons.isEntailed();
             }
-            return ESat.TRUE;
         }
         return ESat.UNDEFINED;
     }
 
     @Override
     public String toString() {
-        return bool.toString() + "=>" + targetCons.toString();
+        return bool.toString() + "=>" + trueCons.toString() + ", !" + bool.toString() + "=>" + falseCons.toString();
     }
 }

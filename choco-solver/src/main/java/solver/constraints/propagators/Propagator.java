@@ -350,7 +350,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void setReifiedSilent() {
-        assert isStateLess() : "the propagator was not stateless";
+        assert isStateLess()||isReifiedAndSilent() : "the propagator was neither stateless nor reified";
         state = REIFIED;
     }
 
@@ -457,6 +457,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @Override
     public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
             v.explain(VariableState.DOM, e);

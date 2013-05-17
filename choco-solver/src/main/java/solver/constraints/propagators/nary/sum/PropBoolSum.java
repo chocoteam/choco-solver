@@ -124,9 +124,9 @@ public class PropBoolSum extends Propagator<IntVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp < n) {
             if (vars[idxVarInProp].getValue() == 1) {
-                min.set(min.get() + 1);
+                min.add(1);
             } else {
-                max.set(max.get() - 1);
+                max.add(-1);
             }
         }
         filter();
@@ -134,6 +134,8 @@ public class PropBoolSum extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
+		if(vIdx==n)
+			return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
         return EventType.INSTANTIATE.mask;
     }
 
@@ -148,7 +150,7 @@ public class PropBoolSum extends Propagator<IntVar> {
         if (lb > sum.getUB() || ub < sum.getLB()) {
             return ESat.FALSE;
         }
-        if (isCompletelyInstantiated()) {
+        if (lb==ub && sum.instantiated()) {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;

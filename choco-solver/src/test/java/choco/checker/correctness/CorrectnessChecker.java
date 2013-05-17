@@ -52,6 +52,7 @@ public class CorrectnessChecker {
 
     public static void checkCorrectness(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, Object parameters) {
         Random r = new Random(seed);
+        System.out.printf("Running %s\n", modeler.name());
         THashMap<int[], IntVar> map = new THashMap<int[], IntVar>();
         double[] densities = {0.1, 0.25, 0.5, 0.75, 1.0};
         boolean[] homogeneous = {true, false};

@@ -273,6 +273,7 @@ public class PropSquare extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         //        return super.explain(d);
         if (d.getVar() == vars[0]) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d instanceof ValueRemoval) {
                 int val = (int) Math.sqrt(((ValueRemoval) d).getVal());
@@ -282,6 +283,7 @@ public class PropSquare extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("PropSquare only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == vars[1]) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d instanceof ValueRemoval) {
                 int val = ((ValueRemoval) d).getVal() ^ 2;

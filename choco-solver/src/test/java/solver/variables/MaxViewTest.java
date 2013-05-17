@@ -31,8 +31,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.nary.cnf.LogOp;
 import solver.search.strategy.IntStrategyFactory;
 
 import java.util.Random;
@@ -47,14 +47,11 @@ public class MaxViewTest {
 
     public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
         BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
-        solver.post(IntConstraintFactory.implies(bs[0], IntConstraintFactory.arithm(z, "=", x)));
-        solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[0]), IntConstraintFactory.arithm(z, "!=", x)));
-        solver.post(IntConstraintFactory.implies(bs[1], IntConstraintFactory.arithm(z, "=", y)));
-        solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[1]), IntConstraintFactory.arithm(z, "!=", y)));
-        solver.post(IntConstraintFactory.implies(bs[2], IntConstraintFactory.arithm(x, ">=", y)));
-        solver.post(IntConstraintFactory.implies(VariableFactory.not(bs[2]), IntConstraintFactory.arithm(x, "<", y)));
-        solver.post(IntConstraintFactory.clauses(Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
-                Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))), solver));
+        solver.post(LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
+        solver.post(LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
+        solver.post(LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
+        solver.post(IntConstraintFactory.clauses(LogOp.or(LogOp.and(bs[0], bs[2]),
+                LogOp.and(bs[1], bs[2].not())), solver));
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {

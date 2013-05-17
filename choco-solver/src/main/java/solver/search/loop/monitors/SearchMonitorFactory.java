@@ -39,8 +39,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public enum SearchMonitorFactory {
-    ;
+public class SearchMonitorFactory {
+    SearchMonitorFactory() {
+    }
 
     private static class DefaultSolutionMessage implements IMessage {
 
@@ -53,10 +54,10 @@ public enum SearchMonitorFactory {
         @Override
         public String print() {
             return String.format("- Solution #%s found. %s \n\t%s.",
-                    new Object[]{solver.getSearchLoop().getMeasures().getSolutionCount(),
+                    solver.getSearchLoop().getMeasures().getSolutionCount(),
                             solver.getSearchLoop().getMeasures().toOneShortLineString(),
                             print(solver.getSearchLoop().getStrategy().vars)
-                    });
+                    );
         }
 
         private String print(Variable[] vars) {
@@ -80,12 +81,13 @@ public enum SearchMonitorFactory {
 
         @Override
         public String print() {
+            int limit = 120;
             Variable[] vars = solver.getSearchLoop().getStrategy().vars;
             StringBuilder s = new StringBuilder(32);
-            for (int i = 0; i < vars.length && s.length() < 120; i++) {
+            for (int i = 0; i < vars.length && s.length() < limit; i++) {
                 s.append(vars[i]).append(' ');
             }
-            if (s.length() >= 120) {
+            if (s.length() >= limit) {
                 s.append("...");
             }
             return s.toString();

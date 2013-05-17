@@ -70,9 +70,6 @@ public class Solution implements ICause {
     /* Values of set variables, in Solver internal order */
     private LinkedList<int[]> setValues;
 
-    /* Statistics of the current solution (time, nodes, etc.) */
-    private long[] measures;
-
     public static Solution empty() {
         return new Solution();
     }
@@ -153,13 +150,9 @@ public class Solution implements ICause {
         }
     }
 
-    public long[] measures() {
-        return measures;
-    }
-
     @Override
     public void explain(Deduction d, Explanation e) {
-        e.add(Explanation.SYSTEM);
+        e.add(Explanation.SYSTEM.get());
     }
 
     @Override

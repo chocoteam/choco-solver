@@ -57,6 +57,6 @@ public class NQueenLinearBinary extends AbstractNQueen {
     }
 
     public static void main(String[] args) {
-        new NQueenLinearBinary().execute("12");
+        new NQueenLinearBinary().execute(args);
     }
 }

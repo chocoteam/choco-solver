@@ -110,6 +110,7 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(aCause);
         // the current deduction is due to the current domain of the involved variables
         Variable var = d.getVar();

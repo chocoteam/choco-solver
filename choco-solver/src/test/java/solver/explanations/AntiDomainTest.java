@@ -29,11 +29,12 @@ package solver.explanations;
 import junit.framework.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.explanations.antidom.AntiDomBipartiteSet;
 import solver.explanations.antidom.AntiDomBitset;
+import solver.explanations.antidom.AntiDomInterval;
 import solver.explanations.antidom.AntiDomain;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.iterators.DisposableValueIterator;
 
 /**
  * <br/>
@@ -43,22 +44,30 @@ import solver.variables.VariableFactory;
  */
 public class AntiDomainTest {
 
-    private void check(AntiDomain ad, Solver solver) {
+    @Test(groups = "1s")
+    public void test01() {
+        Solver solver = new Solver();
+        IntVar v = VariableFactory.enumerated("A", 1, 5, solver);
+        AntiDomain ad = new AntiDomBitset(v);
         Assert.assertFalse(ad.get(1));
         Assert.assertFalse(ad.get(2));
         Assert.assertFalse(ad.get(3));
         Assert.assertFalse(ad.get(4));
         Assert.assertFalse(ad.get(5));
         solver.getEnvironment().worldPush();
-        ad.set(1);
-        ad.set(5);
+        ad.add(1);
+        ad.add(5);
         Assert.assertTrue(ad.get(1));
         Assert.assertFalse(ad.get(2));
         Assert.assertFalse(ad.get(3));
         Assert.assertFalse(ad.get(4));
         Assert.assertTrue(ad.get(5));
         solver.getEnvironment().worldPush();
-        ad.set(3);
+        ad.add(3);
+        DisposableValueIterator values = ad.getValueIterator();
+        while (values.hasNext()) {
+            Assert.assertTrue(ad.get(values.next()));
+        }
         Assert.assertTrue(ad.get(1));
         Assert.assertFalse(ad.get(2));
         Assert.assertTrue(ad.get(3));
@@ -79,29 +88,46 @@ public class AntiDomainTest {
     }
 
     @Test(groups = "1s")
-    public void test01() {
-        Solver solver = new Solver();
-        IntVar v = VariableFactory.enumerated("A", 1, 5, solver);
-        AntiDomain ad = new AntiDomBitset(v);
-        check(ad, solver);
-    }
-
-    @Test(groups = "1s")
     public void test02() {
         Solver solver = new Solver();
-        IntVar v = VariableFactory.enumerated("A", 1, 5, solver);
-        AntiDomain ad = new AntiDomBipartiteSet(v);
-        check(ad, solver);
-    }
-
-    @Test(groups = "1s")
-    public void test03() {
-        Solver solver = new Solver();
-        IntVar v = VariableFactory.enumerated("A", 2, 6, solver);
-        AntiDomain ad = new AntiDomBipartiteSet(v);
-        ad.set(6);
-        ad.set(5);
-        ad.set(2);
-
+        IntVar v = VariableFactory.enumerated("A", 1, 10, solver);
+        AntiDomain ad = new AntiDomInterval(v);
+        for (int i = 1; i < 11; i++) {
+            Assert.assertFalse(ad.get(i));
+        }
+        solver.getEnvironment().worldPush();
+        ad.updateLowerBound(1, 4);
+        ad.updateLowerBound(4, 5);
+        ad.updateUpperBound(10, 7);
+        Assert.assertTrue(ad.get(1));
+        Assert.assertTrue(ad.get(2));
+        Assert.assertTrue(ad.get(3));
+        Assert.assertTrue(ad.get(4));
+        Assert.assertFalse(ad.get(5));
+        Assert.assertFalse(ad.get(6));
+        Assert.assertFalse(ad.get(7));
+        Assert.assertTrue(ad.get(8));
+        Assert.assertTrue(ad.get(9));
+        Assert.assertTrue(ad.get(10));
+        solver.getEnvironment().worldPush();
+        DisposableValueIterator values = ad.getValueIterator();
+        while (values.hasNext()) {
+            Assert.assertTrue(ad.get(values.next()));
+        }
+        solver.getEnvironment().worldPop();
+        Assert.assertTrue(ad.get(1));
+        Assert.assertTrue(ad.get(2));
+        Assert.assertTrue(ad.get(3));
+        Assert.assertTrue(ad.get(4));
+        Assert.assertFalse(ad.get(5));
+        Assert.assertFalse(ad.get(6));
+        Assert.assertFalse(ad.get(7));
+        Assert.assertTrue(ad.get(8));
+        Assert.assertTrue(ad.get(9));
+        Assert.assertTrue(ad.get(10));
+        solver.getEnvironment().worldPop();
+        for (int i = 1; i < 11; i++) {
+            Assert.assertFalse(ad.get(i));
+        }
     }
 }

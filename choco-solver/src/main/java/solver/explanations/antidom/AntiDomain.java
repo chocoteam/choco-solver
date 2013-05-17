@@ -29,6 +29,7 @@ package solver.explanations.antidom;
 import util.iterators.DisposableValueIterator;
 
 /**
+ * An interface for anti-domain, ie, values removed from a specific domain.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -36,10 +37,47 @@ import util.iterators.DisposableValueIterator;
  */
 public interface AntiDomain {
 
-    void set(int outsideval);
+    /**
+     * Add a value to <code>this</code>
+     *
+     * @param outsideval value to add
+     */
+    void add(int outsideval);
 
+    /**
+     * Update the lower bound
+     *
+     * @param oldLB the old lower bound value
+     * @param newLB the new lower bound value
+     */
+    void updateLowerBound(int oldLB, int newLB);
+
+    /**
+     * Update the upper bound
+     *
+     * @param oldUB the old upper bound value
+     * @param newUB the new upper bound value
+     */
+    void updateUpperBound(int oldUB, int newUB);
+
+    /**
+     * Return whether or not a value appears in <code>this</code>
+     *
+     * @param outsideval value to check
+     * @return a boolean value
+     */
     boolean get(int outsideval);
 
+    int getKeyValue(int outsideval);
+
+    /**
+     * Return an iterator over removed values
+     *
+     * @return an iterator
+     */
     DisposableValueIterator getValueIterator();
 
+    boolean isEnumerated();
+
+    int size();
 }

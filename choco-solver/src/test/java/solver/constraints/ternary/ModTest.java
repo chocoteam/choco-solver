@@ -26,10 +26,14 @@
  */
 package solver.constraints.ternary;
 
+import junit.framework.Assert;
+import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -48,4 +52,18 @@ public class ModTest extends AbstractTernaryTest {
     protected Constraint make(IntVar[] vars, Solver s) {
         return IntConstraintFactory.mod(vars[0], vars[1], vars[2]);
     }
+
+    @Test(groups = "10s")
+    public void test2() {
+        Solver solver = new Solver();
+        IntVar res = VariableFactory.bounded("r", 1, 2, solver);
+        solver.post(IntConstraintFactory.mod(res, VariableFactory.fixed(2, solver), VariableFactory.fixed(1, solver)));
+        try {
+            solver.propagate();
+            Assert.assertTrue(res.instantiatedTo(1));
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+    }
+
 }

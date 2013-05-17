@@ -41,7 +41,8 @@ import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
+import solver.search.solution.SolutionPoolFactory;
+import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.search.strategy.selectors.variables.DomOverWDeg;
@@ -54,6 +55,8 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.tools.ArrayUtils;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -79,10 +82,10 @@ public class FGoal {
     }
 
 
-    public static void define_goal(GoalConf gc, Solver aSolver, List<EAnnotation> annotations,
-                                   ResolutionPolicy type, Expression expr) {
+    public static void define_goal(Datas datas, Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
+        GoalConf gc = datas.goals();
         switch (type) {
             case SATISFACTION:
                 break;
@@ -94,6 +97,8 @@ public class FGoal {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
         aSolver.set(gc.searchPattern);
+        search.setSolutionpool(SolutionPoolFactory.NO_SOLUTION.make());
+
         // Then define search goal
         Variable[] vars = aSolver.getVars();
         IntVar[] ivars = new IntVar[vars.length];
@@ -122,9 +127,7 @@ public class FGoal {
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
                 aSolver.set(
                         new StrategiesSequencer(aSolver.getEnvironment(),
-                                strategy,
-                                IntStrategyFactory.random(ivars, gc.seed))
-                );
+                                strategy, makeComplementarySearch(datas)));
 
                 System.out.println("% t:" + gc.seed);
             }
@@ -138,15 +141,17 @@ public class FGoal {
                     if (annotation.id.value.equals("seq_search")) {
                         EArray earray = (EArray) annotation.exps.get(0);
                         for (int i = 0; i < earray.what.size(); i++) {
-                            ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
+                            dvars = ArrayUtils.append(dvars, extractScope((EAnnotation) earray.getWhat_i(i), aSolver));
                         }
                     } else {
                         dvars = ArrayUtils.append(dvars, extractScope(annotation, aSolver));
                     }
                 }
-                ivars = new IntVar[dvars.length];
-                for (int i = 0; i < dvars.length; i++) {
-                    ivars[i] = (IntVar) dvars[i];
+                if (dvars.length > 0) {
+                    ivars = new IntVar[dvars.length];
+                    for (int i = 0; i < dvars.length; i++) {
+                        ivars[i] = (IntVar) dvars[i];
+                    }
                 }
             }
 
@@ -233,5 +238,17 @@ public class FGoal {
                 LoggerFactory.getLogger(FGoal.class).error("Unknown search annotation " + e.toString());
                 throw new FZNException();
         }
+    }
+
+
+    private static AbstractStrategy makeComplementarySearch(Datas datas) {
+        IntVar[] ivars = datas.getSearchVars();
+        Arrays.sort(ivars, new Comparator<IntVar>() {
+            @Override
+            public int compare(IntVar o1, IntVar o2) {
+                return o1.getDomainSize() - o2.getDomainSize();
+            }
+        });
+        return ISF.inputOrder_InDomainMin(ivars);
     }
 }

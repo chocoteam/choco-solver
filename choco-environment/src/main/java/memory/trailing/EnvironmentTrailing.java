@@ -31,6 +31,12 @@ package memory.trailing;
 import memory.*;
 import memory.structure.Operation;
 import memory.trailing.trail.*;
+import memory.trailing.trail.chunck.*;
+import memory.trailing.trail.flatten.*;
+import memory.trailing.trail.unsafe.UnsafeBoolTrail;
+import memory.trailing.trail.unsafe.UnsafeDoubleTrail;
+import memory.trailing.trail.unsafe.UnsafeIntTrail;
+import memory.trailing.trail.unsafe.UnsafeLongTrail;
 
 /**
  * The root class for managing memory and sessions.
@@ -43,30 +49,30 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
 
     /**
      * The maximum numbers of worlds that a
-     * {@link ITrailStorage} can handle.
+     * {@link memory.IStorage} can handle.
      */
     private int maxWorld = 100; //1000;
 
     /**
      * The maximum numbers of updates that a
-     * {@link ITrailStorage} can handle.
+     * {@link memory.IStorage} can handle.
      */
     private static final int MaxHist = 5000;
 
-    //Contains all the {@link ITrailStorage} trails for
+    //Contains all the {@link IStorage} trails for
     // storing different kinds of data.
-    private StoredIntTrail intTrail;
-    private StoredBoolTrail boolTrail;
-    private StoredVectorTrail vectorTrail;
-    private StoredLongTrail longTrail;
+
+    private IStoredIntTrail intTrail;
+    private IStoredBoolTrail boolTrail;
+    private IStoredLongTrail longTrail;
+    private IStoredDoubleTrail doubleTrail;
+    private IOperationTrail operationTrail;
+
     private StoredIntVectorTrail intVectorTrail;
     private StoredDoubleVectorTrail doubleVectorTrail;
-    private StoredDoubleTrail doubleTrail;
-    private OperationTrail operationTrail;
-
 
     /**
-     * Contains all the {@link ITrailStorage} trails for
+     * Contains all the {@link memory.IStorage} trails for
      * storing different kinds of data.
      */
     private ITrailStorage[] trails;
@@ -78,6 +84,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      */
 
     public EnvironmentTrailing() {
+        super(Type.CHUNK);
         trails = new ITrailStorage[0];
         trailSize = 0;
     }
@@ -121,8 +128,9 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         if (currentWorld == 0) {
             throw new IllegalStateException("Commit in world 0?");
         }
+        final int wi = currentWorld;
         for (int i = trailSize; i >= 0; i--) {
-            trails[i].worldCommit();
+            trails[i].worldCommit(wi);
         }
         currentWorld--;
     }
@@ -147,25 +155,8 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateInt makeIntProcedure(final IStateIntProcedure procedure,
-                                      final int initialValue) {
-        return new StoredIntProcedure(this, procedure, initialValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateBool makeBool(final boolean initialValue) {
         return new StoredBool(this, initialValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateIntVector makeIntVector() {
-        return new StoredIntVector(this);
     }
 
     /**
@@ -180,46 +171,9 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateIntVector makeIntVector(final int[] entries) {
-        return new StoredIntVector(this, entries);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateDoubleVector makeDoubleVector() {
-        return new StoredDoubleVector(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateDoubleVector makeDoubleVector(final int size, final double initialValue) {
         return new StoredDoubleVector(this, size, initialValue);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateDoubleVector makeDoubleVector(final double[] entries) {
-        return new StoredDoubleVector(this, entries);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> IStateVector<T> makeVector() {
-        return new StoredVector<T>(this);
-    }
-
-    //    @Override
-    //	public AbstractStateBitSet makeBitSet(int size) {
-    //		return new StoredBitSet(this, size);
-    //	}
 
     /**
      * {@inheritDoc}
@@ -253,64 +207,112 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         return new StoredLong(this, init);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IStateObject makeObject(final Object obj) {
-        throw (new UnsupportedOperationException());
-    }
 
     private void increaseTrail() {// TODO check resizing
-        ITrailStorage[] tmp = trails;
+        IStorage[] tmp = trails;
         trails = new ITrailStorage[tmp.length + 1];
         System.arraycopy(tmp, 0, trails, 0, tmp.length);
     }
 
-    public StoredIntTrail getIntTrail() {
+    public IStoredIntTrail getIntTrail() {
         if (intTrail == null) {
-            intTrail = new StoredIntTrail(this, MaxHist, maxWorld);
+            switch (type) {
+                case FLAT:
+                    intTrail = new StoredIntTrail(MaxHist, maxWorld);
+                    break;
+                case CHUNK:
+                    intTrail = new StoredIntChunckTrail(MaxHist, maxWorld);
+                    break;
+                case UNSAFE:
+                    intTrail = new UnsafeIntTrail(MaxHist, maxWorld);
+                    break;
+            }
             increaseTrail();
             trails[trailSize++] = intTrail;
         }
         return intTrail;
     }
 
-    public StoredLongTrail getLongTrail() {
+    public IStoredLongTrail getLongTrail() {
         if (longTrail == null) {
-            longTrail = new StoredLongTrail(MaxHist, maxWorld);
+            switch (type) {
+                case FLAT:
+                    longTrail = new StoredLongTrail(MaxHist, maxWorld);
+                    break;
+                case CHUNK:
+                    longTrail = new StoredLongChunckTrail(MaxHist, maxWorld);
+                    break;
+                case UNSAFE:
+                    longTrail = new UnsafeLongTrail(MaxHist, maxWorld);
+                    break;
+            }
+
             increaseTrail();
             trails[trailSize++] = longTrail;
         }
         return longTrail;
     }
 
-    public StoredBoolTrail getBoolTrail() {
+    public IStoredBoolTrail getBoolTrail() {
         if (boolTrail == null) {
-            boolTrail = new StoredBoolTrail(this, MaxHist, maxWorld);
+            switch (type) {
+                case FLAT:
+                    boolTrail = new StoredBoolTrail(MaxHist, maxWorld);
+                    break;
+                case CHUNK:
+                    boolTrail = new StoredBoolChunckTrail(MaxHist, maxWorld);
+                    break;
+                case UNSAFE:
+                    boolTrail = new UnsafeBoolTrail(MaxHist, maxWorld);
+                    break;
+            }
+
             increaseTrail();
             trails[trailSize++] = boolTrail;
         }
         return boolTrail;
     }
 
-    public StoredDoubleTrail getDoubleTrail() {
+    public IStoredDoubleTrail getDoubleTrail() {
         if (doubleTrail == null) {
-            doubleTrail = new StoredDoubleTrail(this, MaxHist, maxWorld);
+            switch (type) {
+                case FLAT:
+                    doubleTrail = new StoredDoubleTrail(MaxHist, maxWorld);
+                    break;
+                case CHUNK:
+                    doubleTrail = new StoredDoubleChunckTrail(MaxHist, maxWorld);
+                    break;
+                case UNSAFE:
+                    doubleTrail = new UnsafeDoubleTrail(MaxHist, maxWorld);
+                    break;
+            }
             increaseTrail();
             trails[trailSize++] = doubleTrail;
         }
         return doubleTrail;
     }
 
-    public StoredVectorTrail getVectorTrail() {
-        if (vectorTrail == null) {
-            vectorTrail = new StoredVectorTrail(this, MaxHist, maxWorld);
+    public IOperationTrail getOperationTrail() {
+        if (operationTrail == null) {
+            switch (type) {
+                case FLAT:
+                    operationTrail = new OperationTrail(MaxHist, maxWorld);
+                    break;
+                case CHUNK:
+                case UNSAFE:
+                    operationTrail = new OperationChunckTrail(MaxHist, maxWorld);
+                    break;
+            }
             increaseTrail();
-            trails[trailSize++] = vectorTrail;
+            trails[trailSize++] = operationTrail;
         }
-        return vectorTrail;
+        return operationTrail;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // SPECIFIC DATA STRUCTURES                                                                                       //
+    // NOTE: this data structures should not be used...
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public StoredIntVectorTrail getIntVectorTrail() {
         if (intVectorTrail == null) {
@@ -330,14 +332,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         return doubleVectorTrail;
     }
 
-    public OperationTrail getOperationTrail() {
-        if (operationTrail == null) {
-            operationTrail = new OperationTrail(this, MaxHist, maxWorld);
-            increaseTrail();
-            trails[trailSize++] = operationTrail;
-        }
-        return operationTrail;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void resizeWorldCapacity(final int newWorldCapacity) {
         for (final ITrailStorage trail : trails) {

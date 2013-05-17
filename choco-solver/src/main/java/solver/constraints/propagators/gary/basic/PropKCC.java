@@ -33,6 +33,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import util.ESat;
 import util.graphOperations.connectivity.ConnectivityFinder;
@@ -51,7 +52,7 @@ public class PropKCC extends Propagator {
     // VARIABLES
     //***********************************************************************************
 
-    private UndirectedGraphVar g;
+    private GraphVar g;
     private IntVar k;
     private ConnectivityFinder env_CC_finder, ker_CC_finder;
 
@@ -59,9 +60,9 @@ public class PropKCC extends Propagator {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropKCC(UndirectedGraphVar graph, IntVar k) {
+    public PropKCC(GraphVar graph, IntVar k) {
         super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
-        this.g = (UndirectedGraphVar) vars[0];
+        this.g = (GraphVar) vars[0];
         this.k = (IntVar) vars[1];
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
         ker_CC_finder = new ConnectivityFinder(g.getKernelGraph());
@@ -74,7 +75,7 @@ public class PropKCC extends Propagator {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         int maxOrder = g.getEnvelopOrder();
-        if (k.getUB() == 1 && maxOrder == g.getKernelOrder() && maxOrder > 1) {
+        if ((!g.isDirected()) && k.getUB() == 1 && maxOrder == g.getKernelOrder() && maxOrder > 1) {
             if (!env_CC_finder.isConnectedAndFindIsthma()) {
                 contradiction(g, "");
             }
@@ -97,7 +98,7 @@ public class PropKCC extends Propagator {
             int minCC = 0;
             for (int cc = 0; cc < ccs; cc++) {
                 for (int i = env_CC_finder.getCC_firstNode()[cc]; i >= 0; i = env_CC_finder.getCC_nextNode()[i]) {
-                    if (act.contain(i)) {
+					if (act.contain(i)) {
                         minCC++;
                         break;
                     }

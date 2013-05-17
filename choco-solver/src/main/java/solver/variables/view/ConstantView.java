@@ -36,6 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.explanations.antidom.AntiDomBitset;
 import solver.explanations.antidom.AntiDomain;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
@@ -257,7 +258,7 @@ public class ConstantView implements IntVar<IntDelta> {
 
     @Override
     public AntiDomain antiDomain() {
-        throw new UnsupportedOperationException();
+        return new AntiDomBitset(this);
     }
 
     @Override

@@ -25,6 +25,8 @@ package solver.constraints.real;/*
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import solver.exception.SolverException;
+
 /**
  * A link to Ibex library.
  * The following option should be passed to the VM:
@@ -67,7 +69,11 @@ public class Ibex {
     public static final int FALSE_OR_TRUE = 2;
 
     static {
-        System.loadLibrary("ibex-java");
+        try{
+            System.loadLibrary("ibex-java");
+        }catch (UnsatisfiedLinkError e){
+            throw new SolverException("Ibex is not correctly installed (see http://www.emn.fr/z-info/ibex/).");
+        }
     }
 
     /**

@@ -32,6 +32,8 @@ import memory.Environments;
 import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.nary.cnf.PropFalse;
+import solver.constraints.propagators.nary.cnf.PropTrue;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -48,6 +50,7 @@ import solver.search.strategy.pattern.SearchPattern;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.view.BoolConstantView;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
 import util.ESat;
@@ -127,6 +130,16 @@ public class Solver implements Serializable {
     protected int id = 1;
 
     /**
+     * Two basic constraints TRUE and FALSE, cached to avoid multiple useless occurrences
+     */
+    public final Constraint TRUE, FALSE;
+
+    /**
+     * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
+     */
+    public final BoolConstantView ZERO, ONE;
+
+    /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
@@ -146,6 +159,22 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
+
+        TRUE = new Constraint(this) {
+            {
+                setPropagators(new PropTrue(this.getSolver()));
+            }
+        };
+        FALSE = new Constraint(this) {
+            {
+                setPropagators(new PropFalse(this.getSolver()));
+            }
+        };
+
+        ZERO = new BoolConstantView("0", 0, this);
+        ONE = new BoolConstantView("1", 1, this);
+        ZERO._setNot(ONE);
+        ONE._setNot(ZERO);
     }
 
     /**
@@ -296,9 +325,7 @@ public class Solver implements Serializable {
      * <b>BEWARE:</b> : should be set <b>BEFORE</b> setting the search strategy
      *
      * @param searchPattern a search pattern
-     * @deprecated
      */
-    @Deprecated
     public void set(ISearchPattern searchPattern) {
         this.searchPattern = searchPattern;
     }
@@ -411,6 +438,13 @@ public class Solver implements Serializable {
             if (dynAdd) {
                 engine.dynamicAddition(cs[i], cut);
             }
+			if(cs[i].isReified()){
+				try {
+					cs[i].reif().setToTrue(Cause.Null);
+				} catch (ContradictionException e) {
+					throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
+				}
+			}
         }
     }
 

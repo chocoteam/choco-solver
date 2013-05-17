@@ -30,7 +30,7 @@ package solver.constraints.binary;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.binary.PropElement;
-import solver.constraints.propagators.nary.channeling.PropElementV;
+import solver.constraints.propagators.nary.channeling.PropElementV_fast;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
@@ -70,8 +70,13 @@ public class Element extends IntConstraint<IntVar> {
         this.values = new int[0];
         this.offset = offset;
         //CPRU  double to simulate idempotency
-        setPropagators(new PropElementV(value, values, index, offset),
-                new PropElementV(value, values, index, offset));
+//        setPropagators(new PropElementV(value, values, index, offset),
+//                new PropElementV(value, values, index, offset));
+		// JG : tmp, perf tests
+		setPropagators(
+				new PropElementV_fast(value,values,index,offset,true),
+				new PropElementV_fast(value,values,index,offset,true)
+		);
     }
 
 

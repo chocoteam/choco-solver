@@ -32,6 +32,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.reified.ImplicationConstraint;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -51,14 +54,18 @@ public class PropImplied extends Propagator<Variable> {
     // boolean variable of the reification
     private final BoolVar bVar;
     // constraint to apply if bVar = true
-    private final Constraint impliedCons;
+    private final Constraint trueCons;
     // constraint of this propagator
+    // constraint to apply if bVar = false
+    private final Constraint falseCons;
+
     private final ImplicationConstraint reifCons;
 
-    public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue) {
+    public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
         super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false);
         this.bVar = (BoolVar) vars[0];
-        this.impliedCons = consIfBoolTrue;
+        this.trueCons = consIfBoolTrue;
+        this.falseCons = consIfBoolFalse;
         this.reifCons = reifCons;
     }
 
@@ -66,13 +73,22 @@ public class PropImplied extends Propagator<Variable> {
     public void propagate(int evtmask) throws ContradictionException {
         if (bVar.instantiated()) {
             if (bVar.getBooleanValue() == ESat.TRUE) {
-                reifCons.activate();
+                reifCons.activate(0);
+            } else {
+                reifCons.activate(1);
             }
             setPassive();
         } else {
-            ESat sat = impliedCons.isEntailed();
+            ESat sat = trueCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToFalse(aCause);
+                reifCons.activate(1);
+                setPassive();
+            }
+            sat = falseCons.isEntailed();
+            if (sat == ESat.FALSE) {
+                bVar.setToTrue(aCause);
+                reifCons.activate(0);
                 setPassive();
             }
         }
@@ -82,7 +98,9 @@ public class PropImplied extends Propagator<Variable> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {
             if (bVar.getBooleanValue() == ESat.TRUE) {
-                reifCons.activate();
+                reifCons.activate(0);
+            } else {
+                reifCons.activate(1);
             }
             setPassive();
         } else {
@@ -100,16 +118,31 @@ public class PropImplied extends Propagator<Variable> {
     public ESat isEntailed() {
         if (bVar.instantiated()) {
             if (bVar.getValue() == 1) {
-                return impliedCons.isEntailed();
+                return trueCons.isEntailed();
             } else {
-                return ESat.TRUE;
+                return falseCons.isEntailed();
             }
         }
         return ESat.UNDEFINED;
     }
 
     @Override
+    public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
+        e.add(this);
+        if (d.getVar() == bVar) {
+            // the current deduction is due to the current domain of the involved variables
+            for (Variable v : reifCons.getVariables()) {
+                v.explain(VariableState.DOM, e);
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        // and the application of the current propagator
+    }
+
+    @Override
     public String toString() {
-        return bVar.toString() + "=>" + impliedCons.toString();
+        return bVar.toString() + "=>" + trueCons.toString()+", !"+bVar.toString() + "=>" + falseCons.toString();
     }
 }

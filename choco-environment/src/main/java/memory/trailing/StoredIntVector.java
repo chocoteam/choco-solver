@@ -36,38 +36,13 @@ import memory.trailing.trail.StoredIntVectorTrail;
  * Cette classe permet de stocker facilment des entiers dans un tableau
  * backtrackable d'entiers.
  */
-public final class StoredIntVector implements IStateIntVector {
-
-
-    /**
-     * Minimal capacity of a vector
-     */
-    public static final int MIN_CAPACITY = 8;
-
-    /**
-     * Contains the elements of the vector.
-     */
-
-    private int[] elementData;
+public final class StoredIntVector extends IStateIntVector {
 
     /**
      * Contains time stamps for all entries (the world index of the last update for each entry)
      */
 
     public int[] worldStamps;
-
-    /**
-     * A backtrackable search with the size of the vector.
-     */
-
-    private StoredInt size;
-
-
-    /**
-     * The current environment.
-     */
-
-    private final EnvironmentTrailing environment;
 
     protected final StoredIntVectorTrail myTrail;
 
@@ -81,78 +56,30 @@ public final class StoredIntVector implements IStateIntVector {
      */
 
     public StoredIntVector(EnvironmentTrailing env, int initialSize, int initialValue) {
-        int initialCapacity = MIN_CAPACITY;
+        super(env, initialSize, initialValue);
+        int initialCapacity = Math.max(MIN_CAPACITY, initialSize);
         int w = env.getWorldIndex();
 
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new int[initialCapacity];
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = initialValue;
             this.worldStamps[i] = w;
         }
-        this.size = new StoredInt(env, initialSize);
-        this.myTrail = environment.getIntVectorTrail();
+        this.myTrail = env.getIntVectorTrail();
     }
 
 
     public StoredIntVector(EnvironmentTrailing env, int[] entries) {
-        int initialCapacity = MIN_CAPACITY;
+        super(env, entries);
+        int initialCapacity = Math.max(MIN_CAPACITY, entries.length);
         int w = env.getWorldIndex();
         int initialSize = entries.length;
 
-        if (initialCapacity < initialSize)
-            initialCapacity = initialSize;
-
-        this.environment = env;
-        this.elementData = new int[initialCapacity];
         this.worldStamps = new int[initialCapacity];
         for (int i = 0; i < initialSize; i++) {
-            this.elementData[i] = entries[i]; // could be a System.arrayCopy but since the loop is needed...
             this.worldStamps[i] = w;
         }
-        this.size = new StoredInt(env, initialSize);
-        this.myTrail = environment.getIntVectorTrail();
+        this.myTrail = env.getIntVectorTrail();
     }
-
-    /**
-     * Constructs an empty stored search vector.
-     *
-     * @param env The current environment.
-     */
-
-    public StoredIntVector(EnvironmentTrailing env) {
-        this(env, 0, 0);
-    }
-
-    private boolean rangeCheck(int index) {
-        return index < size.get() && index >= 0;
-    }
-
-    /**
-     * Returns the current size of the stored search vector.
-     */
-
-    public int size() {
-        return size.get();
-    }
-
-
-    /**
-     * Checks if the vector is empty.
-     */
-
-    public boolean isEmpty() {
-        return (size.get() == 0);
-    }
-
-	/*    public Object[] toArray() {
-        // TODO : voir ci c'est utile
-        return new Object[0];
-    }*/
 
 
     /**
@@ -222,30 +149,6 @@ public final class StoredIntVector implements IStateIntVector {
             size.set(newsize);
     }
 
-    /**
-     * Returns the <code>index</code>th element of the vector.
-     */
-
-    public int get(int index) {
-        if (rangeCheck(index)) {
-            return elementData[index];
-        }
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
-    }
-
-    public final int quickGet(int index) {
-        assert (rangeCheck(index));
-        return elementData[index];
-    }
-
-
-    public boolean contains(int val) {
-        int ssize = size.get();
-        for (int i = 0; i < ssize; i++) {
-            if (val == elementData[i]) return true;
-        }
-        return false;
-    }
 
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.

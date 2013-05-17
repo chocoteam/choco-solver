@@ -31,6 +31,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -47,8 +48,9 @@ import java.util.List;
  */
 public class DecomposedAllDifferent extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Number of variables.", required = true)
-    int m;
+    @Option(name = "-n", usage = "Number of variables.", required = false)
+    int n = 5;
+
     IntVar[] X;
     BoolVar[] B;
 
@@ -60,9 +62,9 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        int i = m;
-        X = VariableFactory.enumeratedArray("v", m, 0, m, solver);
-        int[] union = new int[m];
+        int i = n;
+        X = VariableFactory.enumeratedArray("v", n, 0, n, solver);
+        int[] union = new int[n];
         for (int j = 0; j < i; j++) {
             union[j] = j;
         }
@@ -90,8 +92,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                     Constraint cA = IntConstraintFactory.member(X[j], p, q);
                     Constraint ocA = IntConstraintFactory.not_member(X[j], p, q);
 
-                    solver.post(IntConstraintFactory.implies(a, cA));
-                    solver.post(IntConstraintFactory.implies(VariableFactory.not(a), ocA));
+                    solver.post(LogicalConstraintFactory.ifThenElse(a, cA, ocA));
                 }
             }
         }
@@ -153,6 +154,6 @@ public class DecomposedAllDifferent extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new DecomposedAllDifferent().execute();
+        new DecomposedAllDifferent().execute(args);
     }
 }

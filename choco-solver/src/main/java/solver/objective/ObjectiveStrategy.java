@@ -174,7 +174,6 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
-        System.out.println("new objective bounds [" + globalLB + "," + globalUB + "]");
         FastDecision dec = pool.getE();
         if (dec == null) dec = new FastDecision(pool);
         dec.set(obj, target, decOperator);

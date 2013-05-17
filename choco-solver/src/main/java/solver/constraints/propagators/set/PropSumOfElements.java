@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 
 /**
  * Sums elements given by a set variable
@@ -105,8 +104,7 @@ public class PropSumOfElements extends Propagator<Variable> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (weights != null) {
-            ISet tmp = set.getEnvelope();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+            for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
                 if (j < offSet || j >= weights.length + offSet) {
                     set.removeFromEnvelope(j, aCause);
                 }
@@ -117,14 +115,12 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
-        ISet tmp = set.getKernel();
         int sK = 0;
         int sE = 0;
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             sK += get(j);
         }
-        tmp = set.getEnvelope();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             sE += get(j);
         }
         sum.updateLowerBound(sK, aCause);
@@ -133,7 +129,7 @@ public class PropSumOfElements extends Propagator<Variable> {
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (sE - get(j) < lb) {
                 if (set.addToKernel(j, aCause)) {
                     again = true;
@@ -151,14 +147,12 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
-        ISet tmp = set.getKernel();
         int sK = 0;
         int sE = 0;
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             sK += get(j);
         }
-        tmp = set.getEnvelope();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             sE += get(j);
         }
         // filter set

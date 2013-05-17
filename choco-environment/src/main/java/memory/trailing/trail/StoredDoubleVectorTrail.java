@@ -181,7 +181,7 @@ public class StoredDoubleVectorTrail implements ITrailStorage {
      * Comits a world: merging it with the previous one.
      */
 
-    public void worldCommit() {
+    public void worldCommit(int worldIndex) {
         // principle:
         //   currentLevel decreases to end of previous world
         //   updates of the committed world are scanned:

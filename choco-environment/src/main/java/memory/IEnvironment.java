@@ -68,6 +68,18 @@ public interface IEnvironment extends Serializable {
      */
     void worldCommit();
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Factory pattern: new IStateBool objects are created by the environment
+     *
+     * @param initialValue the initial value of the backtrackable boolean
+     * @return Boolean object created by the environment
+     */
+
+    IStateBool makeBool(boolean initialValue);
+
     /**
      * Factory pattern: new IStateInt objects are created by the environment
      * (no initial value is assigned to the backtrackable search)
@@ -87,82 +99,23 @@ public interface IEnvironment extends Serializable {
     IStateInt makeInt(int initialValue);
 
     /**
-     * Factory pattern : new IStateInt with procedure objects are created by the environment
-     *
-     * @param procedure    the procedure to apply
-     * @param initialValue the intial value of the integer
-     * @return IStateInt with procedure
+     * Factory pattern: new StoredFloat objects are created by the environment
+     * (no initial value is assigned to the backtrackable search)
      */
-    IStateInt makeIntProcedure(IStateIntProcedure procedure, int initialValue);
+
+    IStateDouble makeFloat();
 
     /**
-     * Factory pattern: new IStateBool objects are created by the environment
+     * Factory pattern: new StoredFloat objects are created by the environment
      *
-     * @param initialValue the initial value of the backtrackable boolean
-     * @return Boolean object created by the environment
+     * @param initialValue the initial value of the backtrackable search
      */
 
-    IStateBool makeBool(boolean initialValue);
+    IStateDouble makeFloat(double initialValue);
 
-    /**
-     * Factory pattern: new IStateIntVector objects are created by the environment.
-     * Creates an empty vector
-     *
-     * @return IStateIntVector
-     */
-    IStateIntVector makeIntVector();
+    public IStateLong makeLong();
 
-    /**
-     * Factory pattern: new IStateIntVector objects are created by the environment
-     *
-     * @param size         the number of entries in the vector
-     * @param initialValue the common initial value for all entries (backtrackable integers)
-     */
-    IStateIntVector makeIntVector(int size, int initialValue);
-
-    /**
-     * Factory pattern: new IStateIntVector objects are created by the environment
-     *
-     * @param entries an array to be copied as set of initial contents of the vector
-     * @return IStateIntVector
-     */
-    IStateIntVector makeIntVector(int[] entries);
-
-    /**
-     * Factory pattern: new IStateDoubleVector objects are created by the environment.
-     * Creates an empty vector
-     *
-     * @return IStateDoubleVector
-     */
-    IStateDoubleVector makeDoubleVector();
-
-    /**
-     * Factory pattern: new IStateDoubleVector objects are created by the environment
-     *
-     * @param size         the number of entries in the vector
-     * @param initialValue the common initial value for all entries (backtrackable integers)
-     * @return IStateDoubleVector
-     */
-    IStateDoubleVector makeDoubleVector(int size, double initialValue);
-
-    /**
-     * Factory pattern: new IStateDoubleVector objects are created by the environment
-     *
-     * @param entries an array to be copied as set of initial contents of the vector
-     * @return IStateDoubleVector
-     */
-
-    IStateDoubleVector makeDoubleVector(double[] entries);
-
-    /**
-     * Factory pattern: new IStateVector objects are created by the environment.
-     * Creates an empty vector
-     *
-     * @return IStateIntVector
-     * @deprecated
-     */
-    @Deprecated
-    <T> IStateVector<T> makeVector();
+    public IStateLong makeLong(long init);
 
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment
@@ -173,26 +126,22 @@ public interface IEnvironment extends Serializable {
     IStateBitSet makeBitSet(int size);
 
     /**
-     * Factory pattern: new StoredFloat objects are created by the environment
-     * (no initial value is assigned to the backtrackable search)
+     * Factory pattern: new IStateIntVector objects are created by the environment
+     *
+     * @param size         the number of entries in the vector
+     * @param initialValue the common initial value for all entries (backtrackable integers)
      */
-
-    IStateDouble makeFloat();
-
-    public IStateLong makeLong();
-
-    public IStateLong makeLong(long init);
+    IStateIntVector makeIntVector(int size, int initialValue);
 
 
     /**
-     * Factory pattern: new StoredFloat objects are created by the environment
+     * Factory pattern: new IStateDoubleVector objects are created by the environment
      *
-     * @param initialValue the initial value of the backtrackable search
+     * @param size         the number of entries in the vector
+     * @param initialValue the common initial value for all entries (backtrackable integers)
+     * @return IStateDoubleVector
      */
-
-    IStateDouble makeFloat(double initialValue);
-
-    IStateObject makeObject(Object obj);
+    IStateDoubleVector makeDoubleVector(int size, double initialValue);
 
     /**
      * Build a shared bipartite set

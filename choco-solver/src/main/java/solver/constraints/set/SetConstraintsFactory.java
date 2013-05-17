@@ -41,9 +41,9 @@ import util.tools.ArrayUtils;
  *
  * @author Jean-Guillaume Fages
  */
-public final class SetConstraintsFactory {
+public class SetConstraintsFactory {
 
-    private SetConstraintsFactory() {
+    SetConstraintsFactory() {
     }
 
     //***********************************************************************************
@@ -265,6 +265,7 @@ public final class SetConstraintsFactory {
     public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, INTEGERS), SETS[0].getSolver());
         c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2));
+		c.addPropagators(new PropAllDisjoint(SETS));
         return c;
     }
 
@@ -367,7 +368,6 @@ public final class SetConstraintsFactory {
      * @return a constraint which ensures that SETS form a partition of UNIVERSE
      */
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
-        Solver solver = SETS[0].getSolver();
         Constraint c = all_disjoint(SETS);
         c.addPropagators(new PropUnion(SETS, UNIVERSE));
         return c;

@@ -9,7 +9,7 @@ The current release is a beta version.
 Choco3 comes with:
 - various type of variables (integer, boolean, set, graph and real),
 - various state-of-the-art constraints (alldifferent, count, nvalues, etc.),
-- various search strategies, from basic ones (fist_fail, smallest, etc.) to most complex (impact-based and activity-based search),
+- various search strategies, from basic ones (first_fail, smallest, etc.) to most complex (impact-based and activity-based search),
 - explanation-based engine, that enables conflict-based back jumping, dynamic backtracking and path repair,
 
 But also, a FlatZinc parser, facilities to interact with the search loop, factories to help modelling, many samples, etc.
@@ -39,7 +39,7 @@ Next, just declare the dependency:
 <dependency>
    <groupId>choco</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>13.03</version>
+   <version>13.04-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ Next, just declare the dependency:
 
 The jar can be downloaded from this URL:
 
-* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/13.03/choco-solver-13.03-jar-with-dependencies.jar
+* http://www.emn.fr/z-info/choco-repo/mvn/repository/choco/choco-solver/13.04-SNAPSHOT/choco-solver-13.04-SNAPSHOT-jar-with-dependencies.jar
 
 The file contains `choco-environment`, `choco-solver`artifacts and their dependencies.
 

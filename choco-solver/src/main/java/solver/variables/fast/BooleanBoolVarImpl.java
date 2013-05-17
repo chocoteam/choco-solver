@@ -36,10 +36,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.explanations.antidom.AntiDomBool;
 import solver.explanations.antidom.AntiDomain;
-import solver.variables.AbstractVariable;
-import solver.variables.BoolVar;
-import solver.variables.EventType;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import solver.variables.delta.IEnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
@@ -88,6 +85,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
     private DisposableValueIterator _viterator;
 
     private DisposableRangeIterator _riterator;
+
+    private BoolVar<IEnumDelta> not;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -170,9 +169,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         assert cause != null;
-        if (Configuration.PLUG_EXPLANATION) solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
-            if (value != this.getValue()) {
+            int cvalue = this.getValue();
+            if (value != cvalue) {
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, cvalue, cvalue);
+                }
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
@@ -185,9 +187,15 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                }
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
+                if (Configuration.PLUG_EXPLANATION) {
+                    solver.getExplainer().instantiateTo(this, value, cause, 0, 1);
+                }
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
             }
@@ -464,5 +472,29 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IEnumDelta, BoolV
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public void _setNot(BoolVar neg) {
+        this.not = neg;
+    }
+
+    @Override
+    public BoolVar<IEnumDelta> not() {
+        if (not == null) {
+            not = VF.not(this);
+            not._setNot(this);
+        }
+        return not;
+    }
+
+    @Override
+    public boolean isLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isNot() {
+        return false;
     }
 }

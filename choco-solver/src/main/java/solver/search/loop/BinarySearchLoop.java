@@ -177,7 +177,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      * Rolls back the previous state.
      * Then, if it goes back to the base world, stop the search.
-     * Otherwise, gets the oppposite decision, applies it and calls the propagation.
+     * Otherwise, gets the opposite decision, applies it and calls the propagation.
      */
     @Override
     protected void upBranch() {
@@ -203,7 +203,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      */
     @Override
     public void restartSearch() {
-        restaureRootNode();
+        restoreRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {
             objectivemanager.postDynamicCut();
@@ -221,7 +221,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * <br/>
      * <b>Beware, if this method is called from RESTART case, it leads to an infinite loop!</b>
      *
-     * @param to
+     * @param to STEP to reach
      */
     public void moveTo(int to) {
         if ((nextState & RESTART) == 0) {

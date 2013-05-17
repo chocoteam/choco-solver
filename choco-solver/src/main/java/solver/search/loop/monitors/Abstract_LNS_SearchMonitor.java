@@ -123,7 +123,7 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
             try {
                 fixSomeVariables();
                 solver.getEngine().propagate();
-            } catch (Exception e) {
+            } catch (ContradictionException e) {
                 //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
                 solver.getEngine().flush();
                 restrictLess();

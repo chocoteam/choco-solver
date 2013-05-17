@@ -35,6 +35,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -109,7 +110,6 @@ public class AirPlaneLanding extends AbstractProblem {
 
     IntVar[] planes, tardiness, earliness;
     BoolVar[] bVars;
-    TObjectIntHashMap<Constraint> ranking = new TObjectIntHashMap<Constraint>();
     int[] costLAT;
     TObjectIntHashMap<IntVar> maxCost;
     int[] LLTs;
@@ -155,18 +155,8 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr1 = IntConstraintFactory.implies(boolVar, c1);
-                Constraint cr2 = IntConstraintFactory.implies(VariableFactory.not(boolVar), c2);
-                solver.post(cr1);
-                solver.post(cr2);
-                // NOTE: use to be one single reification constraint in "ranking"
-                // not sure that the mapping is still good
-                ranking.put(cr1,
-                        Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
-                                (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
-                ranking.put(cr2,
-                        Math.min((data[i][LLT] - data[i][TT]) * data[i][PCAT],
-                                (data[j][LLT] - data[j][TT]) * data[j][PCAT]));
+                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
+                solver.post(cr);
             }
         }
 
@@ -216,12 +206,10 @@ public class AirPlaneLanding extends AbstractProblem {
     @Override
     public void solve() {
         // -----
-        boolean lns = true;
+        boolean lns = false;
         SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
-        } else {
-            SearchMonitorFactory.log(solver, true, false);
         }
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }

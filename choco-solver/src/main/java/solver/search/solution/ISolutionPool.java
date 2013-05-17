@@ -58,6 +58,8 @@ public interface ISolutionPool extends Serializable {
 
     Solution getBest();
 
+    void restoreBest();
+
     List<Solution> asList();
 
 }

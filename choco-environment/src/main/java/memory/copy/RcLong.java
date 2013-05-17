@@ -28,82 +28,28 @@
 package memory.copy;
 
 
-import memory.IEnvironment;
 import memory.IStateLong;
 
-/*
- * Created by IntelliJ IDEA.
- * User: Julien
- * Date: 29 mars 2007
- * Since : Choco 2.0.0
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 29/04/13
  */
-public final class RcLong implements IStateLong, RecomputableElement {
-
-    private final EnvironmentCopying environment;
-    private long currentValue;
-    private int timeStamp;
+public class RcLong extends IStateLong {
 
     public RcLong(EnvironmentCopying env) {
-        this(env, UNKNOWN_LONG);
+        this(env, Long.MAX_VALUE);
     }
 
     public RcLong(EnvironmentCopying env, long i) {
-        environment = env;
-        currentValue = i;
-        environment.add(this);
-        timeStamp = environment.getWorldIndex();
-    }
-
-
-    @Override
-    public long add(long delta) {
-        long res = currentValue + delta;
-        set(res);
-        return res;
+        super(env, i);
+        env.getLongCopy().add(this);
     }
 
     @Override
-    public long get() {
-        return currentValue;
-    }
-
     public void set(long y) {
         currentValue = y;
         timeStamp = environment.getWorldIndex();
-    }
-
-    /**
-     * Modifies the value without storing the former value on the trailing stack.
-     *
-     * @param y      the new value
-     * @param wstamp the stamp of the world in which the update is performed
-     */
-
-    protected void _set(final long y, final int wstamp) {
-        currentValue = y;
-        timeStamp = wstamp;
-    }
-
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
-    public long deepCopy() {
-        return currentValue;
-    }
-
-
-    public int getType() {
-        return LONG;
-    }
-
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(currentValue);
     }
 }

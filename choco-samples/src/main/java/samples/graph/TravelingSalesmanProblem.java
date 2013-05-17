@@ -63,8 +63,8 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Option(name = "-tl", usage = "time limit.", required = false)
     private long limit = 60000;
     // instance file path
-    @Option(name = "-inst", usage = "TSPLIB TSP Instance file path.", required = false)
-    private String instancePath = "/Users/jfages07/github/In4Ga/ALL_tsp/eil101.tsp";
+    @Option(name = "-inst", usage = "TSPLIB TSP Instance file path (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/).", required = true)
+    private String instancePath;
     @Option(name = "-optPolicy", usage = "Optimization policy (0:top-down,1:bottom-up,2:dichotomic).", required = false)
     private int policy = 1; // the lower bound of the Lagrangian relaxation is pretty good so Bottom-Up is a good choise
 
@@ -129,7 +129,6 @@ public class TravelingSalesmanProblem extends AbstractProblem {
                 throw new UnsupportedOperationException("policy should be 0, 1 or 2");
         }
         SearchMonitorFactory.limitTime(solver, limit);
-        SearchMonitorFactory.log(solver, true, false);
     }
 
     @Override

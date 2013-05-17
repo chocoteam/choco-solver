@@ -32,14 +32,15 @@ import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
 import solver.propagation.queues.CircularQueue;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.strategy.decision.Decision;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import util.iterators.DisposableValueIterator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -54,7 +55,9 @@ import util.iterators.DisposableValueIterator;
 public class RecorderExplanationEngine extends ExplanationEngine implements IMonitorInitPropagation {
 
     TIntObjectHashMap<AntiDomain> removedvalues; // maintien du domaine courant
-    TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintien de la base de deduction
+    TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>> valueremovals; // maintain deduction base
+    // maintain cause of propagator activation -- can be sparse
+    TIntObjectHashMap<PropagatorActivation> propactivs;
     TIntObjectHashMap<Explanation> database; // base d'explications
 
     TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>> leftbranchdecisions; // maintien de la base de left BranchingDecision
@@ -75,6 +78,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         }
         removedvalues = new TIntObjectHashMap<AntiDomain>();
         valueremovals = new TIntObjectHashMap<TIntObjectHashMap<ValueRemoval>>();
+        propactivs = new TIntObjectHashMap<PropagatorActivation>();
         database = new TIntObjectHashMap<Explanation>();
         leftbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
         rightbranchdecisions = new TIntObjectHashMap<TIntObjectHashMap<BranchingDecision>>();
@@ -134,6 +138,19 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     }
 
     @Override
+    public PropagatorActivation getPropagatorActivation(Propagator propagator) {
+//        assert propagator.isActive();
+        int pid = propagator.getId();
+        PropagatorActivation pa;
+        pa = propactivs.get(pid);
+        if (pa == null) {
+            pa = new PropagatorActivation(propagator);
+            propactivs.put(pid, pa);
+        }
+        return pa;
+    }
+
+    @Override
     public BranchingDecision getDecision(Decision decision, boolean isLeft) {
         int vid = decision.getDecisionVariable().getId();
         TIntObjectHashMap<BranchingDecision> mapvar = isLeft ? leftbranchdecisions.get(vid) : rightbranchdecisions.get(vid);
@@ -141,6 +158,10 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         if (mapvar == null) {
             mapvar = new TIntObjectHashMap<BranchingDecision>();
             if (isLeft) {
+                if (!decision.hasNext()) {
+                    System.out.println(decision);
+                    throw new SolverException("Arg!");
+                }
                 leftbranchdecisions.put(vid, mapvar);
             } else {
                 rightbranchdecisions.put(vid, mapvar);
@@ -160,62 +181,76 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     }
 
     @Override
-    public void delete(Deduction deduction) {
-        database.remove(deduction.id);
-    }
-
-    @Override
     public void removeLeftDecisionFrom(Decision decision, Variable var) {
         leftbranchdecisions.get(var.getId()).remove(decision.getId());
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// ACTIONS ON VARIABLE MODIFICATIONS ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
-    public void removeValue(IntVar var, int val, ICause cause) {
-        assert cause != null;
-        // 1. get the deduction
-        Deduction vr = getValueRemoval(var, val);
-        // 2. explain the deduction
-        Explanation expl = database.get(vr.id);
+    public void activePropagator(BoolVar var, Propagator propagator) {
+        PropagatorActivation pa = getPropagatorActivation(propagator);
+        Explanation expl = database.get(pa.id);
         if (expl == null) {
             expl = new Explanation();
-            database.put(vr.id, expl);
         } else {
             expl.reset();
         }
+        var.explain(VariableState.DOM, expl);
+        store(pa, expl);
+    }
+
+
+    private void explainValueRemoval(IntVar var, int val, ICause cause) {
+        // 1. retrieve the deduction
+        Deduction vr = getValueRemoval(var, val);
+        // 2. get the previous explanation, if any
+        Explanation expl = database.get(vr.id);
+        if (expl == null) {
+            expl = new Explanation();
+            store(vr, expl);
+        } else {
+            expl.reset();
+        }
+        // 3. explain the value removal thanks to the cause
         cause.explain(vr, expl);
-        // 3. store it within the database
-
-        // 4. store the removed value withing the inverse domain
-        AntiDomain invdom = getRemovedValues(var);
-        invdom.set(val);
-
-        // 5. explanations monitoring
+        // 4. explanations monitoring
         if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
             onRemoveValue(var, val, cause, expl);
         }
     }
 
     @Override
+    public void removeValue(IntVar var, int val, ICause cause) {
+        assert cause != null;
+        // 1. explain the value removal
+        explainValueRemoval(var, val, cause);
+        // 2. update the inverse domain
+        AntiDomain invdom = getRemovedValues(var);
+        invdom.add(val);
+    }
+
+    @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
         assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
-//        Explanation explanation = new Explanation();
-        for (int v = old; v < val; v++) {    // iteration explicite des valeurs retirees
-            if (!invdom.get(v)) {
-                Deduction vr = getValueRemoval(var, v);
-                Explanation expl = database.get(vr.id);
-                if (expl == null) {
-                    expl = new Explanation();
-                    database.put(vr.id, expl);
-                } else {
-                    expl.reset();
+        if (invdom.isEnumerated()) {
+            for (int v = old; v < val; v++) {
+                if (!invdom.get(v)) {
+                    explainValueRemoval(var, v, cause);
+                    invdom.add(v);
                 }
-                cause.explain(vr, expl);
-                invdom.set(v);
-//                explanation.add(expl);
-                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, v, cause, expl);
-                }
+            }
+        } else {
+            // PREREQUISITE: val is the new LB, so val-1 is the one explained
+            val--;
+            if (!invdom.get(val)) {
+                explainValueRemoval(var, val, cause);
+                // we add +1, because val is the value just BEFORE the new LB
+                invdom.updateLowerBound(old, val + 1);
             }
         }
     }
@@ -224,54 +259,67 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
         assert cause != null;
         AntiDomain invdom = getRemovedValues(var);
-//        Explanation explanation = new Explanation();
-        for (int v = old; v > val; v--) {    // iteration explicite des valeurs retirees
-            if (!invdom.get(v)) {
-                Deduction vr = getValueRemoval(var, v);
-                Explanation expl = database.get(vr.id);
-                if (expl == null) {
-                    expl = new Explanation();
-                    database.put(vr.id, expl);
-                } else {
-                    expl.reset();
-                }
-                cause.explain(vr, expl);
-                invdom.set(v);
-                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, v, cause, expl);
+        if (invdom.isEnumerated()) {
+            for (int v = old; v > val; v--) {
+                if (!invdom.get(v)) {
+                    explainValueRemoval(var, v, cause);
+                    invdom.add(v);
                 }
             }
+        } else {
+            // PREREQUISITE: val is the new UB, so val+1 is the one explained
+            val++;
+            if (!invdom.get(val)) {
+                explainValueRemoval(var, val, cause);
+                // we add -1, because val is the value just AFTER the new LB
+                invdom.updateUpperBound(old, val - 1);
+            }
         }
-//        emList.onUpdateUpperBound(var, old, val, cause, explanation);
     }
 
 
     @Override
-    public void instantiateTo(IntVar var, int val, ICause cause) {
-        assert cause != null;
+    public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
         AntiDomain invdom = getRemovedValues(var);
-        DisposableValueIterator it = var.getValueIterator(true);
-//        Explanation explanation = new Explanation();
-        while (it.hasNext()) {
-            int v = it.next();
-            if (v != val) {
-                Deduction vr = getValueRemoval(var, v);
-                Explanation expl = database.get(vr.id);
-                if (expl == null) {
-                    expl = new Explanation();
-                    database.put(vr.id, expl);
-                } else {
-                    expl.reset();
+
+        if (invdom.isEnumerated()) {
+            for (int v = oldLB; v < val; v++) {
+                if (!invdom.get(v)) {
+                    explainValueRemoval(var, v, cause);
+                    invdom.add(v);
                 }
-                cause.explain(vr, expl);
-                invdom.set(v);
-                if (Configuration.PRINT_EXPLANATION && LOGGER.isInfoEnabled()) {
-                    onRemoveValue(var, v, cause, expl);
+            }
+            for (int v = oldUB; v > val; v--) {
+                if (!invdom.get(v)) {
+                    explainValueRemoval(var, v, cause);
+                    invdom.add(v);
+                }
+            }
+        } else {
+            if (val < oldLB) {
+                // domain wipe out
+                explainValueRemoval(var, oldLB, cause);
+                invdom.updateUpperBound(oldUB, oldLB - 1);
+            } else if (val > oldUB) {
+                // domain wipe out
+                explainValueRemoval(var, oldUB, cause);
+                invdom.updateLowerBound(oldLB, oldUB + 1);
+            } else {
+                if (val > oldLB && !invdom.get(val)) {
+                    explainValueRemoval(var, val - 1, cause);
+                    invdom.updateLowerBound(oldLB, val);
+                }
+                if (val < oldUB && !invdom.get(val)) {
+                    explainValueRemoval(var, val + 1, cause);
+                    invdom.updateUpperBound(oldUB, val);
                 }
             }
         }
-//        emList.onInstantiateTo(var, val, cause, explanation);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     @Override
     public Explanation flatten(Explanation expl) {
@@ -297,7 +345,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             expanded.add(ded.id);
 
             Explanation e = database.get(ded.id);
-
+//            System.out.printf("%s \n", ded);
             if (e != null) {
                 int nbp = e.nbPropagators();
                 for (int i = 0; i < nbp; i++) {
@@ -306,6 +354,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
                 nbd = e.nbDeductions();
                 for (int i = 0; i < nbd; i++) {
                     ded = e.getDeduction(i);
+//                    System.out.printf("\t-> %s\n", ded);
                     if (!expanded.contains(ded.id) && toexpand.add(ded.id)) {
                         pending.addLast(ded);
                     }
@@ -313,6 +362,7 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
             } else {
                 toreturn.add(ded);
             }
+//            System.out.printf("\n");
         }
         return toreturn;
     }
@@ -320,7 +370,8 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
     @Override
     public Explanation flatten(IntVar var, int val) {
         // TODO check that it is always called with val NOT in var
-        return flatten(getValueRemoval(var, val));
+        AntiDomain ad = getRemovedValues(var);
+        return flatten(getValueRemoval(var, ad.getKeyValue(val)));
     }
 
     @Override
@@ -332,7 +383,8 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
 
     @Override
     public Deduction explain(IntVar var, int val) {
-        return explain(getValueRemoval(var, val));
+        AntiDomain ad = getRemovedValues(var);
+        return explain(getValueRemoval(var, ad.getKeyValue(val)));
     }
 
     @Override

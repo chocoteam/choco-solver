@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import solver.variables.SetVar;
 import solver.variables.Variable;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 
 /**
  * Retrieves the maximum element of the set
@@ -104,14 +103,12 @@ public class PropMaxElement extends Propagator<Variable> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             max.updateLowerBound(get(j), aCause);
         }
-        tmp = set.getEnvelope();
-        int maxVal = get(tmp.getFirstElement());
+        int maxVal = get(set.getEnvelopeFirst());
         int ub = max.getUB();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             int k = get(j);
             if (k > ub) {
                 set.removeFromEnvelope(j, aCause);
@@ -133,15 +130,13 @@ public class PropMaxElement extends Propagator<Variable> {
     public ESat isEntailed() {
         int lb = max.getLB();
         int ub = max.getUB();
-        ISet tmp = set.getKernel();
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             if (get(j) > ub) {
                 return ESat.FALSE;
             }
         }
-        tmp = set.getEnvelope();
-        int maxVal = get(tmp.getFirstElement());
-        for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
+        int maxVal = get(set.getEnvelopeFirst());
+        for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (maxVal < get(j)) {
                 maxVal = get(j);
             }

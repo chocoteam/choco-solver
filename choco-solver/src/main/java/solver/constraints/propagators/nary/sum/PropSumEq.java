@@ -30,6 +30,10 @@ package solver.constraints.propagators.nary.sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -244,6 +248,60 @@ public class PropSumEq extends Propagator<IntVar> {
         return linComb.toString();
     }
 
+    @Override
+    public void explain(Deduction d, Explanation e) {
+        e.add(solver.getExplainer().getPropagatorActivation(this));
+        e.add(this);
+        if (d.getmType() == Deduction.Type.ValRem) {
+            ValueRemoval vr = (ValueRemoval) d;
+            IntVar var = (IntVar) vr.getVar();
+            int val = vr.getVal();
+            // 1. find the pos of var in vars
+            boolean ispos;
+            if (pos < (l / 2)) {
+                int i;
+                for (i = 0; i < pos && vars[i].getId() != var.getId(); i++) {
+                }
+                ispos = i < pos;
+            } else {
+                int i;
+                for (i = pos; i < l && vars[i].getId() != var.getId(); i++) {
+                }
+                ispos = i == l;
+            }
+
+            if (val < var.getLB()) { // explain LB
+                int i = 0;
+                for (; i < pos; i++) { // first the positive coefficients
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                    }
+                }
+                for (; i < l; i++) { // then the negative ones
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                    }
+                }
+            } else if (val > var.getUB()) { // explain UB
+                int i = 0;
+                for (; i < pos; i++) { // first the positive coefficients
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
+                    }
+                }
+                for (; i < l; i++) { // then the negative ones
+                    if (vars[i] != var) {
+                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
+                    }
+                }
+            } else {
+                throw new UnsupportedOperationException("PropSumEq only knows how to explain bounds");
+            }
+
+        } else {
+            super.explain(d, e);
+        }
+    }
 
     private int divFloor(int a, int b) {
         // <!> we assume b > 0

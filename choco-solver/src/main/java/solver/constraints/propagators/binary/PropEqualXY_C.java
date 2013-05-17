@@ -154,6 +154,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @Override
     public void explain(Deduction d, Explanation e) {
         if (d.getVar() == x) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 y.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
@@ -161,6 +162,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
             }
         } else if (d.getVar() == y) {
+            e.add(solver.getExplainer().getPropagatorActivation(this));
             e.add(aCause);
             if (d.getmType() == Deduction.Type.ValRem) {
                 x.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal(), e);
@@ -170,6 +172,11 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
         } else {
             super.explain(d, e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return vars[0]+" + "+ vars[1]+ " = " + cste;
     }
 
     private class RemProc implements IntProcedure {

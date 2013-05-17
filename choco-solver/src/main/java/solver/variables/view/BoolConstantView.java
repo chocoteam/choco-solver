@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.VF;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import util.ESat;
@@ -45,6 +46,8 @@ import util.ESat;
  * @since 04/02/11
  */
 public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> {
+
+    private BoolVar not;
 
     public BoolConstantView(String name, int constant, Solver solver) {
         super(name, constant, solver);
@@ -68,5 +71,34 @@ public class BoolConstantView extends ConstantView implements BoolVar<IntDelta> 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
         return false;
+    }
+
+    @Override
+    public BoolVar<IntDelta> not() {
+        if (not == null) {
+            not = VF.not(this);
+            not._setNot(this);
+        }
+        return not;
+    }
+
+    @Override
+    public void _setNot(BoolVar<IntDelta> not) {
+        this.not = not;
+    }
+
+    @Override
+    public boolean isLit() {
+        return true;
+    }
+
+    @Override
+    public boolean isNot() {
+        return constante == 0;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

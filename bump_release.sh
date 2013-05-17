@@ -34,8 +34,7 @@ code)
 		sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
 	else
 		# Update the bundle and the apidoc location
-		echo "No update for snapshot release'"
-        exit 1
+		sedInPlace "s%$REPO_URL.*choco\-solver.*%$REPO_URL/choco\-solver/$VERSION/choco\-solver\-$VERSION\-jar\-with\-dependencies\.jar%" README.md
 	fi
 	## The CHANGES.md file
 	d=`LANG=en_US.utf8 date +"%d %b %Y"`

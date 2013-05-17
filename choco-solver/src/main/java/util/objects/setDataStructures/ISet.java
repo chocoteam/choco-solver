@@ -30,10 +30,10 @@ package util.objects.setDataStructures;
 import java.io.Serializable;
 
 /**
- * Class representing a set (of nodes)
+ * Class representing a set of POSITIVE integers (typically graph nodes)
  * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 9 feb. 2011
+ * @since 9 feb. 2011
+ * @author chameau, Jean-Guillaume Fages
  */
 public interface ISet extends Serializable {
 

@@ -45,10 +45,8 @@ import solver.constraints.nary.automata.MultiCostRegular;
 import solver.constraints.nary.automata.Regular;
 import solver.constraints.nary.channeling.DomainChanneling;
 import solver.constraints.nary.channeling.InverseChanneling;
-import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
@@ -56,17 +54,12 @@ import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
-import solver.constraints.propagators.nary.circuit.PropCircuit_AntiArboFiltering;
-import solver.constraints.propagators.nary.circuit.PropNoSubtour;
-import solver.constraints.propagators.nary.circuit.PropSubcircuit;
-import solver.constraints.propagators.nary.circuit.PropSubcircuit_AntiArboFiltering;
+import solver.constraints.propagators.nary.circuit.*;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
-import solver.constraints.reified.ImplicationConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -95,11 +88,35 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 21/01/13
  */
-public enum IntConstraintFactory {
-    ;
-
+public class IntConstraintFactory {
+    IntConstraintFactory() {
+    }
 
     // BEWARE: PLEASE, keep signatures sorted in alphabetical order!!
+
+    //##################################################################################################################
+    // ZEROARIES #########################################################################################################
+    //##################################################################################################################
+
+    /**
+     * Ensures the TRUE constraint
+     *
+     * @param solver a solver
+     * @return a true constraint
+     */
+    public static Constraint TRUE(Solver solver) {
+        return solver.TRUE;
+    }
+
+    /**
+     * Ensures the FALSE constraint
+     *
+     * @param solver a solver
+     * @return a false constraint
+     */
+    public static Constraint FALSE(Solver solver) {
+        return solver.FALSE;
+    }
 
     //##################################################################################################################
     // UNARIES #########################################################################################################
@@ -117,30 +134,7 @@ public enum IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
-    /**
-     * Implication constraint: BVAR => CSTR
-     * Also called half reification constraint
-     * Ensures:<br/>
-     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
-     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-     * <p/>
-     * Example : <br/>
-     * - <code>implies(b1, arithm(v1, "=", 2));</code>:
-     * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
-     * But if b1 is equal to 0, nothing happens
-     * <p/>
-     * <p/> In order to have BVAR <=> CSTR please use two constraints:
-     * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
-     * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
-     *
-     * @param BVAR variable of reification
-     * @param CSTR the constraint to be satisfied when BVAR = 1
-     */
-    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
-        return new ImplicationConstraint(BVAR, CSTR);
-    }
-
-    /**
+	/**
      * Ensures VAR takes its values in TABLE
      *
      * @param VAR   an integer variable
@@ -364,7 +358,7 @@ public enum IntConstraintFactory {
 
     /**
      * Ensures that all variables from VARS take a different value.
-     * The consistency level should be chosen among "BC" and "AC".
+     * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
      * <p/>
      * <b>BC</b>:
      * <br/>
@@ -376,7 +370,10 @@ public enum IntConstraintFactory {
      * Uses Regin algorithm
      * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      * per arc removed from the support.
-     * Has a good average behavior in practice
+     * <p/>
+     * <b>DEFAULT</b>:
+     * <br/>
+     * Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      *
      * @param VARS        list of variables
      * @param CONSISTENCY consistency level, among {"BC", "AC"}
@@ -389,7 +386,10 @@ public enum IntConstraintFactory {
      *                    Uses Regin algorithm
      *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
      *                    per arc removed from the support.
-     *                    Has a good average behavior in practice
+     *                    <p/>
+     *                    <b>DEFAULT</b>:
+     *                    <br/>
+     *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
      */
     public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
         return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
@@ -418,24 +418,6 @@ public enum IntConstraintFactory {
     }
 
     /**
-     * Make an inverse channeling between VARS1 and VARS2:
-     * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
-     * Performs AC if domains are enumerated.
-     * If not, then it works on bounds without guaranteeing BC
-     * (enumerated domains are strongly recommended)
-     * <p/>
-     * Beware you should have |VARS1| = |VARS2|
-     *
-     * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
-     * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
-     * @param OFFSET1 lowest value in VARS1 (most often 0)
-     * @param OFFSET2 lowest value in VARS2 (most often 0)
-     */
-    public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
-        return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
-    }
-
-    /**
      * Creates a circuit constraint which ensures that
      * <p/> the elements of vars define a covering circuit
      * <p/> where VARS[i] = OFFSET+j means that j is the successor of i.
@@ -444,6 +426,7 @@ public enum IntConstraintFactory {
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
      * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+     * <p/> Strongly Connected Components based filtering (Cambazar & Bourreau JFPC'06 and Fages and Lorca TechReport'12)
      *
      * @param VARS   vector of variables which take their value in [OFFSET,OFFSET+|VARS|-1]
      * @param OFFSET 0 by default but typically 1 if used within MiniZinc
@@ -451,12 +434,11 @@ public enum IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        Solver solver = VARS[0].getSolver();
-        Constraint c = new Constraint(VARS, solver);
-        c.setPropagators(
-                new PropAllDiffAC(VARS),
-                new PropNoSubtour<IntVar>(VARS, OFFSET),
-                new PropCircuit_AntiArboFiltering(VARS, OFFSET));
+        Constraint c = alldifferent(VARS, "DEFAULT");
+        c.addPropagators(
+                new PropNoSubtour(VARS, OFFSET),
+                new PropCircuit_AntiArboFiltering(VARS, OFFSET),
+                new PropCircuitSCC(VARS, OFFSET));
         return c;
     }
 
@@ -467,7 +449,7 @@ public enum IntConstraintFactory {
      * @param SOLVER solver is required, as the TREE can be declared without any variables
      * @return
      */
-    public static ConjunctiveNormalForm clauses(ALogicTree TREE, Solver SOLVER) {
+    public static ConjunctiveNormalForm clauses(LogOp TREE, Solver SOLVER) {
         return new ConjunctiveNormalForm(TREE, SOLVER);
     }
 
@@ -484,15 +466,15 @@ public enum IntConstraintFactory {
         } else {
             solver = NEGLITS[0].getSolver();
         }
-        Literal[] lits = new Literal[POSLITS.length + NEGLITS.length];
+        BoolVar[] lits = new BoolVar[POSLITS.length + NEGLITS.length];
         int i = 0;
         for (; i < POSLITS.length; i++) {
-            lits[i] = Literal.pos(POSLITS[i]);
+            lits[i] = POSLITS[i];
         }
         for (int j = 0; j < NEGLITS.length; j++) {
-            lits[j + i] = Literal.neg(NEGLITS[j]);
+            lits[j + i] = NEGLITS[j].not();
         }
-        ALogicTree tree = Node.or(lits);
+        LogOp tree = LogOp.or(lits);
         return new ConjunctiveNormalForm(tree, solver);
     }
 
@@ -548,9 +530,9 @@ public enum IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.setPropagators(
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY),
-                new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,true));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,false));
+//		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
 
@@ -568,7 +550,7 @@ public enum IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT), new PropDiffN(X, Y, WIDTH, HEIGHT));
+        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
         return c;
     }
 
@@ -633,6 +615,24 @@ public enum IntConstraintFactory {
             }
         }
     }
+
+	/**
+	 * Make an inverse channeling between VARS1 and VARS2:
+	 * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
+	 * Performs AC if domains are enumerated.
+	 * If not, then it works on bounds without guaranteeing BC
+	 * (enumerated domains are strongly recommended)
+	 * <p/>
+	 * Beware you should have |VARS1| = |VARS2|
+	 *
+	 * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
+	 * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
+	 * @param OFFSET1 lowest value in VARS1 (most often 0)
+	 * @param OFFSET2 lowest value in VARS2 (most often 0)
+	 */
+	public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
+		return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
+	}
 
     /**
      * Ensures that :
@@ -767,7 +767,20 @@ public enum IntConstraintFactory {
      * @param COEFFS a vector of int
      * @param SCALAR a variable
      */
-    public static Sum scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
+    public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
+        // better to put an arithm constraint when possible
+        if (VARS.length == 2 && SCALAR.instantiated() && (COEFFS[0] == 1 || COEFFS[0] == -1) && (COEFFS[1] == 1 || COEFFS[1] == -1)) {
+            if (COEFFS[0] == 1) {
+                String op = (COEFFS[1] == 1) ? "+" : "-";
+                return IntConstraintFactory.arithm(VARS[0], op, VARS[1], "=", SCALAR.getValue());
+            } else {
+                if (COEFFS[1] == 1) {
+                    return IntConstraintFactory.arithm(VARS[1], "-", VARS[0], "=", SCALAR.getValue());
+                } else {
+                    return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", -SCALAR.getValue());
+                }
+            }
+        }
         return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
     }
 
@@ -795,10 +808,11 @@ public enum IntConstraintFactory {
         IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
         Constraint c = new Constraint(ArrayUtils.append(VARS, new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}), solver);
         c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
-        c.addPropagators(new PropAllDiffAC(VARS));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
+        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
+        c.addPropagators(new PropSubCircuitSCC(VARS, OFFSET));
         return c;
     }
 
@@ -808,7 +822,11 @@ public enum IntConstraintFactory {
      * @param VARS a vector of variables
      * @param SUM  a variable
      */
-    public static Sum sum(IntVar[] VARS, IntVar SUM) {
+    public static Constraint sum(IntVar[] VARS, IntVar SUM) {
+        // better to put an arithm constraint when possible
+        if (VARS.length == 2 && SUM.instantiated()) {
+            return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", SUM.getValue());
+        }
         return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
     }
 

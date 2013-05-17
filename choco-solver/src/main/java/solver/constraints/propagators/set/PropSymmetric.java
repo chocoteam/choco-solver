@@ -41,7 +41,6 @@ import solver.variables.EventType;
 import solver.variables.SetVar;
 import solver.variables.delta.monitor.SetDeltaMonitor;
 import util.ESat;
-import util.objects.setDataStructures.ISet;
 import util.procedure.IntProcedure;
 
 /**
@@ -102,14 +101,12 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
-            ISet s = vars[i].getEnvelope();
-            for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-                if (j < offSet || j >= n + offSet || !vars[j - offSet].getEnvelope().contain(i + offSet)) {
+            for (int j=vars[i].getEnvelopeFirst(); j!=SetVar.END; j=vars[i].getEnvelopeNext()) {
+                if (j < offSet || j >= n + offSet || !vars[j - offSet].envelopeContains(i + offSet)) {
                     vars[i].removeFromEnvelope(j, aCause);
                 }
             }
-            s = vars[i].getKernel();
-            for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
                 vars[j - offSet].addToKernel(i + offSet, aCause);
             }
         }
@@ -130,9 +127,8 @@ public class PropSymmetric extends Propagator<SetVar> {
     @Override
     public ESat isEntailed() {
         for (int i = 0; i < n; i++) {
-            ISet tmp = vars[i].getKernel();
-            for (int j = tmp.getFirstElement(); j >= 0; j = tmp.getNextElement()) {
-                if (!vars[j - offSet].getEnvelope().contain(i + offSet)) {
+            for (int j=vars[i].getKernelFirst(); j!=SetVar.END; j=vars[i].getKernelNext()) {
+                if (!vars[j - offSet].envelopeContains(i + offSet)) {
                     return ESat.FALSE;
                 }
             }

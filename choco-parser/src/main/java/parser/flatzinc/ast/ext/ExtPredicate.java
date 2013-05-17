@@ -26,7 +26,7 @@
  */
 package parser.flatzinc.ast.ext;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import solver.constraints.Constraint;
 import solver.propagation.generator.Arc;
 import solver.variables.Variable;
@@ -45,11 +45,11 @@ public class ExtPredicate extends Predicate {
     List<Variable> vars;
     List<Constraint> cstrs;
 
-    public ExtPredicate(List<String> ids, THashMap<String, Object> map) {
+    public ExtPredicate(List<String> ids, Datas datas) {
         vars = new ArrayList<Variable>(ids.size());
         cstrs = new ArrayList<Constraint>(ids.size());
         for (int i = 0; i < ids.size(); i++) {
-            Object o = map.get(ids.get(i));
+            Object o = datas.get(ids.get(i));
             if (o instanceof Variable) {
                 vars.add((Variable) o);
             } else if (o instanceof Constraint) {
