@@ -82,11 +82,13 @@ public class PropImplied extends Propagator<Variable> {
             ESat sat = trueCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToFalse(aCause);
+                reifCons.activate(1);
                 setPassive();
             }
             sat = falseCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToTrue(aCause);
+                reifCons.activate(0);
                 setPassive();
             }
         }
