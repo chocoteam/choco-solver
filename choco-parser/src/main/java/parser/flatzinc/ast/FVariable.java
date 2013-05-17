@@ -130,10 +130,11 @@ public final class FVariable {
                     IntVar[] vars = (IntVar[]) map.get(name);
                     layout.addOutputArrays(name, vars, eanno.exps, type);
                     break;
+                case var_is_introduced:
+                    LOGGER.warn("% Not a search variable " + name);
                 default:
                     //LOGGER.warn("% Unknown annotation :" + varanno.toString());
             }
-            break;
         }
     }
 
