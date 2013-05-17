@@ -56,10 +56,12 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	private UndirectedGraph g;
 	private ISet toCompute, tasks;
 	protected CumulFilter[] filters;
+	private boolean shy;
 
-	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa) {
+	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean shy) {
 		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, false);
 		this.n = s.length;
+		this.shy = shy;
 		if (!(n == d.length && n == e.length && n == h.length)) {
 			throw new UnsupportedOperationException();
 		}
@@ -71,13 +73,16 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		this.g = new UndirectedGraph(environment, n, SetType.SWAP_ARRAY, true);
 		this.tasks = SetFactory.makeSwap(n,false);
 		this.toCompute = SetFactory.makeSwap(n, false);
-		// only an energy checker (sweep is performed externally)
 		filters = new CumulFilter[]{new EnergyChecker(), new TimeBasedFilter()};
-//		filters = new CumulFilter[]{new EnergyChecker()};
 	}
 
 	@Override
 	public int getPropagationConditions(int idx) {
+		if(idx==4*n){
+			return EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
+		}
+		if(shy)
+			return EventType.INSTANTIATE.mask;
 		return EventType.BOUND.mask + EventType.INSTANTIATE.mask;
 	}
 
@@ -86,6 +91,8 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			toCompute.clear();
 			for (int i = 0; i < n; i++) {
+				d[i].updateLowerBound(0,aCause);
+				h[i].updateLowerBound(0,aCause);
 				s[i].updateLowerBound(e[i].getLB() - d[i].getUB(), aCause);
 				s[i].updateUpperBound(e[i].getUB() - d[i].getLB(), aCause);
 				e[i].updateUpperBound(s[i].getUB() + d[i].getUB(), aCause);
@@ -105,8 +112,12 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 				}
 			}
 		}else{
-			for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
-				filterAround(i);
+			if(toCompute.getSize()/n>5){
+				filter(g.getActiveNodes());
+			}else{
+				for (int i = toCompute.getFirstElement(); i >= 0; i = toCompute.getNextElement()) {
+					filterAround(i);
+				}
 			}
 		}
 		toCompute.clear();
@@ -116,16 +127,40 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	public void propagate(int varIdx, int mask) throws ContradictionException {
 		if (varIdx < 4 * n) {
 			int v = varIdx % n;
-			if (!toCompute.contain(v)) {
-				toCompute.add(v);
+			if(mandPartExists(v)){
+				if (!toCompute.contain(v)) {
+					toCompute.add(v);
+				}
 			}
 		} else {
 			toCompute.clear();
 			for (int i = 0; i < n; i++) {
-				toCompute.add(i);
+				if(mandPartExists(i)){
+					toCompute.add(i);
+				}
 			}
 		}
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		if(toCompute.getSize()>0){
+			forcePropagate(EventType.CUSTOM_PROPAGATION);
+		}
+	}
+
+	@Override
+	public boolean advise(int varIdx, int mask) {
+		if(!super.advise(varIdx,mask)){
+			return false;
+		}
+		if(varIdx>=4*n){
+			return true;
+		}else{
+			return mandPartExists(varIdx%n);
+		}
+	}
+
+	private boolean mandPartExists(int i) {
+		int lastStart = Math.min(s[i].getUB(),e[i].getUB()-d[i].getLB());
+		int earliestEnd = Math.max(s[i].getLB()+d[i].getLB(),e[i].getLB());
+		return lastStart<earliestEnd;
 	}
 
 	private boolean disjoint(int i, int j) {
@@ -214,11 +249,20 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 			int surface = 0;
 			int camax = capa.getUB();
 			for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
-				surface += d[i].getLB() * h[i].getLB();
 				xMax = Math.max(xMax, e[i].getUB());
 				xMin = Math.min(xMin, s[i].getLB());
-				if (xMax >= xMin && surface > (xMax - xMin) * camax) {
-					contradiction(vars[i], "");
+				if(xMax >= xMin){
+					double availSurf = ((xMax-xMin)*camax-surface);
+					if(d[i].getLB()>0)
+						h[i].updateUpperBound((int)Math.floor((availSurf/(double)d[i].getLB())+0.01),aCause);
+					if(h[i].getLB()>0)
+						d[i].updateUpperBound((int)Math.floor((availSurf/(double)h[i].getLB())+0.01),aCause);
+					surface += d[i].getLB() * h[i].getLB();
+					if(xMax>xMin)
+						capa.updateLowerBound((int)Math.ceil((double)surface/(double)(xMax-xMin)-0.01),aCause);
+					if(surface>(xMax-xMin)*camax){
+						contradiction(capa,"");
+					}
 				}
 			}
 		}
@@ -226,7 +270,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 
 	/**
 	 * Sweep-based filtering
-	 * note that the cumulative constraint now has the sweep-based propagator of Arnaud Letord
+	 * Currently buggy
 	 */
 	private class SweepBasedFilter extends CumulFilter{
 		TTDynamicSweep sweep;
@@ -241,7 +285,6 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 
 	/**
 	 * Time-based filtering (compute the profile over every point in time)
-	 * obsolete but safe
 	 */
 	private class TimeBasedFilter extends CumulFilter{
 		public void filter(ISet tasks) throws ContradictionException{
@@ -257,10 +300,15 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 				int[] time = new int[max - min];
 				int capaMax = capa.getUB();
 				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
+					int minH = h[i].getUB();
+					int maxC = 0;
 					for (int t = s[i].getUB(); t < e[i].getLB(); t++) {
+						minH = Math.min(minH,capaMax-time[t-min]);
 						time[t - min] += h[i].getLB();
-						capa.updateLowerBound(time[t - min], aCause);
+						maxC = Math.max(maxC,time[t - min]);
 					}
+					h[i].updateUpperBound(minH,aCause);
+					capa.updateLowerBound(maxC, aCause);
 				}
 				for (int i = tasks.getFirstElement(); i >= 0; i = tasks.getNextElement()) {
 					if (d[i].getLB() > 0 && h[i].getLB() > 0) {
