@@ -47,9 +47,11 @@ public class PropDiffN extends Propagator<IntVar> {
     private int n;
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
+	private boolean shy;
 
-    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy) {
+    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean shy) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, false);
+		this.shy = shy;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
@@ -60,23 +62,24 @@ public class PropDiffN extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int idx) {
-        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask + EventType.REMOVE.mask;
+		if(shy) return EventType.INSTANTIATE.mask;
+        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
     }
 
-    @Override
-    public boolean advise(int varIdx, int mask) {
-        int v = varIdx % n;
-        ISet s = overlappingBoxes.getNeighborsOf(v);
-        for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
-            if (!overlap(v, i)) {
-                overlappingBoxes.removeEdge(v, i);
-            }
-        }
-        if (!boxesToCompute.contain(v)) {
-            boxesToCompute.add(v);
-        }
-        return super.advise(varIdx, mask);
-    }
+	@Override
+	public void propagate(int varIdx, int mask) throws ContradictionException {
+		int v = varIdx % n;
+		ISet s = overlappingBoxes.getNeighborsOf(v);
+		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
+			if (!overlap(v, i)) {
+				overlappingBoxes.removeEdge(v, i);
+			}
+		}
+		if (!boxesToCompute.contain(v)) {
+			boxesToCompute.add(v);
+		}
+		forcePropagate(EventType.CUSTOM_PROPAGATION);
+	}
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -183,11 +186,6 @@ public class PropDiffN extends Propagator<IntVar> {
                 }
             }
         }
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

@@ -574,8 +574,8 @@ public class IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,true));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,false));
 //		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
@@ -594,7 +594,7 @@ public class IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT), new PropDiffN(X, Y, WIDTH, HEIGHT));
+        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
         return c;
     }
 
