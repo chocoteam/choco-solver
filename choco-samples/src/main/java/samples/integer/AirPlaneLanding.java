@@ -35,6 +35,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -154,7 +155,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
                 Constraint c1 = precedence(planes[i], data[i][ST + j], planes[j]);
                 Constraint c2 = precedence(planes[j], data[j][ST + i], planes[i]);
-                Constraint cr = IntConstraintFactory.implies(boolVar, c1, c2);
+                Constraint cr = LogicalConstraintFactory.ifThenElse(boolVar, c1, c2);
                 solver.post(cr);
             }
         }

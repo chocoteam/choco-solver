@@ -32,6 +32,7 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.cnf.LogOp;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -107,13 +108,13 @@ public class OpenStacks extends AbstractProblem {
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
                 BoolVar[] btmp = VariableFactory.boolArray("bT_" + i + "_" + j, 2, solver);
-                solver.post(IntConstraintFactory.implies(btmp[0],
-                        IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
-                        IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
+                solver.post(LogicalConstraintFactory.ifThenElse(btmp[0],
+						IntConstraintFactory.arithm(o[i][j - 1], "<", VariableFactory.fixed(norders[i], solver)),
+						IntConstraintFactory.arithm(o[i][j - 1], ">=", VariableFactory.fixed(norders[i], solver))));
 
-                solver.post(IntConstraintFactory.implies(btmp[1],
-                        IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
-                        IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
+                solver.post(LogicalConstraintFactory.ifThenElse(btmp[1],
+						IntConstraintFactory.arithm(o[i][j], ">", VariableFactory.fixed(0, solver)),
+						IntConstraintFactory.arithm(o[i][j], "<=", VariableFactory.fixed(0, solver))));
                 solver.post(IntConstraintFactory.clauses(LogOp.ifOnlyIf(o2b[j - 1][i], LogOp.and(btmp[0], btmp[1])), solver));
             }
         }

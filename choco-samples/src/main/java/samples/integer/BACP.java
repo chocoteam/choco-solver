@@ -30,6 +30,7 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -102,9 +103,9 @@ public class BACP extends AbstractProblem {
             //forall(c in courses) (x[p,c] = bool2int(course_period[c] = p)) /\
             for (int j = 0; j < n_courses; j++) {
                 solver.post(
-                        IntConstraintFactory.implies(x[i][j],
-                                IntConstraintFactory.arithm(course_period[j], "=", i),
-                                IntConstraintFactory.arithm(course_period[j], "!=", i))
+                        LogicalConstraintFactory.ifThenElse(x[i][j],
+								IntConstraintFactory.arithm(course_period[j], "=", i),
+								IntConstraintFactory.arithm(course_period[j], "!=", i))
                 );
             }
             // sum(i in courses) (x[p, i])>=courses_per_period_lb /\

@@ -41,6 +41,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.cnf.ILogical;
 import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.lex.LexChain;
@@ -77,12 +78,12 @@ public class LexChainTest {
 
     private ILogical reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
-        solver.post(IntConstraintFactory.implies(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
+        solver.post(LogicalConstraintFactory.ifThenElse(b1, IntConstraintFactory.arithm(Y[i], ">", X[i]), IntConstraintFactory.arithm(Y[i], "<=", X[i])));
         if (i == X.length - 1) {
             return b1;
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
-            solver.post(IntConstraintFactory.implies(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
+            solver.post(LogicalConstraintFactory.ifThenElse(b2, IntConstraintFactory.arithm(Y[i], "=", X[i]), IntConstraintFactory.arithm(X[i], "!=", Y[i])));
             return LogOp.or(b1, LogOp.and(b2, reformulate(i + 1, X, Y, solver)));
         }
     }
