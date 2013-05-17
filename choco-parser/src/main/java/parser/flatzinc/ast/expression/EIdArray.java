@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.expression;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -47,12 +47,12 @@ public final class EIdArray extends Expression {
     public final int index;
     final Object object;
 
-    public EIdArray(THashMap<String, Object> map, String id, int i) {
+    public EIdArray(Datas datas, String id, int i) {
         super(EType.IDA);
         this.name = id;
         this.index = i;
 
-        Object array = map.get(name);
+        Object array = datas.get(name);
         if (int_arr.isInstance(array)) {
             object = ((int[]) array)[index - 1];
         } else if (bool_arr.isInstance(array)) {

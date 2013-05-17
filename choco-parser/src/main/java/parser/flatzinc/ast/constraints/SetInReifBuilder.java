@@ -26,7 +26,7 @@
  */
 package parser.flatzinc.ast.constraints;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.ESetBounds;
@@ -49,7 +49,7 @@ import java.util.List;
 public class SetInReifBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {

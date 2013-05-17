@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -34,6 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.Datas;
 
 import java.io.IOException;
 
@@ -46,20 +46,20 @@ import java.io.IOException;
 public class T_param_decl extends GrammarTest {
 
 
-    public THashMap<String, Object> param_decl(FlatzincParser parser) throws RecognitionException {
+    public Datas param_decl(FlatzincParser parser) throws RecognitionException {
         FlatzincParser.param_decl_return r = parser.param_decl();
         CommonTree t = (CommonTree) r.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.map = new THashMap<String, Object>();
+        walker.datas = new Datas();
         walker.param_decl();
-        return walker.map;
+        return walker.datas;
     }
 
     @Test(groups = "1s")
     public void test1() throws IOException {
         FlatzincParser fp = parser("bool: beer_is_good = true;");
-        THashMap<String, Object> map = null;
+        Datas map = null;
         try {
             map = param_decl(fp);
         } catch (RecognitionException e) {
@@ -74,7 +74,7 @@ public class T_param_decl extends GrammarTest {
     @Test(groups = "1s")
     public void test2() throws IOException {
         FlatzincParser fp = parser("int: n = 4;");
-        THashMap<String, Object> map = null;
+        Datas map = null;
         try {
             map = param_decl(fp);
         } catch (RecognitionException e) {
@@ -90,7 +90,7 @@ public class T_param_decl extends GrammarTest {
     @Test(groups = "1s")
     public void test3() throws IOException {
         FlatzincParser fp = parser("array [1..7] of int: fib = [1,1,2,3,5,8,13];");
-        THashMap<String, Object> map = null;
+        Datas map = null;
         try {
             map = param_decl(fp);
         } catch (RecognitionException e) {

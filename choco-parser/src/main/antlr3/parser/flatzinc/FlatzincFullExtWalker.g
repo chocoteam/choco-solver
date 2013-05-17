@@ -38,8 +38,8 @@ package parser.flatzinc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import parser.flatzinc.ast.declaration.*;
@@ -47,10 +47,10 @@ import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.FZNException;
 import parser.flatzinc.FZNLayout;
 import parser.flatzinc.ast.FConstraint;
-import parser.flatzinc.ast.FGoal;
 import parser.flatzinc.ast.FParameter;
 import parser.flatzinc.ast.FVariable;
-import parser.flatzinc.ast.GoalConf;
+import parser.flatzinc.ast.FGoal;
+import parser.flatzinc.ast.Datas;
 
 
 import parser.flatzinc.ast.ext.*;
@@ -83,32 +83,27 @@ import java.util.Arrays;
 protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
 // maintains map between name and objects
-public THashMap<String, Object> map;
+public Datas datas;
 
 public THashMap<String, ArrayList> groups;
 
 // the solver
 public Solver mSolver;
-// goal configuration
-public GoalConf gc;
 
-// the layout dedicated to pretty print message wrt to fzn recommendations
-public final FZNLayout mLayout = new FZNLayout();
 }
 
 
-flatzinc_model [Solver aSolver, THashMap<String, Object> map, GoalConf gc]
+flatzinc_model [Solver aSolver, Datas datas]
 	:
 	{
 	this.mSolver = aSolver;
-	this.gc = gc;
-	this.map = map;
+	this.datas= datas;
 	this.groups = new THashMap();
     }
 	   (pred_decl)* (param_decl)* (var_decl)* (constraint)* engine? solve_goal
 	{
 	if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
-        mLayout.setSearchLoop(mSolver.getSearchLoop());
+        datas.plugLayout(mSolver);
     }
 	}
 	;
@@ -192,7 +187,7 @@ predicate   returns [Predicate pred]
 	}
 	    ^(IN (i=IDENTIFIER{ids.add($IDENTIFIER.text);})+)
 	{
-	$pred = new ExtPredicate(ids, map);
+	$pred = new ExtPredicate(ids, datas);
 	}
 	|	NOT p=predicate
 	{
@@ -673,11 +668,11 @@ expr    returns[Expression exp]
 //    IDENTIFIER ((LP exps=(expr+) RP)| (LS i=INT_CONST RS))?
 //    {
 //    if(exps == null || $INT_CONST == null){
-//        $exp = nex EIdentifier(map, $IDENTIFIER.text);
+//        $exp = nex EIdentifier(datas, $IDENTIFIER.text);
 //    }else if(exps != null) {
 //        $exps = new EArray(exps);
 //    }else if($INT_CONST != null){
-//        $exps = new EIdArray(map, $IDENTIFIER.text, i);
+//        $exps = new EIdArray(datas, $IDENTIFIER.text, i);
 //    }else{
 //    //todo throw exception
 //    }
@@ -692,11 +687,11 @@ id_expr returns [Expression exp]
        IDENTIFIER ((LP e=expr{exps.add(e);} (CM e=expr{exps.add(e);})* RP)|(LS i=INT_CONST RS))?
     {
     if(exps.size()>0){
-        $exp = new EAnnotation(new EIdentifier(map, $IDENTIFIER.text), exps);
+        $exp = new EAnnotation(new EIdentifier(datas, $IDENTIFIER.text), exps);
     }else if($i!=null) {
-        $exp = new EIdArray(map, $IDENTIFIER.text, Integer.parseInt($i.text));
+        $exp = new EIdArray(datas, $IDENTIFIER.text, Integer.parseInt($i.text));
     }else{
-        $exp = new EIdentifier(map, $IDENTIFIER.text);
+        $exp = new EIdentifier(datas, $IDENTIFIER.text);
     }
     }
     ;
@@ -705,8 +700,8 @@ id_expr returns [Expression exp]
 param_decl
 	:   ^(PAR IDENTIFIER pt=par_type e=expr)
 	{
-	// Parameter(THashMap<String, Object> map, Declaration type, String identifier, Expression expression)
-    FParameter.make_parameter(map, pt, $IDENTIFIER.text, e);
+	// Parameter(THashMap<String, Object> datas, Declaration type, String identifier, Expression expression)
+    FParameter.make_parameter(datas, pt, $IDENTIFIER.text, e);
     }
 	;
 
@@ -714,7 +709,7 @@ param_decl
 var_decl
 	:   ^(VAR IDENTIFIER vt=var_type anns=annotations e=expr?)
 	{
-	FVariable.make_variable(map, vt, $IDENTIFIER.text, anns, e, mSolver, mLayout);
+	FVariable.make_variable(datas, vt, $IDENTIFIER.text, anns, e, mSolver);
 	}
 	;
 
@@ -727,7 +722,7 @@ constraint
 	    ^(CONSTRAINT IDENTIFIER (e=expr{exps.add(e);})+ anns=annotations)
 	{
 	String id = $IDENTIFIER.text;
-	FConstraint.make_constraint(mSolver, map, id, exps, anns);
+	FConstraint.make_constraint(mSolver, datas, id, exps, anns);
 	}
 	;
 
@@ -735,7 +730,7 @@ solve_goal
 	:
 	^(SOLVE anns=annotations res=resolution)
 	{
-    FGoal.define_goal(gc, mSolver,anns,res.type,res.expr);
+    FGoal.define_goal(datas, mSolver,anns,res.type,res.expr);
 	}
 	;
 
@@ -772,7 +767,7 @@ annotation  returns [EAnnotation ann]
     }
     IDENTIFIER (LP (e=expr{exps.add(e);})+ RP)?
     {
-    $ann = new EAnnotation(new EIdentifier(map,$IDENTIFIER.text), exps);
+    $ann = new EAnnotation(new EIdentifier(datas,$IDENTIFIER.text), exps);
     }
     ;
 

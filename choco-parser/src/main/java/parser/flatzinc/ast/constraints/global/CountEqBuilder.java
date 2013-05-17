@@ -26,7 +26,7 @@
  */
 package parser.flatzinc.ast.constraints.global;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.EInt;
@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class CountEqBuilder implements IBuilder {
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar[] x = exps.get(0).toIntVarArray(solver);
         IntVar c = exps.get(2).intVarValue(solver);
         if (exps.get(1) instanceof EInt) {

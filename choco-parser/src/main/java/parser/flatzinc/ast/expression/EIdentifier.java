@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.expression;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.variables.BoolVar;
@@ -48,10 +48,10 @@ public final class EIdentifier extends Expression {
 
     public final Object object;
 
-    public EIdentifier(THashMap<String, Object> map, String s) {
+    public EIdentifier(Datas datas, String s) {
         super(EType.IDE);
         this.value = s;
-        object = map.get(value);
+        object = datas.get(value);
     }
 
     @Override

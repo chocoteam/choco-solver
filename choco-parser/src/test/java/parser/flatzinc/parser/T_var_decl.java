@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -35,6 +34,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -51,12 +51,12 @@ import java.io.IOException;
 public class T_var_decl extends GrammarTest {
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas datas;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
+        datas = new Datas();
     }
 
 
@@ -66,7 +66,7 @@ public class T_var_decl extends GrammarTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = datas;
         walker.var_decl();
     }
 
@@ -79,7 +79,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("digit");
+        Object o = datas.get("digit");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
         IntVar var = ((IntVar) o);
@@ -97,7 +97,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("b");
+        Object o = datas.get("b");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof BoolVar);
         BoolVar var = ((BoolVar) o);
@@ -137,7 +137,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("y");
+        Object o = datas.get("y");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
         IntVar var = ((IntVar) o);
@@ -153,7 +153,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("a");
+        Object o = datas.get("a");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar[]);
         IntVar[] a = ((IntVar[]) o);
@@ -166,7 +166,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        o = map.get("b");
+        o = datas.get("b");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar[]);
         IntVar[] b = ((IntVar[]) o);
@@ -184,7 +184,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("B");
+        Object o = datas.get("B");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
         IntVar var = ((IntVar) o);
@@ -203,7 +203,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("INT____00001");
+        Object o = datas.get("INT____00001");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntVar);
         IntVar var = ((IntVar) o);
@@ -218,7 +218,7 @@ public class T_var_decl extends GrammarTest {
             Assert.fail();
         }
 
-        o = map.get("num");
+        o = datas.get("num");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof IntView);
     }
@@ -232,7 +232,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("C");
+        Object o = datas.get("C");
         Assert.assertTrue(o.getClass().isArray());
         IntVar[] oi = (IntVar[]) o;
         Assert.assertEquals(oi.length, 3);
@@ -269,7 +269,7 @@ public class T_var_decl extends GrammarTest {
         } catch (RecognitionException e) {
             Assert.fail();
         }
-        Object o = map.get("alpha");
+        Object o = datas.get("alpha");
         Assert.assertTrue(o.getClass().isArray());
         IntVar[] oi = (IntVar[]) o;
         Assert.assertEquals(oi.length, 3);

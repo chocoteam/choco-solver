@@ -35,6 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
+import parser.flatzinc.ast.Datas;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -56,23 +57,23 @@ public class T_struct_reg extends GrammarExtTest {
 
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas datas;
     THashMap<String, ArrayList> groups;
     DSLEngine pe;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
+        datas = new Datas();
         groups = new THashMap<String, ArrayList>();
         IntVar[] vars = VariableFactory.boundedArray("v", 5, 1, 5, mSolver);
         Constraint[] cstrs = new Constraint[4];
         for (int i = 0; i < 4; i++) {
             cstrs[i] = IntConstraintFactory.arithm(vars[i], "<", vars[i + 1]);
-            map.put("c_" + i, cstrs[i]);
-            map.put(vars[i].getName(), vars[i]);
+            datas.register("c_" + i, cstrs[i]);
+            datas.register(vars[i].getName(), vars[i]);
         }
-        map.put(vars[4].getName(), vars[4]);
+        datas.register(vars[4].getName(), vars[4]);
         mSolver.post(cstrs);
 
         pe = new DSLEngine(mSolver);
@@ -88,7 +89,7 @@ public class T_struct_reg extends GrammarExtTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = datas;
         walker.groups = groups;
         return walker.struct_reg(pe);
     }

@@ -305,7 +305,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     public void onSolution() {
         solutionCount++;
         updateTimeCount();
-        updatePropagationCount();
+//        updatePropagationCount();
     }
 
     @Override

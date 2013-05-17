@@ -36,12 +36,11 @@ import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
-import solver.constraints.Constraint;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
-import util.ESat;
+import solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +116,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                     }
                 }
                 LOGGER.info("----------");
-                LOGGER.info("% "+searchLoop.getMeasures().getTimeCount());
+//                LOGGER.info("% " + searchLoop.getMeasures().getTimeCount());
             }
         } else {
             LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
@@ -126,13 +125,13 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     }
 
     private boolean check() {
-        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
-        for (int c = 0; c < cstrs.length; c++) {
-            ESat satC = cstrs[c].isSatisfied();
-            if (!ESat.TRUE.equals(satC)) {
-                return false;
-            }
-        }
+//        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
+//        for (int c = 0; c < cstrs.length; c++) {
+//            ESat satC = cstrs[c].isSatisfied();
+//            if (!ESat.TRUE.equals(satC)) {
+//                return false;
+//            }
+//        }
         return true;
     }
 
@@ -181,6 +180,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                 LOGGER.info("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
                 LOGGER.info("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
                 LOGGER.info("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
+                LOGGER.info("% \t Max Depth : {}", searchLoop.getMeasures().getMaxDepth());
                 LOGGER.info("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
                 LOGGER.info("% \t Variables : {}", searchLoop.getSolver().getVars().length);
                 LOGGER.info("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
@@ -199,10 +199,18 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void afterClose() {
     }
 
+    public void addOutputVar(String name, Variable variable, Declaration type) {
+        Exit.log("Cannot output " + name);
+    }
+
     public void addOutputVar(String name, IntVar variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
         output_types.add(type.typeOf);
+    }
+
+    public void addOutputArrays(String name, Variable[] variables, List<Expression> indices, Declaration type) {
+        Exit.log("Cannot output " + name);
     }
 
     public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices, Declaration type) {

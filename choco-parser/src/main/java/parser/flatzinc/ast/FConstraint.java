@@ -74,7 +74,7 @@ public final class FConstraint {
         name
     }
 
-    public static void make_constraint(Solver aSolver, THashMap<String, Object> map,
+    public static void make_constraint(Solver aSolver, Datas datas,
                                        String id, List<Expression> exps, List<EAnnotation> annotations) {
         //TODO: manage annotations
 //        build(id, exps, parser.solver);
@@ -89,9 +89,9 @@ public final class FConstraint {
             builder = (IBuilder) loadManager(name);
             builders.put(id, builder);
         }
-        Constraint[] c = builder.build(aSolver, id, exps, annotations, map);
+        Constraint[] c = builder.build(aSolver, id, exps, annotations, datas);
         aSolver.post(c);
-        readAnnotations(map, annotations, c);
+        readAnnotations(datas, annotations, c);
     }
 
 
@@ -107,7 +107,7 @@ public final class FConstraint {
         }
     }
 
-    public static void readAnnotations(THashMap<String, Object> map, List<EAnnotation> annotations, Constraint[] cstr) {
+    public static void readAnnotations(Datas datas, List<EAnnotation> annotations, Constraint[] cstr) {
         for (int i = 0; i < annotations.size(); i++) {
             EAnnotation eanno = annotations.get(i);
             try {
@@ -118,7 +118,7 @@ public final class FConstraint {
                         if (name.startsWith("\"") && name.endsWith("\"")) {
                             name = name.substring(1, name.length() - 1);
                         }
-                        map.put(name, cstr);
+                        datas.register(name, cstr);
                         break;
                     default:
                         //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
