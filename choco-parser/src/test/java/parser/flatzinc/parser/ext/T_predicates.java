@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser.ext;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -35,6 +34,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincFullExtParser;
 import parser.flatzinc.FlatzincFullExtWalker;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.ext.BoolPredicate;
 import parser.flatzinc.ast.ext.Predicate;
 import solver.Solver;
@@ -50,12 +50,12 @@ import java.io.IOException;
 public class T_predicates extends GrammarExtTest {
 
     Solver mSolver;
-    THashMap<String, Object> map;
+    Datas datas;
 
     @BeforeMethod
     public void before() {
         mSolver = new Solver();
-        map = new THashMap<String, Object>();
+        datas = new Datas();
     }
 
     public Predicate predicates(FlatzincFullExtParser parser) throws RecognitionException {
@@ -64,7 +64,7 @@ public class T_predicates extends GrammarExtTest {
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
         walker.mSolver = mSolver;
-        walker.map = map;
+        walker.datas = datas;
         return walker.predicates();
     }
 

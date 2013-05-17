@@ -28,7 +28,6 @@
 package parser.flatzinc;
 
 import database.MySQLAccess;
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -40,6 +39,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
 import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
@@ -138,7 +138,7 @@ public class ParseAndSolve {
         parseandsolve();
     }
 
-    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map, GoalConf gc) {
+    public void buildParser(InputStream is, Solver mSolver, Datas datas) {
         try {
             // Create an input character stream from standard in
             ANTLRInputStream input = new ANTLRInputStream(is);
@@ -156,7 +156,7 @@ public class ParseAndSolve {
             // Create a tree node stream from resulting tree
             CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
             FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
-            walker.flatzinc_model(mSolver, map, gc);                 // launch at start rule prog
+            walker.flatzinc_model(mSolver, datas);                 // launch at start rule prog
         } catch (IOException io) {
             Exit.log(io.getMessage());
         } catch (RecognitionException re) {
@@ -184,9 +184,9 @@ public class ParseAndSolve {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
                 long creationTime = -System.nanoTime();
-                THashMap<String, Object> map = new THashMap<String, Object>();
-                buildParser(new FileInputStream(new File(instance)), solver, map, gc);
-                makeEngine(solver);
+                Datas datas = new Datas(gc);
+                buildParser(new FileInputStream(new File(instance)), solver, datas);
+                makeEngine(solver, datas);
                 if (!csv.equals("")) {
                     assert acsv != null;
                     acsv.setSolver(solver);
@@ -217,7 +217,7 @@ public class ParseAndSolve {
         userinterruption = false;
     }
 
-    protected void makeEngine(Solver solver) {
+    protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
             case 0:
             case 1:

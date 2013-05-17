@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints.global;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -46,7 +46,7 @@ import java.util.List;
 public class CircuitBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         return new Constraint[]{IntConstraintFactory.circuit(exps.get(0).toIntVarArray(solver), 1)};
     }
 }

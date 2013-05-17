@@ -26,7 +26,6 @@
  */
 package parser.flatzinc.parser;
 
-import gnu.trove.map.hash.THashMap;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -34,6 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import parser.flatzinc.FlatzincParser;
 import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class T_annotation extends GrammarTest {
         CommonTree t = (CommonTree) r.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
         FlatzincWalker walker = new FlatzincWalker(nodes);
-        walker.map = new THashMap<String, Object>();
+        walker.datas = new Datas();
         return walker.annotation();
     }
 

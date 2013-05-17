@@ -99,6 +99,10 @@ final class NoSolutionPool implements ISolutionPool {
     }
 
     @Override
+    public void restoreBest() {
+    }
+
+    @Override
     public void clear() {
     }
 
@@ -140,6 +144,11 @@ final class OneSolutionPool implements ISolutionPool {
         } catch (NullPointerException ex) {
             solution = new Solution(solver);
         }
+    }
+
+    @Override
+    public void restoreBest() {
+        getBest().restore();
     }
 
     @Override
@@ -195,6 +204,11 @@ class InfiniteSolutionPool implements ISolutionPool {
     public void recordSolution(Solver solver) {
         final Solution sol = new Solution(solver);
         solutions.addFirst(sol);
+    }
+
+    @Override
+    public void restoreBest() {
+        getBest().restore();
     }
 
     @Override

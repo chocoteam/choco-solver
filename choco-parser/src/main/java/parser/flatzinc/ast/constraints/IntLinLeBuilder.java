@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.constraints;
 
-import gnu.trove.map.hash.THashMap;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
@@ -50,7 +50,7 @@ import java.util.List;
 public class IntLinLeBuilder implements IBuilder {
 
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, THashMap<String, Object> map) {
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();

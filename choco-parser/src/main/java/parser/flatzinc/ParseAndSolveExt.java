@@ -33,8 +33,8 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.Exit;
-import parser.flatzinc.ast.GoalConf;
 import solver.Solver;
 import solver.propagation.DSLEngine;
 import solver.propagation.generator.Arc;
@@ -62,7 +62,7 @@ public class ParseAndSolveExt extends ParseAndSolve {
     }
 
     @Override
-    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map, GoalConf gc) {
+    public void buildParser(InputStream is, Solver mSolver, Datas datas) {
         try {
             // Create an input character stream from standard in
             ANTLRInputStream input = new ANTLRInputStream(is);
@@ -80,7 +80,7 @@ public class ParseAndSolveExt extends ParseAndSolve {
             // Create a tree node stream from resulting tree
             CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
             FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes); // create a tree parser
-            walker.flatzinc_model(mSolver, map, gc);                 // launch at start rule prog
+            walker.flatzinc_model(mSolver, datas);                 // launch at start rule prog
         } catch (IOException io) {
             Exit.log(io.getMessage());
         } catch (RecognitionException re) {
@@ -89,7 +89,7 @@ public class ParseAndSolveExt extends ParseAndSolve {
     }
 
     @Override
-    protected void makeEngine(Solver solver) {
+    protected void makeEngine(Solver solver, Datas datas) {
 
         switch (eng) {
             case 0:
@@ -111,8 +111,6 @@ public class ParseAndSolveExt extends ParseAndSolve {
                 ArrayList<Arc> pairs = Arc.populate(solver);
                 THashMap<String, ArrayList> groups = new THashMap<String, ArrayList>(1);
                 groups.put("All", pairs);
-                THashMap<String, Object> map = new THashMap<String, Object>();
-
                 String st;
 
                 switch (eng) {
@@ -145,7 +143,7 @@ public class ParseAndSolveExt extends ParseAndSolve {
                     CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
                     FlatzincFullExtWalker walker = new FlatzincFullExtWalker(nodes);
                     walker.mSolver = solver;
-                    walker.map = map;
+                    walker.datas = datas;
                     walker.groups = groups;
                     PropagationStrategy ps = walker.structure(pe);
                     pe.set(ps);
