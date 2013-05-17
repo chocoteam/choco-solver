@@ -34,9 +34,12 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LCF;
 import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
@@ -60,26 +63,46 @@ public class ClauseTest {
             for (int i = 0; i <= n; i++) {
                 Solver s = new Solver();
 
-                BoolVar[] bs = new BoolVar[n];
+				final BoolVar[] bsource = new BoolVar[n];
+				final BoolVar[] bs = new BoolVar[n];
 
-                for (int j = 0; j < n; j++) {
-                    bs[j] = VariableFactory.bool("b" + j, s);
-                    if (j >= i) {
-                        bs[j] = bs[j].not();
-                    }
-                }
+				for (int j = 0; j < n; j++) {
+					bsource[j] = VariableFactory.bool("b" + j, s);
+				}
 
-                LogOp or = LogOp.or(bs);
+				for (int j = 0; j < n; j++) {
+					if (j >= i) {
+//						bs[j] = VariableFactory.bool("b" + j, s);
+//						s.post(ICF.arithm(bs[j],"!=",bsource[j]));
+						bs[j] = bsource[j].not();
+					}else{
+						bs[j] = bsource[j];
+					}
+				}
 
-                log.info(or.toString());
-                Constraint cons = IntConstraintFactory.clauses(or, s);
+//                LogOp or = LogOp.or(bs);
+//                log.info(or.toString());
+//                Constraint cons = IntConstraintFactory.clauses(or, s);
+//                Constraint[] cstrs = new Constraint[]{cons};
+//                s.post(cstrs);
 
-                Constraint[] cstrs = new Constraint[]{cons};
+				s.post(LCF.or(bs));
 
-                s.post(cstrs);
                 s.set(IntStrategyFactory.presetI(bs));
-                s.findAllSolutions();
+
+				System.out.println("RESO");
+				s.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+					@Override
+					public void onSolution() {
+						System.out.println("SOL");
+						for (BoolVar b:bs){
+							System.out.println(b+" val : "+b.getValue());
+						}
+					}
+				});
+				s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
+				System.out.println(sol+" sols");
                 Assert.assertEquals(sol, nSol);
             }
             nSol = nSol * 2 + 1;

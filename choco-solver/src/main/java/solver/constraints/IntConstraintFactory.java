@@ -60,7 +60,6 @@ import solver.constraints.propagators.nary.sum.PropBoolSum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.tree.PropAntiArborescences;
 import solver.constraints.propagators.nary.tree.PropKLoops;
-import solver.constraints.reified.ImplicationConstraint;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -135,50 +134,7 @@ public class IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
-    /**
-     * Implication constraint: BVAR => CSTR
-     * Also called half reification constraint
-     * Ensures:<br/>
-     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
-     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-     * <p/>
-     * Example : <br/>
-     * - <code>implies(b1, arithm(v1, "=", 2));</code>:
-     * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
-     * But if b1 is equal to 0, nothing happens
-     * <p/>
-     * <p/> In order to have BVAR <=> CSTR please use two constraints:
-     * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
-     * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
-     *
-     * @param BVAR variable of reification
-     * @param CSTR the constraint to be satisfied when BVAR = 1
-     */
-    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR) {
-        return new ImplicationConstraint(BVAR, CSTR, CSTR.getSolver().TRUE);
-    }
-
-    /**
-     * Implication constraint: BVAR => CSTR && not(B) => OPP_CSTR.
-     * <br/>
-     * Ensures:
-     * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
-     * <p/>- BVAR = 0 =>  OPP_CSTR is satisfied, <br/>
-     * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-     * <p/>- OPP_CSTR is not satisfied => BVAR = 1 <br/>
-     * <p/>
-     * <p/> In order to have BVAR <=> CSTR, make sure OPP_CSTR is the opposite constraint of CSTR
-     *
-     * @param BVAR     variable of reification
-     * @param CSTR     the constraint to be satisfied when BVAR = 1
-     * @param OPP_CSTR the constraint to be satisfied when BVAR = 0
-     */
-    public static ImplicationConstraint implies(BoolVar BVAR, Constraint CSTR, Constraint OPP_CSTR) {
-        return new ImplicationConstraint(BVAR, CSTR, OPP_CSTR);
-
-    }
-
-    /**
+	/**
      * Ensures VAR takes its values in TABLE
      *
      * @param VAR   an integer variable
@@ -574,8 +530,8 @@ public class IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,true));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,false));
 //		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
@@ -594,7 +550,7 @@ public class IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT), new PropDiffN(X, Y, WIDTH, HEIGHT));
+        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
         return c;
     }
 

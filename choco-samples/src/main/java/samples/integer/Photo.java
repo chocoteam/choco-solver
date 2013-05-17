@@ -32,6 +32,7 @@ import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
@@ -77,9 +78,9 @@ public class Photo extends AbstractProblem {
             dist[i] = VariableFactory.abs(Sum.var(positions[pa], VariableFactory.minus(positions[pb])));
 
             solver.post(
-                    IntConstraintFactory.implies(viols[i],
-                            IntConstraintFactory.arithm(dist[i], "<=", 2),
-                            IntConstraintFactory.arithm(dist[i], ">=", 1)));
+                    LogicalConstraintFactory.ifThenElse(viols[i],
+							IntConstraintFactory.arithm(dist[i], "<=", 2),
+							IntConstraintFactory.arithm(dist[i], ">=", 1)));
         }
         solver.post(IntConstraintFactory.sum(viols, violations));
         solver.post(IntConstraintFactory.alldifferent(positions, "BC"));
