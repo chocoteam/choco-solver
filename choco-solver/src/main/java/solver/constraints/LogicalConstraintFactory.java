@@ -51,9 +51,8 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint and(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
-		s.post(IntConstraintFactory.sum(BOOLS,sum));
-		return IntConstraintFactory.arithm(sum,"=",BOOLS.length);
+		// The domain of the fixed var enforces that sum(BOOLS) == BOOLS.length
+		return IntConstraintFactory.sum(BOOLS, VariableFactory.fixed(BOOLS.length, s));
 	}
 
 	/**
@@ -63,9 +62,9 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint or(BoolVar... BOOLS){
 		Solver s = BOOLS[0].getSolver();
-		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),0,BOOLS.length,s);
-		s.post(IntConstraintFactory.sum(BOOLS,sum));
-		return IntConstraintFactory.arithm(sum,">=",1);
+		IntVar sum = VariableFactory.bounded(StringUtils.randomName(),1,BOOLS.length,s);
+		// The domain of sum var enforces that 1 <= sum(BOOLS) <= BOOLS.length
+		return IntConstraintFactory.sum(BOOLS,sum);
 	}
 
 	//***********************************************************************************
