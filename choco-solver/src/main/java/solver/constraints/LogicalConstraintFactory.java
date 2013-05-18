@@ -28,7 +28,6 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.reified.ImplicationConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -115,8 +114,7 @@ public class LogicalConstraintFactory {
 	 * @return a constraint ensuring that if IF is satisfied, then THEN is satisfied as well
 	 */
 	public static Constraint ifThen(Constraint IF, Constraint THEN){
-		BoolVar bool = IF.reif();
-		return ifThen(bool, THEN);
+		return ifThen(IF.reif(), THEN);
 	}
 
 	/**
@@ -128,27 +126,27 @@ public class LogicalConstraintFactory {
 	 * Otherwise, ELSE must be satisfied
 	 */
 	public static Constraint ifThenElse(Constraint IF, Constraint THEN, Constraint ELSE){
-		BoolVar bool = IF.reif();
-		return ifThenElse(bool, THEN, ELSE);
+		return ifThenElse(IF.reif(), THEN, ELSE);
 	}
 
 	/**
-	 * Implication constraint: BVAR => CSTR && not(B) => OPP_CSTR.
+	 * Implication constraint: BVAR => THEN && not(B) => ELSE.
 	 * <br/>
 	 * Ensures:
-	 * <p/>- BVAR = 1 =>  CSTR is satisfied, <br/>
-	 * <p/>- BVAR = 0 =>  OPP_CSTR is satisfied, <br/>
-	 * <p/>- CSTR is not satisfied => BVAR = 0 <br/>
-	 * <p/>- OPP_CSTR is not satisfied => BVAR = 1 <br/>
+	 * <p/>- BVAR = 1 =>  THEN is satisfied, <br/>
+	 * <p/>- BVAR = 0 =>  ELSE is satisfied, <br/>
+	 * <p/>- THEN is not satisfied => BVAR = 0 <br/>
+	 * <p/>- ELSE is not satisfied => BVAR = 1 <br/>
 	 * <p/>
-	 * <p/> In order to have BVAR <=> CSTR, make sure OPP_CSTR is the opposite constraint of CSTR
+	 * <p/> In order to have BVAR <=> THEN, make sure ELSE is the opposite constraint of THEN
 	 *
 	 * @param BVAR     variable of reification
-	 * @param CSTR     the constraint to be satisfied when BVAR = 1
-	 * @param OPP_CSTR the constraint to be satisfied when BVAR = 0
+	 * @param THEN     the constraint to be satisfied when BVAR = 1
+	 * @param ELSE the constraint to be satisfied when BVAR = 0
 	 */
-	public static ImplicationConstraint ifThenElse(BoolVar BVAR, Constraint CSTR, Constraint OPP_CSTR) {
-		return new ImplicationConstraint(BVAR, CSTR, OPP_CSTR);
+	public static Constraint ifThenElse(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
+		return and(ifThen(BVAR,THEN),ifThen(BVAR.not(),ELSE));
+//		return new ImplicationConstraint(BVAR, THEN, ELSE);
 	}
 
 	/**
@@ -163,14 +161,16 @@ public class LogicalConstraintFactory {
 	 * b1 is equal to 1 => v1 = 2, so v1 != 2 => b1 is equal to 0
 	 * But if b1 is equal to 0, nothing happens
 	 * <p/>
-	 * <p/> In order to have BVAR <=> CSTR please use two constraints:
-	 * <p/> BVAR => CSTR and BVAR2 => CSTR2 where
-	 * <p/> BVAR2 = not(BVAR) and CSTR2 = not(CSTR), i.e. it is the opposite constraint of CSTR
 	 *
 	 * @param BVAR variable of reification
 	 * @param CSTR the constraint to be satisfied when BVAR = 1
 	 */
-	public static ImplicationConstraint ifThen(BoolVar BVAR, Constraint CSTR) {
-		return new ImplicationConstraint(BVAR, CSTR, CSTR.getSolver().TRUE);
+	public static Constraint ifThen(BoolVar BVAR, Constraint CSTR) {
+//		return ifThenElse(BVAR, CSTR, CSTR.getSolver().TRUE);
+		return ICF.arithm(BVAR,"<=",CSTR.reif());
+	}
+
+	public static Constraint reification(BoolVar BVAR, Constraint CSTR){
+		return ICF.arithm(BVAR,"=",CSTR.reif());
 	}
 }
