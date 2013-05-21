@@ -165,7 +165,7 @@ public class PropElementV_fast extends Propagator<IntVar>{
 		boolean exists = false;
 		for(int i=lb;i<=ub;i=index.nextValue(i)){
 			min = Math.min(min, vars[2+i-offset].getLB());
-			max = Math.min(min, vars[2+i-offset].getUB());
+			max = Math.max(max, vars[2+i-offset].getUB());
 			exists |= vars[2+i-offset].contains(val);
 		}
 		if(min>var.getUB() || max<var.getLB()){
