@@ -50,10 +50,12 @@ import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.globalcardinality.GlobalCardinality;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
+import solver.constraints.propagators.binary.PropEqualX_Y;
 import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
+import solver.constraints.propagators.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.propagators.nary.circuit.*;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.propagators.nary.sum.PropBoolSum;
@@ -63,10 +65,7 @@ import solver.constraints.propagators.nary.tree.PropKLoops;
 import solver.constraints.ternary.*;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Task;
-import solver.variables.VariableFactory;
+import solver.variables.*;
 import util.tools.ArrayUtils;
 
 /**
@@ -408,13 +407,20 @@ public class IntConstraintFactory {
 
     /**
      * Maps the boolean assignments variables BVARS with the standard assignment variable VAR.
-     * VAR = i <-> BVARS[i] = 1
+     * VAR = i <-> BVARS[i-OFFSET] = 1
      *
      * @param BVARS array of boolean variables
-     * @param VAR   observed variable
+     * @param VAR   observed variable. Should presumably have an enumerated domain
+	 * @param OFFSET offset parameter
      */
-    public static DomainChanneling boolean_channeling(BoolVar[] BVARS, IntVar VAR) {
-        return new DomainChanneling(BVARS, VAR, VAR.getSolver());
+    public static Constraint boolean_channeling(BoolVar[] BVARS, IntVar VAR, int OFFSET) {
+		if(!VAR.hasEnumeratedDomain()){
+			IntVar enumV = VF.enumerated(VAR.getName()+"_enumImage",VAR.getLB(),VAR.getUB(),VAR.getSolver());
+			Constraint cons = new Constraint(ArrayUtils.append(BVARS,new IntVar[]{VAR,enumV}),VAR.getSolver());
+			cons.setPropagators(new PropEnumDomainChanneling(BVARS,enumV,OFFSET),new PropEqualX_Y(VAR,enumV));
+			return cons;
+		}
+        return new DomainChanneling(BVARS, VAR, OFFSET, VAR.getSolver());
     }
 
     /**

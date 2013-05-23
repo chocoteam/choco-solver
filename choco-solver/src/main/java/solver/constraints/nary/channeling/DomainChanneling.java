@@ -28,7 +28,7 @@ package solver.constraints.nary.channeling;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.channeling.PropDomainChanneling;
+import solver.constraints.propagators.nary.channeling.PropEnumDomainChanneling;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import util.ESat;
@@ -36,40 +36,53 @@ import util.tools.ArrayUtils;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
- * var = i -> bvars[i] = 1
+ * var = i <-> bvars[i-OFFSET] = 1
  * <br/>
  *
  * @author Xavier Lorca
  * @author Hadrien Cambazard
  * @author Fabien Hermenier
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @since 04/08/11
  */
 public class DomainChanneling extends IntConstraint<IntVar> {
 
-    public DomainChanneling(BoolVar[] bs, IntVar x, Solver solver) {
-        super(ArrayUtils.append(bs, new IntVar[]{x}), solver);
-        setPropagators(new PropDomainChanneling(bs, x));
+	private final int offSet, n;
 
+    public DomainChanneling(BoolVar[] bs, IntVar x, int offSet, Solver solver) {
+        super(ArrayUtils.append(bs, new IntVar[]{x}), solver);
+		assert x.hasEnumeratedDomain();
+		setPropagators(new PropEnumDomainChanneling(bs, x, offSet));
+		this.offSet = offSet;
+		this.n = bs.length;
     }
 
     @Override
     public ESat isSatisfied(int[] tuple) {
-        int val = tuple[tuple.length - 1];
+		if(tuple[tuple.length - 1]<offSet || tuple[tuple.length - 1]>offSet+n-1){
+			return ESat.FALSE;
+		}
+		if(tuple[tuple[tuple.length - 1]-offSet]!=1){
+			return ESat.FALSE;
+		}
+		int bit1 = -1;
         for (int i = 0; i < tuple.length - 1; i++) {
-            if (i != val && tuple[i] != 0) {
-                return ESat.FALSE;
-            } else if (i == val && tuple[i] != 1) {
-                return ESat.FALSE;
-            }
+			if(tuple[i]==1){
+				if(bit1==-1){
+					bit1 = i;
+				}else {
+					return ESat.FALSE;
+				}
+			}
         }
-        return ESat.eval(!(val < 0 || val > tuple.length - 1));
+        return ESat.TRUE;
     }
 
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append(vars[vars.length - 1].getName()).append(" = i => <");
+        st.append(vars[vars.length - 1].getName()).append(" = i <=> <");
         int i = 0;
         for (; i < Math.min(3, vars.length - 2); i++) {
             st.append(vars[i].getName()).append(", ");
