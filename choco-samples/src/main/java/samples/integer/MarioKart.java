@@ -31,14 +31,12 @@ import samples.AbstractProblem;
 import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.IntConstraintFactory;
+import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.delta.IEnumDelta;
-import solver.variables.delta.IIntervalDelta;
 import util.tools.ArrayUtils;
 import java.util.Random;
 
@@ -50,13 +48,12 @@ import java.util.Random;
  * A path is a succession of node starting from the source node to the destination node. Each node has to be connected
  * to the previous and the next node by a a directed edge in the graph. The path can't admit any cycle </br>
  *
- * <h2>The Model</h2> This model will specify all the constraints to make a coherent path in the graph. All those
- * constraints are based on a boolean matrix approach of the graph which is efficient for this type of problem. The
- * boolean matrix represents all the edges in the graph, and if the boolean (i, j) of the matrix is equals to true, that
- * means that the path contains this edge starting from the node of id i to the node of id j. If the edge doesn't exists
- * in the graph the the boolean value is equals to the Choco constants FALSE. Else the edge can be used or not, so its
- * representation is a choco boolean variable which can be instantiated to true : edge is in the path or to false : the
- * edge isn't in the path.
+ * <h2>The Model</h2> This model will specify all the constraints to make a coherent path in the graph. The graph is both
+ * represented by a BoolVar matrix and an array of IntVar (successor representation). For instance, if the boolean (i, j)
+ * of the matrix is equals to true, that means that the path contains this edge starting from the node of id i to the node
+ * of id j. If the edge doesn't exists in the graph the the boolean value is equals to the Choco constants FALSE.
+ * Else the edge can be used or not, so its representation is a choco boolean variable which can be instantiated to
+ * true : edge is in the path or to false : the edge isn't in the path.
  *
  * <h2>The Example</h2> We are presenting this problem through an little example of Mario's day. </br> Mario is an
  * Italian Plumber and is work is mainly to find gold in the plumbing of all the houses of the neighborhood. Mario is
@@ -87,9 +84,9 @@ public class MarioKart extends AbstractProblem {
 	/** The maximum amount of gold that Mario has ever founded in a house plumbing */
 	private static int MAX_GOLD = 100;
 	/** The Mario's house id. Random generation if equals to Integer.MAX_VALUE */
-	private static int MARIO_HOUSE_ID = Integer.MAX_VALUE;
+	private static int MARIO_HOUSE_ID = 0;//Integer.MAX_VALUE;
 	/** The Luigi's house id. Random generation if equals to Integer.MAX_VALUE */
-	private static int LUIGI_HOUSE_ID = Integer.MAX_VALUE;
+	private static int LUIGI_HOUSE_ID = 1;//Integer.MAX_VALUE;
 	/** The amount of fuel of the kart in mini-litres */
 	private static int FUEL = 2000;
 	/** The kart of mario */
@@ -144,6 +141,7 @@ public class MarioKart extends AbstractProblem {
 		data();
 		variables();
 		constraints();
+		strengthenFiltering();
 	}
 
 	@Override
@@ -157,12 +155,13 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		solver.set(IntStrategyFactory.inputOrder_InDomainMin(next));
+		solver.set(IntStrategyFactory.firstFail_InDomainMin(next));
 	}
 
 	@Override
 	public void solve() {
 		solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, goldFound);
+		printInputData();
 	}
 
 	@Override
@@ -171,6 +170,30 @@ public class MarioKart extends AbstractProblem {
 		System.out.println((int) ((size.getValue() + 0d) / (HOUSE_NUMBER + 0d) * 100) + " % of houses visited");
 		System.out.println((int) ((fuelConsumed.getValue() + 0d) / (FUEL + 0d) * 100) + " % of fuel burned");
 		System.out.println("! " + goldFound.getValue() + " gold coins earned !");
+	}
+
+	private void printInputData(){
+		System.out.println("nbHouses = "+HOUSE_NUMBER+";");
+		System.out.println("MarioHouse = "+MARIO_HOUSE_ID+";");
+		System.out.println("LuigiHouse = "+LUIGI_HOUSE_ID+";");
+		System.out.println("fuelMax = "+FUEL+";");
+		System.out.println("goldTotalAmount = "+MAX_GOLD*HOUSE_NUMBER+";");
+		String conso = "conso = [";
+		for(int i=0;i<HOUSE_NUMBER;i++){
+			String s = "|";
+			for(int j=0;j<HOUSE_NUMBER-1;j++){
+				s+=this.consumptions[i][j]+",";
+			}
+			conso += s+this.consumptions[i][HOUSE_NUMBER-1];
+		}
+		conso+="|];";
+		System.out.println(conso);
+		String goldInHouse = "goldInHouse = [";
+		for(int i=0;i<HOUSE_NUMBER-1;i++){
+			goldInHouse+=this.gold[i]+",";
+		}
+		goldInHouse += this.gold[HOUSE_NUMBER-1]+"];";
+		System.out.println(goldInHouse);
 	}
 
 	/** Creation of the problem instance */
@@ -216,67 +239,52 @@ public class MarioKart extends AbstractProblem {
 
 	/** Post all the constraints of the problem */
 	private void constraints() {
-		/*
-		 * We compute the gold matrix to have a gold for each edge. The gold of an edge is defined as the gold in his
-		 * destination house
-		 */
+		/* The scalar constraint to compute global consumption of the kart to perform the path */
+		solver.post(ICF.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions), fuelConsumed));
+
+		/* The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
+		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true */
+		BoolVar[] used = new BoolVar[n];
+		for (int i = 0; i < used.length; i++)
+			used[i] = edges[i][i].not();
+		solver.post(ICF.scalar(used, gold, goldFound));
+
+		/* The subcircuit constraint. This forces all the next value to form a circuit which the overall size is equals
+		 * to the size variable. This constraint check if the path contains any sub circles. */
+		solver.post(ICF.subcircuit(next, 0, size));
+
+		/* The path has to end on the t node. This constraint doesn't create a path, but a circle or a circuit. So we
+		 * force the edge (t,s) then all the other node of the circuit will form a starting from s and ending at t */
+		solver.post(ICF.arithm(next[t], "=", s + 0));
+
+		/* The boolean channeling constraint. Enforce the relation between the next values and the edges values in the
+		 * graph boolean variable matrix */
+		for (int i = 0; i < n; i++){
+			solver.post(ICF.boolean_channeling(edges[i], next[i],0));
+		}
+	}
+
+	/** Adds more constraints to get a stronger filtering */
+	private void strengthenFiltering(){
+		/* FUEL RELATED FILTERING:
+		 * identifies the min/max fuel consumption involved by visiting each house */
+		IntVar[] fuelHouse = new IntVar[HOUSE_NUMBER];
+		for(int i=0;i<HOUSE_NUMBER;i++){
+			fuelHouse[i] = VariableFactory.enumerated("fuelHouse",0,FUEL,solver);
+			solver.post(ICF.element(fuelHouse[i],consumptions[i],next[i],0,"none"));
+		}
+		solver.post(ICF.sum(fuelHouse,fuelConsumed));
+
+		/* GOLD RELATED FILTERING
+		* This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the
+		* more golds and respects the fuel limit constraint. The analogy is the following : the weight is the
+		* consumption to go through the edge and the energy is the gold that we can earn */
 		int[][] goldMatrix = new int[n][n];
 		for (int i = 0; i < goldMatrix.length; i++)
 			for (int j = 0; j < goldMatrix.length; j++)
-				goldMatrix[i][j] = (i == j) ? 0 : gold[j];
-
-		/*
-		 * This problem can be seen has a knapsack problem where are trying to found the set of edges that contains the
-		 * more golds and respects the fuel limit constraint. The analogy is the following : the weight is the
-		 * consumption to go through the edge and the energy is the gold that we can earn
-		 */
-		solver.post(IntConstraintFactory.knapsack(ArrayUtils.flatten(edges), VariableFactory.fixed(FUEL, solver),
+				goldMatrix[i][j] = (i == j) ? 0 : gold[i];
+		solver.post(ICF.knapsack(ArrayUtils.flatten(edges), VariableFactory.fixed(FUEL, solver),
 				goldFound, ArrayUtils.flatten(consumptions), ArrayUtils.flatten(goldMatrix)));
-
-		/*
-		 * The scalar constraint to compute global consumption of the kart to perform the path this constraint is
-		 * optional
-		 */
-		solver.post(IntConstraintFactory.scalar(ArrayUtils.flatten(edges), ArrayUtils.flatten(consumptions),
-				fuelConsumed));
-
-		/*
-		 * The scalar constraint to compute the amount of gold founded by Mario in the path. With our model if a
-		 * node isn't used then his next value is equals to his id. Then the boolean edges[i][i] is equals to true
-		 */
-		IntVar<IEnumDelta>[] used = new IntVar[n];
-		for (int i = 0; i < used.length; i++)
-			used[i] = VariableFactory.not(edges[i][i]);
-		solver.post(IntConstraintFactory.scalar(used, gold, goldFound));
-
-		// All the constraints of the general path model :
-
-		int offset = 0;
-		/*
-		 * The subcircuit constraint. This forces all the next value to form a circuit which the overall size is equals
-		 * to the size variable. This constraint check if the path contains any sub circles.
-		 */
-		solver.post(IntConstraintFactory.subcircuit(next, offset, size));
-
-		/*
-		 * The path has to start on the s node. We put a constraint that force the next value of the node s to be
-		 * different for the s node's id + the offset
-		 */
-		solver.post(IntConstraintFactory.arithm(next[s], "!=", s + offset));
-
-		/*
-		 * The path has to end on the t node. This constraint doesn't create a path, but a circle or a circuit. So we
-		 * force the edge (t,s) then all the other node of the circuit will form a starting from s and ending a t
-		 */
-		solver.post(IntConstraintFactory.arithm(next[t], "=", s + offset));
-
-		/*
-		 * The boolean channeling constraint. Enforce the relation between the next values and the edges values in the
-		 * graph boolean variable matrix
-		 */
-		for (int i = 0; i < n; i++){
-			solver.post(IntConstraintFactory.boolean_channeling(edges[i], next[i],0));
-		}
 	}
 
 	// SOME USEFUL METHODS
