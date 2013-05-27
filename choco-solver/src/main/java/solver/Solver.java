@@ -383,6 +383,19 @@ public class Solver implements Serializable {
     }
 
     /**
+     * Unlink the variable from <code>this</code>.
+     * @param variable
+     */
+    public void unassociates(Variable variable) {
+        int idx = 0;
+        for (; idx < vIdx; idx++) {
+            if (variable == vars[idx]) break;
+        }
+        if (idx == vIdx) return;
+        vars[idx] = vars[vIdx--];
+    }
+
+    /**
      * Post a constraint <code>c</code> in the constraints network of <code>this</code>:
      * - add it to the data structure,
      * - set the fixed idx,
@@ -438,13 +451,13 @@ public class Solver implements Serializable {
             if (dynAdd) {
                 engine.dynamicAddition(cs[i], cut);
             }
-			if(cs[i].isReified()){
-				try {
-					cs[i].reif().setToTrue(Cause.Null);
-				} catch (ContradictionException e) {
-					throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
-				}
-			}
+            if (cs[i].isReified()) {
+                try {
+                    cs[i].reif().setToTrue(Cause.Null);
+                } catch (ContradictionException e) {
+                    throw new SolverException("post a constraint whose reification BoolVar is already set to false: no solution can exist");
+                }
+            }
         }
     }
 
