@@ -30,7 +30,7 @@ package solver.constraints.propagators.reified;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.reified.ImplicationConstraint;
+import solver.constraints.ImplicationConstraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -82,11 +82,13 @@ public class PropImplied extends Propagator<Variable> {
             ESat sat = trueCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToFalse(aCause);
+                reifCons.activate(1);
                 setPassive();
             }
             sat = falseCons.isEntailed();
             if (sat == ESat.FALSE) {
                 bVar.setToTrue(aCause);
+                reifCons.activate(0);
                 setPassive();
             }
         }

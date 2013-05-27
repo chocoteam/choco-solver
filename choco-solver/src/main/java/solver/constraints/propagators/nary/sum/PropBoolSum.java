@@ -134,6 +134,8 @@ public class PropBoolSum extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
+		if(vIdx==n)
+			return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
         return EventType.INSTANTIATE.mask;
     }
 

@@ -39,6 +39,7 @@ import util.procedure.IntProcedure;
 import util.tools.ArrayUtils;
 
 /**
+ * Note JG: has some bugs, is not efficient, dont use it!
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
  * var = i -> bvars[i] = 1
  * <br/>
@@ -49,6 +50,7 @@ import util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 04/08/11
  */
+@Deprecated
 public class PropDomainChanneling extends Propagator<IntVar> {
 
     /**

@@ -71,6 +71,7 @@ import java.util.Arrays;
  *
  * @author Xavier Lorca
  * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.propagators.Propagator
@@ -260,7 +261,8 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public BoolVar reif() {
 		if(boolReif==null){
 			boolReif = VF.bool(StringUtils.randomName(), getSolver());
-			getSolver().post(LogicalConstraintFactory.ifThenElse(boolReif, this, getOpposite()));
+//			getSolver().post(LogicalConstraintFactory.ifThenElse(boolReif, this, getOpposite()));
+			getSolver().post(new ImplicationConstraint(boolReif,this,getOpposite()));
 		}
 		return boolReif;
 	}

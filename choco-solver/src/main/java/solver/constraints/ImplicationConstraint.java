@@ -25,9 +25,8 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.reified;
+package solver.constraints;
 
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.reified.PropImplied;
 import solver.exception.ContradictionException;
@@ -56,7 +55,7 @@ public class ImplicationConstraint extends Constraint<Variable, Propagator<Varia
     // indices of propagators
     private int[] indices;
 
-    public ImplicationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+    protected ImplicationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
         super(ArrayUtils.append(new Variable[]{bVar}, consIfBoolTrue.getVariables(), consIfBoolFalse.getVariables()),
                 bVar.getSolver());
         trueCons = consIfBoolTrue;
