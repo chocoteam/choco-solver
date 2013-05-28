@@ -164,12 +164,18 @@ public final class BoolNotView extends IntView<IEnumDelta, BoolVar<IEnumDelta>> 
 
     @Override
     public int nextValue(int v) {
-        return var.previousValue(1 - v);
+        if(v < 0 && contains(0)) {
+            return 0;
+        }
+        return v <= 0 && contains(1) ? 1 : Integer.MAX_VALUE;
     }
 
     @Override
     public int previousValue(int v) {
-        return var.nextValue(1 - v);
+        if(v > 1 && contains(1)) {
+            return 1;
+        }
+        return v >= 1 && contains(0) ? 0 : Integer.MIN_VALUE;
     }
 
     @Override
