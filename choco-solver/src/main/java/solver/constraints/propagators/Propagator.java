@@ -513,14 +513,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public int dynPriority() {
-//        int arity = 0;
-//        for (int i = 0; i < vars.length && arity <= 3; i++) {
-//            arity += vars[i].instantiated() ? 0 : 1;
-//        }
-//        if (arity > 3) {
-//            return priority.priority;
-//        } else return arity;
-        return priority.priority;
+        int arity = 0;
+        for (int i = 0; i < vars.length && arity <= 3; i++) {
+            arity += vars[i].instantiated() ? 0 : 1;
+        }
+        if (arity > 3) {
+            return priority.priority;
+        } else return arity;
+//        return priority.priority;
     }
 
     /**
