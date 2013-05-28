@@ -126,6 +126,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Constraint<V, Propagator<V>> constraint;
     protected final PropagatorPriority priority;
     protected final boolean reactOnPromotion;
+    protected final boolean reactToFineEvt;
     protected final Solver solver;
 
     private static ThreadLocal<TIntHashSet> set = new ThreadLocal<TIntHashSet>() {
@@ -181,21 +182,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
 
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
-        this(vars[0].getSolver(), vars, priority, reactOnPromotion);
-    }
-
     @SuppressWarnings({"unchecked"})
-    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
+    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
         checkVariable(vars);
         this.vars = vars.clone();
         this.solver = solver;
+        this.reactOnPromotion = reactOnPromotion;
+        this.reactToFineEvt = reactToFineEvt;
         this.vindices = new int[vars.length];
-        this.eventmasks = new int[vars.length];
+        this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
         this.environment = solver.getEnvironment();
         this.state = NEW;
         this.priority = priority;
-        this.reactOnPromotion = reactOnPromotion;
         this.aCause = this;
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
@@ -227,6 +225,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         };
     }
 
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
+        this(vars[0].getSolver(), vars, priority, reactOnPromotion, reactToFineEvt);
+    }
+
+    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
+            this(solver, vars, priority, reactOnPromotion, true);
+        }
+
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
+        this(vars[0].getSolver(), vars, priority, reactOnPromotion, true);
+    }
+
     protected Propagator(V[] vars, PropagatorPriority priority) {
         this(vars, priority, true);
     }
@@ -252,16 +262,19 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return true if this the first modification recording since last propagation
      */
     public boolean updateMask(int vidx, EventType evtType) {
+        vidx = reactToFineEvt ? vidx : 0;
         boolean needSched = eventmasks[vidx] == 0;
         eventmasks[vidx] |= evtType.strengthened_mask;
         return needSched;
     }
 
     public int getMask(int vidx) {
+        vidx = reactToFineEvt ? vidx : 0;
         return eventmasks[vidx];
     }
 
     public void clearMask(int vidx) {
+        vidx = reactToFineEvt ? vidx : 0;
         eventmasks[vidx] = 0;
     }
 
@@ -513,14 +526,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public int dynPriority() {
-        int arity = 0;
-        for (int i = 0; i < vars.length && arity <= 3; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
-        }
-        if (arity > 3) {
-            return priority.priority;
-        } else return arity;
-//        return priority.priority;
+//        int arity = 0;
+//        for (int i = 0; i < vars.length && arity <= 3; i++) {
+//            arity += vars[i].instantiated() ? 0 : 1;
+//        }
+//        if (arity > 3) {
+//            return priority.priority;
+//        } else return arity;
+        return priority.priority;
     }
 
     /**

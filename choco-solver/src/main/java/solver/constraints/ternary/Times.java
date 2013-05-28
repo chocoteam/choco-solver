@@ -29,9 +29,7 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.ternary.PropTimesXY;
-import solver.constraints.propagators.ternary.PropTimesZ;
+import solver.constraints.propagators.ternary.PropTimesNaive;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import util.ESat;
@@ -65,11 +63,11 @@ public class Times extends IntConstraint<IntVar> {
         this.Y = v2;
         this.Z = result;
         if (inIntBounds(X, Y)) {
-            setPropagators(new Propagator[]{
-                    new PropTimesXY(v1, v2, result),
-                    new PropTimesZ(v1, v2, result)
-            });
-//            setPropagators(new PropTimesNaive(v1,v2,result));
+//            setPropagators(new Propagator[]{
+//                    new PropTimesXY(v1, v2, result),
+//                    new PropTimesZ(v1, v2, result)
+//            });
+            setPropagators(new PropTimesNaive(v1,v2,result));
 
         } else {
             throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");

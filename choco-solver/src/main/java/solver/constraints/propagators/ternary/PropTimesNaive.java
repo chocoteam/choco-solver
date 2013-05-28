@@ -48,7 +48,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
     IntVar v0, v1, v2;
 
     public PropTimesNaive(IntVar v1, IntVar v2, IntVar result) {
-        super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false, false);
         this.v0 = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
@@ -126,19 +126,5 @@ public class PropTimesNaive extends Propagator<IntVar> {
         if (a != a2)
             throw new ArithmeticException("Overflow occurred from int " + a + " * " + b);
         return product;
-    }
-
-    public boolean updateMask(int vidx, EventType evtType) {
-        boolean needSched = eventmasks[0] == 0;
-        eventmasks[0] |= evtType.strengthened_mask;
-        return needSched;
-    }
-
-    public int getMask(int vidx) {
-        return eventmasks[0];
-    }
-
-    public void clearMask(int vidx) {
-        eventmasks[0] = 0;
     }
 }

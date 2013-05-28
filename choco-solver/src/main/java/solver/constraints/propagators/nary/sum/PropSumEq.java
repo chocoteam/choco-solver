@@ -72,7 +72,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     public PropSumEq(IntVar[] variables, int[] coeffs, int pos, int b) {
-        super(variables, computePriority(variables.length), false);
+        super(variables, computePriority(variables.length), false, false);
         this.c = coeffs;
         this.pos = pos;
         l = variables.length;
@@ -205,6 +205,7 @@ public class PropSumEq extends Propagator<IntVar> {
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
         filter(true, 2);
+//        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override
