@@ -251,17 +251,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param evtType type of event occurring on the variable
      * @return true if this the first modification recording since last propagation
      */
-    public final boolean updateMask(int vidx, EventType evtType) {
+    public boolean updateMask(int vidx, EventType evtType) {
         boolean needSched = eventmasks[vidx] == 0;
         eventmasks[vidx] |= evtType.strengthened_mask;
         return needSched;
     }
 
-    public final int getMask(int vidx) {
+    public int getMask(int vidx) {
         return eventmasks[vidx];
     }
 
-    public final void clearMask(int vidx) {
+    public void clearMask(int vidx) {
         eventmasks[vidx] = 0;
     }
 
@@ -350,7 +350,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void setReifiedSilent() {
-        assert isStateLess()||isReifiedAndSilent() : "the propagator was neither stateless nor reified";
+        assert isStateLess() || isReifiedAndSilent() : "the propagator was neither stateless nor reified";
         state = REIFIED;
     }
 
@@ -513,13 +513,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public int dynPriority() {
-        int arity = 0;
-        for (int i = 0; i < vars.length && arity <= 3; i++) {
-            arity += vars[i].instantiated() ? 0 : 1;
-        }
-        if (arity > 3) {
-            return priority.priority;
-        } else return arity;
+//        int arity = 0;
+//        for (int i = 0; i < vars.length && arity <= 3; i++) {
+//            arity += vars[i].instantiated() ? 0 : 1;
+//        }
+//        if (arity > 3) {
+//            return priority.priority;
+//        } else return arity;
+        return priority.priority;
     }
 
     /**

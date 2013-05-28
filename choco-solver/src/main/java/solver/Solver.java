@@ -392,7 +392,7 @@ public class Solver implements Serializable {
             if (variable == vars[idx]) break;
         }
         if (idx == vIdx) return;
-        vars[idx] = vars[vIdx--];
+        vars[idx] = vars[--vIdx];
     }
 
     /**

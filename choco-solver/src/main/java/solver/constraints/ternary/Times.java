@@ -69,6 +69,7 @@ public class Times extends IntConstraint<IntVar> {
                     new PropTimesXY(v1, v2, result),
                     new PropTimesZ(v1, v2, result)
             });
+//            setPropagators(new PropTimesNaive(v1,v2,result));
 
         } else {
             throw new SolverException("Integer overflow.\nConsider reducing the variable domains.");
