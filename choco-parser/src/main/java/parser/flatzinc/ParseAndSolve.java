@@ -114,7 +114,7 @@ public class ParseAndSolve {
     protected long l = 1;
 
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
-    protected String dbproperties="";
+    protected String dbproperties = "";
 
     private boolean userinterruption = true;
 
@@ -198,11 +198,11 @@ public class ParseAndSolve {
                         ExplanationFactory.SILENT.plugin(solver, fexp);
                     }
                 }
-
+                datas.clear();
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
-                if(!dbproperties.equals("")){
+                if (!dbproperties.equals("")) {
                     // query the database
                     MySQLAccess sql = new MySQLAccess(new File(dbproperties));
                     sql.connect();

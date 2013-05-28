@@ -109,6 +109,7 @@ public class CycloHexan extends AbstractProblem {
         LoggerFactory.getLogger("bench").info("CycloHexan");
         StringBuilder st = new StringBuilder();
         ISolutionPool solutions = solver.getSearchLoop().getSolutionpool();
+        solver.getEnvironment().worldPop();
         for (Solution sol : solutions.asList()) {
             solver.getEnvironment().worldPush();
             sol.restore();
