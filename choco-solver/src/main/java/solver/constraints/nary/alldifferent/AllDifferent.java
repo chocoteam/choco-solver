@@ -72,7 +72,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				return props;
 			}
 			case AC:
-				return new Propagator[]{new PropAllDiffAC_Fast(VARS)};
+				return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC_Fast(VARS)};
 			case BC:
 				return new Propagator[]{new PropAllDiffBC(VARS)};
 			case DEFAULT:

@@ -72,14 +72,20 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     protected short[] scheduled; // also maintains the index of the queue!
     protected BitSet[] eventsets;
     private boolean init;
+    private final boolean dynamic;
 
     final PropagationTrigger trigger; // an object that starts the propagation
 
 
     public SevenQueuesPropagatorEngine(Solver solver) {
+        this(solver, false);
+    }
+
+    public SevenQueuesPropagatorEngine(Solver solver, boolean dynamic) {
         this.exception = new ContradictionException();
         this.environment = solver.getEnvironment();
         this.trigger = new PropagationTrigger(this, solver);
+        this.dynamic = dynamic;
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList<Propagator>();
@@ -220,7 +226,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     IPropagationEngine.Trace.printAlreadySchedule(prop);
                 }
                 if (scheduled[aid] == 0) {
-                    int prio = prop.dynPriority();
+                    int prio = dynamic ? prop.dynPriority() : prop.getPriority().priority;
                     pro_queue[prio].addLast(prop);
                     scheduled[aid] = (short) (prio + 1);
                     notEmpty.set(prio);

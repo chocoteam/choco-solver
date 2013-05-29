@@ -40,7 +40,7 @@ import solver.explanations.ExplanationEngine;
 import solver.objective.ObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
-import solver.propagation.hardcoded.PropagatorEngine;
+import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -573,7 +573,7 @@ public class Solver implements Serializable {
      */
     protected void solve(boolean stopAtFirst) {
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new PropagatorEngine(this));
+            this.set(new SevenQueuesPropagatorEngine(this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.launch(stopAtFirst);
@@ -588,7 +588,7 @@ public class Solver implements Serializable {
     public void propagate() throws ContradictionException {
 //        assert isValid();
         if (engine == NoPropagationEngine.SINGLETON) {
-            this.set(new PropagatorEngine(this));
+            this.set(new SevenQueuesPropagatorEngine(this));
         }
         engine.propagate();
     }
