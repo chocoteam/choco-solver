@@ -32,8 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.ICF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -43,7 +42,7 @@ import java.util.List;
  * (a &#8800; b) &#8660; r
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 26/01/11
  */
 public class IntNeReifBuilder implements IBuilder {
@@ -53,10 +52,8 @@ public class IntNeReifBuilder implements IBuilder {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-
-        Constraint c = IntConstraintFactory.arithm(a, "!=", b);
-        Constraint oc = IntConstraintFactory.arithm(a, "=", b);
-
-        return new Constraint[]{LogicalConstraintFactory.ifThenElse(r, c, oc)};
+		// this constraint is not poster, hence not returned, because it is reified
+		ICF.arithm(a,"!=",b).reifyWith(r);
+		return new Constraint[]{};
     }
 }
