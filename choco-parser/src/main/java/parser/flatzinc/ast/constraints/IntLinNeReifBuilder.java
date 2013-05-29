@@ -59,9 +59,8 @@ public class IntLinNeReifBuilder implements IBuilder {
 
         int[] bounds = Sum.getScalarBounds(bs, as);
         IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        return new Constraint[]{
-				ICF.scalar(bs, as, scalarVar),
-				ICF.arithm(r,"=",ICF.arithm(scalarVar,"!=",c).reif())
-        };
+		// this constraint is not poster, hence not returned, because it is reified
+		ICF.arithm(scalarVar,"!=",c).reifyWith(r);
+		return new Constraint[]{ICF.scalar(bs, as, scalarVar)};
     }
 }

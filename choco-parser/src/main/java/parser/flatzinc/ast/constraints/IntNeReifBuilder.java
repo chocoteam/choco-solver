@@ -52,6 +52,8 @@ public class IntNeReifBuilder implements IBuilder {
         IntVar a = exps.get(0).intVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-        return new Constraint[]{ICF.arithm(r, "=", ICF.arithm(a, "!=", b).reif())};
+		// this constraint is not poster, hence not returned, because it is reified
+		ICF.arithm(a,"!=",b).reifyWith(r);
+		return new Constraint[]{};
     }
 }

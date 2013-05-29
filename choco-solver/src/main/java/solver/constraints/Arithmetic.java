@@ -289,81 +289,57 @@ public class Arithmetic extends IntConstraint<IntVar> {
     }
 
 	@Override
-	public Constraint getOpposite(){
-		reif();
-		if(opposite == null){
-			if(vars.length==1){
-				switch (op1) {
-					case EQ:
-						opposite = new Arithmetic(vars[0],Operator.NQ,cste,solver);
-						break;
-					case NQ:
-						opposite = new Arithmetic(vars[0],Operator.EQ,cste,solver);
-						break;
-					case GE:
-						opposite = new Arithmetic(vars[0],Operator.LT,cste,solver);
-						break;
-					case GT:
-						opposite = new Arithmetic(vars[0],Operator.LE,cste,solver);
-						break;
-					case LE:
-						opposite = new Arithmetic(vars[0],Operator.GT,cste,solver);
-						break;
-					case LT:
-						opposite = new Arithmetic(vars[0],Operator.GE,cste,solver);
-						break;
-					default:
-						throw new UnsupportedOperationException();
-				}
-			}else{
-				assert vars.length==2;
-				switch (op1) {
-					case EQ:
-						opposite = new Arithmetic(vars[0],Operator.NQ,vars[1],op2,cste,solver);
-						break;
-					case NQ:
-						opposite = new Arithmetic(vars[0],Operator.EQ,vars[1],op2,cste,solver);
-						break;
-					case GE:
-						opposite = new Arithmetic(vars[0],Operator.LT,vars[1],op2,cste,solver);
-						break;
-					case GT:
-						opposite = new Arithmetic(vars[0],Operator.LE,vars[1],op2,cste,solver);
-						break;
-					case LE:
-						opposite = new Arithmetic(vars[0],Operator.GT,vars[1],op2,cste,solver);
-						break;
-					case LT:
-						opposite = new Arithmetic(vars[0],Operator.GE,vars[1],op2,cste,solver);
-						break;
-					default:
-						switch (op2) {
-							case EQ:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.NQ,cste,solver);
-								break;
-							case NQ:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.EQ,cste,solver);
-								break;
-							case GE:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.LT,cste,solver);
-								break;
-							case GT:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.LE,cste,solver);
-								break;
-							case LE:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.GT,cste,solver);
-								break;
-							case LT:
-								opposite = new Arithmetic(vars[0],op1,vars[1],Operator.GE,cste,solver);
-								break;
-							default:
-								throw new UnsupportedOperationException();
-						}
-				}
+	public Constraint makeOpposite(){
+		if(vars.length==1){
+			switch (op1) {
+				case EQ:
+					return new Arithmetic(vars[0],Operator.NQ,cste,solver);
+				case NQ:
+					return new Arithmetic(vars[0],Operator.EQ,cste,solver);
+				case GE:
+					return new Arithmetic(vars[0],Operator.LT,cste,solver);
+				case GT:
+					return new Arithmetic(vars[0],Operator.LE,cste,solver);
+				case LE:
+					return new Arithmetic(vars[0],Operator.GT,cste,solver);
+				case LT:
+					return new Arithmetic(vars[0],Operator.GE,cste,solver);
+				default:
+					throw new UnsupportedOperationException();
 			}
-			opposite.opposite = this;
-			opposite.boolReif = boolReif.not();
+		}else{
+			assert vars.length==2;
+			switch (op1) {
+				case EQ:
+					return new Arithmetic(vars[0],Operator.NQ,vars[1],op2,cste,solver);
+				case NQ:
+					return new Arithmetic(vars[0],Operator.EQ,vars[1],op2,cste,solver);
+				case GE:
+					return new Arithmetic(vars[0],Operator.LT,vars[1],op2,cste,solver);
+				case GT:
+					return new Arithmetic(vars[0],Operator.LE,vars[1],op2,cste,solver);
+				case LE:
+					return new Arithmetic(vars[0],Operator.GT,vars[1],op2,cste,solver);
+				case LT:
+					return new Arithmetic(vars[0],Operator.GE,vars[1],op2,cste,solver);
+				default:
+					switch (op2) {
+						case EQ:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.NQ,cste,solver);
+						case NQ:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.EQ,cste,solver);
+						case GE:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.LT,cste,solver);
+						case GT:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.LE,cste,solver);
+						case LE:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.GT,cste,solver);
+						case LT:
+							return new Arithmetic(vars[0],op1,vars[1],Operator.GE,cste,solver);
+						default:
+							throw new UnsupportedOperationException();
+					}
+			}
 		}
-		return opposite;
 	}
 }
