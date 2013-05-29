@@ -165,7 +165,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public int getTypeAndKind() {
-        return Variable.VIEW | var.getTypeAndKind();
+        return VIEW | REAL;
     }
 
     @Override

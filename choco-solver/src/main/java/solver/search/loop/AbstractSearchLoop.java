@@ -292,6 +292,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         if (measures.getSolutionCount() > 0) {
             if (!stopAtFirstSolution) {
                 restoreRootNode();
+                env.worldPush();
                 solutionpool.restoreBest();
             }
             sat = ESat.TRUE;

@@ -564,11 +564,11 @@ public class VariableFactory {
      * @param SOLVER the solver to build the integer variable in.
      */
     public static IntVar fixed(String NAME, int VALUE, Solver SOLVER) {
-        if (NAME.startsWith(CSTE_NAME) && SOLVER.cachedConstants.containsKey(VALUE)) {
+        if (NAME.equals(Integer.toString(VALUE)) && SOLVER.cachedConstants.containsKey(VALUE)) {
             return SOLVER.cachedConstants.get(VALUE);
         }
         ConstantView cste = new ConstantView(NAME, VALUE, SOLVER);
-        if (NAME.startsWith(CSTE_NAME)) {
+        if (NAME.equals(Integer.toString(VALUE))) {
             SOLVER.cachedConstants.put(VALUE, cste);
         }
         return cste;

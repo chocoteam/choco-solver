@@ -27,7 +27,6 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -83,7 +82,7 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
      * @param variables
      */
     public PropAllDiffAC_Fast(IntVar[] variables) {
-        super(variables, PropagatorPriority.QUADRATIC, true);
+        super(variables, PropagatorPriority.QUADRATIC, true, false);
         n = vars.length;
         matching = new IStateInt[n];
         for (int i = 0; i < n; i++) {
@@ -130,37 +129,9 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
         filter();
     }
 
-    private TIntArrayStack toCheck = new TIntArrayStack();
-
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if ((mask & EventType.INSTANTIATE.mask) != 0) {
-            toCheck.clear();
-            toCheck.push(varIdx);
-            fixpoint();
-        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    private void fixpoint() throws ContradictionException {
-        try {
-            while (toCheck.size() > 0) {
-                int vidx = toCheck.pop();
-                int val = vars[vidx].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != vidx) {
-                        if (vars[i].removeValue(val, aCause)) {
-                            if (vars[i].instantiated()) {
-                                toCheck.push(i);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (ContradictionException cex) {
-            toCheck.clear();
-            throw cex;
-        }
     }
 
     //***********************************************************************************

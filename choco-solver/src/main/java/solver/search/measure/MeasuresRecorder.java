@@ -431,7 +431,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
+                "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d",
                 readingTimeCount / IN_MS,
                 initialisationTimeCount / IN_MS,
                 initialPropagationTimeCount / IN_MS,
@@ -446,9 +446,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
                 propagationCount,
                 usedMemory,
                 solver.getVars().length,
-                solver.getCstrs().length,
-//                solver.getEngine().getNbRequests()
-                0
+                solver.getCstrs().length
         ));
 
         return st.toString();

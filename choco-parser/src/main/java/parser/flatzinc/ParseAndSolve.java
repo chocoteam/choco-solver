@@ -93,9 +93,8 @@ public class ParseAndSolve {
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n0: constraint\n1: variable\n2: 7q cstrs\n3: 8q cstrs." +
-            "\n4: 8q vars\n5: abs\n6: arcs\n-1: default", required = false)
-    protected byte eng = -1;
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs", required = false)
+    protected byte eng = 0;
 
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
     protected String csv = "";
@@ -114,7 +113,7 @@ public class ParseAndSolve {
     protected long l = 1;
 
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
-    protected String dbproperties="";
+    protected String dbproperties = "";
 
     private boolean userinterruption = true;
 
@@ -198,11 +197,11 @@ public class ParseAndSolve {
                         ExplanationFactory.SILENT.plugin(solver, fexp);
                     }
                 }
-
+                datas.clear();
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
-                if(!dbproperties.equals("")){
+                if (!dbproperties.equals("")) {
                     // query the database
                     MySQLAccess sql = new MySQLAccess(new File(dbproperties));
                     sql.connect();
@@ -219,13 +218,13 @@ public class ParseAndSolve {
 
     protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
-            case 0:
             case 1:
                 solver.set(new PropagatorEngine(solver));
                 break;
             case 2:
                 solver.set(new VariableEngine(solver));
                 break;
+            case 0:
             case 3:
                 solver.set(new SevenQueuesPropagatorEngine(solver));
                 break;

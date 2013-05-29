@@ -104,4 +104,9 @@ public class Datas {
     public void plugLayout(Solver aSolver) {
         mLayout.setSearchLoop(aSolver.getSearchLoop());
     }
+
+    public void clear(){
+        map.clear();
+        searchVariables.clear();
+    }
 }
