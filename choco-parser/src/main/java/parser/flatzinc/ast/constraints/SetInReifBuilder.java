@@ -33,8 +33,7 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.ICF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -44,7 +43,7 @@ import java.util.List;
  * (a &#8712; b) &#8660; r
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 24/07/12
  */
 public class SetInReifBuilder implements IBuilder {
@@ -52,22 +51,17 @@ public class SetInReifBuilder implements IBuilder {
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         IntVar a = exps.get(0).intVarValue(solver);
-        Constraint[] cs = new Constraint[2];
+		BoolVar r = exps.get(2).boolVarValue(solver);
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            cs[0] = IntConstraintFactory.member(a, values);
-            cs[1] = IntConstraintFactory.not_member(a, values);
+			return new Constraint[]{ICF.arithm(r, "=", ICF.member(a, values).reif())};
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            cs[0] = IntConstraintFactory.member(a, low, upp);
-            cs[1] = IntConstraintFactory.not_member(a, low, upp);
+			return new Constraint[]{ICF.arithm(r, "=", ICF.member(a, low, upp).reif())};
         } else {
             Exit.log("SetVar unavailable");
             return new Constraint[0];
         }
-        BoolVar r = exps.get(2).boolVarValue(solver);
-        return new Constraint[]{LogicalConstraintFactory.ifThenElse(r, cs[0], cs[1])};
-
     }
 }

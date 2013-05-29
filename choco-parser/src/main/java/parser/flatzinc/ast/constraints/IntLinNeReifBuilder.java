@@ -32,8 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.ICF;
 import solver.constraints.nary.Sum;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -46,7 +45,7 @@ import java.util.List;
  * (&#8721; i &#8712; 1..n: as[i].bs[i] &#8800; c) &#8660; r where n is the common length of as and bs
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 26/01/11
  */
 public class IntLinNeReifBuilder implements IBuilder {
@@ -54,18 +53,15 @@ public class IntLinNeReifBuilder implements IBuilder {
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
-        IntVar[] bs =
-                exps.get(1).toIntVarArray(solver);
+        IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
-
         BoolVar r = exps.get(3).boolVarValue(solver);
+
         int[] bounds = Sum.getScalarBounds(bs, as);
         IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
         return new Constraint[]{
-                IntConstraintFactory.scalar(bs, as, scalarVar),
-                LogicalConstraintFactory.ifThenElse(r,
-						IntConstraintFactory.arithm(scalarVar, "!=", c),
-						IntConstraintFactory.arithm(scalarVar, "=", c))
+				ICF.scalar(bs, as, scalarVar),
+				ICF.arithm(r,"=",ICF.arithm(scalarVar,"!=",c).reif())
         };
     }
 }
