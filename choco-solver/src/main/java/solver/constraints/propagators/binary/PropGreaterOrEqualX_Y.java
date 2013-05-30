@@ -55,7 +55,7 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropGreaterOrEqualX_Y(IntVar[] vars) {
-        super(vars, PropagatorPriority.BINARY, true);
+        super(vars, PropagatorPriority.BINARY, false, true);
         this.x = vars[0];
         this.y = vars[1];
     }
