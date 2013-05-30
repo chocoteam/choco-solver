@@ -45,8 +45,6 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.solution.ISolutionPool;
-import solver.search.strategy.pattern.ISearchPattern;
-import solver.search.strategy.pattern.SearchPattern;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -102,8 +100,6 @@ public class Solver implements Serializable {
      * Search loop of the solver
      */
     protected AbstractSearchLoop search;
-
-    protected ISearchPattern searchPattern = SearchPattern.NONE;
 
     protected IPropagationEngine engine;
 
@@ -317,17 +313,7 @@ public class Solver implements Serializable {
      * @param strategies the search strategy to use.
      */
     public void set(AbstractStrategy strategies) {
-        this.search.set(searchPattern.makeSearch(this, strategies));
-    }
-
-    /**
-     * Set a search pattern
-     * <b>BEWARE:</b> : should be set <b>BEFORE</b> setting the search strategy
-     *
-     * @param searchPattern a search pattern
-     */
-    public void set(ISearchPattern searchPattern) {
-        this.searchPattern = searchPattern;
+        this.search.set(strategies);
     }
 
     /**

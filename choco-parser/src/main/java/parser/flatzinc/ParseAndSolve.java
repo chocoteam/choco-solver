@@ -48,8 +48,6 @@ import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.AverageCSV;
-import solver.search.strategy.pattern.SearchPattern;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -99,8 +97,8 @@ public class ParseAndSolve {
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
     protected String csv = "";
 
-    @Option(name = "-sp", usage = "Search pattern.", required = false)
-    protected SearchPattern searchp = SearchPattern.NONE;
+    @Option(name = "-lf", usage = "Last Conflict.", required = false)
+    protected boolean lastConflict;
 
     @Option(name = "-exp", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
     ExplanationFactory expeng = ExplanationFactory.NONE;
@@ -178,7 +176,7 @@ public class ParseAndSolve {
                     }
                 });
             }
-            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, searchp, tl);
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl);
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();

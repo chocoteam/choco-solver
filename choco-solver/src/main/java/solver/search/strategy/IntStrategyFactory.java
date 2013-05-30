@@ -28,6 +28,7 @@
 package solver.search.strategy;
 
 import solver.Solver;
+import solver.search.strategy.strategy.LastConflict;
 import solver.search.strategy.selectors.values.InDomainMax;
 import solver.search.strategy.selectors.values.InDomainMiddle;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -35,6 +36,7 @@ import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -195,4 +197,15 @@ public class IntStrategyFactory {
     public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, int ALPHA, int SPLIT, int NODEIMPACT, long SEED, boolean INITONLY) {
         return new ImpactBased(VARS, ALPHA, SPLIT, NODEIMPACT, SEED, INITONLY);
     }
+
+	/**
+	 * Use the last conflict heuristic as a pluggin over a former search heuristic STRAT
+	 *
+	 * @param SOLVER
+	 * @param STRAT
+	 * @return last conflict strategy
+	 */
+	public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
+		return new StaticStrategiesSequencer(new LastConflict(SOLVER, STRAT, 1, false), STRAT);
+	}
 }
