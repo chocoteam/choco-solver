@@ -60,7 +60,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropEachNodeHasLoop(GraphVar graph, ISet concernedNodes) {
-        super(new GraphVar[]{graph}, PropagatorPriority.UNARY);
+        super(new GraphVar[]{graph}, PropagatorPriority.UNARY,false);
         this.g = vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.enfNode = new NodeEnf();

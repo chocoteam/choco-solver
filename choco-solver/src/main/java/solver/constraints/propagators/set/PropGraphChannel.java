@@ -81,7 +81,7 @@ public class PropGraphChannel extends Propagator<Variable> {
      * @param gV
      */
     public PropGraphChannel(SetVar[] setsV, GraphVar gV) {
-        super(ArrayUtils.append(setsV, new Variable[]{gV}), PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(setsV, new Variable[]{gV}), PropagatorPriority.LINEAR, false);
         this.sets = new SetVar[setsV.length];
         for (int i = 0; i < setsV.length; i++) {
             this.sets[i] = (SetVar) vars[i];

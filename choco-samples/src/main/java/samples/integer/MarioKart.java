@@ -34,6 +34,7 @@ import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -155,7 +156,8 @@ public class MarioKart extends AbstractProblem {
 			}
 		});
 		/* Heuristic choices */
-		solver.set(IntStrategyFactory.firstFail_InDomainMin(next));
+		AbstractStrategy strat = IntStrategyFactory.firstFail_InDomainMin(next);
+		solver.set(IntStrategyFactory.lastConflict(solver,strat));
 	}
 
 	@Override

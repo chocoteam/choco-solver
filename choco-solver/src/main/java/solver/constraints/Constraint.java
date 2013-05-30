@@ -90,8 +90,8 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
     protected int staticPropagationPriority;
 
 	// for reification
-	protected BoolVar boolReif;
-	protected Constraint opposite;
+	private BoolVar boolReif;
+	private Constraint opposite;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
@@ -250,18 +250,28 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	/**
 	 * @return true iff this constraint has been reified
 	 */
-	public boolean isReified(){
+	public final boolean isReified(){
 		return boolReif != null;
+	}
+
+	/**
+	 * Reifies the constraint with a boolean variable
+	 * BEWARE: SHOULD NOT BE USED IF THIS CONSTRAINT IS ALREADY REIFIED!!!
+	 * @param bool
+	 */
+	public final void reifyWith(BoolVar bool){
+		assert (!isReified());
+		boolReif = bool;
+		getSolver().post(new ImplicationConstraint(boolReif,this,getOpposite()));
 	}
 
 	/**
 	 * Get/make the boolean variable indicating whether the constraint is satisfied or not
 	 * @return the boolean reifying the constraint
 	 */
-	public BoolVar reif() {
+	public final BoolVar reif() {
 		if(boolReif==null){
 			boolReif = VF.bool(StringUtils.randomName(), getSolver());
-//			getSolver().post(LogicalConstraintFactory.ifThenElse(boolReif, this, getOpposite()));
 			getSolver().post(new ImplicationConstraint(boolReif,this,getOpposite()));
 		}
 		return boolReif;
@@ -272,11 +282,22 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 * The default opposite constraint does not filter domains but fails if this constraint is satisfied
 	 * @return the opposite constraint of this
 	 */
-	public Constraint getOpposite() {
+	public final Constraint getOpposite() {
 		reif();
 		if(opposite == null){
-			opposite = new DefaultOpposite(this,boolReif.not());
+			opposite = makeOpposite();
+			opposite.opposite = this;
+			opposite.boolReif = boolReif.not();
 		}
 		return opposite;
+	}
+
+	/**
+	 * Make the opposite constraint of this
+	 * BEWARE: this method should never be called by the user
+	 * but it can be overridden to provide better constraint negations
+	 */
+	public Constraint makeOpposite() {
+		return new DefaultOpposite(vars,solver);
 	}
 }

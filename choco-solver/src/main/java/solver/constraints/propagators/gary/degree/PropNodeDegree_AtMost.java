@@ -68,7 +68,7 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtMost(DirectedGraphVar graph, Orientation setType, int[] degrees) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY,false);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.degrees = degrees;
@@ -99,7 +99,7 @@ public class PropNodeDegree_AtMost extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtMost(final UndirectedGraphVar graph, int[] degrees) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY,false);
         target = new SNIS();
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);

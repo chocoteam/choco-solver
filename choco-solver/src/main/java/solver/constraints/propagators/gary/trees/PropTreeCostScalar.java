@@ -62,7 +62,7 @@ public class PropTreeCostScalar extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropTreeCostScalar(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();

@@ -70,7 +70,7 @@ public class PropAllDisjoint extends Propagator<SetVar> {
      * @param sets
      */
     public PropAllDisjoint(SetVar[] sets) {
-        super(sets, PropagatorPriority.LINEAR);
+        super(sets, PropagatorPriority.LINEAR,false);
         n = sets.length;
         // delta monitors
         sdm = new SetDeltaMonitor[n];

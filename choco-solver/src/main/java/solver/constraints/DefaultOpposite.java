@@ -27,10 +27,10 @@
 
 package solver.constraints;
 
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import util.ESat;
@@ -44,10 +44,8 @@ import util.ESat;
  */
 public class DefaultOpposite extends Constraint {
 
-	public DefaultOpposite(Constraint target, BoolVar activeIfTrue) {
-		super(target.getVariables(),target.getSolver());
-		this.opposite = target;
-		this.boolReif = activeIfTrue;
+	public DefaultOpposite(Variable[] vars, Solver solver) {
+		super(vars,solver);
 		setPropagators(new PropOpposite(vars));
 	}
 
@@ -64,7 +62,7 @@ public class DefaultOpposite extends Constraint {
 
 		@Override
 		public void propagate(int evtmask) throws ContradictionException {
-			ESat op = opposite.isSatisfied();
+			ESat op = getOpposite().isSatisfied();
 			if(op == ESat.TRUE){
 				contradiction(vars[0],"");
 			}
@@ -80,7 +78,7 @@ public class DefaultOpposite extends Constraint {
 
 		@Override
 		public ESat isEntailed() {
-			ESat op = opposite.isSatisfied();
+			ESat op = getOpposite().isSatisfied();
 			if(op == ESat.TRUE){
 				return ESat.FALSE;
 			}

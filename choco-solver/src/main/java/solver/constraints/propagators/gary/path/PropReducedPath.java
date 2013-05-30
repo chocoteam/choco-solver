@@ -93,7 +93,7 @@ public class PropReducedPath extends Propagator<DirectedGraphVar> {
      * @param graph
      */
     public PropReducedPath(DirectedGraphVar graph) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
         G = graph;
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
         n = G.getEnvelopGraph().getNbNodes();

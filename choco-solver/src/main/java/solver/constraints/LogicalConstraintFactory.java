@@ -146,7 +146,6 @@ public class LogicalConstraintFactory {
 	 */
 	public static Constraint ifThenElse(BoolVar BVAR, Constraint THEN, Constraint ELSE) {
 		return and(ifThen(BVAR,THEN),ifThen(BVAR.not(),ELSE));
-//		return new ImplicationConstraint(BVAR, THEN, ELSE);
 	}
 
 	/**
@@ -166,7 +165,6 @@ public class LogicalConstraintFactory {
 	 * @param CSTR the constraint to be satisfied when BVAR = 1
 	 */
 	public static Constraint ifThen(BoolVar BVAR, Constraint CSTR) {
-//		return ifThenElse(BVAR, CSTR, CSTR.getSolver().TRUE);
 		return ICF.arithm(BVAR,"<=",CSTR.reif());
 	}
 
