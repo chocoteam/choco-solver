@@ -65,7 +65,7 @@ public class PropUnion extends Propagator<SetVar> {
      * @param union
      */
     public PropUnion(SetVar[] sets, SetVar union) {
-        super(ArrayUtils.append(sets, new SetVar[]{union}), PropagatorPriority.LINEAR);
+        super(ArrayUtils.append(sets, new SetVar[]{union}), PropagatorPriority.LINEAR, true);
         k = sets.length;
         sdm = new SetDeltaMonitor[k + 1];
         for (int i = 0; i <= k; i++) {

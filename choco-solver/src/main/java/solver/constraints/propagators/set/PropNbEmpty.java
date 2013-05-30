@@ -67,7 +67,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * @param nbEmpty
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
-        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY);
+        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY, true);
         this.n = sets.length;
         this.sets = new SetVar[sets.length];
         for (int i = 0; i < sets.length; i++) {
@@ -87,9 +87,7 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx < n) {
-            if (isEmpty.contain(vIdx)) {
-                throw new UnsupportedOperationException("The variable's domain is already empty, how can it be modified?");
-            }
+			assert !isEmpty.contain(vIdx):"The variable's domain is already empty, how can it be modified?";
             if (canBeEmpty.contain(vIdx)) {
                 return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
             } else {
@@ -127,9 +125,7 @@ public class PropNbEmpty extends Propagator<Variable> {
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
         if (v < n) {
-            if (!canBeEmpty.contain(v)) {
-                throw new UnsupportedOperationException();
-            }
+            assert canBeEmpty.contain(v);
             if (sets[v].getKernelSize() > 0) {
                 canBeEmpty.remove(v);
                 nbMaybeEmpty.add(-1);

@@ -34,6 +34,7 @@
 
 package solver.constraints.propagators.set;
 
+import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,6 +61,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
     private SetVar set;
     private SetDeltaMonitor sdm;
     private IntProcedure elemRem;
+	private IStateInt watchLit1, watchLit2;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -73,10 +75,12 @@ public class PropIntMemberSet extends Propagator<Variable> {
      * @param intVar
      */
     public PropIntMemberSet(SetVar setVar, IntVar intVar) {
-        super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY);
+        super(new Variable[]{setVar, intVar}, PropagatorPriority.BINARY, false);
         this.iv = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.sdm = set.monitorDelta(this);
+		watchLit1 = environment.makeInt(iv.getLB()-1);
+		watchLit2 = environment.makeInt(iv.getLB()-1);
         elemRem = new IntProcedure() {
             @Override
             public void execute(int i) throws ContradictionException {
@@ -91,7 +95,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INSTANTIATE.mask;
+        return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.INT_ALL_MASK();
     }
 
     @Override
@@ -101,6 +105,7 @@ public class PropIntMemberSet extends Propagator<Variable> {
             setPassive();
             return;
         }
+		watchLitFilter();
         int maxVal = set.getEnvelopeFirst();
         int minVal = maxVal;
         for (int j = maxVal; j!=SetVar.END; j=set.getEnvelopeNext()) {
@@ -130,8 +135,12 @@ public class PropIntMemberSet extends Propagator<Variable> {
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 1) {
-            set.addToKernel(iv.getValue(), aCause);
-            setPassive();
+			if(iv.instantiated()){
+				set.addToKernel(iv.getValue(), aCause);
+				setPassive();
+			}else{
+				watchLitFilter();
+			}
         } else {
             sdm.freeze();
             sdm.forEach(elemRem, EventType.REMOVE_FROM_ENVELOPE);
@@ -139,11 +148,40 @@ public class PropIntMemberSet extends Propagator<Variable> {
             if (iv.instantiated()) {
                 set.addToKernel(iv.getValue(), aCause);
                 setPassive();
-            }
+            }else{
+				watchLitFilter();
+			}
         }
     }
 
-    @Override
+	private void watchLitFilter() throws ContradictionException {
+		int def = iv.getLB()-1;
+		int w1 = iv.contains(watchLit1.get())? watchLit1.get():def;
+		int w2 = iv.contains(watchLit2.get())? watchLit2.get():def;
+		if(w1 == def || w2 == def){
+			for (int j = set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
+				if(iv.contains(j)){
+					if(w1 == def){
+						w1 = j;
+						watchLit1.set(j);
+					}else if(w2 == def){
+						w2 = j;
+						watchLit2.set(j);
+					}else{
+						return;
+					}
+				}
+			}
+			if(w1 != def){
+				set.addToKernel(w1,aCause);
+				iv.instantiateTo(w1,aCause);
+			}else{
+				contradiction(iv,"");
+			}
+		}
+	}
+
+	@Override
     public ESat isEntailed() {
         if (iv.instantiated()) {
             if (!set.envelopeContains(iv.getValue())) {

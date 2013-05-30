@@ -65,7 +65,7 @@ public class PropAntiArborescences extends Propagator<DirectedGraphVar> {
     //***********************************************************************************
 
     public PropAntiArborescences(DirectedGraphVar graph, boolean simple) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC,false);
         g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);

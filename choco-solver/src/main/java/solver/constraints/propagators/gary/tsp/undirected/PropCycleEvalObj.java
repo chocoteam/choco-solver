@@ -59,7 +59,7 @@ public class PropCycleEvalObj extends Propagator {
     //***********************************************************************************
 
     public PropCycleEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix) {
-        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, obj}, PropagatorPriority.LINEAR,false);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();

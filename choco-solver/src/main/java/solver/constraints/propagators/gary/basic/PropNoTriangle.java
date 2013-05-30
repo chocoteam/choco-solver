@@ -59,7 +59,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropNoTriangle(UndirectedGraphVar graph) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
         g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         gdm = g.monitorDelta(this);

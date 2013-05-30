@@ -89,7 +89,7 @@ public class PropAllDiffGraphIncremental extends Propagator<DirectedGraphVar> {
      * @param matchingCardinality
      */
     public PropAllDiffGraphIncremental(DirectedGraphVar graph, int matchingCardinality) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC,false);
         n = graph.getEnvelopGraph().getNbNodes();
         n2 = 2 * n;
         g = graph;

@@ -71,7 +71,7 @@ public class PropArborescence extends Propagator<DirectedGraphVar> {
      * Ensures that graph is an arborescence rooted in node source
      */
     public PropArborescence(DirectedGraphVar graph, int source, boolean simple) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC,false);
         g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         this.source = source;

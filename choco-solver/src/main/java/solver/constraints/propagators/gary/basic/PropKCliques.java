@@ -66,7 +66,7 @@ public class PropKCliques extends Propagator {
     //***********************************************************************************
 
     public PropKCliques(UndirectedGraphVar graph, IntVar k) {
-        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false);
         g = (UndirectedGraphVar) vars[0];
         this.k = (IntVar) vars[1];
         n = g.getEnvelopGraph().getNbNodes();

@@ -85,7 +85,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     public PropSCCDoorsRules(DirectedGraphVar graph,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();
