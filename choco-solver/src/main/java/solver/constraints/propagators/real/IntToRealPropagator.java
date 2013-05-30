@@ -53,7 +53,7 @@ public class IntToRealPropagator extends Propagator<IntVar> {
      * @param vars array of integer variables
      */
     public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars) {
-        super(vars, PropagatorPriority.LINEAR);
+        super(vars, PropagatorPriority.LINEAR, false, false);
         this.ibex = ibex;
         this.contractorIdx = cIdx;
         this.ibex.add_int_ctr(vars.length);

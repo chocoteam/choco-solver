@@ -55,7 +55,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropGreaterOrEqualX_YC(IntVar[] vars, int c) {
-        super(vars.clone(), PropagatorPriority.BINARY, true);
+        super(vars.clone(), PropagatorPriority.BINARY, false, true);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;
@@ -73,8 +73,8 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, aCause);
-        y.updateUpperBound(x.getUB() - this.cste, aCause);
+            x.updateLowerBound(y.getLB() + this.cste, aCause);
+            y.updateUpperBound(x.getUB() - this.cste, aCause);
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
         }
