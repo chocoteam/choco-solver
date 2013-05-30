@@ -76,7 +76,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
      * @param graph
      */
     public PropPathNoCycle(DirectedGraphVar graph, int source, int sink) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

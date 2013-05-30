@@ -58,7 +58,7 @@ public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
     //***********************************************************************************
 
     public PropGraphRelation(Variable[] vars, G graph, GraphRelation relation) {
-        super((G[]) new GraphVar[]{graph}, PropagatorPriority.QUADRATIC);
+        super((G[]) new GraphVar[]{graph}, PropagatorPriority.QUADRATIC,false);
         this.g = graph;
         this.nodeVars = vars;
         this.n = nodeVars.length;

@@ -68,7 +68,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtLeast(DirectedGraphVar graph, Orientation setType, int[] degrees) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.BINARY,false);
         g = graph;
 		this.degrees = degrees;
         switch (setType) {
@@ -88,7 +88,7 @@ public class PropNodeDegree_AtLeast extends Propagator<GraphVar> {
     }
 
     public PropNodeDegree_AtLeast(UndirectedGraphVar graph, int[] degrees) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.BINARY,false);
         target = new SNIS();
         g = graph;
 		this.degrees = degrees;
