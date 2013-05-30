@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.pattern;
+package solver.search.strategy.strategy;
 
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -37,7 +37,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
 /**
- * @author anonymous
+ * @author Jean-Guillaume Fages, Charles Prud'homme
  */
 public class LastConflict extends AbstractStrategy<Variable> implements IMonitorRestart, IMonitorSolution, IMonitorContradiction {
 
