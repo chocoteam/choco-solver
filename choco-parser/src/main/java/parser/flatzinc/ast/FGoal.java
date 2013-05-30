@@ -96,7 +96,7 @@ public class FGoal {
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
-        aSolver.set(gc.searchPattern);
+//        aSolver.set(gc.searchPattern);
         search.setSolutionpool(SolutionPoolFactory.NO_SOLUTION.make());
 
         // Then define search goal
@@ -188,6 +188,9 @@ public class FGoal {
                 }
             }
         }
+		if(gc.lastConflict){
+			aSolver.set(ISF.lastConflict(aSolver,aSolver.getSearchLoop().getStrategy()));
+		}
         gc.setDescription(description.toString());
     }
 

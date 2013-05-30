@@ -26,8 +26,6 @@
  */
 package parser.flatzinc.ast;
 
-import solver.search.strategy.pattern.SearchPattern;
-
 /**
  * <br/>
  *
@@ -40,22 +38,22 @@ public class GoalConf {
     boolean dec_vars; // use same decision pool as the one defines in the fzn file
     public boolean all; // search for all solutions
     long seed; // seed for random search
-    SearchPattern searchPattern;  // Search pattern
+    boolean lastConflict;  // Search pattern
     long timeLimit;
 
     String description;
 
     public GoalConf() {
-        this(false, 0, false, false, 29091981L, SearchPattern.NONE, -1);
+        this(false, 0, false, false, 29091981L, false, -1);
     }
 
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, SearchPattern sp, long timelimit) {
+    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit) {
         this.free = free;
         this.bbss = bbss;
         this.dec_vars = dec_vars;
         this.seed = seed;
         this.all = all;
-        this.searchPattern = sp;
+        this.lastConflict = lf;
         this.timeLimit = timelimit;
     }
 
