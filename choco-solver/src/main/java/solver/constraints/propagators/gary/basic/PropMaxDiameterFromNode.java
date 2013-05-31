@@ -55,7 +55,7 @@ public class PropMaxDiameterFromNode extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropMaxDiameterFromNode(UndirectedGraphVar graph, int maxDiam, int rootNode) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false, true);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR, true);
         this.g = vars[0];
         this.node = rootNode;
         this.maxDiam = maxDiam;

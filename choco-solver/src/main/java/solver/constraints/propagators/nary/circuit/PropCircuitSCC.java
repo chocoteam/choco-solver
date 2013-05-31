@@ -75,7 +75,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	//***********************************************************************************
 
 	public PropCircuitSCC(IntVar[] succs, int offSet) {
-		super(succs, PropagatorPriority.LINEAR, false, true);
+		super(succs, PropagatorPriority.LINEAR, true);
 		this.offSet = offSet;
 		n = vars.length;
 		n2 = n+1;

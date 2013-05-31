@@ -62,7 +62,7 @@ public class PropNTree extends Propagator {
     //***********************************************************************************
 
     public PropNTree(DirectedGraphVar graph, IntVar nT) {
-        super(new Variable[]{graph, nT}, PropagatorPriority.QUADRATIC,false, true);
+        super(new Variable[]{graph, nT}, PropagatorPriority.QUADRATIC, true);
         g = (DirectedGraphVar) vars[0];
         nTree = (IntVar) vars[1];
         SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());

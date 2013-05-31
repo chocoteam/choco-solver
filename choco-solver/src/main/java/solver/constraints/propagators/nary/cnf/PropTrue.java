@@ -44,7 +44,7 @@ import util.ESat;
 public class PropTrue extends Propagator<BoolVar> {
 
     public PropTrue(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.UNARY, false, false);
+        super(new BoolVar[]{solver.ONE}, PropagatorPriority.UNARY, false);
     }
 
     @Override

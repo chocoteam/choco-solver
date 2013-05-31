@@ -77,7 +77,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     public boolean supBoundModified = true;
 
     public PropAllDiffBC(IntVar[] variables) {
-        super(variables, PropagatorPriority.LINEAR, false, true);
+        super(variables, PropagatorPriority.LINEAR, true);
         int n = vars.length;
 
         t = new int[2 * n + 2];

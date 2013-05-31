@@ -50,7 +50,7 @@ public class PropDiffN extends Propagator<IntVar> {
 	private boolean shy;
 
     public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean shy) {
-        super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
 		this.shy = shy;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {

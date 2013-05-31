@@ -29,7 +29,6 @@ package solver.variables.fast;
 
 import memory.IEnvironment;
 import memory.IStateInt;
-import solver.Cause;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -106,12 +105,11 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-        ICause antipromo = cause;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
             if (Configuration.PLUG_EXPLANATION) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                solver.getExplainer().removeValue(this, value, cause);
             }
             this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
@@ -123,9 +121,6 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
                 SIZE.add(-1);
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             } else {
                 if (reactOnRemoval) {
                     delta.add(value, value, cause);
@@ -133,26 +128,20 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
                 SIZE.add(-1);
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 if (Configuration.PLUG_EXPLANATION) {
-                    solver.getExplainer().removeValue(this, value, antipromo);
+                    solver.getExplainer().removeValue(this, value, cause);
                 }
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
             if (Configuration.PLUG_EXPLANATION) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                solver.getExplainer().removeValue(this, value, cause);
             }
             return true;
         }
@@ -250,33 +239,29 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
             if (oub < value) {
                 if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateLowerBound(this, old, oub+1, antipromo);
+                    solver.getExplainer().updateLowerBound(this, old, oub+1, cause);
                 }
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
 
                 if (reactOnRemoval) {
-                    if (old <= value - 1) delta.add(old, value - 1, antipromo);
+                    if (old <= value - 1) delta.add(old, value - 1, cause);
                 }
                 SIZE.add(old - value);
                 LB.set(value);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 this.notifyPropagators(e, cause);
 
                 if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 }
                 return true;
 
@@ -304,13 +289,12 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
             int olb = this.getLB();
             if (olb > value) {
                 if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateUpperBound(this, old, olb-1, antipromo);
+                    solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
                 }
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
@@ -324,13 +308,10 @@ public final class IntervalIntVarImpl extends AbstractVariable<IIntervalDelta, I
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 this.notifyPropagators(e, cause);
                 if (Configuration.PLUG_EXPLANATION){
-                    solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                    solver.getExplainer().updateUpperBound(this, old, value, cause);
                 }
                 return true;
             }

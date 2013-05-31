@@ -72,7 +72,7 @@ public class PropSumEqIncr extends Propagator<IntVar> {
     }
 
     public PropSumEqIncr(IntVar[] variables, int b) {
-        super(variables, computePriority(variables.length), false, true);
+        super(variables, computePriority(variables.length), true);
         l = vars.length;
         this.b = b;
         I = new IStateInt[l];

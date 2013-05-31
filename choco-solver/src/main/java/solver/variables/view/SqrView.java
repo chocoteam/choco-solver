@@ -27,7 +27,6 @@
 
 package solver.variables.view;
 
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -126,22 +125,13 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
             EventType evt = EventType.REMOVE;
             if (value == inf) {
                 evt = EventType.INCLOW;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             } else if (value == sup) {
                 evt = EventType.DECUPP;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             boolean done = var.removeValue(-rootV, this);
             done |= var.removeValue(rootV, this);
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             if (done) {
                 notifyPropagators(evt, cause);
@@ -204,9 +194,6 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
             EventType evt = EventType.INCLOW;
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             notifyPropagators(evt, cause);
         }
@@ -226,9 +213,6 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
             EventType evt = EventType.DECUPP;
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             notifyPropagators(evt, cause);
         }

@@ -27,7 +27,6 @@
 
 package solver.variables.view;
 
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -90,20 +89,11 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
             if (done) {
                 if (value == inf) {
                     e = EventType.INCLOW;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 } else if (value == sup) {
                     e = EventType.DECUPP;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 this.notifyPropagators(e, cause);
                 return true;
@@ -149,9 +139,6 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
             boolean done = var.updateLowerBound(value - cste, this);
             if (instantiated()) {
                 e = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             if (done) {
                 this.notifyPropagators(e, cause);
@@ -171,9 +158,6 @@ public final class OffsetView extends IntView<IntDelta, IntVar<IntDelta>> {
             boolean done = var.updateUpperBound(value - cste, this);
             if (instantiated()) {
                 e = EventType.INSTANTIATE;
-                if (cause.reactOnPromotion()) {
-                    cause = Cause.Null;
-                }
             }
             if (done) {
                 this.notifyPropagators(e, cause);

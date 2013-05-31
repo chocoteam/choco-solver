@@ -51,7 +51,7 @@ public class PropTimes extends Propagator<IntVar> {
     IntVar v0, v1, v2;
 
     public PropTimes(IntVar v1, IntVar v2, IntVar result) {
-        super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false, true);
+        super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, true);
         this.v0 = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];

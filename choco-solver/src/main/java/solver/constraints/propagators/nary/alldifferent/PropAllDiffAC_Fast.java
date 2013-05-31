@@ -82,7 +82,7 @@ public class PropAllDiffAC_Fast extends Propagator<IntVar> {
      * @param variables
      */
     public PropAllDiffAC_Fast(IntVar[] variables) {
-        super(variables, PropagatorPriority.QUADRATIC, false, false);
+        super(variables, PropagatorPriority.QUADRATIC, false);
         n = vars.length;
         matching = new IStateInt[n];
         for (int i = 0; i < n; i++) {

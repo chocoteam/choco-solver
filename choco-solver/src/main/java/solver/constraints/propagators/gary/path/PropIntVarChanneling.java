@@ -84,7 +84,7 @@ public class PropIntVarChanneling extends Propagator {
      * @param graph
      */
     public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph) {
-        super(ArrayUtils.append(intVars, new Variable[]{graph}), PropagatorPriority.LINEAR,false, true);
+        super(ArrayUtils.append(intVars, new Variable[]{graph}), PropagatorPriority.LINEAR, true);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.intVars = intVars;

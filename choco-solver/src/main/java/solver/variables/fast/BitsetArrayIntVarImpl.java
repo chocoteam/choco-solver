@@ -30,7 +30,6 @@ package solver.variables.fast;
 import memory.IEnvironment;
 import memory.IStateBitSet;
 import memory.IStateInt;
-import solver.Cause;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
@@ -148,22 +147,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, In
 			if (value == getLB()) {
 				LB.set(indexes.nextSetBit(LB.get()));
 				e = EventType.INCLOW;
-				if (cause.reactOnPromotion()) {
-					cause = Cause.Null;
-				}
 			} else if (value == getUB()) {
 				UB.set(indexes.prevSetBit(UB.get()));
 				e = EventType.DECUPP;
-				if (cause.reactOnPromotion()) {
-					cause = Cause.Null;
-				}
 			}
 			assert !indexes.isEmpty();
 			if (this.instantiated()) {
 				e = EventType.INSTANTIATE;
-				if (cause.reactOnPromotion()) {
-					cause = Cause.Null;
-				}
 			}
 			this.notifyPropagators(e, cause);
 			if (Configuration.PLUG_EXPLANATION){
@@ -316,9 +306,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, In
 				SIZE.set(indexes.cardinality());
 				if (instantiated()) {
 					e = EventType.INSTANTIATE;
-					if (cause.reactOnPromotion()) {
-						cause = Cause.Null;
-					}
 				}
 				this.notifyPropagators(e, cause);
 				if (Configuration.PLUG_EXPLANATION){
@@ -350,13 +337,12 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, In
 	 */
 	public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
 		assert cause != null;
-		ICause antipromo = cause;
-		int old = this.getUB();
+        int old = this.getUB();
 		if (old > value) {
 			int olb = this.getLB();
 			if (olb > value) {
 				if (Configuration.PLUG_EXPLANATION){
-					solver.getExplainer().updateUpperBound(this, old, olb-1, antipromo);
+					solver.getExplainer().updateUpperBound(this, old, olb-1, cause);
 				}
 				this.contradiction(cause, EventType.DECUPP, MSG_UPP);
 			} else {
@@ -376,13 +362,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable<IEnumDelta, In
 				SIZE.set(indexes.cardinality());
 				if (instantiated()) {
 					e = EventType.INSTANTIATE;
-					if (cause.reactOnPromotion()) {
-						cause = Cause.Null;
-					}
 				}
 				this.notifyPropagators(e, cause);
 				if (Configuration.PLUG_EXPLANATION){
-					solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+					solver.getExplainer().updateUpperBound(this, old, value, cause);
 				}
 				return true;
 			}

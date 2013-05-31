@@ -55,7 +55,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * @param variables
      */
     public PropAllDiffInst(IntVar[] variables) {
-        super(variables, PropagatorPriority.UNARY, false, true);
+        super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
     }
 

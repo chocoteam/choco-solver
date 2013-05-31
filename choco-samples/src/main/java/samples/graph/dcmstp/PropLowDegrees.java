@@ -61,7 +61,7 @@ public class PropLowDegrees extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropLowDegrees(UndirectedGraphVar vars, int[] maxDegrees) {
-        super(new UndirectedGraphVar[]{vars}, PropagatorPriority.LINEAR, false, true);
+        super(new UndirectedGraphVar[]{vars}, PropagatorPriority.LINEAR, true);
         n = maxDegrees.length;
         oneNode = new BitSet(n);
         counter = new int[n];

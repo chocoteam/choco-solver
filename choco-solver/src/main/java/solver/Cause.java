@@ -42,7 +42,4 @@ public enum Cause implements ICause {
     public void explain(Deduction d, Explanation e) {
     }
 
-    public boolean reactOnPromotion() {
-        return false;
-    }
 }

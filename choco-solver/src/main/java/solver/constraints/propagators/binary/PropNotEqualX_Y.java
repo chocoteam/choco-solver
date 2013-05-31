@@ -66,7 +66,7 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];
     }

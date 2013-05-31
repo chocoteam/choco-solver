@@ -69,7 +69,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
     }
 
     public PropSubcircuit(IntVar[] variables, int offset, IntVar length) {
-        super(variables, PropagatorPriority.UNARY, false, true);
+        super(variables, PropagatorPriority.UNARY, true);
         n = variables.length;
         this.offset = offset;
         this.length = length;

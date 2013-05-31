@@ -92,8 +92,4 @@ public class LogEventCount implements IVariableMonitor, IMonitorClose {
                 "So it cannot explain value removals.");
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
 }

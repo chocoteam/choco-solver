@@ -95,7 +95,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
 
     public PropBoundGlobalCardinality(IntVar[] variables, IntVar[] cardinalities, int firstCardValue, int lastCardValue) {
-        super(ArrayUtils.append(variables, cardinalities == null ? new IntVar[0] : cardinalities), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(variables, cardinalities == null ? new IntVar[0] : cardinalities), PropagatorPriority.LINEAR, true);
         this.card = Arrays.copyOfRange(vars, variables.length, vars.length);
         this.range = lastCardValue - firstCardValue + 1;
         int n = variables.length;

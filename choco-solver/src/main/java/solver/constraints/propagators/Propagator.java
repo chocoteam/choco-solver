@@ -125,7 +125,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected Constraint<V, Propagator<V>> constraint;
     protected final PropagatorPriority priority;
-    protected final boolean reactOnPromotion;
     protected final boolean reactToFineEvt;
     protected final Solver solver;
 
@@ -183,11 +182,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
 
     @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
         this.solver = vars[0].getSolver();
         checkVariable(vars);
         this.vars = vars.clone();
-        this.reactOnPromotion = reactOnPromotion;
         this.reactToFineEvt = reactToFineEvt;
         this.vindices = new int[vars.length];
         this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
@@ -418,17 +416,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public final int getNbVars() {
         return vars.length;
-    }
-
-    /**
-     * Returns the promomotion policy of <code>this</code>.
-     * If <code>this</code> reacts on promotion, it must be informed of the promotion of an event it created.
-     * (example: removing the lower bound of a variable is promoted in lower-bound modification)
-     *
-     * @return <code>true</code> if <code>this</code> must be informed of promotion
-     */
-    public final boolean reactOnPromotion() {
-        return reactOnPromotion;
     }
 
     /**

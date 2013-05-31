@@ -58,7 +58,7 @@ public class PropDomSize extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropDomSize(IntVar[] vars) {
-        super(vars, PropagatorPriority.UNARY, false, true);
+        super(vars, PropagatorPriority.UNARY, true);
         n = vars.length;
         size = new IStateInt[n];
         for (int i = 0; i < n; i++) {

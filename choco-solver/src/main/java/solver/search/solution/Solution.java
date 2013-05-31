@@ -156,11 +156,6 @@ public class Solution implements ICause {
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
     public String toString() {
         return "Solution";
     }

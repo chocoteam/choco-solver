@@ -50,7 +50,7 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
     private int[][] h;
 
     public PropTTDynamicSweep(IntVar[] taskvars, int nbTasks, int nbResources, IntVar[] capacities) {
-        super(ArrayUtils.append(taskvars,capacities), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(taskvars,capacities), PropagatorPriority.QUADRATIC, true);
         this.s = solver;
         this.nbTasks = nbTasks;
         this.nbResources = nbResources;

@@ -57,7 +57,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     private final static int AWAKENING_MASK = EventType.INT_ALL_MASK();
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
-        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
         for (int i = 0; i < this.vars.length; i++) {
             if (!vars[i].hasEnumeratedDomain()) {
                 throw new UnsupportedOperationException("this propagator should be used with enumerated domain variables");

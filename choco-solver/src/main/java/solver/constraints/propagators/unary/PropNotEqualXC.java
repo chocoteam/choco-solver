@@ -50,7 +50,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropNotEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, true);
         this.constant = cste;
     }
 

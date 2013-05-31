@@ -213,11 +213,6 @@ public class ObjectiveManager implements ICause, IMonitorInitPropagation {
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
     public void beforeInitialPropagation() {
     }
 

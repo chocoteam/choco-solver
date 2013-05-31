@@ -88,7 +88,7 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
      * @param cardinalities
      */
     public PropGCC_AC_Cards_AC(IntVar[] variables, int[] value, IntVar[] cardinalities) {
-        super(ArrayUtils.append(variables, cardinalities), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(variables, cardinalities), PropagatorPriority.QUADRATIC, true);
         if (value.length != cards.length) {
             throw new UnsupportedOperationException();
         }
