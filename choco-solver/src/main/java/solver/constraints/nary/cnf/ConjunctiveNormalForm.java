@@ -29,6 +29,7 @@ package solver.constraints.nary.cnf;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.nary.cnf.PropClause;
 import solver.constraints.propagators.nary.cnf.PropFalse;
 import solver.constraints.propagators.nary.cnf.PropTrue;
@@ -59,13 +60,13 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
         this(VariableUtilities.nonReundantVars(tree.flattenBoolVar()), tree, solver);
     }
 
-    private PropClause[] build(LogOp logOp, Solver solver) {
+    private Propagator[] build(LogOp logOp, Solver solver) {
         ILogical tree = LogicTreeToolBox.toCNF(logOp, solver);
 
         if (solver.ONE.equals(tree)) {
-            return new PropClause[]{new PropTrue(solver)};
+            return new Propagator[]{new PropTrue(solver)};
         } else if (solver.ZERO.equals(tree)) {
-            return new PropClause[]{new PropFalse(solver)};
+            return new Propagator[]{new PropFalse(solver)};
         } else {
 
             ILogical[] clauses;
@@ -80,7 +81,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
                 ILogical clause = clauses[i];
                 if (clause.isLit()) {
                     BoolVar bv = (BoolVar) clause;
-                    propClauses[i] = new PropClause(bv, solver);
+                    propClauses[i] = new PropClause(bv);
                 } else {
                     LogOp n = (LogOp) clause;
 //                    int nbPos = 0;
@@ -92,7 +93,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
 //                        BoolVar v = bvars[j];
 //                        nbPos += v.isNot() ? 0 : 1;
 //                    }
-                    propClauses[i] = new PropClause(n, solver);
+                    propClauses[i] = new PropClause(n);
                     for (int j = 0; j < bvars.length; j++) {
                         BoolVar v = bvars[j];
                         HashSet<PropClause> indices = v2p.get(v);

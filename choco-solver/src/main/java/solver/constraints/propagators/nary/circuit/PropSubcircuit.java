@@ -39,6 +39,7 @@ import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -68,17 +69,22 @@ public class PropSubcircuit extends Propagator<IntVar> {
     }
 
     public PropSubcircuit(IntVar[] variables, int offset, IntVar length) {
-        super(variables, PropagatorPriority.UNARY, true);
+        super(variables, PropagatorPriority.UNARY, false, true);
         n = variables.length;
         this.offset = offset;
         this.length = length;
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
+        boolean allEnum = true;
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
+            allEnum &= vars[i].hasEnumeratedDomain();
+        }
+        if (!allEnum) {
+            throw new SolverException("PropSubcircuit needs enumerated variables only");
         }
     }
 
@@ -106,7 +112,6 @@ public class PropSubcircuit extends Propagator<IntVar> {
         int next = vars[idxVarInProp].getValue();
         if (idxVarInProp != next - offset) {
             varInstantiated(idxVarInProp, next - offset);
-            vars[next - offset].removeValue(next, aCause);
         }
     }
 
@@ -133,11 +138,17 @@ public class PropSubcircuit extends Propagator<IntVar> {
             if (size[start].get() == length.getUB()) {
                 vars[last].instantiateTo(start + offset, aCause);
             }
+            boolean isInst = false;
             if (size[start].get() < length.getLB()) {
-                vars[last].removeValue(start + offset, aCause);
+                if (vars[last].removeValue(start + offset, aCause)) {
+                    isInst = vars[last].instantiated();
+                }
             }
             origin[last].set(start);
             end[start].set(last);
+            if (isInst) {
+                varInstantiated(last, vars[last].getValue() - offset);
+            }
         }
     }
 

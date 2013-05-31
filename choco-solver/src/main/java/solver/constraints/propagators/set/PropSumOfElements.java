@@ -73,7 +73,7 @@ public class PropSumOfElements extends Propagator<Variable> {
      * @param sum
      */
     public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum) {
-        super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY, false);
+        super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY, false, true);
         this.sum = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.weights = weights;

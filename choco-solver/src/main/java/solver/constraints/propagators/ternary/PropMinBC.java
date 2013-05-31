@@ -47,7 +47,7 @@ public class PropMinBC extends Propagator<IntVar> {
     IntVar MIN, v1, v2;
 
     public PropMinBC(IntVar X, IntVar Y, IntVar Z) {
-        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false, true);
         this.MIN = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
@@ -66,7 +66,7 @@ public class PropMinBC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        filter();
+        propagate(0);
     }
 
     private void filter() throws ContradictionException {
@@ -143,8 +143,9 @@ public class PropMinBC extends Propagator<IntVar> {
                     vars[1].instantiateTo(min, aCause);
                     setPassive();
                 } else {
-                    vars[1].updateLowerBound(min, aCause);
-                    vars[2].updateLowerBound(min, aCause);
+                    if(vars[1].updateLowerBound(min, aCause)|vars[2].updateLowerBound(min, aCause)){
+                        filter(); // to ensure idempotency for "free"
+                    }
                 }
             }
 

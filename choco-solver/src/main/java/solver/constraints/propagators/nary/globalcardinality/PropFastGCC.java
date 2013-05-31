@@ -72,7 +72,7 @@ public class PropFastGCC extends Propagator<IntVar> {
      * @param valueCardinalities
      */
     public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities) {
-        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false, true);
         if (restrictedValues.length != valueCardinalities.length) {
             throw new UnsupportedOperationException();
         }

@@ -76,7 +76,7 @@ public class PropAntiArborescences extends Propagator<IntVar> {
      * @param linear
      */
     public PropAntiArborescences(IntVar[] succs, int offSet, boolean linear) {
-        super(succs, PropagatorPriority.LINEAR);
+        super(succs, PropagatorPriority.LINEAR, false, true);
         this.n = succs.length;
         this.offSet = offSet;
         this.connectedGraph = new DirectedGraph(n + 1, SetType.LINKED_LIST, false);

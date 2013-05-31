@@ -46,7 +46,10 @@ import util.tools.ArrayUtils;
  * @author Hadrien Cambazard
  * @author Charles Prud'homme
  * @since 04/08/11
+ * TODO: not idempotent !
+ * @deprecated
  */
+@Deprecated
 public class PropElementV extends Propagator<IntVar> {
     private final int offset;
 
@@ -59,7 +62,7 @@ public class PropElementV extends Propagator<IntVar> {
 
     public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
-                PropagatorPriority.QUADRATIC, true);
+                PropagatorPriority.QUADRATIC, false, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

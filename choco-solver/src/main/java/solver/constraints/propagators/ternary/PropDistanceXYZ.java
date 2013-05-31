@@ -56,7 +56,7 @@ public final class PropDistanceXYZ extends Propagator<IntVar> {
      * @param op   the operator to be chosen among {0,1,2} standing for (eq,lt,gt)
      */
     public PropDistanceXYZ(IntVar[] vars, Operator op) {
-        super(vars, PropagatorPriority.TERNARY, false);
+        super(vars, PropagatorPriority.TERNARY, false, true);
         this.operator = op;
     }
 

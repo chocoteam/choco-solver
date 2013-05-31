@@ -108,11 +108,7 @@ public class Knapsack extends AbstractProblem {
         power = VariableFactory.bounded("power", 0, 9999, solver);
 
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
-        // capacity restriction constraint
-        solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
-        // objective computation constraint
-        solver.post(IntConstraintFactory.scalar(objects, energies, power));
-        // dedicated constraint to speed up the search
+
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
     }
 

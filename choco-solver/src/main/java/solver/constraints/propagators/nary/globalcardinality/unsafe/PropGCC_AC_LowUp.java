@@ -94,7 +94,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
      * @param up
      */
     public PropGCC_AC_LowUp(IntVar[] variables, int[] value, int[] low, int[] up) {
-        super(variables, PropagatorPriority.QUADRATIC, false);
+        super(variables, PropagatorPriority.QUADRATIC, false, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

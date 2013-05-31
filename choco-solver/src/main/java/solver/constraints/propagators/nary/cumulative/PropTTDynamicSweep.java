@@ -19,8 +19,9 @@ import java.util.BitSet;
  *
  * Implementation of the k-dimensional sweep algorithm RING version (without precedence relations).
  *
- *
+ * @deprecated
  */
+@Deprecated
 public class PropTTDynamicSweep extends Propagator<IntVar> {
 
     private final Solver s;
@@ -49,7 +50,7 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
     private int[][] h;
 
     public PropTTDynamicSweep(IntVar[] taskvars, int nbTasks, int nbResources, IntVar[] capacities) {
-        super(ArrayUtils.append(taskvars,capacities), PropagatorPriority.QUADRATIC);
+        super(ArrayUtils.append(taskvars,capacities), PropagatorPriority.QUADRATIC, false, true);
         this.s = solver;
         this.nbTasks = nbTasks;
         this.nbResources = nbResources;

@@ -44,6 +44,9 @@ import util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
+/**
+ * !redundant propagator!
+ */
 public class PropKnapsack extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -61,7 +64,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     public PropKnapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
                         int[] weight, int[] energy) {
-        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, false, true);
         this.weigth = weight;
         this.energy = energy;
         this.n = itemOccurence.length;

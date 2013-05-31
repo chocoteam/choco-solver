@@ -56,7 +56,7 @@ public class PropKLoops extends Propagator {
     //***********************************************************************************
 
     public PropKLoops(GraphVar graph, IntVar k) {
-        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false, true);
         this.g = (GraphVar) vars[0];
         this.k = (IntVar) vars[1];
     }

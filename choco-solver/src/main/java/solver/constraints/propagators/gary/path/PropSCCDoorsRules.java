@@ -35,7 +35,6 @@
 package solver.constraints.propagators.gary.path;
 
 import choco.annotations.PropAnn;
-import gnu.trove.list.array.TIntArrayList;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -85,7 +84,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
     public PropSCCDoorsRules(DirectedGraphVar graph,
                              IStateInt nR, IStateInt[] sccOf, ISet[] outArcs,
                              DirectedGraph rg) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false, true);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

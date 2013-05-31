@@ -59,7 +59,7 @@ public class PropMinOfAList extends Propagator<IntVar> {
 
 
     public PropMinOfAList(IntVar[] variables) {
-        super(variables, PropagatorPriority.LINEAR, false);
+        super(variables, PropagatorPriority.LINEAR, false, true);
         indexOfMinimumVariable = solver.getEnvironment().makeInt(-1);
     }
 

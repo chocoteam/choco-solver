@@ -68,7 +68,7 @@ public class PropIndexValue extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropIndexValue(IntVar[] variables, int offset, IntVar nb) {
-        super(ArrayUtils.append(variables, new IntVar[]{nb}), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nb}), PropagatorPriority.LINEAR, false, true);
         n = variables.length;
         this.nb = vars[n];
         this.offset = offset;

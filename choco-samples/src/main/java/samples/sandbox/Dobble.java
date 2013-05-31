@@ -177,7 +177,7 @@ public class Dobble {
         IntProcedure proc;
 
         protected PropTakeFirstValues(IntVar[] variables, final IntVar max, Solver solver, Constraint c) {
-            super(variables, PropagatorPriority.LINEAR, false);
+            super(variables, PropagatorPriority.LINEAR, false, true);
             int n = vars.length;
             idms = new IIntDeltaMonitor[n];
             for (int i = 0; i < n; i++) {

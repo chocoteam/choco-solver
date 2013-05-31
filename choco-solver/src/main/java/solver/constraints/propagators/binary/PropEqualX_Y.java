@@ -62,7 +62,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     private int indexToFilter;
 
     public PropEqualX_Y(IntVar x, IntVar y) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false, true);
         this.x = vars[0];
         this.y = vars[1];
         if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
@@ -83,13 +83,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     }
 
     private void updateBounds() throws ContradictionException {
-        x.updateLowerBound(y.getLB(), aCause);
-        x.updateUpperBound(y.getUB(), aCause);
-        y.updateLowerBound(x.getLB(), aCause);
-        y.updateUpperBound(x.getUB(), aCause);
-        if (y.getLB() != x.getLB() || y.getUB() != x.getUB()) {
-            updateBounds();
-        }
+        while (x.updateLowerBound(y.getLB(), aCause) | y.updateLowerBound(x.getLB(), aCause)) ;
+        while (x.updateUpperBound(y.getUB(), aCause) | y.updateUpperBound(x.getUB(), aCause)) ;
     }
 
     @Override

@@ -67,7 +67,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * @param nbEmpty
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
-        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY, true);
+        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY, true, true);
         this.n = sets.length;
         this.sets = new SetVar[sets.length];
         for (int i = 0; i < sets.length; i++) {

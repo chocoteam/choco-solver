@@ -51,7 +51,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
 
     public PropNotMemberBound(IntVar var, int lb, int ub,
                               boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion, true);
         this.lb = lb;
         this.ub = ub;
     }

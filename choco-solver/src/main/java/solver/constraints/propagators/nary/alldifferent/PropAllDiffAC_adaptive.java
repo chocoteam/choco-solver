@@ -27,7 +27,6 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.stack.array.TIntArrayStack;
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -57,6 +56,8 @@ import java.util.Random;
  * Extra features:
  * - Probabilistic call
  * - Adaptive probability distribution
+ *
+ * ! redundant propagator!
  *
  * @author Jean-Guillaume Fages
  */
@@ -91,7 +92,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
      * @param variables
      */
     public PropAllDiffAC_adaptive(IntVar[] variables, int seed) {
-        super(variables, PropagatorPriority.QUADRATIC, true);
+        super(variables, PropagatorPriority.QUADRATIC, false, true);
 		rd = new Random(seed);
 		period = 16;
         n = vars.length;

@@ -183,10 +183,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
 
     @SuppressWarnings({"unchecked"})
-    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
+        this.solver = vars[0].getSolver();
         checkVariable(vars);
         this.vars = vars.clone();
-        this.solver = solver;
         this.reactOnPromotion = reactOnPromotion;
         this.reactToFineEvt = reactToFineEvt;
         this.vindices = new int[vars.length];
@@ -223,22 +223,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     }
                 }
         };
-    }
-
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion, boolean reactToFineEvt) {
-        this(vars[0].getSolver(), vars, priority, reactOnPromotion, reactToFineEvt);
-    }
-
-    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
-            this(solver, vars, priority, reactOnPromotion, true);
-        }
-
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactOnPromotion) {
-        this(vars[0].getSolver(), vars, priority, reactOnPromotion, true);
-    }
-
-    protected Propagator(V[] vars, PropagatorPriority priority) {
-        this(vars, priority, true);
     }
 
     @Override

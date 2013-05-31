@@ -73,7 +73,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     protected ValidityChecker valcheck;
 
     public PropLargeGAC3rmPositive(IntVar[] vars, IterTuplesTable relation) {
-        super(vars, PropagatorPriority.QUADRATIC, false);
+        super(vars, PropagatorPriority.QUADRATIC, false, true);
         this.relation = relation;
         this.arity = vars.length;
         this.offsets = new int[arity];
