@@ -67,7 +67,7 @@ public class PropNbEmpty extends Propagator<Variable> {
      * @param nbEmpty
      */
     public PropNbEmpty(SetVar[] sets, IntVar nbEmpty) {
-        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY, true, true);
+        super(ArrayUtils.append(sets, new Variable[]{nbEmpty}), PropagatorPriority.UNARY, false, true);
         this.n = sets.length;
         this.sets = new SetVar[sets.length];
         for (int i = 0; i < sets.length; i++) {
@@ -84,17 +84,24 @@ public class PropNbEmpty extends Propagator<Variable> {
     // METHODS
     //***********************************************************************************
 
+
+    @Override
+    public boolean advise(int idxVarInProp, int mask) {
+        if (super.advise(idxVarInProp, mask)) {
+            if (idxVarInProp < n) {
+                return canBeEmpty.contain(idxVarInProp);
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx < n) {
-			assert !isEmpty.contain(vIdx):"The variable's domain is already empty, how can it be modified?";
-            if (canBeEmpty.contain(vIdx)) {
-                return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
-            } else {
-                return EventType.VOID.mask;
-            }
+            return EventType.REMOVE_FROM_ENVELOPE.mask + EventType.ADD_TO_KER.mask;
         } else {
-            return EventType.INSTANTIATE.mask;
+            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         }
     }
 
@@ -150,7 +157,7 @@ public class PropNbEmpty extends Propagator<Variable> {
         if (nbEmpty.instantiated() && nbMin < nbMax) {
             if (nbEmpty.getValue() == nbMax) {
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
-                    for (int j=sets[i].getEnvelopeFirst(); j!=SetVar.END; j=sets[i].getEnvelopeNext()) {
+                    for (int j = sets[i].getEnvelopeFirst(); j != SetVar.END; j = sets[i].getEnvelopeNext()) {
                         sets[i].removeFromEnvelope(j, aCause);
                     }
                     canBeEmpty.remove(i);
@@ -162,7 +169,7 @@ public class PropNbEmpty extends Propagator<Variable> {
                 boolean allFixed = true;
                 for (int i = canBeEmpty.getFirstElement(); i >= 0; i = canBeEmpty.getNextElement()) {
                     if (sets[i].getEnvelopeSize() == 1) {
-						sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
+                        sets[i].addToKernel(sets[i].getEnvelopeFirst(), aCause);
                         canBeEmpty.remove(i);
                     } else {
                         allFixed = false;
