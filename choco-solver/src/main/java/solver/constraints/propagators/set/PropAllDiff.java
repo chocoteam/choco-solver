@@ -64,7 +64,7 @@ public class PropAllDiff extends Propagator<SetVar> {
      * @param sets
      */
     public PropAllDiff(SetVar[] sets) {
-        super(sets, PropagatorPriority.LINEAR, true, true);
+        super(sets, PropagatorPriority.LINEAR, false, true);
         n = sets.length;
     }
 
