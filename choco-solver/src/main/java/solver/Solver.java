@@ -155,6 +155,10 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
         this.engine = NoPropagationEngine.SINGLETON;
+        ZERO = new BoolConstantView("0", 0, this);
+        ONE = new BoolConstantView("1", 1, this);
+        ZERO._setNot(ONE);
+        ONE._setNot(ZERO);
 
         TRUE = new Constraint(this) {
             {
@@ -166,11 +170,6 @@ public class Solver implements Serializable {
                 setPropagators(new PropFalse(this.getSolver()));
             }
         };
-
-        ZERO = new BoolConstantView("0", 0, this);
-        ONE = new BoolConstantView("1", 1, this);
-        ZERO._setNot(ONE);
-        ONE._setNot(ZERO);
     }
 
     /**
@@ -370,6 +369,7 @@ public class Solver implements Serializable {
 
     /**
      * Unlink the variable from <code>this</code>.
+     *
      * @param variable
      */
     public void unassociates(Variable variable) {
