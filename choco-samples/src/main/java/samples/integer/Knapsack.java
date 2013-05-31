@@ -28,6 +28,7 @@
 package samples.integer;
 
 import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -129,6 +130,14 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void prettyOut() {
+        LoggerFactory.getLogger("bench").info("Knapsack -- {}", data.name());
+        StringBuilder st = new StringBuilder();
+        st.append("\tItem: Count\n");
+        for (int i = 0; i < objects.length; i++) {
+            st.append(String.format("\t#%d: %d\n", i, objects[i].getValue()));
+        }
+        st.append(String.format("\n\tPower: %d", power.getValue()));
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
