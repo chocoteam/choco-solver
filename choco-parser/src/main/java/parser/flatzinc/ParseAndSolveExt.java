@@ -57,7 +57,7 @@ import java.util.ArrayList;
  */
 public class ParseAndSolveExt extends ParseAndSolve {
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException{
         new ParseAndSolveExt().doMain(args);
     }
 
