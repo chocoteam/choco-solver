@@ -55,7 +55,7 @@ public class PropSquare extends Propagator<IntVar> {
     protected final IIntDeltaMonitor[] idms;
 
     public PropSquare(IntVar X, IntVar Y) {
-        super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false, true);
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
             idms[i] = vars[i].hasEnumeratedDomain() ? vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;

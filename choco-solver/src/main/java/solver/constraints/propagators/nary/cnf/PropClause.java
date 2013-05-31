@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.nary.cnf;
 
-import solver.Solver;
 import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -48,20 +47,14 @@ public class PropClause extends Propagator<BoolVar> {
     int nbvars;
 
     @SuppressWarnings({"unchecked"})
-    public PropClause(LogOp t, Solver solver) {
-        super(solver, t.flattenBoolVar(), PropagatorPriority.LINEAR, false);
+    public PropClause(LogOp t) {
+        super(t.flattenBoolVar(), PropagatorPriority.LINEAR, false, true);
         nbvars = vars.length;
     }
 
-    public PropClause(BoolVar bv, Solver solver) {
-        super(solver, new BoolVar[]{bv}, PropagatorPriority.UNARY, false);
+    public PropClause(BoolVar bv) {
+        super(new BoolVar[]{bv}, PropagatorPriority.UNARY, false, true);
         nbvars = 1;
-    }
-
-    @SuppressWarnings({"unchecked"})
-    protected PropClause(Solver solver) {
-        super(solver, new BoolVar[0], PropagatorPriority.UNARY, false);
-        nbvars = 0;
     }
 
     void awakeOnInst(int index) throws ContradictionException {

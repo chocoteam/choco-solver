@@ -39,6 +39,7 @@ import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -67,31 +68,26 @@ public class PropNoSubtour extends Propagator<IntVar> {
      * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
      * runs incrementally in O(1) per instantiation event
      *
-     * @param vars
-     */
-    public PropNoSubtour(IntVar[] vars) {
-        this(vars, 0);
-    }
-
-    /**
-     * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
-     * runs incrementally in O(1) per instantiation event
-     *
      * @param variables
      * @param offset
      */
     public PropNoSubtour(IntVar[] variables, int offset) {
-        super(variables, PropagatorPriority.UNARY, true);
+        super(variables, PropagatorPriority.UNARY, false, true);
         n = vars.length;
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
+        boolean allEnum = true;
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
+            allEnum &= vars[i].hasEnumeratedDomain();
         }
         this.offset = offset;
+        if (!allEnum) {
+            throw new SolverException("PropNoSubtour needs enumerated variables only");
+        }
     }
 
     //***********************************************************************************
@@ -141,11 +137,17 @@ public class PropNoSubtour extends Propagator<IntVar> {
             if (size[start].get() == n) {
                 vars[last].instantiateTo(start + offset, aCause);
             }
+            boolean isInst = false;
             if (size[start].get() < n) {
-                vars[last].removeValue(start + offset, aCause);
+                if (vars[last].removeValue(start + offset, aCause)) {
+                    isInst = vars[last].instantiated();
+                }
             }
             origin[last].set(start);
             end[start].set(last);
+            if (isInst) {
+                varInstantiated(last, vars[last].getValue() - offset);
+            }
         }
     }
 

@@ -132,7 +132,7 @@ public class Grocery extends AbstractProblem {
          */
         public PropLargeProduct(IntVar[] vrs, long target) {
             // involved variables, priority (=arity), false (the last parameter should always be false!)
-            super(vrs, PropagatorPriority.BINARY, false);
+            super(vrs, PropagatorPriority.BINARY, false, true);
             assert vrs.length == 2;
             this.target = target;
         }

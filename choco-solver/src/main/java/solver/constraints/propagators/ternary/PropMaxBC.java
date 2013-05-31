@@ -47,7 +47,7 @@ public class PropMaxBC extends Propagator<IntVar> {
     IntVar MAX, v1, v2;
 
     public PropMaxBC(IntVar X, IntVar Y, IntVar Z) {
-        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false, true);
         this.MAX = vars[0];
         this.v1 = vars[1];
         this.v2 = vars[2];
@@ -66,7 +66,7 @@ public class PropMaxBC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        filter();
+        propagate(0);
     }
 
     private void filter() throws ContradictionException {
@@ -143,8 +143,9 @@ public class PropMaxBC extends Propagator<IntVar> {
                     vars[1].instantiateTo(max, aCause);
                     setPassive();
                 } else {
-                    vars[1].updateUpperBound(max, aCause);
-                    vars[2].updateUpperBound(max, aCause);
+                    if (vars[1].updateUpperBound(max, aCause) | vars[2].updateUpperBound(max, aCause)) {
+                        filter(); // to ensure idempotency for "free"
+                    }
                 }
             }
 

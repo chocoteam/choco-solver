@@ -70,7 +70,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
     protected ValidityChecker valcheck;
 
     public PropLargeGAC2001Positive(IntVar[] vs, IterTuplesTable relation) {
-        super(vs, PropagatorPriority.LINEAR, false);
+        super(vs, PropagatorPriority.LINEAR, false, true);
         this.relation = relation;
         this.arity = vs.length;
         this.blocks = new int[arity];

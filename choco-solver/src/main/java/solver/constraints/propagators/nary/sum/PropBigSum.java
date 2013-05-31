@@ -83,7 +83,7 @@ public class PropBigSum extends Propagator<IntVar> {
      * @param sum
      */
     public PropBigSum(IntVar[] vars, int[] coeffs, int pos, int sum) {
-        super(vars, PropagatorPriority.LINEAR, false);
+        super(vars, PropagatorPriority.LINEAR, false, true);
         this.coeffs = coeffs;
         this.pos = pos;
         this.sum = sum;

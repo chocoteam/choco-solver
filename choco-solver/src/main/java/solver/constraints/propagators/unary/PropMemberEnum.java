@@ -54,7 +54,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     public PropMemberEnum(IntVar var, TIntHashSet values,
                           boolean reactOnPromotion) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, reactOnPromotion, true);
         this.values = values;
     }
 

@@ -59,7 +59,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
     //***********************************************************************************
 
     public PropGraphBool(GraphVar graph, BoolVar[][] rel) {
-        super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC,false);
+        super(new GraphVar[]{graph}, PropagatorPriority.QUADRATIC,false, true);
         this.graph = graph;
         gdm = (GraphDeltaMonitor) graph.monitorDelta(this);
         relations = rel;

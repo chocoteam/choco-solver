@@ -70,7 +70,7 @@ public class RealReifiedPropagator extends Propagator<Variable> {
      * @param options   list of options to give to IBEX
      */
     public RealReifiedPropagator(Ibex ibex, int cIdx, String functions, BoolVar bvar, RealVar[] variables, int options) {
-        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, variables), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.<Variable>append(new BoolVar[]{bvar}, variables), PropagatorPriority.LINEAR, false, true);
         this.contractorIdx = cIdx;
         this.ibex = ibex;
         this.functions = functions;

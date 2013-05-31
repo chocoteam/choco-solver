@@ -53,7 +53,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
 	protected final int offSet;
 
     public PropEnumDomainChanneling(BoolVar[] bvars, IntVar aVar,final int offSet) {
-        super(ArrayUtils.append(bvars, new IntVar[]{aVar}), PropagatorPriority.UNARY, false);
+        super(ArrayUtils.append(bvars, new IntVar[]{aVar}), PropagatorPriority.UNARY, false, true);
 		assert aVar.hasEnumeratedDomain();
 		this.n = bvars.length;
 		this.offSet = offSet;

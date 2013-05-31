@@ -64,7 +64,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropEqualX_YC(IntVar[] vars, int c) {
-        super(vars.clone(), PropagatorPriority.BINARY, true);
+        super(vars.clone(), PropagatorPriority.BINARY, false, true);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;
@@ -132,13 +132,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateBounds() throws ContradictionException {
-        x.updateLowerBound(y.getLB() + cste, aCause);
-        x.updateUpperBound(y.getUB() + cste, aCause);
-        y.updateLowerBound(x.getLB() - cste, aCause);
-        y.updateUpperBound(x.getUB() - cste, aCause);
-        if (y.getLB() != x.getLB() - cste || y.getUB() != x.getUB() - cste) {
-            updateBounds();
-        }
+        while (x.updateLowerBound(y.getLB() + cste, aCause) | y.updateLowerBound(x.getLB() - cste, aCause)) ;
+        while (x.updateUpperBound(y.getUB() + cste, aCause) | y.updateUpperBound(x.getUB() - cste, aCause)) ;
     }
 
     @Override

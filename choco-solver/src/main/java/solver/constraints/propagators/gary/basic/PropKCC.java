@@ -34,7 +34,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.UndirectedGraphVar;
 import util.ESat;
 import util.graphOperations.connectivity.ConnectivityFinder;
 import util.objects.setDataStructures.ISet;
@@ -61,7 +60,7 @@ public class PropKCC extends Propagator {
     //***********************************************************************************
 
     public PropKCC(GraphVar graph, IntVar k) {
-        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false, true);
         this.g = (GraphVar) vars[0];
         this.k = (IntVar) vars[1];
         env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());

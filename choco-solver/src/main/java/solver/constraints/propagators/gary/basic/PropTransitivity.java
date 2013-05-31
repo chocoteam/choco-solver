@@ -59,7 +59,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
     //***********************************************************************************
 
     public PropTransitivity(V graph) {
-        super((V[]) new GraphVar[]{graph}, PropagatorPriority.LINEAR, false);
+        super((V[]) new GraphVar[]{graph}, PropagatorPriority.LINEAR, false, true);
         g = vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         arcEnforced = new PairProcedure() {

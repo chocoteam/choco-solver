@@ -50,8 +50,9 @@ import java.util.BitSet;
  * The worst case time complexity is O(nm) but this is very pessimistic
  * In practice it is more like O(m) where m is the number of variable-value pairs
  * <p/>
- * BEWARE UNSAFE : BUG DETECTED THROUGH DOOBLE(3,4,6)
+ * BEWARE UNSAFE : BUG DETECTED THROUGH DOBBLE(3,4,6)
  *
+ * !redundant propagator!
  * @author Jean-Guillaume Fages
  */
 public class PropAtLeastNValues_AC extends Propagator<IntVar> {
@@ -88,7 +89,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

@@ -62,7 +62,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropEqualXY_C(IntVar[] vars, int c) {
-        super(vars.clone(), PropagatorPriority.BINARY, true);
+        super(vars.clone(), PropagatorPriority.BINARY, false, true);
         this.x = vars[0];
         this.y = vars[1];
         this.cste = c;
@@ -86,10 +86,6 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         updateBounds();
-        x.updateLowerBound(cste - y.getUB(), aCause);
-        x.updateUpperBound(cste - y.getLB(), aCause);
-        y.updateLowerBound(cste - x.getUB(), aCause);
-        y.updateUpperBound(cste - x.getLB(), aCause);
         // ensure that, in case of enumerated domains, holes are also propagated
         if (bothEnumerated) {
             int ub = x.getUB();
@@ -128,13 +124,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     }
 
     private void updateBounds() throws ContradictionException {
-        y.updateUpperBound(cste - x.getLB(), aCause);
-        y.updateLowerBound(cste - x.getUB(), aCause);
-        x.updateUpperBound(cste - y.getLB(), aCause);
-        x.updateLowerBound(cste - y.getUB(), aCause);
-        if (y.getLB() != cste - x.getUB() || y.getUB() != cste - x.getLB()) {
-            updateBounds();
-        }
+        while (x.updateLowerBound(cste - y.getUB(), aCause) | y.updateUpperBound(cste - x.getLB(), aCause)) ;
+        while (x.updateUpperBound(cste - y.getLB(), aCause) | y.updateLowerBound(cste - x.getUB(), aCause)) ;
     }
 
     @Override
@@ -176,7 +167,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return vars[0]+" + "+ vars[1]+ " = " + cste;
+        return vars[0] + " + " + vars[1] + " = " + cste;
     }
 
     private class RemProc implements IntProcedure {

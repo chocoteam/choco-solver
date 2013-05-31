@@ -51,6 +51,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
     private TIntArrayList concernedValues;
     private int n;
     private int[] unusedValues, mate;
+    private boolean allEnum; // all variables are enumerated
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,12 +67,16 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * @param nValues
      */
     public PropNValues_Light(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
         n = variables.length;
         concernedValues.sort();
         this.concernedValues = concernedValues;
         unusedValues = new int[concernedValues.size()];
         mate = new int[concernedValues.size()];
+        allEnum = true;
+        for (int i = 0; i < n && allEnum; i++) {
+            allEnum &= vars[i].hasEnumeratedDomain();
+        }
     }
 
     //***********************************************************************************
@@ -146,14 +151,14 @@ public class PropNValues_Light extends Propagator<IntVar> {
                         vars[v].removeValue(val, aCause);
                     }
                 }
-                setPassive();
+                if (allEnum) setPassive();
             } else if (countMax == vars[n].getLB()) {
                 for (int i = concernedValues.size() - 1; i >= 0; i--) {
                     if (mate[i] >= 0) {
                         vars[mate[i]].instantiateTo(concernedValues.get(i), aCause);
                     }
                 }
-                setPassive();
+                if (allEnum) setPassive();
             }
     }
 

@@ -70,7 +70,7 @@ public class PropCount_AC extends Propagator<IntVar> {
      * @param valueCardinality
      */
     public PropCount_AC(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
-        super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, false, true);
         this.value = restrictedValue;
         this.n = decvars.length;
         this.possibles = SetFactory.makeStoredSet(SetType.BITSET, n, environment);

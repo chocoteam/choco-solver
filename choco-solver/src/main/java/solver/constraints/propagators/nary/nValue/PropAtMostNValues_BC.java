@@ -46,6 +46,9 @@ import java.util.BitSet;
  * <p/>
  * => very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
  * =>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+ * <p/>
+ * <p/>
+ * !redundant propagator!
  *
  * @author Jean-Guillaume Fages
  */
@@ -82,7 +85,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtMostNValues_BC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
         n = variables.length;
         minValue = vars[0].getLB();
         int maxValue = vars[0].getUB();
@@ -141,7 +144,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     // PRUNING
     //***********************************************************************************
 
-    private void pruneLB() throws ContradictionException {
+    private boolean pruneLB() throws ContradictionException {
         int node;
         int min = Integer.MIN_VALUE;
         int max = Integer.MIN_VALUE;
@@ -167,22 +170,23 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                 }
             }
         }
-        vars[n].updateLowerBound(nbKer, aCause);
+        boolean hasChanged = vars[n].updateLowerBound(nbKer, aCause);
         if (nbKer == vars[n].getUB()) {
             stamp.clear();
             for (int i = 0; i < n; i++) {
                 node = orderedNodes[i];
                 if (kerRepresentant.get(node)) {
-                    updateKer(minVal[node], true);
+                    hasChanged |= updateKer(minVal[node], true);
                     stamp.clear();
                 }
                 stamp.add(node);
             }
-            updateKer(Integer.MAX_VALUE, true);
+            hasChanged |= updateKer(Integer.MAX_VALUE, true);
         }
+        return hasChanged;
     }
 
-    private void pruneUB() throws ContradictionException {
+    private boolean pruneUB() throws ContradictionException {
         int node;
         int min = Integer.MIN_VALUE;
         int max = Integer.MIN_VALUE;
@@ -208,22 +212,24 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
                 }
             }
         }
-        vars[n].updateLowerBound(nbKer, aCause);
+        boolean hasChanged = vars[n].updateLowerBound(nbKer, aCause);
         if (nbKer == vars[n].getUB()) {
             stamp.clear();
             for (int i = 0; i < n; i++) {
                 node = orderedNodes[i];
                 if (kerRepresentant.get(node)) {
-                    updateKer(maxVal[node], false);
+                    hasChanged |= updateKer(maxVal[node], false);
                     stamp.clear();
                 }
                 stamp.add(node);
             }
-            updateKer(Integer.MIN_VALUE, false);
+            hasChanged |= updateKer(Integer.MIN_VALUE, false);
         }
+        return hasChanged;
     }
 
-    private void updateKer(int newVal, boolean LB) throws ContradictionException {
+    private boolean updateKer(int newVal, boolean LB) throws ContradictionException {
+        boolean hasChanged = false;
         if (LB) {
             int min = Integer.MIN_VALUE;
             for (int i = stamp.size() - 1; i >= 0; i--) {
@@ -232,7 +238,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             }
             for (int i = stamp.size() - 1; i >= 0; i--) {
                 if (vars[stamp.get(i)].getUB() < newVal)
-                    vars[stamp.get(i)].updateLowerBound(min, aCause);
+                    hasChanged |= vars[stamp.get(i)].updateLowerBound(min, aCause);
             }
         } else {
             int max = Integer.MAX_VALUE;
@@ -242,9 +248,10 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
             }
             for (int i = stamp.size() - 1; i >= 0; i--) {
                 if (vars[stamp.get(i)].getLB() > newVal)
-                    vars[stamp.get(i)].updateUpperBound(max, aCause);
+                    hasChanged |= vars[stamp.get(i)].updateUpperBound(max, aCause);
             }
         }
+        return hasChanged;
     }
 
     //***********************************************************************************
@@ -253,11 +260,15 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        computeBounds();
-        sortLB();
-        pruneLB();
-        sortUB();
-        pruneUB();
+        boolean hasChanged;
+        do {
+            computeBounds();
+            sortLB();
+            hasChanged = pruneLB();
+            sortUB();
+            hasChanged |= pruneUB();
+        } while (hasChanged);
+
     }
 
     @Override

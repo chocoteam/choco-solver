@@ -63,7 +63,7 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     public PropConnected(UndirectedGraphVar graph) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false, true);
         g = graph;
         n = graph.getEnvelopGraph().getNbNodes();
         visited = new BitSet(n);

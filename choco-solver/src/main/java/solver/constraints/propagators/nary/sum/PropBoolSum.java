@@ -70,7 +70,7 @@ public class PropBoolSum extends Propagator<IntVar> {
      * @param sum
      */
     public PropBoolSum(BoolVar[] variables, IntVar sum) {
-        super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false);
+        super(ArrayUtils.append(variables, new IntVar[]{sum}), PropagatorPriority.UNARY, false, true);
         n = variables.length;
         this.sum = vars[n];
         min = environment.makeInt();

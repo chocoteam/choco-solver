@@ -55,6 +55,7 @@ import solver.constraints.propagators.extension.binary.BinRelation;
 import solver.constraints.propagators.extension.nary.LargeRelation;
 import solver.constraints.propagators.nary.PropDiffN;
 import solver.constraints.propagators.nary.PropIndexValue;
+import solver.constraints.propagators.nary.PropKnapsack;
 import solver.constraints.propagators.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.propagators.nary.circuit.*;
 import solver.constraints.propagators.nary.cumulative.PropIncrementalCumulative;
@@ -133,7 +134,7 @@ public class IntConstraintFactory {
         return new Arithmetic(VAR, op, CSTE, VAR.getSolver());
     }
 
-	/**
+    /**
      * Ensures VAR takes its values in TABLE
      *
      * @param VAR   an integer variable
@@ -409,17 +410,17 @@ public class IntConstraintFactory {
      * Maps the boolean assignments variables BVARS with the standard assignment variable VAR.
      * VAR = i <-> BVARS[i-OFFSET] = 1
      *
-     * @param BVARS array of boolean variables
-     * @param VAR   observed variable. Should presumably have an enumerated domain
-	 * @param OFFSET offset parameter
+     * @param BVARS  array of boolean variables
+     * @param VAR    observed variable. Should presumably have an enumerated domain
+     * @param OFFSET offset parameter
      */
     public static Constraint boolean_channeling(BoolVar[] BVARS, IntVar VAR, int OFFSET) {
-		if(!VAR.hasEnumeratedDomain()){
-			IntVar enumV = VF.enumerated(VAR.getName()+"_enumImage",VAR.getLB(),VAR.getUB(),VAR.getSolver());
-			Constraint cons = new Constraint(ArrayUtils.append(BVARS,new IntVar[]{VAR,enumV}),VAR.getSolver());
-			cons.setPropagators(new PropEnumDomainChanneling(BVARS,enumV,OFFSET),new PropEqualX_Y(VAR,enumV));
-			return cons;
-		}
+        if (!VAR.hasEnumeratedDomain()) {
+            IntVar enumV = VF.enumerated(VAR.getName() + "_enumImage", VAR.getLB(), VAR.getUB(), VAR.getSolver());
+            Constraint cons = new Constraint(ArrayUtils.append(BVARS, new IntVar[]{VAR, enumV}), VAR.getSolver());
+            cons.setPropagators(new PropEnumDomainChanneling(BVARS, enumV, OFFSET), new PropEqualX_Y(VAR, enumV));
+            return cons;
+        }
         return new DomainChanneling(BVARS, VAR, OFFSET, VAR.getSolver());
     }
 
@@ -536,8 +537,8 @@ public class IntConstraintFactory {
             ends[i] = TASKS[i].getEnd();
         }
         Constraint c = new Constraint(ArrayUtils.append(starts, durations, ends, HEIGHTS, new IntVar[]{CAPACITY}), solver);
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,true));
-        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY,false));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, true));
+        c.addPropagators(new PropIncrementalCumulative(starts, durations, ends, HEIGHTS, CAPACITY, false));
 //		c.addPropagators(new PropTTDynamicSweep(ArrayUtils.append(starts,durations,ends,HEIGHTS),starts.length,1,new IntVar[]{CAPACITY}));
         return c;
     }
@@ -622,29 +623,38 @@ public class IntConstraintFactory {
         }
     }
 
-	/**
-	 * Make an inverse channeling between VARS1 and VARS2:
-	 * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
-	 * Performs AC if domains are enumerated.
-	 * If not, then it works on bounds without guaranteeing BC
-	 * (enumerated domains are strongly recommended)
-	 * <p/>
-	 * Beware you should have |VARS1| = |VARS2|
-	 *
-	 * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
-	 * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
-	 * @param OFFSET1 lowest value in VARS1 (most often 0)
-	 * @param OFFSET2 lowest value in VARS2 (most often 0)
-	 */
-	public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
-		return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
-	}
+    /**
+     * Make an inverse channeling between VARS1 and VARS2:
+     * VARS1[i-OFFSET2] = j <=> VARS2[j-OFFSET1] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     * <p/>
+     * Beware you should have |VARS1| = |VARS2|
+     *
+     * @param VARS1   vector of variables which take their value in [OFFSET1,OFFSET1+|VARS2|-1]
+     * @param VARS2   vector of variables which take their value in [OFFSET2,OFFSET2+|VARS1|-1]
+     * @param OFFSET1 lowest value in VARS1 (most often 0)
+     * @param OFFSET2 lowest value in VARS2 (most often 0)
+     */
+    public static InverseChanneling inverse_channeling(IntVar[] VARS1, IntVar[] VARS2, int OFFSET1, int OFFSET2) {
+        return new InverseChanneling(VARS1, VARS2, OFFSET1, OFFSET2, VARS1[0].getSolver());
+    }
 
     /**
      * Ensures that :
      * <br/>- OCCURRENCES[i] * WEIGHT[i] &#8804; CAPA
      * <br/>- OCCURRENCES[i] * ENERGY[i] = POWER
      * <br/>and maximizing the value of POWER.
+     * <p/>
+     * <p/>
+     * A knapsack constraint
+     * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
+     * "Given a set of items, each with a weight and an energy value,
+     * determine the count of each item to include in a collection so that
+     * the total weight is less than or equal to a given limit and the total value is as large as possible.
+     * It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack
+     * and must fill it with the most useful items."
      *
      * @param OCCURRENCES number of occurrences of an item
      * @param CAPA        capacity of the knapsack
@@ -652,9 +662,13 @@ public class IntConstraintFactory {
      * @param WEIGHT      weight of each item
      * @param ENERGY      energy of each item
      */
-    public static Knapsack knapsack(IntVar[] OCCURRENCES, IntVar CAPA, IntVar POWER,
-                                    int[] WEIGHT, int[] ENERGY) {
-        return new Knapsack(OCCURRENCES, CAPA, POWER, WEIGHT, ENERGY, CAPA.getSolver());
+    public static Constraint knapsack(IntVar[] OCCURRENCES, IntVar CAPA, IntVar POWER,
+                                      int[] WEIGHT, int[] ENERGY) {
+        Constraint knapsack = new Constraint(CAPA.getSolver());
+        knapsack.addPropagators(scalar(OCCURRENCES, WEIGHT, CAPA).propagators);
+        knapsack.addPropagators(scalar(OCCURRENCES, ENERGY, POWER).propagators);
+        knapsack.addPropagators(new PropKnapsack(OCCURRENCES, CAPA, POWER, WEIGHT, ENERGY));
+        return knapsack;
     }
 
     /**

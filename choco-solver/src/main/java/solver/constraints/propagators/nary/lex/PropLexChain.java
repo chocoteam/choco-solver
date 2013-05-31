@@ -64,7 +64,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public IntVar[][] x;
 
     public PropLexChain(IntVar[][] variables, boolean strict) {
-        super(ArrayUtils.flatten(variables), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.flatten(variables), PropagatorPriority.LINEAR, false, true);
         M = variables.length;
         this.N = variables[0].length;
         this.x = new IntVar[M][N];

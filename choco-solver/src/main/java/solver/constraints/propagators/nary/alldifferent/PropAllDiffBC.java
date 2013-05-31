@@ -50,6 +50,8 @@ import static choco.annotations.PropAnn.Status.*;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @revision 04/03/12 : change sort
  * @since 07/02/11
+ *
+ * TODO: useless awakeonbounds?
  */
 @PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
 public class PropAllDiffBC extends Propagator<IntVar> {
@@ -75,7 +77,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     public boolean supBoundModified = true;
 
     public PropAllDiffBC(IntVar[] variables) {
-        super(variables, PropagatorPriority.LINEAR, true);
+        super(variables, PropagatorPriority.LINEAR, false, true);
         int n = vars.length;
 
         t = new int[2 * n + 2];

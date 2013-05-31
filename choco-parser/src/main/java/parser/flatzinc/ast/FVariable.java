@@ -349,6 +349,7 @@ public final class FVariable {
                     }
                 }
                 datas.register(name, bs);
+                vs = bs;
                 break;
             case INT:
                 vs = new IntVar[size];

@@ -59,7 +59,7 @@ public class PropMaxOfAList extends Propagator<IntVar> {
 
 
     public PropMaxOfAList(IntVar[] variables) {
-        super(variables, PropagatorPriority.LINEAR, false);
+        super(variables, PropagatorPriority.LINEAR, false, true);
         indexOfMaximumVariable = solver.getEnvironment().makeInt(-1);
     }
 

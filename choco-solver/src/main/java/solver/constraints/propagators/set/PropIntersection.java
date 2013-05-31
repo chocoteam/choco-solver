@@ -59,7 +59,7 @@ public class PropIntersection extends Propagator<SetVar> {
     //***********************************************************************************
 
     public PropIntersection(SetVar[] sets, SetVar intersection) {
-        super(ArrayUtils.append(sets, new SetVar[]{intersection}), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(sets, new SetVar[]{intersection}), PropagatorPriority.LINEAR, true, true);
         k = sets.length;
         sdm = new SetDeltaMonitor[k + 1];
         for (int i = 0; i <= k; i++) {

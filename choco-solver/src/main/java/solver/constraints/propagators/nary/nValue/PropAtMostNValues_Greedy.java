@@ -45,6 +45,7 @@ import java.util.BitSet;
  * The number of distinct values in the set of variables vars is at most equal to nValues
  * No level of consistency but better than BC in general (for enumerated domains with holes)
  *
+ * !redundant propagator!
  * @author Jean-Guillaume Fages
  */
 public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
@@ -74,7 +75,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtMostNValues_Greedy(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
         n = variables.length;
         cliques = new UndirectedGraph(solver.getEnvironment(), n, SetType.LINKED_LIST, false);
         in = new BitSet(n);

@@ -28,7 +28,10 @@
 package solver.constraints.propagators.nary.cnf;
 
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import util.ESat;
 
@@ -38,15 +41,20 @@ import util.ESat;
  * @author Charles Prud'homme
  * @since 24 nov. 2010
  */
-public class PropFalse extends PropClause {
+public class PropFalse extends Propagator<BoolVar> {
 
     public PropFalse(Solver solver) {
-        super(solver);
+        super(new BoolVar[]{solver.ZERO}, PropagatorPriority.UNARY, false, false);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         this.contradiction(null, "FALSE");
+    }
+
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        propagate(0);
     }
 
     @Override

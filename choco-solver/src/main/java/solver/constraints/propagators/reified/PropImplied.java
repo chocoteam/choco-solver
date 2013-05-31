@@ -28,9 +28,9 @@
 package solver.constraints.propagators.reified;
 
 import solver.constraints.Constraint;
+import solver.constraints.ImplicationConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.ImplicationConstraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -62,7 +62,7 @@ public class PropImplied extends Propagator<Variable> {
     private final ImplicationConstraint reifCons;
 
     public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false, true);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;
