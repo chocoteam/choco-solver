@@ -39,7 +39,6 @@ import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -49,6 +48,7 @@ import java.util.BitSet;
 
 /**
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * @author Jean-Guillaume Fages
  */
 public class PropNoSubtour extends Propagator<IntVar> {
 
@@ -77,17 +77,12 @@ public class PropNoSubtour extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
-        boolean allEnum = true;
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
-            allEnum &= vars[i].hasEnumeratedDomain();
         }
         this.offset = offset;
-        if (!allEnum) {
-            throw new SolverException("PropNoSubtour needs enumerated variables only");
-        }
     }
 
     //***********************************************************************************
@@ -128,6 +123,9 @@ public class PropNoSubtour extends Propagator<IntVar> {
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
+		if (end[var].get() != var) {
+			contradiction(vars[var], "");
+		}
         if (val == start) {
             if (size[start].get() != n) {
                 contradiction(vars[var], "");
@@ -136,6 +134,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
                 vars[last].instantiateTo(start + offset, aCause);
+				setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < n) {

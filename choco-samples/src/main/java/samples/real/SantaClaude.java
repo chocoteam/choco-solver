@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.IntStrategyFactory;
@@ -57,8 +58,9 @@ public class SantaClaude extends AbstractProblem {
     IntVar[] kid_price;
     IntVar total_cost;
     RealVar average;
+	private Ibex ibex;
 
-    @Override
+	@Override
     public void createSolver() {
         solver = new Solver("Santa Claude");
     }
@@ -85,9 +87,9 @@ public class SantaClaude extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
         RealConstraint ave_cons = new RealConstraint(solver);
+		ibex = ave_cons.ibex;
         StringBuilder function = new StringBuilder("(");
-        function.append('{').append(0).append('}');
-        for (int i = 1; i < n_kids; i++) {
+        for (int i = 0; i < n_kids; i++) {
             function.append("+{").append(i).append('}');
         }
         function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
@@ -95,7 +97,6 @@ public class SantaClaude extends AbstractProblem {
         RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
 
         ave_cons.addFunction(function.toString(), all_vars);
-        ave_cons.addFunction("{0} = [10.5,12.5]", average);
         ave_cons.discretize(kid_price);
         solver.post(ave_cons);
     }
@@ -126,6 +127,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void prettyOut() {
+		ibex.release();
     }
 
     public static void main(String[] args) {

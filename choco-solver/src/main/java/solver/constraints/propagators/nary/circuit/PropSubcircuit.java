@@ -39,7 +39,6 @@ import memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -48,6 +47,7 @@ import java.util.BitSet;
 
 /**
  * Subcircuit propagator (one circuit and several loops)
+ * @author Jean-Guillaume Fages
  */
 public class PropSubcircuit extends Propagator<IntVar> {
 
@@ -64,10 +64,6 @@ public class PropSubcircuit extends Propagator<IntVar> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropSubcircuit(IntVar[] variables, IntVar length) {
-        this(variables, 0, length);
-    }
-
     public PropSubcircuit(IntVar[] variables, int offset, IntVar length) {
         super(variables, PropagatorPriority.UNARY, true);
         n = variables.length;
@@ -76,15 +72,10 @@ public class PropSubcircuit extends Propagator<IntVar> {
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
-        boolean allEnum = true;
         for (int i = 0; i < n; i++) {
             origin[i] = environment.makeInt(i);
             end[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
-            allEnum &= vars[i].hasEnumeratedDomain();
-        }
-        if (!allEnum) {
-            throw new SolverException("PropSubcircuit needs enumerated variables only");
         }
     }
 
@@ -137,6 +128,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == length.getUB()) {
                 vars[last].instantiateTo(start + offset, aCause);
+				setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < length.getLB()) {
