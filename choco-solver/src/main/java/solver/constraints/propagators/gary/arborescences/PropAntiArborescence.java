@@ -71,7 +71,7 @@ public class PropAntiArborescence extends Propagator<DirectedGraphVar> {
      * Ensures that graph is an antiarborescence rooted in node sink
      */
     public PropAntiArborescence(DirectedGraphVar graph, int sink, boolean simple) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC,false, true);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.QUADRATIC, true);
         g = vars[0];
         n = g.getEnvelopGraph().getNbNodes();
         this.sink = sink;

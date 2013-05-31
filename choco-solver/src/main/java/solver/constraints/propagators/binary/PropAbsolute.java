@@ -58,7 +58,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected boolean bothEnumerated;
 
     public PropAbsolute(IntVar X, IntVar Y) {
-        super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, false, true);
+        super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
         bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();

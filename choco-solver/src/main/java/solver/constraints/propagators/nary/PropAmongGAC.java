@@ -74,7 +74,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
     protected boolean needFilter;
 
     public PropAmongGAC(IntVar[] variables, int[] values) {
-        super(variables, PropagatorPriority.LINEAR, false, true);
+        super(variables, PropagatorPriority.LINEAR, true);
         nb_vars = variables.length - 1;
         this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {

@@ -210,7 +210,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param cauto         finite automaton with costs
      */
     public PropMultiCostRegular(IntVar[] variables, final IntVar[] costvariables, ICostAutomaton cauto) {
-        super(ArrayUtils.<IntVar>append(variables, costvariables), PropagatorPriority.CUBIC, false, true);
+        super(ArrayUtils.<IntVar>append(variables, costvariables), PropagatorPriority.CUBIC, true);
         this.vs = Arrays.copyOfRange(vars, 0, variables.length);
         this.offset = vs.length;
         this.z = Arrays.copyOfRange(vars, offset, vars.length);

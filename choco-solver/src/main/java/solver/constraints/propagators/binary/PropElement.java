@@ -75,7 +75,7 @@ public class PropElement extends Propagator<IntVar> {
     private Sort s;
 
     public PropElement(IntVar value, int[] values, IntVar index, int offset, Sort s) {
-        super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false, true);
+        super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, true);
         this.lval = values;
         this.cste = offset;
         this.s = s;

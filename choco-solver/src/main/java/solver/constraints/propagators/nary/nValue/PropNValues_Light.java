@@ -67,7 +67,7 @@ public class PropNValues_Light extends Propagator<IntVar> {
      * @param nValues
      */
     public PropNValues_Light(IntVar[] variables, TIntArrayList concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = variables.length;
         concernedValues.sort();
         this.concernedValues = concernedValues;

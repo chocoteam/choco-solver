@@ -154,9 +154,4 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
     public void explain(Deduction d, Explanation e) {
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
 }

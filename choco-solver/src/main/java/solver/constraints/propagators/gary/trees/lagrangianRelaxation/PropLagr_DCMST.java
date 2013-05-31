@@ -75,7 +75,7 @@ public class PropLagr_DCMST extends Propagator implements GraphLagrangianRelaxat
      * Propagator performing the Lagrangian relaxation of the Degree Constrained Minimum Spanning Tree Problem
      */
     public PropLagr_DCMST(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, boolean waitFirstSol) {
-        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC,false, true);
+        super(new Variable[]{graph, cost}, PropagatorPriority.CUBIC, true);
         gV = graph;
         n = gV.getEnvelopGraph().getNbNodes();
         obj = cost;

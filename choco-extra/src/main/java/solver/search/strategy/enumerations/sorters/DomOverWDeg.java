@@ -147,8 +147,4 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
     public void explain(Deduction d, Explanation e) {
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
 }

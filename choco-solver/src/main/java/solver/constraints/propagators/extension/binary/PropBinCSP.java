@@ -43,7 +43,7 @@ public abstract class PropBinCSP extends Propagator<IntVar> {
     protected BinRelation relation;
 
     protected PropBinCSP(IntVar x, IntVar y, BinRelation relation) {
-        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, false, true);
+        super(ArrayUtils.toArray(x, y), PropagatorPriority.BINARY, true);
         this.relation = relation;
     }
 

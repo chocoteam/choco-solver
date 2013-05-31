@@ -48,12 +48,12 @@ public class PropClause extends Propagator<BoolVar> {
 
     @SuppressWarnings({"unchecked"})
     public PropClause(LogOp t) {
-        super(t.flattenBoolVar(), PropagatorPriority.LINEAR, false, true);
+        super(t.flattenBoolVar(), PropagatorPriority.LINEAR, true);
         nbvars = vars.length;
     }
 
     public PropClause(BoolVar bv) {
-        super(new BoolVar[]{bv}, PropagatorPriority.UNARY, false, true);
+        super(new BoolVar[]{bv}, PropagatorPriority.UNARY, true);
         nbvars = 1;
     }
 

@@ -89,7 +89,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

@@ -156,8 +156,4 @@ public class DomOverWDeg implements VariableSelector<IntVar>, IVariableMonitor<I
                 "So it cannot explain value removals.");
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
 }

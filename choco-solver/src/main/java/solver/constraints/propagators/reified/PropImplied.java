@@ -62,7 +62,7 @@ public class PropImplied extends Propagator<Variable> {
     private final ImplicationConstraint reifCons;
 
     public PropImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, true);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;

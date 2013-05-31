@@ -61,7 +61,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     protected final IIntDeltaMonitor[] idms;
 
     public PropDistanceXYC(IntVar[] vars, Operator operator, int cste) {
-        super(vars, PropagatorPriority.BINARY, false, true);
+        super(vars, PropagatorPriority.BINARY, true);
         if (operator == Operator.EQ) {
             this.idms = new IIntDeltaMonitor[this.vars.length];
             for (int i = 0; i < this.vars.length; i++) {

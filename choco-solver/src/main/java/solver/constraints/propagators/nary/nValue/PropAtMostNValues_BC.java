@@ -85,7 +85,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtMostNValues_BC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = variables.length;
         minValue = vars[0].getLB();
         int maxValue = vars[0].getUB();

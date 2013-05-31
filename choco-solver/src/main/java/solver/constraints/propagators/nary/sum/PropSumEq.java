@@ -72,7 +72,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     public PropSumEq(IntVar[] variables, int[] coeffs, int pos, int b) {
-        super(variables, computePriority(variables.length), false, false);
+        super(variables, computePriority(variables.length), false);
         this.c = coeffs;
         this.pos = pos;
         l = variables.length;

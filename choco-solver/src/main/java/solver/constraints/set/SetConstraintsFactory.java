@@ -59,7 +59,7 @@ public class SetConstraintsFactory {
      */
     public static Constraint union(SetVar[] SETS, SetVar UNION) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{UNION}), UNION.getSolver());
-        c.setPropagators(new PropUnion(SETS, UNION));
+        c.setPropagators(new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
         return c;
     }
 
@@ -72,7 +72,7 @@ public class SetConstraintsFactory {
      */
     public static Constraint intersection(SetVar[] SETS, SetVar INTERSECTION) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{INTERSECTION}), INTERSECTION.getSolver());
-        c.setPropagators(new PropIntersection(SETS, INTERSECTION));
+        c.setPropagators(new PropIntersection(SETS, INTERSECTION), new PropIntersection(SETS, INTERSECTION));
         return c;
     }
 
@@ -264,8 +264,9 @@ public class SetConstraintsFactory {
      */
     public static Constraint int_channel(SetVar[] SETS, IntVar[] INTEGERS, int OFFSET_1, int OFFSET_2) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, INTEGERS), SETS[0].getSolver());
-        c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2));
-		c.addPropagators(new PropAllDisjoint(SETS));
+        c.setPropagators(new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2),
+                new PropIntChannel(SETS, INTEGERS, OFFSET_1, OFFSET_2));
+        c.addPropagators(new PropAllDisjoint(SETS));
         return c;
     }
 
@@ -342,7 +343,7 @@ public class SetConstraintsFactory {
     public static Constraint all_different(SetVar[] SETS) {
         Solver solver = SETS[0].getSolver();
         Constraint c = new Constraint(SETS, solver);
-        c.setPropagators(new PropAllDiff(SETS),
+        c.setPropagators(new PropAllDiff(SETS), new PropAllDiff(SETS),
                 new PropAtMost1Empty(SETS));
         return c;
     }
@@ -369,7 +370,7 @@ public class SetConstraintsFactory {
      */
     public static Constraint partition(SetVar[] SETS, SetVar UNIVERSE) {
         Constraint c = all_disjoint(SETS);
-        c.addPropagators(new PropUnion(SETS, UNIVERSE));
+        c.addPropagators(new PropUnion(SETS, UNIVERSE), new PropUnion(SETS, UNIVERSE));
         return c;
     }
 
@@ -426,7 +427,7 @@ public class SetConstraintsFactory {
     public static Constraint element(IntVar INDEX, SetVar[] SETS, int OFFSET, SetVar SET) {
         Solver solver = INDEX.getSolver();
         Constraint c = new Constraint(solver);
-        c.setPropagators(new PropElement(INDEX, SETS, OFFSET, SET));
+        c.setPropagators(new PropElement(INDEX, SETS, OFFSET, SET), new PropElement(INDEX, SETS, OFFSET, SET));
         return c;
     }
 

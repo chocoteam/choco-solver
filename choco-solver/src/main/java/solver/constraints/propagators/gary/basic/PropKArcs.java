@@ -62,7 +62,7 @@ public class PropKArcs extends Propagator {
     //***********************************************************************************
 
     public PropKArcs(GraphVar graph, IntVar k) {
-        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR,false, true);
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR, true);
         g = (GraphVar) vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.k = (IntVar) vars[1];

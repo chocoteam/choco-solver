@@ -161,12 +161,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
         throw new UnsupportedOperationException();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public final boolean reactOnPromotion() {
-        return false;
-    }
-
 
     @Override
     public void explain(Deduction d, Explanation e) {

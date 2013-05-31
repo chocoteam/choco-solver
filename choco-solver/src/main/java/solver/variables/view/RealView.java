@@ -80,11 +80,6 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
     public double getLB() {
         return var.getLB();
     }

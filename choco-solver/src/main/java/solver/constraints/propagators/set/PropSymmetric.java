@@ -68,7 +68,7 @@ public class PropSymmetric extends Propagator<SetVar> {
      * x in set[y-offSet] <=> y in set[x-offSet]
      */
     public PropSymmetric(SetVar[] sets, final int offSet) {
-        super(sets, PropagatorPriority.LINEAR, false, true);
+        super(sets, PropagatorPriority.LINEAR, true);
         n = sets.length;
         this.offSet = offSet;
         sdm = new SetDeltaMonitor[n];

@@ -60,7 +60,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
     //***********************************************************************************
 
     public PropAntiSymmetric(DirectedGraphVar graph) {
-        super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY,false, true);
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
         g = vars[0];
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         enf = new EnfProc();

@@ -55,13 +55,4 @@ public interface ICause extends Serializable {
     void explain(Deduction d, Explanation e);
 
 
-    /**
-     * Returns the promotion policy of <code>this</code>.
-     * If <code>this</code> reacts on promotion, it must be informed of the promotion of an event it created.
-     * (example: removing the lower bound of a variable is promoted in lower-bound modification)
-     *
-     * @return <code>true</code> if <code>this</code> must be informed of promotion
-     */
-    boolean reactOnPromotion();
-
 }

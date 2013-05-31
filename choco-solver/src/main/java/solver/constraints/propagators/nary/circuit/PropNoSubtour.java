@@ -72,7 +72,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
      * @param offset
      */
     public PropNoSubtour(IntVar[] variables, int offset) {
-        super(variables, PropagatorPriority.UNARY, false, true);
+        super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];
         end = new IStateInt[n];

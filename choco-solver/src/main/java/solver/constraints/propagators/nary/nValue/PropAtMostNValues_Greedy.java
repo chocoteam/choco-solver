@@ -75,7 +75,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
      * @param nValues
      */
     public PropAtMostNValues_Greedy(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false, true);
+        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
         n = variables.length;
         cliques = new UndirectedGraph(solver.getEnvironment(), n, SetType.LINKED_LIST, false);
         in = new BitSet(n);

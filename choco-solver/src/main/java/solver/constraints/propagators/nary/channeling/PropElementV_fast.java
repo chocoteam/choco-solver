@@ -63,7 +63,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset, boolean fast) {
-        super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, true);
         this.var = vars[0];
         this.index = vars[1];
         this.offset = offset;

@@ -92,7 +92,7 @@ public class PropAllDiffAC_adaptive extends Propagator<IntVar> {
      * @param variables
      */
     public PropAllDiffAC_adaptive(IntVar[] variables, int seed) {
-        super(variables, PropagatorPriority.QUADRATIC, false, true);
+        super(variables, PropagatorPriority.QUADRATIC, true);
 		rd = new Random(seed);
 		period = 16;
         n = vars.length;

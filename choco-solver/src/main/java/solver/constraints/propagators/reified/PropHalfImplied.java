@@ -59,7 +59,7 @@ public class PropHalfImplied extends Propagator<Variable> {
     private final ImplicationConstraint reifCons;
 
     public PropHalfImplied(BoolVar bool, ImplicationConstraint reifCons, Constraint consIfBoolTrue) {
-        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, true);
         this.bVar = (BoolVar) vars[0];
         this.impliedCons = consIfBoolTrue;
         this.reifCons = reifCons;

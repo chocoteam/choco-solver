@@ -61,7 +61,7 @@ public class PropAtMost1Empty extends Propagator<SetVar> {
      * @param sets
      */
     public PropAtMost1Empty(SetVar[] sets) {
-        super(sets, PropagatorPriority.UNARY,false, true);
+        super(sets, PropagatorPriority.UNARY, true);
         emptySetIndex = environment.makeInt(-1);
     }
 

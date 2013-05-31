@@ -76,7 +76,7 @@ public class PropIntChannel extends Propagator<Variable> {
      * x in sets[y-offSet1] <=> ints[x-offSet2] = y
      */
     public PropIntChannel(SetVar[] setsV, IntVar[] intsV, final int offSet1, final int offSet2) {
-        super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR, true, true);
+        super(ArrayUtils.append(setsV, intsV), PropagatorPriority.LINEAR, true);
         this.nSets = setsV.length;
         this.nInts = intsV.length;
         this.sets = new SetVar[nSets];

@@ -79,7 +79,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
      * @param graph
      */
     public PropTreeNoSubtour(UndirectedGraphVar graph) {
-        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR,false, true);
+        super(new UndirectedGraphVar[]{graph}, PropagatorPriority.LINEAR, true);
         g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.n = g.getEnvelopGraph().getNbNodes();

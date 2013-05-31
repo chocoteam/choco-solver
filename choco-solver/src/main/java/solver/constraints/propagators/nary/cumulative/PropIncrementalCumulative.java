@@ -59,7 +59,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	private boolean shy;
 
 	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean shy) {
-		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, false, true);
+		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, true);
 		this.n = s.length;
 		this.shy = shy;
 		if (!(n == d.length && n == e.length && n == h.length)) {

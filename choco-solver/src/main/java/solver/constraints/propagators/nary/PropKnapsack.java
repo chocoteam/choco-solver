@@ -64,7 +64,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 
     public PropKnapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
                         int[] weight, int[] energy) {
-        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, false, true);
+        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, true);
         this.weigth = weight;
         this.energy = energy;
         this.n = itemOccurence.length;

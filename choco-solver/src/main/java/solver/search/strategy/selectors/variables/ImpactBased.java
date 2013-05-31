@@ -464,11 +464,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
     public void beforeRestart() {
     }
 

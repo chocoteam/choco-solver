@@ -69,7 +69,7 @@ public class RealPropagator extends Propagator<RealVar> {
      * @param options   list of options to give to IBEX
      */
     public RealPropagator(Ibex ibex, int cIdx, String functions, RealVar[] vars, int options) {
-        super(vars, PropagatorPriority.LINEAR, false, true);
+        super(vars, PropagatorPriority.LINEAR, true);
         this.contractorIdx = cIdx;
         this.ibex = ibex;
         this.functions = functions;

@@ -46,7 +46,7 @@ public class PropLargeCSP extends Propagator<IntVar> {
     protected final int[] currentTuple;
 
     public PropLargeCSP(IntVar[] vars, LargeRelation relation) {
-        super(vars, PropagatorPriority.QUADRATIC, false, true);
+        super(vars, PropagatorPriority.QUADRATIC, true);
         this.relation = relation;
         this.currentTuple = new int[vars.length];
     }
