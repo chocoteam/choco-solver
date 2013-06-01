@@ -172,10 +172,10 @@ public class PropIntMemberSet extends Propagator<Variable> {
 					}
 				}
 			}
-			if(w1 != def){
+			if(w1 != def && w2 == def){
 				set.addToKernel(w1,aCause);
 				iv.instantiateTo(w1,aCause);
-			}else{
+			}else if (w1 == def) {
 				contradiction(iv,"");
 			}
 		}
