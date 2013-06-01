@@ -217,7 +217,7 @@ public class ParseAndSolve {
                 datas.clear();
                 LOGGER.info("% solve instance...");
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
-//                solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
+                solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
                 if (!dbproperties.equals("")) {
                     // query the database
                     MySQLAccess sql = new MySQLAccess(new File(dbproperties));
