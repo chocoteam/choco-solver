@@ -45,6 +45,7 @@ import util.ESat;
 
 /**
  * Retrieves the maximum element of the set
+ * the set must not be empty
  *
  * @author Jean-Guillaume Fages
  */
@@ -128,6 +129,9 @@ public class PropMaxElement extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
+		if(set.getEnvelopeSize()==0){
+			return ESat.FALSE;
+		}
         int lb = max.getLB();
         int ub = max.getUB();
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
