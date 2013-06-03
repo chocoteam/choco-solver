@@ -125,8 +125,8 @@ public class MySQLAccess {
             statement.setInt(2, pid);
             statement.setLong(3, (long) solver.getMeasures().getReadingTimeCount());
             statement.setLong(4, (long) solver.getMeasures().getTimeCount());
-            statement.setLong(5, solver.getMeasures().getSolutionCount());
-            statement.setLong(6, solver.getMeasures().getObjectiveValue());
+            statement.setLong(5, solver.getMeasures().getObjectiveValue());
+            statement.setLong(6, solver.getMeasures().getSolutionCount());
             statement.setLong(7, solver.getMeasures().getNodeCount());
             statement.setLong(8, solver.getMeasures().getFailCount());
             statement.executeUpdate();
