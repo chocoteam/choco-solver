@@ -138,7 +138,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
             }
             origin[last].set(start);
             end[start].set(last);
-            if (isInst) {
+            if (isInst && !isPassive()) {
                 varInstantiated(last, vars[last].getValue() - offset);
             }
         }
