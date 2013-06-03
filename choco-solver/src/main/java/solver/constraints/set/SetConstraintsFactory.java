@@ -133,6 +133,17 @@ public class SetConstraintsFactory {
         return c;
     }
 
+	/**
+	 * Prevents SET to be empty
+	 * @param SET a SetVar
+	 * @return a constraint ensuring that SET is not empty
+	 */
+	public static Constraint notEmpty(SetVar SET){
+		Constraint c = new Constraint(new SetVar[]{SET}, SET.getSolver());
+		c.setPropagators(new PropNotEmpty(SET));
+		return c;
+	}
+
     //***********************************************************************************
     // SUM - MAX - MIN
     //***********************************************************************************
@@ -163,7 +174,9 @@ public class SetConstraintsFactory {
      */
     public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM) {
         Constraint c = new Constraint(new Variable[]{INDEXES, SUM}, SUM.getSolver());
-        c.setPropagators(new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM));
+        c.setPropagators(
+				new PropNotEmpty(INDEXES),
+				new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM));
         return c;
     }
 
