@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import util.ESat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +49,6 @@ public class MySQLAccess {
     private static final Logger logger = LoggerFactory.getLogger(MySQLAccess.class);
 
     private static final String SAT = "SAT", MIN = "MIN", MAX = "MAX";
-    private static final int AL_RES = 10, AL_OBJ = 20, AL_TIME = 30, AL_MOD = 40, AL_MUL = 50;
 
     private Properties properties = new Properties();
 
@@ -94,115 +94,20 @@ public class MySQLAccess {
         }
     }
 
-    public void compare(String filename, Solver solver) {
+    public void insert(String filename, String benchname, Solver solver) {
         try {
             File instance = new File(filename);
             String name = instance.getName();
-            ResolutionPolicy policy = solver.getSearchLoop().getObjectivemanager().getPolicy();
 
-            statement = connection.prepareStatement("select * from DESCRIPTION where FILENAME = ? ;");
-            statement.setString(1, name);
-            resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                updateData(name, solver, policy);
-                if (resultSet.next()) {
-                    addAlarm(name, AL_MUL);
-                }
-            } else {
-                insertData(name, solver, policy);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+            boolean optpb = solver.getSearchLoop().getObjectivemanager().isOptimization();
+            // 1. request BENCHMARK
+            int bid = getBenchID(benchname);
+            int pid = getPbID(name,
+                    solver.getSearchLoop().getObjectivemanager().getPolicy(),
+                    optpb ? solver.getMeasures().getObjectiveValue() : solver.getMeasures().getSolutionCount(),
+                    optpb ? solver.getMeasures().isObjectiveOptimal() : !solver.isFeasible().equals(ESat.UNDEFINED));
 
-    /**
-     * Update DESCRIPTION with data related to filename
-     *
-     * @param name   name of the instance
-     * @param solver the solver
-     * @param policy the resolution policy
-     */
-    private void updateData(String name, Solver solver, ResolutionPolicy policy) {
-        try {
-            resetAlarm(name); // clean up the ALARM table
-
-            String res = resultSet.getString("RESOLUTION");
-            ResolutionPolicy aPolicy = res.equals(SAT) ? ResolutionPolicy.SATISFACTION :
-                    res.equals(MIN) ? ResolutionPolicy.MINIMIZE : ResolutionPolicy.MAXIMIZE;
-
-            if (aPolicy.equals(policy)) {
-                int bestSol = resultSet.getInt("BEST_SOL");
-                int curSol;
-                switch (policy) {
-                    case MINIMIZE:
-                        curSol = solver.getMeasures().getObjectiveValue();
-                        if (curSol > bestSol) {
-                            addAlarm(name, AL_OBJ);
-                        } else if (curSol < bestSol) {
-                            addAlarm(name, AL_OBJ);
-                            updateField(name, "BEST_SOL", curSol);
-                        }
-                        break;
-                    case MAXIMIZE:
-                        curSol = solver.getMeasures().getObjectiveValue();
-                        if (curSol < bestSol) {
-                            addAlarm(name, AL_OBJ);
-                        } else if (curSol > bestSol) {
-                            addAlarm(name, AL_OBJ);
-                            updateField(name, "BEST_SOL", curSol);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                long bestTime = resultSet.getLong("TIME");
-                long curTime = (long) solver.getMeasures().getTimeCount();
-                double ratio = ((curTime - bestTime) / bestTime) * 100;
-                if (ratio > 10.0) {
-                    addAlarm(name, AL_TIME);
-                    if (curTime < bestTime) {
-                        updateField(name, "TIME", curTime);
-                    }
-                }
-
-                int bestVars = resultSet.getInt("NB_VAR");
-                int curVars = solver.getNbVars();
-                if (curVars != bestVars) {
-                    addAlarm(name, AL_MOD);
-                }
-
-                int bestCstrs = resultSet.getInt("NB_CSTR");
-                int curCstrs = solver.getNbCstrs();
-                if (curCstrs != bestCstrs) {
-                    addAlarm(name, AL_MOD);
-                }
-
-            } else {
-                addAlarm(name, AL_RES);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateField(String name, String field, int value) {
-        try {
-            PreparedStatement pstatement = connection.prepareStatement("update DESCRIPTION set " + field + " = ? WHERE FILENAME = ?;");
-            pstatement.setString(2, name);
-            pstatement.setInt(1, value);
-            pstatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateField(String name, String field, long value) {
-        try {
-            PreparedStatement pstatement = connection.prepareStatement("update DESCRIPTION set " + field + " = ? WHERE FILENAME = ?;");
-            pstatement.setString(2, name);
-            pstatement.setLong(1, value);
-            pstatement.executeUpdate();
+            insertData(solver, bid, pid);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -211,56 +116,68 @@ public class MySQLAccess {
     /**
      * Insert a new record in DESCRIPTION
      *
-     * @param name   name of the instance
      * @param solver the solver
-     * @param policy the resolution policy
      */
-    private void insertData(String name, Solver solver, ResolutionPolicy policy) {
+    private void insertData(Solver solver, int bid, int pid) {
         try {
-            statement = connection.prepareStatement("insert into DESCRIPTION values (?, ?, ?, ?, ?, ?)");
-            statement.setString(1, name);
-            switch (policy) {
-                case SATISFACTION:
-                    statement.setString(2, SAT);
-                    statement.setInt(3, 0);
-                    break;
-                case MINIMIZE:
-                    statement.setString(2, MIN);
-                    statement.setInt(3, solver.getSearchLoop().getObjectivemanager().getBestValue());
-                    break;
-                case MAXIMIZE:
-                    statement.setString(2, MAX);
-                    statement.setInt(3, solver.getSearchLoop().getObjectivemanager().getBestValue());
-                    break;
-            }
+            statement = connection.prepareStatement("insert into RESOLUTIONS values (?, ?, ?, ?, ?, ?, ?, ?)");
+            statement.setInt(1, bid);
+            statement.setInt(2, pid);
+            statement.setLong(3, (long) solver.getMeasures().getReadingTimeCount());
             statement.setLong(4, (long) solver.getMeasures().getTimeCount());
-            statement.setInt(5, solver.getNbVars());
-            statement.setInt(6, solver.getNbCstrs());
+            statement.setLong(5, solver.getMeasures().getSolutionCount());
+            statement.setLong(6, solver.getMeasures().getObjectiveValue());
+            statement.setLong(7, solver.getMeasures().getNodeCount());
+            statement.setLong(8, solver.getMeasures().getFailCount());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void resetAlarm(String filename) {
-        try {
-            PreparedStatement pstatement = connection.prepareStatement("delete from ALARM where FILENAME = ? ;");
-            pstatement.setString(1, filename);
-            pstatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+    public int getBenchID(String benchname) throws SQLException {
+        statement = connection.prepareStatement("select BID from BENCHMARKS where NAME = ?;");
+        statement.setString(1, benchname);
+        resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        } else {
+            statement = connection.prepareStatement("insert into BENCHMARKS (NAME, DATE, SID) values (?,?,?);");
+            statement.setString(1, benchname);
+            java.util.Date today = new java.util.Date();
+            java.sql.Date sqlToday = new java.sql.Date(today.getTime());
+            statement.setDate(2, sqlToday);
+            statement.setInt(3, 1);
+            statement.executeUpdate();
+            return getBenchID(benchname);
         }
     }
 
-
-    private void addAlarm(String filename, int alarm) {
-        try {
-            PreparedStatement pstatement = connection.prepareStatement("insert into ALARM values (?,?)");
-            pstatement.setString(1, filename);
-            pstatement.setInt(2, alarm);
-            pstatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private int getPbID(String filename, ResolutionPolicy policy, long solution, boolean isopt) throws SQLException {
+        statement = connection.prepareStatement("select PID from PROBLEMS where NAME = ?;");
+        statement.setString(1, filename);
+        resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getInt(1);
+        } else {
+            statement = connection.prepareStatement("insert into PROBLEMS (NAME, RESOLUTION, SOLUTION, OPTIMAL) values (?,?,?,?);");
+            statement.setString(1, filename);
+            switch (policy) {
+                case SATISFACTION:
+                    statement.setString(2, SAT);
+                    break;
+                case MINIMIZE:
+                    statement.setString(2, MIN);
+                    break;
+                case MAXIMIZE:
+                    statement.setString(2, MAX);
+                    break;
+            }
+            statement.setLong(3, solution);
+            statement.setBoolean(4, isopt);
+            statement.executeUpdate();
+            return getPbID(filename, policy, solution, isopt);
         }
     }
 }

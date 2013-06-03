@@ -113,6 +113,9 @@ public class ParseAndSolve {
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
     protected String dbproperties = "";
 
+    @Option(name = "-dbbn", aliases = {"--database-bench-name"}, usage = "Benchmark name", required = false)
+    protected String dbbenchname = "";
+
     private boolean userinterruption = true;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
@@ -222,7 +225,7 @@ public class ParseAndSolve {
                     // query the database
                     MySQLAccess sql = new MySQLAccess(new File(dbproperties));
                     sql.connect();
-                    sql.compare(instance, solver);
+                    sql.insert(instance, dbbenchname, solver);
                 }
             }
             if (!csv.equals("")) {
