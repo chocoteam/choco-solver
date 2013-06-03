@@ -34,6 +34,7 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -57,7 +58,8 @@ public class Bool2IntBuilder implements IBuilder {
         IntVar b = exps.get(1).intVarValue(solver);
         String vname = b.getName();
         if (b.getNbProps() > 0) {
-            throw new FZNException("unable to remove " + b + ": it already exists in propagator(s).");
+            //throw new FZNException("unable to remove " + b + ": it already exists in propagator(s).");
+            return new Constraint[]{ICF.arithm(a, "=", b)};
         }
         solver.unassociates(b);
         datas.register(vname, a);
@@ -65,7 +67,7 @@ public class Bool2IntBuilder implements IBuilder {
             try {
                 a.instantiateTo(b.getValue(), Cause.Null);
             } catch (ContradictionException e) {
-                throw new FZNException("unable to instantiate " + a + " to "+b.getValue()+".");
+                throw new FZNException("unable to instantiate " + a + " to " + b.getValue() + ".");
             }
         }
         return NO_CSTR;
