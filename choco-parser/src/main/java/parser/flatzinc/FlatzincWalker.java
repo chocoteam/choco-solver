@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincWalker.g 2013-05-17 15:15:04
+// $ANTLR 3.4 parser/flatzinc/FlatzincWalker.g 2013-05-31 18:57:29
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes

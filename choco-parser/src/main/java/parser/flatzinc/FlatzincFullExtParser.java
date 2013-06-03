@@ -1,4 +1,4 @@
-// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2013-05-15 14:03:48
+// $ANTLR 3.4 parser/flatzinc/FlatzincFullExtParser.g 2013-05-31 18:57:27
 
 /*
  * Copyright (c) 1999-2012, Ecole des Mines de Nantes
@@ -775,7 +775,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: AND, predicates
+                    // elements: predicates, AND
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -878,7 +878,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: predicates, OR
+                    // elements: OR, predicates
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1618,7 +1618,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: coll, comb_attr, elt, elt, coll
+            // elements: comb_attr, coll, elt, coll, elt
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1825,7 +1825,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: coll, coll, IDENTIFIER, comb_attr, many, many, IDENTIFIER
+            // elements: IDENTIFIER, comb_attr, many, coll, many, coll, IDENTIFIER
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2240,7 +2240,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: many, coll, comb_attr, comb_attr, attribute, coll, attribute, many, attribute, coll, coll, attribute
+            // elements: comb_attr, attribute, attribute, coll, many, coll, coll, attribute, many, coll, comb_attr, attribute
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2469,7 +2469,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: qiter, QUEUE
+                    // elements: QUEUE, qiter
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2550,7 +2550,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: REV, LIST, liter
+                    // elements: LIST, REV, liter
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2640,7 +2640,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: MAX, HEAP, qiter
+                    // elements: qiter, MAX, HEAP
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3385,7 +3385,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: PREDICATE, pred_param, IDENTIFIER
+            // elements: IDENTIFIER, PREDICATE, pred_param
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -3499,7 +3499,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: pred_param_type, IDENTIFIER, CL
+            // elements: IDENTIFIER, CL, pred_param_type
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -3782,7 +3782,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_par_type_u.add(par_type_u118.getTree());
 
                     // AST REWRITE
-                    // elements: index_set, par_type_u
+                    // elements: par_type_u, index_set
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4210,7 +4210,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_var_type_u.add(var_type_u134.getTree());
 
                     // AST REWRITE
-                    // elements: var_type_u, index_set
+                    // elements: index_set, var_type_u
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4539,7 +4539,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4629,7 +4629,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, CM
+                    // elements: CM, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4696,7 +4696,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST, SET
+                    // elements: SET, INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4804,7 +4804,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: SET, CM, INT_CONST, INT_CONST
+                    // elements: SET, INT_CONST, INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5081,7 +5081,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, INT_CONST
+                    // elements: INT_CONST, INT_CONST, DD
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5238,7 +5238,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: SET, INT_CONST, INT_CONST, DD
+                    // elements: INT_CONST, DD, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5346,7 +5346,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: CM, SET, INT_CONST
+                    // elements: SET, INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5475,7 +5475,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, ARRAY, INT_CONST, DD, index_set
+                    // elements: ARRAY, DD, INT_CONST, index_set, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5644,7 +5644,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: index_set, ARRAY, CM, INT_CONST
+                    // elements: CM, INT_CONST, index_set, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5790,7 +5790,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: DD, index_set, SET, INT_CONST, ARRAY, INT_CONST
+                    // elements: index_set, INT_CONST, SET, ARRAY, DD, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5977,7 +5977,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: index_set, ARRAY, CM, INT_CONST, SET
+                    // elements: INT_CONST, CM, index_set, ARRAY, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6319,7 +6319,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: index_set, ARRAY, VAR, SET
+                    // elements: index_set, VAR, ARRAY, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6468,7 +6468,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, DD
+                    // elements: INT_CONST, DD, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6785,7 +6785,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: LB, RB, INT_CONST
+                    // elements: LB, INT_CONST, RB
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6975,7 +6975,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: RS, expr, LS
+                    // elements: RS, LS, expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7354,7 +7354,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: expr, par_type, IDENTIFIER
+            // elements: expr, IDENTIFIER, par_type
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7517,7 +7517,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: annotations, var_type, IDENTIFIER, expr
+            // elements: annotations, expr, var_type, IDENTIFIER
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7706,7 +7706,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: CONSTRAINT, IDENTIFIER, annotations, expr
+            // elements: IDENTIFIER, annotations, expr, CONSTRAINT
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -8244,7 +8244,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: RP, expr, IDENTIFIER, LP
+            // elements: expr, IDENTIFIER, RP, LP
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -8263,7 +8263,7 @@ public TreeAdaptor getTreeAdaptor() {
                 );
 
                 // parser/flatzinc/FlatzincFullExtParser.g:335:20: ( LP ( expr )+ RP )?
-                if ( stream_RP.hasNext()||stream_expr.hasNext()||stream_LP.hasNext() ) {
+                if ( stream_expr.hasNext()||stream_RP.hasNext()||stream_LP.hasNext() ) {
                     adaptor.addChild(root_0, 
                     stream_LP.nextNode()
                     );
@@ -8282,8 +8282,8 @@ public TreeAdaptor getTreeAdaptor() {
                     );
 
                 }
-                stream_RP.reset();
                 stream_expr.reset();
+                stream_RP.reset();
                 stream_LP.reset();
 
             }

@@ -28,11 +28,10 @@
 package parser.flatzinc;
 
 import database.MySQLAccess;
-import org.antlr.runtime.ANTLRInputStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.tree.CommonTree;
-import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -48,6 +47,7 @@ import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
 import solver.search.loop.monitors.AverageCSV;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -135,25 +135,44 @@ public class ParseAndSolve {
         parseandsolve();
     }
 
+//    public void buildParser(InputStream is, Solver mSolver, Datas datas) {
+//        try {
+//            // Create an input character stream from standard in
+//            ANTLRInputStream input = new ANTLRInputStream(is);
+//            // Create an ExprLexer that feeds from that stream
+//            FlatzincLexer lexer = new FlatzincLexer(input);
+//            // Create a stream of tokens fed by the lexer
+//            CommonTokenStream tokens = new CommonTokenStream(lexer);
+//            // Create a parser that feeds off the token stream
+//            FlatzincParser parser = new FlatzincParser(tokens);
+//            // Begin parsing at rule prog, get return value structure
+//            FlatzincParser.flatzinc_model_return r = parser.flatzinc_model();
+//
+//            // WALK RESULTING TREE
+//            CommonTree t = (CommonTree) r.getTree(); // get tree from parser
+//            // Create a tree node stream from resulting tree
+//            CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+//            FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
+//            walker.flatzinc_model(mSolver, datas);                 // launch at start rule prog
+//        } catch (IOException io) {
+//            Exit.log(io.getMessage());
+//        } catch (RecognitionException re) {
+//            Exit.log(re.getMessage());
+//        }
+//    }
+
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {
         try {
             // Create an input character stream from standard in
             ANTLRInputStream input = new ANTLRInputStream(is);
             // Create an ExprLexer that feeds from that stream
-            FlatzincLexer lexer = new FlatzincLexer(input);
+            Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
             // Create a stream of tokens fed by the lexer
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             // Create a parser that feeds off the token stream
-            FlatzincParser parser = new FlatzincParser(tokens);
-            // Begin parsing at rule prog, get return value structure
-            FlatzincParser.flatzinc_model_return r = parser.flatzinc_model();
-
-            // WALK RESULTING TREE
-            CommonTree t = (CommonTree) r.getTree(); // get tree from parser
-            // Create a tree node stream from resulting tree
-            CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
-            FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
-            walker.flatzinc_model(mSolver, datas);                 // launch at start rule prog
+            Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
+            parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
+            parser.flatzinc_model(mSolver, datas);
         } catch (IOException io) {
             Exit.log(io.getMessage());
         } catch (RecognitionException re) {

@@ -56,17 +56,14 @@ public final class FVariable {
 
     private static final boolean DEBUG = true;
     private static final String NO_NAME = "";
+    private static final String output_var = "out";//"output_var";
+    private static final String output_array = "out";//"output_array";
+    private static final String is_defined_var = "is_";//"is_defined_var";
+    private static final String var_is_introduced = "var";//"var_is_introduced";
+
+
 
     static Logger LOGGER = LoggerFactory.getLogger("fzn");
-
-    private enum Annotation {
-        output_var,
-        output_array,
-        is_defined_var,
-        var_is_introduced,
-        viz,
-        none
-    }
 
     public static void make_variable(Datas datas, Declaration type, String identifier, List<EAnnotation> annotations,
                                      Expression expression, Solver aSolver) {
@@ -117,23 +114,29 @@ public final class FVariable {
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
-            Annotation varanno = Annotation.none;
+            //Annotation varanno = Annotation.none;
+            String varanno = NO_NAME;
             switch (etype) {
                 case IDE:
                     EIdentifier identifier = (EIdentifier) expression;
-                    varanno = Annotation.valueOf((identifier).value);
+                    varanno = identifier.value;//;Annotation.valueOf((identifier).value);
                     break;
                 case ANN:
                     EAnnotation eanno = (EAnnotation) expression;
-                    varanno = Annotation.valueOf(eanno.id.value);
+                    varanno = eanno.id.value;//Annotation.valueOf(eanno.id.value);
                     break;
             }
-            switch (varanno) {
+            /*switch (varanno) {
                 case output_var:
                     datas.declareOutput(name, var, type);
                     break;
                 case var_is_introduced:
                     is_introduced = true;
+            }*/
+            if (varanno.startsWith(output_var)) {
+                datas.declareOutput(name, var, type);
+            } else if (varanno.startsWith(var_is_introduced)) {
+                is_introduced = true;
             }
         }
         if (!is_introduced) {
@@ -146,25 +149,33 @@ public final class FVariable {
         for (int i = 0; i < expressions.size(); i++) {
             Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
-            Annotation varanno = Annotation.none;
+            //Annotation varanno = Annotation.none;
+            String varanno = NO_NAME;
             switch (etype) {
                 case IDE:
                     EIdentifier identifier = (EIdentifier) expression;
-                    varanno = Annotation.valueOf((identifier).value);
+                    varanno = identifier.value;//Annotation.valueOf((identifier).value);
                     break;
                 case ANN:
                     EAnnotation eanno = (EAnnotation) expression;
-                    varanno = Annotation.valueOf(eanno.id.value);
+                    varanno = eanno.id.value;//Annotation.valueOf(eanno.id.value);
                     break;
             }
-            switch (varanno) {
+            /*switch (varanno) {
                 case output_array:
                     EAnnotation eanno = (EAnnotation) expression;
                     datas.declareOutput(name, vars, eanno.exps, type);
                     break;
                 case is_defined_var:
                     is_introduced = true;
+            }*/
+            if (varanno.startsWith(output_array)) {
+                EAnnotation eanno = (EAnnotation) expression;
+                datas.declareOutput(name, vars, eanno.exps, type);
+            } else if (varanno.startsWith(var_is_introduced)) {
+                is_introduced = true;
             }
+
         }
         if (!is_introduced) {
             datas.addSearchVars(vars);

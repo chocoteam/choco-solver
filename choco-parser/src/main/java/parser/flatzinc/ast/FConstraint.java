@@ -60,6 +60,10 @@ public final class FConstraint {
 
     private static THashMap<String, IBuilder> builders = new THashMap<String, IBuilder>();
 
+    private static IBuilder builder;
+
+    private static String last = "";
+
     static {
         InputStream is = FConstraint.class.getResourceAsStream("/fzn_manager.properties");
         try {
@@ -76,22 +80,22 @@ public final class FConstraint {
 
     public static void make_constraint(Solver aSolver, Datas datas,
                                        String id, List<Expression> exps, List<EAnnotation> annotations) {
-        //TODO: manage annotations
-//        build(id, exps, parser.solver);
-        IBuilder builder;
-        if (builders.containsKey(id)) {
-            builder = builders.get(id);
-        } else {
-            String name = properties.getProperty(id);
-            if (name == null) {
-                throw new FZNException("Unknown constraint: " + id);
+        if (!last.equals(id)) {
+            if (builders.containsKey(id)) {
+                builder = builders.get(id);
+            } else {
+                String name = properties.getProperty(id);
+                if (name == null) {
+                    throw new FZNException("Unknown constraint: " + id);
+                }
+                builder = (IBuilder) loadManager(name);
+                builders.put(id, builder);
             }
-            builder = (IBuilder) loadManager(name);
-            builders.put(id, builder);
+            last = id;
         }
         Constraint[] c = builder.build(aSolver, id, exps, annotations, datas);
         aSolver.post(c);
-        readAnnotations(datas, annotations, c);
+        //readAnnotations(datas, annotations, c);
     }
 
 
