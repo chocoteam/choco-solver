@@ -25,26 +25,19 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 05/06/13
- * Time: 14:48
- */
-
 package samples.integer;
 
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
-import solver.variables.BoolVar;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 import solver.variables.VF;
-import util.tools.ArrayUtils;
 
 /**
  * Bin packing example
+ * put items into bins so that bin load is balanced
  * @author Jean-Guillaume Fages
  */
 public class BinPacking extends AbstractProblem{
@@ -76,31 +69,25 @@ public class BinPacking extends AbstractProblem{
 		weights = d1_w;
 		nbBins  = d1_nb;
 		// variables
-		int offset = 0;
-		bins = VF.enumeratedArray("bin",nbItems,offset,offset+nbBins-1,solver);
+		bins = VF.enumeratedArray("bin",nbItems,0,nbBins-1,solver);
 		loads= VF.boundedArray("load",nbBins,0,1000,solver);
 		minLoad = VF.bounded("minLoad",0,1000,solver);
-		// created variables
-		BoolVar[][] xbi = VF.boolMatrix("xbi",nbItems,nbBins,solver);
-		int sum = 0;
-		for(int w:weights){
-			sum += w;
-		}
-		IntVar sumView = VF.fixed(sum,solver);
-		// constraints
-		solver.post(ICF.sum(loads,sumView));
-		for(int i=0;i<nbItems;i++){
-			solver.post(ICF.boolean_channeling(ArrayUtils.getColumn(xbi,i),bins[i],offset));
-		}
-		for(int b=0;b<nbBins;b++){
-			solver.post(ICF.scalar(xbi[b],weights,loads[b]));
-		}
+		solver.post(ICF.bin_packing(bins,weights,loads,0));
 		solver.post(ICF.minimum(minLoad,loads));
 	}
 
 	@Override
 	public void configureSearch() {
-
+		solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+			@Override
+			public void onSolution() {
+				String s = minLoad+" : ";
+				for(IntVar l:loads){
+					s+=" "+l.getValue();
+				}
+				System.out.println(s);
+			}
+		});
 	}
 
 	@Override
@@ -109,9 +96,7 @@ public class BinPacking extends AbstractProblem{
 	}
 
 	@Override
-	public void prettyOut() {
-		//To change body of implemented methods use File | Settings | File Templates.
-	}
+	public void prettyOut() {}
 
 	//***********************************************************************************
 	// DATA
