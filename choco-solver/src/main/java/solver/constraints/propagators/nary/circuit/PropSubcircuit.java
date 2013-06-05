@@ -114,6 +114,9 @@ public class PropSubcircuit extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     private void varInstantiated(int var, int val) throws ContradictionException {
+		if(isPassive()){
+			return;
+		}
         int last = end[val].get();  // last in [0, n-1]
         int start = origin[var].get(); // start in [0, n-1]
         if (origin[val].get() != val) {
@@ -128,6 +131,11 @@ public class PropSubcircuit extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == length.getUB()) {
                 vars[last].instantiateTo(start + offset, aCause);
+				for(int i=0;i<n;i++){
+					if(!vars[i].instantiated()){
+						vars[i].instantiateTo(i+offset,aCause);
+					}
+				}
 				setPassive();
             }
             boolean isInst = false;
@@ -138,7 +146,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
             }
             origin[last].set(start);
             end[start].set(last);
-            if (isInst && !isPassive()) {
+            if (isInst) {
                 varInstantiated(last, vars[last].getValue() - offset);
             }
         }

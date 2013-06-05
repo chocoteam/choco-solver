@@ -118,6 +118,9 @@ public class PropNoSubtour extends Propagator<IntVar> {
      * @throws ContradictionException
      */
     private void varInstantiated(int var, int val) throws ContradictionException {
+		if(isPassive()){
+			return;
+		}
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
@@ -144,7 +147,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             }
             origin[last].set(start);
             end[start].set(last);
-            if (isInst && !isPassive()) {
+            if (isInst) {
                 varInstantiated(last, vars[last].getValue() - offset);
             }
         }
