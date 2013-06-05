@@ -587,14 +587,48 @@ public class IntConstraintFactory {
      * @param Y      collection of coordinates in second dimension
      * @param WIDTH  collection of width
      * @param HEIGHT collection of height
+	 * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */
-    public static Constraint diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT) {
+    public static Constraint[] diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT, boolean USE_CUMUL) {
         Solver solver = X[0].getSolver();
-        Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
+        Constraint diffNCons = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
-        return c;
+        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
+		if(USE_CUMUL){
+			IntVar[] EX = new IntVar[X.length];
+			IntVar[] EY = new IntVar[X.length];
+			Task[] TX = new Task[X.length];
+			Task[] TY = new Task[X.length];
+			int minx = Integer.MAX_VALUE/2;
+			int maxx = Integer.MIN_VALUE/2;
+			int miny = Integer.MAX_VALUE/2;
+			int maxy = Integer.MIN_VALUE/2;
+			for(int i=0;i<X.length;i++){
+				EX[i] = VF.bounded("",X[i].getLB()+WIDTH[i].getLB(),X[i].getUB()+WIDTH[i].getUB(),solver);
+				EY[i] = VF.bounded("",Y[i].getLB()+HEIGHT[i].getLB(),Y[i].getUB()+HEIGHT[i].getUB(),solver);
+				TX[i] = VF.task(X[i],WIDTH[i],EX[i]);
+				TY[i] = VF.task(Y[i],HEIGHT[i],EY[i]);
+				minx = Math.min(minx,X[i].getLB());
+				miny = Math.min(miny,Y[i].getLB());
+				maxx = Math.max(maxx,X[i].getUB()+WIDTH[i].getUB());
+				maxy = Math.max(maxy,Y[i].getUB()+HEIGHT[i].getUB());
+			}
+			IntVar maxX = VF.bounded("",minx, maxx,solver);
+			IntVar minX = VF.bounded("",minx,maxx,solver);
+			IntVar diffX = VF.bounded("",0,maxx-minx,solver);
+			IntVar maxY = VF.bounded("",miny, maxy,solver);
+			IntVar minY = VF.bounded("",miny,maxy,solver);
+			IntVar diffY = VF.bounded("",0,maxy-miny,solver);
+			return new Constraint[]{
+					diffNCons,
+					minimum(minX,X),maximum(maxX,EX),scalar(new IntVar[]{maxX,minX},new int[]{1,-1},diffX),
+					cumulative(TX,HEIGHT,diffY),
+					minimum(minY,Y),maximum(maxY,EY),scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
+					cumulative(TY,WIDTH,diffX)
+			};
+		}
+		return new Constraint[]{diffNCons};
     }
 
     /**

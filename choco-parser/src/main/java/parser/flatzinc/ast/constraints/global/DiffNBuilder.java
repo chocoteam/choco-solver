@@ -51,7 +51,7 @@ public class DiffNBuilder implements IBuilder {
         IntVar[] dx = exps.get(2).toIntVarArray(solver);
         IntVar[] dy = exps.get(3).toIntVarArray(solver);
         if (x.length > 1) {
-            return new Constraint[]{IntConstraintFactory.diffn(x, y, dx, dy)};
+            return IntConstraintFactory.diffn(x, y, dx, dy,true);
         }
         return new Constraint[0];
     }
