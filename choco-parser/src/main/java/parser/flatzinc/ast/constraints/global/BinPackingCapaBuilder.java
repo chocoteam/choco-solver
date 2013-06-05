@@ -54,7 +54,7 @@ public class BinPackingCapaBuilder implements IBuilder {
         int[] c = exps.get(0).toIntArray();
 		IntVar[] item_bin = exps.get(1).toIntVarArray(solver);
 		int[] item_size = exps.get(2).toIntArray();
-		LinkedList<Constraint> addCons = new LinkedList<>();
+		LinkedList<Constraint> addCons = new LinkedList();
 		for(int i=0; i<item_bin.length; i++){
 			if(item_bin[i].getLB()<1){
 				addCons.add(ICF.arithm(item_bin[i],">=",1));
