@@ -43,7 +43,7 @@ import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.selectors.graph.arcs.RandomArc;
 import solver.search.strategy.selectors.graph.nodes.RandomNode;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -131,7 +131,7 @@ public class SubCircuitProblem extends AbstractProblem {
 	public void configureSearch() {
 		AbstractStrategy arcs = GraphStrategyFactory.graphStrategy(graph,null,new RandomArc(graph,seed), GraphStrategy.NodeArcPriority.ARCS);
 		AbstractStrategy nodes = GraphStrategyFactory.graphStrategy(graph,new RandomNode(graph,seed), null, GraphStrategy.NodeArcPriority.NODES_THEN_ARCS);
-		solver.set(new StaticStrategiesSequencer(arcs,nodes));
+		solver.set(new StrategiesSequencer(arcs,nodes));
 //		solver.set(GraphStrategyFactory.graphRandom(graph,seed));
 //		solver.set(GraphStrategyFactory.graphLexico(graph));
 	}

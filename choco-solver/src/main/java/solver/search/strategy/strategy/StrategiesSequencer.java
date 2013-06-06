@@ -51,10 +51,7 @@ import util.tools.ArrayUtils;
 public class StrategiesSequencer extends AbstractStrategy<Variable> {
 
     AbstractStrategy[] strategies;
-
     IStateInt index;
-
-    IStateInt size;
 
     private static Variable[] make(AbstractStrategy... strategies) {
         Variable[] vars = new Variable[0];
@@ -64,47 +61,17 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
         return vars;
     }
 
-
     public StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies) {
         super(make(strategies));
-        index = environment.makeInt();
+        index = environment.makeInt(0);
         this.strategies = strategies;
-        size = environment.makeInt(strategies.length);
     }
 
-    /**
-     * Adds a new strategy at the end of the list of strategies.
-     *
-     * @param strategy the strategy to add
-     */
-    public void addStrategy(AbstractStrategy strategy) {
-        ensureCapacity();
-        int _size = size.get();
-        strategies[_size] = strategy;
-        size.add(1);
-    }
-
-    /**
-     * Deletes the current strategy from the list of strategies
-     *
-     * @param strategy the strategy to delete
-     */
-    public void deleteStrategy(AbstractStrategy strategy) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Increases the capacity of the <code>StrategiesSequencer</code> internal strategies list,
-     * to ensure new addings.
-     */
-    protected void ensureCapacity() {
-        int _size = size.get();
-        if (strategies.length == _size) {
-            AbstractStrategy[] tmp = new AbstractStrategy[_size * 3 / 2 + 1];
-            System.arraycopy(strategies, 0, tmp, 0, _size);
-            strategies = tmp;
-        }
-    }
+	public StrategiesSequencer(AbstractStrategy... strategies) {
+		super(make(strategies));
+		index = null;
+		this.strategies = strategies;
+	}
 
     @Override
     public void init() throws ContradictionException {
@@ -118,7 +85,7 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
         if (variable == null || variable.instantiated()) {
             return null;
         }
-        int idx = index.get();
+        int idx = (index==null)?0:index.get();
         Decision decision = null;
         while (decision == null && idx < strategies.length) {
             if (contains(strategies[idx].vars, variable)) {
@@ -144,12 +111,14 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
      */
     @Override
     public Decision getDecision() {
-        int idx = index.get();
+        int idx = (index==null)?0:index.get();
         Decision decision = strategies[idx].getDecision();
         while (decision == null && idx < strategies.length - 1) {
             decision = strategies[++idx].getDecision();
-            index.add(1);
         }
+		if(index!=null){
+			index.set(idx);
+		}
         return decision;
     }
 
