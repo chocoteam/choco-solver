@@ -58,6 +58,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
+@Deprecated
 public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
     //***********************************************************************************

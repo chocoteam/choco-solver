@@ -55,6 +55,7 @@ import java.util.Comparator;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @since 15/06/11
  */
+@Deprecated
 public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     private final int[] treelinks; // Tree links

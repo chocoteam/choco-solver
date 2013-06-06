@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.nary.sum;
+package solver.constraints.deprecatedPropagators;
 
 import memory.IStateInt;
 import solver.constraints.propagators.Propagator;

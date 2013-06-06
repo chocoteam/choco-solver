@@ -41,6 +41,7 @@ import util.procedure.IntProcedure;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @since 16/06/11
  */
+@Deprecated
 public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
     private static final String MSG_INCONSISTENT = "inconsistent";
