@@ -29,7 +29,7 @@ package solver.variables;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.Sum;
+import solver.constraints.nary.sum.Sum;
 import solver.constraints.ternary.Max;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;

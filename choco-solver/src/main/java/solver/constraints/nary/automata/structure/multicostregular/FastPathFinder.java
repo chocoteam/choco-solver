@@ -31,7 +31,7 @@ package solver.constraints.nary.automata.structure.multicostregular;
 import gnu.trove.stack.TIntStack;
 import memory.IStateIntVector;
 import solver.Configuration;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.iterators.DisposableIntIterator;

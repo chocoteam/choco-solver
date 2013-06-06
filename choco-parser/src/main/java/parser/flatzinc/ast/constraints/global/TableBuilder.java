@@ -34,10 +34,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.extension.ExtensionalBinRelation;
-import solver.constraints.propagators.extension.binary.CouplesTable;
-import solver.constraints.propagators.extension.nary.IterTuplesTable;
-import solver.constraints.propagators.extension.nary.LargeRelation;
+import solver.constraints.extension.ExtensionalBinRelation;
+import solver.constraints.extension.binary.CouplesTable;
+import solver.constraints.extension.nary.IterTuplesTable;
+import solver.constraints.extension.nary.LargeRelation;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 

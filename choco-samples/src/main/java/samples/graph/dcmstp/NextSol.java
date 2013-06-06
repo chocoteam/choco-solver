@@ -27,7 +27,7 @@
 
 package samples.graph.dcmstp;
 
-import solver.constraints.propagators.gary.IGraphRelaxation;
+import solver.constraints.gary.IGraphRelaxation;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.UndirectedGraphVar;
 import util.objects.setDataStructures.ISet;

@@ -29,12 +29,8 @@ package solver.constraints.nary.alldifferent;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.binary.PropNotEqualX_Y;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_Fast;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_adaptive;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffInst;
+import solver.constraints.Propagator;
+import solver.constraints.binary.PropNotEqualX_Y;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.ESat;

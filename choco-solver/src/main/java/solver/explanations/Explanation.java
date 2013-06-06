@@ -29,7 +29,7 @@ package solver.explanations;
 
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 
 import java.util.ArrayList;
 import java.util.List;

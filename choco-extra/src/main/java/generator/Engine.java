@@ -26,7 +26,7 @@
  */
 package generator;
 
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import util.objects.IntCircularQueue;
 

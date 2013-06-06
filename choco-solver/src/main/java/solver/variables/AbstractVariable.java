@@ -31,7 +31,7 @@ import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;

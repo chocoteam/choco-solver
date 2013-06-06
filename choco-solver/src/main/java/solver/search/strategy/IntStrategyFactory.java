@@ -28,7 +28,6 @@
 package solver.search.strategy;
 
 import solver.Solver;
-import solver.search.strategy.strategy.LastConflict;
 import solver.search.strategy.selectors.values.InDomainMax;
 import solver.search.strategy.selectors.values.InDomainMiddle;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -36,6 +35,7 @@ import solver.search.strategy.selectors.values.InDomainRandom;
 import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.LastConflict;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;

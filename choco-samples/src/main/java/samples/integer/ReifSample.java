@@ -36,7 +36,9 @@ package samples.integer;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.*;
+import solver.constraints.Constraint;
+import solver.constraints.ICF;
+import solver.constraints.LCF;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.ISF;
 import solver.variables.IntVar;

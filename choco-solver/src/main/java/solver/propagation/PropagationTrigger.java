@@ -31,7 +31,7 @@ import memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 

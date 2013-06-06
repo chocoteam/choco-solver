@@ -32,7 +32,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.loop.monitors.FailPerPropagator;

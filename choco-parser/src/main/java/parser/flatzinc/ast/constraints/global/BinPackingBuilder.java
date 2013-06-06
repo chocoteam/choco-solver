@@ -34,7 +34,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 import solver.variables.VF;
 

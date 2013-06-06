@@ -33,7 +33,6 @@ import solver.search.loop.monitors.IMonitorContradiction;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
 /**

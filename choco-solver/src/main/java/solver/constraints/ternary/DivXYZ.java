@@ -28,7 +28,6 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.ternary.PropDivXYZ;
 import solver.variables.IntVar;
 import util.ESat;
 

@@ -34,7 +34,7 @@
 
 package solver.search.strategy.strategy.graph;
 
-import solver.constraints.propagators.gary.IGraphRelaxation;
+import solver.constraints.gary.IGraphRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;

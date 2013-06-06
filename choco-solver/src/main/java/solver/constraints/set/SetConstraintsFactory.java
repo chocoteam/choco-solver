@@ -30,7 +30,6 @@ package solver.constraints.set;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.set.*;
 import solver.variables.*;
 import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.GraphVar;

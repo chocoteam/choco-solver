@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.tools.ArrayUtils;
+
 import java.util.Random;
 
 /**

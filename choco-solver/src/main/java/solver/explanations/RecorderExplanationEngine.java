@@ -32,7 +32,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.SolverException;
 import solver.explanations.antidom.AntiDomain;
 import solver.propagation.queues.CircularQueue;

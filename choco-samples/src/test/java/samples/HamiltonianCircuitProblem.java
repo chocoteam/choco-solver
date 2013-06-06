@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.path.PropIntVarChanneling;
+import solver.constraints.gary.path.PropIntVarChanneling;
 import solver.exception.ContradictionException;
 import solver.search.strategy.GraphStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;

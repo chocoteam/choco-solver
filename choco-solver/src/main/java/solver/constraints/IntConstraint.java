@@ -28,7 +28,6 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.variables.IntVar;
 import util.ESat;
 

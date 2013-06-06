@@ -41,7 +41,6 @@ import solver.constraints.set.SetConstraintsFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.SetVar;
-import solver.variables.SetVarImpl;
 import solver.variables.VariableFactory;
 
 /**
