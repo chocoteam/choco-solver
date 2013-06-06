@@ -32,7 +32,7 @@
  * Time: 14:05
  */
 
-package solver.constraints;
+package solver.constraints.nary;
 
 import memory.IStateInt;
 import solver.constraints.Propagator;

@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.nary;
+package solver.constraints.nary.circuit;
 
 import memory.IStateBool;
 import memory.IStateInt;

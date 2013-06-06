@@ -33,7 +33,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
-import solver.constraints.nary.MaxOfAList;
+import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.nary.cnf.LogOp;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;

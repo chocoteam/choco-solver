@@ -78,7 +78,7 @@ import java.io.Serializable;
  * <p/>
  * The developer of a propagator must respect some rules to create a efficient propagator:
  * <br/>- internal references to variables must be achieved referencing the <code>this.vars</code> after the call to super,
- * this prevents from wrong references when a variable occurs more than once in the scope (See {@link solver.constraints.nary.PropCount_AC} for instance).
+ * this prevents from wrong references when a variable occurs more than once in the scope (See {@link solver.constraints.nary.count.PropCount_AC} for instance).
  * <br/>- //to complete
  *
  * @author Xavier Lorca

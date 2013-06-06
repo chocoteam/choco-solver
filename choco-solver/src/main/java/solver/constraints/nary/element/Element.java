@@ -25,12 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary;
+package solver.constraints.nary.element;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.binary.PropElement;
-import solver.constraints.nary.PropElementV_fast;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;

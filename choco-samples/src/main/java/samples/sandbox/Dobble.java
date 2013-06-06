@@ -40,7 +40,7 @@ import solver.constraints.IntConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.constraints.gary.channeling.relations.GraphRelationFactory;
-import solver.constraints.nary.MaxOfAList;
+import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.constraints.gary.channeling.PropGraphRelation;

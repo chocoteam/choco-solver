@@ -32,7 +32,7 @@
  * Time: 01:32
  */
 
-package solver.constraints.nary;
+package solver.constraints.nary.element;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
