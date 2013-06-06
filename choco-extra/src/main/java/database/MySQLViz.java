@@ -288,7 +288,7 @@ public class MySQLViz {
     }
 
     public static void main(String[] args) throws SQLException {
-        MySQLViz ms = new MySQLViz(new File("/Users/cprudhom/Sources/Choco3/choco-parser/src/main/resources/mysql.properties"));
+        MySQLViz ms = new MySQLViz(new File("choco-parser/src/main/resources/mysql.properties"));
         ms.connect();
 //        ms.display();
 //        ms.compare();
