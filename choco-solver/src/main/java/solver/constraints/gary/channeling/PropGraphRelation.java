@@ -27,9 +27,9 @@
 
 package solver.constraints.gary.channeling;
 
-import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
+import solver.constraints.gary.channeling.relations.GraphRelation;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;

@@ -28,7 +28,6 @@ package solver.constraints.extension.nary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.extension.nary.*;
 import solver.variables.IntVar;
 import util.ESat;
 

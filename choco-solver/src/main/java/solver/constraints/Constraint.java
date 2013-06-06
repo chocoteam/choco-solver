@@ -31,7 +31,6 @@ package solver.constraints;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.reification.DefaultOpposite;
-import solver.constraints.reification.ReificationConstraint;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
 import solver.variables.BoolVar;

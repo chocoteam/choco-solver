@@ -25,10 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.reification;
+package solver.constraints;
 
-import solver.constraints.Constraint;
-import solver.constraints.Propagator;
+import solver.constraints.reification.PropReif;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;

@@ -27,8 +27,6 @@
 package solver.constraints.extension.binary;
 
 import solver.constraints.IntConstraint;
-import solver.constraints.extension.binary.BinRelation;
-import solver.constraints.extension.binary.PropBinAC2001;
 import solver.variables.IntVar;
 import util.ESat;
 

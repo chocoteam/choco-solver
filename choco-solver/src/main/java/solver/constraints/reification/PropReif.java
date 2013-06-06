@@ -30,6 +30,7 @@ package solver.constraints.reification;
 import solver.constraints.Constraint;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
+import solver.constraints.ReificationConstraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;

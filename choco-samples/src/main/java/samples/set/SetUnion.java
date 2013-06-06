@@ -37,8 +37,6 @@ package samples.set;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.set.SetConstraintsFactory;
-import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.SetStrategyFactory;
 import solver.variables.SetVar;
 import solver.variables.VariableFactory;
