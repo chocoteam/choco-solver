@@ -27,15 +27,12 @@
 
 package parser.flatzinc.ast.constraints;
 
-import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
-import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
@@ -50,19 +47,23 @@ import java.util.List;
  */
 public class Bool2IntBuilder implements IBuilder {
 
-    private static Constraint[] NO_CSTR = new Constraint[0];
+//    private static Constraint[] NO_CSTR = new Constraint[0];
 
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         IntVar b = exps.get(1).intVarValue(solver);
         String vname = b.getName();
+        return new Constraint[]{ICF.arithm(a, "=", b)};
+        /*
+        TODO: fix
         if (b.getNbProps() > 0) {
             //throw new FZNException("unable to remove " + b + ": it already exists in propagator(s).");
-            return new Constraint[]{ICF.arithm(a, "=", b)};
         }
+        LoggerFactory.getLogger("solver").info("{} -> {} // {}: {}", new Object[]{a, b, vname, datas.get(vname)});
         solver.unassociates(b);
         datas.register(vname, a);
+        LoggerFactory.getLogger("solver").info("{} -> {} // {}: {}", new Object[]{a, b, vname, datas.get(vname)});
         if (b.instantiated()) {
             try {
                 a.instantiateTo(b.getValue(), Cause.Null);
@@ -70,6 +71,6 @@ public class Bool2IntBuilder implements IBuilder {
                 throw new FZNException("unable to instantiate " + a + " to " + b.getValue() + ".");
             }
         }
-        return NO_CSTR;
+        return NO_CSTR;*/
     }
 }
