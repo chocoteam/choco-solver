@@ -32,6 +32,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.jdbc.JDBCCategoryDataset;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.*;
@@ -203,17 +204,20 @@ public class MySQLViz {
     private void display(JFreeChart... chart) {
         JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.setLayout(new BoxLayout());
-
         JTabbedPane tabbedPane = new JTabbedPane();
-        frame.setContentPane(tabbedPane);
+		JPanel mainpane = new JPanel(new BorderLayout());
+        frame.setContentPane(mainpane);
+		mainpane.add(tabbedPane,BorderLayout.CENTER);
         for (JFreeChart c : chart) {
             JPanel panel = new JPanel();
             JLabel label = new JLabel();
-            label.setIcon(new ImageIcon(c.createBufferedImage(1000, 1000)));
+            label.setIcon(new ImageIcon(c.createBufferedImage(800, 1500)));
             panel.add(label);
-            tabbedPane.add(panel);
+			JScrollPane scroll = new JScrollPane(panel);
+			tabbedPane.add(c.getTitle().getText(),scroll);
+//			tabbedPane.add(c.getTitle().getText(),new ChartPanel(c));
         }
+		frame.setMinimumSize(new Dimension(900,100));
         frame.pack();
         frame.setVisible(true);
     }
@@ -244,14 +248,11 @@ public class MySQLViz {
      * @return Pie chart; null if no image created.
      */
     public JFreeChart createChart(String query, String[] args, String name) {
-        JFreeChart pieChart = null;
-
+        JFreeChart jfchart = null;
         connect();
-
         final String QUERY = String.format(query, args);
         try {
-//            pieChart = barChart(QUERY, name);
-            pieChart = lineChart(QUERY, name);
+            jfchart = lineChart(QUERY, name);
         } catch (SQLException sqlEx)    // checked exception
         {
             System.err.println("Error trying to acquire JDBCPieDataset.");
@@ -260,7 +261,7 @@ public class MySQLViz {
             sqlEx.printStackTrace();
         }
 
-        return pieChart;
+        return jfchart;
     }
 
     private JFreeChart barChart(String QUERY, String name) throws SQLException {
@@ -293,7 +294,7 @@ public class MySQLViz {
 //        ms.display();
 //        ms.compare();
 //        ms.compare("MZN20130603");
-        ms.compare("JACOP", "MZN20130603", "sb");
+        ms.compare("JACOP", "MZN20130606", "");
 
 //        ms.history("filter_fir_1_1.fzn");
 
