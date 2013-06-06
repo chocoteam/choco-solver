@@ -393,6 +393,21 @@ public class VariableFactory {
         return set(NAME, ENVELOPE, SetType.BITSET, new int[]{}, SetType.BITSET, SOLVER);
     }
 
+	/**
+	 * Builds a set variable with an initial domain given by
+	 * ENVELOP = [MIN_ELEMENT,MAX_ELEMENT] and an empty KERNEL.
+	 * Uses a BitSet representation for both the envelope and the kernel
+	 *
+	 * @param NAME     name of the variable
+	 * @param MIN_ELEMENT
+	 * @param MAX_ELEMENT
+	 * @param SOLVER   solver involving the variable
+	 * @return a set variable
+	 */
+	public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
+		return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
+	}
+
     //*************************************************************************************
     // GRAPH VARIABLES
     //*************************************************************************************

@@ -102,6 +102,27 @@ public class SetVarImpl extends AbstractVariable<SetDelta, SetVar> implements Se
 		this.max = max;
 	}
 
+	/**
+	 * Creates a Set variable
+	 *
+	 * @param name		name of the variable
+	 * @param min		first envelope value
+	 * @param max		last envelope value
+	 * @param solver	solver of the variable.
+	 */
+	protected SetVarImpl(String name, int min, int max, Solver solver) {
+		super(name, solver);
+		solver.associates(this);
+		this.environment = solver.getEnvironment();
+		envelope = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
+		kernel = SetFactory.makeStoredSet(SetType.BITSET, max-min+1, environment);
+		for(int i=min; i<=max; i++){
+			envelope.add(i-min);
+		}
+		this.min = min;
+		this.max = max;
+	}
+
 	private static void check(int[] env, int[] ker, int max, int min) {
 		BitSet b = new BitSet(max-min);
 		for(int i:env){
