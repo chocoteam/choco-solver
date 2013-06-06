@@ -34,3 +34,6 @@ predicate regularChoco(array[int] of var int: x, int: Q, int: S,
 predicate subcircuitChoco(array[int] of var int: x);
 predicate tableChoco(array[int] of var bool: x, array[int, int] of bool: t);
 predicate tableChoco(array[int] of var int: x, array[int, int] of int: t);
+predicate bin_packingChoco(int: c, array[int] of var int: bin, array[int] of int: w);
+predicate bin_packing_loadChoco(array[int] of var int: load, array[int] of var int: bin, array[int] of int: w);
+predicate bin_packing_capaChoco(array[int] of int: c, array[int] of var int: bin, array[int] of int: w);

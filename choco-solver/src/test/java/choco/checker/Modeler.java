@@ -773,8 +773,7 @@ public interface Modeler {
                 dx[i] = vars[i + 2 * k];
                 dy[i] = vars[i + 3 * k];
             }
-            Constraint ctr = IntConstraintFactory.diffn(x, y, dx, dy);
-            Constraint[] ctrs = new Constraint[]{ctr};
+            Constraint[] ctrs = IntConstraintFactory.diffn(x, y, dx, dy,true);
             AbstractStrategy strategy = IntStrategyFactory.inputOrder_InDomainMin(vars);
             s.post(ctrs);
             s.set(strategy);

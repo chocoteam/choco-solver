@@ -406,13 +406,49 @@ public class IntConstraintFactory {
         return new Among(NVAR, VARS, VALUES, NVAR.getSolver());
     }
 
+	/**
+	 * Bin Packing formulation:
+	 * forall b in [0,BIN_LOAD.length-1],
+	 * BIN_LOAD[b]=sum(ITEM_SIZE[i] | i in [0,ITEM_SIZE.length-1], ITEM_BIN[i] = b+OFFSET
+	 * forall i in [0,ITEM_SIZE.length-1], ITEM_BIN is in [OFFSET,BIN_LOAD.length-1+OFFSET],
+	 *
+	 * @param ITEM_BIN IntVar representing the bin of each item
+	 * @param ITEM_SIZE int representing the size of each item
+	 * @param BIN_LOAD IntVar representing the load of each bin (i.e. the sum of the size of the items in it)
+	 * @param OFFSET 0 by default but typically 1 if used within MiniZinc
+	 *               (which counts from 1 to n instead of from 0 to n-1)
+	 * @return
+	 */
+	public static Constraint[] bin_packing(IntVar[] ITEM_BIN, int[] ITEM_SIZE, IntVar[] BIN_LOAD, int OFFSET){
+		int nbBins = BIN_LOAD.length;
+		int nbItems= ITEM_BIN.length;
+		Solver s = ITEM_BIN[0].getSolver();
+		BoolVar[][] xbi = VF.boolMatrix("xbi",nbBins,nbItems,s);
+		int sum = 0;
+		for(int is:ITEM_SIZE){
+			sum += is;
+		}
+		IntVar sumView = VF.fixed(sum,s);
+		// constraints
+		Constraint[] bpcons = new Constraint[nbItems+nbBins+1];
+		for(int i=0;i<nbItems;i++){
+			bpcons[i] = ICF.boolean_channeling(ArrayUtils.getColumn(xbi,i),ITEM_BIN[i],OFFSET);
+		}
+		for(int b=0;b<nbBins;b++){
+			bpcons[nbItems+b] = ICF.scalar(xbi[b],ITEM_SIZE,BIN_LOAD[b]);
+		}
+		bpcons[nbItems+nbBins] = ICF.sum(BIN_LOAD,sumView);
+		return bpcons;
+	}
+
     /**
      * Maps the boolean assignments variables BVARS with the standard assignment variable VAR.
      * VAR = i <-> BVARS[i-OFFSET] = 1
      *
      * @param BVARS  array of boolean variables
      * @param VAR    observed variable. Should presumably have an enumerated domain
-     * @param OFFSET offset parameter
+     * @param OFFSET 0 by default but typically 1 if used within MiniZinc
+	 *               (which counts from 1 to n instead of from 0 to n-1)
      */
     public static Constraint boolean_channeling(BoolVar[] BVARS, IntVar VAR, int OFFSET) {
         if (!VAR.hasEnumeratedDomain()) {
@@ -551,14 +587,48 @@ public class IntConstraintFactory {
      * @param Y      collection of coordinates in second dimension
      * @param WIDTH  collection of width
      * @param HEIGHT collection of height
+	 * @param USE_CUMUL indicates whether or not redundant cumulative constraints should be put on each dimension (advised)
      * @return a non-overlapping constraint
      */
-    public static Constraint diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT) {
+    public static Constraint[] diffn(IntVar[] X, IntVar[] Y, IntVar[] WIDTH, IntVar[] HEIGHT, boolean USE_CUMUL) {
         Solver solver = X[0].getSolver();
-        Constraint c = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
+        Constraint diffNCons = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        c.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
-        return c;
+        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
+		if(USE_CUMUL){
+			IntVar[] EX = new IntVar[X.length];
+			IntVar[] EY = new IntVar[X.length];
+			Task[] TX = new Task[X.length];
+			Task[] TY = new Task[X.length];
+			int minx = Integer.MAX_VALUE/2;
+			int maxx = Integer.MIN_VALUE/2;
+			int miny = Integer.MAX_VALUE/2;
+			int maxy = Integer.MIN_VALUE/2;
+			for(int i=0;i<X.length;i++){
+				EX[i] = VF.bounded("",X[i].getLB()+WIDTH[i].getLB(),X[i].getUB()+WIDTH[i].getUB(),solver);
+				EY[i] = VF.bounded("",Y[i].getLB()+HEIGHT[i].getLB(),Y[i].getUB()+HEIGHT[i].getUB(),solver);
+				TX[i] = VF.task(X[i],WIDTH[i],EX[i]);
+				TY[i] = VF.task(Y[i],HEIGHT[i],EY[i]);
+				minx = Math.min(minx,X[i].getLB());
+				miny = Math.min(miny,Y[i].getLB());
+				maxx = Math.max(maxx,X[i].getUB()+WIDTH[i].getUB());
+				maxy = Math.max(maxy,Y[i].getUB()+HEIGHT[i].getUB());
+			}
+			IntVar maxX = VF.bounded("",minx, maxx,solver);
+			IntVar minX = VF.bounded("",minx,maxx,solver);
+			IntVar diffX = VF.bounded("",0,maxx-minx,solver);
+			IntVar maxY = VF.bounded("",miny, maxy,solver);
+			IntVar minY = VF.bounded("",miny,maxy,solver);
+			IntVar diffY = VF.bounded("",0,maxy-miny,solver);
+			return new Constraint[]{
+					diffNCons,
+					minimum(minX,X),maximum(maxX,EX),scalar(new IntVar[]{maxX,minX},new int[]{1,-1},diffX),
+					cumulative(TX,HEIGHT,diffY),
+					minimum(minY,Y),maximum(maxY,EY),scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, diffY),
+					cumulative(TY,WIDTH,diffX)
+			};
+		}
+		return new Constraint[]{diffNCons};
     }
 
     /**
@@ -814,7 +884,8 @@ public class IntConstraintFactory {
      * <p/> Filtering algorithms:
      * <p/> subtour elimination : Caseau & Laburthe (ICLP'97)
      * <p/> allDifferent GAC algorithm: R&eacute;gin (AAAI'94)
-     * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> dominator-based filtering: Fages & Lorca (CP'11)
+	 * <p/> SCC-based filtering
      *
      * @param VARS
      * @param OFFSET          0 by default but 1 if used within MiniZinc
