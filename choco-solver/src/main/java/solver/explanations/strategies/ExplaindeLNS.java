@@ -39,7 +39,7 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import util.iterators.DisposableValueIterator;
 
@@ -148,7 +148,7 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
     @Override
     public void afterInitialize() {
         AbstractStrategy cstrat = solver.getSearchLoop().getStrategy();
-        solver.set(new StaticStrategiesSequencer(
+        solver.set(new StrategiesSequencer(
                 new Strategy(), cstrat
         ));
     }

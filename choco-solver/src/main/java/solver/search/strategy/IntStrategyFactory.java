@@ -36,7 +36,7 @@ import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.LastConflict;
-import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -206,6 +206,6 @@ public class IntStrategyFactory {
 	 * @return last conflict strategy
 	 */
 	public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
-		return new StaticStrategiesSequencer(new LastConflict(SOLVER, STRAT, 1, false), STRAT);
+		return new StrategiesSequencer(new LastConflict(SOLVER, STRAT, 1, false), STRAT);
 	}
 }
