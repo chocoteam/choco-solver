@@ -32,11 +32,11 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.jdbc.JDBCCategoryDataset;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.*;
 import java.util.Properties;
+import java.util.Vector;
 
 /**
  * <br/>
@@ -46,10 +46,14 @@ import java.util.Properties;
  */
 public class MySQLViz {
 
-    private static final String QUERY1 = "SELECT t1.PID, t1.%s - t2.%s FROM RESOLUTIONS as t1, RESOLUTIONS as t2 " +
-            "WHERE t1.BID=%s AND t2.BID=%s AND t1.PID=t2.PID order by t1.PID";
+    private static final String QUERY1 = "SELECT t0.NAME, t1.%s +0 as %s, t2.%s +0 as %s FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
+            "WHERE t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s, t2.%s";
 
-    private static final String QUERY2 = "SELECT t1.BID, t1.%s FROM RESOLUTIONS as t1, BENCHMARKS as t2 " +
+    private static final String QUERY2 = "SELECT t0.NAME, t1.%s +0 as %s, t2.%s +0 as %s " +
+            "FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
+            "WHERE t0.NAME like \"%s\" AND t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s ASC, t2.%s ASC";
+
+    private static final String QUERY3 = "SELECT t1.BID, t1.%s FROM RESOLUTIONS as t1, BENCHMARKS as t2 " +
             "WHERE t1.PID=%s AND t1.BID=t2.BID order by t2.DATE";
 
 
@@ -73,15 +77,40 @@ public class MySQLViz {
         pwd = properties.getProperty("mysql.pwd");
     }
 
+    public void display() throws SQLException {
+        JFrame frame = new JFrame("");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        PreparedStatement statement = connection.prepareStatement("select NAME from BENCHMARKS;");
+        ResultSet resultSet = statement.executeQuery();
+
+        Vector<String> benchs = new Vector<String>();
+        while (resultSet.next()) {
+            benchs.add(resultSet.getString(1));
+        }
+
+        JList liste = new JList();
+        liste.setListData(benchs);
+
+        frame.getContentPane().add(liste);
+
+        JButton bdis = new JButton("display");
+
+
+//        frame.getContentPane().add();
+
+        frame.pack();
+        frame.setVisible(true);
+    }
+
     public void compare() {
-        compare(null, null);
+        compare(null, null, "");
     }
 
     public void compare(String bname) {
-        compare(bname, null);
+        compare(bname, null, "");
     }
 
-    public void compare(String bname1, String bname2) {
+    public void compare(String bname1, String bname2, String pbname) {
         int bid1 = 1, bid2 = 1;
         // 1. get ids
         if (bname1 != null) {
@@ -106,6 +135,7 @@ public class MySQLViz {
                 ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     bid1 = resultSet.getInt(1);
+                    bname1 = "FIRST";
                 } else {
                     return;
                 }
@@ -128,17 +158,24 @@ public class MySQLViz {
             }
         } else {
             bid2 = bid1 - 1;
+            bname1 = "SECOND";
         }
 
         display(
-                createChart(QUERY1, new String[]{"BUILDING_TIME", "BUILDING_TIME", Integer.toString(bid1),
-                        Integer.toString(bid2)}, "BUILDING_TIME"),
-                createChart(QUERY1, new String[]{"SOLVING_TIME", "SOLVING_TIME", Integer.toString(bid1),
-                        Integer.toString(bid2)}, "SOLVING_TIME"),
-                createChart(QUERY1, new String[]{"SOLUTION", "SOLUTION", Integer.toString(bid1),
-                        Integer.toString(bid2)}, "SOLUTION"),
-                createChart(QUERY1, new String[]{"NB_SOL", "NB_SOL", Integer.toString(bid1),
-                        Integer.toString(bid2)}, "NB_SOL")
+//                createChart(QUERY1, new String[]{"BUILDING_TIME", "BUILDING_TIME", Integer.toString(bid1),
+//                        Integer.toString(bid2)}, "BUILDING_TIME"),
+//                createChart(QUERY1, new String[]{"SOLVING_TIME", bname1, "SOLVING_TIME", bname2, Integer.toString(bid1),
+//                        Integer.toString(bid2)}, "SOLVING_TIME"),
+//                createChart(QUERY1, new String[]{"OBJECTIVE", bname1, "OBJECTIVE", bname2, Integer.toString(bid1),
+//                        Integer.toString(bid2)}, "OBJECTIVE"),
+//                createChart(QUERY1, new String[]{"NB_SOL", bname1, "NB_SOL", bname2, Integer.toString(bid1),
+//                        Integer.toString(bid2)}, "NB_SOL"),
+                createChart(QUERY2, new String[]{"SOLVING_TIME", bname1, "SOLVING_TIME", bname2, pbname + "%", Integer.toString(bid1),
+                        Integer.toString(bid2), "SOLVING_TIME", "SOLVING_TIME"}, "SOLVING_TIME"),
+                createChart(QUERY2, new String[]{"OBJECTIVE", bname1, "OBJECTIVE", bname2, pbname + "%", Integer.toString(bid1),
+                        Integer.toString(bid2),"OBJECTIVE", "OBJECTIVE"}, "OBJECTIVE"),
+                createChart(QUERY2, new String[]{"NB_SOL", bname1, "NB_SOL", bname2, pbname + "%", Integer.toString(bid1),
+                        Integer.toString(bid2), "NB_SOL", "NB_SOL"}, "NB_SOL")
         );
     }
 
@@ -158,20 +195,24 @@ public class MySQLViz {
             e.printStackTrace();
         }
 
-        display(createChart(QUERY2, new String[]{"SOLVING_TIME", Integer.toString(pid)}, "SOLVING_TIME"));
+        display(createChart(QUERY3, new String[]{"SOLVING_TIME", Integer.toString(pid)}, "SOLVING_TIME"));
 
     }
 
 
     private void display(JFreeChart... chart) {
         JFrame frame = new JFrame("");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setLayout(new BoxLayout());
 
-        frame.setLayout(new FlowLayout());
+        JTabbedPane tabbedPane = new JTabbedPane();
+        frame.setContentPane(tabbedPane);
         for (JFreeChart c : chart) {
+            JPanel panel = new JPanel();
             JLabel label = new JLabel();
-            label.setIcon(new ImageIcon(c.createBufferedImage(750, 450)));
-            frame.getContentPane().add(label);
+            label.setIcon(new ImageIcon(c.createBufferedImage(1000, 1000)));
+            panel.add(label);
+            tabbedPane.add(panel);
         }
         frame.pack();
         frame.setVisible(true);
@@ -209,19 +250,8 @@ public class MySQLViz {
 
         final String QUERY = String.format(query, args);
         try {
-            JDBCCategoryDataset pieDataset =
-                    new JDBCCategoryDataset(connection, QUERY);
-
-            pieChart =
-                    ChartFactory.createLineChart(name, // chart title
-                            "pb",
-                            "stat",
-                            pieDataset,
-                            PlotOrientation.VERTICAL,
-                            true,      // legend displayed
-                            true,      // tooltips displayed
-                            false);   // no URLs
-
+//            pieChart = barChart(QUERY, name);
+            pieChart = lineChart(QUERY, name);
         } catch (SQLException sqlEx)    // checked exception
         {
             System.err.println("Error trying to acquire JDBCPieDataset.");
@@ -233,14 +263,39 @@ public class MySQLViz {
         return pieChart;
     }
 
-    public static void main(String[] args) {
+    private JFreeChart barChart(String QUERY, String name) throws SQLException {
+        return
+                ChartFactory.createBarChart(name, // chart title
+                        "pb",
+                        "stat",
+                        new JDBCCategoryDataset(connection, QUERY),
+                        PlotOrientation.HORIZONTAL,
+                        true,      // legend displayed
+                        true,      // tooltips displayed
+                        true);   // no URLs
+    }
+
+    private JFreeChart lineChart(String QUERY, String name) throws SQLException {
+        return
+                ChartFactory.createLineChart(name, // chart title
+                        "pb",
+                        "stat",
+                        new JDBCCategoryDataset(connection, QUERY),
+                        PlotOrientation.HORIZONTAL,
+                        true,      // legend displayed
+                        true,      // tooltips displayed
+                        true);   // no URLs
+    }
+
+    public static void main(String[] args) throws SQLException {
         MySQLViz ms = new MySQLViz(new File("/Users/cprudhom/Sources/Choco3/choco-parser/src/main/resources/mysql.properties"));
         ms.connect();
-        ms.compare();
-        ms.compare("MZN20130603");
-        ms.compare("MZN20130603", "JACOP");
+//        ms.display();
+//        ms.compare();
+//        ms.compare("MZN20130603");
+        ms.compare("JACOP", "MZN20130603", "sb");
 
-        ms.history("filter_fir_1_1.fzn");
+//        ms.history("filter_fir_1_1.fzn");
 
 
     }

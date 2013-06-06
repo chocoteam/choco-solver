@@ -161,7 +161,7 @@ public class MySQLAccess {
         if (resultSet.next()) {
             return resultSet.getInt(1);
         } else {
-            statement = connection.prepareStatement("insert into PROBLEMS (NAME, RESOLUTION, SOLUTION, OPTIMAL) values (?,?,?,?);");
+            statement = connection.prepareStatement("insert into PROBLEMS (NAME, RESOLUTION, OBJECTIVE, OPTIMAL) values (?,?,?,?);");
             statement.setString(1, filename);
             switch (policy) {
                 case SATISFACTION:
