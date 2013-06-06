@@ -68,7 +68,7 @@ public class SetUnion extends AbstractProblem {
         // y initial domain
 		y = VariableFactory.set("y",new int[]{-6,-2,7},solver);
         // z initial domain
-		z = VariableFactory.set("z",new int[]{1,-2,5,7,3},new int[]{-2},solver);
+		z = VariableFactory.set("z",-2,7,solver);
         // set-union constraint
 		solver.post(SetConstraintsFactory.union(new SetVar[]{x, y}, z));
         if (noEmptySet) {
