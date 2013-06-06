@@ -28,6 +28,13 @@ package solver.constraints.real;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Solver;
+import solver.search.strategy.selectors.values.RealDomainMiddle;
+import solver.search.strategy.selectors.variables.Cyclic;
+import solver.search.strategy.strategy.AssignmentInterval;
+import solver.variables.IntVar;
+import solver.variables.RealVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -128,5 +135,27 @@ public class RealTest {
         Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
 
         ibex.release();
+    }
+
+    @Test(groups = "1s")
+    public void test4() {
+        Solver solver = new Solver();
+
+        double precision = 0.00000001;
+        IntVar x = VariableFactory.bounded("x", 0, 9, solver);
+        IntVar y = VariableFactory.bounded("y", 0, 9, solver);
+        RealVar[] vars = new RealVar[]{VariableFactory.real(x, precision), VariableFactory.real(y, precision)};
+        RealConstraint rcons = new RealConstraint(solver);
+        // Actually ,we need the calculated result like these :
+        // x : [2.000000, 2.000000], y : [4.000000, 4.000000]
+        // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
+        // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
+        rcons.addFunction("{0} * {1} = 8", vars);
+//        rcons.discretize(x,y);
+        solver.post(rcons);
+        solver.set(new AssignmentInterval(vars, new Cyclic(vars), new RealDomainMiddle()));
+        solver.findSolution();
+        Assert.assertEquals(x.getValue(), 2);
+        Assert.assertEquals(y.getValue(), 4);
     }
 }

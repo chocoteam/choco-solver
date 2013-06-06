@@ -49,7 +49,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
     protected final double precision;
 
     public RealView(IntVar var, double precision) {
-        super("(real)"+var.getName(),var.getSolver());
+        super("(real)" + var.getName(), var.getSolver());
         this.var = var;
         this.precision = precision;
         this.var.subscribeView(this);
@@ -77,10 +77,10 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
         var.recordMask(mask);
     }
 
-	@Override
-	public String toString() {
-		return "(real)"+var.toString();
-	}
+    @Override
+    public String toString() {
+        return "(real)" + var.toString();
+    }
 
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
 
@@ -96,17 +96,29 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
-		return var.updateLowerBound((int) Math.ceil(value-precision), this);
+        if (var.updateLowerBound((int) Math.ceil(value - precision), this)) {
+            notifyPropagators(EventType.INCLOW, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
-		return var.updateUpperBound((int) Math.floor(value+precision), this);
+        if (var.updateUpperBound((int) Math.floor(value + precision), this)) {
+            notifyPropagators(EventType.INCLOW, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
-        return var.updateLowerBound((int) lowerbound, this) & var.updateUpperBound((int) upperbound, this);
+        if (var.updateLowerBound((int) lowerbound, this) & var.updateUpperBound((int) upperbound, this)) {
+            notifyPropagators(EventType.BOUND, cause);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -116,7 +128,7 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean instantiated() {
-		return var.instantiated();
+        return var.instantiated();
     }
 
     @Override
