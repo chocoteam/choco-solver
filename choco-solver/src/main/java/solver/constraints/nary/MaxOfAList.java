@@ -28,7 +28,6 @@ package solver.constraints.nary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.PropMaxOfAList;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;

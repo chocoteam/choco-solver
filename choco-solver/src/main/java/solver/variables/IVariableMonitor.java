@@ -35,7 +35,7 @@ import java.io.Serializable;
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
  * or instantiation) and do something right after the modification.
  * <p/>
- * This differs from {@link solver.constraints.propagators.Propagator} because it is not scheduled in the propagation engine.
+ * This differs from {@link solver.constraints.Propagator} because it is not scheduled in the propagation engine.
  * However, it assumes that <code>this</code> executes fast and low complexity operations.
  * Otherwise, it should be a propagator.
  * <p/>

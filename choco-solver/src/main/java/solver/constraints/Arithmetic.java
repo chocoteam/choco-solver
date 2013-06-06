@@ -27,11 +27,11 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.propagators.binary.*;
-import solver.constraints.propagators.unary.PropEqualXC;
-import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
-import solver.constraints.propagators.unary.PropLessOrEqualXC;
-import solver.constraints.propagators.unary.PropNotEqualXC;
+import solver.constraints.binary.*;
+import solver.constraints.unary.PropEqualXC;
+import solver.constraints.unary.PropGreaterOrEqualXC;
+import solver.constraints.unary.PropLessOrEqualXC;
+import solver.constraints.unary.PropNotEqualXC;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import util.ESat;

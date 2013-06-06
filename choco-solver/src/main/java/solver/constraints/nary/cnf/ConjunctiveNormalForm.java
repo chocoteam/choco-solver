@@ -29,10 +29,7 @@ package solver.constraints.nary.cnf;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.nary.cnf.PropClause;
-import solver.constraints.propagators.nary.cnf.PropFalse;
-import solver.constraints.propagators.nary.cnf.PropTrue;
+import solver.constraints.Propagator;
 import solver.variables.BoolVar;
 import util.ESat;
 import util.VariableUtilities;

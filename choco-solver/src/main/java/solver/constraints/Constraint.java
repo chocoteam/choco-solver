@@ -30,7 +30,8 @@ package solver.constraints;
 
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.reification.DefaultOpposite;
+import solver.constraints.reification.ReificationConstraint;
 import solver.exception.ContradictionException;
 import solver.propagation.IPriority;
 import solver.variables.BoolVar;
@@ -74,7 +75,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @version 0.01, june 2010
  * @see solver.variables.Variable
- * @see solver.constraints.propagators.Propagator
+ * @see Propagator
  * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
@@ -262,7 +263,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public final void reifyWith(BoolVar bool){
 		assert (!isReified());
 		boolReif = bool;
-		getSolver().post(new ImplicationConstraint(boolReif,this,getOpposite()));
+		getSolver().post(new ReificationConstraint(boolReif,this,getOpposite()));
 	}
 
 	/**
@@ -272,7 +273,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public final BoolVar reif() {
 		if(boolReif==null){
 			boolReif = VF.bool(StringUtils.randomName(), getSolver());
-			getSolver().post(new ImplicationConstraint(boolReif,this,getOpposite()));
+			getSolver().post(new ReificationConstraint(boolReif,this,getOpposite()));
 		}
 		return boolReif;
 	}

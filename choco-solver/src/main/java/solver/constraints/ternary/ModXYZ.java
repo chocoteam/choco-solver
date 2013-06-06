@@ -29,10 +29,7 @@ package solver.constraints.ternary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.sum.PropSumEq;
-import solver.constraints.propagators.ternary.PropDivXYZ;
-import solver.constraints.propagators.ternary.PropTimesXY;
-import solver.constraints.propagators.ternary.PropTimesZ;
+import solver.constraints.nary.sum.PropSumEq;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import util.ESat;

@@ -29,7 +29,6 @@ package solver.constraints.nary.automata;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
-import solver.constraints.propagators.nary.automaton.PropRegular;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import util.ESat;

@@ -30,7 +30,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import memory.IStateInt;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;

@@ -28,9 +28,6 @@ package solver.constraints.real;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.real.IntToRealPropagator;
-import solver.constraints.propagators.real.RealPropagator;
-import solver.constraints.propagators.real.RealReifiedPropagator;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.RealVar;

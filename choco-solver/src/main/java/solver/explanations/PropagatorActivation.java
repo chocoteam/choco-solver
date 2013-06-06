@@ -26,7 +26,7 @@
  */
 package solver.explanations;
 
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 
 /**
  * A deduction dedicated to propagator activation.

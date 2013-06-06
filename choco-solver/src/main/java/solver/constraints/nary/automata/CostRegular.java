@@ -37,7 +37,6 @@ import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.costregular.Arc;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
-import solver.constraints.propagators.nary.automaton.PropCostRegular;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.Variable;

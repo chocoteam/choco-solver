@@ -29,7 +29,6 @@ package solver.constraints.ternary;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.Operator;
-import solver.constraints.propagators.ternary.PropDistanceXYZ;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import util.ESat;

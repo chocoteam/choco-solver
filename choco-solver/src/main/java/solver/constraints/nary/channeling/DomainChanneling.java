@@ -28,7 +28,6 @@ package solver.constraints.nary.channeling;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.channeling.PropEnumDomainChanneling;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import util.ESat;

@@ -36,7 +36,7 @@ import memory.IStateIntVector;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.ICause;
 import solver.constraints.nary.automata.structure.Node;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import util.iterators.DisposableIntIterator;

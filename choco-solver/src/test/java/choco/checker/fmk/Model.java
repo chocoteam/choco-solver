@@ -31,7 +31,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.propagators.nary.sum.PropBoolSum;
+import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.set.SetConstraintsFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.SetStrategyFactory;

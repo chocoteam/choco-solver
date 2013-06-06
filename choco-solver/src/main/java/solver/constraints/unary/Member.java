@@ -31,8 +31,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.unary.PropMemberBound;
-import solver.constraints.propagators.unary.PropMemberEnum;
 import solver.variables.IntVar;
 import util.ESat;
 

@@ -30,7 +30,7 @@ package solver.search.measure;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.*;
 

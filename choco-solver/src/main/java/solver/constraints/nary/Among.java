@@ -30,7 +30,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.PropAmongGAC;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
