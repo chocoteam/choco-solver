@@ -80,11 +80,12 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
         //			System.out.println("optimality proved");return;
         //		}
         if (!(solver.getMeasures().getSolutionCount() == 0
-                || solver.getSearchLoop().getLimits().isReached()
+                || solver.isCompleteSearch()
                 || isSearchComplete())) {
             restrictLess();
             solver.getSearchLoop().restartAfterEachSolution(true);
             solver.getSearchLoop().forceAlive(true);
+            solver.getSearchLoop().resetReachedLimit(false);
             solver.getSearchLoop().restart();
         }
     }

@@ -27,44 +27,28 @@
 
 package solver.search.limits;
 
-import solver.Solver;
+import solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
- * Set a limit over the number of found solutions allowed during the search.
+ * Set a limit over the number of nodes opened allowed during the search.
  * When this limit is reached, the search loop is informed and the resolution is stopped.
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public class SolutionLimit extends ALimit {
+public final class NodeCounter extends ACounter implements IMonitorOpenNode {
 
-    private long solutionlimit;
-
-    public SolutionLimit(Solver solver, long solutionlimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.solutionlimit = solutionlimit;
+    public NodeCounter(long nodelimit) {
+        super(nodelimit);
     }
 
     @Override
-    public boolean isReached() {
-        final long diff = solutionlimit - measures.getSolutionCount();
-        return diff <= 0;
+    public void beforeOpenNode() {
+        incCounter();
     }
 
     @Override
-    public String toString() {
-        return String.format("Solutions: %d >= %d", measures.getSolutionCount(), solutionlimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return solutionlimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        solutionlimit = newLimit;
+    public void afterOpenNode() {
     }
 }

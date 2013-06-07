@@ -32,7 +32,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
-import solver.search.limits.LimitChecker;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
@@ -126,9 +125,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    /* factory for limits management */
-    LimitChecker limitchecker;
-
+    boolean hasReachedLimit;
 
     /**
      * Solution pool -- way to record solutions. Default object is last solution recorded.
@@ -154,7 +151,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         smList = new SearchMonitorList();
         smList.add(this.measures);
         this.nextState = INIT;
-        this.limitchecker = new LimitChecker(this);
         rootWorldIndex = -1;
     }
 
@@ -297,9 +293,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             }
             sat = ESat.TRUE;
             if (objectivemanager.isOptimization()) {
-                measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
+                measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && hasReachedLimit);
             }
-        } else if (limitchecker.isReached()) {
+        } else if (hasReachedLimit) {
             measures.setObjectiveOptimal(false);
             sat = ESat.UNDEFINED;
         }
@@ -315,6 +311,19 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             decision = tmp.getPrevious();
             tmp.free();
         }
+    }
+
+    public final void reachLimit() {
+        hasReachedLimit = true;
+        interrupt();
+    }
+
+    public void resetReachedLimit(boolean bvalue) {
+        hasReachedLimit = bvalue;
+    }
+
+    public boolean hasReachedLimit() {
+        return hasReachedLimit;
     }
 
     /**
@@ -338,14 +347,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         nextState = RESTART;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Gets the list of limits over the search loop.
-     */
-    public LimitChecker getLimits() {
-        return limitchecker;
-    }
-
 
     @Override
     public void plugSearchMonitor(ISearchMonitor sm) {

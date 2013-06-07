@@ -27,56 +27,26 @@
 
 package solver.search.limits;
 
-import solver.Solver;
-import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.monitors.IMonitorSolution;
 
 /**
- * A limit over run time.
- * It acts as a monitor, to be up-to-date when the search loop asks for limit reaching.
+ * Set a limit over the number of found solutions allowed during the search.
+ * When this limit is reached, the search loop is informed and the resolution is stopped.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19/04/11
+ * @since 15 juil. 2010
  */
-public class TimeLimit extends ALimit implements IMonitorOpenNode {
+public class SolutionCounter extends ACounter implements IMonitorSolution {
 
-    private long timeLimit;
-
-    public TimeLimit(Solver solver, long timeLimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.timeLimit = timeLimit;
-        solver.getSearchLoop().plugSearchMonitor(this);
+    public SolutionCounter(long solutionlimit) {
+        super(solutionlimit);
     }
 
 
     @Override
-    public boolean isReached() {
-        final float diff = timeLimit - measures.getTimeCount();
-        return diff <= 0.0;
+    public void onSolution() {
+        incCounter();
     }
-
-    @Override
-    public String toString() {
-        return String.format("Time: %.3f >= %d", measures.getTimeCount(), timeLimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return timeLimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        timeLimit = newLimit;
-    }
-
-    @Override
-    public void beforeOpenNode() {
-        this.measures.updateTimeCount();
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
 }

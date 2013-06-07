@@ -42,7 +42,7 @@ import solver.explanations.Explanation;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.RecorderExplanationEngine;
 import solver.explanations.VariableState;
-import solver.search.limits.FailLimit;
+import solver.search.limits.FailCounter;
 import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -207,7 +207,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void solve() {
         // -----
         boolean lns = false;
-        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
+        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailCounter(100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
         }
