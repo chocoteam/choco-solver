@@ -80,7 +80,7 @@ public class MySQLViz {
 
     public void display() throws SQLException {
         JFrame frame = new JFrame("");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         PreparedStatement statement = connection.prepareStatement("select NAME from BENCHMARKS;");
         ResultSet resultSet = statement.executeQuery();
 
@@ -203,7 +203,7 @@ public class MySQLViz {
 
     private void display(JFreeChart... chart) {
         JFrame frame = new JFrame("");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JTabbedPane tabbedPane = new JTabbedPane();
 		JPanel mainpane = new JPanel(new BorderLayout());
         frame.setContentPane(mainpane);
