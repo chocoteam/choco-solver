@@ -47,10 +47,10 @@ import java.util.Vector;
  */
 public class MySQLViz {
 
-    private static final String QUERY1 = "SELECT t0.NAME, t1.%s +0 as %s, t2.%s +0 as %s FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
+    private static final String QUERY1 = "SELECT t0.NAME, t1.%s +0 as \"%s\", t2.%s +0 as \"%s\" FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
             "WHERE t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s, t2.%s";
 
-    private static final String QUERY2 = "SELECT t0.NAME, t1.%s +0 as %s, t2.%s +0 as %s " +
+    private static final String QUERY2 = "SELECT t0.NAME, t1.%s +0 as \"%s\", t2.%s +0 as \"%s\" " +
             "FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
             "WHERE t0.NAME like \"%s\" AND t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s ASC, t2.%s ASC";
 
@@ -294,7 +294,7 @@ public class MySQLViz {
 //        ms.display();
 //        ms.compare();
 //        ms.compare("MZN20130603");
-        ms.compare("JACOP", "MZN20130606", "");
+        ms.compare("MZN20130606", "MZN20130607.093635", "");
 
 //        ms.history("filter_fir_1_1.fzn");
 
