@@ -44,7 +44,9 @@ import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.ISolutionPool;
+import solver.search.solution.ISolutionRecorder;
+import solver.search.solution.LastSolutionRecorder;
+import solver.search.solution.Solution;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -73,44 +75,32 @@ import java.util.Arrays;
  */
 public class Solver implements Serializable {
 
-
     private static final long serialVersionUID = 3L;
 
     private ExplanationEngine explainer;
 
-    /**
-     * Variables of the solver
-     */
+    /** Variables of the solver */
     Variable[] vars;
     int vIdx;
-    /**
-     * Constraints of the solver
-     */
+
+    /** Constraints of the solver */
     Constraint[] cstrs;
     int cIdx;
 
     public TIntObjectHashMap<ConstantView> cachedConstants;
 
-    /**
-     * Environment, based of the search tree (trailing or copying)
-     */
+    /** Environment, based of the search tree (trailing or copying) */
     final IEnvironment environment;
 
-    /**
-     * Search loop of the solver
-     */
+    /** Search loop of the solver */
     protected AbstractSearchLoop search;
 
     protected IPropagationEngine engine;
 
-    /**
-     * Solver's measures
-     */
+    /** Solver's measures */
     protected final IMeasures measures;
 
-    /**
-     * Solver name
-     */
+    /** Solver name */
     protected String name;
 
     /**
@@ -159,7 +149,6 @@ public class Solver implements Serializable {
         ONE = new BoolConstantView("1", 1, this);
         ZERO._setNot(ONE);
         ONE._setNot(ZERO);
-
         TRUE = new Constraint(this) {
             {
                 setPropagators(new PropTrue(this.getSolver()));
@@ -330,18 +319,6 @@ public class Solver implements Serializable {
      */
     public void set(ExplanationEngine explainer) {
         this.explainer = explainer;
-    }
-
-    /**
-     * By default, no solution is stored during the resolution process
-     * ({@link solver.search.solution.SolutionPoolFactory#NO_SOLUTION}).
-     * <p/>
-     * One may want to store one or more solutions found. To do so, overriding the default solution pool is required.
-     *
-     * @param solutionPool a solution pool, use {@link solver.search.solution.SolutionPoolFactory}
-     */
-    public void set(ISolutionPool solutionPool) {
-        this.search.setSolutionpool(solutionPool);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,6 +527,7 @@ public class Solver implements Serializable {
             throw new SolverException("No objective variable has been defined");
         }
         this.search.setObjectivemanager(new ObjectiveManager(objective, policy, this));
+		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
         solve(false);
         return new int[]{search.getObjectivemanager().getBestLB(), search.getObjectivemanager().getBestUB()};
     }

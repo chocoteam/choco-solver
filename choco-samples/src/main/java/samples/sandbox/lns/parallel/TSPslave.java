@@ -34,7 +34,6 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
-import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
@@ -111,9 +110,7 @@ public class TSPslave extends AbstractParallelSlave {
         GraphStrategies strategy = new GraphStrategies(undi, distMatrix, null);
         strategy.configure(GraphStrategies.MAX_COST, true);
         solver.set(new StrategiesSequencer(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), strategy));
-        solver.set(SolutionPoolFactory.LAST_ONE.make());
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
-        solver.getSearchLoop().getSolutionpool().getBest().restore();
         //output
         if (solver.getMeasures().getSolutionCount() == 0) {
             throw new UnsupportedOperationException();

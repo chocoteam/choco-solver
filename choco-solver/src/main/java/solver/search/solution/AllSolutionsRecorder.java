@@ -25,41 +25,43 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 07/06/13
+ * Time: 14:10
+ */
+
 package solver.search.solution;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 
-import java.io.Serializable;
-import java.util.List;
+import java.util.LinkedList;
 
-/**
- * An interface to define a solution pool.
- * A solution pool stores solutions found during the resolution process.
- * <p/>
- * <br/>
- *
- * @author Arnaud Malapert
- * @author Charles Prud'homme
- * @since 19 juil. 2010
- */
-public interface ISolutionPool extends Serializable {
+public class AllSolutionsRecorder implements ISolutionRecorder {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(ISolutionPool.class);
+	LinkedList<Solution> solutions;
+	Solver solver;
 
-    void clear();
+	public AllSolutionsRecorder(Solver solver){
+		this.solver = solver;
+		this.solutions = new LinkedList();
+	}
 
-    boolean isEmpty();
+	@Override
+	public void onSolution() {
+		Solution solution = new Solution();
+		solution.record(solver);
+		solutions.add(solution);
+	}
 
-    long size();
+	@Override
+	public Solution getLastSolution() {
+		return solutions.getLast();
+	}
 
-    void recordSolution(Solver solver);
-
-    Solution getBest();
-
-    void restoreBest();
-
-    List<Solution> asList();
-
+	@Override
+	public LinkedList<Solution> getAllSolutions() {
+		return solutions;
+	}
 }

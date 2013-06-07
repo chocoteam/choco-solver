@@ -108,7 +108,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         //todo: checker d'etat
         solver.setFeasible(ESat.TRUE);
         assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
-        solutionpool.recordSolution(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
             interrupt();
