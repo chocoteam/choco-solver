@@ -24,46 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.limits;
 
-import solver.Solver;
-import solver.search.loop.monitors.IMonitorOpenNode;
-
 /**
- * A limit over run time.
- * It acts as a monitor, to be up-to-date when the search loop asks for limit reaching.
+ * An interface to define action to be done when a counter has reached its limit
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19/04/11
+ * @since 07/06/13
  */
-public class TimeLimit extends ALimit implements IMonitorOpenNode {
+public interface ICounterAction {
 
-    private Solver solver;
-
-    private static final int IN_NS = 1000 * 1000;
-
-    public TimeLimit(Solver solver, long timeLimit) {
-        super(timeLimit * IN_NS); // <- timelimit is in ms, we compare with ns!
-        this.solver = solver;
-    }
-
-
-    @Override
-    public void init() {
-        solver.getMeasures().updateTimeCount();
-        long time = (long) (solver.getMeasures().getTimeCount() * IN_NS);
-        max += System.nanoTime() - time;
-    }
-
-    @Override
-    public void beforeOpenNode() {
-        current = max - System.nanoTime();
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
+    /**
+     * Action to execute when a limit is reached
+     */
+    void onLimitReached();
 
 }

@@ -27,49 +27,28 @@
 
 package solver.search.limits;
 
+import solver.search.loop.monitors.IMonitorOpenNode;
+
 /**
+ * Set a limit over the number of nodes opened allowed during the search.
+ * When this limit is reached, the search loop is informed and the resolution is stopped.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 29 juil. 2010
+ * @since 15 juil. 2010
  */
-public abstract class ALimit implements ILimit {
+public final class NodeCounter extends ACounter implements IMonitorOpenNode {
 
-    protected long max, current;
-
-    public ALimit(long limit) {
-        max = current = limit;
+    public NodeCounter(long nodelimit) {
+        super(nodelimit);
     }
 
     @Override
-    public void init() {
+    public void beforeOpenNode() {
+        incCounter();
     }
 
     @Override
-    public void update() {
+    public void afterOpenNode() {
     }
-
-    @Override
-    public final void overrideLimit(long newLimit) {
-        max = current = newLimit;
-    }
-
-    @Override
-    public final boolean isReached() {
-        return current <= 0;
-    }
-
-    @Override
-    public long getLimitValue() {
-        return max - current;
-    }
-
-    protected final void incCounter() {
-        current--;
-    }
-
-    protected final void incCounter(long value) {
-        current -= value;
-    }
-
 }

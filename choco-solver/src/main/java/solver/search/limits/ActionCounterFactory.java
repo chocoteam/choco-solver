@@ -24,32 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.limits;
 
-import solver.search.loop.monitors.IMonitorOpenNode;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
- * Set a limit over the number of nodes opened allowed during the search.
- * When this limit is reached, the search loop is informed and the resolution is stopped.
+ * A factory dedicated to counter actions; action to be performed when a counter reached its limit.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15 juil. 2010
+ * @since 07/06/13
  */
-public final class NodeLimit extends ALimit implements IMonitorOpenNode {
+public class ActionCounterFactory {
 
-
-    public NodeLimit(long nodelimit) {
-        super(nodelimit);
+    private ActionCounterFactory() {
     }
 
-    @Override
-    public void beforeOpenNode() {
-        incCounter();
+    private static ThreadLocal<ICounterAction> none = new ThreadLocal<ICounterAction>() {
+        @Override
+        protected ICounterAction initialValue() {
+            return new ICounterAction() {
+                @Override
+                public void onLimitReached() {
+                    // nothing
+                }
+            };
+        }
+    };
+
+    public static ICounterAction none() {
+        return none.get();
     }
 
-    @Override
-    public void afterOpenNode() {
+
+    public static ICounterAction interruptSearch(final AbstractSearchLoop searchLoop) {
+        return new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                searchLoop.reachLimit();
+            }
+        };
+    }
+
+    public static ICounterAction restartSearch(final AbstractSearchLoop searchLoop) {
+        return new ICounterAction() {
+            @Override
+            public void onLimitReached() {
+                searchLoop.restart();
+            }
+        };
     }
 }

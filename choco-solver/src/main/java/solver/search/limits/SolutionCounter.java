@@ -27,10 +27,10 @@
 
 package solver.search.limits;
 
-import solver.search.loop.monitors.IMonitorUpBranch;
+import solver.search.loop.monitors.IMonitorSolution;
 
 /**
- * Set a limit over the number of backtracks allowed during the search.
+ * Set a limit over the number of found solutions allowed during the search.
  * When this limit is reached, the search loop is informed and the resolution is stopped.
  * <p/>
  * <br/>
@@ -38,18 +38,15 @@ import solver.search.loop.monitors.IMonitorUpBranch;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public final class BacktrackLimit extends ALimit implements IMonitorUpBranch {
+public class SolutionCounter extends ACounter implements IMonitorSolution {
 
-    public BacktrackLimit(long backtracklimit) {
-        super(backtracklimit);
+    public SolutionCounter(long solutionlimit) {
+        super(solutionlimit);
     }
 
+
     @Override
-    public void beforeUpBranch() {
+    public void onSolution() {
         incCounter();
-    }
-
-    @Override
-    public void afterUpBranch() {
     }
 }

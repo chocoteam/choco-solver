@@ -27,25 +27,79 @@
 
 package solver.search.limits;
 
-import solver.exception.ContradictionException;
-import solver.search.loop.monitors.IMonitorContradiction;
+import solver.search.loop.monitors.IMonitorInitialize;
 
 /**
- * Set a limit over the number of fails allowed during the search.
- * When this limit is reached, the search loop is informed and the resolution is stopped.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15 juil. 2010
+ * @since 29 juil. 2010
  */
-public final class FailLimit extends ALimit implements IMonitorContradiction {
+public abstract class ACounter implements ICounter, IMonitorInitialize {
 
-    public FailLimit(long faillimit) {
-        super(faillimit);
+    protected long max, current;
+    protected ICounterAction action;
+
+    public ACounter(long limit) {
+        max = limit;
+        current = 0;
+        this.action = ActionCounterFactory.none();
     }
 
     @Override
-    public void onContradiction(ContradictionException cex) {
-        current--;
+    public void init() {
+    }
+
+    @Override
+    public void update() {
+    }
+
+    @Override
+    public final void overrideLimit(long newLimit) {
+        max = newLimit;
+    }
+
+    @Override
+    public void reset() {
+        current = 0;
+        init();
+    }
+
+    @Override
+    public final boolean isReached() {
+        return max - current <= 0;
+    }
+
+    @Override
+    public long getLimitValue() {
+        return max;
+    }
+
+    protected final void incCounter() {
+        current++;
+        if (isReached()) {
+            action.onLimitReached();
+        }
+    }
+
+    protected final void setCounter(long value) {
+        current = value;
+        if (isReached()) {
+            action.onLimitReached();
+        }
+    }
+
+    @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
+    public void afterInitialize() {
+        this.init();
+    }
+
+    @Override
+    public void setAction(ICounterAction action) {
+        this.action = action;
     }
 }

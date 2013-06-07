@@ -27,6 +27,8 @@
 
 package solver.search.limits;
 
+import solver.Solver;
+import solver.search.loop.monitors.IMonitorInitialize;
 import solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
@@ -37,7 +39,7 @@ import solver.search.loop.monitors.IMonitorOpenNode;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public class ThreadTimeLimit extends Thread implements ILimit, IMonitorOpenNode {
+public class ThreadTimeCounter extends Thread implements ICounter, IMonitorOpenNode, IMonitorInitialize {
 
     private long timelimit;
 
@@ -47,10 +49,13 @@ public class ThreadTimeLimit extends Thread implements ILimit, IMonitorOpenNode 
 
     private volatile boolean isreached;
 
-    public ThreadTimeLimit(long duration) {
+    private ICounterAction action;
+
+
+    public ThreadTimeCounter(Solver solver, long duration) {
         super("time limit");
         this.duration = duration;
-        this.threshold = duration / 10;
+        this.threshold = duration / 3;
         this.isreached = false;
     }
 
@@ -102,10 +107,32 @@ public class ThreadTimeLimit extends Thread implements ILimit, IMonitorOpenNode 
     }
 
     @Override
+    public void reset() {
+        throw new UnsupportedOperationException("ThreadLimit cannot be reset");
+    }
+
+    @Override
     public void beforeOpenNode() {
+        if (isreached) {
+            action.onLimitReached();
+        }
     }
 
     @Override
     public void afterOpenNode() {
+    }
+
+    @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
+    public void afterInitialize() {
+        this.init();
+    }
+
+    @Override
+    public void setAction(ICounterAction action) {
+        this.action = action;
     }
 }

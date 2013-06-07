@@ -37,7 +37,7 @@ import solver.Solver;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.limits.FailLimit;
+import solver.search.limits.FailCounter;
 import solver.search.loop.monitors.IMonitorDownBranch;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -389,7 +389,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
                 SearchMonitorFactory.geometrical(solver, 3 * vars.length, r,
-                        new FailLimit(3 * vars.length), Integer.MAX_VALUE);
+                        new FailCounter(3 * vars.length), Integer.MAX_VALUE);
 
             }
         }
