@@ -27,8 +27,6 @@
 
 package solver.search.limits;
 
-import solver.search.measure.IMeasures;
-
 /**
  * <br/>
  *
@@ -37,10 +35,10 @@ import solver.search.measure.IMeasures;
  */
 public abstract class ALimit implements ILimit {
 
-    final IMeasures measures;
+    protected long max, current;
 
-    public ALimit(IMeasures measures) {
-        this.measures = measures;
+    public ALimit(long limit) {
+        max = current = limit;
     }
 
     @Override
@@ -50,4 +48,28 @@ public abstract class ALimit implements ILimit {
     @Override
     public void update() {
     }
+
+    @Override
+    public final void overrideLimit(long newLimit) {
+        max = current = newLimit;
+    }
+
+    @Override
+    public final boolean isReached() {
+        return current <= 0;
+    }
+
+    @Override
+    public long getLimitValue() {
+        return max - current;
+    }
+
+    protected final void incCounter() {
+        current--;
+    }
+
+    protected final void incCounter(long value) {
+        current -= value;
+    }
+
 }

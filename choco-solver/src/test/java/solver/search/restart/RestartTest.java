@@ -68,7 +68,7 @@ public class RestartTest {
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.geometrical(solver, 2, 1.2,
-                new NodeLimit(solver, 2), 2);
+                new NodeLimit(2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -80,7 +80,7 @@ public class RestartTest {
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.luby(solver, 2, 2,
-                new NodeLimit(solver, 2), 2);
+                new NodeLimit(2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);

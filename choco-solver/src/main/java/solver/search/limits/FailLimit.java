@@ -27,7 +27,8 @@
 
 package solver.search.limits;
 
-import solver.Solver;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorContradiction;
 
 /**
  * Set a limit over the number of fails allowed during the search.
@@ -37,33 +38,14 @@ import solver.Solver;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public final class FailLimit extends ALimit {
+public final class FailLimit extends ALimit implements IMonitorContradiction {
 
-    private long faillimit;
-
-    public FailLimit(Solver solver, long faillimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.faillimit = faillimit;
+    public FailLimit(long faillimit) {
+        super(faillimit);
     }
 
     @Override
-    public boolean isReached() {
-        final long diff = faillimit - measures.getFailCount();
-        return diff <= 0;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Fails: %d >= %d", measures.getFailCount(), faillimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return faillimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        faillimit = newLimit;
+    public void onContradiction(ContradictionException cex) {
+        current--;
     }
 }

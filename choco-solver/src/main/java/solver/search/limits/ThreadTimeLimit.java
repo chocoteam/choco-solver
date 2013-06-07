@@ -27,6 +27,8 @@
 
 package solver.search.limits;
 
+import solver.search.loop.monitors.IMonitorOpenNode;
+
 /**
  * Set a limit over the search time.
  * When this limit is reached, the search loop is informed and the resolution is stopped.
@@ -35,7 +37,7 @@ package solver.search.limits;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public class ThreadTimeLimit extends Thread implements ILimit {
+public class ThreadTimeLimit extends Thread implements ILimit, IMonitorOpenNode {
 
     private long timelimit;
 
@@ -97,5 +99,13 @@ public class ThreadTimeLimit extends Thread implements ILimit {
         long diff = newLimit - duration;
         duration = newLimit;
         timelimit += diff;
+    }
+
+    @Override
+    public void beforeOpenNode() {
+    }
+
+    @Override
+    public void afterOpenNode() {
     }
 }

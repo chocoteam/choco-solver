@@ -27,7 +27,7 @@
 
 package solver.search.limits;
 
-import solver.Solver;
+import solver.search.loop.monitors.IMonitorSolution;
 
 /**
  * Set a limit over the number of found solutions allowed during the search.
@@ -38,33 +38,15 @@ import solver.Solver;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public class SolutionLimit extends ALimit {
+public class SolutionLimit extends ALimit implements IMonitorSolution {
 
-    private long solutionlimit;
-
-    public SolutionLimit(Solver solver, long solutionlimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.solutionlimit = solutionlimit;
+    public SolutionLimit(long solutionlimit) {
+        super(solutionlimit);
     }
 
-    @Override
-    public boolean isReached() {
-        final long diff = solutionlimit - measures.getSolutionCount();
-        return diff <= 0;
-    }
 
     @Override
-    public String toString() {
-        return String.format("Solutions: %d >= %d", measures.getSolutionCount(), solutionlimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return solutionlimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        solutionlimit = newLimit;
+    public void onSolution() {
+        incCounter();
     }
 }

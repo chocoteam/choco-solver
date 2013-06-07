@@ -68,6 +68,7 @@ public class LimitChecker implements Serializable, IMonitorInitialize, IMonitorO
             searchloop.plugSearchMonitor(this);
         }
         limits.add(limit);
+        searchloop.plugSearchMonitor(limit);
     }
 
     public void remove(ILimit limit) {

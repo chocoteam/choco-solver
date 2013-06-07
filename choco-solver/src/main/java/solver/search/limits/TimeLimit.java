@@ -40,39 +40,26 @@ import solver.search.loop.monitors.IMonitorOpenNode;
  */
 public class TimeLimit extends ALimit implements IMonitorOpenNode {
 
-    private long timeLimit;
+    private Solver solver;
+
+    private static final int IN_NS = 1000 * 1000;
 
     public TimeLimit(Solver solver, long timeLimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.timeLimit = timeLimit;
-        solver.getSearchLoop().plugSearchMonitor(this);
+        super(timeLimit * IN_NS); // <- timelimit is in ms, we compare with ns!
+        this.solver = solver;
     }
 
 
     @Override
-    public boolean isReached() {
-        final float diff = timeLimit - measures.getTimeCount();
-        return diff <= 0.0;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Time: %.3f >= %d", measures.getTimeCount(), timeLimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return timeLimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        timeLimit = newLimit;
+    public void init() {
+        solver.getMeasures().updateTimeCount();
+        long time = (long) (solver.getMeasures().getTimeCount() * IN_NS);
+        max += System.nanoTime() - time;
     }
 
     @Override
     public void beforeOpenNode() {
-        this.measures.updateTimeCount();
+        current = max - System.nanoTime();
     }
 
     @Override

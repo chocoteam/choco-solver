@@ -27,6 +27,8 @@
 
 package solver.search.limits;
 
+import solver.search.loop.monitors.ISearchMonitor;
+
 import java.io.Serializable;
 
 /**
@@ -48,7 +50,7 @@ import java.io.Serializable;
  * @see solver.search.limits.SolutionLimit
  * @since 15 juil. 2010
  */
-public interface ILimit extends Serializable {
+public interface ILimit extends Serializable, ISearchMonitor {
 
     void init();
 

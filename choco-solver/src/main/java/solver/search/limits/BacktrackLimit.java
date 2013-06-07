@@ -27,7 +27,7 @@
 
 package solver.search.limits;
 
-import solver.Solver;
+import solver.search.loop.monitors.IMonitorUpBranch;
 
 /**
  * Set a limit over the number of backtracks allowed during the search.
@@ -38,33 +38,18 @@ import solver.Solver;
  * @author Charles Prud'homme
  * @since 15 juil. 2010
  */
-public final class BacktrackLimit extends ALimit {
+public final class BacktrackLimit extends ALimit implements IMonitorUpBranch {
 
-    private long backtracklimit;
-
-    public BacktrackLimit(Solver solver, long backtracklimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.backtracklimit = backtracklimit;
+    public BacktrackLimit(long backtracklimit) {
+        super(backtracklimit);
     }
 
     @Override
-    public boolean isReached() {
-        final long diff = backtracklimit - measures.getBackTrackCount();
-        return diff <= 0;
+    public void beforeUpBranch() {
+        incCounter();
     }
 
     @Override
-    public String toString() {
-        return String.format("backtracks: %d >= %d", measures.getBackTrackCount(), backtracklimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return backtracklimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        backtracklimit = newLimit;
+    public void afterUpBranch() {
     }
 }

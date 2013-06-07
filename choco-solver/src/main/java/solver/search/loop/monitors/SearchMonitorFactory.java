@@ -278,7 +278,7 @@ public class SearchMonitorFactory {
      * @param limit maximal number of nodes to open
      */
     public static void limitNode(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new NodeLimit(solver, limit));
+        solver.getSearchLoop().getLimits().add(new NodeLimit(limit));
     }
 
     /**
@@ -288,7 +288,7 @@ public class SearchMonitorFactory {
      * @param limit maximal number of solutions
      */
     public static void limitSolution(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new SolutionLimit(solver, limit));
+        solver.getSearchLoop().getLimits().add(new SolutionLimit(limit));
     }
 
 
@@ -324,7 +324,7 @@ public class SearchMonitorFactory {
      * @param limit maximal number of fails
      */
     public static void limitFail(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new FailLimit(solver, limit));
+        solver.getSearchLoop().getLimits().add(new FailLimit(limit));
     }
 
     /**
@@ -334,7 +334,7 @@ public class SearchMonitorFactory {
      * @param limit maximal number of backtracks
      */
     public static void limitBacktrack(Solver solver, long limit) {
-        solver.getSearchLoop().getLimits().add(new BacktrackLimit(solver, limit));
+        solver.getSearchLoop().getLimits().add(new BacktrackLimit(limit));
     }
 
 

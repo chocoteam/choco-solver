@@ -389,7 +389,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
                 SearchMonitorFactory.geometrical(solver, 3 * vars.length, r,
-                        new FailLimit(solver, 3 * vars.length), Integer.MAX_VALUE);
+                        new FailLimit(3 * vars.length), Integer.MAX_VALUE);
 
             }
         }

@@ -207,7 +207,7 @@ public class AirPlaneLanding extends AbstractProblem {
     public void solve() {
         // -----
         boolean lns = false;
-        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(solver, 100), 100);
+        SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailLimit(100), 100);
         if (lns) {
             solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
         }
