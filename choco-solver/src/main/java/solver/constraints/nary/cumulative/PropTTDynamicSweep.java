@@ -252,11 +252,11 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
                     hidx = 3 * nbTasks + curEvt[1] * nbResources;
 					if (curEvt[2] == Event.FSCP) {
                         for (int r=0;r<nbResources;r++) {
-                            height[r] += vars[hidx+r].getValue();
+                            height[r] += vars[hidx+r].getLB();//Value();
                         }
                     } else if (curEvt[2] == Event.FECP) {
                         for (int r=0;r<nbResources;r++) {
-                            height[r] -= vars[hidx+r].getValue();
+                            height[r] -= vars[hidx+r].getLB();//getValue();
                         }
                     }
 
@@ -1029,7 +1029,7 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
             if ( minStart > ls[t] ) {
                 prunning = true;
                 ls[t] = minStart;
-                le[t] = minEnd;
+                le[t] = Math.max(le[t],ls[t]+ld[t]);
             }
         }
 
@@ -1323,11 +1323,11 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
         }
 
         public void adjustMax(int t, int maxStart, int maxEnd) {
-            assert(maxStart < maxEnd);
-            assert(maxStart + ld[t] == maxEnd);
+//            assert(maxStart < maxEnd);
+//            assert(maxStart + ld[t] == maxEnd);
             if ( maxEnd < ue[t] ) {
                 prunning = true;
-                us[t] = maxStart;
+                us[t] = Math.min(us[t],ue[t]-ld[t]);
                 ue[t] = maxEnd;
             }
         }
@@ -1362,7 +1362,7 @@ public class PropTTDynamicSweep extends Propagator<IntVar> {
                 processEvents();
                 filter();
             }
-            assert (maxProperty());
+//            assert (maxProperty());
             return prunning;
         }
 
