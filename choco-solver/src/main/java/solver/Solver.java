@@ -470,7 +470,7 @@ public class Solver implements Serializable {
      * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
      */
     public boolean isCompleteSearch() {
-        return !search.getLimits().isReached();
+        return !search.hasReachedLimit();
     }
 
     /**

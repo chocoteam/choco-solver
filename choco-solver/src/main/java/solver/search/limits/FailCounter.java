@@ -27,27 +27,25 @@
 
 package solver.search.limits;
 
-import solver.search.measure.IMeasures;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.IMonitorContradiction;
 
 /**
+ * Set a limit over the number of fails allowed during the search.
+ * When this limit is reached, the search loop is informed and the resolution is stopped.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 29 juil. 2010
+ * @since 15 juil. 2010
  */
-public abstract class ALimit implements ILimit {
+public final class FailCounter extends ACounter implements IMonitorContradiction {
 
-    final IMeasures measures;
-
-    public ALimit(IMeasures measures) {
-        this.measures = measures;
+    public FailCounter(long faillimit) {
+        super(faillimit);
     }
 
     @Override
-    public void init() {
-    }
-
-    @Override
-    public void update() {
+    public void onContradiction(ContradictionException cex) {
+        incCounter();
     }
 }

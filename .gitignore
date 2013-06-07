@@ -10,3 +10,4 @@ parser/src/lib/*
 *.DS_Store
 
 choco-parser/src/main/resources/mysql.properties
+choco-solver/src/test/resources/logback-test

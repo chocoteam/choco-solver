@@ -27,37 +27,45 @@
 
 package solver.search.limits;
 
-import java.io.Serializable;
+import solver.Solver;
+import solver.search.loop.monitors.IMonitorOpenNode;
 
 /**
- * <code>LimitChecker</code> is an abstract class extending <code>Thread</code>.
- * When it has been started, it sleeps during <code>sleeptime</code> and awake, check the particular limit
- * defined by the extension. If the limit is not reached, it falls asleep. Otherwise,
- * it informs the <code>AbstractSearchLoop</code> that it should stop.
- * A limit can only be used once. Using a limit twice, ie starting it more than one time, leads to a
- * {@link IllegalThreadStateException}.
- * <p/>
- * TODO: deal with multiple uses of a limit...
+ * A limit over run time.
+ * It acts as a monitor, to be up-to-date when the search loop asks for limit reaching.
  * <br/>
  *
  * @author Charles Prud'homme
- * @see ThreadTimeLimit
- * @see solver.search.limits.NodeLimit
- * @see solver.search.limits.BacktrackLimit
- * @see solver.search.limits.FailLimit
- * @see solver.search.limits.SolutionLimit
- * @since 15 juil. 2010
+ * @since 19/04/11
  */
-public interface ILimit extends Serializable {
+public class TimeCounter extends ACounter implements IMonitorOpenNode {
 
-    void init();
+    private Solver solver;
 
-    boolean isReached();
+    private static final int IN_NS = 1000 * 1000;
 
-    void update();
+    private long offset;
 
-    long getLimitValue();
+    public TimeCounter(Solver solver, long timeLimit) {
+        super(timeLimit * IN_NS); // <- timelimit is in ms, we compare with ns!
+        this.solver = solver;
+    }
 
-    void overrideLimit(long newLimit);
+
+    @Override
+    public void init() {
+        solver.getMeasures().updateTimeCount();
+        long time = (long) (solver.getMeasures().getTimeCount() * IN_NS);
+        offset = System.nanoTime() - time;
+    }
+
+    @Override
+    public void beforeOpenNode() {
+        setCounter(System.nanoTime() - offset);
+    }
+
+    @Override
+    public void afterOpenNode() {
+    }
 
 }

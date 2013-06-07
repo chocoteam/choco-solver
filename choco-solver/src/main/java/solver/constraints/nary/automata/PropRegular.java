@@ -85,26 +85,25 @@ public class PropRegular extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
             graph = initGraph(solver.getEnvironment(), vars, automaton);
-        } else {
-            for (int i = 0; i < vars.length; i++) {
-                graph.updateSupports(i, vars[i], this);
-            }
-            int left, right;
-            for (int i = 0; i < vars.length; i++) {
-                left = right = Integer.MIN_VALUE;
-                for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
-                    StoredIndexedBipartiteSet sup = graph.getSupport(i, j);
-                    if (sup == null || sup.isEmpty()) {
-                        if (j == right + 1) {
-                            right = j;
-                        } else {
-                            vars[i].removeInterval(left, right, aCause);
-                            left = right = j;
-                        }
+        }
+        for (int i = 0; i < vars.length; i++) {
+            graph.updateSupports(i, vars[i], this);
+        }
+        int left, right;
+        for (int i = 0; i < vars.length; i++) {
+            left = right = Integer.MIN_VALUE;
+            for (int j = vars[i].getLB(); j <= vars[i].getUB(); j = vars[i].nextValue(j)) {
+                StoredIndexedBipartiteSet sup = graph.getSupport(i, j);
+                if (sup == null || sup.isEmpty()) {
+                    if (j == right + 1) {
+                        right = j;
+                    } else {
+                        vars[i].removeInterval(left, right, aCause);
+                        left = right = j;
                     }
                 }
-                vars[i].removeInterval(left, right, aCause);
             }
+            vars[i].removeInterval(left, right, aCause);
         }
         for (int i = 0; i < idms.length; i++) {
             idms[i].unfreeze();

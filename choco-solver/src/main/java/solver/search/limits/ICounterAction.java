@@ -24,46 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.limits;
 
-import solver.Solver;
-
 /**
- * Set a limit over the number of nodes opened allowed during the search.
- * When this limit is reached, the search loop is informed and the resolution is stopped.
+ * An interface to define action to be done when a counter has reached its limit
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15 juil. 2010
+ * @since 07/06/13
  */
-public final class NodeLimit extends ALimit {
+public interface ICounterAction {
 
-    private long nodelimit;
+    /**
+     * Action to execute when a limit is reached
+     */
+    void onLimitReached();
 
-    public NodeLimit(Solver solver, long nodelimit) {
-        super(solver.getSearchLoop().getMeasures());
-        this.nodelimit = nodelimit;
-    }
-
-    @Override
-    public boolean isReached() {
-        final long diff = nodelimit - measures.getNodeCount();
-        return diff <= 0;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Nodes: %d >= %d", measures.getNodeCount(), nodelimit);
-    }
-
-    @Override
-    public long getLimitValue() {
-        return nodelimit;
-    }
-
-    @Override
-    public void overrideLimit(long newLimit) {
-        nodelimit = newLimit;
-    }
 }
