@@ -36,8 +36,6 @@ import solver.search.limits.LimitChecker;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
-import solver.search.solution.ISolutionPool;
-import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -128,12 +126,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /* factory for limits management */
     LimitChecker limitchecker;
-
-
-    /**
-     * Solution pool -- way to record solutions. Default object is last solution recorded.
-     */
-    ISolutionPool solutionpool = SolutionPoolFactory.LAST_ONE.make();
 
     public SearchMonitorList smList;
 
@@ -290,11 +282,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void close() {
         ESat sat = ESat.FALSE;
         if (measures.getSolutionCount() > 0) {
-            if (!stopAtFirstSolution) {
-                restoreRootNode();
-                env.worldPush();
-                solutionpool.restoreBest();
-            }
             sat = ESat.TRUE;
             if (objectivemanager.isOptimization()) {
                 measures.setObjectiveOptimal(measures.getSolutionCount() > 0 && stopAtFirstSolution && limitchecker.isReached());
@@ -362,24 +349,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             plugSearchMonitor(objectivemanager);
         }
         this.measures.declareObjective();
-    }
-
-    /**
-     * Return the set of solution found during resolution.
-     * Depending on the choice made, the set of solution can be empty even if some solutions has been found.
-     */
-    public ISolutionPool getSolutionpool() {
-        return solutionpool;
-    }
-
-    /**
-     * Override the default pool of solutions.
-     *
-     * @param solutionpool a pool of solutions
-     * @see SolutionPoolFactory
-     */
-    public void setSolutionpool(ISolutionPool solutionpool) {
-        this.solutionpool = solutionpool;
     }
 
     public void restartAfterEachSolution(boolean does) {

@@ -34,8 +34,34 @@
 
 package solver.search.solution;
 
-public class AllSolutionsRecorder {
+import solver.Solver;
 
-	public static no
+import java.util.LinkedList;
 
+public class AllSolutionsRecorder implements ISolutionRecorder {
+
+	LinkedList<Solution> solutions;
+	Solver solver;
+
+	public AllSolutionsRecorder(Solver solver){
+		this.solver = solver;
+		this.solutions = new LinkedList();
+	}
+
+	@Override
+	public void onSolution() {
+		Solution solution = new Solution();
+		solution.record(solver);
+		solutions.add(solution);
+	}
+
+	@Override
+	public Solution getLastSolution() {
+		return solutions.getLast();
+	}
+
+	@Override
+	public LinkedList<Solution> getAllSolutions() {
+		return solutions;
+	}
 }

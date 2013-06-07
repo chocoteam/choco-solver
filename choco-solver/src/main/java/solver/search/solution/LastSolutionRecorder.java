@@ -37,16 +37,19 @@ package solver.search.solution;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.loop.monitors.IMonitorClose;
-import solver.search.loop.monitors.IMonitorSolution;
 
-public class LastSolutionRecorder implements IMonitorSolution, IMonitorClose {
+import java.util.LinkedList;
+
+public class LastSolutionRecorder implements ISolutionRecorder, IMonitorClose {
 
 	Solution solution;
 	Solver solver;
+	boolean restoreOnClose;
 
-	public LastSolutionRecorder(Solution solution, Solver solver){
+	public LastSolutionRecorder(Solution solution, boolean restoreOnClose, Solver solver){
 		this.solver = solver;
 		this.solution = solution;
+		this.restoreOnClose = restoreOnClose;
 	}
 
 	@Override
@@ -56,13 +59,28 @@ public class LastSolutionRecorder implements IMonitorSolution, IMonitorClose {
 
 	@Override
 	public void afterClose() {
-		try{
-			solution.restore();
-		}catch (ContradictionException e){
-			throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+		if(restoreOnClose){
+			try{
+				solver.getSearchLoop().restoreRootNode();
+				solver.getEnvironment().worldPush();
+				solution.restore();
+			}catch (ContradictionException e){
+				throw new UnsupportedOperationException("restoring the last solution ended in a failure");
+			}
 		}
 	}
 
 	@Override
 	public void beforeClose() {}
+
+	@Override
+	public Solution getLastSolution(){
+		return solution;
+	}
+
+	@Override
+	public LinkedList<Solution> getAllSolutions() {
+		throw new UnsupportedOperationException("only the last decision has been stored. " +
+				"Please use an AllSolutionsRecorder instead");
+	}
 }

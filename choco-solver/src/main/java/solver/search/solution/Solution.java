@@ -27,13 +27,9 @@
 
 package solver.search.solution;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.IntVar;
@@ -42,112 +38,87 @@ import solver.variables.SetVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 
 /**
  * <br/>
  *
- * @author Arnaud Malapert
- * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
- * @since 19 juil. 2010
+ * @author Charles Prud'homme
+ * @since 05/06/2013
  */
 public class Solution implements ICause {
 
+	HashMap<IntVar,Integer> intmap = new HashMap();
+	HashMap<RealVar,double[]> realmap = new HashMap();
+	HashMap<SetVar,int[]> setmap = new HashMap();
+	HashMap<GraphVar,boolean[][]> graphmap = new HashMap();
+	boolean empty = true;
 
-    /* Reference to the solver */
-    private Solver solver;
+    public Solution() {}
 
-    /* Values of integer variables, in Solver internal order */
-    private TIntArrayList intvalues;
-
-    /* Values of double variables, in Solver internal order */
-    private TDoubleArrayList realvalues;
-
-    /* Values of graph variables, in Solver internal order */
-    private LinkedList<boolean[][]> graphValues;
-
-    /* Values of set variables, in Solver internal order */
-    private LinkedList<int[]> setValues;
-
-    public static Solution empty() {
-        return new Solution();
-    }
-
-    private Solution() {
-    }
-
-    public Solution(Solver solver) {
-        replace(solver);
-    }
-
-    public void replace(Solver solver) {
-        this.solver = solver;
+	/**
+	 * Records the current solution of the solver
+	 * clears all previous recordings
+	 * @param solver
+	 */
+    public void record(Solver solver) {
+		empty = false;
+		intmap.clear();
+		realmap.clear();
+		setmap.clear();
+		graphmap.clear();
         Variable[] vars = solver.getVars();
-        intvalues = new TIntArrayList();
-        realvalues = new TDoubleArrayList();
-        graphValues = new LinkedList<boolean[][]>();
-        setValues = new LinkedList<int[]>();
         for (int i = 0; i < vars.length; i++) {
-            assert (vars[i].instantiated()) : vars[i] + " is not instantiated"; // BEWARE only decision variables should be instantiated
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
+			assert (vars[i].instantiated()) :
+					vars[i] + " is not instantiated when recording a solution.";
             switch (kind) {
                 case Variable.INT:
                 case Variable.BOOL:
-                    intvalues.add(((IntVar) vars[i]).getValue());
+					IntVar v = (IntVar) vars[i];
+					intmap.put(v, v.getValue());
                     break;
                 case Variable.REAL:
-                    realvalues.add(((RealVar) vars[i]).getLB());
-                    realvalues.add(((RealVar) vars[i]).getUB());
+					RealVar r = (RealVar) vars[i];
+					realmap.put(r,new double[]{r.getLB(),r.getUB()});
                     break;
                 case Variable.SET:
-                    assert vars[i].instantiated() : vars[i] + " is not instantiated when recording a solution";
-                    setValues.add(((SetVar) vars[i]).getValue());
+					SetVar s = (SetVar) vars[i];
+                    setmap.put(s,s.getValue());
                     break;
                 case Variable.GRAPH:
-                    assert vars[i].instantiated() : vars[i] + " is not instantiated when recording a solution";
-                    graphValues.add(((GraphVar) vars[i]).getValue());
+					GraphVar g = (GraphVar) vars[i];
+					graphmap.put(g,g.getValue());
                     break;
             }
         }
-//        measures = solver.getSearchLoop().getMeasures().
     }
 
-
-    public void restore() {
-        try {
-            Variable[] vars = solver.getVars();
-            int nbGV = 0;
-            int nbSets = 0;
-            int nbi = 0, nbr = 0;
-            for (int i = 0; i < vars.length; i++) {
-                int kind = vars[i].getTypeAndKind() & Variable.KIND;
-                switch (kind) {
-                    case Variable.INT:
-                    case Variable.BOOL:
-                        ((IntVar) vars[i]).instantiateTo(intvalues.get(nbi++), this);
-                        break;
-                    case Variable.REAL:
-                        ((RealVar) vars[i]).updateBounds(realvalues.get(nbr++), realvalues.get(nbr++), this);
-                        break;
-                    case Variable.SET:
-                        int[] sv = setValues.get(nbSets);
-                        ((SetVar) vars[i]).instantiateTo(sv, this);
-                        nbSets++;
-                        break;
-                    case Variable.GRAPH:
-                        boolean[][] gv = graphValues.get(nbGV);
-                        ((GraphVar) vars[i]).instantiateTo(gv, this);
-                        nbGV++;
-                        break;
-                }
-
-            }
-        } catch (ContradictionException ex) {
-            ex.printStackTrace();
-            LoggerFactory.getLogger("solver").error("BUG in restoring solution !!");
-            throw new SolverException("Restored solution not consistent !!");
-        }
+	/**
+	 * Set all variables to their respective value in the solution
+	 * Throws an exception is this empties a domain (i.e. this domain does not contain
+	 * the solution value)
+	 *
+	 * BEWARE: A restart might be required so that domains contain the solution values
+	 */
+    public void restore() throws ContradictionException {
+		if(empty){
+			throw new UnsupportedOperationException("Empty solution. No solution found");
+		}
+		for(IntVar i:intmap.keySet()){
+			i.instantiateTo(intmap.get(i),this);
+		}
+		for(SetVar s:setmap.keySet()){
+			s.instantiateTo(setmap.get(s),this);
+		}
+		for(GraphVar g:graphmap.keySet()){
+			g.instantiateTo(graphmap.get(g),this);
+		}
+		for(RealVar r:realmap.keySet()){
+			double[] bounds = realmap.get(r);
+			r.updateBounds(bounds[0],bounds[1],this);
+		}
     }
 
     @Override
@@ -159,4 +130,52 @@ public class Solution implements ICause {
     public String toString() {
         return "Solution";
     }
+
+	/**
+	 * Get the value of variable v in this solution
+	 * @param v IntVar (or BoolVar)
+	 * @return the value of variable v in this solution
+	 */
+	public int getIntVal(IntVar v){
+		if(empty){
+			throw new UnsupportedOperationException("Empty solution. No solution found");
+		}
+		return intmap.get(v);
+	};
+
+	/**
+	 * Get the value of variable s in this solution
+	 * @param s SetVar
+	 * @return the value of variable s in this solution
+	 */
+	public int[] getSetVal(SetVar s){
+		if(empty){
+			throw new UnsupportedOperationException("Empty solution. No solution found");
+		}
+		return setmap.get(s);
+	};
+
+	/**
+	 * Get the value of variable g in this solution
+	 * @param g GraphVar
+	 * @return the value of variable g in this solution
+	 */
+	public boolean[][] getGraphVal(GraphVar g){
+		if(empty){
+			throw new UnsupportedOperationException("Empty solution. No solution found");
+		}
+		return graphmap.get(g);
+	};
+
+	/**
+	 * Get the bounds of r in this solution
+	 * @param r RealVar
+	 * @return the bounds of r in this solution
+	 */
+	public double[] getRealBounds(RealVar r){
+		if(empty){
+			throw new UnsupportedOperationException("Empty solution. No solution found");
+		}
+		return realmap.get(r);
+	};
 }

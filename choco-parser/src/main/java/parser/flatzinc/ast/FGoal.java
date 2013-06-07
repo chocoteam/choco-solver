@@ -41,7 +41,6 @@ import solver.Solver;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
@@ -97,7 +96,6 @@ public class FGoal {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
 //        aSolver.set(gc.searchPattern);
-        search.setSolutionpool(SolutionPoolFactory.NO_SOLUTION.make());
 
         // Then define search goal
         Variable[] vars = aSolver.getVars();
