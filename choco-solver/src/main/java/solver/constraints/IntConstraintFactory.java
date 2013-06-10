@@ -481,7 +481,7 @@ public class IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        Constraint c = alldifferent(VARS, "DEFAULT");
+        Constraint c = alldifferent(VARS, "AC");
         c.addPropagators(
                 new PropNoSubtour(VARS, OFFSET),
                 new PropCircuit_AntiArboFiltering(VARS, OFFSET),
@@ -905,7 +905,7 @@ public class IntConstraintFactory {
         c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
-        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
+        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.AC));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
         c.addPropagators(new PropSubCircuitSCC(VARS, OFFSET));
         return c;

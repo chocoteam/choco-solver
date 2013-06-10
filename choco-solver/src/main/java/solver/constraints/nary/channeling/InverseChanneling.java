@@ -75,8 +75,8 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         this.minX = minX;
         this.minY = minY;
         if (allEnumerated(X, Y)) {
-			addPropagators(AllDifferent.createPropagators(this.X, AllDifferent.Type.DEFAULT));
-			addPropagators(AllDifferent.createPropagators(this.Y, AllDifferent.Type.DEFAULT));
+			addPropagators(AllDifferent.createPropagators(this.X, AllDifferent.Type.AC));
+			addPropagators(AllDifferent.createPropagators(this.Y, AllDifferent.Type.AC));
             addPropagators(new PropInverseChannelAC(this.X, this.Y, minX, minY));
         } else {// Beware no BC on the conjunction of those propagators but only separately
             addPropagators(new PropAllDiffBC(this.X));
