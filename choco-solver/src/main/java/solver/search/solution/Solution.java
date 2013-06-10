@@ -178,4 +178,11 @@ public class Solution implements ICause {
 		}
 		return realmap.get(r);
 	};
+
+	/**
+	 * @return true iff this is a valid solution
+	 */
+	public boolean hasBeenFound(){
+		return !empty;
+	}
 }
