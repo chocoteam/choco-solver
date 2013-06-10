@@ -219,6 +219,7 @@ public class ParseAndSolve {
                 }
                 datas.clear();
                 LOGGER.info("% solve instance...");
+//                SMF.log(solver, false, true);
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
                 if (!dbproperties.equals("")) {

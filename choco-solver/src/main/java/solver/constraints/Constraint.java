@@ -89,9 +89,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
     protected int staticPropagationPriority;
 
-	// for reification
-	private BoolVar boolReif;
-	private Constraint opposite;
+    // for reification
+    private BoolVar boolReif;
+    private Constraint opposite;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
@@ -247,57 +247,64 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
         return "Cstr(" + Arrays.toString(propagators) + ")";
     }
 
-	/**
-	 * @return true iff this constraint has been reified
-	 */
-	public final boolean isReified(){
-		return boolReif != null;
-	}
+    /**
+     * @return true iff this constraint has been reified
+     */
+    public final boolean isReified() {
+        return boolReif != null;
+    }
 
-	/**
-	 * Reifies the constraint with a boolean variable
-	 * BEWARE: SHOULD NOT BE USED IF THIS CONSTRAINT IS ALREADY REIFIED!!!
-	 * @param bool
-	 */
-	public final void reifyWith(BoolVar bool){
-		assert (!isReified());
-		boolReif = bool;
-		getSolver().post(new ReificationConstraint(boolReif,this,getOpposite()));
-	}
+    /**
+     * Reifies the constraint with a boolean variable
+     * If the reified boolean variable already exists, an additional (equality) constraint is automatically posted.
+     *
+     * @param bool
+     */
+    public final void reifyWith(BoolVar bool) {
+        //assert (!isReified());
+        if (boolReif == null) {
+            boolReif = bool;
+            getSolver().post(new ReificationConstraint(boolReif, this, getOpposite()));
+        } else {
+            getSolver().post(new Arithmetic(bool, Operator.EQ, boolReif, this.getSolver()));
+        }
+    }
 
-	/**
-	 * Get/make the boolean variable indicating whether the constraint is satisfied or not
-	 * @return the boolean reifying the constraint
-	 */
-	public final BoolVar reif() {
-		if(boolReif==null){
-			boolReif = VF.bool(StringUtils.randomName(), getSolver());
-			getSolver().post(new ReificationConstraint(boolReif,this,getOpposite()));
-		}
-		return boolReif;
-	}
+    /**
+     * Get/make the boolean variable indicating whether the constraint is satisfied or not
+     *
+     * @return the boolean reifying the constraint
+     */
+    public final BoolVar reif() {
+        if (boolReif == null) {
+            boolReif = VF.bool(StringUtils.randomName(), getSolver());
+            getSolver().post(new ReificationConstraint(boolReif, this, getOpposite()));
+        }
+        return boolReif;
+    }
 
-	/**
-	 * Get/make the opposite constraint of this
-	 * The default opposite constraint does not filter domains but fails if this constraint is satisfied
-	 * @return the opposite constraint of this
-	 */
-	public final Constraint getOpposite() {
-		reif();
-		if(opposite == null){
-			opposite = makeOpposite();
-			opposite.opposite = this;
-			opposite.boolReif = boolReif.not();
-		}
-		return opposite;
-	}
+    /**
+     * Get/make the opposite constraint of this
+     * The default opposite constraint does not filter domains but fails if this constraint is satisfied
+     *
+     * @return the opposite constraint of this
+     */
+    public final Constraint getOpposite() {
+        reif();
+        if (opposite == null) {
+            opposite = makeOpposite();
+            opposite.opposite = this;
+            opposite.boolReif = boolReif.not();
+        }
+        return opposite;
+    }
 
-	/**
-	 * Make the opposite constraint of this
-	 * BEWARE: this method should never be called by the user
-	 * but it can be overridden to provide better constraint negations
-	 */
-	public Constraint makeOpposite() {
-		return new DefaultOpposite(vars,solver);
-	}
+    /**
+     * Make the opposite constraint of this
+     * BEWARE: this method should never be called by the user
+     * but it can be overridden to provide better constraint negations
+     */
+    public Constraint makeOpposite() {
+        return new DefaultOpposite(vars, solver);
+    }
 }
