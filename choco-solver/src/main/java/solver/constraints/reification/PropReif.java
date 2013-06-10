@@ -39,7 +39,6 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import util.ESat;
-import util.tools.ArrayUtils;
 
 /**
  * Implication propagator
@@ -61,8 +60,8 @@ public class PropReif extends Propagator<Variable> {
 
     private final ReificationConstraint reifCons;
 
-    public PropReif(BoolVar bool, ReificationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(ArrayUtils.append(new BoolVar[]{bool}, reifCons.getVariables()), PropagatorPriority.LINEAR, true);
+    public PropReif(ReificationConstraint reifCons, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
+        super(reifCons.getVariables(), PropagatorPriority.LINEAR, true);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
         this.falseCons = consIfBoolFalse;

@@ -27,6 +27,7 @@
 
 package solver.constraints;
 
+import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.reification.PropReif;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
@@ -34,6 +35,8 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import util.ESat;
 import util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
  * Implication constraint: boolean b => constraint c
@@ -54,14 +57,34 @@ public class ReificationConstraint extends Constraint<Variable, Propagator<Varia
     // indices of propagators
     private int[] indices;
 
+    private static Variable[] nonubiquity(Variable[] one, Variable[] two) {
+        Variable[] ret = new Variable[one.length + two.length];
+        TIntHashSet idx = new TIntHashSet();
+        int j = 0;
+        for (int i = 0; i < one.length; i++) {
+            if (!idx.contains(one[i].getId())) {
+                ret[j++] = one[i];
+                idx.add(one[i].getId());
+            }
+        }
+        for (int i = 0; i < two.length; i++) {
+            if (!idx.contains(two[i].getId())) {
+                ret[j++] = two[i];
+                idx.add(two[i].getId());
+            }
+        }
+        return Arrays.copyOf(ret, j);
+    }
+
+
     protected ReificationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super(ArrayUtils.append(new Variable[]{bVar}, consIfBoolTrue.getVariables(), consIfBoolFalse.getVariables()),
+        super(ArrayUtils.append(new Variable[]{bVar}, nonubiquity(consIfBoolTrue.getVariables(), consIfBoolFalse.getVariables())),
                 bVar.getSolver());
         trueCons = consIfBoolTrue;
         falseCons = consIfBoolFalse;
         bool = bVar;
         indices = new int[3];
-        PropReif reifProp = new PropReif(bVar, this, trueCons, falseCons);
+        PropReif reifProp = new PropReif(this, trueCons, falseCons);
         setPropagators(
                 ArrayUtils.append(new Propagator[]{reifProp},
                         trueCons.getPropagators().clone(),
