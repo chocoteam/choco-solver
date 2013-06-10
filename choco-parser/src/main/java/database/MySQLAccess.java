@@ -175,7 +175,7 @@ public class MySQLAccess {
                     statement.setString(2, MAX);
                     break;
             }
-            statement.setLong(3, solution);
+            statement.setLong(3, solution==Integer.MAX_VALUE?-100:solution);
             statement.setBoolean(4, isopt);
             statement.executeUpdate();
             return getPbID(filename, policy, solution, isopt);

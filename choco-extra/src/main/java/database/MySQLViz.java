@@ -52,7 +52,7 @@ public class MySQLViz {
 
     private static final String QUERY2 = "SELECT t0.NAME, t1.%s +0 as \"%s\", t2.%s +0 as \"%s\" " +
             "FROM PROBLEMS as t0, RESOLUTIONS as t1, RESOLUTIONS as t2 " +
-            "WHERE t0.NAME like \"%s\" AND t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s ASC, t2.%s ASC";
+            "WHERE t0.RESOLUTION!='SAT' AND t0.NAME like \"%s\" AND t1.BID=%s AND t2.BID=%s AND t0.PID = t1.PID AND t1.PID=t2.PID order by t1.%s ASC, t2.%s ASC";
 
     private static final String QUERY3 = "SELECT t1.BID, t1.%s FROM RESOLUTIONS as t1, BENCHMARKS as t2 " +
             "WHERE t1.PID=%s AND t1.BID=t2.BID order by t2.DATE";
@@ -294,7 +294,7 @@ public class MySQLViz {
 //        ms.display();
 //        ms.compare();
 //        ms.compare("MZN20130603");
-        ms.compare("MZN20130606", "MZN20130607.093635", "");
+        ms.compare("JACOP", "MZN20130610.150246", "");
 
 //        ms.history("filter_fir_1_1.fzn");
 
