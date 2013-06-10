@@ -59,7 +59,7 @@ public class LastSolutionRecorder implements ISolutionRecorder, IMonitorClose {
 
 	@Override
 	public void afterClose() {
-		if(restoreOnClose){
+		if(restoreOnClose && solution.hasBeenFound()){
 			try{
 				solver.getSearchLoop().restoreRootNode();
 				solver.getEnvironment().worldPush();
