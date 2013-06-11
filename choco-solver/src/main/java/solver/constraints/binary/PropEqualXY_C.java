@@ -145,7 +145,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
     private boolean match() {
         int lb = x.getLB();
-        int ub = y.getUB();
+        int ub = x.getUB();
         for (; lb <= ub; lb = x.nextValue(lb)) {
             if (y.contains(cste - lb)) return true;
         }
