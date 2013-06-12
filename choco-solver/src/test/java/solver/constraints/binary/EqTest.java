@@ -26,6 +26,14 @@
  */
 package solver.constraints.binary;
 
+import junit.framework.Assert;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.ICF;
+import solver.variables.IntVar;
+import solver.variables.VF;
+import util.ESat;
+
 /**
  * <br/>
  *
@@ -33,4 +41,35 @@ package solver.constraints.binary;
  * @since 12/06/13
  */
 public class EqTest {
+
+    @Test
+    public void test1() {
+        Solver s = new Solver();
+        IntVar two1 = VF.fixed(2, s);
+        IntVar two2 = VF.fixed(2, s);
+        s.post(ICF.arithm(two1, "=", two2));
+        Assert.assertTrue(s.findSolution());
+        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+    }
+
+
+    @Test
+    public void test2() {
+        Solver s = new Solver();
+        IntVar three = VF.fixed(3, s);
+        IntVar two = VF.fixed(2, s);
+        s.post(ICF.arithm(three, "-", two, "=", 1));
+        Assert.assertTrue(s.findSolution());
+        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+    }
+
+    @Test
+    public void test3() {
+        Solver s = new Solver();
+        IntVar three = VF.fixed(3, s);
+        IntVar two = VF.fixed(2, s);
+        s.post(ICF.arithm(three, "=", two, "+", 1));
+        Assert.assertTrue(s.findSolution());
+        Assert.assertEquals(ESat.TRUE, s.isEntailed());
+    }
 }
