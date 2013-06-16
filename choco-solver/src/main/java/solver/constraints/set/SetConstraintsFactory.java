@@ -58,7 +58,7 @@ public class SetConstraintsFactory {
      */
     public static Constraint union(SetVar[] SETS, SetVar UNION) {
         Constraint c = new Constraint(ArrayUtils.append(SETS, new SetVar[]{UNION}), UNION.getSolver());
-        c.setPropagators(new PropUnion(SETS, UNION), new PropUnion(SETS, UNION));
+        c.setPropagators(new PropUnion(SETS, UNION));
         return c;
     }
 
