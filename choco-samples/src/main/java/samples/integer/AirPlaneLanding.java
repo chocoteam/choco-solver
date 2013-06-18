@@ -37,14 +37,7 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
 import solver.constraints.ternary.Max;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.explanations.ExplanationFactory;
-import solver.explanations.RecorderExplanationEngine;
-import solver.explanations.VariableState;
 import solver.search.limits.FailCounter;
-import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
-import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -208,9 +201,6 @@ public class AirPlaneLanding extends AbstractProblem {
         // -----
         boolean lns = false;
         SearchMonitorFactory.geometrical(solver, 200, 1.2, new FailCounter(100), 100);
-        if (lns) {
-            solver.getSearchLoop().plugSearchMonitor(new ExplainedLNS(solver, objective));
-        }
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 
@@ -254,82 +244,6 @@ public class AirPlaneLanding extends AbstractProblem {
         }
         sc.close();
         return data;
-    }
-
-    private static final class ExplainedLNS extends Abstract_LNS_SearchMonitor implements IMonitorInitPropagation {
-
-        private int coeff = 10;
-
-        private IntVar objective;
-
-        private int bestCost;
-
-        private RecorderExplanationEngine explainer;
-
-        public ExplainedLNS(Solver solver, IntVar objective) {
-            super(solver, true);
-            this.objective = objective;
-            this.bestCost = objective.getUB() + 1;
-        }
-
-        @Override
-        public void beforeInitialPropagation() {
-        }
-
-        @Override
-        public void afterInitialPropagation() {
-        }
-
-        @Override
-        protected boolean isSearchComplete() {
-            return coeff == 1;
-        }
-
-        @Override
-        public void afterRestart() {
-            if (solver.getMeasures().getSolutionCount() == 1) {
-                ExplanationFactory.SILENT.plugin(solver, false);
-                explainer = (RecorderExplanationEngine) solver.getExplainer();
-                explainer.beforeInitialPropagation();
-            }
-        }
-
-        @Override
-        protected void recordSolution() {
-            if ((objective.getValue() > bestCost)) {
-                throw new UnsupportedOperationException();
-            }
-            bestCost = objective.getValue();
-            if (solver.getMeasures().getRestartCount() > 0) {
-                try {
-                    objective.updateUpperBound(bestCost - 1, this);
-                    solver.propagate();
-                } catch (ContradictionException cex) {
-                    if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-                        Explanation expl = new Explanation();
-                        if (cex.v != null) {
-                            cex.v.explain(VariableState.DOM, expl);
-                        } else {
-                            cex.c.explain(null, expl);
-                        }
-                        Explanation complete = explainer.flatten(expl);
-                        explainer.onContradiction(cex, complete);
-                    } else {
-                        throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void fixSomeVariables() throws ContradictionException {
-            objective.updateUpperBound(bestCost / coeff - 1, this);
-        }
-
-        @Override
-        protected void restrictLess() {
-            coeff /= 2;
-        }
     }
 
     /////////////////////////////////////////

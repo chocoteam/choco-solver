@@ -24,9 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.search.loop.lns.neighbors;
 
-import solver.Solver;
+import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -40,9 +40,10 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 18/04/13
  */
-public class RandomLNS extends Abstract_LNS_SearchMonitor {
+public class RandomNeighborhood implements INeighbor {
 
     private final int n;
+    private final double factor;
     private final IntVar[] vars;
     private final int[] bestSolution;
     private Random rd;
@@ -50,10 +51,10 @@ public class RandomLNS extends Abstract_LNS_SearchMonitor {
 
     BitSet fragment;  // index of variable to set unfrozen
 
-    public RandomLNS(Solver solver, IntVar[] vars, long seed) {
-        super(solver, true);
-
+    public RandomNeighborhood(IntVar[] vars, long seed, double factor) {
         this.n = vars.length;
+        assert factor > 1.0;
+        this.factor = factor;
         this.vars = vars.clone();
 
         this.rd = new Random(seed);
@@ -63,12 +64,12 @@ public class RandomLNS extends Abstract_LNS_SearchMonitor {
     }
 
     @Override
-    protected boolean isSearchComplete() {
+    public boolean isSearchComplete() {
         return nbFixedVariables == 0;
     }
 
     @Override
-    protected void recordSolution() {
+    public void recordSolution() {
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
@@ -76,12 +77,12 @@ public class RandomLNS extends Abstract_LNS_SearchMonitor {
     }
 
     @Override
-    protected void fixSomeVariables() throws ContradictionException {
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
         fragment.set(0, n); // all variables are frozen
         for (int i = 0; i < nbFixedVariables && fragment.cardinality() > 0; i++) {
             int id = selectVariable();
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                vars[id].instantiateTo(bestSolution[id], this);
+                vars[id].instantiateTo(bestSolution[id], cause);
             }
             fragment.clear(id);
         }
@@ -97,7 +98,7 @@ public class RandomLNS extends Abstract_LNS_SearchMonitor {
     }
 
     @Override
-    protected void restrictLess() {
-        nbFixedVariables /= 1.2;
+    public void restrictLess() {
+        nbFixedVariables /= factor;
     }
 }

@@ -180,7 +180,7 @@ public class FGoal {
                         ActivityBased abs = new ActivityBased(aSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, gc.seed);
                         aSolver.set(abs);
 //                        if (type != ResolutionPolicy.SATISFACTION) { // also add LNS in optimization
-//                            aSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
+//                            aSolver.getSearchLoop().plugSearchMonitor(new ActivityBasedNeighborhood(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
 //                        }
                         break;
                 }

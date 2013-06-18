@@ -27,13 +27,18 @@
 package solver.explanations.strategies;
 
 import gnu.trove.list.array.TIntArrayList;
+import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
 import solver.objective.ObjectiveManager;
-import solver.search.loop.monitors.*;
+import solver.search.loop.lns.neighbors.INeighbor;
+import solver.search.loop.monitors.IMonitorInitPropagation;
+import solver.search.loop.monitors.IMonitorInitialize;
+import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.loop.monitors.IMonitorUpBranch;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -49,15 +54,14 @@ import java.util.*;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitorInitPropagation, IMonitorSolution,
-        IMonitorUpBranch, IMonitorInitialize {
+public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation, IMonitorUpBranch, IMonitorInitialize, IMonitorRestart {
 
 
     private static final int A = 0; // A: activated
     private static final int R = 1; // R: refuted
     private static final int O = 2; // O: involving the objective variable
 
-
+    protected final Solver solver;
     protected ExplanationEngine mExplanationEngine;
     private ObjectiveManager om;
     private IntVar objective;
@@ -110,8 +114,8 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
         BACKTRACK, CONFLICT, RANDOM
     }
 
-    public ExplaindeLNS(Solver solver, Policy policy, long seed) {
-        super(solver, true);
+    public ExplainedNeighborhood(Solver solver, Policy policy, long seed) {
+        this.solver = solver;
         this.policy = policy;
         this.random = new Random(seed);
 
@@ -139,6 +143,8 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
         tmpDeductions = new ArrayList<Deduction>(16);
         tmpValueDedutions = new HashSet<Deduction>(16);
         inRndMode = false;
+
+        solver.getSearchLoop().plugSearchMonitor(this);
     }
 
     @Override
@@ -164,30 +170,8 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
-
     }
 
-
-    private void random() {
-        if (path.size() > 0) {
-            FastDecision d0 = (FastDecision) path.get(0);
-            int cste = (int) ((2 * n) / (3 * epsilon)) - 1;
-            path.clear();
-            for (int i = 0; i < cste; i++) {
-                int id = selectVariable();
-                if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                    FastDecision d = (FastDecision) d0.duplicate();
-                    d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
-                    path.add(d);
-                }
-            }
-            nbFixedVars = path.size();
-            decisions[A].clear();
-            decisions[A].set(0, path.size());
-            decisions[O].clear();
-            decisions[R].clear();
-        }
-    }
 
     private int selectVariable() {
         int id;
@@ -196,6 +180,10 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
             cc--;
         }
         return id;
+    }
+
+    @Override
+    public void beforeRestart() {
     }
 
     @Override
@@ -209,11 +197,27 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
         } else {
             DD++;
             switch (policy) {
+                case BACKTRACK:
+                    if (decisions[A].cardinality() > 0 && !inRndMode) {
+                        restrictLess();
+                    } /*else {
+                        epsilon = inRndMode ? epsilon * 1.02 : 1.;
+                        inRndMode = true;
+                        random();
+                    }*/
+                    break;
                 case CONFLICT:
-                    conflict();
+//                    conflict();
+                    if (decisions[A].cardinality() > 0 && !inRndMode) {
+                        conflict();
+                    } else {
+                        epsilon = inRndMode ? epsilon * 1.02 : 1.;
+                        inRndMode = true;
+                        random();
+                    }
                     break;
                 case RANDOM:
-                    epsilon = inRndMode ? epsilon * 1.2 : 1.;
+                    epsilon = inRndMode ? epsilon * 1.02 : 1.;
                     inRndMode = true;
                     random();
                     break;
@@ -236,15 +240,36 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
         }
     }
 
+    private void random() {
+        if (path.size() > 0) {
+            FastDecision d0 = (FastDecision) path.get(0);
+            int cste = (int) ((2 * n) / (3 * epsilon)) - 1;
+            path.clear();
+            for (int i = 0; i < cste; i++) {
+                int id = selectVariable();
+                if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
+                    FastDecision d = (FastDecision) d0.duplicate();
+                    d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
+                    path.add(d);
+                }
+            }
+            nbFixedVars = path.size();
+            decisions[A].clear();
+            decisions[A].set(0, path.size());
+            decisions[O].clear();
+            decisions[R].clear();
+        }
+    }
+
 
     @Override
-    protected boolean isSearchComplete() {
+    public boolean isSearchComplete() {
         return decisions[A].cardinality() == 0 || (policy == Policy.BACKTRACK && nbFixedVars == 0);
     }
 
     @Override
-    protected void recordSolution() {
-        System.out.printf("%d - %d\n", RR,DD);
+    public void recordSolution() {
+//        System.out.printf("%d - %d\n", RR, DD);
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
@@ -284,12 +309,12 @@ public class ExplaindeLNS extends Abstract_LNS_SearchMonitor implements IMonitor
 
 
     @Override
-    protected void fixSomeVariables() throws ContradictionException {
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
         // nothing to do, every thing is done with the delegate strategy
     }
 
     @Override
-    protected void restrictLess() {
+    public void restrictLess() {
         chooseNext();
         nbDecApplied = curIdx = 0;
     }

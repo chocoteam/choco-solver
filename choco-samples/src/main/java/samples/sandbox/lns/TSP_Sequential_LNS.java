@@ -29,11 +29,13 @@ package samples.sandbox.lns;
 
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
+import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
+import solver.search.loop.lns.LargeNeighborhoodSearch;
+import solver.search.loop.lns.neighbors.INeighbor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
@@ -134,7 +136,8 @@ public class TSP_Sequential_LNS {
         strategy.configure(GraphStrategies.MIN_COST, true);
         solver.set(strategy);
         SearchMonitorFactory.limitTime(solver, 100000);
-        solver.getSearchLoop().plugSearchMonitor(new TSP_LNS_Monitor(solver, undi, totalCost));
+        solver.getSearchLoop().plugSearchMonitor(
+                new LargeNeighborhoodSearch(solver, new TSP_LNS_Monitor(solver, undi, totalCost), false));
         // resolution
         long timeInst = System.currentTimeMillis();
         System.out.println("start LNS...");
@@ -147,9 +150,10 @@ public class TSP_Sequential_LNS {
     // RESOLUTION
     //***********************************************************************************
 
-    private static class TSP_LNS_Monitor extends Abstract_LNS_SearchMonitor {
+    private static class TSP_LNS_Monitor implements INeighbor {
 
         //variables
+        private final Solver solver;
         private int[] bestSolution;
         private int bestCost;
         private UndirectedGraphVar g;
@@ -161,7 +165,7 @@ public class TSP_Sequential_LNS {
 
         // constructor
         private TSP_LNS_Monitor(Solver solver, UndirectedGraphVar g, IntVar cost) {
-            super(solver, false);
+            this.solver = solver;
             this.n = g.getEnvelopGraph().getNbNodes();
             this.g = g;
             this.cost = cost;
@@ -172,16 +176,16 @@ public class TSP_Sequential_LNS {
             System.out.println(n + " nodes / " + nbFixedVars + " fixed arcs");
         }
 
-        public void onContradiction(ContradictionException cex) {
-            nbFails++;
-            if (nbFails == 200) {
-                nbFails = 0;
-                solver.getSearchLoop().restart();
-            }
-        }
+//        public void onContradiction(ContradictionException cex) {
+//            nbFails++;
+//            if (nbFails == 200) {
+//                nbFails = 0;
+//                solver.getSearchLoop().restart();
+//            }
+//        }
 
         @Override
-        protected void recordSolution() {
+        public void recordSolution() {
             if ((cost.getValue() > bestCost && bestCost != -1) || !g.instantiated()) {
                 throw new UnsupportedOperationException();
             }
@@ -208,25 +212,25 @@ public class TSP_Sequential_LNS {
         }
 
         @Override
-        protected void restrictLess() {
+        public void restrictLess() {
             nbFixedVars /= 2;
             System.out.println("nbFixedVars " + nbFixedVars);
         }
 
         @Override
-        protected boolean isSearchComplete() {
+        public boolean isSearchComplete() {
             return nbFixedVars == 0;
         }
 
         @Override
-        protected void fixSomeVariables() throws ContradictionException {
+        public void fixSomeVariables(ICause cause) throws ContradictionException {
             int x;
             for (int k = 0; k < nbFixedVars; k++) {
                 x = rd.nextInt(n);
                 if (x < n - 1) {
-                    g.enforceArc(bestSolution[x], bestSolution[x + 1], this);
+                    g.enforceArc(bestSolution[x], bestSolution[x + 1], cause);
                 } else {
-                    g.enforceArc(bestSolution[x], bestSolution[0], this);
+                    g.enforceArc(bestSolution[x], bestSolution[0], cause);
                 }
             }
         }

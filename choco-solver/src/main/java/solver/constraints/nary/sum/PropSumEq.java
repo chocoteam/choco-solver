@@ -253,7 +253,7 @@ public class PropSumEq extends Propagator<IntVar> {
     public void explain(Deduction d, Explanation e) {
         e.add(solver.getExplainer().getPropagatorActivation(this));
         e.add(this);
-        if (d.getmType() == Deduction.Type.ValRem) {
+        if (d!=null && d.getmType() == Deduction.Type.ValRem) {
             ValueRemoval vr = (ValueRemoval) d;
             IntVar var = (IntVar) vr.getVar();
             int val = vr.getVal();

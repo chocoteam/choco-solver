@@ -306,10 +306,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         interrupt();
     }
 
-    public void resetReachedLimit(boolean bvalue) {
-        hasReachedLimit = bvalue;
-    }
-
     public boolean hasReachedLimit() {
         return hasReachedLimit;
     }
