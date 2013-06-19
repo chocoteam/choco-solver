@@ -50,8 +50,8 @@ import static choco.annotations.PropAnn.Status.*;
  * @author Hadrien Cambazard, Charles Prud'homme
  * @revision 04/03/12 : change sort
  * @since 07/02/11
- *
- * TODO: useless awakeonbounds?
+ *        <p/>
+ *        TODO: useless awakeonbounds?
  */
 @PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
 public class PropAllDiffBC extends Propagator<IntVar> {
@@ -72,12 +72,22 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     int[] instantiatedValues;
     IStateInt ivIdx;
+    private boolean allEnum;
 
     public boolean infBoundModified = true;
     public boolean supBoundModified = true;
 
-    public PropAllDiffBC(IntVar[] variables) {
+    private final boolean weak;
+
+    /**
+     * The filtering algorithm for the AllDifferent constraint ensuring bound consistency
+     *
+     * @param variables list of variables
+     * @param weak      set to true provides a weaker filtering algorithm (less than BC): the filtering algorithm is triggered on instantiation only.
+     */
+    public PropAllDiffBC(IntVar[] variables, boolean weak) {
         super(variables, PropagatorPriority.LINEAR, true);
+        this.weak = weak;
         int n = vars.length;
 
         t = new int[2 * n + 2];
@@ -91,7 +101,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
         int idx = 0;
         instantiatedValues = new int[n];
+        allEnum = true;
         for (int i = 0; i < vars.length; i++) {
+            allEnum &= vars[i].hasEnumeratedDomain();
             Interval interval = new Interval();
             interval.var = vars[i];
             interval.idx = i;
@@ -117,33 +129,36 @@ public class PropAllDiffBC extends Propagator<IntVar> {
      *          if initialisation encounters a contradiction
      */
     protected void initialize() throws ContradictionException {
-        int left, right;
-        for (int j = 0; j < vars.length; j++) {
-            left = right = Integer.MIN_VALUE;
-            for (int i = 0; i < j; i++) {
-                if (vars[i].instantiated()) {
-                    int val = vars[i].getValue();
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[j].removeInterval(left, right, aCause);
-                        left = right = val;
+        if (allEnum) {
+            int left, right;
+            for (int j = 0; j < vars.length; j++) {
+                left = right = Integer.MIN_VALUE;
+                for (int i = 0; i < j; i++) {
+                    if (vars[i].instantiated()) {
+                        int val = vars[i].getValue();
+                        if (val == right + 1) {
+                            right = val;
+                        } else {
+                            vars[j].removeInterval(left, right, aCause);
+                            left = right = val;
+                        }
                     }
                 }
-            }
-            for (int i = j + 1; i < vars.length; i++) {
-                if (vars[i].instantiated()) {
-                    int val = vars[i].getValue();
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        vars[j].removeInterval(left, right, aCause);
-                        left = right = val;
+                for (int i = j + 1; i < vars.length; i++) {
+                    if (vars[i].instantiated()) {
+                        int val = vars[i].getValue();
+                        if (val == right + 1) {
+                            right = val;
+                        } else {
+                            vars[j].removeInterval(left, right, aCause);
+                            left = right = val;
+                        }
                     }
                 }
+                vars[j].removeInterval(left, right, aCause);
             }
-            vars[j].removeInterval(left, right, aCause);
         }
+        infBoundModified = supBoundModified = true;
     }
 
     @Override
@@ -157,7 +172,12 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
+            infBoundModified = supBoundModified = true;
             awakeOnInst(varIdx);
+            if (weak) {
+                forcePropagate(EventType.CUSTOM_PROPAGATION);
+                return;
+            }
         } else if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
             infBoundModified = supBoundModified = true;
             if (!vars[varIdx].hasEnumeratedDomain()) {
@@ -174,7 +194,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 awakeOnSup(varIdx);
             }
         }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        if (!weak) {
+            forcePropagate(EventType.CUSTOM_PROPAGATION);
+        }
     }
 
     @Override
@@ -212,7 +234,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     //****************************************************************************************************************//
 
     protected void awakeOnBound(int i) throws ContradictionException {
-        infBoundModified = supBoundModified = true;
         for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
@@ -227,7 +248,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void awakeOnInf(int i) throws ContradictionException {
-        infBoundModified = true;
         for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
@@ -239,7 +259,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void awakeOnSup(int i) throws ContradictionException {
-        supBoundModified = true;
         for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
@@ -251,8 +270,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void awakeOnInst(int i) throws ContradictionException {   // Propagation classique
-        infBoundModified = true;
-        supBoundModified = true;
         int val = vars[i].getValue();
         for (int j = 0; j < vars.length; j++) {
             if (j != i) {
