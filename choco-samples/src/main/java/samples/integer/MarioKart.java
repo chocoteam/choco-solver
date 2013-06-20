@@ -33,7 +33,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.BoolVar;
