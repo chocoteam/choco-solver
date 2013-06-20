@@ -44,7 +44,6 @@ import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.ISolutionRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
 import solver.search.strategy.strategy.AbstractStrategy;
