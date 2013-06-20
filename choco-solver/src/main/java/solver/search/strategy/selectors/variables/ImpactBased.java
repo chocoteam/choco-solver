@@ -120,7 +120,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         if (variable == null || variable.instantiated()) {
             return null;
         }
-        if (vars[currentVar] != variable) {
+        if (currentVar == -1 || vars[currentVar] != variable) {
             // retrieve indice of the variable in vars
             currentVar = Arrays.binarySearch(vars, variable);
             assert vars[currentVar] == variable;

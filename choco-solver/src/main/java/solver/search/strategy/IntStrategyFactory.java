@@ -36,7 +36,6 @@ import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.LastConflict;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -187,7 +186,7 @@ public class IntStrategyFactory {
 	 * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
 	 * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
 	 * <br/>
-	 * Uses default parameters
+	 * Uses default parameters (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
 	 *
 	 * @param VARS           collection of variables
 	 * @param SEED           the seed for random
@@ -218,13 +217,13 @@ public class IntStrategyFactory {
 	 * <p/>
 	 * <b>"Impact-Based Search Strategies for Constraint Programming",
 	 * Philippe Refalo, CP2004.</b>
-	 * Uses default parameters
+	 * Uses default parameters (ALPHA=2,SPLIT=3,NODEIMPACT=10,INITONLY=true)
 	 *
 	 * @param VARS       variables of the problem (should be integers)
 	 * @param SEED       a seed for random
 	 */
 	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
-		return new ImpactBased(VARS, 2, 3, 10, SEED, false);
+		return new ImpactBased(VARS, 2, 3, 10, SEED, true);
 	}
 
 	/**

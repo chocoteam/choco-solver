@@ -75,6 +75,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void init() throws ContradictionException {
+		mainStrategy.init();
     }
 
     @Override
@@ -82,7 +83,10 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 		if(active){
 			Variable decVar = firstNotInst();
 			if (decVar != null) {
-				return mainStrategy.computeDecision(decVar);
+				Decision d = mainStrategy.computeDecision(decVar);
+				if(d != null){
+					return d;
+				}
 			}
 		}
 		active = true;
@@ -112,8 +116,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     }
 
     @Override
-    public void beforeRestart() {
-    }
+    public void beforeRestart() {}
 
     @Override
     public void afterRestart() {
@@ -127,7 +130,6 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     //***********************************************************************************
     //***********************************************************************************
-
 
     private Variable firstNotInst() {
 		for(int i=nbCV-1;i>=0;i--){

@@ -199,7 +199,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         if (variable == null || variable.instantiated()) {
             return null;
         }
-        if (vars[currentVar] != variable) {
+        if (currentVar==-1 || vars[currentVar] != variable) {
+			if(sampling){
+				return null;
+			}
             // retrieve indice of the variable in vars
             currentVar = Arrays.binarySearch(vars, variable);
             assert vars[currentVar] == variable;
