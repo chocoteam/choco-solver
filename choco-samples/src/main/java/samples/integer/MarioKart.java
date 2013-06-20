@@ -33,6 +33,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.BoolVar;
@@ -92,7 +93,7 @@ public class MarioKart extends AbstractProblem {
 	/** The amount of fuel of the kart in mini-litres */
 	private static int FUEL = 2000;
 	/** The kart of mario */
-	private static KART MARIOS_KART = KART.NORMAL;
+	private static KART MARIOS_KART = KART.ECOLO;
 
 	// INSTANCES VARIABLES
 
@@ -159,6 +160,7 @@ public class MarioKart extends AbstractProblem {
 		/* Heuristic choices */
 		AbstractStrategy strat = IntStrategyFactory.firstFail_InDomainMin(next);
 		solver.set(IntStrategyFactory.lastConflict(solver,strat));
+//		solver.set(strat);
 	}
 
 	@Override

@@ -181,6 +181,21 @@ public class IntStrategyFactory {
         return new ActivityBased(solver, VARS, GAMMA, DELTA, ALPHA, RESTART, FORCE_SAMPLING, SEED);
     }
 
+	/**
+	 * Create an Activity based search strategy.
+	 * <p/>
+	 * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
+	 * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
+	 * <br/>
+	 * Uses default parameters
+	 *
+	 * @param VARS           collection of variables
+	 * @param SEED           the seed for random
+	 */
+	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, long SEED) {
+		return new ActivityBased(solver, VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+	}
+
     /**
      * Create an Impact-based search strategy.
      * <p/>
@@ -199,13 +214,39 @@ public class IntStrategyFactory {
     }
 
 	/**
-	 * Use the last conflict heuristic as a pluggin over a former search heuristic STRAT
+	 * Create an Impact-based search strategy.
+	 * <p/>
+	 * <b>"Impact-Based Search Strategies for Constraint Programming",
+	 * Philippe Refalo, CP2004.</b>
+	 * Uses default parameters
+	 *
+	 * @param VARS       variables of the problem (should be integers)
+	 * @param SEED       a seed for random
+	 */
+	public static AbstractStrategy<IntVar> ImpactBased(IntVar[] VARS, long SEED) {
+		return new ImpactBased(VARS, 2, 3, 10, SEED, false);
+	}
+
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
 	 *
 	 * @param SOLVER
 	 * @param STRAT
 	 * @return last conflict strategy
 	 */
 	public static AbstractStrategy lastConflict(Solver SOLVER, AbstractStrategy STRAT) {
-		return new StrategiesSequencer(new LastConflict(SOLVER, STRAT, 1, false), STRAT);
+		return new LastConflict(SOLVER, STRAT, 1);
+	}
+
+	/**
+	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic STRAT
+	 * Considers the K last conflicts
+	 *
+	 * @param SOLVER
+	 * @param STRAT
+	 * @return last conflict strategy
+	 */
+	public static AbstractStrategy lastKConflicts(Solver SOLVER, int K, AbstractStrategy STRAT) {
+		return new LastConflict(SOLVER, STRAT, K);
 	}
 }
