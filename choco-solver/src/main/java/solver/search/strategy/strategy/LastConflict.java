@@ -59,7 +59,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     //***********************************************************************************
 
     public LastConflict(Solver solver, AbstractStrategy<Variable> mainStrategy, int k) {
-        super(solver.getVars());
+        super(mainStrategy.vars);
 		assert k>0 : "parameter K of last conflict must be strictly positive!";
         this.solver = solver;
         this.mainStrategy = mainStrategy;
