@@ -107,7 +107,7 @@ public class PropMinElement extends Propagator<Variable> {
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             min.updateUpperBound(get(j), aCause);
         }
-        int minVal = get(set.getEnvelopeFirst());
+        int minVal = Integer.MAX_VALUE;
         int lb = min.getLB();
         for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             int k = get(j);
