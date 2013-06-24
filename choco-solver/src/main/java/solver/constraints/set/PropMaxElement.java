@@ -107,7 +107,7 @@ public class PropMaxElement extends Propagator<Variable> {
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
             max.updateLowerBound(get(j), aCause);
         }
-        int maxVal = get(set.getEnvelopeFirst());
+        int maxVal = Integer.MIN_VALUE;
         int ub = max.getUB();
         for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             int k = get(j);
