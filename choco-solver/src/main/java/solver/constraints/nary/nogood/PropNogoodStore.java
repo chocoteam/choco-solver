@@ -141,7 +141,7 @@ public class PropNogoodStore extends Propagator<IntVar> {
             for (int i = 0; i < nogoods.size(); i++) {
                 INogood ng = allnogoods.get(nogoods.get(i));
                 int idx = indices.get(i);
-                if (val != ng.getVal(idx)) { // val == ng.getVal(idx) then the ng is verified
+                if (val == ng.getVal(idx)) {
                     for (int j = 0; j < ng.size(); j++) {
                         if (ng.getVar(j) != var) {
 //                            ng.getVar(j).explain(VariableState.REM, ng.getVal(j), e);
