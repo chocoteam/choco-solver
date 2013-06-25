@@ -62,7 +62,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt();
+            interrupt(MSG_INIT);
             return;
         }
         this.env.worldPush(); // push another wolrd to recover the state after initial propagation
@@ -79,7 +79,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             this.env.worldPop();
             solver.setFeasible(ESat.FALSE);
             solver.getEngine().flush();
-            interrupt();
+            interrupt(MSG_SEARCH_INIT);
         }
         moveTo(OPEN_NODE);
     }
@@ -110,7 +110,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
-            interrupt();
+            interrupt(MSG_FIRST_SOL);
         } else {
             moveTo(stateAfterSolution);
         }
@@ -184,7 +184,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
         if (decision == RootDecision.ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
-            interrupt();
+            interrupt(MSG_ROOT);
         } else {
             jumpTo--;
             if (jumpTo <= 0 && decision.hasNext()) {
@@ -209,7 +209,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
-            interrupt();
+            interrupt(MSG_CUT);
         }
     }
 

@@ -39,6 +39,8 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.search.limits.ACounter;
+import solver.search.limits.ICounterAction;
 import solver.search.loop.lns.neighbors.INeighbor;
 import solver.search.loop.monitors.IMonitorInterruption;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -57,6 +59,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     protected Solver solver;
     protected final boolean restartAfterEachSolution;
     protected final INeighbor neighbor;
+    protected ACounter counter; // can be null!
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -69,32 +72,38 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         this.restartAfterEachSolution = restartAfterEachSolution;
     }
 
+
+    public void setCounter(ACounter counter) {
+        this.counter = counter;
+    }
+
     //***********************************************************************************
     // RECORD & RESTART
     //***********************************************************************************
 
     @Override
     public void onSolution() {
+        if (counter != null) {
+            // the fast restart policy is plugged when the first solution has been found
+            if (solver.getMeasures().getSolutionCount() == 1) {
+                counter.setAction(
+                        new ICounterAction() {
+                            @Override
+                            public void onLimitReached() {
+                                solver.getSearchLoop().restart();
+                                counter.reset();
+                            }
+                        });
+                solver.getSearchLoop().plugSearchMonitor(counter);
+            }
+        }
         neighbor.recordSolution();
     }
 
     @Override
     public void afterInterrupt() {
-//        if (solver.getMeasures().getSolutionCount() == 0) {
-//            System.out.println("research complete : no solution");
-//            return;
-//        }
-//        if (solver.getSearchLoop().hasReachedLimit()) {
-//            System.out.println("limit reached");
-//            return;
-//        }
-//        if (neighbor.isSearchComplete()) {
-//            System.out.println("optimality proved");
-//            return;
-//        }
         if (solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
-
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             solver.getSearchLoop().forceAlive(true);
             solver.getSearchLoop().restart();
@@ -113,6 +122,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
             //System.out.println("SOLVER RESTARTED");
+            if (counter != null) counter.reset();
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
                 neighbor.fixSomeVariables(this);

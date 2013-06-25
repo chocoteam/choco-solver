@@ -47,7 +47,7 @@ public class RandomNeighborhood implements INeighbor {
     private final IntVar[] vars;
     private final int[] bestSolution;
     private Random rd;
-    private int nbFixedVariables = 0;
+    private double nbFixedVariables = 0d;
 
     BitSet fragment;  // index of variable to set unfrozen
 

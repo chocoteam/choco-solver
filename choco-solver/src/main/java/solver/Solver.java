@@ -468,8 +468,8 @@ public class Solver implements Serializable {
      * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
      */
-    public boolean isCompleteSearch() {
-        return !search.hasReachedLimit();
+    public boolean hasReachedLimit() {
+        return search.hasReachedLimit();
     }
 
     /**

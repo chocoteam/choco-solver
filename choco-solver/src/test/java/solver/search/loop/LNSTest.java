@@ -36,7 +36,6 @@ import solver.search.loop.lns.neighbors.PropgagationGuidedNeighborhood;
 import solver.search.loop.lns.neighbors.RandomNeighborhood;
 import solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
 import solver.search.loop.lns.neighbors.SequenceNeighborhood;
-import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -66,7 +65,7 @@ public class LNSTest {
         for (int i = 0; i < nos; i++) {
             objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, (int) Math.ceil(capacities[1] / volumes[i]), solver);
         }
-        final IntVar power = VariableFactory.bounded("power", 0, 99999, solver);
+        final IntVar power = VariableFactory.bounded("power", 8371, 99999, solver);
         IntVar scalar = VariableFactory.bounded("weight", capacities[0], capacities[1], solver);
         solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, power));
@@ -119,28 +118,6 @@ public class LNSTest {
                 SearchMonitorFactory.limitThreadTime(solver, 20000);
                 break;
         }
-
-//        SMF.log(solver, true, false);
-
-//        final FailCounter fc = new FailCounter(20);
-//        fc.setAction(new ICounterAction() {
-//            @Override
-//            public void onLimitReached() {
-//                solver.getSearchLoop().restart();
-//                fc.reset();
-//            }
-//        });
-        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-            @Override
-            public void onSolution() {
-                if (solver.getMeasures().getSolutionCount() == 1) {
-//                    solver.getSearchLoop().plugSearchMonitor(fc);
-                } else if (power.getValue() == 8372) {
-                    System.out.printf("%d : %d -- %.3fms, %d nodes\n", lns, power.getValue(), solver.getMeasures().getTimeCount(), solver.getMeasures().getNodeCount());
-                }
-            }
-        });
-
 
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
     }
