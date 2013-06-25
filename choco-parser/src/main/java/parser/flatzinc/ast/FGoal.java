@@ -38,8 +38,13 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.nary.nogood.NogoodStoreForRestarts;
+import solver.explanations.strategies.ExplainedNeighborhood2;
 import solver.objective.ObjectiveManager;
+import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.lns.LargeNeighborhoodSearch;
+import solver.search.loop.lns.neighbors.*;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -80,7 +85,6 @@ public class FGoal {
         set_search
     }
 
-
     public static void define_goal(Datas datas, Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
@@ -103,6 +107,7 @@ public class FGoal {
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
         }
+        Variable[] defdecvars = null; // defined dec vars
         StringBuilder description = new StringBuilder();
         if (annotations.size() > 0 && !gc.free) {
             AbstractStrategy strategy = null;
@@ -121,6 +126,7 @@ public class FGoal {
                 } else {
                     strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
+                defdecvars = strategy.vars;
 //                solver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
                 aSolver.set(
@@ -151,6 +157,7 @@ public class FGoal {
                         ivars[i] = (IntVar) dvars[i];
                     }
                 }
+                defdecvars = ivars;
             }
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
@@ -186,11 +193,51 @@ public class FGoal {
                 }
             }
         }
-		if(gc.lastConflict){
-			aSolver.set(ISF.lastConflict(aSolver,aSolver.getSearchLoop().getStrategy()));
-		}
+        plugLNS(aSolver, ivars, defdecvars, gc);
+
+        if (gc.lastConflict) {
+            aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
+        }
         gc.setDescription(description.toString());
     }
+
+
+    private static void plugLNS(Solver solver, IntVar[] ivars, Variable[] ddvars, GoalConf gc) {
+        INeighbor neighbor = null;
+        IntVar[] dvars = new IntVar[ddvars.length];
+        for (int i = 0; i < dvars.length; i++) {
+            dvars[i] = (IntVar) ddvars[i];
+        }
+
+        switch (gc.lns) {
+            case RLNS:
+                neighbor = new RandomNeighborhood(dvars, gc.seed, 1.05);
+                break;
+            case PGLNS:
+                neighbor = new SequenceNeighborhood(
+                        new PropgagationGuidedNeighborhood(solver, dvars, gc.seed, 100),
+                        new ReversePropagationGuidedNeighborhood(solver, dvars, gc.seed, 100),
+                        new RandomNeighborhood(dvars, gc.seed, 1.05)
+                );
+                break;
+            case ELNS:
+                neighbor = new ExplainedNeighborhood2(solver, null,  gc.seed, null, 1.05);
+                break;
+            case ELNS_NG:
+                NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(ivars, solver);
+                neighbor = new ExplainedNeighborhood2(solver,dvars, gc.seed, ngs, 1.05);
+                solver.post(ngs);
+                break;
+        }
+        if (neighbor != null) {
+            LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+            solver.getSearchLoop().plugSearchMonitor(lns);
+            if (gc.fastRestart) {
+                lns.setCounter(new FailCounter(30));
+            }
+        }
+    }
+
 
     /**
      * Read search annotation and build corresponding strategy

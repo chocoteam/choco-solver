@@ -24,60 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc.ast;
+package solver.constraints.nary.nogood;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import solver.exception.ContradictionException;
+import solver.variables.IntVar;
+import util.ESat;
 
 /**
+ * An interface to define a Nogood.
+ * <p/>
+ * Made of a list of variables, a list of values and an int.
+ * {vars, values} matches positive decisions.
+ * A positive decision d_i is vars_i=values_i.
+ * <p/>
+ * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/11/12
+ * @since 20/06/13
  */
-public class GoalConf {
-    boolean free; // force free search
-    int bbss; // set free search : 1: activity based, 2: impact based, 3: dom/wdeg
-    boolean dec_vars; // use same decision pool as the one defines in the fzn file
-    public boolean all; // search for all solutions
-    long seed; // seed for random search
-    boolean lastConflict;  // Search pattern
-    long timeLimit;
+public interface INogood {
 
-    String description;
+    final static Logger LOGGER = LoggerFactory.getLogger(Nogood.class);
 
-    boolean fastRestart;
+    void setIdx(int idx);
 
-    public enum LNS {
-        NONE,
-        RLNS,
-        PGLNS,
-        ELNS,
-        ELNS_NG,
-    }
+    int getIdx();
 
-    LNS lns;
+    int propagate(PropNogoodStore pngs) throws ContradictionException;
 
-    public GoalConf() {
-        this(false, 0, false, false, 29091981L, false, -1, LNS.NONE, false);
-    }
+    int awakeOnInst(int idx, PropNogoodStore pngs) throws ContradictionException;
 
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit, LNS lns, boolean fr) {
-        this.free = free;
-        this.bbss = bbss;
-        this.dec_vars = dec_vars;
-        this.seed = seed;
-        this.all = all;
-        this.lastConflict = lf;
-        this.timeLimit = timelimit;
-        this.lns = lns;
-        this.fastRestart = fr;
-    }
+    boolean isUnit();
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    ESat isEntailed();
 
-    public String getDescription() {
-        return description;
-    }
+    int size();
 
+    IntVar getVar(int i);
 
+    int getVal(int i);
 }

@@ -27,10 +27,14 @@
 package solver.explanations.strategies;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.nary.nogood.NogoodStoreForRestarts;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
 import solver.objective.ObjectiveManager;
@@ -39,6 +43,8 @@ import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.IMonitorInitialize;
 import solver.search.loop.monitors.IMonitorRestart;
 import solver.search.loop.monitors.IMonitorUpBranch;
+import solver.search.restart.GeometricalRestartStrategy;
+import solver.search.restart.IRestartStrategy;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
@@ -51,100 +57,112 @@ import util.iterators.DisposableValueIterator;
 import java.util.*;
 
 /**
+ * A new version of the Explained-based neighborhood for LNS.
+ * <p/>
+ * Short description of the algorithm:
+ * a. on a solution:
+ *
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation, IMonitorUpBranch, IMonitorInitialize, IMonitorRestart {
+public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagation, IMonitorUpBranch, IMonitorInitialize, IMonitorRestart {
+
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
 
-    private static final int A = 0; // A: activated
-    private static final int R = 1; // R: refuted
-    private static final int O = 2; // O: involving the objective variable
+    private static final int ACTIVATED = 0; // ACTIVATED: activated
+    private static final int REFUTED = 1; // REFUTED: refuted
+    private static final int OBJECTIVE = 2; // OBJECTIVE: involving the objective variable
+    private static final int CUT = 3; // CUT: decisions associated to the cut
 
     protected final Solver solver;
     protected ExplanationEngine mExplanationEngine;
     private ObjectiveManager om;
     private IntVar objective;
     private int LB, UB;
+    private final int n;
+    private final IntVar[] vars;
     private Decision last;
-
-    // cluster mode on
 
     // decision path that leads to a solution
     private ArrayList<Decision> path;
-
 
     // list of decisions related to the explanation of the objective variable
     private final ArrayList<Decision> valueDecisions;
     // list of index of clusters
     private final TIntArrayList clusters;
+    private final IRestartStrategy geo;
     // current cluster treated
     private int cluster;
     // index of the decision currently applied, and the nb of decision already applied
     private int curIdx, nbDecApplied;
     // list of decisions related to the exception, if any
-    private final ArrayList<Decision> exceptionDecisions;
-    //
-    private int idExDec;
+//    private final ArrayList<Decision> exceptionDecisions;
 
     // various status of the decisions
     private BitSet[] decisions;
     // for restrict algo, do we fail applying the fragment
     private boolean applyFgmt;
-
-    private final int n;
-    private final IntVar[] vars;
-    private final int[] bestSolution;
+    // do we need to force conflict?
+    private boolean forceCft;
 
     // TEMPORARY DATA STRUCTURES
     private final ArrayList<Deduction> tmpDeductions;
     private final Set<Deduction> tmpValueDedutions;
 
 
+    // FOR RANDOM
+    private final double rfactor;
     private final Random random;
     private boolean inRndMode;
-    private double epsilon = 1.;
-    private int nbFixedVars;
+    private FastDecision duplicator;
+    private double nbFixedVars;
+    private final int[] bestSolution;
+    private BitSet notFrozen;
 
-    int RR = 0, DD = 0;
+    // FOR NOGOOD
+    private NogoodStoreForRestarts ngs;
+    private boolean recordNG = false;
 
-    private final Policy policy;
-
-    public static enum Policy {
-        BACKTRACK, CONFLICT, RANDOM
-    }
-
-    public ExplainedNeighborhood(Solver solver, Policy policy, long seed) {
+    public ExplainedNeighborhood2(Solver solver, IntVar[] dvars, long seed, NogoodStoreForRestarts ngs, double rfactor) {
         this.solver = solver;
-        this.policy = policy;
         this.random = new Random(seed);
+        this.ngs = ngs;
+        this.rfactor = rfactor;
 
-        n = solver.getNbVars();
-        vars = new IntVar[n];
-        for (int k = 0; k < n; k++) {
-            vars[k] = (IntVar) solver.getVar(k);
+        if (dvars == null) {
+            n = solver.getNbVars();
+            vars = new IntVar[solver.getNbVars()];
+            for (int k = 0; k < n; k++) {
+                vars[k] = (IntVar) solver.getVar(k);
+            }
+        } else {
+            n = dvars.length;
+            vars = dvars.clone();
         }
         bestSolution = new int[n];
         nbFixedVars = n / 2;
 
-        ExplanationFactory.LAZY.plugin(solver, false);
+        ExplanationFactory.LAZY.plugin(solver, true);
         this.mExplanationEngine = solver.getExplainer();
 
         path = new ArrayList<Decision>(16);
         valueDecisions = new ArrayList<Decision>(16);
         clusters = new TIntArrayList(16);
-        decisions = new BitSet[3];
-        for (int i = 0; i < 3; i++) {
+        decisions = new BitSet[5];
+        for (int i = 0; i < 4; i++) {
             decisions[i] = new BitSet(16);
         }
-        exceptionDecisions = new ArrayList<Decision>(16);
 
         // TEMPORARY DATA STRUCTURES
         tmpDeductions = new ArrayList<Deduction>(16);
         tmpValueDedutions = new HashSet<Deduction>(16);
+
         inRndMode = false;
 
         solver.getSearchLoop().plugSearchMonitor(this);
+        notFrozen = new BitSet(n);
+        geo = new GeometricalRestartStrategy(1, 1.2);
     }
 
     @Override
@@ -172,117 +190,61 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
         UB = objective.getUB();
     }
 
-
-    private int selectVariable() {
-        int id;
-        int cc = random.nextInt(bestSolution.length);
-        for (id = 0; id >= 0 && cc > 0; id++) {
-            cc--;
-        }
-        return id;
-    }
-
     @Override
     public void beforeRestart() {
+        if (recordNG && ngs != null) {
+            ngs.beforeRestart();
+        }
+        recordNG = false;
     }
 
     @Override
     public void afterRestart() {
+        if (ngs != null) {
+            ngs.afterRestart();
+        }
         last = null;
         nbDecApplied = curIdx = 0;
-
-        if (applyFgmt && !inRndMode) {
-            RR++;
-            restrictLess();
-        } else {
-            DD++;
-            switch (policy) {
-                case BACKTRACK:
-                    if (decisions[A].cardinality() > 0 && !inRndMode) {
-                        restrictLess();
-                    } else {
-                        epsilon = inRndMode ? epsilon * 1.02 : 1.;
-                        inRndMode = true;
-                        random();
-                    }
-                    break;
-                case CONFLICT:
-//                    conflict();
-                    if (decisions[A].cardinality() > 0 && !inRndMode) {
-                        conflict();
-                    } else {
-                        epsilon = inRndMode ? epsilon * 1.02 : 1.;
-                        inRndMode = true;
-                        random();
-                    }
-                    break;
-                case RANDOM:
-                    epsilon = inRndMode ? epsilon * 1.02 : 1.;
-                    inRndMode = true;
-                    random();
-                    break;
+        if (inRndMode) {
+            if (applyFgmt) {
+                nbFixedVars /= rfactor;
             }
+            random();
+            return;
         }
-    }
-
-    private void conflict() {
-        if (path.size() > 0 && exceptionDecisions.isEmpty()) {
-            explainCut();
-            int id = path.indexOf(exceptionDecisions.get(idExDec++));
-            decisions[A].clear(id);
-        } else if (idExDec < exceptionDecisions.size()) {
-            int id = path.indexOf(exceptionDecisions.get(idExDec - 1));
-            decisions[A].set(id);
-            id = path.indexOf(exceptionDecisions.get(idExDec++));
-            decisions[A].clear(id);
-        } else {
-            restrictLess();
-        }
-    }
-
-    private void random() {
+        // 1. if a new solution has been found:
         if (path.size() > 0) {
-            FastDecision d0 = (FastDecision) path.get(0);
-            int cste = (int) ((2 * n) / (3 * epsilon)) - 1;
-            path.clear();
-            for (int i = 0; i < cste; i++) {
-                int id = selectVariable();
-                if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                    FastDecision d = (FastDecision) d0.duplicate();
-                    d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
-                    path.add(d);
-                }
+            // force the failure and explain it
+            if (forceCft) {
+                explainCut();
             }
-            nbFixedVars = path.size();
-            decisions[A].clear();
-            decisions[A].set(0, path.size());
-            decisions[O].clear();
-            decisions[R].clear();
+            relaxNeighborhood();
         }
     }
-
 
     @Override
     public boolean isSearchComplete() {
-        return decisions[A].cardinality() == 0 || (policy == Policy.BACKTRACK && nbFixedVars == 0);
+        return decisions[ACTIVATED].cardinality() == 0 || (inRndMode && nbFixedVars == 0);
     }
 
     @Override
     public void recordSolution() {
-//        System.out.printf("%d - %d\n", RR, DD);
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
-
+        nbFixedVars = n / 2;
+        if (duplicator == null) {
+            duplicator = (FastDecision) solver.getSearchLoop().decision.duplicate();
+        }
         // 1. clear data structures
         tmpDeductions.clear();
         valueDecisions.clear();
-        exceptionDecisions.clear();
         clusters.clear();
         path.clear();
-        decisions[A].clear();
-        decisions[O].clear();
-        decisions[R].clear();
+        decisions[ACTIVATED].clear();
+        decisions[OBJECTIVE].clear();
+        decisions[REFUTED].clear();
+        decisions[CUT].clear();
 
 
         // 2. get anti domain of the objective variable
@@ -297,14 +259,17 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
         }
 
         // 5. compute the first fragment to apply
-        computeFragment();
+        clonePath();
 
         // 6. prepare the next fragment heuristic
         cluster = 1;
-        epsilon = 1.;
         // for the restart:
         applyFgmt = true;
+        // force conflict
+        forceCft = true;
         inRndMode = false;
+        nbFixedVars = n / 2;
+
     }
 
 
@@ -315,7 +280,8 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
 
     @Override
     public void restrictLess() {
-        chooseNext();
+        nbFixedVars /= rfactor;
+        relaxNeighborhood();
         nbDecApplied = curIdx = 0;
     }
 
@@ -329,9 +295,10 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             solver.getSearchLoop().restart();
         } else if (last != null && solver.getSearchLoop().decision.getId() == last.getId()) {
             // if we close the subtree
-            if (policy != Policy.BACKTRACK) {
-                solver.getSearchLoop().restart();
-            }
+            solver.getSearchLoop().restart();
+            // HACK for nogood recording
+            solver.getSearchLoop().decision.buildNext();
+            recordNG = !inRndMode;
         }
     }
 
@@ -355,37 +322,29 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             near = objective.getValue() - 1;
         }
 
-
         int value;
         if (ismax) {
-            while (it.hasNext() && it.next() < near) {
-            }
-            while (it.hasNext() && (value = it.next()) < far) {
-                explainValue(value);
+            // explain why obj cannot take a smaller value: from far to near
+            if (it.hasNext()) {
+                do {
+                    value = it.next();
+                } while (value < near || value > far); // skip {LBs} and {UBs before init propag}
+                do {
+                    explainValue(value);
+                } while (it.hasNext() && (value = it.next()) >= near);
             }
         } else {
-            while (it.hasNext() && (value = it.next()) <= near) {
-                explainValue(value);
+            // explain why obj cannot take a smaller value: from far to near
+            if (it.hasNext()) {
+                do {
+                    value = it.next();
+                } while (value < far);// skip {LBs before init propag}
+                do {
+                    explainValue(value);
+                } while (it.hasNext() && (value = it.next()) <= near);
             }
         }
         it.dispose();
-
-    }
-
-
-    /**
-     * Build the cluster, for restrict less operation
-     */
-    private void buildCluster() {
-        if (clusters.size() > 1) {
-            int one = clusters.get(1);
-            clusters.clear();
-            clusters.add(0);
-            clusters.add(one);
-            for (int i = one + 1; i < tmpDeductions.size(); i++) {
-                clusters.add(i);
-            }
-        }
     }
 
 
@@ -410,6 +369,28 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
         }
     }
 
+
+    /**
+     * Build the cluster, for restrict less operation
+     */
+    private void buildCluster() {
+        if (clusters.size() > 1) {
+            int one = clusters.get(1);
+            clusters.clear();
+            clusters.add(0);
+            clusters.add(one);
+            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo.getNextCutoff(j)) {
+                clusters.add(i);
+            }
+            if (clusters.get(clusters.size() - 1) != tmpDeductions.size() - 1) {
+                clusters.add(tmpDeductions.size() - 1);
+            }
+//            for (int i = one + 1; i < tmpDeductions.size(); i++) {
+//                clusters.add(i);
+//            }
+        }
+    }
+
     /**
      * Extract decision from the explanation
      *
@@ -431,7 +412,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
     /**
      * Compute the initial fragment, ie set of decisions to keep.
      */
-    private void computeFragment() {
+    private void clonePath() {
         Decision dec = solver.getSearchLoop().decision;
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
@@ -446,7 +427,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             path.set(j, di);
 
 
-            for (int k = 0; k < 3; k++) {
+            for (int k = 0; k < 3; k++) { // avoid CUT, because it is empty
 
                 boolean bi = decisions[k].get(i);
                 boolean bj = decisions[k].get(j);
@@ -456,7 +437,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             }
         }
 
-        assert path.size() - 1 == decisions[A].previousSetBit(path.size() * 2);
+        assert path.size() - 1 == decisions[ACTIVATED].previousSetBit(path.size() * 2);
     }
 
 
@@ -473,85 +454,27 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
         boolean forceNext = !dec.hasNext();
         if (forceNext) {
             clone.buildNext(); // hack
-            decisions[R].set(pos);
+            decisions[REFUTED].set(pos);
         }
-        if (dec.getDecisionVariable().getId() != objective.getId()) {
-            decisions[O].set(pos);
+        if (dec.getDecisionVariable().getId() == objective.getId()) {
+            decisions[OBJECTIVE].set(pos);
         }
-        decisions[A].set(pos);
+        decisions[ACTIVATED].set(pos);
         int idx = valueDecisions.indexOf(dec);
         if (idx > -1) valueDecisions.set(idx, clone);
     }
 
 ////
 
-    private class Strategy extends AbstractStrategy<IntVar> {
-
-        protected Strategy() {
-            super(new IntVar[0]);
-        }
-
-        @Override
-        public void init() throws ContradictionException {
-        }
-
-        @Override
-        public Decision<IntVar> getDecision() {
-            Decision d = null;
-            if (nbDecApplied < decisions[A].cardinality()) {
-                curIdx = decisions[A].nextSetBit(curIdx);
-                if (curIdx > -1) {
-                    d = path.get(curIdx++);
-                    nbDecApplied++;
-                    d = d.duplicate();
-                    d.setWorldIndex(solver.getEnvironment().getWorldIndex() - 1);
-                    last = d;
-                }
-            }
-            applyFgmt = d != null;
-            return d;
-        }
-
-    }
-
-
-    /**
-     * Compute the next decisions to relax
-     */
-    private void chooseNext() {
-        if (cluster < clusters.size()) {
-            int k = cluster++;
-            for (int i = clusters.get(k - 1); i < clusters.get(k); i++) {
-                Decision dec = valueDecisions.get(i);
-                int idx = path.indexOf(dec);
-                decisions[A].clear(idx);
-            }
-        } else {
-            int idx = decisions[A].previousSetBit(path.size());
-            if (idx > -1) {
-                decisions[A].clear(idx);
-            }
-        }
-        // then desactivate refuted decisions
-        int firstClear = decisions[A].nextClearBit(0);
-        for (int i = decisions[R].nextSetBit(0); i > -1 && i < firstClear && firstClear > -1; i = decisions[R].nextSetBit(i + 1)) {
-            if (!decisions[O].get(i)) {
-                decisions[A].set(i);
-            }
-        }
-        for (int j = decisions[R].nextSetBit(firstClear); j > -1; j = decisions[R].nextSetBit(j + 1)) {
-            decisions[A].clear(j);
-        }
-
-        assert path.size() - 1 >= decisions[A].previousSetBit(path.size() * 2);
-    }
-
     /**
      * Force the failure, apply decisions to the last solution + cut => failure!
      */
     private void explainCut() {
         // Goal: force the failure to get the set of decisions related to the cut
-
+        forceCft = false;
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("explain Cut");
+        }
         // 1. make a backup
         solver.getEnvironment().worldPush();
         Decision d;
@@ -564,9 +487,9 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             for (int i = 0; i < path.size(); i++) {
                 d = path.get(i);
                 nbDecApplied++;
+                d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
-                d.setPrevious(previous);
                 solver.propagate();
                 previous = d;
             }
@@ -576,7 +499,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
                 tmpDeductions.clear();
                 tmpValueDedutions.clear();
-                exceptionDecisions.clear(); // useless but... you know...
+                decisions[CUT].clear(); // useless but... you know...
 
                 // 3. explain the failure
                 Explanation expl = new Explanation();
@@ -589,10 +512,15 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
                 extractDecision(complete, tmpValueDedutions);
                 tmpDeductions.addAll(tmpValueDedutions);
 
-                assert tmpDeductions.size() > 0 : "woo... if this is empty, that's strange...";
+                if (tmpDeductions.isEmpty()) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("woo... if this is empty, that's strange...");
+                    }
+                    throw new SolverException("Empty explanation!");
+                }
 
                 for (int i = 0; i < tmpDeductions.size(); i++) {
-                    exceptionDecisions.add(((BranchingDecision) tmpDeductions.get(i)).getDecision());
+                    decisions[CUT].set(path.indexOf(((BranchingDecision) tmpDeductions.get(i)).getDecision()));
                 }
 
                 // 4. need to replace the duplicate decision with the correct one
@@ -609,9 +537,106 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             }
         }
         solver.getEnvironment().worldPop();
-
         solver.getEngine().flush();
+    }
 
-        idExDec = 0;
+
+    /**
+     * Compute the next decisions to relax
+     */
+    private void relaxNeighborhood() {
+        if (cluster < clusters.size()) {
+            int k = cluster++;
+            for (int i = clusters.get(k - 1); i < clusters.get(k); i++) {
+                Decision dec = valueDecisions.get(i);
+                int idx = path.indexOf(dec);
+                decisions[ACTIVATED].clear(idx);
+                decisions[CUT].clear(idx);
+            }
+        } else if (!decisions[CUT].isEmpty()) {
+            // then hit the conflict decisions...
+//            int idx = decisions[CUT].previousSetBit(path.size());
+            int idx = decisions[CUT].nextSetBit(0);
+            if (idx > -1) {
+                decisions[ACTIVATED].clear(idx);
+                decisions[CUT].clear(idx);
+            }
+        } else {
+//          switch to rnd mode
+            inRndMode = true;
+            random();
+            return;
+        }
+        // then deactivate refuted decisions
+        int firstClear = decisions[ACTIVATED].nextClearBit(0);
+        for (int i = decisions[REFUTED].nextSetBit(0); i > -1 && i < firstClear && firstClear > -1; i = decisions[REFUTED].nextSetBit(i + 1)) {
+            if (decisions[OBJECTIVE].get(i)) {
+                decisions[ACTIVATED].set(i);
+            }
+        }
+        for (int j = decisions[REFUTED].nextSetBit(firstClear); j > -1; j = decisions[REFUTED].nextSetBit(j + 1)) {
+            decisions[ACTIVATED].clear(j);
+        }
+
+        assert path.size() - 1 >= decisions[ACTIVATED].previousSetBit(path.size() * 2);
+    }
+
+    private void random() {
+        if (duplicator != null) {
+            notFrozen.set(0, n);
+            path.clear();
+            for (int i = 0; i < nbFixedVars && notFrozen.cardinality() > 0; i++) {
+                int id = selectVariable();
+                if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
+                    FastDecision d = (FastDecision) duplicator.duplicate();
+                    d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
+                    path.add(d);
+                    notFrozen.clear(id);
+                }
+            }
+            decisions[ACTIVATED].clear();
+            decisions[ACTIVATED].set(0, path.size());
+            decisions[OBJECTIVE].clear();
+            decisions[REFUTED].clear();
+            decisions[CUT].clear();
+        }
+    }
+
+    private int selectVariable() {
+        int id;
+        int cc = random.nextInt(notFrozen.cardinality());
+        for (id = notFrozen.nextSetBit(0); id >= 0 && cc > 0; id = notFrozen.nextSetBit(id + 1)) {
+            cc--;
+        }
+        return id;
+    }
+
+    private class Strategy extends AbstractStrategy<IntVar> {
+
+        protected Strategy() {
+            super(new IntVar[0]);
+        }
+
+        @Override
+        public void init() throws ContradictionException {
+        }
+
+        @Override
+        public Decision<IntVar> getDecision() {
+            Decision d = null;
+            if (nbDecApplied < decisions[ACTIVATED].cardinality()) {
+                curIdx = decisions[ACTIVATED].nextSetBit(curIdx);
+                if (curIdx > -1) {
+                    d = path.get(curIdx++);
+                    nbDecApplied++;
+                    d = d.duplicate();
+                    d.setWorldIndex(solver.getEnvironment().getWorldIndex() - 1);
+                    last = d;
+                }
+            }
+            applyFgmt = d != null;
+            return d;
+        }
+
     }
 }
