@@ -32,15 +32,25 @@
  * Time: 16:51
  */
 
-package solver.search.loop.monitors;
+package solver.search.loop.lns;
 
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.search.limits.ACounter;
+import solver.search.limits.ICounterAction;
+import solver.search.loop.lns.neighbors.INeighbor;
+import solver.search.loop.monitors.IMonitorInterruption;
+import solver.search.loop.monitors.IMonitorRestart;
+import solver.search.loop.monitors.IMonitorSolution;
 
-public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorClose, IMonitorRestart {
+/**
+ * How to branch a Large Neighborhood Search ?
+ * This class provides services to plug a LNS, it relies on a Neighbor computation, and enables fast restarts.
+ */
+public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorRestart {
 
     //***********************************************************************************
     // VARIABLES
@@ -48,15 +58,23 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
 
     protected Solver solver;
     protected final boolean restartAfterEachSolution;
+    protected final INeighbor neighbor;
+    protected ACounter counter; // can be null!
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public Abstract_LNS_SearchMonitor(Solver solver, boolean restartAfterEachSolution) {
+    public LargeNeighborhoodSearch(Solver solver, INeighbor neighbor, boolean restartAfterEachSolution) {
         solver.getSearchLoop().restartAfterEachSolution(true);
         this.solver = solver;
+        this.neighbor = neighbor;
         this.restartAfterEachSolution = restartAfterEachSolution;
+    }
+
+
+    public void setCounter(ACounter counter) {
+        this.counter = counter;
     }
 
     //***********************************************************************************
@@ -65,48 +83,32 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
 
     @Override
     public void onSolution() {
-        recordSolution();
+        if (counter != null) {
+            // the fast restart policy is plugged when the first solution has been found
+            if (solver.getMeasures().getSolutionCount() == 1) {
+                counter.setAction(
+                        new ICounterAction() {
+                            @Override
+                            public void onLimitReached() {
+                                solver.getSearchLoop().restart();
+                                counter.reset();
+                            }
+                        });
+                solver.getSearchLoop().plugSearchMonitor(counter);
+            }
+        }
+        neighbor.recordSolution();
     }
 
     @Override
     public void afterInterrupt() {
-        //		if(solver.getMeasures().getSolutionCount()==0){
-        //			System.out.println("research complete : no solution");return;
-        //		}
-        //		if(solver.getSearchLoop().getLimitsBox().isReached()){
-        //			System.out.println("limit reached");return;
-        //		}
-        //		if(isSearchComplete()){
-        //			System.out.println("optimality proved");return;
-        //		}
-        if (!(solver.getMeasures().getSolutionCount() == 0
-                || solver.isCompleteSearch()
-                || isSearchComplete())) {
-            restrictLess();
-            solver.getSearchLoop().restartAfterEachSolution(true);
+        if (solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
+            neighbor.restrictLess();
+            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             solver.getSearchLoop().forceAlive(true);
-            solver.getSearchLoop().resetReachedLimit(false);
             solver.getSearchLoop().restart();
         }
     }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
-    }
-
-    /**
-     * @return true iff the search is in a complete mode (no fixed variable)
-     */
-    protected abstract boolean isSearchComplete();
-
-    /**
-     * Record values of decision variables to freeze some ones during the next LNS run
-     */
-    protected abstract void recordSolution();
 
     //***********************************************************************************
     // FIX VARIABLES FOR NEXT LNS STEP
@@ -120,35 +122,19 @@ public abstract class Abstract_LNS_SearchMonitor implements ICause, IMonitorSolu
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
             //System.out.println("SOLVER RESTARTED");
+            if (counter != null) counter.reset();
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
-                fixSomeVariables();
+                neighbor.fixSomeVariables(this);
                 solver.getEngine().propagate();
             } catch (ContradictionException e) {
                 //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
                 solver.getEngine().flush();
-                restrictLess();
+                neighbor.restrictLess();
                 solver.getSearchLoop().restart();
             }
         }
     }
-
-    /**
-     * Freezes some variables in order to have a fast computation
-     *
-     * @throws ContradictionException if variables have been fixed to inconsistent values
-     *                                this can happen if fixed variables cannot yield to a better solution than the last one
-     *                                a contradiction is raised because a cut has been posted on the objective function
-     *                                Notice that it could be used to generate a no-good
-     */
-    protected abstract void fixSomeVariables() throws ContradictionException;
-
-    /**
-     * Use less restriction at the beginning of a LNS run
-     * in order to get better solutions
-     * Called when no solution was found during a LNS run (trapped into a local optimum)
-     */
-    protected abstract void restrictLess();
 
 
     @Override

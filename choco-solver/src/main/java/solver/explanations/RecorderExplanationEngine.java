@@ -111,7 +111,11 @@ public class RecorderExplanationEngine extends ExplanationEngine implements IMon
         if (toreturn == null) {
             toreturn = v.antiDomain();
             removedvalues.put(vid, toreturn);
-            valueremovals.put(vid, new TIntObjectHashMap<ValueRemoval>());
+            TIntObjectHashMap<ValueRemoval> hm = valueremovals.get(vid);
+            if (hm == null) {
+                hm = new TIntObjectHashMap<ValueRemoval>();
+                valueremovals.put(vid, hm);
+            }
         }
         return toreturn;
     }

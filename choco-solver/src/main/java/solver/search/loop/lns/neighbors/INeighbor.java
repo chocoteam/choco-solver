@@ -24,60 +24,48 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc.ast;
+package solver.search.loop.lns.neighbors;
+
+import solver.ICause;
+import solver.exception.ContradictionException;
 
 /**
+ * An interface defining services required for the LNS to select variables to freeze-unfreeze.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/11/12
+ * @since 18/06/13
  */
-public class GoalConf {
-    boolean free; // force free search
-    int bbss; // set free search : 1: activity based, 2: impact based, 3: dom/wdeg
-    boolean dec_vars; // use same decision pool as the one defines in the fzn file
-    public boolean all; // search for all solutions
-    long seed; // seed for random search
-    boolean lastConflict;  // Search pattern
-    long timeLimit;
-
-    String description;
-
-    boolean fastRestart;
-
-    public enum LNS {
-        NONE,
-        RLNS,
-        PGLNS,
-        ELNS,
-        ELNS_NG,
-    }
-
-    LNS lns;
-
-    public GoalConf() {
-        this(false, 0, false, false, 29091981L, false, -1, LNS.NONE, false);
-    }
-
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit, LNS lns, boolean fr) {
-        this.free = free;
-        this.bbss = bbss;
-        this.dec_vars = dec_vars;
-        this.seed = seed;
-        this.all = all;
-        this.lastConflict = lf;
-        this.timeLimit = timelimit;
-        this.lns = lns;
-        this.fastRestart = fr;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+public interface INeighbor {
 
 
+    /**
+     * Record values of decision variables to freeze some ones during the next LNS run
+     */
+    void recordSolution();
+
+    /**
+     * Freezes some variables in order to have a fast computation
+     *
+     * @param cause the LNS
+     * @throws solver.exception.ContradictionException
+     *          if variables have been fixed to inconsistent values
+     *          this can happen if fixed variables cannot yield to a better solution than the last one
+     *          a contradiction is raised because a cut has been posted on the objective function
+     *          Notice that it could be used to generate a no-good
+     */
+    void fixSomeVariables(ICause cause) throws ContradictionException;
+
+    /**
+     * Use less restriction at the beginning of a LNS run
+     * in order to get better solutions
+     * Called when no solution was found during a LNS run (trapped into a local optimum)
+     */
+    void restrictLess();
+
+
+    /**
+     * @return true iff the search is in a complete mode (no fixed variable)
+     */
+    boolean isSearchComplete();
 }

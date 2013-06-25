@@ -160,7 +160,7 @@ public class VariableFactory {
      * @return an array of integer variables with bounded domains
      */
     public static IntVar[][] boundedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        IntVar[][] vars = new IntVar[DIM1][DIM2];
+        IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = boundedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
@@ -218,7 +218,7 @@ public class VariableFactory {
      * @return a matrix of integer variables with enumerated domains
      */
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
-        IntVar[][] vars = new IntVar[DIM1][DIM2];
+        IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             for (int j = 0; j < DIM2; j++) {
                 vars[i][j] = enumerated(NAME + "[" + i + "][" + j + "]", MIN, MAX, SOLVER);
@@ -241,11 +241,11 @@ public class VariableFactory {
         if (VALUES.length == 1) {
             return fixed(NAME, VALUES[0], SOLVER);
         } else {
-			if((VALUES[VALUES.length-1]-VALUES[0])/VALUES.length>5){
-				return new BitsetArrayIntVarImpl(NAME,VALUES,SOLVER);
-			}else{
-				return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
-			}
+            if ((VALUES[VALUES.length - 1] - VALUES[0]) / VALUES.length > 5) {
+                return new BitsetArrayIntVarImpl(NAME, VALUES, SOLVER);
+            } else {
+                return new BitsetIntVarImpl(NAME, VALUES, SOLVER);
+            }
         }
     }
 
@@ -342,7 +342,7 @@ public class VariableFactory {
      * @return a real variable matrix with bounded domains initialized to [MIN,MAX]
      */
     public static RealVar[][] realMatrix(String NAME, int DIM1, int DIM2, double MIN, double MAX, double PRECISION, Solver SOLVER) {
-        RealVar[][] vars = new RealVar[DIM1][DIM2];
+        RealVar[][] vars = new RealVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
             vars[i] = realArray(NAME + "[" + i + "]", DIM2, MIN, MAX, PRECISION, SOLVER);
         }
@@ -393,20 +393,20 @@ public class VariableFactory {
         return set(NAME, ENVELOPE, SetType.BITSET, new int[]{}, SetType.BITSET, SOLVER);
     }
 
-	/**
-	 * Builds a set variable with an initial domain given by
-	 * ENVELOP = [MIN_ELEMENT,MAX_ELEMENT] and an empty KERNEL.
-	 * Uses a BitSet representation for both the envelope and the kernel
-	 *
-	 * @param NAME     name of the variable
-	 * @param MIN_ELEMENT
-	 * @param MAX_ELEMENT
-	 * @param SOLVER   solver involving the variable
-	 * @return a set variable
-	 */
-	public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
-		return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
-	}
+    /**
+     * Builds a set variable with an initial domain given by
+     * ENVELOP = [MIN_ELEMENT,MAX_ELEMENT] and an empty KERNEL.
+     * Uses a BitSet representation for both the envelope and the kernel
+     *
+     * @param NAME        name of the variable
+     * @param MIN_ELEMENT
+     * @param MAX_ELEMENT
+     * @param SOLVER      solver involving the variable
+     * @return a set variable
+     */
+    public static SetVar set(String NAME, int MIN_ELEMENT, int MAX_ELEMENT, Solver SOLVER) {
+        return new SetVarImpl(NAME, MIN_ELEMENT, MAX_ELEMENT, SOLVER);
+    }
 
     //*************************************************************************************
     // GRAPH VARIABLES

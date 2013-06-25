@@ -28,6 +28,8 @@
 package solver.search.loop;
 
 import memory.IEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
@@ -76,6 +78,8 @@ import util.ESat;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
+
     //    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
     public int timeStamp;
 
@@ -87,6 +91,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     static final int UP_BRANCH = 1 << 4;
     static final int RESTART = 1 << 5;
     static final int RESUME = 1 << 6;
+
+    static final String MSG_LIMIT = "a limit has been reached";
+    static final String MSG_ROOT = "the entire search space has been explored";
+    static final String MSG_CUT = "applying the cut leads to a failure";
+    static final String MSG_FIRST_SOL = "stop at first solution";
+    static final String MSG_INIT = "failure encountered during initial propagation";
+    static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
+
 
     /* Reference to the solver */
     final Solver solver;
@@ -303,11 +315,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public final void reachLimit() {
         hasReachedLimit = true;
-        interrupt();
-    }
-
-    public void resetReachedLimit(boolean bvalue) {
-        hasReachedLimit = bvalue;
+        interrupt(MSG_LIMIT);
     }
 
     public boolean hasReachedLimit() {
@@ -316,8 +324,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Force the search to stop
+     *
+     * @param message a message to motivate the interruption -- for logging only
      */
-    public final void interrupt() {
+    public final void interrupt(String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search interruption: {}", message);
+        }
         nextState = RESUME;
         alive = false;
         smList.afterInterrupt();

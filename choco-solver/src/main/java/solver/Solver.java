@@ -461,15 +461,15 @@ public class Solver implements Serializable {
      * Possible back values are:
      * <p/>
      * <br/>- <code>true</code> : the resolution is complete and
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
-     * proven to be optimal, or the CSP has been proven to be unsatifisiable.
+     * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
      */
-    public boolean isCompleteSearch() {
-        return !search.hasReachedLimit();
+    public boolean hasReachedLimit() {
+        return search.hasReachedLimit();
     }
 
     /**

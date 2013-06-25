@@ -24,60 +24,56 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc.ast;
+package solver.search.loop.lns.neighbors;
+
+import solver.ICause;
+import solver.exception.ContradictionException;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/11/12
+ * @since 18/06/13
  */
-public class GoalConf {
-    boolean free; // force free search
-    int bbss; // set free search : 1: activity based, 2: impact based, 3: dom/wdeg
-    boolean dec_vars; // use same decision pool as the one defines in the fzn file
-    public boolean all; // search for all solutions
-    long seed; // seed for random search
-    boolean lastConflict;  // Search pattern
-    long timeLimit;
+public class SequenceNeighborhood implements INeighbor {
 
-    String description;
 
-    boolean fastRestart;
+    protected int who;
+    protected int count;
+    protected INeighbor[] neighbors;
 
-    public enum LNS {
-        NONE,
-        RLNS,
-        PGLNS,
-        ELNS,
-        ELNS_NG,
+    public SequenceNeighborhood(INeighbor... neighbors) {
+        this.neighbors = neighbors;
+        who = 0;
+        count = neighbors.length;
     }
 
-    LNS lns;
-
-    public GoalConf() {
-        this(false, 0, false, false, 29091981L, false, -1, LNS.NONE, false);
+    @Override
+    public void recordSolution() {
+        for (int i = 0; i < count; i++) {
+            neighbors[i].recordSolution();
+        }
+        who = 0;
     }
 
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit, LNS lns, boolean fr) {
-        this.free = free;
-        this.bbss = bbss;
-        this.dec_vars = dec_vars;
-        this.seed = seed;
-        this.all = all;
-        this.lastConflict = lf;
-        this.timeLimit = timelimit;
-        this.lns = lns;
-        this.fastRestart = fr;
+    @Override
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
+        neighbors[who].fixSomeVariables(cause);
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    @Override
+    public void restrictLess() {
+        who++;
+        if (who == count) who = 0;
+        neighbors[who].restrictLess();
     }
 
-    public String getDescription() {
-        return description;
+    @Override
+    public boolean isSearchComplete() {
+        boolean isComplete = false;
+        for (int i = 0; i < count; i++) {
+            isComplete |= neighbors[i].isSearchComplete();
+        }
+        return isComplete;
     }
-
-
 }
