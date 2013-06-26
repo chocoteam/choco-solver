@@ -91,7 +91,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
     private final ArrayList<Decision> valueDecisions;
     // list of index of clusters
     private final TIntArrayList clusters;
-    private final IRestartStrategy geo;
+    private final IRestartStrategy geo4cluster, geo4rnd;
     // current cluster treated
     private int cluster;
     // index of the decision currently applied, and the nb of decision already applied
@@ -115,6 +115,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
     private final double rfactor;
     private final Random random;
     private boolean inRndMode;
+    private int nbCall, limit;
     private FastDecision duplicator;
     private double nbFixedVars;
     private final int[] bestSolution;
@@ -141,7 +142,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
             vars = dvars.clone();
         }
         bestSolution = new int[n];
-        nbFixedVars = n / 2;
+        nbFixedVars = 2. * n / 3. + 1;
 
         ExplanationFactory.LAZY.plugin(solver, true);
         this.mExplanationEngine = solver.getExplainer();
@@ -162,7 +163,8 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
 
         solver.getSearchLoop().plugSearchMonitor(this);
         notFrozen = new BitSet(n);
-        geo = new GeometricalRestartStrategy(1, 1.2);
+        geo4cluster = new GeometricalRestartStrategy(1, 1.2);
+        geo4rnd = new GeometricalRestartStrategy(n / 2, 1.01);
     }
 
     @Override
@@ -224,7 +226,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
 
     @Override
     public boolean isSearchComplete() {
-        return decisions[ACTIVATED].cardinality() == 0 || (inRndMode && nbFixedVars == 0);
+        return decisions[ACTIVATED].cardinality() == 0 || (inRndMode && nbFixedVars < 1);
     }
 
     @Override
@@ -232,7 +234,6 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
-        nbFixedVars = n / 2;
         if (duplicator == null) {
             duplicator = (FastDecision) solver.getSearchLoop().decision.duplicate();
         }
@@ -268,7 +269,9 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
         // force conflict
         forceCft = true;
         inRndMode = false;
-        nbFixedVars = n / 2;
+        nbFixedVars = 2. * n / 3. + 1;
+        nbCall = 0;
+        limit = geo4rnd.getNextCutoff(nbCall);
 
     }
 
@@ -317,10 +320,17 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
         if (ismax) {
             far = UB;
             near = objective.getValue() + 1;
+            if (far == objective.getValue()) {
+                return;
+            }
         } else {
             far = LB;
             near = objective.getValue() - 1;
+            if (far == objective.getValue()) {
+                return;
+            }
         }
+
 
         int value;
         if (ismax) {
@@ -328,7 +338,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
             if (it.hasNext()) {
                 do {
                     value = it.next();
-                } while (value < near || value > far); // skip {LBs} and {UBs before init propag}
+                } while (it.hasNext() && (value < near || value > far)); // skip {LBs} and {UBs before init propag}
                 do {
                     explainValue(value);
                 } while (it.hasNext() && (value = it.next()) >= near);
@@ -338,7 +348,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
             if (it.hasNext()) {
                 do {
                     value = it.next();
-                } while (value < far);// skip {LBs before init propag}
+                } while (it.hasNext() && value < far);// skip {LBs before init propag}
                 do {
                     explainValue(value);
                 } while (it.hasNext() && (value = it.next()) <= near);
@@ -379,7 +389,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
             clusters.clear();
             clusters.add(0);
             clusters.add(one);
-            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo.getNextCutoff(j)) {
+            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo4cluster.getNextCutoff(j)) {
                 clusters.add(i);
             }
             if (clusters.get(clusters.size() - 1) != tmpDeductions.size() - 1) {
@@ -486,7 +496,6 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
             mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager().postDynamicCut();
             for (int i = 0; i < path.size(); i++) {
                 d = path.get(i);
-                nbDecApplied++;
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
@@ -513,10 +522,10 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
                 tmpDeductions.addAll(tmpValueDedutions);
 
                 if (tmpDeductions.isEmpty()) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("woo... if this is empty, that's strange...");
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("2 cases: (a) optimality proven or (b) bug in explanation");
                     }
-                    throw new SolverException("Empty explanation!");
+                    throw new SolverException("2 cases: (a) optimality proven or (b) bug in explanation");
                 }
 
                 for (int i = 0; i < tmpDeductions.size(); i++) {
@@ -583,9 +592,14 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
 
     private void random() {
         if (duplicator != null) {
+            nbCall++;
+            if (nbCall > limit) {
+                limit = nbCall + geo4rnd.getNextCutoff(nbCall);
+                nbFixedVars /= rfactor;
+            }
             notFrozen.set(0, n);
             path.clear();
-            for (int i = 0; i < nbFixedVars && notFrozen.cardinality() > 0; i++) {
+            for (int i = 0; i < nbFixedVars - 1 && notFrozen.cardinality() > 0; i++) {
                 int id = selectVariable();
                 if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                     FastDecision d = (FastDecision) duplicator.duplicate();

@@ -193,8 +193,7 @@ public class FGoal {
                 }
             }
         }
-        plugLNS(aSolver, ivars, defdecvars, gc);
-
+        plugLNS(aSolver, ivars, defdecvars!=null?defdecvars:ivars, gc);
         if (gc.lastConflict) {
             aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
         }

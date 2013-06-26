@@ -28,6 +28,8 @@ package solver.search.loop.lns.neighbors;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.restart.GeometricalRestartStrategy;
+import solver.search.restart.IRestartStrategy;
 import solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -42,12 +44,14 @@ import java.util.Random;
  */
 public class RandomNeighborhood implements INeighbor {
 
+    IRestartStrategy geo;
     private final int n;
     private final double factor;
     private final IntVar[] vars;
     private final int[] bestSolution;
     private Random rd;
     private double nbFixedVariables = 0d;
+    private int nbCall, limit;
 
     BitSet fragment;  // index of variable to set unfrozen
 
@@ -60,12 +64,12 @@ public class RandomNeighborhood implements INeighbor {
         this.rd = new Random(seed);
         this.bestSolution = new int[n];
         this.fragment = new BitSet(n);
-        nbFixedVariables = n / 2;
+        geo = new GeometricalRestartStrategy(n / 2, 1.01);
     }
 
     @Override
     public boolean isSearchComplete() {
-        return nbFixedVariables == 0;
+        return nbFixedVariables < 1;
     }
 
     @Override
@@ -73,13 +77,20 @@ public class RandomNeighborhood implements INeighbor {
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
-        nbFixedVariables = n / 2;
+        nbFixedVariables = 2. * n / 3. + 1;
+        nbCall = 0;
+        limit = geo.getNextCutoff(nbCall);
     }
 
     @Override
     public void fixSomeVariables(ICause cause) throws ContradictionException {
+        nbCall++;
+        if (nbCall > limit) {
+            limit = nbCall + geo.getNextCutoff(nbCall);
+            restrictLess();
+        }
         fragment.set(0, n); // all variables are frozen
-        for (int i = 0; i < nbFixedVariables && fragment.cardinality() > 0; i++) {
+        for (int i = 0; i < nbFixedVariables - 1 && fragment.cardinality() > 0; i++) {
             int id = selectVariable();
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                 vars[id].instantiateTo(bestSolution[id], cause);
