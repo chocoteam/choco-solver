@@ -96,7 +96,13 @@ public class RealPropagator extends Propagator<RealVar> {
                 for (int i = 0; i < vars.length; i++) {
                     vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], aCause);
                 }
+                break;
             case Ibex.ENTAILED:
+                for (int i = 0; i < vars.length; i++) {
+                    vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], aCause);
+                }
+                setPassive();
+                break;
             case Ibex.NOT_SIGNIFICANT:
             default:
         }

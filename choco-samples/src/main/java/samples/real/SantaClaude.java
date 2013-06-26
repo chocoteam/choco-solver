@@ -97,7 +97,6 @@ public class SantaClaude extends AbstractProblem {
         RealVar[] all_vars = ArrayUtils.append(VariableFactory.real(kid_price, precision), new RealVar[]{average});
 
         ave_cons.addFunction(function.toString(), all_vars);
-        ave_cons.discretize(kid_price);
         solver.post(ave_cons);
     }
 
