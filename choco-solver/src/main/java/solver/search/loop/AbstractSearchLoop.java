@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
+import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -142,14 +143,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Objective manager. Default object is no objective.
      */
-    ObjectiveManager objectivemanager;
+	ObjectiveManager objectivemanager;
 
     private boolean alive;
     public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-        objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
+        objectivemanager = new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -360,9 +361,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
-        if (objectivemanager.isOptimization()) {
-            plugSearchMonitor(objectivemanager);
-        }
         this.measures.declareObjective();
     }
 
