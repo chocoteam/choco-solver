@@ -185,10 +185,10 @@ public class DCMST extends AbstractProblem {
                 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
             throw new UnsupportedOperationException();
         }
-        if (solver.getSearchLoop().getObjectivemanager().getBestValue() != optimum
-                && optimum != 100000 // when the optimum is not given in bounds.csv
-                && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-            throw new UnsupportedOperationException("wrong optimum ? " + solver.getSearchLoop().getObjectivemanager().getBestValue() + " != " + optimum);
+        if (solver.getMeasures().getTimeCount() < TIMELIMIT &&
+			totalCost.getValue() != optimum && optimum != 100000 // when the optimum is not given in bounds.csv
+        ) {
+            throw new UnsupportedOperationException("wrong optimum ? " + solver.getSearchLoop().getObjectivemanager().getBestSolutionValue() + " != " + optimum);
         }
         if (solver.getMeasures().getSolutionCount() > 1
                 && (ub == optimum)) {
@@ -198,7 +198,7 @@ public class DCMST extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+        int bestCost = (int) solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
         String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
                 + solver.getMeasures().getNodeCount() + ";" + (int) (solver.getMeasures().getTimeCount()) + ";" + bestCost + ";\n";
         TextWriter.writeTextInto(txt, outFile);

@@ -33,6 +33,7 @@ import samples.graph.input.TSP_Utils;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -139,7 +140,7 @@ public class TravelingSalesmanProblem extends AbstractProblem {
     @Override
     public void prettyOut() {
         System.out.println("optimum in ["
-                + solver.getSearchLoop().getObjectivemanager().getBestLB() + ","
-                + solver.getSearchLoop().getObjectivemanager().getBestUB() + "]");
+                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestLB() + ","
+                + ((IntObjectiveManager)solver.getSearchLoop().getObjectivemanager()).getBestUB() + "]");
     }
 }
