@@ -31,7 +31,6 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.explanations.strategies.ExplainedNeighborhood;
-import solver.explanations.strategies.ExplainedNeighborhood2;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.lns.neighbors.PropgagationGuidedNeighborhood;
 import solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -105,22 +104,7 @@ public class LNSTest {
                 break;
             case 5:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new ExplainedNeighborhood(solver, ExplainedNeighborhood.Policy.BACKTRACK, 123456L), true));
-//                SearchMonitorFactory.limitThreadTime(solver, 20000);
-                break;
-            case 6:
-                solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new ExplainedNeighborhood(solver, ExplainedNeighborhood.Policy.CONFLICT, 123456L), true));
-//                SearchMonitorFactory.limitThreadTime(solver, 20000);
-                break;
-            case 7:
-                solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new ExplainedNeighborhood(solver, ExplainedNeighborhood.Policy.RANDOM, 123456L), true));
-                SearchMonitorFactory.limitThreadTime(solver, 20000);
-                break;
-            case 8:
-                solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new ExplainedNeighborhood2(solver, null, 123456L, null, 1.05), true));
+                        new ExplainedNeighborhood(solver, null, 123456L, null, 1.05), true));
 //                SearchMonitorFactory.limitThreadTime(solver, 20000);
                 break;
         }
@@ -138,9 +122,6 @@ public class LNSTest {
         knapsack20(3);
         knapsack20(4);
         knapsack20(5);
-        knapsack20(6);
-        knapsack20(7);
-        knapsack20(8);
     }
 
 

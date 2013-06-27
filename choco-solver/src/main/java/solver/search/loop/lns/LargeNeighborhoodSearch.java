@@ -60,6 +60,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     protected final boolean restartAfterEachSolution;
     protected final INeighbor neighbor;
     protected ACounter counter; // can be null!
+    protected boolean hasAppliedNeighborhood;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -102,7 +103,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void afterInterrupt() {
-        if (solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
+        if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             solver.getSearchLoop().forceAlive(true);
@@ -116,6 +117,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void beforeRestart() {
+        hasAppliedNeighborhood = false;
     }
 
     @Override
@@ -126,6 +128,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
                 neighbor.fixSomeVariables(this);
+                hasAppliedNeighborhood = true;
                 solver.getEngine().propagate();
             } catch (ContradictionException e) {
                 //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");

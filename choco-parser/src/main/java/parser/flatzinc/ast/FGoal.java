@@ -39,7 +39,7 @@ import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.nary.nogood.NogoodStoreForRestarts;
-import solver.explanations.strategies.ExplainedNeighborhood2;
+import solver.explanations.strategies.ExplainedNeighborhood;
 import solver.objective.ObjectiveManager;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
@@ -220,11 +220,11 @@ public class FGoal {
                 );
                 break;
             case ELNS:
-                neighbor = new ExplainedNeighborhood2(solver, null,  gc.seed, null, 1.05);
+                neighbor = new ExplainedNeighborhood(solver, null,  gc.seed, null, 1.05);
                 break;
             case ELNS_NG:
                 NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(ivars, solver);
-                neighbor = new ExplainedNeighborhood2(solver,dvars, gc.seed, ngs, 1.05);
+                neighbor = new ExplainedNeighborhood(solver,dvars, gc.seed, ngs, 1.05);
                 solver.post(ngs);
                 break;
         }
