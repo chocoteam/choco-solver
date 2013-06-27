@@ -198,7 +198,7 @@ public class DCMST extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        int bestCost = (int) solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
+        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestSolutionValue().intValue();
         String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
                 + solver.getMeasures().getNodeCount() + ";" + (int) (solver.getMeasures().getTimeCount()) + ";" + bestCost + ";\n";
         TextWriter.writeTextInto(txt, outFile);
