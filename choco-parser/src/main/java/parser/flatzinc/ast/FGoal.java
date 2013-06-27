@@ -40,7 +40,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.nary.nogood.NogoodStoreForRestarts;
 import solver.explanations.strategies.ExplainedNeighborhood2;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
@@ -94,7 +94,7 @@ public class FGoal {
                 break;
             default:
                 IntVar obj = expr.intVarValue(aSolver);
-                search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
+                search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
         }
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);

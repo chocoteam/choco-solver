@@ -37,7 +37,8 @@ import solver.constraints.nary.cnf.PropTrue;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
+import solver.objective.RealObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
@@ -48,6 +49,7 @@ import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
+import solver.variables.RealVar;
 import solver.variables.Variable;
 import solver.variables.view.BoolConstantView;
 import solver.variables.view.ConstantView;
@@ -511,25 +513,42 @@ public class Solver implements Serializable {
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     *
+     * Restores the best solution found so far (if any)
+	 *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
-     * @return an array of int [LB, UB], representing the best bounds of the <code>objective</code> found so far.
-     *         <p/>
-     *         Note that when LB = UB, the optimality has been proven.
      */
-    public int[] findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new ObjectiveManager(objective, policy, this));
+        this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
 		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
         solve(false);
-        return new int[]{search.getObjectivemanager().getBestLB(), search.getObjectivemanager().getBestUB()};
     }
+
+
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objective the variable to optimize
+	 */
+	public void findOptimalSolution(ResolutionPolicy policy, RealVar objective) {
+		if (policy == ResolutionPolicy.SATISFACTION) {
+			throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
+		}
+		if (objective == null) {
+			throw new SolverException("No objective variable has been defined");
+		}
+		this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this));
+		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
+		solve(false);
+	}
 
     /**
      * This method should not be called externally. It launches the resolution process.
@@ -736,5 +755,4 @@ public class Solver implements Serializable {
     public int nextId() {
         return id++;
     }
-
 }

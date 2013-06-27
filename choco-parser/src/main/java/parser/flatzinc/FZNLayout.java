@@ -171,7 +171,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
                 LOGGER.info("% - Search statistics");
                 LOGGER.info("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
                 if (searchLoop.getMeasures().hasObjective()) {
-                    LOGGER.info("% \t Objective : {}", searchLoop.getMeasures().getObjectiveValue());
+                    LOGGER.info("% \t Objective : {}", searchLoop.getMeasures().getBestSolutionValue().intValue());
                 }
                 LOGGER.info("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
                 LOGGER.info("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());

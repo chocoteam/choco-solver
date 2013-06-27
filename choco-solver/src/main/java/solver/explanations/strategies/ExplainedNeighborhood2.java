@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
 import solver.search.loop.lns.neighbors.INeighbor;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.IMonitorInitialize;
@@ -77,7 +77,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
 
     protected final Solver solver;
     protected ExplanationEngine mExplanationEngine;
-    private ObjectiveManager om;
+    private IntObjectiveManager om;
     private IntVar objective;
     private int LB, UB;
     private final int n;
@@ -184,7 +184,7 @@ public class ExplainedNeighborhood2 implements INeighbor, IMonitorInitPropagatio
 
     @Override
     public void afterInitialPropagation() {
-        om = mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
+        om = (IntObjectiveManager) mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();
