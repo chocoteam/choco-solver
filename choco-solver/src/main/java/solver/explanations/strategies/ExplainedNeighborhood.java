@@ -568,7 +568,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             int k;
             do {
                 k = cluster++;
-            } while (!checkCluster(k));
+            } while (k < clusters.size() && !checkCluster(k));
             if (k < clusters.size()) {
                 for (int i = clusters.get(k - 1); i < clusters.get(k); i++) {
                     Decision dec = valueDecisions.get(i);
@@ -579,20 +579,19 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
                 relaxNeighborhood();
             }
         } else {
-            int wo; // which one?
+            int idx = -1;
             if (applyFgmt && !decisions[CUT].isEmpty()) {
-                wo = CUT;
+                idx = decisions[CUT].previousSetBit(path.size() * 2);
             } else if (!applyFgmt && !decisions[DOM].isEmpty()) {
-                wo = DOM;
+                idx = decisions[CUT].previousSetBit(0);
+            }
+            if (idx > -1) {
+                removeFromPath(idx);
             } else {
                 // switch to rnd mode
                 inRndMode = true;
                 random();
                 return;
-            }
-            int idx = decisions[wo].nextSetBit(0);
-            if (idx > -1) {
-                removeFromPath(idx);
             }
         }
         // then deactivate refuted decisions
