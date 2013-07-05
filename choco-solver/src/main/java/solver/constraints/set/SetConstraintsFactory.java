@@ -177,9 +177,10 @@ public class SetConstraintsFactory {
      */
     public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, SUM}, SUM.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
+        c.setPropagators(new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 
@@ -213,9 +214,10 @@ public class SetConstraintsFactory {
      */
     public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, MAX_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
+        c.setPropagators(new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 
@@ -249,9 +251,10 @@ public class SetConstraintsFactory {
      */
     public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, MIN_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
+        c.setPropagators(new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 
