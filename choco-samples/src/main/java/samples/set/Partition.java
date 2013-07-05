@@ -100,7 +100,7 @@ public class Partition extends AbstractProblem {
             solver.post(SetConstraintsFactory.nbEmpty(new SetVar[]{x, y, z, universe}, VariableFactory.fixed(0, solver)));
         }
         // restricts the sum of elements in universe
-        solver.post(SetConstraintsFactory.sum(universe, sum));
+        solver.post(SetConstraintsFactory.sum(universe, sum, true));
     }
 
     @Override
