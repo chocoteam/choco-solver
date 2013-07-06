@@ -114,11 +114,22 @@ public class RealView extends AbstractVariable<NoDelta, RealVar>
 
     @Override
     public boolean updateBounds(double lowerbound, double upperbound, ICause cause) throws ContradictionException {
-        if (var.updateLowerBound((int) lowerbound, this) & var.updateUpperBound((int) upperbound, this)) {
-            notifyPropagators(EventType.BOUND, cause);
-            return true;
+        int c = 0;
+        c += (var.updateLowerBound((int) Math.ceil(lowerbound - precision), this) ? 1 : 0);
+        c += (var.updateUpperBound((int) Math.floor(upperbound + precision), this) ? 2 : 0);
+        switch (c) {
+            case 3:
+                notifyPropagators(EventType.BOUND, cause);
+                return true;
+            case 2:
+                notifyPropagators(EventType.DECUPP, cause);
+                return true;
+            case 1:
+                notifyPropagators(EventType.INCLOW, cause);
+                return true;
+            default: //cas 0;
+                return false;
         }
-        return false;
     }
 
     @Override

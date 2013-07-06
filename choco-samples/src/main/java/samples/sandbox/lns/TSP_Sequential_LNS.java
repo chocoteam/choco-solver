@@ -143,7 +143,7 @@ public class TSP_Sequential_LNS {
         System.out.println("start LNS...");
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
         System.out.println("end LNS... duration = " + (System.currentTimeMillis() - timeInst) + " ms");
-        return solver.getMeasures().getObjectiveValue();
+        return totalCost.getValue();
     }
 
     //***********************************************************************************

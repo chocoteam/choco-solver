@@ -248,6 +248,17 @@ public class IntConstraintFactory {
         return new Element(VALUE, TABLE, INDEX, OFFSET, SORT, VALUE.getSolver());
     }
 
+	/**
+	 * Build ELEMENT constraint: VALUE = TABLE[INDEX]
+	 *
+	 * @param VALUE  an integer variable taking its value in TABLE
+	 * @param TABLE  an array of integer values
+	 * @param INDEX  an integer variable representing the value of VALUE in TABLE
+	 */
+	public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX) {
+		return element(VALUE, TABLE, INDEX, 0, "detect");
+	}
+
     /**
      * Enforces VAR1 = VAR2^2
      */

@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
 import solver.search.loop.lns.neighbors.ANeighbor;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.IMonitorUpBranch;
@@ -64,7 +64,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
     protected ExplanationEngine mExplanationEngine;
-    private ObjectiveManager om;
+    private IntObjectiveManager om;
     private IntVar objective;
     private int LB, UB;
     protected final Random random;
@@ -217,7 +217,7 @@ public class ExplainingObjective extends ANeighbor implements IMonitorInitPropag
 
     @Override
     public void afterInitialPropagation() {
-        om = mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
+        om = (IntObjectiveManager) mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager();
         objective = om.getObjective();
         LB = objective.getLB();
         UB = objective.getUB();

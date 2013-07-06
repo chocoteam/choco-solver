@@ -59,6 +59,7 @@ public class PropMinElement extends Propagator<Variable> {
     private SetVar set;
     private int offSet;
     private int[] weights;
+	private final boolean notEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -70,9 +71,11 @@ public class PropMinElement extends Propagator<Variable> {
      *
      * @param setVar
      * @param min
+	 * @param notEmpty true : the set variable cannot be empty
+	 *                 false : the set may be empty (if so, the MIN constraint is not applied)
      */
-    public PropMinElement(SetVar setVar, IntVar min) {
-        this(setVar, null, 0, min);
+    public PropMinElement(SetVar setVar, IntVar min, boolean notEmpty) {
+        this(setVar, null, 0, min, notEmpty);
     }
 
     /**
@@ -83,13 +86,16 @@ public class PropMinElement extends Propagator<Variable> {
      * @param weights
      * @param offSet
      * @param min
+	 * @param notEmpty true : the set variable cannot be empty
+	 *                 false : the set may be empty (if so, the MIN constraint is not applied)
      */
-    public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min) {
+    public PropMinElement(SetVar setVar, int[] weights, int offSet, IntVar min, boolean notEmpty) {
         super(new Variable[]{setVar, min}, PropagatorPriority.BINARY, true);
         this.min = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offSet;
+		this.notEmpty = notEmpty;
     }
 
     //***********************************************************************************
@@ -119,7 +125,9 @@ public class PropMinElement extends Propagator<Variable> {
                 }
             }
         }
-        min.updateLowerBound(minVal, aCause);
+		if(notEmpty || set.getKernelSize()>0){
+			min.updateLowerBound(minVal, aCause);
+		}
     }
 
     @Override
@@ -130,7 +138,11 @@ public class PropMinElement extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
 		if(set.getEnvelopeSize()==0){
-			return ESat.FALSE;
+			if(notEmpty){
+				return ESat.FALSE;
+			}else{
+				return ESat.TRUE;
+			}
 		}
         int lb = min.getLB();
         int ub = min.getUB();
@@ -139,13 +151,13 @@ public class PropMinElement extends Propagator<Variable> {
                 return ESat.FALSE;
             }
         }
-        int minVal = get(set.getEnvelopeFirst());
+        int minVal = Integer.MAX_VALUE;
         for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             if (minVal > get(j)) {
                 minVal = get(j);
             }
         }
-        if (minVal > ub) {
+        if (minVal > ub && (notEmpty || set.getKernelSize()>0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

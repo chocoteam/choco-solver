@@ -38,7 +38,7 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
@@ -93,7 +93,7 @@ public class FGoal {
                 break;
             default:
                 IntVar obj = expr.intVarValue(aSolver);
-                search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
+                search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
         }
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);

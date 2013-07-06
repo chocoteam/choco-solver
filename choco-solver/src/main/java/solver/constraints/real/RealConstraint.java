@@ -29,7 +29,6 @@ package solver.constraints.real;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.variables.BoolVar;
-import solver.variables.IntVar;
 import solver.variables.RealVar;
 
 /**
@@ -155,14 +154,6 @@ public class RealConstraint extends Constraint {
         addPropagators(new RealReifiedPropagator(ibex, contractors++, functions, bvar, rvars, Ibex.COMPO));
     }
 
-    /**
-     * Add a discretization constraint to Ibex, forcing variable in parameters to be considered as discrete
-     *
-     * @param vars array of variables
-     */
-    public void discretize(IntVar... vars) {
-        addPropagators(new IntToRealPropagator(ibex, contractors++, vars));
-    }
 
     @Override
     protected void finalize() throws Throwable {
