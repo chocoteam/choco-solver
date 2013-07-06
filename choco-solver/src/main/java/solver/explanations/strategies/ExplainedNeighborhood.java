@@ -38,7 +38,7 @@ import solver.exception.SolverException;
 import solver.explanations.*;
 import solver.explanations.antidom.AntiDomain;
 import solver.objective.ObjectiveManager;
-import solver.search.loop.lns.neighbors.INeighbor;
+import solver.search.loop.lns.neighbors.ANeighbor;
 import solver.search.loop.monitors.IMonitorInitPropagation;
 import solver.search.loop.monitors.IMonitorInitialize;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -65,7 +65,7 @@ import java.util.*;
  * @author Charles Prud'homme
  * @since 01/10/12
  */
-public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation, IMonitorUpBranch, IMonitorInitialize, IMonitorRestart {
+public class ExplainedNeighborhood extends ANeighbor implements IMonitorInitPropagation, IMonitorUpBranch, IMonitorInitialize, IMonitorRestart {
 
     private static Logger LOGGER = LoggerFactory.getLogger("solver");
 
@@ -79,7 +79,6 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
     private static final int DOMCUT = 5; // DOMCUT: decisions common to DOM and CUT
     private static final int SIZE = 6;
 
-    protected final Solver solver;
     protected ExplanationEngine mExplanationEngine;
     private ObjectiveManager om;
     private IntVar objective;
@@ -130,7 +129,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
     private boolean recordNG = false;
 
     public ExplainedNeighborhood(Solver solver, IntVar[] dvars, long seed, NogoodStoreForRestarts ngs, double rfactor) {
-        this.solver = solver;
+        super(solver);
         this.random = new Random(seed);
         this.ngs = ngs;
         this.rfactor = rfactor;
@@ -177,8 +176,8 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
 
     @Override
     public void afterInitialize() {
-        AbstractStrategy cstrat = solver.getSearchLoop().getStrategy();
-        solver.set(new StrategiesSequencer(
+        AbstractStrategy cstrat = mSolver.getSearchLoop().getStrategy();
+        mSolver.set(new StrategiesSequencer(
                 new Strategy(), cstrat
         ));
     }
@@ -239,7 +238,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             bestSolution[i] = vars[i].getValue();
         }
         if (duplicator == null) {
-            duplicator = (FastDecision) solver.getSearchLoop().decision.duplicate();
+            duplicator = (FastDecision) mSolver.getSearchLoop().decision.duplicate();
         }
         // 1. clear data structures
         tmpDeductions.clear();
@@ -301,12 +300,12 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
     @Override
     public void afterUpBranch() {
         if (applyFgmt) {
-            solver.getSearchLoop().restart();
-        } else if (last != null && solver.getSearchLoop().decision.getId() == last.getId()) {
+            mSolver.getSearchLoop().restart();
+        } else if (last != null && mSolver.getSearchLoop().decision.getId() == last.getId()) {
             // if we close the subtree
-            solver.getSearchLoop().restart();
+            mSolver.getSearchLoop().restart();
             // HACK for nogood recording
-            solver.getSearchLoop().decision.buildNext();
+            mSolver.getSearchLoop().decision.buildNext();
             recordNG = !inRndMode;
         }
     }
@@ -429,7 +428,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
      * Compute the initial fragment, ie set of decisions to keep.
      */
     private void clonePath() {
-        Decision dec = solver.getSearchLoop().decision;
+        Decision dec = mSolver.getSearchLoop().decision;
         while ((dec != RootDecision.ROOT)) {
             addToPath(dec);
             dec = dec.getPrevious();
@@ -495,11 +494,11 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
             LOGGER.debug("explain Cut");
         }
         // 1. make a backup
-        solver.getEnvironment().worldPush();
+        mSolver.getEnvironment().worldPush();
         Decision d;
         try {
 
-            Decision previous = solver.getSearchLoop().decision;
+            Decision previous = mSolver.getSearchLoop().decision;
             assert previous == RootDecision.ROOT;
             // 2. apply the decisions
             mExplanationEngine.getSolver().getSearchLoop().getObjectivemanager().postDynamicCut();
@@ -508,10 +507,10 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
                 d.setPrevious(previous);
                 d.buildNext();
                 d.apply();
-                solver.propagate();
+                mSolver.propagate();
                 previous = d;
             }
-            //solver.propagate();
+            //mSolver.propagate();
             assert false : "SHOULD FAIL!";
         } catch (ContradictionException cex) {
             if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
@@ -554,8 +553,8 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
                 throw new UnsupportedOperationException(this.getClass().getName() + ".onContradiction incoherent state");
             }
         }
-        solver.getEnvironment().worldPop();
-        solver.getEngine().flush();
+        mSolver.getEnvironment().worldPop();
+        mSolver.getEngine().flush();
         decisions[DOMCUT].and(decisions[CUT]);
     }
 
@@ -679,7 +678,7 @@ public class ExplainedNeighborhood implements INeighbor, IMonitorInitPropagation
                     d = path.get(curIdx++);
                     nbDecApplied++;
                     d = d.duplicate();
-                    d.setWorldIndex(solver.getEnvironment().getWorldIndex() - 1);
+                    d.setWorldIndex(mSolver.getEnvironment().getWorldIndex() - 1);
                     last = d;
                 }
             }

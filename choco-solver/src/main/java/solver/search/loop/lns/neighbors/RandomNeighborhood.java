@@ -26,10 +26,11 @@
  */
 package solver.search.loop.lns.neighbors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.restart.GeometricalRestartStrategy;
-import solver.search.restart.IRestartStrategy;
 import solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -42,64 +43,74 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 18/04/13
  */
-public class RandomNeighborhood implements INeighbor {
+public class RandomNeighborhood extends ANeighbor {
 
-    IRestartStrategy geo;
-    private final int n;
-    private final double factor;
-    private final IntVar[] vars;
-    private final int[] bestSolution;
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+
+    protected final int n;
+    protected final IntVar[] vars;
+    protected final int[] bestSolution;
+    private final int[] previous;
     private Random rd;
     private double nbFixedVariables = 0d;
-    private int nbCall, limit;
+    private int nbCall;
+    private int limit;
+    private int level;
 
-    BitSet fragment;  // index of variable to set unfrozen
+    protected BitSet fragment;  // index of variable to set unfrozen
 
-    public RandomNeighborhood(IntVar[] vars, long seed, double factor) {
+    public RandomNeighborhood(Solver aSolver, IntVar[] vars, int level, long seed) {
+        super(aSolver);
         this.n = vars.length;
-        assert factor > 1.0;
-        this.factor = factor;
         this.vars = vars.clone();
+        this.level = level;
 
         this.rd = new Random(seed);
         this.bestSolution = new int[n];
+        this.previous = new int[n];
         this.fragment = new BitSet(n);
-        geo = new GeometricalRestartStrategy(n / 2, 1.01);
     }
 
     @Override
     public boolean isSearchComplete() {
-        return nbFixedVariables < 1;
+        return false;
     }
 
     @Override
     public void recordSolution() {
+        int count = 0;
         for (int i = 0; i < vars.length; i++) {
+            previous[i] = bestSolution[i];
             bestSolution[i] = vars[i].getValue();
+            if (previous[i] == bestSolution[i]) {
+                count++;
+            }
         }
+        //System.out.printf("%d/%d = %.3f, -- %d -- %.3f\n", count, n, ((count * 1d) / (n * 1d)), fragment.cardinality(), nbFixedVariables);
         nbFixedVariables = 2. * n / 3. + 1;
         nbCall = 0;
-        limit = geo.getNextCutoff(nbCall);
+        limit = 200; //geo.getNextCutoff(nbCall);
     }
 
     @Override
     public void fixSomeVariables(ICause cause) throws ContradictionException {
         nbCall++;
-        if (nbCall > limit) {
-            limit = nbCall + geo.getNextCutoff(nbCall);
-            restrictLess();
-        }
+        restrictLess();
         fragment.set(0, n); // all variables are frozen
         for (int i = 0; i < nbFixedVariables - 1 && fragment.cardinality() > 0; i++) {
             int id = selectVariable();
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                vars[id].instantiateTo(bestSolution[id], cause);
+                impose(id, cause);
             }
             fragment.clear(id);
         }
     }
 
-    private int selectVariable() {
+    protected void impose(int id, ICause cause) throws ContradictionException {
+        vars[id].instantiateTo(bestSolution[id], cause);
+    }
+
+    protected int selectVariable() {
         int id;
         int cc = rd.nextInt(fragment.cardinality());
         for (id = fragment.nextSetBit(0); id >= 0 && cc > 0; id = fragment.nextSetBit(id + 1)) {
@@ -110,6 +121,9 @@ public class RandomNeighborhood implements INeighbor {
 
     @Override
     public void restrictLess() {
-        nbFixedVariables /= factor;
+        if (nbCall > limit) {
+            limit = nbCall + level;
+            nbFixedVariables = rd.nextDouble() * n;
+        }
     }
 }

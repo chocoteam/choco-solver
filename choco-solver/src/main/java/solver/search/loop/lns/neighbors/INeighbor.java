@@ -28,6 +28,7 @@ package solver.search.loop.lns.neighbors;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.limits.ACounter;
 
 /**
  * An interface defining services required for the LNS to select variables to freeze-unfreeze.
@@ -68,4 +69,17 @@ public interface INeighbor {
      * @return true iff the search is in a complete mode (no fixed variable)
      */
     boolean isSearchComplete();
+
+    /**
+     * Plug a fast restart strategy to the neighborhood
+     *
+     * @param counter a counter
+     */
+    void fastRestart(ACounter counter);
+
+    /**
+     * This method is called by {@link solver.search.loop.lns.LargeNeighborhoodSearch} on the first solution,
+     * it activates the fast restart strategy
+     */
+    void activeFastRestart();
 }

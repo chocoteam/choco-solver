@@ -31,8 +31,11 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.constraints.nary.nogood.NogoodStoreForRestarts;
-import solver.explanations.strategies.ExplainedNeighborhood;
+import solver.explanations.strategies.ExplainingCut;
+import solver.explanations.strategies.ExplainingObjective;
+import solver.explanations.strategies.RandomNeighborhood4Explanation;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
+import solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import solver.search.loop.monitors.IMessage;
 import solver.search.loop.monitors.SMF;
 import solver.search.strategy.IntStrategyFactory;
@@ -59,8 +62,12 @@ public class ELNSTest {
         solver.post(ICF.arithm(vars[4], "+", vars[5], ">", 3));
 
         NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(vars, solver);
-        solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                new ExplainedNeighborhood(solver, vars, 123456L, ngs, 1.05), true));
+        solver.getSearchLoop().plugSearchMonitor(
+                new LargeNeighborhoodSearch(solver,
+                        new SequenceNeighborhood(
+                                new ExplainingObjective(solver, 200, 123456L),
+                                new ExplainingCut(solver, 200, 123456L),
+                                new RandomNeighborhood4Explanation(solver, vars, 200, 123456L)), true));
         solver.post(ngs);
         solver.set(IntStrategyFactory.random(vars, seed));
 
@@ -68,7 +75,7 @@ public class ELNSTest {
         SMF.log(solver, true, true, new IMessage() {
             @Override
             public String print() {
-                return Arrays.toString(vars) + " o:"+obj;
+                return Arrays.toString(vars) + " o:" + obj;
             }
         });
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, obj);

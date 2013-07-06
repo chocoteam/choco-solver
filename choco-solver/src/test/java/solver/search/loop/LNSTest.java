@@ -30,9 +30,11 @@ import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.explanations.strategies.ExplainedNeighborhood;
+import solver.explanations.strategies.ExplainingCut;
+import solver.explanations.strategies.ExplainingObjective;
+import solver.explanations.strategies.RandomNeighborhood4Explanation;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
-import solver.search.loop.lns.neighbors.PropgagationGuidedNeighborhood;
+import solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
 import solver.search.loop.lns.neighbors.RandomNeighborhood;
 import solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
 import solver.search.loop.lns.neighbors.SequenceNeighborhood;
@@ -65,47 +67,60 @@ public class LNSTest {
         for (int i = 0; i < nos; i++) {
             objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, (int) Math.ceil(capacities[1] / volumes[i]), solver);
         }
-        final IntVar power = VariableFactory.bounded("power", 8371, 99999, solver);
+        final IntVar power = VariableFactory.bounded("power", 0, 99999, solver);
         IntVar scalar = VariableFactory.bounded("weight", capacities[0], capacities[1], solver);
         solver.post(IntConstraintFactory.scalar(objects, volumes, scalar));
         solver.post(IntConstraintFactory.scalar(objects, energies, power));
         solver.post(IntConstraintFactory.knapsack(objects, scalar, power, volumes, energies));
         solver.set(IntStrategyFactory.inputOrder_InDomainMin(objects));
-//        SearchMonitorFactory.log(solver, false, false);
+        SearchMonitorFactory.log(solver, true, false);
         switch (lns) {
             case 0:
                 break;
             case 1:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new RandomNeighborhood(objects, 123456L, 1.2), true));
+                        new RandomNeighborhood(solver, objects, 200, 123456L), true));
                 SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
             case 2:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new PropgagationGuidedNeighborhood(solver, objects, 123456L, 100), true));
+                        new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10), true));
                 SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
             case 3:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new SequenceNeighborhood(
-                                new PropgagationGuidedNeighborhood(solver, objects, 123456L, 100),
-                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100)
+                                new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
+                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10)
                         ), true));
                 SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
             case 4:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
                         new SequenceNeighborhood(
-                                new PropgagationGuidedNeighborhood(solver, objects, 123456L, 100),
-                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100),
-                                new RandomNeighborhood(objects, 123456L, 1.2)
+                                new PropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
+                                new ReversePropagationGuidedNeighborhood(solver, objects, 123456L, 100, 10),
+                                new RandomNeighborhood(solver, objects, 200, 123456L)
                         ), true));
                 SearchMonitorFactory.limitThreadTime(solver, 2000);
                 break;
             case 5:
                 solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
-                        new ExplainedNeighborhood(solver, null, 123456L, null, 1.05), true));
-//                SearchMonitorFactory.limitThreadTime(solver, 20000);
+                        new ExplainingCut(solver, 200, 123456L), true));
+                SearchMonitorFactory.limitThreadTime(solver, 2000);
+                break;
+            case 6:
+                solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver,
+                        new ExplainingObjective(solver, 200, 123456L), true));
+                SearchMonitorFactory.limitThreadTime(solver, 200000);
+                break;
+            case 7:
+                SequenceNeighborhood ngb = new SequenceNeighborhood(
+                        new ExplainingObjective(solver, 200, 123456L),
+                        new ExplainingCut(solver, 200, 123456L),
+                        new RandomNeighborhood4Explanation(solver, objects, 200, 123456L));
+                solver.getSearchLoop().plugSearchMonitor(new LargeNeighborhoodSearch(solver, ngb, true));
+                SearchMonitorFactory.limitThreadTime(solver, 200000);
                 break;
         }
 
@@ -122,6 +137,8 @@ public class LNSTest {
         knapsack20(3);
         knapsack20(4);
         knapsack20(5);
+        knapsack20(6);
+        knapsack20(7);
     }
 
 

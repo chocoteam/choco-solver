@@ -24,62 +24,47 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package parser.flatzinc.ast;
+package solver.search.loop.lns.neighbors;
+
+import solver.Solver;
+import solver.search.limits.ACounter;
+import solver.search.limits.ICounterAction;
 
 /**
+ * An abstract class for neighbor, to manage the counter
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/11/12
+ * @since 04/07/13
  */
-public class GoalConf {
-    boolean free; // force free search
-    int bbss; // set free search : 1: activity based, 2: impact based, 3: dom/wdeg
-    boolean dec_vars; // use same decision pool as the one defines in the fzn file
-    public boolean all; // search for all solutions
-    long seed; // seed for random search
-    boolean lastConflict;  // Search pattern
-    long timeLimit;
+public abstract class ANeighbor implements INeighbor {
 
-    String description;
+    protected final Solver mSolver;
+    protected ACounter counter;
 
-    boolean fastRestart;
-
-    public enum LNS {
-        NONE,
-        RLNS,
-        RLNS_BB,
-        PGLNS,
-        PGLNS_BB,
-        ELNS,
-        ELNS_BB,
+    protected ANeighbor(Solver mSolver) {
+        this.mSolver = mSolver;
     }
 
-    LNS lns;
 
-    public GoalConf() {
-        this(false, 0, false, false, 29091981L, false, -1, LNS.NONE, false);
+    @Override
+    public void fastRestart(ACounter counter) {
+        this.counter = counter;
     }
 
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit, LNS lns, boolean fr) {
-        this.free = free;
-        this.bbss = bbss;
-        this.dec_vars = dec_vars;
-        this.seed = seed;
-        this.all = all;
-        this.lastConflict = lf;
-        this.timeLimit = timelimit;
-        this.lns = lns;
-        this.fastRestart = fr;
+    @Override
+    public void activeFastRestart() {
+        if (counter != null) {
+            counter.setAction(
+                    new ICounterAction() {
+                        @Override
+                        public void onLimitReached() {
+                            mSolver.getSearchLoop().restart();
+                            counter.reset();
+                        }
+                    });
+            mSolver.getSearchLoop().plugSearchMonitor(counter);
+        }
     }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
 
 }

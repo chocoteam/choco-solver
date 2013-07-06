@@ -140,4 +140,21 @@ public class StatisticUtils {
         return back;
     }
 
+    public static long binomialCoefficients(int n, int k) {
+
+        long Ank = 1;
+
+        if (k < 0 || k > n) {
+            return 0;
+        }
+
+        long i = n - k + 1;
+        while (i <= n && Ank >= 0) {
+            Ank = Ank * i;
+            i = i + 1;
+        }
+        if (Ank < 0) return Integer.MAX_VALUE;
+        return Ank;
+    }
+
 }
