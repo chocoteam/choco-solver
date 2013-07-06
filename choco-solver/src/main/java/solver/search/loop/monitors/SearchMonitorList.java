@@ -41,7 +41,7 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         IMonitorInitialize, IMonitorInitPropagation, IMonitorInterruption, IMonitorOpenNode, IMonitorRestart,
         IMonitorSolution, IMonitorUpBranch {
 
-	List<IMonitorClose> mclos = new ArrayList<IMonitorClose>();
+    List<IMonitorClose> mclos = new ArrayList<IMonitorClose>();
     List<IMonitorContradiction> mcont = new ArrayList<IMonitorContradiction>();
     List<IMonitorDownBranch> mdbra = new ArrayList<IMonitorDownBranch>();
     List<IMonitorInitialize> minit = new ArrayList<IMonitorInitialize>();
@@ -219,6 +219,53 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
                 mubra.add((IMonitorUpBranch) sm);
             }
         }
+    }
+
+    public boolean contains(ISearchMonitor sm) {
+        if (sm != null) {
+            boolean isPluggedIn = false;
+            if (sm instanceof IMonitorClose) {
+                isPluggedIn |= mclos.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorContradiction) {
+                isPluggedIn |= mcont.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorDownBranch) {
+                isPluggedIn |= mdbra.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInitialize) {
+                isPluggedIn |= minit.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInitPropagation) {
+                isPluggedIn |= mipro.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInterruption) {
+                isPluggedIn |= minte.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorOpenNode) {
+                isPluggedIn |= mopno.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorRestart) {
+                isPluggedIn |= mrest.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorSolution) {
+                isPluggedIn |= msolu.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorUpBranch) {
+                isPluggedIn |= mubra.contains(sm);
+            }
+            if (isPluggedIn) return true;
+        }
+        return false;
     }
 
 }

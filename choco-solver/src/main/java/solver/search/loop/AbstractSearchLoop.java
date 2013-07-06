@@ -352,7 +352,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     @Override
     public void plugSearchMonitor(ISearchMonitor sm) {
-        smList.add(sm);
+        if (!smList.contains(sm)) {
+            smList.add(sm);
+        } else {
+            LOGGER.warn("The search monitor already exists and is ignored");
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

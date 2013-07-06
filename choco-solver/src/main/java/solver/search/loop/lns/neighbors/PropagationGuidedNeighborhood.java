@@ -46,16 +46,15 @@ import java.util.TreeMap;
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class PropgagationGuidedNeighborhood implements INeighbor, IMonitorInitPropagation {
+public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitorInitPropagation {
 
-
-    protected final Solver solver;
     protected final int n;
     protected final IntVar[] vars;
     protected final int[] bestSolution;
     protected int[] dsize;
     protected Random rd;
-    protected int cste = 100;
+    protected int fgmtSize = 100;
+    protected int listSize;
     protected double epsilon = 1.;
     protected double logSum = 0.;
 
@@ -64,15 +63,16 @@ public class PropgagationGuidedNeighborhood implements INeighbor, IMonitorInitPr
     BitSet fragment;  // index of variable to set unfrozen
 
 
-    public PropgagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int cste) {
-        this.solver = solver;
+    public PropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        super(solver);
 
         this.n = vars.length;
         this.vars = vars.clone();
 
         this.rd = new Random(seed);
         this.bestSolution = new int[n];
-        this.cste = cste;
+        this.fgmtSize = fgmtSize;
+        this.listSize = listSize;
 
         this.all = new TreeMap<Integer, Integer>();
         this.candidate = new TreeMap<Integer, Integer>();
@@ -99,14 +99,14 @@ public class PropgagationGuidedNeighborhood implements INeighbor, IMonitorInitPr
             int ds = vars[i].getDomainSize();
             logSum += Math.log(ds);
         }
-        cste = (int) (30 * (1 + epsilon));
+        fgmtSize = (int) (30 * (1 + epsilon));
         fragment.set(0, n); // all variables are frozen
         update(cause);
-        epsilon = (.95 * epsilon) + (.05 * (logSum / cste));
+        epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
     }
 
     protected void update(ICause cause) throws ContradictionException {
-        while (logSum > cste && fragment.cardinality() > 0) {
+        while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
             int id = selectVariable();
@@ -114,7 +114,7 @@ public class PropgagationGuidedNeighborhood implements INeighbor, IMonitorInitPr
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                 vars[id].instantiateTo(bestSolution[id], cause);
-                solver.propagate();
+                mSolver.propagate();
                 fragment.clear(id);
 
                 logSum = 0;
@@ -131,7 +131,7 @@ public class PropgagationGuidedNeighborhood implements INeighbor, IMonitorInitPr
                 }
                 candidate.clear();
                 int k = 0;
-                while (!all.isEmpty() && candidate.size() < 10) {
+                while (!all.isEmpty() && candidate.size() < listSize) {
                     int first = all.firstKey();
                     all.remove(first);
                     if (fragment.get(first)) {

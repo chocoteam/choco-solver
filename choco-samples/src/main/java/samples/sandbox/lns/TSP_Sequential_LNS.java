@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.exception.ContradictionException;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
-import solver.search.loop.lns.neighbors.INeighbor;
+import solver.search.loop.lns.neighbors.ANeighbor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.strategy.graph.GraphStrategies;
 import solver.variables.IntVar;
@@ -150,10 +150,9 @@ public class TSP_Sequential_LNS {
     // RESOLUTION
     //***********************************************************************************
 
-    private static class TSP_LNS_Monitor implements INeighbor {
+    private static class TSP_LNS_Monitor extends ANeighbor {
 
         //variables
-        private final Solver solver;
         private int[] bestSolution;
         private int bestCost;
         private UndirectedGraphVar g;
@@ -165,7 +164,7 @@ public class TSP_Sequential_LNS {
 
         // constructor
         private TSP_LNS_Monitor(Solver solver, UndirectedGraphVar g, IntVar cost) {
-            this.solver = solver;
+            super(solver);
             this.n = g.getEnvelopGraph().getNbNodes();
             this.g = g;
             this.cost = cost;
