@@ -38,13 +38,12 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.nary.nogood.NogoodStoreForRestarts;
-import solver.explanations.strategies.ExplainedNeighborhood2;
 import solver.objective.IntObjectiveManager;
+import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
-import solver.search.loop.lns.neighbors.*;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -127,11 +126,11 @@ public class FGoal {
                     strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
                 defdecvars = strategy.vars;
-//                solver.set(strategy);
+                aSolver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
-                aSolver.set(
-                        new StrategiesSequencer(aSolver.getEnvironment(),
-                                strategy, makeComplementarySearch(datas)));
+//                aSolver.set(
+//                        new StrategiesSequencer(aSolver.getEnvironment(),
+//                                strategy, makeComplementarySearch(datas)));
 
                 System.out.println("% t:" + gc.seed);
             }
@@ -193,8 +192,7 @@ public class FGoal {
                 }
             }
         }
-        plugLNS(aSolver, ivars, defdecvars, gc);
-
+        plugLNS(aSolver, ivars, defdecvars != null ? defdecvars : ivars, gc);
         if (gc.lastConflict) {
             aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
         }
@@ -203,38 +201,34 @@ public class FGoal {
 
 
     private static void plugLNS(Solver solver, IntVar[] ivars, Variable[] ddvars, GoalConf gc) {
-        INeighbor neighbor = null;
+        LargeNeighborhoodSearch lns = null;
         IntVar[] dvars = new IntVar[ddvars.length];
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
-
+        ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:
-                neighbor = new RandomNeighborhood(dvars, gc.seed, 1.05);
+                lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
+                break;
+            case RLNS_BB:
+                lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
                 break;
             case PGLNS:
-                neighbor = new SequenceNeighborhood(
-                        new PropgagationGuidedNeighborhood(solver, dvars, gc.seed, 100),
-                        new ReversePropagationGuidedNeighborhood(solver, dvars, gc.seed, 100),
-                        new RandomNeighborhood(dvars, gc.seed, 1.05)
-                );
+                lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
+                break;
+            case PGLNS_BB:
+                lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);
                 break;
             case ELNS:
-                neighbor = new ExplainedNeighborhood2(solver, null,  gc.seed, null, 1.05);
+                lns = LNSFactory.elns(solver, dvars, 200, gc.seed, gc.fastRestart ? new FailCounter(30) : null, fr);
                 break;
-            case ELNS_NG:
-                NogoodStoreForRestarts ngs = new NogoodStoreForRestarts(ivars, solver);
-                neighbor = new ExplainedNeighborhood2(solver,dvars, gc.seed, ngs, 1.05);
-                solver.post(ngs);
+            case ELNS_BB:
+                lns = LNSFactory.elns(solver, ivars, 200, gc.seed, gc.fastRestart ? new FailCounter(30) : null, fr);
                 break;
         }
-        if (neighbor != null) {
-            LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        if (lns != null) {
             solver.getSearchLoop().plugSearchMonitor(lns);
-            if (gc.fastRestart) {
-                lns.setCounter(new FailCounter(30));
-            }
         }
     }
 

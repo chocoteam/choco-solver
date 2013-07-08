@@ -34,13 +34,13 @@
 
 package solver.search.loop.lns;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.limits.ACounter;
-import solver.search.limits.ICounterAction;
 import solver.search.loop.lns.neighbors.INeighbor;
 import solver.search.loop.monitors.IMonitorInterruption;
 import solver.search.loop.monitors.IMonitorRestart;
@@ -52,6 +52,8 @@ import solver.search.loop.monitors.IMonitorSolution;
  */
 public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonitorInterruption, IMonitorRestart {
 
+    private static Logger LOGGER = LoggerFactory.getLogger("solver");
+
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
@@ -59,7 +61,7 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
     protected Solver solver;
     protected final boolean restartAfterEachSolution;
     protected final INeighbor neighbor;
-    protected ACounter counter; // can be null!
+    protected boolean hasAppliedNeighborhood;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -72,37 +74,22 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
         this.restartAfterEachSolution = restartAfterEachSolution;
     }
 
-
-    public void setCounter(ACounter counter) {
-        this.counter = counter;
-    }
-
     //***********************************************************************************
     // RECORD & RESTART
     //***********************************************************************************
 
     @Override
     public void onSolution() {
-        if (counter != null) {
-            // the fast restart policy is plugged when the first solution has been found
-            if (solver.getMeasures().getSolutionCount() == 1) {
-                counter.setAction(
-                        new ICounterAction() {
-                            @Override
-                            public void onLimitReached() {
-                                solver.getSearchLoop().restart();
-                                counter.reset();
-                            }
-                        });
-                solver.getSearchLoop().plugSearchMonitor(counter);
-            }
+        // the fast restart policy is plugged when the first solution has been found
+        if (solver.getMeasures().getSolutionCount() == 1) {
+            neighbor.activeFastRestart();
         }
         neighbor.recordSolution();
     }
 
     @Override
     public void afterInterrupt() {
-        if (solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
+        if (hasAppliedNeighborhood && solver.getMeasures().getSolutionCount() > 0 && !solver.getSearchLoop().hasReachedLimit() && !neighbor.isSearchComplete()) {
             neighbor.restrictLess();
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             solver.getSearchLoop().forceAlive(true);
@@ -116,19 +103,18 @@ public class LargeNeighborhoodSearch implements ICause, IMonitorSolution, IMonit
 
     @Override
     public void beforeRestart() {
+        hasAppliedNeighborhood = false;
     }
 
     @Override
     public void afterRestart() {
         if (solver.getMeasures().getSolutionCount() > 0) {
-            //System.out.println("SOLVER RESTARTED");
-            if (counter != null) counter.reset();
             solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
             try {
                 neighbor.fixSomeVariables(this);
+                hasAppliedNeighborhood = true;
                 solver.getEngine().propagate();
             } catch (ContradictionException e) {
-                //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
                 solver.getEngine().flush();
                 neighbor.restrictLess();
                 solver.getSearchLoop().restart();

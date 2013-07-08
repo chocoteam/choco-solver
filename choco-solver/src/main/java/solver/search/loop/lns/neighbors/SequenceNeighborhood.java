@@ -28,6 +28,9 @@ package solver.search.loop.lns.neighbors;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.limits.ACounter;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -35,36 +38,42 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public class SequenceNeighborhood implements INeighbor {
+public class SequenceNeighborhood extends ANeighbor {
 
 
     protected int who;
     protected int count;
     protected INeighbor[] neighbors;
+    protected int[] counters;
 
     public SequenceNeighborhood(INeighbor... neighbors) {
+        super(null);
         this.neighbors = neighbors;
         who = 0;
         count = neighbors.length;
+        counters = new int[count];
+        counters[0] = -1;
     }
 
     @Override
     public void recordSolution() {
+        counters[who]++;
         for (int i = 0; i < count; i++) {
             neighbors[i].recordSolution();
         }
-        who = 0;
+        who = count - 1; // forces to start with the first neighbor
+        System.out.printf("%s %s\n", "% REPARTITION", Arrays.toString(counters));
     }
 
     @Override
     public void fixSomeVariables(ICause cause) throws ContradictionException {
+        who++;
+        if (who == count) who = 0;
         neighbors[who].fixSomeVariables(cause);
     }
 
     @Override
     public void restrictLess() {
-        who++;
-        if (who == count) who = 0;
         neighbors[who].restrictLess();
     }
 
@@ -75,5 +84,19 @@ public class SequenceNeighborhood implements INeighbor {
             isComplete |= neighbors[i].isSearchComplete();
         }
         return isComplete;
+    }
+
+    @Override
+    public void activeFastRestart() {
+        for (int i = 0; i < count; i++) {
+            neighbors[i].activeFastRestart();
+        }
+    }
+
+    @Override
+    public void fastRestart(ACounter counter) {
+        for (int i = 0; i < count; i++) {
+            neighbors[i].fastRestart(counter);
+        }
     }
 }

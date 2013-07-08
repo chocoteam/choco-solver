@@ -40,15 +40,15 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class ReversePropagationGuidedNeighborhood extends PropgagationGuidedNeighborhood {
+public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeighborhood {
 
-    public ReversePropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int cste) {
-        super(solver, vars, seed, cste);
+    public ReversePropagationGuidedNeighborhood(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        super(solver, vars, seed, fgmtSize, listSize);
     }
 
     @Override
     protected void update(ICause cause) throws ContradictionException {
-        while (logSum > cste && fragment.cardinality() > 0) {
+        while (logSum > fgmtSize && fragment.cardinality() > 0) {
             all.clear();
             // 1. pick a variable
             int id = selectVariable();
@@ -56,9 +56,9 @@ public class ReversePropagationGuidedNeighborhood extends PropgagationGuidedNeig
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
 
-                solver.getEnvironment().worldPush();
+                mSolver.getEnvironment().worldPush();
                 vars[id].instantiateTo(bestSolution[id], cause);
-                solver.propagate();
+                mSolver.propagate();
                 fragment.clear(id);
 
                 for (int i = 0; i < n; i++) {
@@ -75,10 +75,10 @@ public class ReversePropagationGuidedNeighborhood extends PropgagationGuidedNeig
                         }
                     }
                 }
-                solver.getEnvironment().worldPop();
+                mSolver.getEnvironment().worldPop();
                 candidate.clear();
                 int k = 1;
-                while (!all.isEmpty() && candidate.size() < 10) {
+                while (!all.isEmpty() && candidate.size() < listSize) {
                     int first = all.firstKey();
                     all.remove(first);
                     if (fragment.get(first)) {
@@ -99,7 +99,7 @@ public class ReversePropagationGuidedNeighborhood extends PropgagationGuidedNeig
                 vars[i].instantiateTo(bestSolution[i], cause);
             }
         }
-        solver.propagate();
+        mSolver.propagate();
 
         logSum = 0;
         for (int i = 0; i < n; i++) {

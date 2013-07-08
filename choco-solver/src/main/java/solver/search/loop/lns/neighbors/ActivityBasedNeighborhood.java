@@ -44,12 +44,10 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 12/06/12
  */
-public class ActivityBasedNeighborhood implements INeighbor {
+public class ActivityBasedNeighborhood extends ANeighbor {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
-
-    private final Solver solver;
     private final int n;
     private final IntVar[] vars;
 
@@ -60,7 +58,7 @@ public class ActivityBasedNeighborhood implements INeighbor {
 
 
     public ActivityBasedNeighborhood(Solver solver, IntVar[] vars, long seed, ActivityBased abs, int firstNbFixedVars) {
-        this.solver = solver;
+        super(solver);
         this.n = vars.length;
         this.vars = vars.clone();
         bestSolution = new int[n];
@@ -81,7 +79,7 @@ public class ActivityBasedNeighborhood implements INeighbor {
         nbFixedVars /= 2;
 //        System.out.println("nbFixedVars " + nbFixedVars);
         if (logger.isInfoEnabled()) {
-            solver.getMeasures().updateTimeCount();
+            mSolver.getMeasures().updateTimeCount();
             logger.info(">> nbFixedVars {}", nbFixedVars);
         }
     }
