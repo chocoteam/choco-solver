@@ -47,11 +47,11 @@ public class PropDiffN extends Propagator<IntVar> {
     private int n;
     private UndirectedGraph overlappingBoxes;
     private ISet boxesToCompute;
-	private boolean shy;
+	private boolean fast;
 
-    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean shy) {
+    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean fast) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
-		this.shy = shy;
+		this.fast = fast;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new UnsupportedOperationException();
@@ -62,7 +62,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int idx) {
-		if(shy) return EventType.INSTANTIATE.mask;
+		if(fast) return EventType.INSTANTIATE.mask;
         return EventType.INSTANTIATE.mask + +EventType.BOUND.mask;
     }
 
@@ -71,7 +71,7 @@ public class PropDiffN extends Propagator<IntVar> {
 		int v = varIdx % n;
 		ISet s = overlappingBoxes.getNeighborsOf(v);
 		for (int i = s.getFirstElement(); i >= 0; i = s.getNextElement()) {
-			if (!overlap(v, i)) {
+			if (!mayOverlap(v, i)) {
 				overlappingBoxes.removeEdge(v, i);
 			}
 		}
@@ -89,7 +89,7 @@ public class PropDiffN extends Propagator<IntVar> {
             }
             for (int i = 0; i < n; i++) {
                 for (int j = i + 1; j < n; j++) {
-                    if (overlap(i, j)) {
+                    if (mayOverlap(i, j)) {
                         overlappingBoxes.addEdge(i, j);
                         if (boxInstantiated(i) && boxInstantiated(j)) {
                             contradiction(vars[i], "");
@@ -108,7 +108,7 @@ public class PropDiffN extends Propagator<IntVar> {
         boxesToCompute.clear();
     }
 
-    private boolean overlap(int i, int j) {
+    private boolean mayOverlap(int i, int j) {
         if (disjoint(i, j, true) || disjoint(i, j, false)) {
             return false;
         }
@@ -121,14 +121,14 @@ public class PropDiffN extends Propagator<IntVar> {
                 || (vars[j + off].getLB() >= vars[i + off].getUB() + vars[i + off + 2 * n].getUB());
     }
 
-    protected void filterFromBox(int b) throws ContradictionException {
-        ISet s = overlappingBoxes.getNeighborsOf(b);
+    protected void filterFromBox(int i) throws ContradictionException {
+        ISet s = overlappingBoxes.getNeighborsOf(i);
         // check energy
-        int xm = vars[b].getLB();
-        int xM = vars[b].getUB() + vars[b + 2 * n].getUB();
-        int ym = vars[b + n].getLB();
-        int yM = vars[b + n].getUB() + vars[b + 3 * n].getUB();
-        int am = vars[b + 2 * n].getLB() * vars[b + 3 * n].getLB();
+        int xm = vars[i].getLB();
+        int xM = vars[i].getUB() + vars[i + 2 * n].getUB();
+        int ym = vars[i + n].getLB();
+        int yM = vars[i + n].getUB() + vars[i + 3 * n].getUB();
+        int am = vars[i + 2 * n].getLB() * vars[i + 3 * n].getLB();
         for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
             xm = Math.min(xm, vars[j].getLB());
             xM = Math.max(xM, vars[j].getUB() + vars[j + 2 * n].getUB());
@@ -136,57 +136,68 @@ public class PropDiffN extends Propagator<IntVar> {
             yM = Math.max(yM, vars[j + n].getUB() + vars[j + 3 * n].getUB());
             am += vars[j + 2 * n].getLB() * vars[j + 3 * n].getLB();
             if (am > (xM - xm) * (yM - ym)) {
-                contradiction(vars[b], "");
+                contradiction(vars[i], "");
             }
         }
-        // mandatory part of box b
-        int mps_xi = vars[b].getUB();
-        int mpe_xi = vars[b].getLB() + vars[b + 2 * n].getLB();
-        int mps_yi = vars[b + n].getUB();
-        int mpe_yi = vars[b + n].getLB() + vars[b + 3 * n].getLB();
-        // mandatory part exists
-        if (mps_xi < mpe_xi && mps_yi < mpe_yi) {
-            for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
-                filterBox(b, j, mps_xi, mpe_xi, mps_yi, mpe_yi);
-            }
-        }
+		// mandatory part based filtering
+		boolean horizontal = true;
+		boolean vertical   = false;
+		for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
+			if(doOverlap(i,j,horizontal)){
+				filter(i,j,vertical);
+			}
+			if(doOverlap(i,j,vertical)){
+				filter(i,j,horizontal);
+			}
+			assert !(doOverlap(i,j,horizontal) && doOverlap(i,j,vertical));
+		}
     }
 
-    private void filterBox(int i, int j, int mps_xi, int mpe_xi, int mps_yi, int mpe_yi) throws ContradictionException {
-        // mandatory part of box j
-        int mps_xj = vars[j].getUB();
-        int mpe_xj = vars[j].getLB() + vars[j + 2 * n].getLB();
-        int mps_yj = vars[j + n].getUB();
-        int mpe_yj = vars[j + n].getLB() + vars[j + 3 * n].getLB();
-        // mandatory part exists
-        if (mps_xj < mpe_xj && mps_yj < mpe_yj) {
-            boolean overH = mps_xj < mpe_xi && mpe_xj > mps_xi;
-            boolean overV = mps_yj < mpe_yi && mpe_yj > mps_yi;
-            if (overH && overV) {// mandatory parts overlap
-                contradiction(vars[i], "");
-            } else if (overH) {// mandatory parts overlap horizontally only
-                if (mps_yi < mps_yj) {
-                    vars[j + n].updateLowerBound(mpe_yi, aCause);
-                    vars[i + n].updateUpperBound(mps_yj - vars[i + 3 * n].getLB(), aCause);
-                    vars[i + 3 * n].updateUpperBound(mps_yj - vars[i + n].getLB(), aCause);
-                } else {
-                    vars[i + n].updateLowerBound(mpe_yj, aCause);
-                    vars[j + n].updateUpperBound(mps_yi - vars[j + 3 * n].getLB(), aCause);
-                    vars[j + 3 * n].updateUpperBound(mps_yi - vars[j + n].getLB(), aCause);
-                }
-            } else if (overV) {// mandatory parts overlap vertically only
-                if (mps_xi < mps_xj) {
-                    vars[j].updateLowerBound(mpe_xi, aCause);
-                    vars[i].updateUpperBound(mps_xj - vars[i + 2 * n].getLB(), aCause);
-                    vars[i + 2 * n].updateUpperBound(mps_xj - vars[i].getLB(), aCause);
-                } else {
-                    vars[i].updateLowerBound(mpe_xj, aCause);
-                    vars[j].updateUpperBound(mps_xi - vars[j + 2 * n].getLB(), aCause);
-                    vars[j + 2 * n].updateUpperBound(mps_xi - vars[j].getLB(), aCause);
-                }
-            }
-        }
-    }
+	private boolean doOverlap(int i, int j, boolean hori){
+		int offSet = hori?0:n;
+		int S_i = vars[i+offSet].getUB();
+		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
+		int S_j = vars[j+offSet].getUB();
+		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
+		return (S_i<e_i && e_j>S_i && S_j<e_i)
+				|| (S_j<e_j && e_i>S_j && S_i<e_j);
+	}
+
+	private void filter(int i, int j, boolean hori) throws ContradictionException {
+		int offSet = hori?0:n;
+		int S_i = vars[i+offSet].getUB();
+		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
+		int S_j = vars[j+offSet].getUB();
+		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
+		if(S_i<e_i){
+			if(e_j>S_i){
+				// s_j>=e_i    s_j >= s_i+d_i
+				vars[j+offSet].updateLowerBound(e_i,aCause);
+				vars[i+offSet].updateUpperBound(vars[j+offSet].getLB()-vars[i+2*n+offSet].getLB(),aCause);
+				vars[i+offSet+2*n].updateUpperBound(vars[j+offSet].getLB()-vars[i+offSet].getLB(),aCause);
+			}
+			if(S_j<e_i){
+				// ej<=si
+				vars[i+offSet].updateLowerBound(e_j,aCause);
+				vars[j+offSet].updateUpperBound(vars[i+offSet].getLB()-vars[j+2*n+offSet].getLB(),aCause);
+				vars[j+offSet+2*n].updateUpperBound(vars[i+offSet].getLB()-vars[j+offSet].getLB(),aCause);
+			}
+		}
+		if(S_j<e_j){
+			if(e_i>S_j){
+				// s_j>=e_i    s_j >= s_i+d_i
+				vars[i+offSet].updateLowerBound(e_j,aCause);
+				vars[j+offSet].updateUpperBound(vars[i+offSet].getLB()-vars[j+2*n+offSet].getLB(),aCause);
+				vars[j+offSet+2*n].updateUpperBound(vars[i+offSet].getLB()-vars[j+offSet].getLB(),aCause);
+			}
+			if(S_i<e_j){
+				// ej<=si
+				vars[j+offSet].updateLowerBound(e_i,aCause);
+				vars[i+offSet].updateUpperBound(vars[j+offSet].getLB()-vars[i+2*n+offSet].getLB(),aCause);
+				vars[i+offSet+2*n].updateUpperBound(vars[j+offSet].getLB()-vars[i+offSet].getLB(),aCause);
+			}
+		}
+	}
 
     @Override
     public ESat isEntailed() {
@@ -194,7 +205,7 @@ public class PropDiffN extends Propagator<IntVar> {
             if (boxInstantiated(i))
                 for (int j = i + 1; j < n; j++) {
                     if (boxInstantiated(j)) {
-                        if (overlap(i, j)) {
+                        if (mayOverlap(i, j)) {
                             return ESat.FALSE;
                         }
                     }

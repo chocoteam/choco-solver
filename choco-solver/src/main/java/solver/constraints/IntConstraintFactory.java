@@ -609,7 +609,7 @@ public class IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint diffNCons = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
+        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, false), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
 		if(USE_CUMUL){
 			IntVar[] EX = new IntVar[X.length];
 			IntVar[] EY = new IntVar[X.length];
