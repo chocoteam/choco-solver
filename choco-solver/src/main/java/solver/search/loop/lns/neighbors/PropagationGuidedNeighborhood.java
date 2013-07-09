@@ -161,7 +161,7 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
 
     @Override
     public void restrictLess() {
-        epsilon = .1 * (logSum / fgmtSize);
+        epsilon += .1 * (logSum / fgmtSize);
     }
 
     @Override
