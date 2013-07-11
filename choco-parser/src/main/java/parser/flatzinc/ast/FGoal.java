@@ -47,12 +47,10 @@ import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.ActivityBased;
-import solver.search.strategy.selectors.variables.DomOverWDeg;
-import solver.search.strategy.selectors.variables.FirstFail;
-import solver.search.strategy.selectors.variables.ImpactBased;
+import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.strategy.Once;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -126,13 +124,13 @@ public class FGoal {
                     strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
                 defdecvars = strategy.vars;
-                aSolver.set(strategy);
+//                aSolver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
-//                aSolver.set(
-//                        new StrategiesSequencer(aSolver.getEnvironment(),
-//                                strategy, makeComplementarySearch(datas)));
+                aSolver.set(
+                        new StrategiesSequencer(aSolver.getEnvironment(),
+                                strategy, makeComplementarySearch(datas)));
 
-                System.out.println("% t:" + gc.seed);
+//                System.out.println("% t:" + gc.seed);
             }
         } else { // no strategy OR use free search
             if (gc.dec_vars) { // select same decision variables as declared in file?
@@ -291,6 +289,6 @@ public class FGoal {
                 return o1.getDomainSize() - o2.getDomainSize();
             }
         });
-        return ISF.inputOrder_InDomainMin(ivars);
+        return new Once(new InputOrder(ivars), new InDomainMin());
     }
 }

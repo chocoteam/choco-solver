@@ -25,62 +25,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision.fast;
+package solver.search.strategy.strategy;
 
-import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
-import solver.variables.SetVar;
-import util.PoolManager;
+import solver.search.strategy.selectors.InValueIterator;
+import solver.search.strategy.selectors.VariableSelector;
+import solver.variables.IntVar;
 
 /**
- * @author Jean-Guillaume Fages
- * @since Jan. 2013
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 2 juil. 2010
  */
-public class FastDecisionSet extends Decision<SetVar> {
+public class Once extends Assignment {
 
-    int value;
-    DecisionOperator<SetVar> operator;
-    final PoolManager<FastDecisionSet> poolManager;
+    public Once(VariableSelector<IntVar> varselector, InValueIterator valueIterator) {
+        super(varselector, valueIterator);
+    }
 
-    public FastDecisionSet(PoolManager<FastDecisionSet> poolManager) {
-        this.poolManager = poolManager;
+    public Once(VariableSelector<IntVar> varselector, InValueIterator valueIterator,
+                DecisionOperator assgnt) {
+        super(varselector, valueIterator, assgnt);
     }
 
     @Override
-    public Integer getDecisionValue() {
-        return value;
-    }
-
-    @Override
-    public void apply() throws ContradictionException {
-        if (branch == 1) {
-            operator.apply(var, value, this);
-        } else if (branch == 2) {
-            operator.unapply(var, value, this);
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        Decision<IntVar> d = super.computeDecision(variable);
+        if (d != null) {
+            d.once(true);
         }
-    }
-
-    public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
-        super.set(v);
-        this.var = v;
-        this.value = value;
-        this.operator = operator;
-    }
-
-    @Override
-    public void reverse() {
-        this.operator = operator.opposite();
-    }
-
-    @Override
-    public void free() {
-        previous = null;
-        poolManager.returnE(this);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), operator.toString(), value, branch);
+        return d;
     }
 }

@@ -125,13 +125,13 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
     }
 
     private boolean check() {
-//        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
-//        for (int c = 0; c < cstrs.length; c++) {
-//            ESat satC = cstrs[c].isSatisfied();
-//            if (!ESat.TRUE.equals(satC)) {
-//                return false;
-//            }
-//        }
+        /*Constraint[] cstrs = searchLoop.getSolver().getCstrs();
+        for (int c = 0; c < cstrs.length; c++) {
+            ESat satC = cstrs[c].isSatisfied();
+            if (!ESat.TRUE.equals(satC)) {
+                return false;
+            }
+        }*/
         return true;
     }
 
