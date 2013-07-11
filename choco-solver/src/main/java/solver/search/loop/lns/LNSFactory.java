@@ -130,8 +130,8 @@ public class LNSFactory {
         INeighbor neighbor = new SequenceNeighborhood(
                 pg(solver, vars, fgmtSize, listSize, seed, frcounter),
                 rpg(solver, vars, fgmtSize, listSize, seed, frcounter),
-                random(solver, vars, level, seed, frcounter)
-//                pg(solver, vars, fgmtSize, 0, seed, frcounter) // <= state of the art configuration
+//                random(solver, vars, level, seed, frcounter)
+                pg(solver, vars, fgmtSize, 0, seed, frcounter) // <= state of the art configuration
         );
         return new LargeNeighborhoodSearch(solver, neighbor, true);
     }
