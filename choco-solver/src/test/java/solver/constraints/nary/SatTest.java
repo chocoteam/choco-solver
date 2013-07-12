@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.PropSat;
-import solver.search.loop.monitors.SMF;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 
@@ -85,10 +84,10 @@ public class SatTest {
         Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
         sat.addPropagators(psat);
         solver.post(sat);
-        SMF.log(solver, true, true);
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
     }
+
 
     @Test(groups = "1s")
     public void test4() {
@@ -105,4 +104,37 @@ public class SatTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
+
+    @Test(groups = "1s")
+    public void test5() {
+        Solver solver = new Solver();
+        BoolVar b1, b2, r;
+        b1 = VF.bool("b1", solver);
+        b2 = VF.bool("b2", solver);
+        r = VF.bool("r", solver);
+        PropSat psat = new PropSat(solver);
+        PropSat.addBoolAndEqVar(psat, b1, b2, r);
+        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
+        sat.addPropagators(psat);
+        solver.post(sat);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void test6() {
+        Solver solver = new Solver();
+        BoolVar b1, b2, r;
+        b1 = VF.bool("b1", solver);
+        b2 = VF.bool("b2", solver);
+        r = VF.bool("r", solver);
+        PropSat psat = new PropSat(solver);
+        PropSat.addBoolOrEqVar(psat, b1, b2, r);
+        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
+        sat.addPropagators(psat);
+        solver.post(sat);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
 }

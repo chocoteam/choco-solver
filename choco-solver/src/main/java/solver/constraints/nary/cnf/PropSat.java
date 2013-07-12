@@ -97,7 +97,7 @@ public class PropSat extends Propagator<BoolVar> {
                     boolean sign = SatSolver.sign(lit);
                     int var = SatSolver.var(lit);
                     int val = vars[var].getValue();
-                    if (val == (sign ? 1 : 0)) cnt++; // if the lit is ok
+                    if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
                     else break;
                 }
                 if (cnt == c.size()) return ESat.FALSE;
@@ -343,6 +343,15 @@ public class PropSat extends Propagator<BoolVar> {
                 sat.addClause(lits.get(i), lits.get(j));
             }
         }
+        return true;
+    }
+
+    boolean AddAtMostNMinusOne(PropSat sat, BoolVar[] vars) {
+        TIntList lits = new TIntArrayList(vars.length);
+        for (int i = 0; i < vars.length; ++i) {
+            lits.set(i, SatSolver.negated(sat.Literal(vars[i])));
+        }
+        sat.addClause(lits);
         return true;
     }
 

@@ -117,7 +117,9 @@ public class SatSolver {
                 ps.set(j++, lit);
             }
         }
-        ps.remove(j, ps.size() - j);
+        if (j < ps.size() - 1) {
+            ps.remove(j + 1, ps.size() - j - 1);
+        }
 
         if (ps.size() == 0) {
             return (ok_ = false);
@@ -176,7 +178,7 @@ public class SatSolver {
                 assignment_.put(x, Boolean.kUndefined);
             }
             qhead_ = trail_markers_.get(level);
-            trail_.remove(level, trail_.size() - level);
+            trail_.remove(trail_markers_.get(level), trail_.size() - trail_markers_.get(level));
             trail_markers_.remove(level, trail_markers_.size() - level);
         }
     }
@@ -283,7 +285,7 @@ public class SatSolver {
 
             int i = 0;
             int j = 0;
-            while (ws!= null && i < ws.size()) {
+            while (ws != null && i < ws.size()) {
                 // Try to avoid inspecting the clause:
                 int blocker = ws.get(i).blocker;
                 if (valueLit(blocker) == Boolean.kTrue) {
@@ -342,7 +344,7 @@ public class SatSolver {
                     }
                 }
             }
-            if(ws!=null)ws.ensureCapacity(j);
+            if (ws != null) ws.ensureCapacity(j);
         }
         return result;
     }
