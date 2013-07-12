@@ -144,7 +144,7 @@ public class PropDiffN extends Propagator<IntVar> {
 		boolean vertical   = false;
 		for (int j = s.getFirstElement(); j >= 0; j = s.getNextElement()) {
 			if(doOverlap(i,j,horizontal)){
-				filter(i,j,vertical);
+				filter(i, j, vertical);
 			}
 			if(doOverlap(i,j,vertical)){
 				filter(i,j,horizontal);
@@ -169,32 +169,16 @@ public class PropDiffN extends Propagator<IntVar> {
 		int e_i = vars[i+offSet].getLB() + vars[i+2*n+offSet].getLB();
 		int S_j = vars[j+offSet].getUB();
 		int e_j = vars[j+offSet].getLB() + vars[j+2*n+offSet].getLB();
-		if(S_i<e_i){
+		if(S_i<e_i || S_j<e_j){
 			if(e_j>S_i){
-				// s_j>=e_i    s_j >= s_i+d_i
 				vars[j+offSet].updateLowerBound(e_i,aCause);
-				vars[i+offSet].updateUpperBound(vars[j+offSet].getLB()-vars[i+2*n+offSet].getLB(),aCause);
-				vars[i+offSet+2*n].updateUpperBound(vars[j+offSet].getLB()-vars[i+offSet].getLB(),aCause);
+				vars[i+offSet].updateUpperBound(S_j-vars[i+2*n+offSet].getLB(),aCause);
+				vars[i+offSet+2*n].updateUpperBound(S_j-vars[i+offSet].getLB(),aCause);
 			}
 			if(S_j<e_i){
-				// ej<=si
 				vars[i+offSet].updateLowerBound(e_j,aCause);
-				vars[j+offSet].updateUpperBound(vars[i+offSet].getLB()-vars[j+2*n+offSet].getLB(),aCause);
-				vars[j+offSet+2*n].updateUpperBound(vars[i+offSet].getLB()-vars[j+offSet].getLB(),aCause);
-			}
-		}
-		if(S_j<e_j){
-			if(e_i>S_j){
-				// s_j>=e_i    s_j >= s_i+d_i
-				vars[i+offSet].updateLowerBound(e_j,aCause);
-				vars[j+offSet].updateUpperBound(vars[i+offSet].getLB()-vars[j+2*n+offSet].getLB(),aCause);
-				vars[j+offSet+2*n].updateUpperBound(vars[i+offSet].getLB()-vars[j+offSet].getLB(),aCause);
-			}
-			if(S_i<e_j){
-				// ej<=si
-				vars[j+offSet].updateLowerBound(e_i,aCause);
-				vars[i+offSet].updateUpperBound(vars[j+offSet].getLB()-vars[i+2*n+offSet].getLB(),aCause);
-				vars[i+offSet+2*n].updateUpperBound(vars[j+offSet].getLB()-vars[i+offSet].getLB(),aCause);
+				vars[j+offSet].updateUpperBound(S_i-vars[j+2*n+offSet].getLB(),aCause);
+				vars[j+offSet+2*n].updateUpperBound(S_i-vars[j+offSet].getLB(),aCause);
 			}
 		}
 	}
