@@ -211,7 +211,13 @@ public class ParseAndSolve {
                 Solver solver = new Solver();
                 long creationTime = -System.nanoTime();
                 Datas datas = new Datas(gc);
-                buildParser(new FileInputStream(new File(instance)), solver, datas);
+				boolean removeB2I = false;
+				if(removeB2I){// pas forcement plus rapide mais facilite l'analyse
+					PreprocessFZN.processB2I(instance);
+					buildParser(new FileInputStream(new File(instance+"_")), solver, datas);
+				}else{
+					buildParser(new FileInputStream(new File(instance)), solver, datas);
+				}
                 makeEngine(solver, datas);
                 if (!csv.equals("")) {
                     assert acsv != null;
