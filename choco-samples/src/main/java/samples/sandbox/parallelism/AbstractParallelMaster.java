@@ -38,10 +38,10 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
     // VARIABLES
     //***********************************************************************************
 
-    protected S[] slaves;
-    private int nbWorkingSlaves;
-    private Thread mainThread;
-    private boolean wait;
+	public S[] slaves;
+	public int nbWorkingSlaves;
+	public Thread mainThread;
+    public boolean wait;
 
     public AbstractParallelMaster() {
         mainThread = Thread.currentThread();

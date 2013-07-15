@@ -25,56 +25,49 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.sandbox.parallelism;
-
 /**
- * Slave born to be mastered and work in parallel
- *
- * @author Jean-Guillaume Fages
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 15/07/13
+ * Time: 16:31
  */
-public abstract class AbstractParallelSlave {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+package parser.flatzinc.para;
 
-    public AbstractParallelMaster master;
-    public final int id;
+import parser.flatzinc.ParseAndSolve;
+import samples.sandbox.parallelism.AbstractParallelMaster;
+import samples.sandbox.parallelism.AbstractParallelSlave;
+import java.io.IOException;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+public class ParaserSlave extends AbstractParallelSlave{
 
-    /**
-     * Create a slave born to be mastered and work in parallel
-     *
-     * @param master
-     * @param id     slave unique name
-     */
-    public AbstractParallelSlave(AbstractParallelMaster master, int id) {
-        this.master = master;
-        this.id = id;
-    }
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    //***********************************************************************************
-    // SUB-PROBLEM SOLVING
-    //***********************************************************************************
+	ParseAndSolve job;
+	String[] args;
 
-    /**
-     * Creates a new thread to work in parallel
-     */
-    public void workInParallel() {
-        Thread t = new Thread(new Runnable() {
-            public void run() {
-                work();
-                master.wishGranted();
-            }
-        });
-        t.start();
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    /**
-     * do something
-     */
-    public abstract void work();
+	public ParaserSlave(AbstractParallelMaster master, int id, String[] args){
+		super(master,id);
+		this.args = args;
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	@Override
+	public void work() {
+		job = new ParseAndSolve();
+		try {
+			job.doMain(args);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
