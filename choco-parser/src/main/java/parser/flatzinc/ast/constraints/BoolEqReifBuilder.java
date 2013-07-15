@@ -38,23 +38,20 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
- * (a &#8744; b) &#8660; r
+ * (a = b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class BoolOrBuilder implements IBuilder {
+public class BoolEqReifBuilder implements IBuilder {
+
     @Override
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-//        return new Constraint[]{IntConstraintFactory.clauses(
-//                        LogOp.reified(r,
-//                                LogOp.or(a,
-//                                        b)), solver)};
-        SatFactory.addBoolOrEqVar(a, b, r);
+        SatFactory.addBoolIsEqVar(a, b, r);
         return new Constraint[]{};
     }
 }

@@ -42,6 +42,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.ILogical;
 import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.lex.LexChain;
@@ -99,10 +100,10 @@ public class LexChainTest {
         ILogical[] trees = new ILogical[n - 1];
         for (int i = 0; i < n - 1; i++) {
             trees[i] = reformulate(0, X[i], X[i + 1], solver);
-            //refor.post(new ConjunctiveNormalForm(reformulate(0, X[i], X[i + 1], refor), refor));
+            //refor.post(new SatConstraint(reformulate(0, X[i], X[i + 1], refor), refor));
         }
 
-        solver.post(IntConstraintFactory.clauses(LogOp.and(trees), solver));
+        SatFactory.addClauses(LogOp.and(trees), solver);
         solver.set(IntStrategyFactory.random(ArrayUtils.flatten(X), seed));
         return solver;
     }

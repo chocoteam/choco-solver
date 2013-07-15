@@ -25,36 +25,54 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package parser.flatzinc.ast.constraints;
+package solver.constraints.nary.cnf;
 
-import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
-
-import java.util.List;
+import util.ESat;
 
 /**
- * (a &#8744; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 22 nov. 2010
  */
-public class BoolOrBuilder implements IBuilder {
+public class SatConstraint extends Constraint<BoolVar, PropSat> {
+
+    final PropSat miniSat;
+
+    public SatConstraint(Solver solver) {
+        super(solver);
+        miniSat = new PropSat(solver);
+        setPropagators(miniSat);
+
+    }
+
     @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        BoolVar r = exps.get(2).boolVarValue(solver);
-//        return new Constraint[]{IntConstraintFactory.clauses(
-//                        LogOp.reified(r,
-//                                LogOp.or(a,
-//                                        b)), solver)};
-        SatFactory.addBoolOrEqVar(a, b, r);
-        return new Constraint[]{};
+    public ESat isSatisfied() {
+        ESat so = ESat.UNDEFINED;
+        for (int i = 0; i < propagators.length; i++) {
+            so = propagators[i].isEntailed();
+            if (!so.equals(ESat.TRUE)) {
+                return so;
+            }
+        }
+        return so;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append('(');
+        for (int p = 0; p < propagators.length; p++) {
+            st.append(propagators[p].toString()).append(") and (");
+        }
+        st.replace(st.length() - 6, st.length(), "");
+        return st.toString();
+    }
+
+    public SatSolver getSatSolver() {
+        return propagators[0].getSatSolver();
     }
 }

@@ -30,8 +30,8 @@ package solver.constraints.nary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.nary.cnf.PropSat;
+import solver.constraints.SatFactory;
+import solver.search.loop.monitors.SMF;
 import solver.variables.BoolVar;
 import solver.variables.VF;
 
@@ -46,14 +46,10 @@ public class SatTest {
     @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver();
-        PropSat psat = new PropSat(solver);
         BoolVar b1, b2;
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
-        PropSat.addBoolEq(psat, b1, b2);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolEq(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -61,14 +57,10 @@ public class SatTest {
     @Test(groups = "1s")
     public void test2() {
         Solver solver = new Solver();
-        PropSat psat = new PropSat(solver);
         BoolVar b1, b2;
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
-        PropSat.addBoolNot(psat, b1, b2);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolNot(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
     }
@@ -76,14 +68,10 @@ public class SatTest {
     @Test(groups = "1s")
     public void test3() {
         Solver solver = new Solver();
-        PropSat psat = new PropSat(solver);
         BoolVar b1, b2;
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
-        PropSat.addBoolLe(psat, b1, b2);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolLe(b1, b2);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 3);
     }
@@ -92,15 +80,11 @@ public class SatTest {
     @Test(groups = "1s")
     public void test4() {
         Solver solver = new Solver();
-        PropSat psat = new PropSat(solver);
         BoolVar b1, b2, r;
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
         r = VF.bool("r", solver);
-        PropSat.addBoolIsEqVar(psat, b1, b2, r);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolIsEqVar(b1, b2, r);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -112,11 +96,7 @@ public class SatTest {
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
         r = VF.bool("r", solver);
-        PropSat psat = new PropSat(solver);
-        PropSat.addBoolAndEqVar(psat, b1, b2, r);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolAndEqVar(b1, b2, r);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }
@@ -128,11 +108,44 @@ public class SatTest {
         b1 = VF.bool("b1", solver);
         b2 = VF.bool("b2", solver);
         r = VF.bool("r", solver);
-        PropSat psat = new PropSat(solver);
-        PropSat.addBoolOrEqVar(psat, b1, b2, r);
-        Constraint<BoolVar, PropSat> sat = new Constraint<BoolVar, PropSat>(solver);
-        sat.addPropagators(psat);
-        solver.post(sat);
+        SatFactory.addBoolOrEqVar(b1, b2, r);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void test7() {
+        Solver solver = new Solver();
+        BoolVar b1, b2;
+        b1 = VF.bool("b1", solver);
+        b2 = VF.bool("b2", solver);
+        SatFactory.addBoolLt(b1, b2);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void test8() {
+        Solver solver = new Solver();
+        BoolVar b1, b2, r;
+        b1 = VF.bool("b1", solver);
+        b2 = VF.bool("b2", solver);
+        r = VF.bool("r", solver);
+        SatFactory.addBoolIsLeVar(b1, b2, r);
+        SMF.log(solver, true, true);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void test9() {
+        Solver solver = new Solver();
+        BoolVar b1, b2, r;
+        b1 = VF.bool("b1", solver);
+        b2 = VF.bool("b2", solver);
+        r = VF.bool("r", solver);
+        SatFactory.addBoolIsLtVar(b1, b2, r);
+        SMF.log(solver, true, true);
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
     }

@@ -107,11 +107,15 @@ public class PropSat extends Propagator<BoolVar> {
         return ESat.UNDEFINED;
     }
 
+    public SatSolver getSatSolver() {
+        return sat_;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int Literal(BoolVar expr) {
+    public int Literal(BoolVar expr) {
         boolean expr_negated = false;
         if (indices_.containsKey(expr)) {
             return SatSolver.makeLiteral(indices_.get(expr), !expr_negated);
@@ -148,33 +152,33 @@ public class PropSat extends Propagator<BoolVar> {
 
 
     // Add a clause to the solver, clears the vector.
-    boolean addClause(TIntList lits) {
+    public boolean addClause(TIntList lits) {
         boolean result = sat_.addClause(lits);
         storeEarlyDeductions();
         return result;
     }
 
     // Add the empty clause, making the solver contradictory.
-    boolean addEmptyClause() {
+    public boolean addEmptyClause() {
         return sat_.addEmptyClause();
     }
 
     // Add a unit clause to the solver.
-    boolean addClause(int p) {
+    public boolean addClause(int p) {
         boolean result = sat_.addClause(p);
         storeEarlyDeductions();
         return result;
     }
 
     // Add a binary clause to the solver.
-    boolean addClause(int p, int q) {
+    public boolean addClause(int p, int q) {
         boolean result = sat_.addClause(p, q);
         storeEarlyDeductions();
         return result;
     }
 
     // Add a ternary clause to the solver.
-    boolean addClause(int p, int q, int r) {
+    public boolean addClause(int p, int q, int r) {
         boolean result = sat_.addClause(p, q, r);
         storeEarlyDeductions();
         return result;
@@ -207,156 +211,6 @@ public class PropSat extends Propagator<BoolVar> {
     public static void declareVariable(PropSat sat, BoolVar var) {
         //CHECK(sat.Check(var));
         sat.Literal(var);
-    }
-
-    public static boolean addBoolEq(PropSat sat, BoolVar left, BoolVar right) {
-//      if (!sat.Check(left) || !sat.Check(right)) {
-//        return false;
-//      }
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        sat.addClause(SatSolver.negated(left_lit), right_lit);
-        sat.addClause(left_lit, SatSolver.negated(right_lit));
-        return true;
-    }
-
-    public static boolean addBoolLe(PropSat sat, BoolVar left, BoolVar right) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        sat.addClause(SatSolver.negated(left_lit), right_lit);
-        return true;
-    }
-
-    public static boolean addBoolNot(PropSat sat, BoolVar left, BoolVar right) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        sat.addClause(SatSolver.negated(left_lit), SatSolver.negated(right_lit));
-        sat.addClause(left_lit, right_lit);
-        return true;
-    }
-
-    public static boolean addBoolOrArrayEqVar(PropSat sat, BoolVar[] vars, BoolVar target) {
-        int target_lit = sat.Literal(target);
-        TIntList lits = new TIntArrayList(vars.length + 1);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, sat.Literal(vars[i]));
-        }
-        lits.set(vars.length, SatSolver.negated(target_lit));
-        sat.addClause(lits);
-        for (int i = 0; i < vars.length; ++i) {
-            sat.addClause(target_lit, SatSolver.negated(sat.Literal(vars[i])));
-        }
-        return true;
-    }
-
-    public static boolean addBoolAndArrayEqVar(PropSat sat, BoolVar[] vars, BoolVar target) {
-        int target_lit = sat.Literal(target);
-        TIntList lits = new TIntArrayList(vars.length + 1);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, SatSolver.negated(sat.Literal(vars[i])));
-        }
-        lits.set(vars.length, target_lit);
-        sat.addClause(lits);
-        for (int i = 0; i < vars.length; ++i) {
-            sat.addClause(SatSolver.negated(target_lit), sat.Literal(vars[i]));
-        }
-        return true;
-    }
-
-    public static boolean addBoolOrEqVar(PropSat sat, BoolVar left, BoolVar right, BoolVar target) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        int target_lit = sat.Literal(target);
-        sat.addClause(left_lit, right_lit, SatSolver.negated(target_lit));
-        sat.addClause(SatSolver.negated(left_lit), target_lit);
-        sat.addClause(SatSolver.negated(right_lit), target_lit);
-        return true;
-    }
-
-    public static boolean addBoolAndEqVar(PropSat sat, BoolVar left, BoolVar right, BoolVar target) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        int target_lit = sat.Literal(target);
-        sat.addClause(SatSolver.negated(left_lit), SatSolver.negated(right_lit), target_lit);
-        sat.addClause(left_lit, SatSolver.negated(target_lit));
-        sat.addClause(right_lit, SatSolver.negated(target_lit));
-        return true;
-    }
-
-    public static boolean addBoolIsEqVar(PropSat sat, BoolVar left, BoolVar right, BoolVar target) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        int target_lit = sat.Literal(target);
-        sat.addClause(SatSolver.negated(left_lit), right_lit, SatSolver.negated(target_lit));
-        sat.addClause(left_lit, SatSolver.negated(right_lit), SatSolver.negated(target_lit));
-        sat.addClause(left_lit, right_lit, target_lit);
-        sat.addClause(SatSolver.negated(left_lit), SatSolver.negated(right_lit), target_lit);
-        return true;
-    }
-
-    public static boolean addBoolIsNEqVar(PropSat sat, BoolVar left, BoolVar right, BoolVar target) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        int target_lit = sat.Literal(target);
-        sat.addClause(SatSolver.negated(left_lit), right_lit, target_lit);
-        sat.addClause(left_lit, SatSolver.negated(right_lit), target_lit);
-        sat.addClause(left_lit, right_lit, SatSolver.negated(target_lit));
-        sat.addClause(SatSolver.negated(left_lit), SatSolver.negated(right_lit), SatSolver.negated(target_lit));
-        return true;
-    }
-
-    public static boolean addBoolIsLeVar(PropSat sat, BoolVar left, BoolVar right, BoolVar target) {
-        int left_lit = sat.Literal(left);
-        int right_lit = sat.Literal(right);
-        int target_lit = sat.Literal(target);
-        sat.addClause(SatSolver.negated(left_lit), right_lit, SatSolver.negated(target_lit));
-        sat.addClause(left_lit, target_lit);
-        sat.addClause(SatSolver.negated(right_lit), target_lit);
-        return true;
-    }
-
-    public static boolean addBoolOrArrayEqualTrue(PropSat sat, BoolVar[] vars) {
-        TIntList lits = new TIntArrayList(vars.length);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, sat.Literal(vars[i]));
-        }
-        sat.addClause(lits);
-        return true;
-    }
-
-    public static boolean addBoolAndArrayEqualFalse(PropSat sat, BoolVar[] vars) {
-        TIntList lits = new TIntArrayList(vars.length);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, SatSolver.negated(sat.Literal(vars[i])));
-        }
-        sat.addClause(lits);
-        return true;
-    }
-
-    public static boolean addAtMostOne(PropSat sat, BoolVar[] vars) {
-        TIntList lits = new TIntArrayList(vars.length);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, SatSolver.negated(sat.Literal(vars[i])));
-        }
-        for (int i = 0; i < lits.size() - 1; ++i) {
-            for (int j = i + 1; j < lits.size(); ++j) {
-                sat.addClause(lits.get(i), lits.get(j));
-            }
-        }
-        return true;
-    }
-
-    boolean AddAtMostNMinusOne(PropSat sat, BoolVar[] vars) {
-        TIntList lits = new TIntArrayList(vars.length);
-        for (int i = 0; i < vars.length; ++i) {
-            lits.set(i, SatSolver.negated(sat.Literal(vars[i])));
-        }
-        sat.addClause(lits);
-        return true;
-    }
-
-    public static boolean addArrayXor(PropSat sat, BoolVar[] vars) {
-        return false;
     }
 
 }

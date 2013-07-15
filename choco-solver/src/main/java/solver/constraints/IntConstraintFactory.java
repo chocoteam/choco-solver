@@ -51,8 +51,6 @@ import solver.constraints.nary.channeling.DomainChanneling;
 import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
-import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.count.Count;
 import solver.constraints.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.nary.element.Element;
@@ -498,42 +496,6 @@ public class IntConstraintFactory {
                 new PropCircuit_AntiArboFiltering(VARS, OFFSET),
                 new PropCircuitSCC(VARS, OFFSET));
         return c;
-    }
-
-    /**
-     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
-     *
-     * @param TREE   the syntactic tree
-     * @param SOLVER solver is required, as the TREE can be declared without any variables
-     * @return
-     */
-    public static ConjunctiveNormalForm clauses(LogOp TREE, Solver SOLVER) {
-        return new ConjunctiveNormalForm(TREE, SOLVER);
-    }
-
-    /**
-     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
-     *
-     * @param POSLITS positive literals
-     * @param NEGLITS negative literals
-     */
-    public static ConjunctiveNormalForm clauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
-        Solver solver;
-        if (POSLITS.length > 0) {
-            solver = POSLITS[0].getSolver();
-        } else {
-            solver = NEGLITS[0].getSolver();
-        }
-        BoolVar[] lits = new BoolVar[POSLITS.length + NEGLITS.length];
-        int i = 0;
-        for (; i < POSLITS.length; i++) {
-            lits[i] = POSLITS[i];
-        }
-        for (int j = 0; j < NEGLITS.length; j++) {
-            lits[j + i] = NEGLITS[j].not();
-        }
-        LogOp tree = LogOp.or(lits);
-        return new ConjunctiveNormalForm(tree, solver);
     }
 
     /**

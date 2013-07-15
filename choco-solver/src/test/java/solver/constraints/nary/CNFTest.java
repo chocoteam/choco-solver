@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -54,15 +55,15 @@ public class CNFTest {
             IntVar y = VariableFactory.bounded("y", 0, 24, solver);
 
             if (i == 0) {
-                solver.post(IntConstraintFactory.clauses(LogOp.implies(
+                SatFactory.addClauses(LogOp.implies(
                         a,
                         b
-                ), solver));
+                ), solver);
             } else {
-                solver.post(IntConstraintFactory.clauses(LogOp.implies(
+                SatFactory.addClauses(LogOp.implies(
                         b.not(),
                         a.not()
-                ), solver));
+                ), solver);
             }
             solver.post(LogicalConstraintFactory.ifThenElse(b, IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
 //            SearchMonitorFactory.log(solver, true, true);

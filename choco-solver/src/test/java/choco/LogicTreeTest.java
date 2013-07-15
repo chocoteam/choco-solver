@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.ILogical;
 import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.cnf.LogicTreeToolBox;
@@ -238,7 +239,7 @@ public class LogicTreeTest {
                     rCNF[0],
                     LogOp.and(rCNF[1], rCNF[2])
             );
-            sCNF.post(IntConstraintFactory.clauses(tree, sCNF));
+            SatFactory.addClauses(tree, sCNF);
             sCNF.set(IntStrategyFactory.random(rCNF, seed));
 
 //            SearchMonitorFactory.log(sCNF, true, true);

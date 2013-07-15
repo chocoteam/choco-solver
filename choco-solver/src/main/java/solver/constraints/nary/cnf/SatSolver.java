@@ -57,7 +57,7 @@ public class SatSolver {
     // If false, the constraints are already unsatisfiable. No part of
     // the solver state may be used!
     boolean ok_;
-    // List of problem clauses.
+    // List of problem addClauses.
     ArrayList<Clause> clauses;
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
@@ -109,7 +109,7 @@ public class SatSolver {
         ps.sort();
         int lit = kUndefinedLiteral;
         int j = 0;
-        for (int i = 0; i < ps.size(); ++i) {
+        for (int i = 0; i < ps.size(); i++) {
             if (valueLit(ps.get(i)) == Boolean.kTrue || ps.get(i) == negated(lit)) {
                 return true;
             } else if (valueLit(ps.get(i)) != Boolean.kFalse && ps.get(i) != lit) {
@@ -363,7 +363,7 @@ public class SatSolver {
     /**
      * inline Literal Negated(Literal p) { return Literal(p.value() ^ 1); }
      */
-    protected static int negated(int l) {
+    public static int negated(int l) {
         return (l ^ 1);
     }
 
