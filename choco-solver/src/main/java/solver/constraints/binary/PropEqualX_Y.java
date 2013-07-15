@@ -133,7 +133,9 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if ((x.getUB() < y.getLB()) ||
-                (x.getLB() > y.getUB()))
+                (x.getLB() > y.getUB()) ||
+                x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && !match()
+                )
             return ESat.FALSE;
         else if (x.instantiated() &&
                 y.instantiated() &&
@@ -141,6 +143,15 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             return ESat.TRUE;
         else
             return ESat.UNDEFINED;
+    }
+
+    private boolean match() {
+        int lb = x.getLB();
+        int ub = x.getUB();
+        for (; lb <= ub; lb = x.nextValue(lb)) {
+            if (y.contains(lb)) return true;
+        }
+        return false;
     }
 
     private class RemProc implements IntProcedure {

@@ -24,10 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.search.loop.lns.neighbors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.selectors.variables.ActivityBased;
@@ -43,7 +44,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 12/06/12
  */
-public class ABSLNS extends Abstract_LNS_SearchMonitor {
+public class ActivityBasedNeighborhood extends ANeighbor {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
@@ -56,9 +57,8 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
     private final ActivityBased abs;
 
 
-    public ABSLNS(Solver solver, IntVar[] vars, long seed, ActivityBased abs, boolean restartAfterEachSolution,
-                  int firstNbFixedVars) {
-        super(solver, restartAfterEachSolution);
+    public ActivityBasedNeighborhood(Solver solver, IntVar[] vars, long seed, ActivityBased abs, int firstNbFixedVars) {
+        super(solver);
         this.n = vars.length;
         this.vars = vars.clone();
         bestSolution = new int[n];
@@ -68,44 +68,44 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
     }
 
     @Override
-    protected void recordSolution() {
+    public void recordSolution() {
         for (int i = 0; i < vars.length; i++) {
             bestSolution[i] = vars[i].getValue();
         }
     }
 
     @Override
-    protected void restrictLess() {
+    public void restrictLess() {
         nbFixedVars /= 2;
 //        System.out.println("nbFixedVars " + nbFixedVars);
         if (logger.isInfoEnabled()) {
-            solver.getMeasures().updateTimeCount();
+            mSolver.getMeasures().updateTimeCount();
             logger.info(">> nbFixedVars {}", nbFixedVars);
         }
     }
 
     @Override
-    protected boolean isSearchComplete() {
+    public boolean isSearchComplete() {
         return nbFixedVars == 0;
     }
 
     @Override
-    protected void fixSomeVariables() throws ContradictionException {
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
         if (!abs.sampling) {
             //TODO
-            activity();
+            activity(cause);
             //random();
         }
     }
 
-    private void random() throws ContradictionException {
+    private void random(ICause cause) throws ContradictionException {
         for (int k = 0; k < nbFixedVars; k++) {
             int x = rd.nextInt(vars.length + 1);
-            vars[x].instantiateTo(bestSolution[x], this);
+            vars[x].instantiateTo(bestSolution[x], cause);
         }
     }
 
-    private void activity() throws ContradictionException {
+    private void activity(ICause cause) throws ContradictionException {
         BitSet selected = new BitSet(vars.length);
         while (selected.cardinality() < nbFixedVars) {
             double a = Integer.MIN_VALUE;
@@ -117,7 +117,7 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
                     idx = k;
                 }
             }
-            vars[idx].instantiateTo(bestSolution[idx], this);
+            vars[idx].instantiateTo(bestSolution[idx], cause);
             selected.set(idx);
         }
     }

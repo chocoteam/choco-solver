@@ -37,18 +37,19 @@ import solver.constraints.nary.cnf.PropTrue;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
+import solver.objective.RealObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.NoPropagationEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.solution.ISolutionRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
+import solver.variables.RealVar;
 import solver.variables.Variable;
 import solver.variables.view.BoolConstantView;
 import solver.variables.view.ConstantView;
@@ -462,15 +463,15 @@ public class Solver implements Serializable {
      * Possible back values are:
      * <p/>
      * <br/>- <code>true</code> : the resolution is complete and
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findSolution()}: a solution has been found or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #nextSolution()}: a new solution has been found, or no more solutions exist.
-     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatifisiable.
+     * <br/>&nbsp;&nbsp;&nbsp;* {@link #findAllSolutions()}: all solutions have been found, or the CSP has been proven to be unsatisfiable.
      * <br/>&nbsp;&nbsp;&nbsp;* {@link #findOptimalSolution(ResolutionPolicy, solver.variables.IntVar)}: the optimal solution has been found and
-     * proven to be optimal, or the CSP has been proven to be unsatifisiable.
+     * proven to be optimal, or the CSP has been proven to be unsatisfiable.
      * <br/>- <code>false</code>: the resolution stopped after reaching a limit.
      */
-    public boolean isCompleteSearch() {
-        return !search.hasReachedLimit();
+    public boolean hasReachedLimit() {
+        return search.hasReachedLimit();
     }
 
     /**
@@ -512,25 +513,42 @@ public class Solver implements Serializable {
 
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-     *
+     * Restores the best solution found so far (if any)
+	 *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
-     * @return an array of int [LB, UB], representing the best bounds of the <code>objective</code> found so far.
-     *         <p/>
-     *         Note that when LB = UB, the optimality has been proven.
      */
-    public int[] findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
+    public void findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         if (policy == ResolutionPolicy.SATISFACTION) {
             throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
         }
         if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
-        this.search.setObjectivemanager(new ObjectiveManager(objective, policy, this));
+        this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
 		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
         solve(false);
-        return new int[]{search.getObjectivemanager().getBestLB(), search.getObjectivemanager().getBestUB()};
     }
+
+
+	/**
+	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+	 * Restores the best solution found so far (if any)
+	 *
+	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+	 * @param objective the variable to optimize
+	 */
+	public void findOptimalSolution(ResolutionPolicy policy, RealVar objective) {
+		if (policy == ResolutionPolicy.SATISFACTION) {
+			throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
+		}
+		if (objective == null) {
+			throw new SolverException("No objective variable has been defined");
+		}
+		this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this));
+		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
+		solve(false);
+	}
 
     /**
      * This method should not be called externally. It launches the resolution process.
@@ -737,5 +755,4 @@ public class Solver implements Serializable {
     public int nextId() {
         return id++;
     }
-
 }

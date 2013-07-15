@@ -43,11 +43,25 @@ public class GoalConf {
 
     String description;
 
-    public GoalConf() {
-        this(false, 0, false, false, 29091981L, false, -1);
+    boolean fastRestart;
+
+    public enum LNS {
+        NONE,
+        RLNS,
+        RLNS_BB,
+        PGLNS,
+        PGLNS_BB,
+        ELNS,
+        ELNS_BB,
     }
 
-    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit) {
+    LNS lns;
+
+    public GoalConf() {
+        this(false, 0, false, false, 29091981L, false, -1, LNS.NONE, false);
+    }
+
+    public GoalConf(boolean free, int bbss, boolean dec_vars, boolean all, long seed, boolean lf, long timelimit, LNS lns, boolean fr) {
         this.free = free;
         this.bbss = bbss;
         this.dec_vars = dec_vars;
@@ -55,6 +69,8 @@ public class GoalConf {
         this.all = all;
         this.lastConflict = lf;
         this.timeLimit = timelimit;
+        this.lns = lns;
+        this.fastRestart = fr;
     }
 
     public void setDescription(String description) {

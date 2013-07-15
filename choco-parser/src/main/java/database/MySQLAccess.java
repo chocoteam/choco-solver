@@ -104,7 +104,7 @@ public class MySQLAccess {
             int bid = getBenchID(benchname);
             int pid = getPbID(name,
                     solver.getSearchLoop().getObjectivemanager().getPolicy(),
-                    optpb ? solver.getMeasures().getObjectiveValue() : solver.getMeasures().getSolutionCount(),
+                    optpb ? solver.getMeasures().getBestSolutionValue().intValue() : solver.getMeasures().getSolutionCount(),
                     optpb ? solver.getMeasures().isObjectiveOptimal() : !solver.isFeasible().equals(ESat.UNDEFINED));
 
             insertData(solver, bid, pid);
@@ -125,7 +125,7 @@ public class MySQLAccess {
             statement.setInt(2, pid);
             statement.setLong(3, (long) solver.getMeasures().getReadingTimeCount());
             statement.setLong(4, (long) solver.getMeasures().getTimeCount());
-            statement.setLong(5, solver.getSearchLoop().getObjectivemanager().isOptimization() ? solver.getMeasures().getObjectiveValue() :
+            statement.setLong(5, solver.getSearchLoop().getObjectivemanager().isOptimization() ? solver.getMeasures().getBestSolutionValue().intValue() :
                     solver.getMeasures().getSolutionCount());
             statement.setLong(6, solver.getMeasures().getSolutionCount());
             statement.setLong(7, solver.getMeasures().getNodeCount());
@@ -175,7 +175,7 @@ public class MySQLAccess {
                     statement.setString(2, MAX);
                     break;
             }
-            statement.setLong(3, solution);
+            statement.setLong(3, solution==Integer.MAX_VALUE?-100:solution);
             statement.setBoolean(4, isopt);
             statement.executeUpdate();
             return getPbID(filename, policy, solution, isopt);

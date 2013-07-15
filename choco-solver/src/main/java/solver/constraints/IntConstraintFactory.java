@@ -248,6 +248,17 @@ public class IntConstraintFactory {
         return new Element(VALUE, TABLE, INDEX, OFFSET, SORT, VALUE.getSolver());
     }
 
+	/**
+	 * Build ELEMENT constraint: VALUE = TABLE[INDEX]
+	 *
+	 * @param VALUE  an integer variable taking its value in TABLE
+	 * @param TABLE  an array of integer values
+	 * @param INDEX  an integer variable representing the value of VALUE in TABLE
+	 */
+	public static Element element(IntVar VALUE, int[] TABLE, IntVar INDEX) {
+		return element(VALUE, TABLE, INDEX, 0, "detect");
+	}
+
     /**
      * Enforces VAR1 = VAR2^2
      */
@@ -481,7 +492,7 @@ public class IntConstraintFactory {
      * @return a circuit constraint
      */
     public static Constraint circuit(IntVar[] VARS, int OFFSET) {
-        Constraint c = alldifferent(VARS, "DEFAULT");
+        Constraint c = alldifferent(VARS, "AC");
         c.addPropagators(
                 new PropNoSubtour(VARS, OFFSET),
                 new PropCircuit_AntiArboFiltering(VARS, OFFSET),
@@ -598,7 +609,7 @@ public class IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint diffNCons = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
+        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, false), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
 		if(USE_CUMUL){
 			IntVar[] EX = new IntVar[X.length];
 			IntVar[] EY = new IntVar[X.length];
@@ -905,7 +916,7 @@ public class IntConstraintFactory {
         c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
-        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.DEFAULT));
+        c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.AC));
         c.addPropagators(new PropSubcircuit_AntiArboFiltering(VARS, OFFSET));
         c.addPropagators(new PropSubCircuitSCC(VARS, OFFSET));
         return c;

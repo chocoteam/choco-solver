@@ -28,9 +28,12 @@
 package solver.search.loop;
 
 import memory.IEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
+import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -76,6 +79,8 @@ import util.ESat;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
+    protected final static Logger LOGGER = LoggerFactory.getLogger(ISearchLoop.class);
+
     //    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
     public int timeStamp;
 
@@ -87,6 +92,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     static final int UP_BRANCH = 1 << 4;
     static final int RESTART = 1 << 5;
     static final int RESUME = 1 << 6;
+
+    static final String MSG_LIMIT = "a limit has been reached";
+    static final String MSG_ROOT = "the entire search space has been explored";
+    static final String MSG_CUT = "applying the cut leads to a failure";
+    static final String MSG_FIRST_SOL = "stop at first solution";
+    static final String MSG_INIT = "failure encountered during initial propagation";
+    static final String MSG_SEARCH_INIT = "search strategy detects inconsistency";
+
 
     /* Reference to the solver */
     final Solver solver;
@@ -130,14 +143,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Objective manager. Default object is no objective.
      */
-    ObjectiveManager objectivemanager;
+	ObjectiveManager objectivemanager;
 
     private boolean alive;
     public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-        objectivemanager = new ObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
+        objectivemanager = new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -303,11 +316,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public final void reachLimit() {
         hasReachedLimit = true;
-        interrupt();
-    }
-
-    public void resetReachedLimit(boolean bvalue) {
-        hasReachedLimit = bvalue;
+        interrupt(MSG_LIMIT);
     }
 
     public boolean hasReachedLimit() {
@@ -316,8 +325,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Force the search to stop
+     *
+     * @param message a message to motivate the interruption -- for logging only
      */
-    public final void interrupt() {
+    public final void interrupt(String message) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Search interruption: {}", message);
+        }
         nextState = RESUME;
         alive = false;
         smList.afterInterrupt();
@@ -338,7 +352,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     @Override
     public void plugSearchMonitor(ISearchMonitor sm) {
-        smList.add(sm);
+        if (!smList.contains(sm)) {
+            smList.add(sm);
+        } else {
+            LOGGER.warn("The search monitor already exists and is ignored");
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,9 +365,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
-        if (objectivemanager.isOptimization()) {
-            plugSearchMonitor(objectivemanager);
-        }
         this.measures.declareObjective();
     }
 

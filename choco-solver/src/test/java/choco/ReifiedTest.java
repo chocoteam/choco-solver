@@ -286,8 +286,8 @@ public class ReifiedTest {
         BoolVar[] bv = VariableFactory.boolArray("b1", 10, solver);
         for (int i = 1; i <= 10; i++) {
             solver.post(LogicalConstraintFactory.ifThenElse(bv[i - 1],
-					IntConstraintFactory.arithm(cp, "=", i),
-					IntConstraintFactory.arithm(cp, "!=", i)));
+                    IntConstraintFactory.arithm(cp, "=", i),
+                    IntConstraintFactory.arithm(cp, "!=", i)));
         }
 
         IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
@@ -296,8 +296,8 @@ public class ReifiedTest {
         BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
         for (int i = 1; i <= 10; i++) {
             solver.post(LogicalConstraintFactory.ifThenElse(bv2[i - 1],
-					IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), "<", cp),
-					IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
+                    IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), "<", cp),
+                    IntConstraintFactory.arithm(VariableFactory.fixed(i, solver), ">=", cp)));
         }
 
         solver.set(new VariableEngine(solver));
@@ -457,6 +457,31 @@ public class ReifiedTest {
 
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 5);
 
+    }
+
+    @Test(groups = "1s")
+    public void test_boussard1() {
+        Solver solver = new Solver();
+        BoolVar a = VariableFactory.bool("a", solver);
+        BoolVar b = VariableFactory.bool("b", solver);
+        BoolVar c = VariableFactory.bool("c", solver);
+
+        solver.post(LogicalConstraintFactory.ifThen(
+                a,
+                LogicalConstraintFactory.ifThen(
+                        b,
+                        IntConstraintFactory.arithm(c, "=", 1))));
+        solver.set(IntStrategyFactory.firstFail_InDomainMin(new BoolVar[]{a, b, c}));
+        if (solver.findSolution()) {
+            int index = 0;
+            do {
+                index++;
+                System.out.println(index + " : a=" + a.getValue() + ", b=" + b.getValue() + ",c= " + c.getValue());
+            }
+            while (solver.nextSolution());
+            System.out.println("nombre total de solutions = " + index);
+        }
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 7);
     }
 
 }

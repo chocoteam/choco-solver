@@ -116,6 +116,13 @@ public class ParseAndSolve {
     @Option(name = "-dbbn", aliases = {"--database-bench-name"}, usage = "Benchmark name", required = false)
     protected String dbbenchname = "";
 
+
+    @Option(name = "-lns", usage = "Plug Large Neighborhood Seach in", required = false)
+    protected GoalConf.LNS lns = GoalConf.LNS.NONE;
+
+    @Option(name = "-fr", aliases = "--fast-restart", usage = "Force fast restart (fail 20).", required = false)
+    protected boolean fr = false;
+
     private boolean userinterruption = true;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
@@ -198,7 +205,7 @@ public class ParseAndSolve {
                     }
                 });
             }
-            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl);
+            GoalConf gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, lns, fr);
             for (int i = 0; i < l; i++) {
                 LOGGER.info("% parse instance...");
                 Solver solver = new Solver();
@@ -219,6 +226,7 @@ public class ParseAndSolve {
                 }
                 datas.clear();
                 LOGGER.info("% solve instance...");
+//                SMF.log(solver, false, true);
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
                 if (!dbproperties.equals("")) {

@@ -131,7 +131,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if ((x.getUB() + y.getUB() < cste) ||
-                (x.getLB() + y.getLB() > cste))
+                (x.getLB() + y.getLB() > cste) ||
+                x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && !match())
             return ESat.FALSE;
         else if (x.instantiated() &&
                 y.instantiated() &&
@@ -141,6 +142,15 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             return ESat.UNDEFINED;
     }
 
+
+    private boolean match() {
+        int lb = x.getLB();
+        int ub = x.getUB();
+        for (; lb <= ub; lb = x.nextValue(lb)) {
+            if (y.contains(cste - lb)) return true;
+        }
+        return false;
+    }
 
     @Override
     public void explain(Deduction d, Explanation e) {

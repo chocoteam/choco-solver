@@ -38,8 +38,12 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.objective.ObjectiveManager;
+import solver.objective.IntObjectiveManager;
+import solver.search.limits.ACounter;
+import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.lns.LNSFactory;
+import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
 import solver.search.strategy.selectors.values.InDomainMin;
@@ -80,7 +84,6 @@ public class FGoal {
         set_search
     }
 
-
     public static void define_goal(Datas datas, Solver aSolver, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
@@ -90,7 +93,7 @@ public class FGoal {
                 break;
             default:
                 IntVar obj = expr.intVarValue(aSolver);
-                search.setObjectivemanager(new ObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
+                search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
         }
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
@@ -103,6 +106,7 @@ public class FGoal {
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
         }
+        Variable[] defdecvars = null; // defined dec vars
         StringBuilder description = new StringBuilder();
         if (annotations.size() > 0 && !gc.free) {
             AbstractStrategy strategy = null;
@@ -121,11 +125,12 @@ public class FGoal {
                 } else {
                     strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
-//                solver.set(strategy);
+                defdecvars = strategy.vars;
+                aSolver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
-                aSolver.set(
-                        new StrategiesSequencer(aSolver.getEnvironment(),
-                                strategy, makeComplementarySearch(datas)));
+//                aSolver.set(
+//                        new StrategiesSequencer(aSolver.getEnvironment(),
+//                                strategy, makeComplementarySearch(datas)));
 
                 System.out.println("% t:" + gc.seed);
             }
@@ -151,6 +156,7 @@ public class FGoal {
                         ivars[i] = (IntVar) dvars[i];
                     }
                 }
+                defdecvars = ivars;
             }
 
             LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
@@ -180,17 +186,52 @@ public class FGoal {
                         ActivityBased abs = new ActivityBased(aSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, gc.seed);
                         aSolver.set(abs);
 //                        if (type != ResolutionPolicy.SATISFACTION) { // also add LNS in optimization
-//                            aSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
+//                            aSolver.getSearchLoop().plugSearchMonitor(new ActivityBasedNeighborhood(aSolver, ivars, gc.seed, abs, false, ivars.length / 2));
 //                        }
                         break;
                 }
             }
         }
-		if(gc.lastConflict){
-			aSolver.set(ISF.lastConflict(aSolver,aSolver.getSearchLoop().getStrategy()));
-		}
+        plugLNS(aSolver, ivars, defdecvars != null ? defdecvars : ivars, gc);
+        if (gc.lastConflict) {
+            aSolver.set(ISF.lastConflict(aSolver, aSolver.getSearchLoop().getStrategy()));
+        }
         gc.setDescription(description.toString());
     }
+
+
+    private static void plugLNS(Solver solver, IntVar[] ivars, Variable[] ddvars, GoalConf gc) {
+        LargeNeighborhoodSearch lns = null;
+        IntVar[] dvars = new IntVar[ddvars.length];
+        for (int i = 0; i < dvars.length; i++) {
+            dvars[i] = (IntVar) ddvars[i];
+        }
+        ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
+        switch (gc.lns) {
+            case RLNS:
+                lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
+                break;
+            case RLNS_BB:
+                lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
+                break;
+            case PGLNS:
+                lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
+                break;
+            case PGLNS_BB:
+                lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);
+                break;
+            case ELNS:
+                lns = LNSFactory.elns(solver, dvars, 200, gc.seed, gc.fastRestart ? new FailCounter(30) : null, fr);
+                break;
+            case ELNS_BB:
+                lns = LNSFactory.elns(solver, ivars, 200, gc.seed, gc.fastRestart ? new FailCounter(30) : null, fr);
+                break;
+        }
+        if (lns != null) {
+            solver.getSearchLoop().plugSearchMonitor(lns);
+        }
+    }
+
 
     /**
      * Read search annotation and build corresponding strategy

@@ -166,7 +166,6 @@ public class ConnectivityFinder {
 		ISet act = graph.getActiveNodes();
 		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
 			inf[i] = Integer.MAX_VALUE;
-			CC_firstNode[i] = -1;
 			p[i] = -1;
 		}
 		//algo

@@ -24,80 +24,92 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
+package solver.constraints.nary.nogood;
 
-import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-
-import java.util.BitSet;
-import java.util.Random;
+import util.ESat;
 
 /**
- * A Random LNS
+ * A class to define a Nogood of size == 1.
  * <p/>
+ * Made of a list of variables, a list of values and an int.
+ * {vars, values} matches positive decisions.
+ * A positive decision d_i is vars_i=values_i.
+ * <p/>
+ * Related to "Nogood Recording from Restarts", C. Lecoutre et al.
+ * <br/>
  *
  * @author Charles Prud'homme
- * @since 18/04/13
+ * @since 20/06/13
  */
-public class RandomLNS extends Abstract_LNS_SearchMonitor {
+public class UnitNogood implements INogood {
 
-    private final int n;
-    private final IntVar[] vars;
-    private final int[] bestSolution;
-    private Random rd;
-    private int nbFixedVariables = 0;
+    final IntVar var;
+    final int value;
+    int idxInStore;
 
-    BitSet fragment;  // index of variable to set unfrozen
 
-    public RandomLNS(Solver solver, IntVar[] vars, long seed) {
-        super(solver, true);
+    public UnitNogood(IntVar var, int value) {
+        this.value = value;
+        this.var = var;
+    }
 
-        this.n = vars.length;
-        this.vars = vars.clone();
+    public void setIdx(int idx) {
+        this.idxInStore = idx;
+    }
 
-        this.rd = new Random(seed);
-        this.bestSolution = new int[n];
-        this.fragment = new BitSet(n);
-        nbFixedVariables = n / 2;
+    public int getIdx() {
+        return this.idxInStore;
+    }
+
+    public int propagate(PropNogoodStore pngs) throws ContradictionException {
+        var.removeValue(value, pngs);
+        return -1;
+    }
+
+    public int awakeOnInst(int idx, PropNogoodStore pngs) throws ContradictionException {
+        var.removeValue(value, pngs);
+        return -1;
     }
 
     @Override
-    protected boolean isSearchComplete() {
-        return nbFixedVariables == 0;
+    public boolean isUnit() {
+        return true;
     }
 
-    @Override
-    protected void recordSolution() {
-        for (int i = 0; i < vars.length; i++) {
-            bestSolution[i] = vars[i].getValue();
-        }
-        nbFixedVariables = n / 2;
-    }
-
-    @Override
-    protected void fixSomeVariables() throws ContradictionException {
-        fragment.set(0, n); // all variables are frozen
-        for (int i = 0; i < nbFixedVariables && fragment.cardinality() > 0; i++) {
-            int id = selectVariable();
-            if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                vars[id].instantiateTo(bestSolution[id], this);
+    public ESat isEntailed() {
+        if (var.contains(value)) {
+            if (var.instantiated()) {
+                return ESat.FALSE;
+            } else {
+                return ESat.UNDEFINED;
             }
-            fragment.clear(id);
         }
-    }
-
-    private int selectVariable() {
-        int id;
-        int cc = rd.nextInt(fragment.cardinality());
-        for (id = fragment.nextSetBit(0); id >= 0 && cc > 0; id = fragment.nextSetBit(id + 1)) {
-            cc--;
-        }
-        return id;
+        return ESat.TRUE;
     }
 
     @Override
-    protected void restrictLess() {
-        nbFixedVariables /= 1.2;
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(var.getName()).append("==").append(value).append(',');
+        return sb.toString();
+    }
+
+    @Override
+    public int size() {
+        return 1;
+    }
+
+    @Override
+    public IntVar getVar(int i) {
+        if (i == 0) return var;
+        return null;
+    }
+
+    @Override
+    public int getVal(int i) {
+        if (i == 0) return value;
+        return Integer.MAX_VALUE;
     }
 }

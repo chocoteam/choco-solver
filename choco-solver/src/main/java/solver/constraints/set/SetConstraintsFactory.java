@@ -153,10 +153,12 @@ public class SetConstraintsFactory {
      *
      * @param SET a set variable
      * @param SUM an integer variable representing sum{i | i in SET}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the SUM constraint is not applied)
      * @return a constraint ensuring that sum{i | i in set} = SUM
      */
-    public static Constraint sum(SetVar SET, IntVar SUM) {
-        return sum(SET, null, 0, SUM);
+    public static Constraint sum(SetVar SET, IntVar SUM, boolean NOT_EMPTY) {
+        return sum(SET, null, 0, SUM, NOT_EMPTY);
     }
 
     /**
@@ -169,13 +171,16 @@ public class SetConstraintsFactory {
      *                but generally 1 with MiniZinc API
      *                which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
      * @param SUM     an integer variable representing sum{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the SUM constraint is not applied)
      * @return a constraint ensuring that sum{WEIGHTS[i-OFFSET] | i in INDEXES} = SUM
      */
-    public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM) {
+    public static Constraint sum(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar SUM, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, SUM}, SUM.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM));
+        c.setPropagators(new PropSumOfElements(INDEXES, WEIGHTS, OFFSET, SUM, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 
@@ -185,10 +190,12 @@ public class SetConstraintsFactory {
      *
      * @param SET               a set variable
      * @param MAX_ELEMENT_VALUE an integer variable representing max{i | i in SET}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the MAX constraint is not applied)
      * @return a constraint ensuring that max{i | i in set} = MAX_ELEMENT_VALUE
      */
-    public static Constraint max(SetVar SET, IntVar MAX_ELEMENT_VALUE) {
-        return max(SET, null, 0, MAX_ELEMENT_VALUE);
+    public static Constraint max(SetVar SET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
+        return max(SET, null, 0, MAX_ELEMENT_VALUE, NOT_EMPTY);
     }
 
     /**
@@ -201,13 +208,16 @@ public class SetConstraintsFactory {
      *                          but generally 1 with MiniZinc API
      *                          which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
      * @param MAX_ELEMENT_VALUE an integer variable representing max{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the MAX constraint is not applied)
      * @return a constraint ensuring that max{WEIGHTS[i-OFFSET] | i in INDEXES} = MAX_ELEMENT_VALUE
      */
-    public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE) {
+    public static Constraint max(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MAX_ELEMENT_VALUE, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, MAX_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE));
+        c.setPropagators(new PropMaxElement(INDEXES, WEIGHTS, OFFSET, MAX_ELEMENT_VALUE, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 
@@ -217,10 +227,12 @@ public class SetConstraintsFactory {
      *
      * @param SET               a set variable
      * @param MIN_ELEMENT_VALUE an integer variable representing min{i | i in SET}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the MIN constraint is not applied)
      * @return a constraint ensuring that min{i | i in SET} = MIN_ELEMENT_VALUE
      */
-    public static Constraint min(SetVar SET, IntVar MIN_ELEMENT_VALUE) {
-        return min(SET, null, 0, MIN_ELEMENT_VALUE);
+    public static Constraint min(SetVar SET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
+        return min(SET, null, 0, MIN_ELEMENT_VALUE, NOT_EMPTY);
     }
 
     /**
@@ -233,13 +245,16 @@ public class SetConstraintsFactory {
      *                          but generally 1 with MiniZinc API
      *                          which counts from 1 to n instead of counting from 0 to n-1 (Java standard)
      * @param MIN_ELEMENT_VALUE integer variable representing min{WEIGHTS[i-OFFSET] | i in INDEXES}
+	 * @param NOT_EMPTY true : the set variable cannot be empty
+	 *                  false : the set may be empty (if so, the MIN constraint is not applied)
      * @return a constraint ensuring that min{WEIGHTS[i-OFFSET] | i in INDEXES} = MIN_ELEMENT_VALUE
      */
-    public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE) {
+    public static Constraint min(SetVar INDEXES, int[] WEIGHTS, int OFFSET, IntVar MIN_ELEMENT_VALUE, boolean NOT_EMPTY) {
         Constraint c = new Constraint(new Variable[]{INDEXES, MIN_ELEMENT_VALUE}, INDEXES.getSolver());
-        c.setPropagators(
-				new PropNotEmpty(INDEXES),
-				new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE));
+        c.setPropagators(new PropMinElement(INDEXES, WEIGHTS, OFFSET, MIN_ELEMENT_VALUE, NOT_EMPTY));
+		if(NOT_EMPTY){
+			c.addPropagators(new PropNotEmpty(INDEXES));
+		}
         return c;
     }
 

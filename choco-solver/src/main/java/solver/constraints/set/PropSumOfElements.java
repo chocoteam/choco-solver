@@ -58,6 +58,7 @@ public class PropSumOfElements extends Propagator<Variable> {
     private SetVar set;
     private int offSet;
     private int[] weights;
+	private final boolean notEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -71,13 +72,16 @@ public class PropSumOfElements extends Propagator<Variable> {
      * @param weights
      * @param offset
      * @param sum
+	 * @param notEmpty true : the set variable cannot be empty
+	 *                 false : the set may be empty (if so, the SUM constraint is not applied)
      */
-    public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum) {
+    public PropSumOfElements(SetVar indexes, int[] weights, int offset, IntVar sum, boolean notEmpty) {
         super(new Variable[]{indexes, sum}, PropagatorPriority.BINARY, true);
         this.sum = (IntVar) vars[1];
         this.set = (SetVar) vars[0];
         this.weights = weights;
         this.offSet = offset;
+		this.notEmpty = notEmpty;
     }
 
     /**
@@ -86,9 +90,11 @@ public class PropSumOfElements extends Propagator<Variable> {
      *
      * @param setVar
      * @param sum
+	 * @param notEmpty true : the set variable cannot be empty
+	 *                 false : the set may be empty (if so, the SUM constraint is not applied)
      */
-    public PropSumOfElements(SetVar setVar, IntVar sum) {
-        this(setVar, null, 0, sum);
+    public PropSumOfElements(SetVar setVar, IntVar sum, boolean notEmpty) {
+        this(setVar, null, 0, sum, notEmpty);
     }
 
     //***********************************************************************************
@@ -123,8 +129,10 @@ public class PropSumOfElements extends Propagator<Variable> {
         for (int j=set.getEnvelopeFirst(); j!=SetVar.END; j=set.getEnvelopeNext()) {
             sE += get(j);
         }
-        sum.updateLowerBound(sK, aCause);
-        sum.updateUpperBound(sE, aCause);
+		if(notEmpty || set.getKernelSize()>0){
+			sum.updateLowerBound(sK, aCause);
+			sum.updateUpperBound(sE, aCause);
+		}
         boolean again = false;
         // filter set
         int lb = sum.getLB();
@@ -147,6 +155,13 @@ public class PropSumOfElements extends Propagator<Variable> {
 
     @Override
     public ESat isEntailed() {
+		if(set.getEnvelopeSize()==0){
+			if(notEmpty){
+				return ESat.FALSE;
+			}else {
+				return ESat.TRUE;
+			}
+		}
         int sK = 0;
         int sE = 0;
         for (int j=set.getKernelFirst(); j!=SetVar.END; j=set.getKernelNext()) {
@@ -158,7 +173,7 @@ public class PropSumOfElements extends Propagator<Variable> {
         // filter set
         int lb = sum.getLB();
         int ub = sum.getUB();
-        if (lb > sE || ub < sK) {
+        if ((lb > sE || ub < sK) && (notEmpty || set.getKernelSize()>0)) {
             return ESat.FALSE;
         }
         if (isCompletelyInstantiated()) {

@@ -28,7 +28,7 @@ package solver.search.loop.monitors;
 
 import solver.exception.ContradictionException;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,16 +41,16 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
         IMonitorInitialize, IMonitorInitPropagation, IMonitorInterruption, IMonitorOpenNode, IMonitorRestart,
         IMonitorSolution, IMonitorUpBranch {
 
-    List<IMonitorClose> mclos = new LinkedList<IMonitorClose>();
-    List<IMonitorContradiction> mcont = new LinkedList<IMonitorContradiction>();
-    List<IMonitorDownBranch> mdbra = new LinkedList<IMonitorDownBranch>();
-    List<IMonitorInitialize> minit = new LinkedList<IMonitorInitialize>();
-    List<IMonitorInitPropagation> mipro = new LinkedList<IMonitorInitPropagation>();
-    List<IMonitorInterruption> minte = new LinkedList<IMonitorInterruption>();
-    List<IMonitorOpenNode> mopno = new LinkedList<IMonitorOpenNode>();
-    List<IMonitorRestart> mrest = new LinkedList<IMonitorRestart>();
-    List<IMonitorSolution> msolu = new LinkedList<IMonitorSolution>();
-    List<IMonitorUpBranch> mubra = new LinkedList<IMonitorUpBranch>();
+    List<IMonitorClose> mclos = new ArrayList<IMonitorClose>();
+    List<IMonitorContradiction> mcont = new ArrayList<IMonitorContradiction>();
+    List<IMonitorDownBranch> mdbra = new ArrayList<IMonitorDownBranch>();
+    List<IMonitorInitialize> minit = new ArrayList<IMonitorInitialize>();
+    List<IMonitorInitPropagation> mipro = new ArrayList<IMonitorInitPropagation>();
+    List<IMonitorInterruption> minte = new ArrayList<IMonitorInterruption>();
+    List<IMonitorOpenNode> mopno = new ArrayList<IMonitorOpenNode>();
+    List<IMonitorRestart> mrest = new ArrayList<IMonitorRestart>();
+    List<IMonitorSolution> msolu = new ArrayList<IMonitorSolution>();
+    List<IMonitorUpBranch> mubra = new ArrayList<IMonitorUpBranch>();
 
 
     @Override
@@ -219,6 +219,53 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
                 mubra.add((IMonitorUpBranch) sm);
             }
         }
+    }
+
+    public boolean contains(ISearchMonitor sm) {
+        if (sm != null) {
+            boolean isPluggedIn = false;
+            if (sm instanceof IMonitorClose) {
+                isPluggedIn |= mclos.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorContradiction) {
+                isPluggedIn |= mcont.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorDownBranch) {
+                isPluggedIn |= mdbra.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInitialize) {
+                isPluggedIn |= minit.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInitPropagation) {
+                isPluggedIn |= mipro.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorInterruption) {
+                isPluggedIn |= minte.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorOpenNode) {
+                isPluggedIn |= mopno.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorRestart) {
+                isPluggedIn |= mrest.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorSolution) {
+                isPluggedIn |= msolu.contains(sm);
+            }
+            if (isPluggedIn) return true;
+            if (sm instanceof IMonitorUpBranch) {
+                isPluggedIn |= mubra.contains(sm);
+            }
+            if (isPluggedIn) return true;
+        }
+        return false;
     }
 
 }
