@@ -8,6 +8,7 @@ predicate amongChoco(var int: n, array[int] of var int: x, set of int: v);
 predicate atleastChoco(int: n, array[int] of var int: x, int: v);
 predicate atmostChoco(int: n, array[int] of var int: x, int: v);
 predicate circuitChoco(array[int] of var int: x);
+predicate count_eq_reif_choco(array[int] of var int: x, var int: y, var int: c, var bool: b);
 predicate count_eqchoco(array[int] of var int: x, var int: y, var int: c);
 predicate cumulativeChoco(array[int] of var int: s, array[int] of var int: d, array[int] of var int: r, var int: b);
 predicate diffnChoco(array[int] of var int: x, array[int] of var int: y,array[int] of var int: dx, array[int] of var int: dy);

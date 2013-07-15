@@ -1,6 +1,7 @@
 %-----------------------------------------------------------------------------%
 % Constrains 'c' to be the number of occurrences of 'y' in 'x'. 
 %-----------------------------------------------------------------------------%
+include "count_eq_reif.mzn";
 
 predicate count_eq(array[int] of var int: x, var int: y, var int: c) =
     count_eqchoco(x,y,c);
