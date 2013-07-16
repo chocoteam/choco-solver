@@ -51,7 +51,6 @@ import solver.variables.IntVar;
 import util.PoolManager;
 import util.iterators.DisposableValueIterator;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -204,7 +203,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 				return null;
 			}
             // retrieve indice of the variable in vars
-            currentVar = Arrays.binarySearch(vars, variable);
+			for(int i=0;i<vars.length;i++){
+				if(vars[i]==variable){
+					currentVar = i;
+				}
+			}
             assert vars[currentVar] == variable;
         }
         currentVal = variable.getLB();
