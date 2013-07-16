@@ -41,7 +41,6 @@ import solver.Solver;
 import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.IMonitorSolution;
-
 import java.io.IOException;
 
 public class ParaserSlave extends AbstractParallelSlave<ParaserMaster>{
@@ -52,6 +51,7 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster>{
 
 	String[] args;
 	Solver solver;
+	ParseAndSolve PAS;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -60,6 +60,12 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster>{
 	public ParaserSlave(ParaserMaster master, int id, String[] args){
 		super(master,id);
 		this.args = args;
+		PAS = new ParseAndSolve();
+		try {// sequential parsing (safer)
+			PAS.parse(args);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	//***********************************************************************************
@@ -68,23 +74,20 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster>{
 
 	@Override
 	public void work() {
-		ParseAndSolve pas = new ParseAndSolve(){
-			@Override
-			protected void beforeStart(Solver s) {
-				solver = s;
-				final ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
-				if(om!=null && om.isOptimization()){
-					solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
-						@Override
-						public void onSolution() {
-							master.newSol(om.getBestSolutionValue().intValue(), om.getPolicy());
-						}
-					});
-				}
-			}
-		};
 		try {
-			pas.doMain(args);
+			// plug monitor to communicate bounds (should not be added in the sequential phasis)
+			solver = PAS.getSolver();
+			final ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
+			if(om!=null && om.isOptimization()){
+				solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+					@Override
+					public void onSolution() {
+						master.newSol(om.getBestSolutionValue().intValue(), om.getPolicy());
+					}
+				});
+			}
+			// go!
+			PAS.solve();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
