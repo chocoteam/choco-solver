@@ -85,8 +85,8 @@ public class ParseAndSolve {
     @Option(name = "-seed", usage = "Seed for randomness", required = false)
     protected long seed = 29091981L;
 
-//    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
-//    protected int nb_cores = 1;
+    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
+    protected int nb_cores = 1;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;

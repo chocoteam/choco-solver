@@ -59,16 +59,8 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave>{
 			if(args[i].equals("-p")){
 				// -p option defines the number of slaves
 				nbCores = Math.min(nbCores,Integer.parseInt(args[i+1]));
-				// removes -p option from slave arguments
 				// each slave has one thread
-				String[] a2 = new String[args.length-2];
-				for(int i2=0;i2<i;i2++){
-					a2[i2] = args[i2];
-				}
-				for(int i2=i+2;i2<args.length;i2++){
-					a2[i2-2] = args[i2];
-				}
-				args = a2;
+				args[i+1] = "1";
 				break;
 			}
 		}
