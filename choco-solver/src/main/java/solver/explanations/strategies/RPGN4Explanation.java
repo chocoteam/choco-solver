@@ -29,29 +29,30 @@ package solver.explanations.strategies;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.loop.lns.neighbors.RandomNeighborhood;
+import solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
 import solver.search.loop.monitors.IMonitorUpBranch;
 import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.variables.IntVar;
+import util.objects.IntCircularQueue;
 
 /**
- * This class extends {@link solver.search.loop.lns.neighbors.RandomNeighborhood}, but, instead of instantiating variables
- * to values, it builds a fake decision path, this enables plugging explanation in.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 03/07/13
+ * @since 16/07/13
  */
-public class RandomNeighborhood4Explanation extends RandomNeighborhood implements IMonitorUpBranch {
+public class RPGN4Explanation extends ReversePropagationGuidedNeighborhood implements IMonitorUpBranch {
 
+    IntCircularQueue queue;
     private Decision duplicator;
     private Decision last; // needed to catch up the case when a subtree is closed, and this imposes the fgmt
 
-    public RandomNeighborhood4Explanation(Solver aSolver, IntVar[] vars, int level, long seed) {
-        super(aSolver, vars, level, seed);
-        mSolver.getSearchLoop().plugSearchMonitor(this);
+
+    public RPGN4Explanation(Solver solver, IntVar[] vars, long seed, int fgmtSize, int listSize) {
+        super(solver, vars, seed, fgmtSize, listSize);
+        queue = new IntCircularQueue(vars.length);
     }
 
     @Override
@@ -63,23 +64,30 @@ public class RandomNeighborhood4Explanation extends RandomNeighborhood implement
     }
 
     @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
+    public void restrictLess() {
         last = null;
+        super.restrictLess();
+    }
+
+    @Override
+    public void fixSomeVariables(ICause cause) throws ContradictionException {
+        queue.clear();
+        mSolver.getEnvironment().worldPush();
         super.fixSomeVariables(cause);
+        mSolver.getEnvironment().worldPop();
+        while (!queue.isEmpty()) {
+            int id = queue.pop();
+            FastDecision d = (FastDecision) duplicator.duplicate();
+            d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
+            last = d;
+            ExplanationToolbox.imposeDecisionPath(mSolver, d);
+        }
     }
 
     @Override
     protected void impose(int id, ICause cause) throws ContradictionException {
-        FastDecision d = (FastDecision) duplicator.duplicate();
-        d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
-        last = d;
-        ExplanationToolbox.imposeDecisionPath(mSolver, d);
-    }
-
-    @Override
-    public void restrictLess() {
-        last = null;
-        super.restrictLess();
+        super.impose(id, cause);
+        queue.add(id);
     }
 
     @Override

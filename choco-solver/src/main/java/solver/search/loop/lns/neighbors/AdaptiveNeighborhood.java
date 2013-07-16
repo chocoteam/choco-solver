@@ -26,11 +26,7 @@
  */
 package solver.search.loop.lns.neighbors;
 
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.search.limits.ACounter;
-
-import java.util.Arrays;
+import java.util.Random;
 
 /**
  * <br/>
@@ -38,69 +34,32 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public class SequenceNeighborhood extends ANeighbor {
+public class AdaptiveNeighborhood extends SequenceNeighborhood {
 
+    private Random random;
+    private int sum;
 
-    protected int who;
-    protected int count;
-    protected INeighbor[] neighbors;
-    protected int[] counters;
-
-    public SequenceNeighborhood(INeighbor... neighbors) {
-        super(null);
-        this.neighbors = neighbors;
-        who = 0;
-        count = neighbors.length;
-        counters = new int[count];
-        counters[0] = -1;
+    public AdaptiveNeighborhood(long seed, INeighbor... neighbors) {
+        super(neighbors);
+        this.random = new Random(seed);
+        sum = count - 1;
     }
 
     @Override
     public void recordSolution() {
-        counters[who]++;
+        sum++;
+        super.recordSolution();
+    }
+
+    @Override
+    protected void nextNeighbor() {
+        int r = random.nextInt(sum);
         for (int i = 0; i < count; i++) {
-            neighbors[i].recordSolution();
+            r -= (counters[i] + 1);
+            if (r <= 0) {
+                who = i;
+                return;
+            }
         }
-        who = count - 1; // forces to start with the first neighbor
-        System.out.printf("%s %s\n", "% REPARTITION", Arrays.toString(counters));
-    }
-
-    @Override
-    public void fixSomeVariables(ICause cause) throws ContradictionException {
-        nextNeighbor();
-        if (who == count) who = 0;
-        neighbors[who].fixSomeVariables(cause);
-    }
-
-    @Override
-    public void restrictLess() {
-        neighbors[who].restrictLess();
-    }
-
-    @Override
-    public boolean isSearchComplete() {
-        boolean isComplete = false;
-        for (int i = 0; i < count; i++) {
-            isComplete |= neighbors[i].isSearchComplete();
-        }
-        return isComplete;
-    }
-
-    @Override
-    public void activeFastRestart() {
-        for (int i = 0; i < count; i++) {
-            neighbors[i].activeFastRestart();
-        }
-    }
-
-    @Override
-    public void fastRestart(ACounter counter) {
-        for (int i = 0; i < count; i++) {
-            neighbors[i].fastRestart(counter);
-        }
-    }
-
-    protected void nextNeighbor(){
-        who++;
     }
 }

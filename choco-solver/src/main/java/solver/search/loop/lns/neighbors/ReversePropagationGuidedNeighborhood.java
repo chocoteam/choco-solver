@@ -96,7 +96,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
         }
         for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
             if (vars[i].contains(bestSolution[i])) {
-                vars[i].instantiateTo(bestSolution[i], cause);
+                impose(i, cause);
             }
         }
         mSolver.propagate();

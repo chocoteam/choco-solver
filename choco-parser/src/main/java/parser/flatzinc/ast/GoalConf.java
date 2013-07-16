@@ -53,6 +53,9 @@ public class GoalConf {
         PGLNS_BB,
         ELNS,
         ELNS_BB,
+        PGELNS_BB,
+        APGELNS_BB
+
     }
 
     LNS lns;
