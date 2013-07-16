@@ -32,13 +32,13 @@ package samples.sandbox.parallelism;
  *
  * @author Jean-Guillaume Fages
  */
-public abstract class AbstractParallelSlave {
+public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    public AbstractParallelMaster master;
+    public P master;
     public final int id;
 
     //***********************************************************************************
@@ -51,7 +51,7 @@ public abstract class AbstractParallelSlave {
      * @param master
      * @param id     slave unique name
      */
-    public AbstractParallelSlave(AbstractParallelMaster master, int id) {
+    public AbstractParallelSlave(P master, int id) {
         this.master = master;
         this.id = id;
     }
