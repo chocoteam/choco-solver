@@ -24,57 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc;
 
-package samples.sandbox.parallelism;
+import antlr.RecognitionException;
+import parser.flatzinc.para.ParaserMaster;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
- * Slave born to be mastered and work in parallel
+ * The main entry point
+ * <br/>
  *
- * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ * @since 16/07/13
  */
-public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
+public class ChocoFZN {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    public P master;
-    public final int id;
-
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-
-    /**
-     * Create a slave born to be mastered and work in parallel
-     *
-     * @param master
-     * @param id     slave unique name
-     */
-    public AbstractParallelSlave(P master, int id) {
-        this.master = master;
-        this.id = id;
-    }
-
-    //***********************************************************************************
-    // SUB-PROBLEM SOLVING
-    //***********************************************************************************
-
-    /**
-     * Creates a new thread to work in parallel
-     */
-    public void workInParallel() {
-        Thread t = new Thread(new Runnable() {
-            public void run() {
-                work();
-                master.wishGranted();
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+        int nbCores = 1;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-p")) {
+                // -p option defines the number of slaves
+                nbCores = Integer.parseInt(args[i + 1]);
+                // each slave has one thread
+                args[i + 1] = "1";
+                break;
             }
-        });
-        t.start();
+        }
+        if (nbCores == 1) {
+            new ParseAndSolve().doMain(args);
+        } else {
+            // will manage one ParseAndSolve per thread
+            new ParaserMaster(nbCores, args).distributedSlavery();
+        }
     }
-
-    /**
-     * do something
-     */
-    public abstract void work();
 }

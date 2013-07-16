@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.sandbox.parallelism;
+package solver.thread;
 
 /**
  * Master a set of slaves which will work in parallel

@@ -52,7 +52,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 /**
  * <br/>
@@ -64,6 +63,10 @@ public class ParseAndSolve {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////  MINIZINC OPTIONS   ////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // receives other command line parameters than options
     @Argument
     protected String instance;
@@ -71,17 +74,8 @@ public class ParseAndSolve {
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions.", required = false)
     protected boolean all = false;
 
-    @Option(name = "-i", aliases = {"--ignore-search"}, usage = "Ignore search strategy.", required = false)
+    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy.", required = false)
     protected boolean free = false;
-
-    @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
-    protected int bbss = 1;
-
-    @Option(name = "-dv", usage = "Use same decision variables as declared in file (default false)", required = false)
-    protected boolean decision_vars = false;
-
-    @Option(name = "-seed", usage = "Seed for randomness", required = false)
-    protected long seed = 29091981L;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
     protected int nb_cores = 1;
@@ -89,20 +83,17 @@ public class ParseAndSolve {
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;
 
-    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs", required = false)
-    protected byte eng = 0;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////  CHOCO OPTIONS   ///////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    @Option(name = "-seed", usage = "Seed for randomness", required = false)
+    protected long seed = 29091981L;
 
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
     protected String csv = "";
-
-    @Option(name = "-lf", usage = "Last Conflict.", required = false)
-    protected boolean lastConflict;
-
-    @Option(name = "-exp", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
-    protected ExplanationFactory expeng = ExplanationFactory.NONE;
-
-    @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
-    protected boolean fexp = false;
 
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
     protected String dbproperties = "";
@@ -110,6 +101,14 @@ public class ParseAndSolve {
     @Option(name = "-dbbn", aliases = {"--database-bench-name"}, usage = "Benchmark name", required = false)
     protected String dbbenchname = "";
 
+    @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
+    protected int bbss = 1;
+
+    @Option(name = "-dv", usage = "Use same decision variables as declared in file (default false)", required = false)
+    protected boolean decision_vars = false;
+
+    @Option(name = "-lf", usage = "Last Conflict.", required = false)
+    protected boolean lastConflict;
 
     @Option(name = "-lns", usage = "Plug Large Neighborhood Seach in", required = false)
     protected GoalConf.LNS lns = GoalConf.LNS.NONE;
@@ -117,106 +116,115 @@ public class ParseAndSolve {
     @Option(name = "-fr", aliases = "--fast-restart", usage = "Force fast restart (fail 20).", required = false)
     protected boolean fr = false;
 
-    protected boolean userinterruption = true;
-	protected Solver solver;
-	protected GoalConf gc;
-	protected AverageCSV acsv;
+    @Option(name = "-exp", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
+    protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
-        new ParseAndSolve().doMain(args);
-    }
+    @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
+    protected boolean fexp = false;
+
+    @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n1: constraint\n2: variable\n3(*): 7q cstrs", required = false)
+    protected byte eng = 0;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected boolean userinterruption = true;
+    protected Solver solver;
+    protected GoalConf gc;
+    protected AverageCSV acsv;
+
 
     public void doMain(String[] args) throws IOException, RecognitionException {
         parse(args);
-		solve();
+        solve();
     }
 
-	public void parse(String[] args) throws IOException, RecognitionException {
-		CmdLineParser cmdparser = new CmdLineParser(this);
-		cmdparser.setUsageWidth(160);
-		try {
-			cmdparser.parseArgument(args);
-		} catch (CmdLineException e) {
-			System.err.println(e.getMessage());
-			System.err.println("ParseAndSolve [options...] fzn_instance...");
-			cmdparser.printUsage(System.err);
-			System.err.println("\nCheck MiniZinc is correctly installed.");
-			System.err.println();
-			return;
-		}
-		if (!csv.equals("")) {
-			acsv = new AverageCSV(csv, 1);
-			final AverageCSV finalAcsv = acsv;
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				public void run() {
-					if (isUserinterruption()) {
-						finalAcsv.record(instance, ";**ERROR**;");
-					}
-				}
-			});
-		}
-		gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, lns, fr);
-		LOGGER.info("% parse instance...");
-		solver = new Solver();
-		long creationTime = -System.nanoTime();
-		Datas datas = new Datas(gc);
-		boolean removeB2I = false;
-		if(removeB2I){// pas forcement plus rapide mais facilite l'analyse
-			PreprocessFZN.processB2I(instance);
-			buildParser(new FileInputStream(new File(instance+"_")),solver,datas);
-		}else{
-			buildParser(new FileInputStream(new File(instance)),solver,datas);
-		}
-		makeEngine(solver, datas);
-		if (!csv.equals("")) {
-			assert acsv != null;
-			acsv.setSolver(solver);
-		}
-		if (!solver.getExplainer().isActive()) {
-			if (expeng != ExplanationFactory.NONE) {
-				expeng.plugin(solver, fexp);
-			} else if (fexp) {
-				ExplanationFactory.SILENT.plugin(solver, fexp);
-			}
-		}
-		datas.clear();
-		solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
-	}
+    public void parse(String[] args) throws IOException, RecognitionException {
+        CmdLineParser cmdparser = new CmdLineParser(this);
+        cmdparser.setUsageWidth(160);
+        try {
+            cmdparser.parseArgument(args);
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            System.err.println("ParseAndSolve [options...] fzn_instance...");
+            cmdparser.printUsage(System.err);
+            System.err.println("\nCheck MiniZinc is correctly installed.");
+            System.err.println();
+            return;
+        }
+        if (!csv.equals("")) {
+            acsv = new AverageCSV(csv, 1);
+            final AverageCSV finalAcsv = acsv;
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    if (isUserinterruption()) {
+                        finalAcsv.record(instance, ";**ERROR**;");
+                    }
+                }
+            });
+        }
+        gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, lns, fr);
+        LOGGER.info("% parse instance...");
+        solver = new Solver();
+        long creationTime = -System.nanoTime();
+        Datas datas = new Datas(gc);
+        buildLayout(datas);
+        boolean removeB2I = false;
+        if (removeB2I) {// pas forcement plus rapide mais facilite l'analyse
+            PreprocessFZN.processB2I(instance);
+            buildParser(new FileInputStream(new File(instance + "_")), solver, datas);
+        } else {
+            buildParser(new FileInputStream(new File(instance)), solver, datas);
+        }
+        makeEngine(solver, datas);
+        if (!csv.equals("")) {
+            assert acsv != null;
+            acsv.setSolver(solver);
+        }
+        if (!solver.getExplainer().isActive()) {
+            if (expeng != ExplanationFactory.NONE) {
+                expeng.plugin(solver, fexp);
+            } else if (fexp) {
+                ExplanationFactory.SILENT.plugin(solver, fexp);
+            }
+        }
+        datas.clear();
+        solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+    }
 
-	public void solve() throws IOException {
-		LOGGER.info("% solve instance...");
-		solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
-		if (!dbproperties.equals("")) {
-			// query the database
-			MySQLAccess sql = new MySQLAccess(new File(dbproperties));
-			sql.connect();
-			sql.insert(instance, dbbenchname, solver);
-		}
-		if (!csv.equals("")) {
-			assert acsv != null;
-			acsv.record(instance, gc.getDescription());
-		}
-		userinterruption = false;
-	}
+    public void solve() throws IOException {
+        LOGGER.info("% solve instance...");
+        solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
+        if (!dbproperties.equals("")) {
+            // query the database
+            MySQLAccess sql = new MySQLAccess(new File(dbproperties));
+            sql.connect();
+            sql.insert(instance, dbbenchname, solver);
+        }
+        if (!csv.equals("")) {
+            assert acsv != null;
+            acsv.record(instance, gc.getDescription());
+        }
+        userinterruption = false;
+    }
 
-	public void buildParser(InputStream is, Solver mSolver, Datas datas) {
-		try {
-			// Create an input character stream from standard in
-			ANTLRInputStream input = new ANTLRInputStream(is);
-			// Create an ExprLexer that feeds from that stream
-			Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
-			// Create a stream of tokens fed by the lexer
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			// Create a parser that feeds off the token stream
-			Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
-			parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
-			parser.flatzinc_model(mSolver, datas);
-		} catch (IOException io) {
-			Exit.log(io.getMessage());
-		}
-	}
+    public void buildParser(InputStream is, Solver mSolver, Datas datas) {
+        try {
+            // Create an input character stream from standard in
+            ANTLRInputStream input = new ANTLRInputStream(is);
+            // Create an ExprLexer that feeds from that stream
+            Flatzinc4Lexer lexer = new Flatzinc4Lexer(input);
+            // Create a stream of tokens fed by the lexer
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            // Create a parser that feeds off the token stream
+            Flatzinc4Parser parser = new Flatzinc4Parser(tokens);
+            parser.getInterpreter().setPredictionMode(PredictionMode.SLL); // try with simpler/faster SLL(*)
+            parser.flatzinc_model(mSolver, datas);
+        } catch (IOException io) {
+            Exit.log(io.getMessage());
+        }
+    }
 
-	protected void makeEngine(Solver solver, Datas datas) {
+    protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
             case 1:
                 solver.set(new PropagatorEngine(solver));
@@ -239,11 +247,15 @@ public class ParseAndSolve {
         }
     }
 
-	protected boolean isUserinterruption() {
+    protected boolean isUserinterruption() {
         return userinterruption;
     }
 
-	public Solver getSolver(){
-		return solver;
-	}
+    public Solver getSolver() {
+        return solver;
+    }
+
+    public void buildLayout(Datas datas) {
+        datas.setmLayout(new FZNLayout());
+    }
 }

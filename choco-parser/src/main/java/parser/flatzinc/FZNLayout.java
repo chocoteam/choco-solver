@@ -51,7 +51,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout implements IMonitorSolution, IMonitorClose {
+public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -124,7 +124,7 @@ public final class FZNLayout implements IMonitorSolution, IMonitorClose {
         }
     }
 
-    private boolean check() {
+    protected boolean check() {
 //        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
 //        for (int c = 0; c < cstrs.length; c++) {
 //            ESat satC = cstrs[c].isSatisfied();

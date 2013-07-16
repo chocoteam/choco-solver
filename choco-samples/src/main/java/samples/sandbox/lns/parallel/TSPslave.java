@@ -27,8 +27,6 @@
 
 package samples.sandbox.lns.parallel;
 
-import samples.sandbox.parallelism.AbstractParallelMaster;
-import samples.sandbox.parallelism.AbstractParallelSlave;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -36,6 +34,8 @@ import solver.objective.ObjectiveStrategy;
 import solver.objective.OptimizationPolicy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.GraphStrategies;
+import solver.thread.AbstractParallelMaster;
+import solver.thread.AbstractParallelSlave;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;

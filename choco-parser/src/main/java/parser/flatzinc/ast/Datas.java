@@ -47,7 +47,7 @@ public class Datas {
     final GoalConf gc;
 
     // the layout dedicated to pretty print message wrt to fzn recommendations
-    final FZNLayout mLayout;
+    FZNLayout mLayout;
 
     final THashMap<String, Object> map;
 
@@ -57,11 +57,14 @@ public class Datas {
         this.gc = gc;
         this.map = new THashMap<String, Object>();
         searchVariables = new THashSet<Variable>();
-        mLayout = new FZNLayout();
     }
 
     public Datas() {
         this(new GoalConf());
+    }
+
+    public void setmLayout(FZNLayout mLayout) {
+        this.mLayout = mLayout;
     }
 
     public void register(String name, Object o) {

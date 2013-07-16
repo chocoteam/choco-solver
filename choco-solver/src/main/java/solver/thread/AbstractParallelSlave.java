@@ -25,88 +25,56 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package solver.thread;
+
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 15/07/13
- * Time: 16:31
+ * Slave born to be mastered and work in parallel
+ *
+ * @author Jean-Guillaume Fages
  */
-
-package parser.flatzinc.para;
-
-import parser.flatzinc.FZNLayoutPara;
-import parser.flatzinc.ParseAndSolve;
-import parser.flatzinc.ast.Datas;
-import solver.ResolutionPolicy;
-import solver.Solver;
-import solver.objective.IntObjectiveManager;
-import solver.thread.AbstractParallelSlave;
-
-import java.io.IOException;
-
-public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
+public abstract class AbstractParallelSlave<P extends AbstractParallelMaster> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    String[] args;
-    Solver solver;
-    ParseAndSolve PAS;
+    public P master;
+    public final int id;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public ParaserSlave(final ParaserMaster master, int id, String[] args) {
-        super(master, id);
-        this.args = args;
-        PAS = new ParseAndSolve() {
-            @Override
-            public void buildLayout(Datas datas) {
-                datas.setmLayout(new FZNLayoutPara(master));
-            }
-        };
-        try {// sequential parsing (safer)
-            PAS.parse(args);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Create a slave born to be mastered and work in parallel
+     *
+     * @param master
+     * @param id     slave unique name
+     */
+    public AbstractParallelSlave(P master, int id) {
+        this.master = master;
+        this.id = id;
     }
 
     //***********************************************************************************
-    // METHODS
+    // SUB-PROBLEM SOLVING
     //***********************************************************************************
 
-    @Override
-    public void work() {
-        try {
-            // plug monitor to communicate bounds (should not be added in the sequential phasis)
-            solver = PAS.getSolver();
-            PAS.solve();
-            if (!solver.hasReachedLimit()) {
-                master.closeWithSuccess();
+    /**
+     * Creates a new thread to work in parallel
+     */
+    public void workInParallel() {
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                work();
+                master.wishGranted();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+        t.start();
     }
 
-    public void findBetterThan(int val, ResolutionPolicy policy) {
-        if (solver == null) {// can happen if a solution is found before this thread is fully ready
-            return;
-        }
-        IntObjectiveManager iom = (IntObjectiveManager) solver.getSearchLoop().getObjectivemanager();
-        switch (policy) {
-            case MAXIMIZE:
-                iom.updateBestLB(val);
-                break;
-            case MINIMIZE:
-                iom.updateBestUB(val);
-                break;
-            case SATISFACTION:
-                // nothing to do
-                break;
-        }
-    }
+    /**
+     * do something
+     */
+    public abstract void work();
 }

@@ -29,11 +29,11 @@ package samples.sandbox.lns.parallel;
 
 import samples.graph.input.TSP_Utils;
 import samples.graph.output.TextWriter;
-import samples.sandbox.parallelism.AbstractParallelMaster;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.strategy.graph.GraphStrategies;
+import solver.thread.AbstractParallelMaster;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.UndirectedGraphVar;

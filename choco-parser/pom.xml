@@ -71,7 +71,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>parser.flatzinc.ParseAndSolve</mainClass>
+                            <mainClass>parser.flatzinc.ChocoFZN</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

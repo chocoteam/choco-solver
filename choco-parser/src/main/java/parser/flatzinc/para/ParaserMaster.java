@@ -27,80 +27,117 @@
 
 package parser.flatzinc.para;
 
-import samples.sandbox.parallelism.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
+import solver.thread.AbstractParallelMaster;
 import util.tools.ArrayUtils;
 
-public class ParaserMaster extends AbstractParallelMaster<ParaserSlave>{
+public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
-	int nbCores;
-	public final static String[][] config = new String[][]{
-			{},									// fix
-			{"-lf"},							// fix+lf
-			{"-lf","-lns","RLNS"},		// LNS random + fix + lf
-			{"-lf","-lns","PGLNS"},		// LNS propag + fix + lf
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
+    int bestVal;
+    int nbSol;
+    boolean closeWithSuccess;
+    ResolutionPolicy policy;
+
+    public final static String[][] config = new String[][]{
+            {},                                    // fix
+            {"-lf"},                            // fix+lf
+            {"-lf", "-lns", "RLNS"},        // LNS random + fix + lf
+            {"-lf", "-lns", "PGLNS"},        // LNS propag + fix + lf
 //				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
 //				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf
 //				{"-lf","-i","-bbss","3","-dv"},	// WDeg on dec vars + lf
-	};
+    };
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public ParaserMaster(String[] args){
-		nbCores = config.length;
-		for(int i=0;i<args.length;i++){
-			if(args[i].equals("-p")){
-				// -p option defines the number of slaves
-				nbCores = Math.min(nbCores,Integer.parseInt(args[i+1]));
-				// each slave has one thread
-				args[i+1] = "1";
-				break;
-			}
-		}
-		slaves = new ParaserSlave[nbCores];
-		for(int i=0;i<nbCores;i++){
-			String[] options = ArrayUtils.append(args,config[i]);
-			slaves[i] = new ParaserSlave(this,i, options);
-		}
-	}
+    public ParaserMaster(int nbCores, String[] args) {
+        nbCores = Math.min(nbCores, config.length);
+        slaves = new ParaserSlave[nbCores];
+        for (int i = 0; i < nbCores; i++) {
+            String[] options = ArrayUtils.append(args, config[i]);
+            slaves[i] = new ParaserSlave(this, i, options);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	/**
-	 * A slave has CLOSED ITS SEARCH TREE, every one should stop!
-	 */
-	public synchronized void wishGranted() {
-		System.exit(0);
-	}
+    /**
+     * A slave has CLOSED ITS SEARCH TREE, every one should stop!
+     */
+    public synchronized void wishGranted() {
+        if (LOGGER.isInfoEnabled()) {
+            if (nbSol == 0) {
+                if (!closeWithSuccess) {
+                    LOGGER.info("=====UNKNOWN=====");
+                } else {
+                    LOGGER.info("=====UNSATISFIABLE=====");
+                }
+            } else {
+                if (!closeWithSuccess && (policy != null && policy != ResolutionPolicy.SATISFACTION)) {
+                    LOGGER.info("=====UNBOUNDED=====");
+                } else {
+                    LOGGER.info("==========");
+                }
+            }
+        }
+        System.exit(0);
+    }
 
-	/**
-	 * A solution of cost val has been found
-	 * informs slaves that they must find better
-	 * @param val
-	 * @param policy
-	 */
-	public synchronized void newSol(int val, ResolutionPolicy policy) {
-		for (int i = 0; i < slaves.length; i++) {
-			slaves[i].findBetterThan(val,policy);
-		}
-	}
+    /**
+     * A solution of cost val has been found
+     * informs slaves that they must find better
+     *
+     * @param val
+     * @param policy
+     */
+    public synchronized boolean newSol(int val, ResolutionPolicy policy) {
+        this.policy = policy;
+        if (nbSol == 0) {
+            bestVal = val;
+        }
+        nbSol++;
+        boolean isBetter = false;
+        switch (policy) {
+            case MINIMIZE:
+                if (bestVal > val) {
+                    bestVal = val;
+                    isBetter = true;
+                }
+                break;
+            case MAXIMIZE:
+                if (bestVal < val) {
+                    bestVal = val;
+                    isBetter = true;
+                }
+                break;
+            case SATISFACTION:
+                bestVal = 1;
+                isBetter = nbSol == 1;
+                break;
+        }
+        if (isBetter) {
+            for (int i = 0; i < slaves.length; i++) {
+                slaves[i].findBetterThan(val, policy);
+            }
+        }
+        return isBetter;
+    }
 
-	public static void main(String[] args){
-		System.out.println("initial arguments");
-		for(String s:args){
-			System.out.println(s);
-		}
-	    ParaserMaster master = new ParaserMaster(args);
-		System.out.println("launch parallel resolution");
-		master.distributedSlavery();
-	}
+    public synchronized void closeWithSuccess() {
+        this.closeWithSuccess = true;
+    }
+
 }
