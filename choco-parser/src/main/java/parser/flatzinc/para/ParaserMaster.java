@@ -28,6 +28,7 @@
 package parser.flatzinc.para;
 
 import samples.sandbox.parallelism.*;
+import solver.ResolutionPolicy;
 import util.tools.ArrayUtils;
 
 public class ParaserMaster extends AbstractParallelMaster<ParaserSlave>{
@@ -37,30 +38,40 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave>{
 	//***********************************************************************************
 
 	int nbCores;
+	public final static String[][] config = new String[][]{
+			{},									// fix
+			{"-lf"},							// fix+lf
+			{"-lf","-lns","RLNS"},		// LNS random + fix + lf
+			{"-lf","-lns","PGLNS"},		// LNS propag + fix + lf
+
+//				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
+//				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf
+//				{"-lf","-i","-bbss","3","-dv"},	// WDeg on dec vars + lf
+	};
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-//	public ParaserMaster(int nb, String[] args){
-//		nbCores = nb;
-//		slaves = new ParaserSlave[nbCores];
-//		for(int i=0;i<nbCores;i++){
-//			slaves[i] = new ParaserSlave(this,i,args);
-//		}
-//	}
-
 	public ParaserMaster(String[] args){
-		String[][] config = new String[][]{
-				{},
-				{"-lf"},
-//				{"-lf","-i","-bbss","1","-dv"},
-//				{"-lf","-i","-bbss","2","-dv"},
-//				{"-lf","-i","-bbss","3","-dv"},
-				{"-lf","-lns","RLNS","-dv"},
-//				{"-lf","-lns","PGLNS","-dv"}
-		};
 		nbCores = config.length;
+		for(int i=0;i<args.length;i++){
+			if(args[i].equals("-p")){
+				// -p option defines the number of slaves
+				nbCores = Math.min(nbCores,Integer.parseInt(args[i+1]));
+				// removes -p option from slave arguments
+				// each slave has one thread
+				String[] a2 = new String[args.length-2];
+				for(int i2=0;i2<i;i2++){
+					a2[i2] = args[i2];
+				}
+				for(int i2=i+2;i2<args.length;i2++){
+					a2[i2-2] = args[i2];
+				}
+				args = a2;
+				break;
+			}
+		}
 		slaves = new ParaserSlave[nbCores];
 		for(int i=0;i<nbCores;i++){
 			String[] options = ArrayUtils.append(args,config[i]);
@@ -72,9 +83,23 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave>{
 	// METHODS
 	//***********************************************************************************
 
+	/**
+	 * A slave has CLOSED ITS SEARCH TREE, every one should stop!
+	 */
 	public synchronized void wishGranted() {
-		// once a slave has CLOSED THE SEARCH TREE, every one should stop!
 		System.exit(0);
+	}
+
+	/**
+	 * A solution of cost val has been found
+	 * informs slaves that they must find better
+	 * @param val
+	 * @param policy
+	 */
+	public synchronized void newSol(int val, ResolutionPolicy policy) {
+		for (int i = 0; i < slaves.length; i++) {
+			slaves[i].findBetterThan(val,policy);
+		}
 	}
 
 	public static void main(String[] args){

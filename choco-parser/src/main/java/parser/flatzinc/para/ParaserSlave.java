@@ -35,24 +35,29 @@
 package parser.flatzinc.para;
 
 import parser.flatzinc.ParseAndSolve;
-import samples.sandbox.parallelism.AbstractParallelMaster;
 import samples.sandbox.parallelism.AbstractParallelSlave;
+import solver.ResolutionPolicy;
+import solver.Solver;
+import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
+import solver.search.loop.monitors.IMonitorSolution;
+
 import java.io.IOException;
 
-public class ParaserSlave extends AbstractParallelSlave{
+public class ParaserSlave extends AbstractParallelSlave<ParaserMaster>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	ParseAndSolve job;
 	String[] args;
+	Solver solver;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public ParaserSlave(AbstractParallelMaster master, int id, String[] args){
+	public ParaserSlave(ParaserMaster master, int id, String[] args){
 		super(master,id);
 		this.args = args;
 	}
@@ -63,11 +68,42 @@ public class ParaserSlave extends AbstractParallelSlave{
 
 	@Override
 	public void work() {
-		job = new ParseAndSolve();
+		ParseAndSolve pas = new ParseAndSolve(){
+			@Override
+			protected void beforeStart(Solver s) {
+				solver = s;
+				final ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
+				if(om!=null && om.isOptimization()){
+					solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+						@Override
+						public void onSolution() {
+							master.newSol(om.getBestSolutionValue().intValue(), om.getPolicy());
+						}
+					});
+				}
+			}
+		};
 		try {
-			job.doMain(args);
+			pas.doMain(args);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void findBetterThan(int val, ResolutionPolicy policy) {
+//		String operator = ">";
+//		if(policy==ResolutionPolicy.MINIMIZE){
+//			operator = "<";
+//		}
+		if(solver==null){// can happen if a solution is found before this thread is fully ready
+			return;
+		}
+		IntObjectiveManager iom = (IntObjectiveManager) solver.getSearchLoop().getObjectivemanager();
+		if(policy==ResolutionPolicy.MINIMIZE){
+			iom.updateBestUB(val);
+		}else{
+			iom.updateBestLB(val);
+		}
+//		solver.postCut(ICF.arithm(iom.getObjective(), operator, val));
 	}
 }

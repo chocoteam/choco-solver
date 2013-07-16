@@ -85,8 +85,8 @@ public class ParseAndSolve {
     @Option(name = "-seed", usage = "Seed for randomness", required = false)
     protected long seed = 29091981L;
 
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
-    protected int nb_cores = 1;
+//    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
+//    protected int nb_cores = 1;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
     protected long tl = -1;
@@ -101,7 +101,7 @@ public class ParseAndSolve {
     protected boolean lastConflict;
 
     @Option(name = "-exp", aliases = "--exp-eng", usage = "Type of explanation engine to plug in")
-    ExplanationFactory expeng = ExplanationFactory.NONE;
+    protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
     @Option(name = "-fe", aliases = "--flatten-expl", usage = "Flatten explanations (automatically plug ExplanationFactory.SILENT in if undefined).", required = false)
     protected boolean fexp = false;
@@ -123,7 +123,7 @@ public class ParseAndSolve {
     @Option(name = "-fr", aliases = "--fast-restart", usage = "Force fast restart (fail 20).", required = false)
     protected boolean fr = false;
 
-    private boolean userinterruption = true;
+    protected boolean userinterruption = true;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
@@ -232,10 +232,10 @@ public class ParseAndSolve {
                 }
                 datas.clear();
                 LOGGER.info("% solve instance...");
-//                SMF.log(solver, false, true);
                 solver.getSearchLoop().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+				beforeStart(solver);
                 solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
-                if (!dbproperties.equals("")) {
+				if (!dbproperties.equals("")) {
                     // query the database
                     MySQLAccess sql = new MySQLAccess(new File(dbproperties));
                     sql.connect();
@@ -250,7 +250,14 @@ public class ParseAndSolve {
         userinterruption = false;
     }
 
-    protected void makeEngine(Solver solver, Datas datas) {
+	/**
+	 * This method is called just before launching the resolution
+	 * May be overwritten to plug monitors for instance
+	 * @param solver
+	 */
+	protected void beforeStart(Solver solver) {}
+
+	protected void makeEngine(Solver solver, Datas datas) {
         switch (eng) {
             case 1:
                 solver.set(new PropagatorEngine(solver));
@@ -273,7 +280,7 @@ public class ParseAndSolve {
         }
     }
 
-    private boolean isUserinterruption() {
+	protected boolean isUserinterruption() {
         return userinterruption;
     }
 }
