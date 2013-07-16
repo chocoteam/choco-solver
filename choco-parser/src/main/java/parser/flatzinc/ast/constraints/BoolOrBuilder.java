@@ -32,8 +32,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.LogOp;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
 import java.util.List;
@@ -51,9 +50,11 @@ public class BoolOrBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-        return new Constraint[]{IntConstraintFactory.clauses(
-                LogOp.reified(r,
-                        LogOp.or(a,
-                                b)), solver)};
+//        return new Constraint[]{IntConstraintFactory.clauses(
+//                        LogOp.reified(r,
+//                                LogOp.or(a,
+//                                        b)), solver)};
+        SatFactory.addBoolOrEqVar(a, b, r);
+        return new Constraint[]{};
     }
 }

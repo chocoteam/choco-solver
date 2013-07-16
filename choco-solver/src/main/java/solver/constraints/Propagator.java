@@ -49,6 +49,7 @@ import solver.variables.VariableFactory;
 import util.ESat;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 
 /**
@@ -179,23 +180,23 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
 
-    @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
-        this.solver = vars[0].getSolver();
+    protected Propagator(Solver solver, V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+        this.solver = solver;
         checkVariable(vars);
-        this.vars = vars.clone();
         this.reactToFineEvt = reactToFineEvt;
-        this.vindices = new int[vars.length];
-        this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
         this.environment = solver.getEnvironment();
         this.state = NEW;
         this.priority = priority;
         this.aCause = this;
+
+        this.vars = vars.clone();
+        this.vindices = new int[vars.length];
+        this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
-            /*if (!vars[v].instantiated()) {
-                nbNi++;
-            }*/
+                    /*if (!vars[v].instantiated()) {
+                        nbNi++;
+                    }*/
         }
         fails = 0;
         ID = solver.nextId();
@@ -219,6 +220,36 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                     }
                 }
         };
+
+    }
+
+
+    @SuppressWarnings({"unchecked"})
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+        this(vars[0].getSolver(), vars, priority, reactToFineEvt);
+    }
+
+    protected void addVariable(V... nvars) {
+        checkVariable(vars);
+        V[] tmp = vars;
+        vars = Arrays.copyOf(vars, vars.length + nvars.length);
+        System.arraycopy(tmp, 0, vars, 0, tmp.length);
+        System.arraycopy(nvars, 0, vars, tmp.length, nvars.length);
+
+
+        int[] itmp = this.vindices;
+        vindices = new int[vars.length];
+        System.arraycopy(itmp, 0, vindices, 0, itmp.length);
+
+        if (reactToFineEvt) {
+            itmp = this.eventmasks;
+            this.eventmasks = new int[vars.length];
+            System.arraycopy(itmp, 0, eventmasks, 0, itmp.length);
+        }
+        for (int v = tmp.length; v < vars.length; v++) {
+            vindices[v] = vars[v].link(this, v);
+        }
+
     }
 
     @Override

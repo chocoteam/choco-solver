@@ -162,7 +162,7 @@ public final class LogOp implements ILogical {
      * @param op operator checked
      * @return <code>true</code> if <code>this</code> is <code>op</code>
      */
-    boolean is(Operator op) {
+    public boolean is(Operator op) {
         return op.equals(operator);
     }
 
@@ -253,7 +253,7 @@ public final class LogOp implements ILogical {
      *
      * @return an array of logic trees, <code>null</code> otherwise
      */
-    ILogical[] getChildren() {
+    public ILogical[] getChildren() {
         return children;
     }
 

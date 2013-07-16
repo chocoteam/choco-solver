@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.exception.ContradictionException;
 import solver.search.strategy.IntStrategyFactory;
@@ -103,7 +104,7 @@ public class AbsoluteTest {
         solver.post(LogicalConstraintFactory.ifThenElse(b1, IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(X, "!=", Y)));
         solver.post(LogicalConstraintFactory.ifThenElse(b2, IntConstraintFactory.arithm(X, "+", Y, "=", 0), IntConstraintFactory.arithm(X, "+", Y, "!=", 0)));
         LogOp root = LogOp.or(b1, b2);
-        solver.post(IntConstraintFactory.clauses(root, solver));
+        SatFactory.addClauses(root, solver);
         solver.set(IntStrategyFactory.random(ArrayUtils.toArray(X, Y), System.currentTimeMillis()));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;
@@ -120,7 +121,7 @@ public class AbsoluteTest {
         solver.post(LogicalConstraintFactory.ifThenElse(b1, IntConstraintFactory.arithm(X, "=", Y), IntConstraintFactory.arithm(X, "!=", Y)));
         solver.post(LogicalConstraintFactory.ifThenElse(b2, IntConstraintFactory.arithm(X, "+", Y, "=", 0), IntConstraintFactory.arithm(X, "+", Y, "!=", 0)));
         LogOp root = LogOp.or(b1, b2);
-        solver.post(IntConstraintFactory.clauses(root, solver));
+        SatFactory.addClauses(root, solver);
         solver.set(IntStrategyFactory.presetI(ArrayUtils.toArray(X, Y)));
 //        SearchMonitorFactory.log(solver, true, true);
         return solver;

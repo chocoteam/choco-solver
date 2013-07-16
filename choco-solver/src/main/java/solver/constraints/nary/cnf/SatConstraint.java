@@ -28,47 +28,51 @@
 package solver.constraints.nary.cnf;
 
 import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
+import solver.constraints.Constraint;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import util.ESat;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24 nov. 2010
+ * @since 22 nov. 2010
  */
-public class PropTrue extends Propagator<BoolVar> {
+public class SatConstraint extends Constraint<BoolVar, PropSat> {
 
-    public PropTrue(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.UNARY, false);
+    final PropSat miniSat;
+
+    public SatConstraint(Solver solver) {
+        super(solver);
+        miniSat = new PropSat(solver);
+        setPropagators(miniSat);
+
     }
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        setPassive();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
+    public ESat isSatisfied() {
+        ESat so = ESat.UNDEFINED;
+        for (int i = 0; i < propagators.length; i++) {
+            so = propagators[i].isEntailed();
+            if (!so.equals(ESat.TRUE)) {
+                return so;
+            }
+        }
+        return so;
     }
 
     @Override
     public String toString() {
-        return java.lang.Boolean.TRUE.toString();
+        StringBuilder st = new StringBuilder();
+        st.append('(');
+        for (int p = 0; p < propagators.length; p++) {
+            st.append(propagators[p].toString()).append(") and (");
+        }
+        st.replace(st.length() - 6, st.length(), "");
+        return st.toString();
     }
 
-    @Override
-    public ESat isEntailed() {
-        return ESat.TRUE;
+    public SatSolver getSatSolver() {
+        return propagators[0].getSatSolver();
     }
 }

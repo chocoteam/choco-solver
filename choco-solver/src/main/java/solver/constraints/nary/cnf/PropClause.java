@@ -39,7 +39,9 @@ import util.ESat;
  *
  * @author Charles Prud'homme
  * @since 22 nov. 2010
+ * @deprecated replaced by {@link PropSat}, a miniSat solver
  */
+@Deprecated
 public class PropClause extends Propagator<BoolVar> {
 
     int watchLit1, watchLit2;

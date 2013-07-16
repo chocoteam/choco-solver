@@ -25,50 +25,32 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.cnf;
+package parser.flatzinc.ast.constraints;
 
+import parser.flatzinc.ast.Datas;
+import parser.flatzinc.ast.expression.EAnnotation;
+import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
-import solver.exception.ContradictionException;
+import solver.constraints.Constraint;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
-import util.ESat;
+
+import java.util.List;
 
 /**
+ * (a < b)
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24 nov. 2010
+ * @since 26/01/11
  */
-public class PropTrue extends Propagator<BoolVar> {
-
-    public PropTrue(Solver solver) {
-        super(new BoolVar[]{solver.ONE}, PropagatorPriority.UNARY, false);
-    }
+public class BoolLtBuilder implements IBuilder {
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        setPassive();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        propagate(0);
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.VOID.mask;
-    }
-
-    @Override
-    public String toString() {
-        return java.lang.Boolean.TRUE.toString();
-    }
-
-    @Override
-    public ESat isEntailed() {
-        return ESat.TRUE;
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        BoolVar a = exps.get(0).boolVarValue(solver);
+        BoolVar b = exps.get(1).boolVarValue(solver);
+        SatFactory.addBoolLe(a, b);
+        return new Constraint[]{};
     }
 }

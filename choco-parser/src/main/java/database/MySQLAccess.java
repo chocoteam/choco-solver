@@ -125,8 +125,15 @@ public class MySQLAccess {
             statement.setInt(2, pid);
             statement.setLong(3, (long) solver.getMeasures().getReadingTimeCount());
             statement.setLong(4, (long) solver.getMeasures().getTimeCount());
-            statement.setLong(5, solver.getSearchLoop().getObjectivemanager().isOptimization() ? solver.getMeasures().getBestSolutionValue().intValue() :
-                    solver.getMeasures().getSolutionCount());
+            long obj = -100;
+            if (solver.getSearchLoop().getObjectivemanager().isOptimization()) {
+                if (solver.getMeasures().getSolutionCount() > 0) {
+                    obj = solver.getMeasures().getBestSolutionValue().intValue();
+                }
+            } else {
+                obj = solver.getMeasures().getSolutionCount();
+            }
+            statement.setLong(5, obj);
             statement.setLong(6, solver.getMeasures().getSolutionCount());
             statement.setLong(7, solver.getMeasures().getNodeCount());
             statement.setLong(8, solver.getMeasures().getFailCount());
@@ -175,7 +182,7 @@ public class MySQLAccess {
                     statement.setString(2, MAX);
                     break;
             }
-            statement.setLong(3, solution==Integer.MAX_VALUE?-100:solution);
+            statement.setLong(3, solution == Integer.MAX_VALUE ? -100 : solution);
             statement.setBoolean(4, isopt);
             statement.executeUpdate();
             return getPbID(filename, policy, solution, isopt);

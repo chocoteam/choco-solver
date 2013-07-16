@@ -32,14 +32,13 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.LogOp;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
 import java.util.List;
 
 /**
- * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i]) &#8660; r
+ * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i])
  * <br/>
  *
  * @author Charles Prud'homme
@@ -59,6 +58,8 @@ public class BoolClauseBuilder implements IBuilder {
         for (int i = 0; i < bs.length; i++) {
             lits[i + al] = bs[i].not();
         }
-        return new Constraint[]{IntConstraintFactory.clauses(LogOp.or(lits), solver)};
+//        return new Constraint[]{IntConstraintFactory.clauses(LogOp.or(lits), solver)};
+        SatFactory.addClauses(as, bs);
+        return new Constraint[]{};
     }
 }

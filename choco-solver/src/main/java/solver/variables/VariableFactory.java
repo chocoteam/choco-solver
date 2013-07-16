@@ -220,9 +220,7 @@ public class VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            for (int j = 0; j < DIM2; j++) {
-                vars[i][j] = enumerated(NAME + "[" + i + "][" + j + "]", MIN, MAX, SOLVER);
-            }
+            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
         return vars;
     }
