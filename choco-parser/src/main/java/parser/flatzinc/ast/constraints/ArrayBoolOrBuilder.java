@@ -54,7 +54,7 @@ public class ArrayBoolOrBuilder implements IBuilder {
         if (as.length == 0) {
             return new Constraint[]{ICF.arithm(r, "=", 1)};
         } else {
-//            return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.or(as)), solver)};
+//            SatFactory.addClauses(LogOp.reified(r, LogOp.or(as)), solver);
             SatFactory.addBoolOrArrayEqVar(as, r);
             return new Constraint[]{};
         }

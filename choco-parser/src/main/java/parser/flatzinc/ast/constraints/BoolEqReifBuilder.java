@@ -51,6 +51,7 @@ public class BoolEqReifBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
+//        ICF.arithm(a, "=", b).reifyWith(r);
         SatFactory.addBoolIsEqVar(a, b, r);
         return new Constraint[]{};
     }

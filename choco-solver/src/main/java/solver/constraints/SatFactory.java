@@ -104,12 +104,11 @@ public class SatFactory {
         Solver solver = POSLITS.length > 0 ? POSLITS[0].getSolver() : NEGLITS[0].getSolver();
         PropSat sat = solver.getMinisat().propagators[0];
         TIntList lits = new TIntArrayList(POSLITS.length + NEGLITS.length);
-        int j = 0;
         for (int i = 0; i < POSLITS.length; i++) {
-            lits.set(j++, SatSolver.negated(sat.Literal(POSLITS[i])));
+            lits.add(SatSolver.negated(sat.Literal(POSLITS[i])));
         }
         for (int i = 0; i < NEGLITS.length; i++) {
-            lits.set(j++, sat.Literal(POSLITS[i]));
+            lits.add(sat.Literal(POSLITS[i]));
         }
         sat.addClause(lits);
         return true;
@@ -223,9 +222,9 @@ public class SatFactory {
         int target_lit = sat.Literal(TARGET);
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.set(i, sat.Literal(BOOLVARS[i]));
+            lits.add(sat.Literal(BOOLVARS[i]));
         }
-        lits.set(BOOLVARS.length, SatSolver.negated(target_lit));
+        lits.add(SatSolver.negated(target_lit));
         sat.addClause(lits);
         for (int i = 0; i < BOOLVARS.length; i++) {
             sat.addClause(target_lit, SatSolver.negated(sat.Literal(BOOLVARS[i])));
@@ -246,9 +245,9 @@ public class SatFactory {
         int target_lit = sat.Literal(TARGET);
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.set(i, SatSolver.negated(sat.Literal(BOOLVARS[i])));
+            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
         }
-        lits.set(BOOLVARS.length, target_lit);
+        lits.add(target_lit);
         sat.addClause(lits);
         for (int i = 0; i < BOOLVARS.length; i++) {
             sat.addClause(SatSolver.negated(target_lit), sat.Literal(BOOLVARS[i]));
@@ -420,7 +419,7 @@ public class SatFactory {
         PropSat sat = solver.getMinisat().propagators[0];
         TIntList lits = new TIntArrayList(BOOLVARS.length);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.set(i, SatSolver.negated(sat.Literal(BOOLVARS[i])));
+            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
         }
         sat.addClause(lits);
         return true;
@@ -437,7 +436,7 @@ public class SatFactory {
         PropSat sat = solver.getMinisat().propagators[0];
         TIntList lits = new TIntArrayList(BOOLVARS.length);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.set(i, SatSolver.negated(sat.Literal(BOOLVARS[i])));
+            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
         }
         for (int i = 0; i < lits.size() - 1; i++) {
             for (int j = i + 1; j < lits.size(); ++j) {
@@ -458,7 +457,7 @@ public class SatFactory {
         PropSat sat = solver.getMinisat().propagators[0];
         TIntList lits = new TIntArrayList(BOOLVARS.length);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.set(i, SatSolver.negated(sat.Literal(BOOLVARS[i])));
+            lits.add(SatSolver.negated(sat.Literal(BOOLVARS[i])));
         }
         sat.addClause(lits);
         return true;

@@ -50,7 +50,7 @@ public class BoolLtBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
-        SatFactory.addBoolLe(a, b);
+        SatFactory.addBoolLt(a, b);
         return new Constraint[]{};
     }
 }
