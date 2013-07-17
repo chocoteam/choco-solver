@@ -45,12 +45,14 @@ public class Set_LinkedList implements ISet {
      * The first cell of the linked list
      */
     protected IntCell first;
+	protected IntCell last;
     protected int size;
     protected IntCell nextCell; // enables to iterate
     protected IntCell poolGC;
 
     public Set_LinkedList() {
         this.first = null;
+		this.last = null;
         nextCell = null;
         this.size = 0;
         poolGC = null;
@@ -107,6 +109,10 @@ public class Set_LinkedList implements ISet {
             recycled.init(element, first);
             first = recycled;
         }
+		if(last==null){
+			assert size==0;
+			last=first;
+		}
         this.size++;
         return true;
     }
@@ -130,8 +136,14 @@ public class Set_LinkedList implements ISet {
                 poolGC = current;
                 if (previous == null) {
                     this.first = current.next;
+					if(first==null){
+						last = null;
+					}
                 } else {
                     previous.next = current.next;
+					if(current.next==null){
+						last = previous;
+					}
                 }
                 removed = true;
                 poolGC.next = old;
@@ -159,10 +171,12 @@ public class Set_LinkedList implements ISet {
     @Override
     public void clear() {
         if (first != null) {
-            first.next = poolGC;
+////            first.next = poolGC;
+			last.next = poolGC;
             poolGC = first;
         }
         first = null;
+		last = null;
         nextCell = null;
         size = 0;
     }
