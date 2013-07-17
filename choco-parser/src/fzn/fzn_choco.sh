@@ -27,17 +27,10 @@ OPTIONS:
         When invoked with this option the solver ignores any specified search strategy.
 
     -p
-        NOT YET AVAILABLE
         When invoked with this option the solver is free to use multiple threads and/or cores during search.
         The argument n specifies the number of cores that are available.  (The default is $NB_NODES.)
 
-    -e, --engine <e>
-        Specify the type of propagation engine e to use.
-
-    --csv <filepath>
-        Specifiy an CSV file to trace the result
-
-    --time-limit <n>
+    -tl <n>
         Limit the resolution time of each problem instance to n seconds.  (The default is $TIME_LIMIT.)
 		
 	--jargs <args>
@@ -135,4 +128,4 @@ then
     ARGS=$ARGS" -i"
 fi
 
-java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ParseAndSolve ${ARGS}
+java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}

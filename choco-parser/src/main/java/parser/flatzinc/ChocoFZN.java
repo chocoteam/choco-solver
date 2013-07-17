@@ -24,68 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc;
 
-package samples.sandbox.parallelism;
+import antlr.RecognitionException;
+import parser.flatzinc.para.ParaserMaster;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
- * Master a set of slaves which will work in parallel
+ * The main entry point
+ * <br/>
  *
- * @param <S>
+ * @author Charles Prud'homme
+ * @since 16/07/13
  */
-public class AbstractParallelMaster<S extends AbstractParallelSlave> {
+public class ChocoFZN {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
-
-    protected S[] slaves;
-    private int nbWorkingSlaves;
-    private Thread mainThread;
-    private boolean wait;
-
-    public AbstractParallelMaster() {
-        mainThread = Thread.currentThread();
-    }
-
-    //***********************************************************************************
-    // DISTRIBUTED METHODS
-    //***********************************************************************************
-
-    /**
-     * Make the slaves work in parallel
-     */
-    public void distributedSlavery() {
-        nbWorkingSlaves = slaves.length;
-        for (int i = 0; i < slaves.length; i++) {
-            slaves[i].workInParallel();
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
+        int nbCores = 1;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-p")) {
+                // -p option defines the number of slaves
+                nbCores = Integer.parseInt(args[i + 1]);
+                // each slave has one thread
+                args[i + 1] = "1";
+                break;
+            }
         }
-        wait = true;
-        try {
-            while (wait)
-                mainThread.sleep(20);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
-    }
-
-    /**
-     * Make the slaves work in sequence
-     */
-    public void sequentialSlavery() {
-        nbWorkingSlaves = slaves.length;
-        for (int i = 0; i < slaves.length; i++) {
-            slaves[i].work();
-        }
-    }
-
-    /**
-     * A slave notify the master that he fulfilled his task
-     */
-    public synchronized void wishGranted() {
-        nbWorkingSlaves--;
-        if (nbWorkingSlaves == 0) {
-            wait = false;
+        if (nbCores == 1) {
+            new ParseAndSolve().doMain(args);
+        } else {
+            // will manage one ParseAndSolve per thread
+            new ParaserMaster(nbCores, args).distributedSlavery();
         }
     }
 }

@@ -51,7 +51,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout implements IMonitorSolution, IMonitorClose {
+public class FZNLayout implements IMonitorSolution, IMonitorClose {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 

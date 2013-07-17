@@ -100,6 +100,22 @@ public class IntObjectiveManager extends ObjectiveManager {
         return bestKnownLowerBound;
     }
 
+	/**
+	 * States that lb is a global lower bound on the problem
+	 * @param lb lower bound
+	 */
+	public void updateBestLB(int lb) {
+		bestKnownLowerBound = Math.max(bestKnownLowerBound,lb);
+	}
+
+	/**
+	 * States that ub is a global upper bound on the problem
+	 * @param ub upper bound
+	 */
+	public void updateBestUB(int ub) {
+		bestKnownUpperBound = Math.min(bestKnownUpperBound,ub);
+	}
+
     /**
      * @return the best upper bound computed so far
      */
