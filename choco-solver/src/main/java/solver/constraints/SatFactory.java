@@ -71,14 +71,8 @@ public class SatFactory {
                     LogOp n = (LogOp) clause;
                     BoolVar[] bvars = n.flattenBoolVar();
                     TIntList lits = new TIntArrayList(bvars.length);
-                    int lit;
                     for (int j = 0; j < bvars.length; j++) {
-                        if (bvars[j].isNot()) {
-                            lit = sat.Literal(bvars[j].not());
-                        } else {
-                            lit = SatSolver.negated(sat.Literal(bvars[j]));
-                        }
-                        lits.add(lit);
+                        lits.add(sat.Literal(bvars[j]));
                     }
                     ret &= sat.addClause(lits);
                 }
