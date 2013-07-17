@@ -296,7 +296,7 @@ public class SatSolver {
                 // Make sure the false literal is data[1]:
                 Clause cr = ws.get(i).clause;
                 Clause c = cr;
-                int false_lit = negated(p);
+                final int false_lit = negated(p);
                 if (c._g(0) == false_lit) {
                     c._s(0, c._g(1));
                     c._s(1, false_lit);
@@ -305,7 +305,7 @@ public class SatSolver {
                 i++;
 
                 // If 0th watch is true, then clause is already satisfied.
-                int first = c._g(0);
+                final int first = c._g(0);
                 Watcher w = new Watcher(cr, first);
                 if (first != blocker && valueLit(first) == Boolean.kTrue) {
                     ws.set(j++, w);
@@ -344,7 +344,11 @@ public class SatSolver {
                     }
                 }
             }
-            if (ws != null) ws.ensureCapacity(j);
+            if (ws != null) {
+                for (int k = ws.size() - 1; k >= j; k--) {
+                    ws.remove(k);
+                }
+            }
         }
         return result;
     }
@@ -444,7 +448,7 @@ public class SatSolver {
             blocker = kUndefinedLiteral;
         }
 
-        public Watcher(Clause cr, int l) {
+        public Watcher(final Clause cr, int l) {
             this.clause = cr;
             this.blocker = l;
         }
