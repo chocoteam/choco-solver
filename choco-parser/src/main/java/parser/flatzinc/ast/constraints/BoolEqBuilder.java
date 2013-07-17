@@ -50,6 +50,7 @@ public class BoolEqBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
+//        return new Constraint[]{IntConstraintFactory.arithm(a, "=", b)};
         SatFactory.addBoolEq(a, b);
         return new Constraint[]{};
     }

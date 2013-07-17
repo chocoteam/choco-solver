@@ -127,7 +127,7 @@ public class SatSolver {
             uncheckedEnqueue(ps.get(0));
             return (ok_ = propagate());
         } else {
-            Clause cr = new Clause(ps);
+            Clause cr = new Clause(ps.toArray());
             clauses.add(cr);
             attachClause(cr);
         }
@@ -412,22 +412,22 @@ public class SatSolver {
      * @since 12/07/13
      */
     class Clause {
-        private TIntList literals_;
+        private int[] literals_;
 
-        public Clause(TIntList ps) {
-            literals_ = new TIntArrayList(ps);
+        public Clause(int[] ps) {
+            literals_ = ps.clone();
         }
 
         int size() {
-            return literals_.size();
+            return literals_.length;
         }
 
         int _g(int i) {
-            return literals_.get(i);
+            return literals_[i];
         }
 
         int _s(int pos, int l) {
-            return literals_.set(pos, l);
+            return literals_[pos] = l;
         }
     }
 
