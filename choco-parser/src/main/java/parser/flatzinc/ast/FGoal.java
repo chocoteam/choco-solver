@@ -126,11 +126,11 @@ public class FGoal {
                     strategy = readSearchAnnotation(annotation, aSolver, description);
                 }
                 defdecvars = strategy.vars;
-                aSolver.set(strategy);
+//                aSolver.set(strategy);
                 LoggerFactory.getLogger(FGoal.class).warn("% Fix seed");
-//                aSolver.set(
-//                        new StrategiesSequencer(aSolver.getEnvironment(),
-//                                strategy, makeComplementarySearch(datas)));
+                aSolver.set(
+                        new StrategiesSequencer(aSolver.getEnvironment(),
+                                strategy, makeComplementarySearch(datas)));
 
                 System.out.println("% t:" + gc.seed);
             }

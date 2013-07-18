@@ -29,10 +29,7 @@ package solver.search.loop.lns;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.LazyExplanationEngine;
-import solver.explanations.strategies.ExplainingCut;
-import solver.explanations.strategies.ExplainingObjective;
-import solver.explanations.strategies.PGN4Explanation;
-import solver.explanations.strategies.RPGN4Explanation;
+import solver.explanations.strategies.*;
 import solver.search.limits.ACounter;
 import solver.search.loop.lns.neighbors.*;
 import solver.variables.IntVar;
@@ -74,7 +71,7 @@ public class LNSFactory {
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a random neighborhood
+     * @return a propagation-guided neighborhood
      */
     public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
@@ -91,7 +88,7 @@ public class LNSFactory {
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a random neighborhood
+     * @return a reverse propagation-guided neighborhood
      */
     public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
@@ -158,7 +155,8 @@ public class LNSFactory {
         neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
         neighbor2.fastRestart(fr4exp);
-        INeighbor neighbor3 = random(solver, vars, level, seed, fr4rnd);
+        INeighbor neighbor3 = new RandomNeighborhood4Explanation(solver, vars, level, seed);
+        neighbor3.fastRestart(fr4rnd);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
         return new LargeNeighborhoodSearch(solver, neighbor, true);
