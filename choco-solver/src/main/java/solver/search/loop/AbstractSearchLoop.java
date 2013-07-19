@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.ObjectiveManager;
+import solver.propagation.NoPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
@@ -157,6 +158,15 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         rootWorldIndex = -1;
     }
 
+    /**
+     * This method enables to solve a problem another time:
+     * <ul>
+     *     <li>It backtracks up to the root node of the search tree,</li>
+     *     <li>it sets the objective manager to null,</li>
+     *     <li>it resets the measures to 0,</li>
+     *     <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
+     * </ul>
+     */
     public void reset() {
         this.nextState = INIT;
         env.worldPopUntil(rootWorldIndex);
@@ -164,6 +174,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         timeStamp++;
         rootWorldIndex = -1;
         searchWorldIndex = -1;
+        solver.set(NoPropagationEngine.SINGLETON);
         this.measures.reset();
     }
 

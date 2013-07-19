@@ -31,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.ICF;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -48,7 +49,9 @@ public class ObjectiveTest {
     public void test1() {
         Solver solver = new Solver();
 
-        IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        IntVar iv = VF.enumerated("iv", -5, 15, solver);
+        solver.post(ICF.arithm(iv, ">=", 0));
+        solver.post(ICF.arithm(iv, "<=", 10));
         Random rnd = new Random();
         for (int i = 0; i < 100; i++) {
             int k = rnd.nextInt(4);
@@ -103,6 +106,21 @@ public class ObjectiveTest {
             Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 10);
             Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
         }
+    }
+
+    @Test(groups = "1s")
+    public void test2() {
+        Solver solver = new Solver();
+        IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        solver.post(ICF.arithm(iv, ">=", 2));
+
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
+        Assert.assertEquals(iv.getValue(), 2);
+
+        solver.getSearchLoop().reset();
+
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
+        Assert.assertEquals(iv.getValue(), 2);
     }
 
 }
