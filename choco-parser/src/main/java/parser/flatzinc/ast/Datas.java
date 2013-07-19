@@ -57,7 +57,6 @@ public class Datas {
         this.gc = gc;
         this.map = new THashMap<String, Object>();
         searchVariables = new THashSet<Variable>();
-        mLayout = new FZNLayout();
     }
 
     public Datas() {
