@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
+import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -121,6 +122,36 @@ public class ObjectiveTest {
 
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
         Assert.assertEquals(iv.getValue(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void test3() {
+        final Solver solver = new Solver();
+        final IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        solver.post(ICF.arithm(iv, ">=", 2));
+
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.post(ICF.arithm(iv, ">=", 4));
+            }
+        });
+        solver.findSolution();
+        Assert.assertEquals(iv.getValue(), 2);
+
+        solver.getSearchLoop().reset();
+        solver.getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
+            @Override
+            public void onSolution() {
+                solver.postCut(ICF.arithm(iv, ">=", 6));
+            }
+        });
+        solver.findSolution();
+        Assert.assertEquals(iv.getValue(), 2);
+
+        solver.getSearchLoop().reset();
+        solver.findSolution();
+        Assert.assertEquals(iv.getValue(), 6);
     }
 
 }
