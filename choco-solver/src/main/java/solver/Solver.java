@@ -501,6 +501,7 @@ public class Solver implements Serializable {
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
+        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(true);
         return measures.getSolutionCount() > 0;
     }
@@ -525,6 +526,7 @@ public class Solver implements Serializable {
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
+        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(false);
         return measures.getSolutionCount();
     }

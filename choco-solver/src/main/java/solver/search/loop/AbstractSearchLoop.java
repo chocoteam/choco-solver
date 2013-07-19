@@ -30,11 +30,10 @@ package solver.search.loop;
 import memory.IEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
+import solver.propagation.NoPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
@@ -143,14 +142,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Objective manager. Default object is no objective.
      */
-	ObjectiveManager objectivemanager;
+    ObjectiveManager objectivemanager;
 
     private boolean alive;
     public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-        objectivemanager = new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -160,15 +158,25 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         rootWorldIndex = -1;
     }
 
-    /*
-    TODO: uncomment when necessary
-    private void reset() {
+    /**
+     * This method enables to solve a problem another time:
+     * <ul>
+     *     <li>It backtracks up to the root node of the search tree,</li>
+     *     <li>it sets the objective manager to null,</li>
+     *     <li>it resets the measures to 0,</li>
+     *     <li>and sets the propagation engine to NO_NoPropagationEngine.</li>
+     * </ul>
+     */
+    public void reset() {
         this.nextState = INIT;
-        restoreRootNode();
+        env.worldPopUntil(rootWorldIndex);
+        this.objectivemanager = null;
+        timeStamp++;
         rootWorldIndex = -1;
         searchWorldIndex = -1;
+        solver.set(NoPropagationEngine.SINGLETON);
         this.measures.reset();
-    }*/
+    }
 
     @SuppressWarnings({"unchecked"})
     public void set(AbstractStrategy strategy) {
