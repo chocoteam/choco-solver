@@ -89,6 +89,7 @@ public final class FConstraint {
                     throw new FZNException("Unknown constraint: " + id);
                 }
                 builder = (IBuilder) loadManager(name);
+                LOGGER.info("% {}", name);
                 builders.put(id, builder);
             }
             last = id;

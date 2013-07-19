@@ -58,6 +58,5 @@ public class ArrayBoolXorBuilder implements IBuilder {
         }
         IntVar res = VariableFactory.enumerated(StringUtils.randomName(), values, solver);
         return new Constraint[]{IntConstraintFactory.sum(as, res)};
-
     }
 }
