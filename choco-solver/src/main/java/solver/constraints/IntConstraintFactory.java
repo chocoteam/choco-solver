@@ -41,6 +41,8 @@ import solver.constraints.extension.nary.LargeRelation;
 import solver.constraints.nary.PropDiffN;
 import solver.constraints.nary.PropKnapsack;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.conditions.Condition;
+import solver.constraints.nary.alldifferent.conditions.PropConditionnalAllDiff_AC;
 import solver.constraints.nary.among.Among;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.IAutomaton;
@@ -59,6 +61,7 @@ import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.nary.min_max.MinOfAList;
+import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
 import solver.constraints.nary.sum.PropBoolSum;
 import solver.constraints.nary.sum.PropSumEq;
@@ -407,6 +410,33 @@ public class IntConstraintFactory {
     public static AllDifferent alldifferent(IntVar[] VARS, String CONSISTENCY) {
         return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
     }
+
+	/**
+	 * Alldifferent holds on the subset of VARS which satisfies the given CONDITION
+	 * @param VARS		collection of variables
+	 * @param CONDITION	condition defining which variables should be constrained
+	 */
+	public static Constraint alldifferent_conditionnal(IntVar[] VARS, Condition CONDITION) {
+		Constraint c = new Constraint(VARS,VARS[0].getSolver());
+		c.addPropagators(new PropConditionnalAllDiff_AC(VARS,CONDITION));
+		return c;
+	}
+
+	/**
+	 * Variables in VARS must either be different or equal to EXCEPTION_VALUE
+	 * (e.g. alldifferent_except_0)
+	 * @param VARS    			collection of variables
+	 * @param EXCEPTION_VALUE	joker value which can occur multiple times
+	 */
+	public static Constraint alldifferent_except_value(IntVar[] VARS, final int EXCEPTION_VALUE) {
+		Condition cond = new Condition() {
+			@Override
+			public boolean holdOnVar(IntVar x) {
+				return !x.contains(EXCEPTION_VALUE);
+			}
+		};
+		return alldifferent_conditionnal(VARS,cond);
+	}
 
     /**
      * NVAR is the number of variables of the collection VARIABLES that take their value in VALUES.
@@ -813,6 +843,19 @@ public class IntConstraintFactory {
 
         return new NValues(VARS, NVALUES, NVALUES.getSolver(), types);
     }
+
+	/**
+	 * Filters the conjunction of NValue and difference constraints
+	 * (propagator AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
+	 * Difference constraint should be propagated separately in addition
+	 * @param VARS		collection of variables
+	 * @param NVALUES	limit variable
+	 * @param DIFF		set of difference constraints
+	 * @return a NValue constraint
+	 */
+	public static NValues nvalues(IntVar[] VARS, IntVar NVALUES, Differences DIFF) {
+		return new NValues(VARS,NVALUES,DIFF);
+	}
 
     /**
      * Enforces the sequence of VARS to be a word
