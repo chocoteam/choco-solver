@@ -49,8 +49,8 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
 
     public final static String[][] config = new String[][]{
             {"-lf"},					// fix+lf
-			{"-lf", "-lns", "RLNS"},	// LNS random + fix + lf
 			{"-lf", "-lns", "PGLNS"},	// LNS propag + fix + lf
+			{"-lf", "-lns", "RLNS"},	// LNS random + fix + lf
             {},							// fix
 //				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
 //				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf

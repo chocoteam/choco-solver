@@ -39,6 +39,7 @@ import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
@@ -86,13 +87,11 @@ public class FGoal {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
         GoalConf gc = datas.goals();
-        switch (type) {
-            case SATISFACTION:
-                break;
-            default:
-                IntVar obj = expr.intVarValue(aSolver);
-                search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
-        }
+		IntVar obj = null;
+		if(type!=ResolutionPolicy.SATISFACTION){
+			obj = expr.intVarValue(aSolver);
+		}
+		search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
@@ -204,16 +203,25 @@ public class FGoal {
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
+		ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
         ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:
                 lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
+				if(!om.isOptimization()){
+					lns = null;
+					solver.set(ISF.ActivityBased(dvars,0));
+				}
                 break;
             case RLNS_BB:
                 lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
                 break;
             case PGLNS:
                 lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
+				if(!om.isOptimization()){
+					lns = null;
+					solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
+				}
                 break;
             case PGLNS_BB:
                 lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);
