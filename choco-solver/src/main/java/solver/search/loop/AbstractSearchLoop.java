@@ -143,7 +143,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /**
      * Objective manager. Default object is no objective.
      */
-	ObjectiveManager objectivemanager;
+    ObjectiveManager objectivemanager;
 
     private boolean alive;
     public Decision decision = RootDecision.ROOT;
@@ -160,15 +160,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         rootWorldIndex = -1;
     }
 
-    /*
-    TODO: uncomment when necessary
-    private void reset() {
+    public void reset() {
         this.nextState = INIT;
-        restoreRootNode();
+        env.worldPopUntil(rootWorldIndex);
+        timeStamp++;
         rootWorldIndex = -1;
         searchWorldIndex = -1;
         this.measures.reset();
-    }*/
+    }
 
     @SuppressWarnings({"unchecked"})
     public void set(AbstractStrategy strategy) {

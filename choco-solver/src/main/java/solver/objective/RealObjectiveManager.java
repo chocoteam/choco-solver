@@ -56,7 +56,7 @@ public class RealObjectiveManager extends ObjectiveManager {
      * @param solver
      */
     public RealObjectiveManager(final RealVar objective, ResolutionPolicy policy, Solver solver) {
-        super(policy,solver.getMeasures());
+        super(policy, solver.getMeasures());
         this.objective = objective;
         if (policy != ResolutionPolicy.SATISFACTION) {
             this.bestKnownLowerBound = objective.getLB();
@@ -65,10 +65,18 @@ public class RealObjectiveManager extends ObjectiveManager {
     }
 
 
+    @Override
+    public void reset() {
+        if (policy != ResolutionPolicy.SATISFACTION) {
+            this.bestKnownLowerBound = objective.getLB();
+            this.bestKnownUpperBound = objective.getUB();
+        }
+    }
+
     /**
      * @return the best objective value found so far (returns the initial bound if no solution has been found yet)
      */
-	@Override
+    @Override
     public Double getBestSolutionValue() {
         if (policy == ResolutionPolicy.MINIMIZE) {
             return bestKnownUpperBound;
@@ -112,6 +120,7 @@ public class RealObjectiveManager extends ObjectiveManager {
      * Prevent the solver from computing worse quality solutions
      *
      * @throws solver.exception.ContradictionException
+     *
      */
     public void postDynamicCut() throws ContradictionException {
         if (policy == ResolutionPolicy.MINIMIZE) {
