@@ -119,10 +119,9 @@ public class NValues extends IntConstraint<IntVar> {
 	 * @param vars
 	 * @param nValues
 	 * @param diff
-	 * @param solver
 	 */
-	public NValues(IntVar[] vars, IntVar nValues, Differences diff, Solver solver) {
-		this(vars, nValues, getDomainUnion(vars), solver);
+	public NValues(IntVar[] vars, IntVar nValues, Differences diff) {
+		this(vars, nValues, getDomainUnion(vars), nValues.getSolver());
 		addPropagators(
 				new AMNV_Gci_MD_R13(vars,nValues,diff),
 				new AMNV_Gci_R_R13(vars,nValues,diff,30)

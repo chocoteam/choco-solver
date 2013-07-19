@@ -66,16 +66,4 @@ public interface Differences {
 			return i1!=i2;
 		}
 	};
-	/** Considers a (symmetric) matrix of differences */
-	public Differences MATRIX = new Differences() {
-		boolean[][] diff;
-		/**diff[i][j] = true iff var[i] must be different from var[j]*/
-		public void set(boolean[][] diff){
-			this.diff = diff;
-		}
-		@Override
-		public boolean mustBeDifferent(int i1, int i2) {
-			return diff[i1][i2];
-		}
-	};
 }
