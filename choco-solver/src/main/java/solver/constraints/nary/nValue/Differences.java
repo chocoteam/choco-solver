@@ -31,6 +31,9 @@ package solver.constraints.nary.nValue;
  * @author Jean-Guillaume Fages and Tanguy Lapegue
  *
  * Object that represent a binary difference constraint
+ * This object is not a constraint, it will not be propagated,
+ * it is only used to inform an NValue constraint that differences
+ * are present in the model, in order to improve filtering
  */
 public interface Differences {
 
@@ -39,10 +42,40 @@ public interface Differences {
 	//***********************************************************************************
 
 	/**
-	 *
 	 * @param i1
 	 * @param i2
 	 * @return true iff variables associated with indexes i1 and i2 MUST be different
 	 */
 	public boolean mustBeDifferent(int i1, int i2);
+
+	//***********************************************************************************
+	// IMPLEMENTATIONS
+	//***********************************************************************************
+
+	/** No difference constraint is considered */
+	public final static Differences NONE = new Differences() {
+		@Override
+		public boolean mustBeDifferent(int i1, int i2) {
+			return false;
+		}
+	};
+	/** Variables must be all different */
+	public final static Differences ALL = new Differences() {
+		@Override
+		public boolean mustBeDifferent(int i1, int i2) {
+			return i1!=i2;
+		}
+	};
+	/** Considers a (symmetric) matrix of differences */
+	public Differences MATRIX = new Differences() {
+		boolean[][] diff;
+		/**diff[i][j] = true iff var[i] must be different from var[j]*/
+		public void set(boolean[][] diff){
+			this.diff = diff;
+		}
+		@Override
+		public boolean mustBeDifferent(int i1, int i2) {
+			return diff[i1][i2];
+		}
+	};
 }

@@ -64,7 +64,9 @@ public class NValues extends IntConstraint<IntVar> {
         at_most_greedy {
             @Override
             public void addProp(IntVar[] vars, IntVar nValues, IntConstraint<IntVar> cons, Solver solver) {
-                cons.addPropagators(new PropAtMostNValues_Greedy(vars, nValues));
+				cons.addPropagators(
+						new AMNV_Gci_MD_R13(vars,nValues,Differences.NONE),
+						new AMNV_Gci_R_R13(vars,nValues,Differences.NONE,30));
             }
         },
         at_least_AC {
@@ -107,6 +109,25 @@ public class NValues extends IntConstraint<IntVar> {
             t.addProp(vars, nValues, this, solver);
         }
     }
+
+	/**
+	 * NValues constraint
+	 * The number of distinct values in vars is exactly nValues
+	 * Considers a set of difference constraints "diff" to achieve
+	 * a stronger filtering (AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param diff
+	 * @param solver
+	 */
+	public NValues(IntVar[] vars, IntVar nValues, Differences diff, Solver solver) {
+		this(vars, nValues, getDomainUnion(vars), solver);
+		addPropagators(
+				new AMNV_Gci_MD_R13(vars,nValues,diff),
+				new AMNV_Gci_R_R13(vars,nValues,diff,30)
+		);
+	}
 
     private static TIntArrayList getDomainUnion(IntVar[] vars) {
         TIntArrayList values = new TIntArrayList();
