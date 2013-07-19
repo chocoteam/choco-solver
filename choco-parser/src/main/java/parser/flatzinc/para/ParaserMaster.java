@@ -48,10 +48,10 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
     ResolutionPolicy policy;
 
     public final static String[][] config = new String[][]{
-            {},                                    // fix
-            {"-lf"},                            // fix+lf
-            {"-lf", "-lns", "RLNS"},        // LNS random + fix + lf
-            {"-lf", "-lns", "PGLNS"},        // LNS propag + fix + lf
+            {"-lf"},					// fix+lf
+			{"-lf", "-lns", "PGLNS"},	// LNS propag + fix + lf
+			{"-lf", "-lns", "RLNS"},	// LNS random + fix + lf
+            {},							// fix
 //				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
 //				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf
 //				{"-lf","-i","-bbss","3","-dv"},	// WDeg on dec vars + lf
@@ -67,7 +67,16 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         for (int i = 0; i < nbCores; i++) {
             String[] options = ArrayUtils.append(args, config[i]);
             slaves[i] = new ParaserSlave(this, i, options);
+			slaves[i].workInParallel();
         }
+		wait = true;
+		try {
+			while (wait)
+				mainThread.sleep(20);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
     }
 
     //***********************************************************************************
@@ -128,11 +137,10 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
                 isBetter = nbSol == 1;
                 break;
         }
-        if (isBetter) {
-            for (int i = 0; i < slaves.length; i++) {
-                slaves[i].findBetterThan(val, policy);
-            }
-        }
+		if (isBetter)
+			for (int i = 0; i < slaves.length; i++)
+				if(slaves[i]!=null)
+					slaves[i].findBetterThan(val, policy);
         return isBetter;
     }
 

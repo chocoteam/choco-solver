@@ -27,6 +27,7 @@
 package parser.flatzinc;
 
 import parser.flatzinc.para.ParaserMaster;
+import solver.ResolutionPolicy;
 import solver.objective.ObjectiveManager;
 
 /**
@@ -47,7 +48,8 @@ public class FZNLayoutPara extends FZNLayout {
     @Override
     public void onSolution() {
         ObjectiveManager om = searchLoop.getObjectivemanager();
-        if (master.newSol(om.getBestSolutionValue().intValue(), om.getPolicy())) {
+		int val = om.getPolicy()== ResolutionPolicy.SATISFACTION?1:om.getBestSolutionValue().intValue();
+        if (master.newSol(val, om.getPolicy())) {
             super.onSolution();
         }
     }
