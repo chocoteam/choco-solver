@@ -90,4 +90,9 @@ public abstract class ObjectiveManager implements ICause {
 	 * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
 	 */
 	public abstract Number getBestSolutionValue();
+
+    /**
+     * Reset <code>this</code> to initial state.
+     */
+    public abstract void reset();
 }
