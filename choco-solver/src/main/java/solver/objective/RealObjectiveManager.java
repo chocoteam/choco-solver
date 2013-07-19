@@ -64,15 +64,6 @@ public class RealObjectiveManager extends ObjectiveManager {
         }
     }
 
-
-    @Override
-    public void reset() {
-        if (policy != ResolutionPolicy.SATISFACTION) {
-            this.bestKnownLowerBound = objective.getLB();
-            this.bestKnownUpperBound = objective.getUB();
-        }
-    }
-
     /**
      * @return the best objective value found so far (returns the initial bound if no solution has been found yet)
      */
