@@ -30,10 +30,8 @@ package solver.search.loop;
 import memory.IEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -150,7 +148,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
-        objectivemanager = new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver);//default
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -163,6 +160,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void reset() {
         this.nextState = INIT;
         env.worldPopUntil(rootWorldIndex);
+        this.objectivemanager = null;
         timeStamp++;
         rootWorldIndex = -1;
         searchWorldIndex = -1;

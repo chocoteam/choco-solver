@@ -91,8 +91,4 @@ public abstract class ObjectiveManager implements ICause {
 	 */
 	public abstract Number getBestSolutionValue();
 
-    /**
-     * Reset <code>this</code> to initial state.
-     */
-    public abstract void reset();
 }

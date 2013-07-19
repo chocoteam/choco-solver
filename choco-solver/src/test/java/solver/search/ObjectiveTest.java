@@ -31,9 +31,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.ResolutionPolicy;
 import solver.Solver;
-import solver.search.loop.monitors.SMF;
 import solver.variables.IntVar;
 import solver.variables.VF;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -48,18 +49,60 @@ public class ObjectiveTest {
         Solver solver = new Solver();
 
         IntVar iv = VF.enumerated("iv", 0, 10, solver);
-
-        SMF.log(solver, true, true);
-        solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
-        System.out.println("Maximum: " + iv);
-        Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 10);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
-
-        // solver.reset();
-        solver.getSearchLoop().reset();
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
-        System.out.println("Minimum: " + iv);
-        Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 0);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 2);
+        Random rnd = new Random();
+        for (int i = 0; i < 100; i++) {
+            int k = rnd.nextInt(4);
+            switch (k) {
+                case 0:
+                    one(solver, iv);
+                    break;
+                case 1:
+                    all(solver, iv);
+                    break;
+                case 2:
+                    min(solver, iv);
+                    break;
+                case 3:
+                    max(solver, iv);
+                    break;
+            }
+        }
     }
+
+    private void one(Solver solver, IntVar iv) {
+        for (int i = 0; i < 2; i++) {
+            solver.getSearchLoop().reset();
+            solver.findSolution();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);
+            Assert.assertEquals(solver.getMeasures().getNodeCount(), 2);
+        }
+    }
+
+    private void all(Solver solver, IntVar iv) {
+        for (int i = 0; i < 2; i++) {
+            solver.getSearchLoop().reset();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), 11);
+            Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
+        }
+    }
+
+    private void min(Solver solver, IntVar iv) {
+        for (int i = 0; i < 2; i++) {
+            solver.getSearchLoop().reset();
+            solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, iv);
+            Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 0);
+            Assert.assertEquals(solver.getMeasures().getNodeCount(), 2);
+        }
+    }
+
+    private void max(Solver solver, IntVar iv) {
+        for (int i = 0; i < 2; i++) {
+            solver.getSearchLoop().reset();
+            solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, iv);
+            Assert.assertEquals(solver.getMeasures().getBestSolutionValue(), 10);
+            Assert.assertEquals(solver.getMeasures().getNodeCount(), 21);
+        }
+    }
+
 }

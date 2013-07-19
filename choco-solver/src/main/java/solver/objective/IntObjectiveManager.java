@@ -79,14 +79,6 @@ public class IntObjectiveManager extends ObjectiveManager {
         this(objective, policy, solver, true);
     }
 
-    @Override
-    public void reset() {
-        if (policy != ResolutionPolicy.SATISFACTION) {
-            this.bestKnownLowerBound = objective.getLB();
-            this.bestKnownUpperBound = objective.getUB();
-        }
-    }
-
     public Integer getBestSolutionValue() {
         if (policy == ResolutionPolicy.MINIMIZE) {
             return bestKnownUpperBound;
