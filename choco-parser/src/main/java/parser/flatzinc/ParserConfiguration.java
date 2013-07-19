@@ -63,6 +63,12 @@ public class ParserConfiguration {
         }
     }
 
+    // Set to true to print constraint creation during parsing
+    public static final boolean PRINT_CONSTRAINT = Boolean.parseBoolean(properties.getProperty("PRINT_CONSTRAINT"));
+
     // Set to true to print scheduling information
     public static final boolean ENABLE_CLAUSE = Boolean.parseBoolean(properties.getProperty("ENABLE_CLAUSE"));
+
+    // Set to true to log the resolution trace
+    public static final boolean PRINT_SEARCH = Boolean.parseBoolean(properties.getProperty("PRINT_SEARCH"));
 }

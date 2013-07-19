@@ -31,6 +31,7 @@ import gnu.trove.map.hash.THashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.FZNException;
+import parser.flatzinc.ParserConfiguration;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
@@ -89,7 +90,7 @@ public final class FConstraint {
                     throw new FZNException("Unknown constraint: " + id);
                 }
                 builder = (IBuilder) loadManager(name);
-                LOGGER.info("% {}", name);
+                if (ParserConfiguration.PRINT_CONSTRAINT) LOGGER.info("% {}", name);
                 builders.put(id, builder);
             }
             last = id;
