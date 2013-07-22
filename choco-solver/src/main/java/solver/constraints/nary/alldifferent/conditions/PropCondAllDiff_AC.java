@@ -40,7 +40,7 @@ import util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropConditionnalAllDiff_AC extends Propagator<IntVar> {
+public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
 	private Condition condition;
 	private AllDiffACAlgorithm filter;
@@ -57,7 +57,7 @@ public class PropConditionnalAllDiff_AC extends Propagator<IntVar> {
 	 * @param condition defines the subset of variables which is considered by the
 	 *                  alldifferent constraint
 	 */
-	public PropConditionnalAllDiff_AC(IntVar[] variables, Condition condition) {
+	public PropCondAllDiff_AC(IntVar[] variables, Condition condition) {
 		super(variables, PropagatorPriority.QUADRATIC,false);
 		this.condition = condition;
 	}
@@ -106,9 +106,10 @@ public class PropConditionnalAllDiff_AC extends Propagator<IntVar> {
 				nbInst++;
 				if(condition.holdOnVar(vars[i])){
 					for (int j = i + 1; j < vars.length; j++) {
-						if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
-							return ESat.FALSE;
-						}
+						if(condition.holdOnVar(vars[j]))
+							if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+								return ESat.FALSE;
+							}
 					}
 				}
 			}
