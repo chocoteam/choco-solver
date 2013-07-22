@@ -121,13 +121,13 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         boolean isBetter = false;
         switch (policy) {
             case MINIMIZE:
-                if (bestVal > val) {
+                if (bestVal > val || nbSol==1) {
                     bestVal = val;
                     isBetter = true;
                 }
                 break;
             case MAXIMIZE:
-                if (bestVal < val) {
+                if (bestVal < val || nbSol==1) {
                     bestVal = val;
                     isBetter = true;
                 }
