@@ -30,8 +30,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.limits.ACounter;
 
-import java.util.Arrays;
-
 /**
  * <br/>
  *
@@ -62,7 +60,7 @@ public class SequenceNeighborhood extends ANeighbor {
             neighbors[i].recordSolution();
         }
         who = count - 1; // forces to start with the first neighbor
-        System.out.printf("%s %s\n", "% REPARTITION", Arrays.toString(counters));
+//        System.out.printf("%s %s\n", "% REPARTITION", Arrays.toString(counters));
     }
 
     @Override

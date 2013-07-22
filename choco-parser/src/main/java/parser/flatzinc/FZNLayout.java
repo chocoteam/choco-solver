@@ -27,9 +27,11 @@
 
 package parser.flatzinc;
 
+import database.MySQLAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.Exit;
+import parser.flatzinc.ast.GoalConf;
 import parser.flatzinc.ast.declaration.DArray;
 import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.EArray;
@@ -37,11 +39,13 @@ import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.AverageCSV;
 import solver.search.loop.monitors.IMonitorClose;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +75,16 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     int nbSolution;
     boolean userinterruption = true;
 
-    public FZNLayout() {
+
+    protected final String instance;
+    protected String csv;
+    protected AverageCSV acsv;
+    protected String dbproperties;
+    protected String dbbenchname;
+    protected MySQLAccess sql;
+    protected GoalConf gc;
+
+    public FZNLayout(final String instance, final String csv, GoalConf gc, String dbproperties, String dbbenchname) {
         super();
         output_vars = new ArrayList<IntVar>();
         output_names = new ArrayList<String>();
@@ -80,14 +93,15 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
         output_arrays_vars = new ArrayList<IntVar[]>();
         output_arrays_types = new ArrayList<Declaration.DType>();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                if (isUserinterruption()) {
-                    beforeClose();
-                    LOGGER.info("% Unexpected resolution interruption!");
-                }
-            }
-        });
+        this.instance = instance;
+        this.csv = csv;
+        this.dbproperties = dbproperties;
+        this.dbbenchname = dbbenchname;
+        this.gc = gc;
+    }
+
+    public FZNLayout() {
+        this("", "", null, "", "");
     }
 
     @Override
@@ -188,6 +202,19 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                         searchLoop.getMeasures().getPropagationsCount());
             }
         }
+        if (sql != null) {
+            // query the database
+            sql.connect();
+            sql.insert(instance, dbbenchname,
+                    searchLoop.getMeasures().toArray(),
+                    searchLoop.getObjectivemanager().getPolicy(),
+                    searchLoop.hasReachedLimit(),
+                    searchLoop.getMeasures().isObjectiveOptimal());
+        }
+        if (!csv.equals("")) {
+            assert acsv != null;
+            acsv.record(csv, instance, gc.getDescription(), searchLoop.getMeasures().toArray());
+        }
         userinterruption = false;
     }
 
@@ -261,5 +288,25 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
     public void setSearchLoop(AbstractSearchLoop searchLoop) {
         searchLoop.plugSearchMonitor(this);
         this.searchLoop = searchLoop;
+    }
+
+    public void makeup() {
+        if (!csv.equals("")) {
+            acsv = new AverageCSV();
+        }
+        if (dbproperties != "") {
+            sql = new MySQLAccess(new File(dbproperties));
+        }
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                if (isUserinterruption()) {
+                    beforeClose();
+                    LOGGER.info("% Unexpected resolution interruption!");
+                    if (acsv != null) {
+                        acsv.record(csv, instance, ";**ERROR**;", new Number[0]);
+                    }
+                }
+            }
+        });
     }
 }
