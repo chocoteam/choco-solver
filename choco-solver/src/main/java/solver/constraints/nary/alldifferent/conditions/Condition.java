@@ -53,12 +53,20 @@ public interface Condition {
 		public boolean holdOnVar(IntVar x) {
 			return true;
 		}
+		@Override
+		public String toString(){
+			return "";
+		}
 	};
 	/** Satisfied iff the variable cannot take value 0*/
 	public final static Condition EXCEPT_0 = new Condition() {
 		@Override
 		public boolean holdOnVar(IntVar x) {
 			return !x.contains(0);
+		}
+		@Override
+		public String toString(){
+			return "_except_0";
 		}
 	};
 }

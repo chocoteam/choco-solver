@@ -42,7 +42,8 @@ import solver.constraints.nary.PropDiffN;
 import solver.constraints.nary.PropKnapsack;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.conditions.Condition;
-import solver.constraints.nary.alldifferent.conditions.PropConditionnalAllDiff_AC;
+import solver.constraints.nary.alldifferent.conditions.ConditionnalAllDifferent;
+import solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
 import solver.constraints.nary.among.Among;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.IAutomaton;
@@ -417,25 +418,15 @@ public class IntConstraintFactory {
 	 * @param CONDITION	condition defining which variables should be constrained
 	 */
 	public static Constraint alldifferent_conditionnal(IntVar[] VARS, Condition CONDITION) {
-		Constraint c = new Constraint(VARS,VARS[0].getSolver());
-		c.addPropagators(new PropConditionnalAllDiff_AC(VARS,CONDITION));
-		return c;
+		return new ConditionnalAllDifferent(VARS,CONDITION,false);
 	}
 
 	/**
-	 * Variables in VARS must either be different or equal to EXCEPTION_VALUE
-	 * (e.g. alldifferent_except_0)
+	 * Variables in VARS must either be different or equal to 0
 	 * @param VARS    			collection of variables
-	 * @param EXCEPTION_VALUE	joker value which can occur multiple times
 	 */
-	public static Constraint alldifferent_except_value(IntVar[] VARS, final int EXCEPTION_VALUE) {
-		Condition cond = new Condition() {
-			@Override
-			public boolean holdOnVar(IntVar x) {
-				return !x.contains(EXCEPTION_VALUE);
-			}
-		};
-		return alldifferent_conditionnal(VARS,cond);
+	public static Constraint alldifferent_except_0(IntVar[] VARS) {
+		return alldifferent_conditionnal(VARS,Condition.EXCEPT_0);
 	}
 
     /**

@@ -24,39 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.alldifferent;
+package solver.constraints.nary.alldifferent.conditions;
 
-import gnu.trove.stack.array.TIntArrayStack;
-import solver.constraints.Propagator;
-import solver.constraints.PropagatorPriority;
+import solver.constraints.nary.alldifferent.PropAllDiffInst;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
 /**
- * Propagator for AllDifferent that only reacts on instantiation
+ * Propagator for ConditionnalAllDifferent that only reacts on instantiation
  *
- * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
  */
-public class PropAllDiffInst extends Propagator<IntVar> {
+public class PropCondAllDiffInst extends PropAllDiffInst {
 
-	protected final int n;
-	protected TIntArrayStack toCheck = new TIntArrayStack();
+	protected Condition condition;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     /**
-     * AllDifferent constraint for integer variables
+     * ConditionnalAllDifferent constraint for integer variables
      * enables to control the cardinality of the matching
      *
      * @param variables
+	 * @param c a condition to define the subset of variables subject to the AllDiff cstr
      */
-    public PropAllDiffInst(IntVar[] variables) {
-        super(variables, PropagatorPriority.UNARY, true);
-        n = vars.length;
+    public PropCondAllDiffInst(IntVar[] variables, Condition c) {
+        super(variables);
+		this.condition = c;
     }
 
 
@@ -65,82 +62,68 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     //***********************************************************************************
 
     @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
-    }
-
-    @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append("PropAllDiffInst(");
-        int i = 0;
-        for (; i < Math.min(4, n); i++) {
-            st.append(vars[i].getName()).append(", ");
-        }
-        if (i < n - 2) {
-            st.append("...,");
-        }
-        st.append(vars[n - 1].getName()).append(")");
-        return st.toString();
+		StringBuilder st = new StringBuilder();
+		st.append("PropCondAllDiffInst(");
+		int i = 0;
+		for (; i < Math.min(4, n); i++) {
+			st.append(vars[i].getName()).append(", ");
+		}
+		if (i < n - 2) {
+			st.append("...,");
+		}
+		st.append(vars[n - 1].getName()).append(")");
+		st.append(condition);
+		return st.toString();
     }
 
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
 
-	@Override
-    public void propagate(int evtmask) throws ContradictionException {
-        toCheck.clear();
-        for (int v = 0; v < n; v++) {
-            if (vars[v].instantiated()) {
-                toCheck.push(v);
-            }
-        }
-        fixpoint();
-
-    }
-
-    @Override
-    public void propagate(int varIdx, int mask) throws ContradictionException {
-        toCheck.push(varIdx);
-        fixpoint();
-    }
-
 	protected void fixpoint() throws ContradictionException {
-        try {
-            while (toCheck.size() > 0) {
-                int vidx = toCheck.pop();
-                int val = vars[vidx].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != vidx) {
-                        if (vars[i].removeValue(val, aCause)) {
-                            if (vars[i].instantiated()) {
-                                toCheck.push(i);
-                            }
-                        }
+		try {
+			while (toCheck.size() > 0) {
+				int vidx = toCheck.pop();
+				if(condition.holdOnVar(vars[vidx])){
+					int val = vars[vidx].getValue();
+					for (int i = 0; i < n; i++) {
+						if (i != vidx) {
+							if (vars[i].removeValue(val, aCause)) {
+								if (vars[i].instantiated()) {
+									toCheck.push(i);
+								}
+							}
 
-                    }
-                }
-            }
-        } catch (ContradictionException cex) {
-            toCheck.clear();
-            throw cex;
-        }
-    }
-
+						}
+					}
+				}
+			}
+		} catch (ContradictionException cex) {
+			toCheck.clear();
+			throw cex;
+		}
+	}
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    if (vars[i].getValue() == vars[j].getValue()) {
-                        return ESat.FALSE;
-                    }
-                }
-            }
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+		int nbInst = 0;
+		for (int i = 0; i < vars.length; i++) {
+			if (vars[i].instantiated()) {
+				nbInst++;
+				if(condition.holdOnVar(vars[i])){
+					for (int j = i + 1; j < vars.length; j++) {
+						if(condition.holdOnVar(vars[j]))
+							if (vars[j].instantiated() && vars[i].getValue() == vars[j].getValue()) {
+								return ESat.FALSE;
+							}
+					}
+				}
+			}
+		}
+		if (nbInst == vars.length) {
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
     }
 }

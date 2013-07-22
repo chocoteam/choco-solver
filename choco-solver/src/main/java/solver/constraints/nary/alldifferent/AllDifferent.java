@@ -109,7 +109,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
     }
 
     @Override
-    public ESat isSatisfied() {
+    public ESat isEntailed() {
         for (IntVar v : vars) {
             if (v.instantiated()) {
                 int vv = v.getValue();
