@@ -43,7 +43,6 @@ import solver.constraints.nary.PropKnapsack;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.conditions.Condition;
 import solver.constraints.nary.alldifferent.conditions.ConditionnalAllDifferent;
-import solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
 import solver.constraints.nary.among.Among;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.IAutomaton;

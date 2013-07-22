@@ -268,20 +268,20 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		}
 	}
 
-	/**
-	 * Sweep-based filtering
-	 * Currently buggy
-	 */
-	private class SweepBasedFilter extends CumulFilter{
-		TTDynamicSweep sweep;
-		public void filter(ISet tasks) throws ContradictionException{
-			if(sweep == null) {
-				sweep = new TTDynamicSweep(vars,n,1,aCause);
-			}
-			sweep.set(tasks);
-			sweep.mainLoop();
-		}
-	}
+//	/**
+//	 * Sweep-based filtering
+//	 * Currently buggy
+//	 */
+//	private class SweepBasedFilter extends CumulFilter{
+//		TTDynamicSweep sweep;
+//		public void filter(ISet tasks) throws ContradictionException{
+//			if(sweep == null) {
+//				sweep = new TTDynamicSweep(vars,n,1,aCause);
+//			}
+//			sweep.set(tasks);
+//			sweep.mainLoop();
+//		}
+//	}
 
 	/**
 	 * Time-based filtering (compute the profile over every point in time)
