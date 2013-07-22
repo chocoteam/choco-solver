@@ -3,6 +3,7 @@
 % it.
 
 predicate alldifferentChoco(array[int] of var int: x);
+predicate alldifferentBut0Choco(array[int] of var int: x);
 
 predicate amongChoco(var int: n, array[int] of var int: x, set of int: v);
 predicate atleastChoco(int: n, array[int] of var int: x, int: v);
