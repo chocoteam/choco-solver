@@ -30,10 +30,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
-import solver.constraints.binary.Absolute;
-import solver.constraints.binary.DistanceXYC;
-import solver.constraints.binary.PropEqualX_Y;
-import solver.constraints.binary.Square;
+import solver.constraints.binary.*;
 import solver.constraints.extension.binary.BinCSP;
 import solver.constraints.extension.binary.BinRelation;
 import solver.constraints.extension.nary.LargeCSP;
@@ -63,9 +60,7 @@ import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.nary.min_max.MinOfAList;
 import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
-import solver.constraints.nary.sum.PropBoolSum;
-import solver.constraints.nary.sum.PropSumEq;
-import solver.constraints.nary.sum.Sum;
+import solver.constraints.nary.sum.*;
 import solver.constraints.nary.tree.PropAntiArborescences;
 import solver.constraints.nary.tree.PropKLoops;
 import solver.constraints.ternary.*;
@@ -73,6 +68,7 @@ import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.variables.*;
 import util.tools.ArrayUtils;
+import util.tools.StringUtils;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -868,24 +864,95 @@ public class IntConstraintFactory {
      * @param SCALAR a variable
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
-        // better to put an arithm constraint when possible
-        if (VARS.length == 2 && SCALAR.instantiated() && (COEFFS[0] == 1 || COEFFS[0] == -1) && (COEFFS[1] == 1 || COEFFS[1] == -1)) {
-            if (COEFFS[0] == 1) {
-                String op = (COEFFS[1] == 1) ? "+" : "-";
-                return IntConstraintFactory.arithm(VARS[0], op, VARS[1], "=", SCALAR.getValue());
-            } else {
-                if (COEFFS[1] == 1) {
-                    return IntConstraintFactory.arithm(VARS[1], "-", VARS[0], "=", SCALAR.getValue());
-                } else {
-                    return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", -SCALAR.getValue());
-                }
-            }
-        }
-        return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
-    }
+		return scalar(VARS, COEFFS, "=", SCALAR);
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
+	/**
+	 * A scalar constraint which ensures that Sum(VARS[i]*COEFFS[i]) OPERATOR SCALAR
+	 * @param VARS		a collection of IntVar
+	 * @param COEFFS	a collection of int, for which |VARS|=|COEFFS|
+	 * @param OPERATOR	an operator in {"=", "!=", ">","<",">=","<="}
+	 * @param SCALAR	an IntVar
+	 * @return a scalar constraint
+	 */
+	public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
+		if(VARS.length==0){
+			return arithm(VF.fixed(0,SCALAR.getSolver()),OPERATOR,SCALAR);
+		}
+		// detect sums
+		int n = VARS.length;
+		int nbOne = 0;
+		int nbMinusOne = 0;
+		int nbZero = 0;
+		for(int i=0;i<n;i++){
+			if(COEFFS[i]==1){
+				nbOne++;
+			}
+			else if (COEFFS[i]==-1){
+				nbMinusOne++;
+			}else if (COEFFS[i]==0){
+				nbZero++;
+			}
+		}
+		if(nbZero>0){
+			IntVar[] nonZerosVars = new IntVar[n-nbZero];
+			int[] nonZerosCoefs   = new int[n-nbZero];
+			int k = 0;
+			for(int i=0;i<n;i++){
+				if (COEFFS[i]==0){
+					nonZerosVars[k] = VARS[i];
+					nonZerosCoefs[k]= COEFFS[k];
+					k++;
+				}
+			}
+			return scalar(nonZerosVars,nonZerosCoefs,OPERATOR,SCALAR);
+		}
+		if(nbOne+nbMinusOne==n){
+			if(nbOne==n){
+				return sum(VARS,OPERATOR,SCALAR);
+			}else if(nbMinusOne==n){
+				return sum(VARS,Operator.getFlip(OPERATOR),VF.minus(SCALAR));
+			}else if(SCALAR.instantiated()){
+				if(nbMinusOne==1){
+					IntVar[] v2 = new IntVar[n-1];
+					IntVar s2 = null;
+					int k = 0;
+					for(int i=0;i<n;i++){
+						if (COEFFS[i]!=-1){
+							v2[k++] = VARS[i];
+						}else{
+							s2 = VARS[i];
+						}
+					}
+					return sum(v2,OPERATOR,VF.offset(s2,SCALAR.getValue()));
+				}
+				else if(nbOne==1){
+					IntVar[] v2 = new IntVar[n-1];
+					IntVar s2 = null;
+					int k = 0;
+					for(int i=0;i<n;i++){
+						if (COEFFS[i]!=1){
+							v2[k++] = VARS[i];
+						}else{
+							s2 = VARS[i];
+						}
+					}
+					return sum(v2,Operator.getFlip(OPERATOR),VF.offset(s2,-SCALAR.getValue()));
+				}
+			}
+		}
+		//
+		if(OPERATOR.equals("=")){
+			return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
+		}
+		int[] b = Scalar.getScalarBounds(VARS,COEFFS);
+		IntVar p = VF.bounded(StringUtils.randomName(),b[0],b[1],SCALAR.getSolver());
+		SCALAR.getSolver().post(scalar(VARS,COEFFS,"=",p));
+		return arithm(p,OPERATOR,SCALAR);
+	}
+
+	/**
+	 * Creates a subcircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where
      * <p/> VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and VARS[i] = OFFSET+i means that i is not part of the circuit
@@ -908,7 +975,7 @@ public class IntConstraintFactory {
         Solver solver = VARS[0].getSolver();
         IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
         Constraint c = new Constraint(ArrayUtils.append(VARS, new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}), solver);
-        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
+		c.addPropagators(new PropEqualXY_C(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, n));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
         c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.AC));
@@ -924,12 +991,23 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(IntVar[] VARS, IntVar SUM) {
-        // better to put an arithm constraint when possible
-        if (VARS.length == 2 && SUM.instantiated()) {
-            return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", SUM.getValue());
-        }
-        return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
+        return sum(VARS,"=",SUM);
     }
+
+	/**
+	 * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+	 * @param VARS		a collection of IntVar
+	 * @param OPERATOR	operator in {"=", "!=", ">","<",">=","<="}
+	 * @param SUM		an IntVar
+	 * @return	a sum constraint
+	 */
+	public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
+		if (VARS.length == 2 && SUM.instantiated()) {
+			return arithm(VARS[0],"+",VARS[1],OPERATOR,SUM.getValue());
+		}else{
+			return new Sum(VARS,Operator.get(OPERATOR),SUM);
+		}
+	}
 
     /**
      * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.

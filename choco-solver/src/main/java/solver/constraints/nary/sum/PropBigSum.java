@@ -42,8 +42,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 
-import static solver.constraints.nary.sum.Sum.BIG_SUM_GROUP;
-
 /**
  * Sum constraint that ensure that the sum of integer variables vars is equal
  * to the integer sum
@@ -66,6 +64,8 @@ public class PropBigSum extends Propagator<IntVar> {
     Node root;
     Node[] leafs;
     int index;
+	public static int BIG_SUM_SIZE = 160;
+	public static int BIG_SUM_GROUP = 20;
 
     //***********************************************************************************
     // CONSTRUCTORS
