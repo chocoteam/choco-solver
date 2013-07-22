@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.sum.PropBigSum;
 import solver.constraints.nary.sum.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.IntVar;
@@ -55,11 +56,11 @@ public class SumTests {
         for (int seed = 0; seed < 20; seed++) {
             random.setSeed(seed);
             int[][] dom = DomainBuilder.buildFullDomains(random.nextInt(m) + 2, -random.nextInt(b), random.nextInt(b) + 1);
-            Sum.BIG_SUM_SIZE = 100;
-            Sum.BIG_SUM_GROUP = 100;
+            PropBigSum.BIG_SUM_SIZE = 100;
+			PropBigSum.BIG_SUM_GROUP = 100;
             Solver view = sum(dom, seed, 0);
-            Sum.BIG_SUM_SIZE = 1;
-            Sum.BIG_SUM_GROUP = 2;
+			PropBigSum.BIG_SUM_SIZE = 1;
+			PropBigSum.BIG_SUM_GROUP = 2;
             Solver cons = sum(dom, seed, 0);
             view.findAllSolutions();
             cons.findAllSolutions();
