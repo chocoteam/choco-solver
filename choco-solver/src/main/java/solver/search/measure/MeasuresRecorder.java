@@ -209,10 +209,10 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         return hasObjective;
     }
 
-	@Override
-	public Number getBestSolutionValue(){
-		return solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
-	}
+    @Override
+    public Number getBestSolutionValue() {
+        return solver.getSearchLoop().getObjectivemanager().getBestSolutionValue();
+    }
 
     @Override
     public long getUsedMemory() {
@@ -358,21 +358,22 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     //**************************************** PRINTERS **************************************************************//
     //****************************************************************************************************************//
 
-    public double[] toArray() {
-        return new double[]{
+    public Number[] toArray() {
+        return new Number[]{
                 solutionCount,
                 readingTimeCount / IN_MS,
                 initialisationTimeCount / IN_MS,
                 (initialPropagationTimeCount - initialisationTimeCount) / IN_MS,
                 (timeCount - initialPropagationTimeCount) / IN_MS,
                 timeCount / IN_SEC,
-				hasObjective() ? getBestSolutionValue().doubleValue() : 0,
+                hasObjective() ? getBestSolutionValue(): 0,
                 nodeCount,
                 backtrackCount,
                 failCount,
                 restartCount,
                 eventCount,
-                propagationCount
+                propagationCount,
+
         };
     }
 
@@ -380,9 +381,9 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     public String toOneLineString() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, ", solutionCount));
-		if (hasObjective()) {
-			st.append(solver.getSearchLoop().getObjectivemanager()+", ");
-		}
+        if (hasObjective()) {
+            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+        }
         st.append(String.format("Building time : %.3fms, Initialisation : %.3fms, Initial propagation : %.3fms, " +
                 "Resolution %.3fs (%.6fms), Total %.3fs, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
                 readingTimeCount / IN_MS,
@@ -403,10 +404,10 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
     @Override
     public String toOneShortLineString() {
         StringBuilder st = new StringBuilder(256);
-		st.append(String.format("%d Solutions, ", solutionCount));
-		if (hasObjective()) {
-			st.append(solver.getSearchLoop().getObjectivemanager()+", ");
-		}
+        st.append(String.format("%d Solutions, ", solutionCount));
+        if (hasObjective()) {
+            st.append(solver.getSearchLoop().getObjectivemanager() + ", ");
+        }
         st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts",
                 (timeCount - initialPropagationTimeCount) / IN_SEC,
                 (timeCount - initialPropagationTimeCount) / IN_MS,
@@ -423,7 +424,7 @@ public final class MeasuresRecorder implements IMeasures, IMonitorClose, IMonito
         st.append("- Search statistics\n");
         st.append(String.format("\tSolutions: %,d\n", solutionCount));
         if (hasObjective()) {
-            st.append("\t"+solver.getSearchLoop().getObjectivemanager()+",\n");
+            st.append("\t" + solver.getSearchLoop().getObjectivemanager() + ",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +

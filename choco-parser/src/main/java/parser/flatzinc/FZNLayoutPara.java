@@ -26,6 +26,7 @@
  */
 package parser.flatzinc;
 
+import parser.flatzinc.ast.GoalConf;
 import parser.flatzinc.para.ParaserMaster;
 import solver.ResolutionPolicy;
 import solver.objective.ObjectiveManager;
@@ -40,15 +41,15 @@ public class FZNLayoutPara extends FZNLayout {
 
     final ParaserMaster master;
 
-    public FZNLayoutPara(ParaserMaster master) {
-        super();
+    public FZNLayoutPara(ParaserMaster master, String instance, String csv, GoalConf gc, String dbproperties, String dbbenchname) {
+        super(instance, csv, gc, dbproperties, dbbenchname);
         this.master = master;
     }
 
     @Override
     public void onSolution() {
         ObjectiveManager om = searchLoop.getObjectivemanager();
-		int val = om.getPolicy()== ResolutionPolicy.SATISFACTION?1:om.getBestSolutionValue().intValue();
+        int val = om.getPolicy() == ResolutionPolicy.SATISFACTION ? 1 : om.getBestSolutionValue().intValue();
         if (master.newSol(val, om.getPolicy())) {
             super.onSolution();
         }

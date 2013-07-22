@@ -27,7 +27,6 @@
 
 package parser.flatzinc;
 
-import database.MySQLAccess;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -46,7 +45,6 @@ import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
-import solver.search.loop.monitors.AverageCSV;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,7 +67,7 @@ public class ParseAndSolve {
 
     // receives other command line parameters than options
     @Argument
-    protected String instance;
+    public String instance;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions.", required = false)
     protected boolean all = false;
@@ -93,13 +91,13 @@ public class ParseAndSolve {
     protected long seed = 29091981L;
 
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
-    protected String csv = "";
+    public String csv = "";
 
     @Option(name = "-db", aliases = {"--database"}, usage = "Query a database", required = false)
-    protected String dbproperties = "";
+    public String dbproperties = "";
 
     @Option(name = "-dbbn", aliases = {"--database-bench-name"}, usage = "Benchmark name", required = false)
-    protected String dbbenchname = "";
+    public String dbbenchname = "";
 
     @Option(name = "-bbss", usage = "Black box search strategy:\n1(*): activity based\n2: impact based\n3: dom/wdeg", required = false)
     protected int bbss = 1;
@@ -127,10 +125,8 @@ public class ParseAndSolve {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected boolean userinterruption = true;
     protected Solver solver;
-    protected GoalConf gc;
-    protected AverageCSV acsv;
+    public GoalConf gc;
 
 
     public void doMain(String[] args) throws IOException, RecognitionException {
@@ -151,17 +147,6 @@ public class ParseAndSolve {
             System.err.println();
             return;
         }
-        if (!csv.equals("")) {
-            acsv = new AverageCSV(csv, 1);
-            final AverageCSV finalAcsv = acsv;
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    if (isUserinterruption()) {
-                        finalAcsv.record(instance, ";**ERROR**;");
-                    }
-                }
-            });
-        }
         gc = new GoalConf(free, bbss, decision_vars, all, seed, lastConflict, tl, lns, fr);
         LOGGER.info("% parse instance...");
         solver = new Solver();
@@ -176,10 +161,6 @@ public class ParseAndSolve {
             buildParser(new FileInputStream(new File(instance)), solver, datas);
         }
         makeEngine(solver, datas);
-        if (!csv.equals("")) {
-            assert acsv != null;
-            acsv.setSolver(solver);
-        }
         if (!solver.getExplainer().isActive()) {
             if (expeng != ExplanationFactory.NONE) {
                 expeng.plugin(solver, fexp);
@@ -194,17 +175,6 @@ public class ParseAndSolve {
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
         solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
-        if (!dbproperties.equals("")) {
-            // query the database
-            MySQLAccess sql = new MySQLAccess(new File(dbproperties));
-            sql.connect();
-            sql.insert(instance, dbbenchname, solver);
-        }
-        if (!csv.equals("")) {
-            assert acsv != null;
-            acsv.record(instance, gc.getDescription());
-        }
-        userinterruption = false;
     }
 
     public void buildParser(InputStream is, Solver mSolver, Datas datas) {
@@ -247,15 +217,13 @@ public class ParseAndSolve {
         }
     }
 
-    protected boolean isUserinterruption() {
-        return userinterruption;
-    }
-
     public Solver getSolver() {
         return solver;
     }
 
     public void buildLayout(Datas datas) {
-        datas.setmLayout(new FZNLayout());
+        FZNLayout fl = new FZNLayout(instance, csv, gc, dbproperties, dbbenchname);
+        datas.setmLayout(fl);
+        fl.makeup();
     }
 }
