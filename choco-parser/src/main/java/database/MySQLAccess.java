@@ -29,8 +29,6 @@ package database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
-import solver.Solver;
-import util.ESat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,20 +92,20 @@ public class MySQLAccess {
         }
     }
 
-    public void insert(String filename, String benchname, Solver solver) {
+    public void insert(String filename, String benchname, Number[] measures, ResolutionPolicy policy, boolean isFeasible, boolean isopt) {
         try {
             File instance = new File(filename);
             String name = instance.getName();
 
-            boolean optpb = solver.getSearchLoop().getObjectivemanager().isOptimization();
+            boolean optpb = policy != ResolutionPolicy.SATISFACTION;
             // 1. request BENCHMARK
             int bid = getBenchID(benchname);
             int pid = getPbID(name,
-                    solver.getSearchLoop().getObjectivemanager().getPolicy(),
-                    optpb ? solver.getMeasures().getBestSolutionValue().intValue() : solver.getMeasures().getSolutionCount(),
-                    optpb ? solver.getMeasures().isObjectiveOptimal() : !solver.isFeasible().equals(ESat.UNDEFINED));
+                    policy,
+                    optpb ? measures[6].longValue() : measures[0].longValue(),
+                    optpb ? isopt : isFeasible);
 
-            insertData(solver, bid, pid);
+            insertData(optpb, measures, bid, pid);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -115,28 +113,26 @@ public class MySQLAccess {
 
     /**
      * Insert a new record in DESCRIPTION
-     *
-     * @param solver the solver
      */
-    private void insertData(Solver solver, int bid, int pid) {
+    private void insertData(boolean optpb, Number[] measures, int bid, int pid) {
         try {
             statement = connection.prepareStatement("insert into RESOLUTIONS values (?, ?, ?, ?, ?, ?, ?, ?)");
             statement.setInt(1, bid);
             statement.setInt(2, pid);
-            statement.setLong(3, (long) solver.getMeasures().getReadingTimeCount());
-            statement.setLong(4, (long) solver.getMeasures().getTimeCount());
+            statement.setLong(3, measures[1].longValue());
+            statement.setLong(4, measures[5].longValue());
             long obj = -100;
-            if (solver.getSearchLoop().getObjectivemanager().isOptimization()) {
-                if (solver.getMeasures().getSolutionCount() > 0) {
-                    obj = solver.getMeasures().getBestSolutionValue().intValue();
+            if (optpb) {
+                if (measures[0].longValue() > 0) {
+                    obj = measures[6].intValue();
                 }
             } else {
-                obj = solver.getMeasures().getSolutionCount();
+                obj = measures[0].longValue();
             }
             statement.setLong(5, obj);
-            statement.setLong(6, solver.getMeasures().getSolutionCount());
-            statement.setLong(7, solver.getMeasures().getNodeCount());
-            statement.setLong(8, solver.getMeasures().getFailCount());
+            statement.setLong(6, measures[0].longValue()); // solution count
+            statement.setLong(7, measures[7].longValue()); // node count
+            statement.setLong(8, measures[9].longValue()); // fail count
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

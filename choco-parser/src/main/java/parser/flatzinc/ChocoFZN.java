@@ -43,6 +43,12 @@ public class ChocoFZN {
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         int nbCores = 1;
+		boolean all = false;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("-a")) {
+				all = true;
+			}
+		}
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
                 // -p option defines the number of slaves
@@ -52,11 +58,14 @@ public class ChocoFZN {
                 break;
             }
         }
+		if(all){
+			nbCores = 1;
+		}
         if (nbCores == 1) {
             new ParseAndSolve().doMain(args);
         } else {
             // will manage one ParseAndSolve per thread
-            new ParaserMaster(nbCores, args).distributedSlavery();
+            new ParaserMaster(nbCores, args);
         }
     }
 }

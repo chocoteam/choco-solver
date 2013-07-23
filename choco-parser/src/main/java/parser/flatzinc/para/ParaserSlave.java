@@ -64,7 +64,7 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
         PAS = new ParseAndSolve() {
             @Override
             public void buildLayout(Datas datas) {
-                datas.setmLayout(new FZNLayoutPara(master));
+                datas.setmLayout(new FZNLayoutPara(master, PAS.instance, PAS.csv, PAS.gc, PAS.dbproperties, PAS.dbbenchname));
             }
         };
         try {// sequential parsing (safer)
@@ -93,10 +93,9 @@ public class ParaserSlave extends AbstractParallelSlave<ParaserMaster> {
     }
 
     public void findBetterThan(int val, ResolutionPolicy policy) {
-        if (solver == null) {// can happen if a solution is found before this thread is fully ready
-            return;
-        }
+        if (solver == null) return;// can happen if a solution is found before this thread is fully ready
         IntObjectiveManager iom = (IntObjectiveManager) solver.getSearchLoop().getObjectivemanager();
+        if (iom == null) return;// can happen if a solution is found before this thread is fully ready
         switch (policy) {
             case MAXIMIZE:
                 iom.updateBestLB(val);

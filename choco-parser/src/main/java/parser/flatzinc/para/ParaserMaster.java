@@ -28,11 +28,16 @@
 package parser.flatzinc.para;
 
 
+import database.MySQLAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parser.flatzinc.ParseAndSolve;
 import solver.ResolutionPolicy;
+import solver.search.loop.monitors.AverageCSV;
 import solver.thread.AbstractParallelMaster;
 import util.tools.ArrayUtils;
+
+import java.io.File;
 
 public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
 
@@ -46,12 +51,13 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
     int nbSol;
     boolean closeWithSuccess;
     ResolutionPolicy policy;
+    ParseAndSolve aPas;
 
     public final static String[][] config = new String[][]{
-            {},                                    // fix
-            {"-lf"},                            // fix+lf
-            {"-lf", "-lns", "RLNS"},        // LNS random + fix + lf
-            {"-lf", "-lns", "PGLNS"},        // LNS propag + fix + lf
+            {"-lf"},                    // fix+lf
+            {"-lf", "-lns", "PGLNS"},    // LNS propag + fix + lf
+            {"-lf", "-lns", "RLNS"},    // LNS random + fix + lf
+            {},                            // fix
 //				{"-lf","-i","-bbss","1","-dv"},		// ABS on dec vars + lf
 //				{"-lf","-i","-bbss","2","-dv"},	// IBS on dec vars + lf
 //				{"-lf","-i","-bbss","3","-dv"},	// WDeg on dec vars + lf
@@ -67,6 +73,19 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         for (int i = 0; i < nbCores; i++) {
             String[] options = ArrayUtils.append(args, config[i]);
             slaves[i] = new ParaserSlave(this, i, options);
+            if (i == 0) {
+                aPas = slaves[i].PAS;
+            }
+            slaves[i].workInParallel();
+        }
+
+        wait = true;
+        try {
+            while (wait)
+                mainThread.sleep(20);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -93,6 +112,24 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
                 }
             }
         }
+        Number[] nbs = slaves[0].solver.getMeasures().toArray();
+        nbs[0] = nbSol;
+        nbs[6] = policy != ResolutionPolicy.SATISFACTION ? bestVal : 0;
+        if (!aPas.csv.equals("")) {
+            AverageCSV acsv = new AverageCSV();
+            acsv.record(aPas.csv, aPas.instance, aPas.gc.getDescription(),
+                    nbs);
+        }
+        if (!aPas.dbproperties.equals("")) {
+            MySQLAccess sql = new MySQLAccess(new File(aPas.dbproperties));
+            // query the database
+            sql.connect();
+            sql.insert(aPas.instance, aPas.dbbenchname,
+                    nbs,
+                    policy,
+                    nbSol > 0 || closeWithSuccess,
+                    nbSol > 0 && closeWithSuccess);
+        }
         System.exit(0);
     }
 
@@ -112,13 +149,13 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         boolean isBetter = false;
         switch (policy) {
             case MINIMIZE:
-                if (bestVal > val) {
+                if (bestVal > val || nbSol == 1) {
                     bestVal = val;
                     isBetter = true;
                 }
                 break;
             case MAXIMIZE:
-                if (bestVal < val) {
+                if (bestVal < val || nbSol == 1) {
                     bestVal = val;
                     isBetter = true;
                 }
@@ -130,7 +167,9 @@ public class ParaserMaster extends AbstractParallelMaster<ParaserSlave> {
         }
         if (isBetter) {
             for (int i = 0; i < slaves.length; i++) {
-                slaves[i].findBetterThan(val, policy);
+                if (slaves[i] != null) {
+                    slaves[i].findBetterThan(val, policy);
+                }
             }
         }
         return isBetter;

@@ -10,9 +10,9 @@ JAVA_ARGS="-Xss64m -Xms64m -Xmx4096m"
 
 usage="\
 
-Usage: fzn_choco.sh [<options>] [<jar>] [<file>]
+Usage: fzn_choco.sh [<options>] [<file>]
 
-    Parse and solve <file> using Choco <jar>.
+    Parse and solve <file> using Choco.
 
 OPTIONS:
 
@@ -33,17 +33,16 @@ OPTIONS:
     -tl <n>
         Limit the resolution time of each problem instance to n seconds.  (The default is $TIME_LIMIT.)
 		
-	--jargs <args>
+    --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
 		
 EXAMPLES:
 	
 	Basic command to solve a fzn model with choco:
-	$> fzn_choco.sh ./choco-parser-13.03-jar-with-dependencies.jar ./alpha.fzn
+	$> fzn_choco.sh  ./alpha.fzn
 
 	Additionnal arguments:
-	$> fzn_choco.sh --jargs \"-Xmx128m\" --time-limit 100 \\ 
-		./choco-parser-13.03-jar-with-dependencies.jar ./alpha.fzn
+	$> fzn_choco.sh --jargs \"-Xmx128m\" --time-limit 100 ./alpha.fzn
 
 "
 
@@ -85,7 +84,7 @@ do
             shift
         ;;
 
-		--jargs)
+	--jargs)
             JAVA_ARGS="$2"
             shift
         ;;
@@ -104,8 +103,7 @@ do
     shift
 done
 
-CHOCO_JAR=$1
-FILE=$2
+FILE=$1
 
 
 if test $# -eq 0
@@ -128,4 +126,4 @@ then
     ARGS=$ARGS" -i"
 fi
 
-java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}
+java ${JAVA_ARGS} -cp .:./choco.jar parser.flatzinc.ChocoFZN ${ARGS}

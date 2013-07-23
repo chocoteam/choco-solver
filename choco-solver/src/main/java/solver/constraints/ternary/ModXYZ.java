@@ -55,7 +55,7 @@ public class ModXYZ extends IntConstraint<IntVar> {
                 new PropDivXYZ(X, Y, t1),
                 new PropTimesXY(t1, Y, t2),
                 new PropTimesZ(t1, Y, t2),
-                new PropSumEq(new IntVar[]{Z, t2, X}, new int[]{1, 1, -1}, 2, 0)
+                new PropSumEq(new IntVar[]{Z, t2}, X)
         );
     }
 
