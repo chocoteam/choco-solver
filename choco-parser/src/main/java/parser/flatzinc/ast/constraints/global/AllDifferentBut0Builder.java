@@ -25,50 +25,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.ternary;
+package parser.flatzinc.ast.constraints.global;
 
+import parser.flatzinc.ast.Datas;
+import parser.flatzinc.ast.constraints.IBuilder;
+import parser.flatzinc.ast.expression.EAnnotation;
+import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
-import solver.constraints.IntConstraint;
-import solver.constraints.nary.sum.PropSumEq;
+import solver.constraints.Constraint;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.ESat;
-import util.tools.StringUtils;
 
-/**
- * X mod Y = Z
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 19/04/11
- */
-public class ModXYZ extends IntConstraint<IntVar> {
+import java.util.List;
 
-    public ModXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        int xl = Math.abs(X.getLB());
-        int xu = Math.abs(X.getUB());
-        int b = Math.max(xl, xu);
-        IntVar t1 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
-        IntVar t2 = VariableFactory.bounded(StringUtils.randomName(), -b, b, solver);
-        setPropagators(
-                new PropDivXYZ(X, Y, t1),
-                new PropTimesXY(t1, Y, t2),
-                new PropTimesZ(t1, Y, t2),
-                new PropSumEq(new IntVar[]{Z, t2}, X)
-        );
-    }
+public class AllDifferentBut0Builder implements IBuilder {
 
     @Override
-    public ESat isSatisfied(int[] tuple) {
-        if (tuple[1] == 0) {
-            return ESat.eval(tuple[0] == tuple[2]);
+    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
+        IntVar[] vars = exps.get(0).toIntVarArray(solver);
+        if (vars.length > 1) {
+            return new Constraint[]{IntConstraintFactory.alldifferent_except_0(vars)};
         }
-        return ESat.eval(tuple[0] % tuple[1] == tuple[2]);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s MOD %s = %s", vars[0].getName(), vars[1].getName(), vars[2].getName());
+        return new Constraint[0];
     }
 }
+

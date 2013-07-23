@@ -30,22 +30,18 @@ package solver.constraints.nary.sum;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ValueRemoval;
-import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
 import util.tools.ArrayUtils;
 
 /**
- * A propagator for SUM(x_i) = y
+ * A propagator for SUM(x_i) >= y
  *
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
-public class PropSumEq extends Propagator<IntVar> {
+public class PropSumGeq extends Propagator<IntVar> {
 
     final int n; // number of variables
 
@@ -61,42 +57,30 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] variables, IntVar sum) {
+    public PropSumGeq(IntVar[] variables, IntVar sum) {
         super(ArrayUtils.append(variables, new IntVar[]{sum}), computePriority(variables.length), false);
         n = variables.length;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-		boolean again;
-		do{
-			int min = 0;
-			int max = 0;
-			int ampMax = 0;
+		int max = 0;
+		int ampMax = 0;
+		for(int i=0;i<n;i++){
+			max += vars[i].getUB();
+			ampMax = Math.max(vars[i].getUB()-vars[i].getLB(),ampMax);
+		}
+		vars[n].updateUpperBound(max,aCause);
+		int lb = vars[n].getLB();
+		if(max-ampMax<lb){
 			for(int i=0;i<n;i++){
-				min += vars[i].getLB();
-				max += vars[i].getUB();
-				ampMax = Math.max(vars[i].getUB()-vars[i].getLB(),ampMax);
+				vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
 			}
-			vars[n].updateLowerBound(min,aCause);
-			vars[n].updateUpperBound(max,aCause);
-			int lb = vars[n].getLB();
-			int ub = vars[n].getUB();
-			again = false;
-			if(min+ampMax>ub){
-				again = true;
-				for(int i=0;i<n;i++){
-					vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
-				}
-			}
-			if(max-ampMax<lb){
-				again = true;
-				for(int i=0;i<n;i++){
-					vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
-				}
-			}
-		} while (again);
-	}
+		}
+		if(max-(ampMax*n)>=lb){
+			setPassive();
+		}
+    }
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
@@ -105,7 +89,8 @@ public class PropSumEq extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return EventType.INSTANTIATE.mask +
+				(vIdx<n?EventType.DECUPP.mask:EventType.INCLOW.mask);
     }
 
     @Override
@@ -116,10 +101,10 @@ public class PropSumEq extends Propagator<IntVar> {
 			min += vars[i].getLB();
 			max += vars[i].getUB();
 		}
-		if(max<vars[n].getLB() || min>vars[n].getUB()){
+		if(max<vars[n].getLB()){
 			return ESat.FALSE;
 		}
-		if(min==max && vars[n].instantiated()){
+		if(min>=vars[n].getUB()){
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
@@ -133,7 +118,7 @@ public class PropSumEq extends Propagator<IntVar> {
         for (; i < n; i++) {
             linComb.append(" + ").append(vars[i].getName());
         }
-        linComb.append(" = ");
+		linComb.append(" >= ");
         linComb.append(vars[n].getName());
         return linComb.toString();
     }
