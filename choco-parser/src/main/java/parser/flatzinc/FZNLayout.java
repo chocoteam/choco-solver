@@ -202,6 +202,8 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                 LOGGER.debug("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
                 LOGGER.debug("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
                         searchLoop.getMeasures().getPropagationsCount());
+            } else {
+                LOGGER.debug("% " + searchLoop.getMeasures().toOneShortLineString());
             }
         }
         if (sql != null) {

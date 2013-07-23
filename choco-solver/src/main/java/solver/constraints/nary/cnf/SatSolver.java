@@ -62,6 +62,8 @@ public class SatSolver {
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
     TIntObjectHashMap<ArrayList<Watcher>> watches_;
+    // implies_[lit] is a list of literals to set to true if 'lit' becomes true.
+    TIntObjectHashMap<TIntList> implies_;
     // The current assignments.
     TIntObjectHashMap<Boolean> assignment_;
     // Assignment stack; stores all assigments made in the order they
@@ -84,6 +86,7 @@ public class SatSolver {
         num_vars_ = 0;
         this.clauses = new ArrayList<Clause>();
         this.watches_ = new TIntObjectHashMap<ArrayList<Watcher>>();
+        this.implies_ = new TIntObjectHashMap<TIntList>();
         this.assignment_ = new TIntObjectHashMap<Boolean>();
         this.trail_ = new TIntArrayList();
         this.trail_markers_ = new TIntArrayList();
@@ -95,6 +98,7 @@ public class SatSolver {
     public int newVariable() {
         int v = incrementVariableCounter();
 //            watches_.resize(2 * v + 2);
+//        implies_.resize(2 * v.value() + 2);
         assignment_.put(v, Boolean.kUndefined);
         return v;
     }
@@ -121,15 +125,36 @@ public class SatSolver {
             ps.remove(j + 1, ps.size() - j - 1);
         }
 
-        if (ps.size() == 0) {
+
+        switch (ps.size()) {
+            case 0:
             return (ok_ = false);
-        } else if (ps.size() == 1) {
+            case 1:
             uncheckedEnqueue(ps.get(0));
             return (ok_ = propagate());
-        } else {
+            case 2:
+                int l0 = ps.get(0);
+                int l1 = ps.get(1);
+                TIntList i0 = implies_.get(negated(l0));
+                if (i0 == null) {
+                    i0 = new TIntArrayList();
+                    implies_.put(negated(l0), i0);
+                }
+                i0.add(l1);
+
+                TIntList i1 = implies_.get(negated(l1));
+                if (i1 == null) {
+                    i1 = new TIntArrayList();
+                    implies_.put(negated(l1), i1);
+                }
+                i1.add(l0);
+                break;
+            default:
             Clause cr = new Clause(ps.toArray());
             clauses.add(cr);
             attachClause(cr);
+                break;
+
         }
         return true;
     }
@@ -280,6 +305,16 @@ public class SatSolver {
         boolean result = true;
         while (qhead_ < trail_.size()) {
             int p = trail_.get(qhead_++);
+            // Propagate the implies first.
+            TIntList to_add = implies_.get(p);
+            if (to_add != null) {
+                for (int i = 0; i < to_add.size(); ++i) {
+                    if (!enqueue(to_add.get(i))) {
+                        return false;
+                    }
+                }
+            }
+
             // 'p' is enqueued fact to propagate.
             ArrayList<Watcher> ws = watches_.get(p);
 
