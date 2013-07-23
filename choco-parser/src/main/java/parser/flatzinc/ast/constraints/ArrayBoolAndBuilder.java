@@ -55,7 +55,7 @@ public class ArrayBoolAndBuilder implements IBuilder {
         } else {
 //            return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
             SatFactory.addBoolAndArrayEqVar(as, r);
-            return new Constraint[]{};
+            return new Constraint[0];
         }
     }
 }

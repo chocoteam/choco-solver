@@ -24,39 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc;
 
-package parser.flatzinc.ast.constraints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import parser.flatzinc.ParserConfiguration;
-import parser.flatzinc.ast.Datas;
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.SatFactory;
-import solver.variables.BoolVar;
-
-import java.util.List;
+import java.util.Properties;
 
 /**
- * (a &#8804; b)
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 19/07/13
  */
-public class BoolLeBuilder implements IBuilder {
+public class ParserConfiguration {
+    private static final Logger logger = LoggerFactory.getLogger(ParserConfiguration.class);
 
-    @Override
-    public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
-        BoolVar a = exps.get(0).boolVarValue(solver);
-        BoolVar b = exps.get(1).boolVarValue(solver);
-        if (ParserConfiguration.ENABLE_CLAUSE) {
-            SatFactory.addBoolLe(a, b);
-            return new Constraint[0];
-        } else {
-            return new Constraint[]{IntConstraintFactory.arithm(a, "<=", b)};
+    private static final String UDPATH = "/myparser.properties";
+
+    private static final String PATH = "/parser.properties";
+
+    private static Properties properties = new Properties();
+
+    static {
+        try {
+            properties.load(ParserConfiguration.class.getResourceAsStream(PATH));
+        } catch (Exception e) {
+            logger.error("Unable to load " + PATH + " file from classpath.", e);
+            System.exit(1);
+        }
+        // then override values, if any
+        try {
+            properties.load(ParserConfiguration.class.getResourceAsStream(UDPATH));
+        } catch (NullPointerException e) {
+            //            logger.warn("No user defined properties. Skip loading " + UDPATH + " file.");
+        } catch (Exception e) {
+            logger.error("Unable to load " + UDPATH + " file from classpath.", e);
         }
     }
+
+    // Set to true to print constraint creation during parsing
+    public static final boolean PRINT_CONSTRAINT = Boolean.parseBoolean(properties.getProperty("PRINT_CONSTRAINT"));
+
+    // Set to true to print scheduling information
+    public static final boolean ENABLE_CLAUSE = Boolean.parseBoolean(properties.getProperty("ENABLE_CLAUSE"));
+
+    // Set to true to log the resolution trace
+    public static final boolean PRINT_SEARCH = Boolean.parseBoolean(properties.getProperty("PRINT_SEARCH"));
 }

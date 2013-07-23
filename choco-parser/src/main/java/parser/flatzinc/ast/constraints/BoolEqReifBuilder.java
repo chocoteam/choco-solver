@@ -27,11 +27,13 @@
 
 package parser.flatzinc.ast.constraints;
 
+import parser.flatzinc.ParserConfiguration;
 import parser.flatzinc.ast.Datas;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ICF;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
@@ -51,8 +53,11 @@ public class BoolEqReifBuilder implements IBuilder {
         BoolVar a = exps.get(0).boolVarValue(solver);
         BoolVar b = exps.get(1).boolVarValue(solver);
         BoolVar r = exps.get(2).boolVarValue(solver);
-//        ICF.arithm(a, "=", b).reifyWith(r);
-        SatFactory.addBoolIsEqVar(a, b, r);
-        return new Constraint[]{};
+        if (ParserConfiguration.ENABLE_CLAUSE) {
+            SatFactory.addBoolIsEqVar(a, b, r);
+        } else {
+            ICF.arithm(a, "=", b).reifyWith(r);
+        }
+        return new Constraint[0];
     }
 }

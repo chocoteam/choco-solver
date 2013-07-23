@@ -161,7 +161,11 @@ public class MySQLViz {
             bid2 = bid1 - 1;
             bname1 = "SECOND";
         }
-
+        try {
+            print(bid2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         display(
 //                createChart(QUERY1, new String[]{"BUILDING_TIME", "BUILDING_TIME", Integer.toString(bid1),
 //                        Integer.toString(bid2)}, "BUILDING_TIME"),
@@ -174,7 +178,7 @@ public class MySQLViz {
                 createChart(QUERY2, new String[]{"SOLVING_TIME", bname1, "SOLVING_TIME", bname2, pbname + "%", Integer.toString(bid1),
                         Integer.toString(bid2), "SOLVING_TIME", "SOLVING_TIME"}, "SOLVING_TIME"),
                 createChart(QUERY2, new String[]{"OBJECTIVE", bname1, "OBJECTIVE", bname2, pbname + "%", Integer.toString(bid1),
-                        Integer.toString(bid2),"OBJECTIVE", "OBJECTIVE"}, "OBJECTIVE"),
+                        Integer.toString(bid2), "OBJECTIVE", "OBJECTIVE"}, "OBJECTIVE"),
                 createChart(QUERY2, new String[]{"NB_SOL", bname1, "NB_SOL", bname2, pbname + "%", Integer.toString(bid1),
                         Integer.toString(bid2), "NB_SOL", "NB_SOL"}, "NB_SOL")
         );
@@ -205,19 +209,19 @@ public class MySQLViz {
         JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JTabbedPane tabbedPane = new JTabbedPane();
-		JPanel mainpane = new JPanel(new BorderLayout());
+        JPanel mainpane = new JPanel(new BorderLayout());
         frame.setContentPane(mainpane);
-		mainpane.add(tabbedPane,BorderLayout.CENTER);
+        mainpane.add(tabbedPane, BorderLayout.CENTER);
         for (JFreeChart c : chart) {
             JPanel panel = new JPanel();
             JLabel label = new JLabel();
             label.setIcon(new ImageIcon(c.createBufferedImage(800, 1500)));
             panel.add(label);
-			JScrollPane scroll = new JScrollPane(panel);
-			tabbedPane.add(c.getTitle().getText(),scroll);
+            JScrollPane scroll = new JScrollPane(panel);
+            tabbedPane.add(c.getTitle().getText(), scroll);
 //			tabbedPane.add(c.getTitle().getText(),new ChartPanel(c));
         }
-		frame.setMinimumSize(new Dimension(900,100));
+        frame.setMinimumSize(new Dimension(900, 100));
         frame.pack();
         frame.setVisible(true);
     }
@@ -288,13 +292,32 @@ public class MySQLViz {
                         true);   // no URLs
     }
 
+    /**
+     * Create pie chart representing percentage of employees in each department
+     * that has at least one employee.
+     *
+     * @return Pie chart; null if no image created.
+     */
+    public void print(int bid) throws SQLException {
+        connect();
+        PreparedStatement statement = connection.prepareStatement("SELECT P.NAME, R.* FROM PROBLEMS as P, RESOLUTIONS as R WHERE BID=? and P.PID=R.PID;");
+        statement.setInt(1, bid);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            System.out.printf("%s ", resultSet.getString(1));
+            System.out.printf("%s ", resultSet.getString(5));
+            System.out.printf("%s ", resultSet.getString(6));
+            System.out.printf("%s \n", resultSet.getString(7));
+        }
+    }
+
     public static void main(String[] args) throws SQLException {
         MySQLViz ms = new MySQLViz(new File("choco-parser/src/main/resources/mysql.properties"));
         ms.connect();
 //        ms.display();
 //        ms.compare();
 //        ms.compare("MZN20130603");
-        ms.compare("JACOP", "MZN20130610.150246", "");
+        ms.compare("JACOP", "MZN20130719.093050", "");
 
 //        ms.history("filter_fir_1_1.fzn");
 
