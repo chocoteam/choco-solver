@@ -270,27 +270,6 @@ public class ViewsTest {
 
 
     @Test(groups = "30s")
-    public void test1e() {
-        // Z = X^2
-        for (int seed = 0; seed < 99999; seed++) {
-            Solver ref = new Solver();
-            Solver solver = new Solver();
-            {
-                IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
-                IntVar z = VariableFactory.enumerated("z", 0, 4, ref);
-                ref.post(IntConstraintFactory.times(x, x, z));
-                ref.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
-            }
-            {
-                IntVar z = VariableFactory.enumerated("z", 0, 4, solver);
-                IntVar x = VariableFactory.sqr(z);
-                solver.set(IntStrategyFactory.random(new IntVar[]{x, z}, seed));
-            }
-            check(ref, solver, seed, false, true);
-        }
-    }
-
-    @Test(groups = "30s")
     public void test1f() {
         // Z = MAX(X,Y)
         Solver ref = new Solver();

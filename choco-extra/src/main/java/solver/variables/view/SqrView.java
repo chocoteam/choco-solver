@@ -34,7 +34,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -49,6 +48,7 @@ import util.iterators.DisposableValueIterator;
  * C. Shulte and G. Tack.<br/>
  * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
+ * BEWARE: floor and ceil !!
  * @author Charles Prud'homme
  * @since 09/08/11
  */
@@ -337,7 +337,7 @@ public final class SqrView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public IntVar duplicate() {
-        return VariableFactory.sqr(this.var);
+        return new SqrView(this.var, solver);
     }
 
     @Override

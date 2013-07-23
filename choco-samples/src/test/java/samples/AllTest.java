@@ -39,7 +39,6 @@ import solver.explanations.ExplanationFactory;
 import solver.propagation.PropagationEngineFactory;
 import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import util.tools.ArrayUtils;
 
 import java.util.Arrays;
 
@@ -76,7 +75,7 @@ public class AllTest {
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
-        args = ArrayUtils.append(args, new String[]{"-policy", strat.name()});
+//        args = ArrayUtils.append(args, new String[]{"-engine", strat.name()});
         this.environment = env;
         this.properties = properties;
         this.strat = strat;

@@ -30,10 +30,6 @@ package solver.constraints.nary.sum;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ValueRemoval;
-import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
@@ -84,15 +80,15 @@ public class PropSumEq extends Propagator<IntVar> {
 			int ub = vars[n].getUB();
 			again = false;
 			if(min+ampMax>ub){
-				again = true;
+//				again = true;
 				for(int i=0;i<n;i++){
-					vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
+                    again |= vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
 				}
 			}
 			if(max-ampMax<lb){
-				again = true;
+//				again = true;
 				for(int i=0;i<n;i++){
-					vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
+                    again |= vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
 				}
 			}
 		} while (again);

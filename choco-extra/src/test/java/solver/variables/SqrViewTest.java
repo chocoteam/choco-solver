@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.variables.view.SqrView;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -51,7 +52,7 @@ public class SqrViewTest {
         Solver solver = new Solver();
 
         IntVar X = VariableFactory.enumerated("X", -4, 12, solver);
-        IntVar Z = VariableFactory.sqr(X);
+        IntVar Z = new SqrView(X, solver);
 
         try {
 //            solver.propagate();
@@ -105,7 +106,7 @@ public class SqrViewTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.bounded("o", domains[0][0], domains[0][domains[0].length - 1], solver);
-            IntVar v = VariableFactory.sqr(o);
+            IntVar v = new SqrView(o, solver);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 int va = (int) Math.sqrt(vit.next());
@@ -152,7 +153,7 @@ public class SqrViewTest {
             Solver solver = new Solver();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = VariableFactory.enumerated("o", domains[0], solver);
-            IntVar v = VariableFactory.sqr(o);
+            IntVar v = new SqrView(o, solver);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 int va = (int) Math.sqrt(vit.next());
