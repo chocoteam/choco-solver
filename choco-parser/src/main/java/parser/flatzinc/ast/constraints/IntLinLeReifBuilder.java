@@ -33,11 +33,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.nary.sum.Scalar;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import util.tools.StringUtils;
+import solver.variables.VF;
 
 import java.util.List;
 
@@ -58,10 +57,28 @@ public class IntLinLeReifBuilder implements IBuilder {
         int c = exps.get(2).intValue();
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        int[] bounds = Scalar.getScalarBounds(bs, as);
-        IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        // this constraint is not poster, hence not returned, because it is reified
-		ICF.arithm(scalarVar,"<=",c).reifyWith(r);
-		return new Constraint[]{ICF.scalar(bs, as, scalarVar)};
+        Constraint cstr = null;
+        if (as.length == 1) {
+            if (as[0] == 1) {
+                cstr = ICF.arithm(bs[0], "<=", c);
+            } else if (as[0] == -1) {
+                cstr = ICF.arithm(bs[0], ">=", -c);
+            }
+        } else if (as.length == 2) {
+            if (as[0] == 1 && as[1] == 1) {
+                cstr = ICF.arithm(bs[0], "+", bs[1], "<=", c);
+            } else if (as[0] == 1 && as[1] == -1) {
+                cstr = ICF.arithm(bs[0], "-", bs[1], "<=", c);
+            } else if (as[0] == -1 && as[1] == 1) {
+                cstr = ICF.arithm(bs[1], "-", bs[0], "<=", c);
+            } else if (as[0] == -1 && as[1] == -1) {
+                cstr = ICF.arithm(bs[0], "+", bs[1], ">=", -c);
+            }
+        }
+        if (cstr == null) {
+            cstr = IntConstraintFactory.scalar(bs, as, "<=", VF.fixed(c, solver));
+        }
+        cstr.reifyWith(r);
+        return new Constraint[0];
     }
 }

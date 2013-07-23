@@ -60,7 +60,9 @@ import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.nary.min_max.MinOfAList;
 import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
-import solver.constraints.nary.sum.*;
+import solver.constraints.nary.sum.PropBoolSum;
+import solver.constraints.nary.sum.Scalar;
+import solver.constraints.nary.sum.Sum;
 import solver.constraints.nary.tree.PropAntiArborescences;
 import solver.constraints.nary.tree.PropKLoops;
 import solver.constraints.ternary.*;
@@ -901,7 +903,7 @@ public class IntConstraintFactory {
 			for(int i=0;i<n;i++){
 				if (COEFFS[i]!=0){
 					nonZerosVars[k] = VARS[i];
-					nonZerosCoefs[k]= COEFFS[k];
+					nonZerosCoefs[k]= COEFFS[i];
 					k++;
 				}
 			}
