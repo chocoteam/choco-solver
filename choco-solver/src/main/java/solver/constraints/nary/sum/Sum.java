@@ -105,23 +105,6 @@ public class Sum extends IntConstraint<IntVar> {
         return sumst.toString();
     }
 
-	public static IntVar var(IntVar a, IntVar b) {
-		if (a.instantiated()) {
-			if (b.instantiated()) {
-				return VariableFactory.fixed(a.getValue() + b.getValue(), a.getSolver());
-			} else {
-				return VariableFactory.offset(b, a.getValue());
-			}
-		} else if (b.instantiated()) {
-			return VariableFactory.offset(a, b.getValue());
-		} else {
-			Solver solver = a.getSolver();
-			IntVar z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
-			solver.post(IntConstraintFactory.sum(new IntVar[]{a, b}, z));
-			return z;
-		}
-	}
-
 	@Override
 	public Constraint makeOpposite(){
 		IntVar[] X = new IntVar[vars.length-1];
