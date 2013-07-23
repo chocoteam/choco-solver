@@ -712,25 +712,6 @@ public class VariableFactory {
     }
 
     /**
-     * Create a view over VAR such that: VAR<sup>2</sup>.
-     * <p/>
-     * <br/>- if VAR is already instantiated, returns a fixed variable;
-     * <br/>- otherwise, returns an square view;
-     * <p/>
-     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-     * Any operations on this will transformed to operations on VAR following the "square" rules.
-     *
-     * @param VAR an integer variable.
-     */
-    public static IntVar sqr(IntVar VAR) {
-        if (VAR.instantiated()) {
-            int value = VAR.getValue();
-            return fixed(value * value, VAR.getSolver());
-        }
-        return new SqrView(VAR, VAR.getSolver());
-    }
-
-    /**
      * Create a real variable based on an integer variable VAR.
      * The PRECISION is used to evaluate when the view is instantiated, that is, when
      * the size of the domain of the view is strictly less than  PRECISION.
