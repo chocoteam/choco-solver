@@ -899,7 +899,7 @@ public class IntConstraintFactory {
 			int[] nonZerosCoefs   = new int[n-nbZero];
 			int k = 0;
 			for(int i=0;i<n;i++){
-				if (COEFFS[i]==0){
+				if (COEFFS[i]!=0){
 					nonZerosVars[k] = VARS[i];
 					nonZerosCoefs[k]= COEFFS[k];
 					k++;
