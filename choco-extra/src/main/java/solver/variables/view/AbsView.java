@@ -308,7 +308,7 @@ public final class AbsView extends IntView<IntDelta, IntVar<IntDelta>> {
 
     @Override
     public IntVar duplicate() {
-        return VariableFactory.abs(this.var);
+        return new AbsView(this.var,getSolver());
     }
 
     @Override
