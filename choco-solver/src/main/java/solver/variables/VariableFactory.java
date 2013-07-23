@@ -28,7 +28,11 @@
 package solver.variables;
 
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.variables.fast.BitsetArrayIntVarImpl;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
@@ -37,6 +41,7 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
+import util.tools.StringUtils;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
@@ -707,7 +712,10 @@ public class VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            return new AbsView(VAR, VAR.getSolver());
+			Solver s = VAR.getSolver();
+			IntVar abs = bounded(StringUtils.randomName(),0,Math.max(VAR.getLB(),VAR.getUB()),s);
+			s.post(IntConstraintFactory.absolute(abs,VAR));
+            return abs;
         }
     }
 
