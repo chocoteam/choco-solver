@@ -130,7 +130,9 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                     }
                 }
                 LOGGER.info("----------");
-                LOGGER.info("% " + searchLoop.getMeasures().toOneShortLineString());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("% " + searchLoop.getMeasures().toOneShortLineString());
+                }
             }
         } else {
             LOGGER.error("%\n% /!\\ ERROR >>>>>>>   Find a solution that does not seem to be correct!!  <<<<<<<<\n%");
@@ -181,24 +183,24 @@ public class FZNLayout implements IMonitorSolution, IMonitorClose {
                     LOGGER.info("==========");
                 }
             }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("% - Search statistics");
-                LOGGER.info("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("% - Search statistics");
+                LOGGER.debug("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
                 if (searchLoop.getMeasures().hasObjective()) {
-                    LOGGER.info("% \t Objective : {}", searchLoop.getMeasures().getBestSolutionValue().intValue());
+                    LOGGER.debug("% \t Objective : {}", searchLoop.getMeasures().getBestSolutionValue().intValue());
                 }
-                LOGGER.info("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
-                LOGGER.info("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
-                LOGGER.info("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
-                LOGGER.info("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
-                LOGGER.info("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
-                LOGGER.info("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
-                LOGGER.info("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
-                LOGGER.info("% \t Max Depth : {}", searchLoop.getMeasures().getMaxDepth());
-                LOGGER.info("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
-                LOGGER.info("% \t Variables : {}", searchLoop.getSolver().getVars().length);
-                LOGGER.info("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
-                LOGGER.info("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
+                LOGGER.debug("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
+                LOGGER.debug("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
+                LOGGER.debug("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
+                LOGGER.debug("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
+                LOGGER.debug("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
+                LOGGER.debug("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
+                LOGGER.debug("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
+                LOGGER.debug("% \t Max Depth : {}", searchLoop.getMeasures().getMaxDepth());
+                LOGGER.debug("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
+                LOGGER.debug("% \t Variables : {}", searchLoop.getSolver().getVars().length);
+                LOGGER.debug("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
+                LOGGER.debug("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
                         searchLoop.getMeasures().getPropagationsCount());
             }
         }
