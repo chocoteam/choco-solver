@@ -56,7 +56,7 @@ public class ArrayBoolOrBuilder implements IBuilder {
         } else {
 //            SatFactory.addClauses(LogOp.reified(r, LogOp.or(as)), solver);
             SatFactory.addBoolOrArrayEqVar(as, r);
-            return new Constraint[]{};
+            return new Constraint[0];
         }
     }
 }
