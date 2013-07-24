@@ -54,9 +54,6 @@ public class IntLinLeBuilder implements IBuilder {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
-        int[] bounds = Scalar.getScalarBounds(bs, as);
-        bounds[1] = Math.min(bounds[1], c);
-        IntVar scalar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        return new Constraint[]{IntConstraintFactory.scalar(bs, as, scalar)};
+        return new Constraint[]{IntConstraintFactory.scalar(bs, as, "<=",VariableFactory.fixed(c,solver))};
     }
 }

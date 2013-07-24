@@ -32,7 +32,7 @@
  * Time: 18:32
  */
 
-package solver.constraints.nary.sum;
+package solver.constraints.deprecatedPropagators;
 
 import memory.IStateInt;
 import solver.constraints.Propagator;
@@ -52,6 +52,7 @@ import util.ESat;
  * <p/>
  * <cpru> the data structure can be improved
  */
+@Deprecated
 public class PropBigSum extends Propagator<IntVar> {
 
     //***********************************************************************************

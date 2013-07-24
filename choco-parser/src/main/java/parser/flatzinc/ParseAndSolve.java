@@ -175,6 +175,24 @@ public class ParseAndSolve {
 
     public void solve() throws IOException {
         LOGGER.info("% solve instance...");
+//		ArrayList<String> names = new ArrayList<>();
+//		ArrayList<Integer> nb = new ArrayList<>();
+//		for(Constraint c:solver.getCstrs()){
+//			for(Propagator p:c.getPropagators()){
+//				String cn = p.getClass().getSimpleName();
+//				if(names.contains(cn)){
+//					int i = names.indexOf(cn);
+//					nb.set(i,nb.get(i)+1);
+//				}else{
+//					names.add(cn);
+//					nb.add(1);
+//				}
+//			}
+//		}
+//		for(int i=0;i<nb.size();i++){
+//			System.out.println(names.get(i)+" ("+nb.get(i)+")");
+//		}
+//		System.exit(0);
         if(ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
         solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
     }
