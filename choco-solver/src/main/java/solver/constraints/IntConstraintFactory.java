@@ -947,7 +947,10 @@ public class IntConstraintFactory {
 		}
 		int[] b = Scalar.getScalarBounds(VARS,COEFFS);
 		IntVar p = VF.bounded(StringUtils.randomName(),b[0],b[1],SCALAR.getSolver());
-		SCALAR.getSolver().post(scalar(VARS,COEFFS,"=",p));
+		SCALAR.getSolver().post(
+				Scalar.buildScalar(VARS, COEFFS, p, 1, VARS[0].getSolver())
+		);
+//		SCALAR.getSolver().post(scalar(VARS,COEFFS,"=",p));
 		return arithm(p,OPERATOR,SCALAR);
 	}
 
@@ -1002,10 +1005,27 @@ public class IntConstraintFactory {
 	 * @return	a sum constraint
 	 */
 	public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
-		if (VARS.length == 2 && SUM.instantiated()) {
+		if (VARS.length==1){
+			if(SUM.instantiated()){
+				return arithm(VARS[0],OPERATOR,SUM.getValue());
+			}else{
+				return arithm(VARS[0],OPERATOR,SUM);
+			}
+		}else if (VARS.length == 2 && SUM.instantiated()) {
 			return arithm(VARS[0],"+",VARS[1],OPERATOR,SUM.getValue());
 		}else{
-			return new Sum(VARS,Operator.get(OPERATOR),SUM);
+			if(OPERATOR.equals("=")){
+				return new Sum(VARS,SUM);
+			}
+			int lb = 0;
+			int ub = 0;
+			for(IntVar v:VARS){
+				lb += v.getLB();
+				ub += v.getUB();
+			}
+			IntVar p = VF.bounded(StringUtils.randomName(),lb,ub,SUM.getSolver());
+			SUM.getSolver().post(new Sum(VARS,p));
+			return arithm(p,OPERATOR,SUM);
 		}
 	}
 

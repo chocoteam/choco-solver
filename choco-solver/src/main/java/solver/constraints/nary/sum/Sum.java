@@ -27,51 +27,22 @@
 
 package solver.constraints.nary.sum;
 
-import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.Operator;
-import solver.constraints.binary.PropNotEqualX_Y;
 import solver.variables.IntVar;
-import solver.variables.VF;
-import solver.variables.VariableFactory;
-import solver.variables.fast.IntervalIntVarImpl;
 import util.ESat;
 import util.tools.ArrayUtils;
-import util.tools.StringUtils;
 
 /**
- * Constraint for Sum(x_i) operator y
- * (operator in {<,<=,=,>=,>})
+ * Constraint for Sum(x_i) = y
  *
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
 public class Sum extends IntConstraint<IntVar> {
 
-	Operator op;
-
-    public Sum(IntVar[] x, Operator op, IntVar y) {
+    public Sum(IntVar[] x, IntVar y) {
         super(ArrayUtils.append(x,new IntVar[]{y}), y.getSolver());
-		this.op = op;
-		switch (op){
-			case EQ:setPropagators(new PropSumEq(x,y));break;
-			case GE:setPropagators(new PropSumGeq(x,y));break;
-			case GT:setPropagators(new PropSumGeq(x, VF.offset(y,1)));break;
-			case LE:setPropagators(new PropSumLeq(x,y));break;
-			case LT:setPropagators(new PropSumLeq(x, VF.offset(y,-1)));break;
-			case NQ:
-				int lb = 0;
-				int ub = 0;
-				for(IntVar v:x){
-					lb+=v.getLB();
-					ub+=v.getUB();
-				}
-				IntVar sum = VF.bounded(StringUtils.randomName(),lb,ub,y.getSolver());
-				setPropagators(new PropSumEq(x,sum),new PropNotEqualX_Y(sum,y));break;
-			default:throw new UnsupportedOperationException();
-		}
+		setPropagators(new PropSumEq(x,y));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,15 +54,7 @@ public class Sum extends IntConstraint<IntVar> {
         for (int i = 0; i < n; i++) {
             sum += tuple[i];
         }
-		switch (op){
-			case EQ:return ESat.eval(sum == tuple[n]);
-			case GE:return ESat.eval(sum >= tuple[n]);
-			case GT:return ESat.eval(sum > tuple[n]);
-			case LE:return ESat.eval(sum <= tuple[n]);
-			case LT:return ESat.eval(sum < tuple[n]);
-			case NQ:return ESat.eval(sum != tuple[n]);
-			default:throw new UnsupportedOperationException();
-		}
+		return ESat.eval(sum == tuple[n]);
     }
 
     @Override
@@ -104,13 +67,4 @@ public class Sum extends IntConstraint<IntVar> {
         sumst.append(vars[vars.length - 1]);
         return sumst.toString();
     }
-
-	@Override
-	public Constraint makeOpposite(){
-		IntVar[] X = new IntVar[vars.length-1];
-		for(int i=0;i<X.length;i++){
-			X[i] = vars[i];
-		}
-		return new Sum(X,Operator.getOpposite(op),vars[X.length]);
-	}
 }

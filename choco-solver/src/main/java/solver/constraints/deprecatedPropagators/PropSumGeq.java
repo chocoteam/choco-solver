@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.sum;
+package solver.constraints.deprecatedPropagators;
 
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
@@ -41,6 +41,7 @@ import util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 21/07/13
  */
+@Deprecated
 public class PropSumGeq extends Propagator<IntVar> {
 
     final int n; // number of variables
