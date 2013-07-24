@@ -36,6 +36,7 @@ import solver.constraints.ICF;
 import solver.constraints.nary.sum.Scalar;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VF;
 import solver.variables.VariableFactory;
 import util.tools.StringUtils;
 
@@ -57,10 +58,10 @@ public class IntLinEqReifBuilder implements IBuilder {
         int c = exps.get(2).intValue();
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        int[] bounds = Scalar.getScalarBounds(bs, as);
-        IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        // this constraint is not poster, hence not returned, because it is reified
-		ICF.arithm(scalarVar,"=",c).reifyWith(r);
-		return new Constraint[]{ICF.scalar(bs, as, scalarVar)};
+		int[] b = Scalar.getScalarBounds(bs,as);
+		IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], solver);
+		solver.post(ICF.scalar(bs,as,p));
+		ICF.arithm(p,"=",c).reifyWith(r);
+		return new Constraint[]{};
     }
 }
