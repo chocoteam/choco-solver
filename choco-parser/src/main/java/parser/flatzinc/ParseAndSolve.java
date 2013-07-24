@@ -45,6 +45,7 @@ import solver.explanations.ExplanationFactory;
 import solver.propagation.hardcoded.PropagatorEngine;
 import solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import solver.propagation.hardcoded.VariableEngine;
+import solver.search.loop.monitors.SMF;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -192,6 +193,7 @@ public class ParseAndSolve {
 //			System.out.println(names.get(i)+" ("+nb.get(i)+")");
 //		}
 //		System.exit(0);
+        if(ParserConfiguration.PRINT_SEARCH) SMF.log(solver, true, true);
         solver.getSearchLoop().launch((!solver.getSearchLoop().getObjectivemanager().isOptimization()) && !gc.all);
     }
 
