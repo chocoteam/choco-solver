@@ -150,7 +150,6 @@ public class PropagatorEngine implements IPropagationEngine {
                 evtset.clear(v);
                 mask = lastProp.getMask(v);
                 lastProp.clearMask(v);
-                lastProp.decNbPendingEvt();
                 // run propagation on the specific event
                 lastProp.fineERcalls++;
                 lastProp.propagate(v, mask);
@@ -206,7 +205,6 @@ public class PropagatorEngine implements IPropagationEngine {
                     if (Configuration.PRINT_SCHEDULE) {
                         IPropagationEngine.Trace.printSchedule(prop);
                     }
-                    prop.incNbPendingEvt();
                     eventsets[aid].set(pindice);
                 } else if (Configuration.PRINT_SCHEDULE) {
                     IPropagationEngine.Trace.printAlreadySchedule(prop);
@@ -230,13 +228,13 @@ public class PropagatorEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
         //if (aid > -1) {
-        assert aid > -1 : "try to desactivate an unknown constraint";
-        // we don't remove the element from its master to avoid costly operations
-        BitSet evtset = eventsets[aid];
-        for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
-            propagator.clearMask(p);
-        }
-        evtset.clear();
+            assert aid > -1 : "try to desactivate an unknown constraint";
+            // we don't remove the element from its master to avoid costly operations
+            BitSet evtset = eventsets[aid];
+            for (int p = evtset.nextSetBit(0); p >= 0; p = evtset.nextSetBit(p + 1)) {
+                propagator.clearMask(p);
+            }
+            evtset.clear();
         propagator.flushPendingEvt();
     }
 

@@ -102,6 +102,11 @@ public class ConstantView implements IntVar<IntDelta> {
     }
 
     @Override
+    public int[] getPIndices() {
+        return new int[0];
+    }
+
+    @Override
     public Propagator getPropagator(int idx) {
         return null;
     }
