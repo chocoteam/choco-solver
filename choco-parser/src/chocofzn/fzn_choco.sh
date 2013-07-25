@@ -4,8 +4,6 @@ STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
-ENGINE=-1
-CSV=../out.csv
 JAVA_ARGS="-Xss64m -Xms64m -Xmx4096m"
 
 usage="\
@@ -31,7 +29,7 @@ OPTIONS:
         The argument n specifies the number of cores that are available.  (The default is $NB_NODES.)
 
     -tl <n>
-        Limit the resolution time of each problem instance to n seconds.  (The default is $TIME_LIMIT.)
+        Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
 		
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
@@ -111,7 +109,7 @@ then
     echo "%% No flatzinc file found"
     exit 1
 else
-    ARGS="$FILE -tl $TIME_LIMIT -p $NB_NODES -e $ENGINE -csv $CSV"
+    ARGS="$FILE -tl $TIME_LIMIT -p $NB_NODES"
 fi
 
 if test "$STOP_AT_FIRST" = "no"
