@@ -38,6 +38,7 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.exception.ContradictionException;
 import solver.objective.IntObjectiveManager;
 import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
@@ -47,11 +48,14 @@ import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.*;
+import solver.search.strategy.selectors.variables.ActivityBased;
+import solver.search.strategy.selectors.variables.DomOverWDeg;
+import solver.search.strategy.selectors.variables.FirstFail;
+import solver.search.strategy.selectors.variables.ImpactBased;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.Assignment;
-import solver.search.strategy.strategy.Once;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -290,13 +294,53 @@ public class FGoal {
 
 
     private static AbstractStrategy makeComplementarySearch(Datas datas) {
-        IntVar[] ivars = datas.getSearchVars();
+//        final IntVar[] ivars = datas.getSearchVars();
+        final IntVar[] ivars = datas.getOutputVars();
         Arrays.sort(ivars, new Comparator<IntVar>() {
             @Override
             public int compare(IntVar o1, IntVar o2) {
                 return o1.getDomainSize() - o2.getDomainSize();
             }
         });
-        return new Once(new InputOrder(ivars), new InDomainMin());
+//        return new Once(new InputOrder(ivars), new InDomainMin());
+        return new AbstractStrategy<IntVar>(ivars) {
+            boolean created = false;
+            Decision d = new Decision<IntVar>() {
+
+                @Override
+                public void apply() throws ContradictionException {
+                    for (int i = 0; i < ivars.length; i++) {
+                        if (!ivars[i].instantiated()) {
+                            ivars[i].instantiateTo(ivars[i].getLB(), this);
+                            ivars[i].getSolver().propagate();
+                        }
+                    }
+                }
+
+                @Override
+                public Object getDecisionValue() {
+                    return null;
+                }
+
+                @Override
+                public void free() {
+                    created = false;
+                }
+            };
+
+            @Override
+            public void init() throws ContradictionException {
+            }
+
+            @Override
+            public Decision<IntVar> getDecision() {
+                if (!created) {
+                    created = true;
+                    d.once(true);
+                    return d;
+                }
+                return null;
+            }
+        };
     }
 }
