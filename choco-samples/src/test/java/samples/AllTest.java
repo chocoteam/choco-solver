@@ -75,6 +75,9 @@ public class AllTest {
                    long nbSol) {
         this.prob = prob;
         this.args = arguments;
+		if(args==null){
+			args=new String[0];
+		}
 //        args = ArrayUtils.append(args, new String[]{"-engine", strat.name()});
         this.environment = env;
         this.properties = properties;
