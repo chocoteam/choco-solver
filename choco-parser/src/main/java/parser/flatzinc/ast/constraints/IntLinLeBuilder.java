@@ -53,28 +53,7 @@ public class IntLinLeBuilder implements IBuilder {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
-        Constraint cstr = null;
-        if (as.length == 1) {
-            if (as[0] == 1) {
-                cstr = ICF.arithm(bs[0], "<=", c);
-            } else if (as[0] == -1) {
-                cstr = ICF.arithm(bs[0], ">=", -c);
-            }
-        } else if (as.length == 2) {
-            if (as[0] == 1 && as[1] == 1) {
-                cstr = ICF.arithm(bs[0], "+", bs[1], "<=", c);
-            } else if (as[0] == 1 && as[1] == -1) {
-                cstr = ICF.arithm(bs[0], "-", bs[1], "<=", c);
-            } else if (as[0] == -1 && as[1] == 1) {
-                cstr = ICF.arithm(bs[1], "-", bs[0], "<=", c);
-            } else if (as[0] == -1 && as[1] == -1) {
-                cstr = ICF.arithm(bs[0], "+", bs[1], ">=", -c);
-            }
-        }
-        if (cstr == null) {
-//            cstr = IntConstraintFactory.scalar(bs, as, "<=", VF.fixed(c, solver));
-            cstr = IntConstraintFactory.scalar(bs, as, "<=", VariableFactory.fixed(c, solver));
-        }
+        Constraint cstr = IntConstraintFactory.scalar(bs, as, "<=", VariableFactory.fixed(c, solver));
         return new Constraint[]{cstr};
 
     }

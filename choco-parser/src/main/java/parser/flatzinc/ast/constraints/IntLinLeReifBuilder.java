@@ -55,28 +55,7 @@ public class IntLinLeReifBuilder implements IBuilder {
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
         BoolVar r = exps.get(3).boolVarValue(solver);
-        Constraint cstr = null;
-        if (as.length == 1) {
-            if (as[0] == 1) {
-                cstr = ICF.arithm(bs[0], "<=", c);
-            } else if (as[0] == -1) {
-                cstr = ICF.arithm(bs[0], ">=", -c);
-            }
-        } else
-        if (as.length == 2) {
-            if (as[0] == 1 && as[1] == 1) {
-                cstr = ICF.arithm(bs[0], "+", bs[1], "<=", c);
-            } else if (as[0] == 1 && as[1] == -1) {
-                cstr = ICF.arithm(bs[0], "-", bs[1], "<=", c);
-            } else if (as[0] == -1 && as[1] == 1) {
-                cstr = ICF.arithm(bs[1], "-", bs[0], "<=", c);
-            } else if (as[0] == -1 && as[1] == -1) {
-                cstr = ICF.arithm(bs[0], "+", bs[1], ">=", -c);
-            }
-        }
-        if (cstr == null) {
-            cstr = ICF.scalar(bs, as, "<=", VariableFactory.fixed(c, bs[0].getSolver()));
-        }
+        Constraint cstr = ICF.scalar(bs, as, "<=", VariableFactory.fixed(c, bs[0].getSolver()));
         cstr.reifyWith(r);
         return new Constraint[0];
     }

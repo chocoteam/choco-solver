@@ -881,6 +881,18 @@ public class IntConstraintFactory {
 		if(VARS.length==0){
 			return arithm(VF.fixed(0,SCALAR.getSolver()),OPERATOR,SCALAR);
 		}
+		if (COEFFS.length == 2 && SCALAR.instantiated()) {
+			int c = SCALAR.getValue();
+			if (COEFFS[0] == 1 && COEFFS[1] == 1) {
+				return ICF.arithm(VARS[0], "+", VARS[1], "<=", c);
+			} else if (COEFFS[0] == 1 && COEFFS[1] == -1) {
+				return ICF.arithm(VARS[0], "-", VARS[1], "<=", c);
+			} else if (COEFFS[0] == -1 && COEFFS[1] == 1) {
+				return ICF.arithm(VARS[1], "-", VARS[0], "<=", c);
+			} else if (COEFFS[0] == -1 && COEFFS[1] == -1) {
+				return ICF.arithm(VARS[0], "+", VARS[1], ">=", -c);
+			}
+		}
 		// detect sums
 		int n = VARS.length;
 		int nbOne = 0;
@@ -944,15 +956,13 @@ public class IntConstraintFactory {
 			}
 		}
 		//
+		Solver s = VARS[0].getSolver();
 		if(OPERATOR.equals("=")){
-			return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
+			return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1, s);
 		}
 		int[] b = Scalar.getScalarBounds(VARS,COEFFS);
-		IntVar p = VF.bounded(StringUtils.randomName(),b[0],b[1],SCALAR.getSolver());
-		SCALAR.getSolver().post(
-				Scalar.buildScalar(VARS, COEFFS, p, 1, VARS[0].getSolver())
-		);
-//		SCALAR.getSolver().post(scalar(VARS,COEFFS,"=",p));
+		IntVar p = VF.bounded(StringUtils.randomName(),b[0],b[1],s);
+		s.post(Scalar.buildScalar(VARS, COEFFS, p, 1, s));
 		return arithm(p,OPERATOR,SCALAR);
 	}
 
