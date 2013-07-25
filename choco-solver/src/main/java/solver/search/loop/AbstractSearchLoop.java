@@ -373,7 +373,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setObjectivemanager(ObjectiveManager objectivemanager) {
         this.objectivemanager = objectivemanager;
-        this.measures.declareObjective();
+        if(objectivemanager.isOptimization()){
+            this.measures.declareObjective();
+        }
     }
 
     public void restartAfterEachSolution(boolean does) {

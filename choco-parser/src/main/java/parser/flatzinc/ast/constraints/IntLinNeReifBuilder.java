@@ -33,9 +33,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
+import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.VF;
 
 import java.util.List;
 
@@ -54,7 +55,8 @@ public class IntLinNeReifBuilder implements IBuilder {
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
         BoolVar r = exps.get(3).boolVarValue(solver);
-/*        Constraint cstr = null;
+
+        Constraint cstr = null;
         if (as.length == 1) {
             if (as[0] == 1) {
                 cstr = ICF.arithm(bs[0], "!=", c);
@@ -77,8 +79,5 @@ public class IntLinNeReifBuilder implements IBuilder {
         }
         cstr.reifyWith(r);
         return new Constraint[0];
-*/
-		ICF.scalar(bs,as,"!=", VariableFactory.fixed(c, bs[0].getSolver())).reifyWith(r);
-		return new Constraint[]{};
     }
 }

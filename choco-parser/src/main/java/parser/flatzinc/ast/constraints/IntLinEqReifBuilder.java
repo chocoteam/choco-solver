@@ -58,13 +58,13 @@ public class IntLinEqReifBuilder implements IBuilder {
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         Constraint cstr = null;
-        /*if (as.length == 1) {
+        if (as.length == 1) {
             if (as[0] == 1) {
                 cstr = ICF.arithm(bs[0], "=", c);
             } else if (as[0] == -1) {
                 cstr = ICF.arithm(bs[0], "=", -c);
             }
-        } else */if (as.length == 2) {
+        } else if (as.length == 2) {
             if (as[0] == 1 && as[1] == 1) {
                 cstr = ICF.arithm(bs[0], "+", bs[1], "=", c);
             } else if (as[0] == 1 && as[1] == -1) {
