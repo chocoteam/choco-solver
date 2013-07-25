@@ -101,7 +101,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private int[] vindices;
     // the i^th event mask stores modification events on the i^th variable, since the last propagation
     protected int[] eventmasks;
-    protected int[] conditions; // propaation conditions per variables
 
 
     protected static final short NEW = 0, REIFIED = 1, ACTIVE = 2, PASSIVE = 3;
@@ -193,10 +192,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.vars = vars.clone();
         this.vindices = new int[vars.length];
         this.eventmasks = new int[reactToFineEvt ? vars.length : 1];
-        this.conditions = new int[vars.length];
         for (int v = 0; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
-            conditions[v] = getPropagationConditions(v);
                     /*if (!vars[v].instantiated()) {
                         nbNi++;
                     }*/
@@ -244,9 +241,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         vindices = new int[vars.length];
         System.arraycopy(itmp, 0, vindices, 0, itmp.length);
 
-        itmp = this.conditions;
-        conditions = new int[vars.length];
-        System.arraycopy(itmp, 0, conditions, 0, itmp.length);
 
         if (reactToFineEvt) {
             itmp = this.eventmasks;
@@ -255,7 +249,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
-            conditions[v] = getPropagationConditions(v);
         }
 
     }
@@ -333,7 +326,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return <code>true</code> if <code>this</code> should be scheduled, <code>false</code> otherwise.
      */
     public boolean advise(int idxVarInProp, int mask) {
-        return (mask & conditions[idxVarInProp]) != 0;
+        return (mask & getPropagationConditions(idxVarInProp)) != 0;
     }
 
     /**
@@ -367,7 +360,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         environment.save(operations[NEW]);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
-            vars[v].recordMask(conditions[v]);
+            vars[v].recordMask(getPropagationConditions(v));
         }
     }
 
@@ -377,7 +370,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         environment.save(operations[REIFIED]);
         // update activity mask of variables
         for (int v = 0; v < vars.length; v++) {
-            vars[v].recordMask(conditions[v]);
+            vars[v].recordMask(getPropagationConditions(v));
         }
     }
 
