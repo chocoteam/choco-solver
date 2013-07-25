@@ -45,9 +45,6 @@ import java.io.Serializable;
  */
 public class IntCircularQueue implements Serializable {
 
-    private static final int JOKER = Integer.MIN_VALUE;
-
-
     int[] elementData;
     // head points to the first logical element in the array, and
     // tail points to the element following the last.  This means
@@ -68,6 +65,7 @@ public class IntCircularQueue implements Serializable {
      * @return the powers of 2 value immedialty greater to <code>size</code>
      */
     private static int closestGreater2n(int size) {
+        if (size == 0) return 2;
         int _size = Integer.highestOneBit(size) << 1;
         assert (_size >= size);
         return _size;
@@ -83,12 +81,12 @@ public class IntCircularQueue implements Serializable {
     // The convert() method takes a logical index (as if head was
     // always 0) and calculates the index within elementData
 
-    private int convert(int index, int base) {
-        return (index + base) & (capacity - 1);
+    private int convert(int base, int delta) {
+        return (base + delta) & (capacity - 1);
     }
 
     public boolean isEmpty() {
-        return size == 0;
+        return head == tail;
     }
 
     public int size() {
@@ -103,25 +101,26 @@ public class IntCircularQueue implements Serializable {
         return elementData[convert(index, head)];
     }
 
-    public boolean add(int e) {
-        elementData[tail] = e;
-        tail = convert(1, tail);
-        if (size < capacity) size++; //otherwise, "pop" the last one
-        else head = convert(1, head);
+    public boolean addFirst(int e) {
+//        elements[head = (head - 1) & (elements.length - 1)] = e;
+//        if (head == tail)
+//            doubleCapacity();
+        elementData[head = convert(head, -1)] = e;
+        size++;
+        if (head == tail)
+            doubleCapacity();
         return true;
     }
 
-    public int indexOf(int elem) {
-        if (elem == JOKER) {
-            for (int i = 0; i < size; i++)
-                if (elementData[convert(i, head)] == JOKER)
-                    return i;
-        } else {
-            for (int i = 0; i < size; i++)
-                if (elem == elementData[convert(i, head)])
-                    return i;
-        }
-        return -1;
+    public boolean addLast(int e) {
+//        elements[tail] = e;
+//        if ( (tail = (tail + 1) & (elements.length - 1)) == head)
+//            doubleCapacity();
+        elementData[tail] = e;
+        size++;
+        if ((tail = convert(tail, 1)) == head)
+            doubleCapacity();
+        return true;
     }
 
     /**
@@ -130,15 +129,15 @@ public class IntCircularQueue implements Serializable {
      * It is optimized for removing first and last elements
      * but also allows you to remove in the middle of the list.
      */
-    public int pop() {
-        int pos = convert(0, head);
+    public int pollFirst() {
+        int pos = convert(head, 0);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         int tmp = elementData[pos];
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
         if (pos == head) {
-            head = convert(1, head);
+            head = convert(head, 1);
         }
         size--;
         return tmp;
@@ -150,68 +149,36 @@ public class IntCircularQueue implements Serializable {
      * It is optimized for removing first and last elements
      * but also allows you to remove in the middle of the list.
      */
-    public int popLast() {
-        int pos = convert(-1, tail);
+    public int pollLast() {
+        int pos = convert(tail, -1);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         int tmp = elementData[pos];
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
-        if (pos == tail - 1) {
-            tail = pos;
-        }
+        tail = pos;
         size--;
         return tmp;
     }
 
     /**
-     * {@inheritDoc}
-     * This method is the main reason we re-wrote the class.
-     * It is optimized for removing first and last elements
-     * but also allows you to remove in the middle of the list.
+     * Double the capacity of this deque.  Call only when full, i.e.,
+     * when head and tail have wrapped around to become equal.
      */
-    public int remove() {
-        int pos = convert(0, head);
-        // an interesting application of try/finally is to avoid
-        // having to use local variables
-        int tmp = elementData[pos];
-//        elementData[pos] = null; // Let gc do its work
-        // optimized for FIFO access, i.e. adding to back and
-        // removing from front
-        if (pos == head) {
-            head = convert(1, head);
-        }
-        size--;
-        return tmp;
+    private void doubleCapacity() {
+        assert head == tail;
+        int p = head;
+        int n = capacity;
+        int r = n - p; // number of elements to the right of p
+        int newCapacity = n << 1;
+        if (newCapacity < 0)
+            throw new IllegalStateException("Sorry, deque too big");
+        int[] a = new int[newCapacity];
+        System.arraycopy(elementData, p, a, 0, r);
+        System.arraycopy(elementData, 0, a, r, p);
+        elementData = a;
+        head = 0;
+        tail = n;
+        capacity = newCapacity;
     }
-
-    /**
-     * {@inheritDoc}
-     * This method is the main reason we re-wrote the class.
-     * It is optimized for removing first and last elements
-     * but also allows you to remove in the middle of the list.
-     */
-    public int remove(int index) {
-        int pos = convert(index, head);
-        int tmp = elementData[pos];
-//        elementData[pos] = null; // Let gc do its work
-        // optimized for FIFO access, i.e. adding to back and
-        // removing from front
-        if (pos - head == 0) {
-            head = convert(1, head);
-        } else if (pos - tail == 0) {
-            tail = convert(capacity, tail - 1);
-        } else {
-            if (pos > head && pos > tail) { // tail/head/pos
-                System.arraycopy(elementData, head, elementData, head + 1, pos - head);
-                head = convert(1, head);
-            } else {
-                System.arraycopy(elementData, pos + 1, elementData, pos, tail - pos - 1);
-                tail = convert(capacity, tail - 1);
-            }
-        }
-        size--;
-        return tmp;
-    }
-
 }

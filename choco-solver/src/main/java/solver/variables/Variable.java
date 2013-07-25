@@ -111,6 +111,8 @@ public interface Variable<D extends IDelta> extends Identity, Serializable, Comp
      */
     int getNbProps();
 
+    int[] getPIndices();
+
     /**
      * Return the position of the variable in the propagator at position pidx
      *
