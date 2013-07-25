@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.VF;
+import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -54,13 +54,14 @@ public class IntLinLeBuilder implements IBuilder {
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
         int c = exps.get(2).intValue();
         Constraint cstr = null;
-        if (as.length == 1) {
+        /*if (as.length == 1) {
             if (as[0] == 1) {
                 cstr = ICF.arithm(bs[0], "<=", c);
             } else if (as[0] == -1) {
                 cstr = ICF.arithm(bs[0], ">=", -c);
             }
-        } else if (as.length == 2) {
+        } else */
+        /*if (as.length == 2) {
             if (as[0] == 1 && as[1] == 1) {
                 cstr = ICF.arithm(bs[0], "+", bs[1], "<=", c);
             } else if (as[0] == 1 && as[1] == -1) {
@@ -70,10 +71,12 @@ public class IntLinLeBuilder implements IBuilder {
             } else if (as[0] == -1 && as[1] == -1) {
                 cstr = ICF.arithm(bs[0], "+", bs[1], ">=", -c);
             }
-        }
+        }     */
         if (cstr == null) {
-            cstr = IntConstraintFactory.scalar(bs, as, "<=", VF.fixed(c, solver));
+//            cstr = IntConstraintFactory.scalar(bs, as, "<=", VF.fixed(c, solver));
+            cstr = IntConstraintFactory.scalar(bs, as, "<=", VariableFactory.fixed(c, solver));
         }
         return new Constraint[]{cstr};
+
     }
 }

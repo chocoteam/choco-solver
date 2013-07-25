@@ -33,10 +33,11 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
+import solver.constraints.nary.sum.Scalar;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
+import util.tools.StringUtils;
 
 import java.util.List;
 
@@ -57,13 +58,13 @@ public class IntLinEqReifBuilder implements IBuilder {
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         Constraint cstr = null;
-        if (as.length == 1) {
+        /*if (as.length == 1) {
             if (as[0] == 1) {
                 cstr = ICF.arithm(bs[0], "=", c);
             } else if (as[0] == -1) {
                 cstr = ICF.arithm(bs[0], "=", -c);
             }
-        } else if (as.length == 2) {
+        } else */if (as.length == 2) {
             if (as[0] == 1 && as[1] == 1) {
                 cstr = ICF.arithm(bs[0], "+", bs[1], "=", c);
             } else if (as[0] == 1 && as[1] == -1) {
@@ -75,7 +76,10 @@ public class IntLinEqReifBuilder implements IBuilder {
             }
         }
         if (cstr == null) {
-            cstr = IntConstraintFactory.scalar(bs, as, "=", VF.fixed(c, solver));
+            int[] b = Scalar.getScalarBounds(bs, as);
+            IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], solver);
+            solver.post(ICF.scalar(bs, as, p));
+            cstr = ICF.arithm(p, "=", c);
         }
         cstr.reifyWith(r);
         return new Constraint[0];

@@ -51,11 +51,7 @@ public class Scalar extends IntConstraint<IntVar> {
         super(vars, solver);
         this.coeffs = coeffs.clone();
         this.b = b;
-        if (vars.length > PropBigSum.BIG_SUM_SIZE) {
-            setPropagators(new PropBigSum(vars, coeffs, pos, b));
-        } else {
-            setPropagators(new PropScalarEq(vars, coeffs, pos, b));
-        }
+		setPropagators(new PropScalarEq(vars, coeffs, pos, b));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
