@@ -884,13 +884,13 @@ public class IntConstraintFactory {
 		if (COEFFS.length == 2 && SCALAR.instantiated()) {
 			int c = SCALAR.getValue();
 			if (COEFFS[0] == 1 && COEFFS[1] == 1) {
-				return ICF.arithm(VARS[0], "+", VARS[1], "<=", c);
+				return ICF.arithm(VARS[0], "+", VARS[1], OPERATOR, c);
 			} else if (COEFFS[0] == 1 && COEFFS[1] == -1) {
-				return ICF.arithm(VARS[0], "-", VARS[1], "<=", c);
+				return ICF.arithm(VARS[0], "-", VARS[1], OPERATOR, c);
 			} else if (COEFFS[0] == -1 && COEFFS[1] == 1) {
-				return ICF.arithm(VARS[1], "-", VARS[0], "<=", c);
+				return ICF.arithm(VARS[1], "-", VARS[0], OPERATOR, c);
 			} else if (COEFFS[0] == -1 && COEFFS[1] == -1) {
-				return ICF.arithm(VARS[0], "+", VARS[1], ">=", -c);
+				return ICF.arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR), -c);
 			}
 		}
 		// detect sums
