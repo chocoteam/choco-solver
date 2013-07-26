@@ -33,6 +33,7 @@ import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.ICF;
 import solver.search.loop.monitors.IMonitorSolution;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VF;
 
@@ -152,6 +153,21 @@ public class ObjectiveTest {
         solver.getSearchLoop().reset();
         solver.findSolution();
         Assert.assertEquals(iv.getValue(), 6);
+    }
+
+    @Test(groups = "1s")
+    public void test4() {
+        Solver solver = new Solver();
+        IntVar iv = VF.enumerated("iv", 0, 10, solver);
+        BoolVar v = ICF.arithm(iv, "<=", 2).reif();
+
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        System.out.println("Minimum1: " + iv + " : " + solver.isEntailed());
+
+        solver.getSearchLoop().reset();
+
+        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, v);
+        System.out.println("Minimum2: " + iv + " : " + solver.isEntailed());
     }
 
 }

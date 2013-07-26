@@ -67,6 +67,7 @@ public class LastSolutionRecorder implements ISolutionRecorder, IMonitorClose {
 			}catch (ContradictionException e){
 				throw new UnsupportedOperationException("restoring the last solution ended in a failure");
 			}
+            solver.getEngine().flush();
 		}
 	}
 
