@@ -68,11 +68,13 @@ public class ThreadSolver extends Thread {
     }
 
     public void findSolution() {
+        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver));
         this.saf = true;
         start();
     }
 
     public void findAllSolutions() {
+        solver.getSearchLoop().setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, solver));
         this.saf = false;
         start();
     }
