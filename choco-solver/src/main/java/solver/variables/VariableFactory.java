@@ -29,10 +29,7 @@ package solver.variables;
 
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
 import solver.variables.fast.BitsetArrayIntVarImpl;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
@@ -713,7 +710,12 @@ public class VariableFactory {
             return minus(VAR);
         } else {
 			Solver s = VAR.getSolver();
-			IntVar abs = bounded(StringUtils.randomName(),0,Math.max(VAR.getLB(),VAR.getUB()),s);
+            IntVar abs;
+            if(VAR.hasEnumeratedDomain()){
+                abs = enumerated(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }else{
+                abs = bounded(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }
 			s.post(IntConstraintFactory.absolute(abs,VAR));
             return abs;
         }
