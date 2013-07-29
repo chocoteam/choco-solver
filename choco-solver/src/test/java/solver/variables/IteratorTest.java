@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.nary.sum.Sum;
 import solver.constraints.ternary.Max;
+import solver.exception.ContradictionException;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -439,7 +440,12 @@ public class IteratorTest {
     public void testAbs1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-        DisposableValueIterator vit = var.getValueIterator(true);
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
+		DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
         Assert.assertTrue(vit.hasNext());
@@ -453,6 +459,11 @@ public class IteratorTest {
     public void testAbs2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -467,6 +478,11 @@ public class IteratorTest {
     public void testAbs3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -483,6 +499,11 @@ public class IteratorTest {
     public void testAbs4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
