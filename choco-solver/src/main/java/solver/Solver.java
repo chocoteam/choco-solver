@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.PropFalse;
 import solver.constraints.nary.cnf.PropTrue;
+import solver.constraints.nary.cnf.SatConstraint;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -125,6 +126,9 @@ public class Solver implements Serializable {
      * Two basic constants ZERO and ONE, cached to avoid multiple useless occurrences.
      */
     public final BoolConstantView ZERO, ONE;
+
+
+    protected SatConstraint minisat;
 
     /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
@@ -425,6 +429,20 @@ public class Solver implements Serializable {
         }
     }
 
+    /**
+     * Return a constraint embedding a minisat solver.
+     * It is highly recommanded that there is only once instance of this constraint in a solver.
+     * So a call to this method will create and post the constraint if it does not exist.
+     * @return the minisat constraint
+     */
+    public SatConstraint getMinisat() {
+        if (minisat == null) {
+            minisat = new SatConstraint(this);
+            this.post(minisat);
+        }
+        return minisat;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// RELATED TO RESOLUTION //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,6 +501,7 @@ public class Solver implements Serializable {
      * @return <code>true</code> if and only if a solution has been found.
      */
     public boolean findSolution() {
+        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(true);
         return measures.getSolutionCount() > 0;
     }
@@ -507,6 +526,7 @@ public class Solver implements Serializable {
      * @return the number of found solutions.
      */
     public long findAllSolutions() {
+        this.search.setObjectivemanager(new IntObjectiveManager(null, ResolutionPolicy.SATISFACTION, this));
         solve(false);
         return measures.getSolutionCount();
     }
@@ -514,7 +534,7 @@ public class Solver implements Serializable {
     /**
      * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
      * Restores the best solution found so far (if any)
-	 *
+     *
      * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
      * @param objective the variable to optimize
      */
@@ -526,29 +546,29 @@ public class Solver implements Serializable {
             throw new SolverException("No objective variable has been defined");
         }
         this.search.setObjectivemanager(new IntObjectiveManager(objective, policy, this));
-		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
+        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
         solve(false);
     }
 
 
-	/**
-	 * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
-	 * Restores the best solution found so far (if any)
-	 *
-	 * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
-	 * @param objective the variable to optimize
-	 */
-	public void findOptimalSolution(ResolutionPolicy policy, RealVar objective) {
-		if (policy == ResolutionPolicy.SATISFACTION) {
-			throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
-		}
-		if (objective == null) {
-			throw new SolverException("No objective variable has been defined");
-		}
-		this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this));
-		search.plugSearchMonitor(new LastSolutionRecorder(new Solution(),true,this));
-		solve(false);
-	}
+    /**
+     * Attempts optimize the value of the <code>objective</code> variable w.r.t. to the optimization <code>policy</code>.
+     * Restores the best solution found so far (if any)
+     *
+     * @param policy    optimization policy, among ResolutionPolicy.MINIMIZE and ResolutionPolicy.MAXIMIZE
+     * @param objective the variable to optimize
+     */
+    public void findOptimalSolution(ResolutionPolicy policy, RealVar objective) {
+        if (policy == ResolutionPolicy.SATISFACTION) {
+            throw new SolverException("Solver.findOptimalSolution(...) can not be called with ResolutionPolicy.SATISFACTION.");
+        }
+        if (objective == null) {
+            throw new SolverException("No objective variable has been defined");
+        }
+        this.search.setObjectivemanager(new RealObjectiveManager(objective, policy, this));
+        search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, this));
+        solve(false);
+    }
 
     /**
      * This method should not be called externally. It launches the resolution process.

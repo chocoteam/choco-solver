@@ -30,10 +30,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import solver.Solver;
-import solver.constraints.binary.Absolute;
-import solver.constraints.binary.DistanceXYC;
-import solver.constraints.binary.PropEqualX_Y;
-import solver.constraints.binary.Square;
+import solver.constraints.binary.*;
 import solver.constraints.extension.binary.BinCSP;
 import solver.constraints.extension.binary.BinRelation;
 import solver.constraints.extension.nary.LargeCSP;
@@ -41,6 +38,8 @@ import solver.constraints.extension.nary.LargeRelation;
 import solver.constraints.nary.PropDiffN;
 import solver.constraints.nary.PropKnapsack;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.conditions.Condition;
+import solver.constraints.nary.alldifferent.conditions.ConditionnalAllDifferent;
 import solver.constraints.nary.among.Among;
 import solver.constraints.nary.automata.CostRegular;
 import solver.constraints.nary.automata.FA.IAutomaton;
@@ -51,8 +50,6 @@ import solver.constraints.nary.channeling.DomainChanneling;
 import solver.constraints.nary.channeling.InverseChanneling;
 import solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import solver.constraints.nary.circuit.*;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
-import solver.constraints.nary.cnf.LogOp;
 import solver.constraints.nary.count.Count;
 import solver.constraints.nary.cumulative.PropIncrementalCumulative;
 import solver.constraints.nary.element.Element;
@@ -61,9 +58,10 @@ import solver.constraints.nary.lex.Lex;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.nary.min_max.MaxOfAList;
 import solver.constraints.nary.min_max.MinOfAList;
+import solver.constraints.nary.nValue.Differences;
 import solver.constraints.nary.nValue.NValues;
 import solver.constraints.nary.sum.PropBoolSum;
-import solver.constraints.nary.sum.PropSumEq;
+import solver.constraints.nary.sum.Scalar;
 import solver.constraints.nary.sum.Sum;
 import solver.constraints.nary.tree.PropAntiArborescences;
 import solver.constraints.nary.tree.PropKLoops;
@@ -72,6 +70,7 @@ import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
 import solver.variables.*;
 import util.tools.ArrayUtils;
+import util.tools.StringUtils;
 
 /**
  * A Factory to declare constraint based on integer variables (only).
@@ -410,6 +409,23 @@ public class IntConstraintFactory {
         return new AllDifferent(VARS, VARS[0].getSolver(), AllDifferent.Type.valueOf(CONSISTENCY));
     }
 
+	/**
+	 * Alldifferent holds on the subset of VARS which satisfies the given CONDITION
+	 * @param VARS		collection of variables
+	 * @param CONDITION	condition defining which variables should be constrained
+	 */
+	public static Constraint alldifferent_conditionnal(IntVar[] VARS, Condition CONDITION) {
+		return new ConditionnalAllDifferent(VARS,CONDITION,false);
+	}
+
+	/**
+	 * Variables in VARS must either be different or equal to 0
+	 * @param VARS    			collection of variables
+	 */
+	public static Constraint alldifferent_except_0(IntVar[] VARS) {
+		return alldifferent_conditionnal(VARS,Condition.EXCEPT_0);
+	}
+
     /**
      * NVAR is the number of variables of the collection VARIABLES that take their value in VALUES.
      *
@@ -501,42 +517,6 @@ public class IntConstraintFactory {
     }
 
     /**
-     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
-     *
-     * @param TREE   the syntactic tree
-     * @param SOLVER solver is required, as the TREE can be declared without any variables
-     * @return
-     */
-    public static ConjunctiveNormalForm clauses(LogOp TREE, Solver SOLVER) {
-        return new ConjunctiveNormalForm(TREE, SOLVER);
-    }
-
-    /**
-     * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
-     *
-     * @param POSLITS positive literals
-     * @param NEGLITS negative literals
-     */
-    public static ConjunctiveNormalForm clauses(BoolVar[] POSLITS, BoolVar[] NEGLITS) {
-        Solver solver;
-        if (POSLITS.length > 0) {
-            solver = POSLITS[0].getSolver();
-        } else {
-            solver = NEGLITS[0].getSolver();
-        }
-        BoolVar[] lits = new BoolVar[POSLITS.length + NEGLITS.length];
-        int i = 0;
-        for (; i < POSLITS.length; i++) {
-            lits[i] = POSLITS[i];
-        }
-        for (int j = 0; j < NEGLITS.length; j++) {
-            lits[j + i] = NEGLITS[j].not();
-        }
-        LogOp tree = LogOp.or(lits);
-        return new ConjunctiveNormalForm(tree, solver);
-    }
-
-    /**
      * Ensures that the assignment of a sequence of variables is recognized by CAUTOMATON, a deterministic finite automaton,
      * and that the sum of the costs associated to each assignment is bounded by the cost variable.
      * This version allows to specify different costs according to the automaton state at which the assignment occurs
@@ -609,7 +589,7 @@ public class IntConstraintFactory {
         Solver solver = X[0].getSolver();
         Constraint diffNCons = new Constraint(ArrayUtils.append(X, Y, WIDTH, HEIGHT), solver);
         // (not idempotent, so requires two propagators)
-        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, true), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
+        diffNCons.setPropagators(new PropDiffN(X, Y, WIDTH, HEIGHT, false), new PropDiffN(X, Y, WIDTH, HEIGHT, false));
 		if(USE_CUMUL){
 			IntVar[] EX = new IntVar[X.length];
 			IntVar[] EY = new IntVar[X.length];
@@ -852,6 +832,19 @@ public class IntConstraintFactory {
         return new NValues(VARS, NVALUES, NVALUES.getSolver(), types);
     }
 
+	/**
+	 * Filters the conjunction of NValue and difference constraints
+	 * (propagator AMNV(Gci,RMD,R13) of Fages and Lapègue, CP'13)
+	 * Difference constraint should be propagated separately in addition
+	 * @param VARS		collection of variables
+	 * @param NVALUES	limit variable
+	 * @param DIFF		set of difference constraints
+	 * @return a NValue constraint
+	 */
+	public static NValues nvalues(IntVar[] VARS, IntVar NVALUES, Differences DIFF) {
+		return new NValues(VARS,NVALUES,DIFF);
+	}
+
     /**
      * Enforces the sequence of VARS to be a word
      * recognized by the deterministic finite automaton AUTOMATON.
@@ -873,24 +866,108 @@ public class IntConstraintFactory {
      * @param SCALAR a variable
      */
     public static Constraint scalar(IntVar[] VARS, int[] COEFFS, IntVar SCALAR) {
-        // better to put an arithm constraint when possible
-        if (VARS.length == 2 && SCALAR.instantiated() && (COEFFS[0] == 1 || COEFFS[0] == -1) && (COEFFS[1] == 1 || COEFFS[1] == -1)) {
-            if (COEFFS[0] == 1) {
-                String op = (COEFFS[1] == 1) ? "+" : "-";
-                return IntConstraintFactory.arithm(VARS[0], op, VARS[1], "=", SCALAR.getValue());
-            } else {
-                if (COEFFS[1] == 1) {
-                    return IntConstraintFactory.arithm(VARS[1], "-", VARS[0], "=", SCALAR.getValue());
-                } else {
-                    return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", -SCALAR.getValue());
-                }
-            }
-        }
-        return Sum.buildScalar(VARS, COEFFS, SCALAR, 1, VARS[0].getSolver());
-    }
+		return scalar(VARS, COEFFS, "=", SCALAR);
+	}
 
-    /**
-     * Creates a subcircuit constraint which ensures that
+	/**
+	 * A scalar constraint which ensures that Sum(VARS[i]*COEFFS[i]) OPERATOR SCALAR
+	 * @param VARS		a collection of IntVar
+	 * @param COEFFS	a collection of int, for which |VARS|=|COEFFS|
+	 * @param OPERATOR	an operator in {"=", "!=", ">","<",">=","<="}
+	 * @param SCALAR	an IntVar
+	 * @return a scalar constraint
+	 */
+	public static Constraint scalar(IntVar[] VARS, int[] COEFFS, String OPERATOR, IntVar SCALAR) {
+		if(VARS.length==0){
+			return arithm(VF.fixed(0,SCALAR.getSolver()),OPERATOR,SCALAR);
+		}
+		if (COEFFS.length == 2 && SCALAR.instantiated()) {
+			int c = SCALAR.getValue();
+			if (COEFFS[0] == 1 && COEFFS[1] == 1) {
+				return ICF.arithm(VARS[0], "+", VARS[1], OPERATOR, c);
+			} else if (COEFFS[0] == 1 && COEFFS[1] == -1) {
+				return ICF.arithm(VARS[0], "-", VARS[1], OPERATOR, c);
+			} else if (COEFFS[0] == -1 && COEFFS[1] == 1) {
+				return ICF.arithm(VARS[1], "-", VARS[0], OPERATOR, c);
+			} else if (COEFFS[0] == -1 && COEFFS[1] == -1) {
+				return ICF.arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR), -c);
+			}
+		}
+		// detect sums
+		int n = VARS.length;
+		int nbOne = 0;
+		int nbMinusOne = 0;
+		int nbZero = 0;
+		for(int i=0;i<n;i++){
+			if(COEFFS[i]==1){
+				nbOne++;
+			}
+			else if (COEFFS[i]==-1){
+				nbMinusOne++;
+			}else if (COEFFS[i]==0){
+				nbZero++;
+			}
+		}
+		if(nbZero>0){
+			IntVar[] nonZerosVars = new IntVar[n-nbZero];
+			int[] nonZerosCoefs   = new int[n-nbZero];
+			int k = 0;
+			for(int i=0;i<n;i++){
+				if (COEFFS[i]!=0){
+					nonZerosVars[k] = VARS[i];
+					nonZerosCoefs[k]= COEFFS[i];
+					k++;
+				}
+			}
+			return scalar(nonZerosVars,nonZerosCoefs,OPERATOR,SCALAR);
+		}
+		if(nbOne+nbMinusOne==n){
+			if(nbOne==n){
+				return sum(VARS,OPERATOR,SCALAR);
+			}else if(nbMinusOne==n){
+				return sum(VARS,Operator.getFlip(OPERATOR),VF.minus(SCALAR));
+			}else if(SCALAR.instantiated()){
+				if(nbMinusOne==1){
+					IntVar[] v2 = new IntVar[n-1];
+					IntVar s2 = null;
+					int k = 0;
+					for(int i=0;i<n;i++){
+						if (COEFFS[i]!=-1){
+							v2[k++] = VARS[i];
+						}else{
+							s2 = VARS[i];
+						}
+					}
+					return sum(v2,OPERATOR,VF.offset(s2,SCALAR.getValue()));
+				}
+				else if(nbOne==1){
+					IntVar[] v2 = new IntVar[n-1];
+					IntVar s2 = null;
+					int k = 0;
+					for(int i=0;i<n;i++){
+						if (COEFFS[i]!=1){
+							v2[k++] = VARS[i];
+						}else{
+							s2 = VARS[i];
+						}
+					}
+					return sum(v2,Operator.getFlip(OPERATOR),VF.offset(s2,-SCALAR.getValue()));
+				}
+			}
+		}
+		//
+		Solver s = VARS[0].getSolver();
+		if(OPERATOR.equals("=")){
+			return Scalar.buildScalar(VARS, COEFFS, SCALAR, 1, s);
+		}
+		int[] b = Scalar.getScalarBounds(VARS,COEFFS);
+		IntVar p = VF.bounded(StringUtils.randomName(),b[0],b[1],s);
+		s.post(Scalar.buildScalar(VARS, COEFFS, p, 1, s));
+		return arithm(p,OPERATOR,SCALAR);
+	}
+
+	/**
+	 * Creates a subcircuit constraint which ensures that
      * <p/> the elements of vars define a single circuit of subcircuitSize nodes where
      * <p/> VARS[i] = OFFSET+j means that j is the successor of i.
      * <p/> and VARS[i] = OFFSET+i means that i is not part of the circuit
@@ -913,7 +990,7 @@ public class IntConstraintFactory {
         Solver solver = VARS[0].getSolver();
         IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
         Constraint c = new Constraint(ArrayUtils.append(VARS, new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}), solver);
-        c.addPropagators(new PropSumEq(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, new int[]{1, 1}, 2, n));
+		c.addPropagators(new PropEqualXY_C(new IntVar[]{nbLoops, SUBCIRCUIT_SIZE}, n));
         c.addPropagators(new PropIndexValue(VARS, OFFSET, nbLoops));
         c.addPropagators(new PropSubcircuit(VARS, OFFSET, SUBCIRCUIT_SIZE));
         c.addPropagators(AllDifferent.createPropagators(VARS, AllDifferent.Type.AC));
@@ -929,12 +1006,40 @@ public class IntConstraintFactory {
      * @param SUM  a variable
      */
     public static Constraint sum(IntVar[] VARS, IntVar SUM) {
-        // better to put an arithm constraint when possible
-        if (VARS.length == 2 && SUM.instantiated()) {
-            return IntConstraintFactory.arithm(VARS[0], "+", VARS[1], "=", SUM.getValue());
-        }
-        return Sum.buildSum(VARS, SUM, VARS[0].getSolver());
+        return sum(VARS,"=",SUM);
     }
+
+	/**
+	 * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM.
+	 * @param VARS		a collection of IntVar
+	 * @param OPERATOR	operator in {"=", "!=", ">","<",">=","<="}
+	 * @param SUM		an IntVar
+	 * @return	a sum constraint
+	 */
+	public static Constraint sum(IntVar[] VARS, String OPERATOR, IntVar SUM) {
+		if (VARS.length==1){
+			if(SUM.instantiated()){
+				return arithm(VARS[0],OPERATOR,SUM.getValue());
+			}else{
+				return arithm(VARS[0],OPERATOR,SUM);
+			}
+		}else if (VARS.length == 2 && SUM.instantiated()) {
+			return arithm(VARS[0],"+",VARS[1],OPERATOR,SUM.getValue());
+		}else{
+			if(OPERATOR.equals("=")){
+				return new Sum(VARS,SUM);
+			}
+			int lb = 0;
+			int ub = 0;
+			for(IntVar v:VARS){
+				lb += v.getLB();
+				ub += v.getUB();
+			}
+			IntVar p = VF.bounded(StringUtils.randomName(),lb,ub,SUM.getSolver());
+			SUM.getSolver().post(new Sum(VARS,p));
+			return arithm(p,OPERATOR,SUM);
+		}
+	}
 
     /**
      * Enforces that &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> = SUM.

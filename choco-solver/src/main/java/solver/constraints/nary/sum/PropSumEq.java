@@ -30,34 +30,20 @@ package solver.constraints.nary.sum;
 import solver.constraints.Propagator;
 import solver.constraints.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ValueRemoval;
-import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import util.ESat;
+import util.tools.ArrayUtils;
 
 /**
- * A propagator for SUM(x_i) = b
- * <br/>
- * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
- * W. Harvey and J. Schimpf
- * <p/>
+ * A propagator for SUM(x_i) = y
  *
- * @author Charles Prud'homme
- * @revision 04/03/12 use I in filterOn{G,L}eg
- * @since 18/03/11
+ * @author Jean-Guillaume Fages
+ * @since 21/07/13
  */
 public class PropSumEq extends Propagator<IntVar> {
 
-    final int[] c; // list of coefficients
-    final int pos; // index of the last positive coefficient
-    final int l; // number of variables
-    final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
-
+    final int n; // number of variables
 
     protected static PropagatorPriority computePriority(int nbvars) {
         if (nbvars == 1) {
@@ -71,141 +57,46 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] variables, int[] coeffs, int pos, int b) {
-        super(variables, computePriority(variables.length), false);
-        this.c = coeffs;
-        this.pos = pos;
-        l = variables.length;
-        this.b = b;
-        I = new int[l];
+    public PropSumEq(IntVar[] variables, IntVar sum) {
+        super(ArrayUtils.append(variables, new IntVar[]{sum}), computePriority(variables.length), false);
+        n = variables.length;
     }
-
-    protected void prepare() {
-        int f = 0, e = 0, i = 0;
-        int lb, ub;
-        for (; i < pos; i++) { // first the positive coefficients
-            lb = vars[i].getLB() * c[i];
-            ub = vars[i].getUB() * c[i];
-            f += lb;
-            e += ub;
-            I[i] = (ub - lb);
-        }
-        for (; i < l; i++) { // then the negative ones
-            lb = vars[i].getUB() * c[i];
-            ub = vars[i].getLB() * c[i];
-            f += lb;
-            e += ub;
-            I[i] = (ub - lb);
-        }
-        sumLB = f;
-        sumUB = e;
-    }
-
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filter(true, 2);
-    }
-
-    protected void filter(boolean startWithLeq, int nbRules) throws ContradictionException {
-        prepare();
-        boolean run;
-        int nbR = 0;
-        do {
-            if (startWithLeq) {
-                run = filterOnLeq();
-            } else {
-                run = filterOnGeq();
-            }
-            startWithLeq ^= true;
-            nbR++;
-        } while (run || nbR < nbRules);
-        checkEntailment();
-    }
-
-    protected void checkEntailment() {
-        if (sumUB - b <= 0 && sumLB - b >= 0) {
-            this.setPassive();
-        }
-    }
-
-
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnLeq() throws ContradictionException {
-        boolean anychange = false;
-        if (b - sumLB < 0) {
-            this.contradiction(null, "b - sumLB < 0");
-        }
-        int lb, ub, i = 0;
-        // positive coefficients first
-        for (; i < pos; i++) {
-            if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getLB() * c[i];
-                ub = lb + I[i];
-                if (vars[i].updateUpperBound(divFloor(b - sumLB + lb, c[i]), aCause)) {
-                    int nub = vars[i].getUB() * c[i];
-                    sumUB -= ub - nub;
-                    I[i] = nub - lb;
-                    anychange = true;
-                }
-            }
-        }
-        // then negative ones
-        for (; i < l; i++) {
-            if (I[i] - (b - sumLB) > 0) {
-                lb = vars[i].getUB() * c[i];
-                ub = lb + I[i];
-                if (vars[i].updateLowerBound(divCeil(-(b - sumLB + lb), -c[i]), aCause)) {
-                    int nub = vars[i].getLB() * c[i];
-                    sumUB -= ub - nub;
-                    I[i] = nub - lb;
-                    anychange = true;
-                }
-            }
-        }
-        return anychange;
-    }
-
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnGeq() throws ContradictionException {
-        boolean anychange = false;
-        if (b - sumUB > 0) {
-            this.contradiction(null, "b - sumUB > 0");
-        }
-        int lb, ub, i = 0;
-        // positive coefficients first
-        for (; i < pos; i++) {
-            if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getUB() * c[i];
-                lb = ub - I[i];
-                if (vars[i].updateLowerBound(divCeil(b - sumUB + ub, c[i]), aCause)) {
-                    int nlb = vars[i].getLB() * c[i];
-                    sumLB += nlb - lb;
-                    I[i] = ub - nlb;
-                    anychange = true;
-                }
-            }
-        }
-        // then negative ones
-        for (; i < l; i++) {
-            if (I[i] > -(b - sumUB)) {
-                ub = vars[i].getLB() * c[i];
-                lb = ub - I[i];
-                if (vars[i].updateUpperBound(divFloor(-(b - sumUB + ub), -c[i]), aCause)) {
-                    int nlb = vars[i].getUB() * c[i];
-                    sumLB += nlb - lb;
-                    I[i] = ub - nlb;
-                    anychange = true;
-                }
-            }
-        }
-        return anychange;
-    }
+		boolean again;
+		do{
+			int min = 0;
+			int max = 0;
+			int ampMax = 0;
+			for(int i=0;i<n;i++){
+				min += vars[i].getLB();
+				max += vars[i].getUB();
+				ampMax = Math.max(vars[i].getUB()-vars[i].getLB(),ampMax);
+			}
+			vars[n].updateLowerBound(min,aCause);
+			vars[n].updateUpperBound(max,aCause);
+			int lb = vars[n].getLB();
+			int ub = vars[n].getUB();
+			again = false;
+			if(min+ampMax>ub){
+//				again = true;
+				for(int i=0;i<n;i++){
+                    again |= vars[i].updateUpperBound(ub-min+vars[i].getLB(),aCause);
+				}
+			}
+			if(max-ampMax<lb){
+//				again = true;
+				for(int i=0;i<n;i++){
+                    again |= vars[i].updateLowerBound(lb-max+vars[i].getUB(),aCause);
+				}
+			}
+		} while (again);
+	}
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
-        filter(true, 2);
-//        forcePropagate(EventType.CUSTOM_PROPAGATION);
+        propagate(0);
     }
 
     @Override
@@ -215,111 +106,31 @@ public class PropSumEq extends Propagator<IntVar> {
 
     @Override
     public final ESat isEntailed() {
-        int sumUB = 0, sumLB = 0, i = 0;
-        for (; i < pos; i++) { // first the positive coefficients
-            sumLB += vars[i].getLB() * c[i];
-            sumUB += vars[i].getUB() * c[i];
-        }
-        for (; i < l; i++) { // then the negative ones
-            sumLB += vars[i].getUB() * c[i];
-            sumUB += vars[i].getLB() * c[i];
-        }
-        return compare(sumLB, sumUB);
-    }
-
-    protected ESat compare(int sumLB, int sumUB) {
-        if (sumUB == b && sumLB == b) {
-            return ESat.TRUE;
-        } else if (sumLB > b || sumUB < b) {
-            return ESat.FALSE;
-        }
-        return ESat.UNDEFINED;
+		int min = 0;
+		int max = 0;
+		for(int i=0;i<n;i++){
+			min += vars[i].getLB();
+			max += vars[i].getUB();
+		}
+		if(max<vars[n].getLB() || min>vars[n].getUB()){
+			return ESat.FALSE;
+		}
+		if(min==max && vars[n].instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
     }
 
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(vars[0].getName()).append('.').append(c[0]);
+        linComb.append(vars[0].getName());
         int i = 1;
-        for (; i < l; i++) {
-            linComb.append(" + ").append(vars[i].getName()).append('.').append(c[i]);
+        for (; i < n; i++) {
+            linComb.append(" + ").append(vars[i].getName());
         }
         linComb.append(" = ");
-        linComb.append(b);
+        linComb.append(vars[n].getName());
         return linComb.toString();
     }
-
-    @Override
-    public void explain(Deduction d, Explanation e) {
-        e.add(solver.getExplainer().getPropagatorActivation(this));
-        e.add(this);
-        if (d!=null && d.getmType() == Deduction.Type.ValRem) {
-            ValueRemoval vr = (ValueRemoval) d;
-            IntVar var = (IntVar) vr.getVar();
-            int val = vr.getVal();
-            // 1. find the pos of var in vars
-            boolean ispos;
-            if (pos < (l / 2)) {
-                int i;
-                for (i = 0; i < pos && vars[i].getId() != var.getId(); i++) {
-                }
-                ispos = i < pos;
-            } else {
-                int i;
-                for (i = pos; i < l && vars[i].getId() != var.getId(); i++) {
-                }
-                ispos = i == l;
-            }
-
-            if (val < var.getLB()) { // explain LB
-                int i = 0;
-                for (; i < pos; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
-                    }
-                }
-                for (; i < l; i++) { // then the negative ones
-                    if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
-                    }
-                }
-            } else if (val > var.getUB()) { // explain UB
-                int i = 0;
-                for (; i < pos; i++) { // first the positive coefficients
-                    if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.LB : VariableState.UB, e);
-                    }
-                }
-                for (; i < l; i++) { // then the negative ones
-                    if (vars[i] != var) {
-                        vars[i].explain(ispos ? VariableState.UB : VariableState.LB, e);
-                    }
-                }
-            } else {
-                throw new UnsupportedOperationException("PropSumEq only knows how to explain bounds");
-            }
-
-        } else {
-            super.explain(d, e);
-        }
-    }
-
-    private int divFloor(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return (a / b);
-        } else {
-            return (a - b + 1) / b;
-        }
-    }
-
-    private int divCeil(int a, int b) {
-        // <!> we assume b > 0
-        if (a >= 0) {
-            return ((a + b - 1) / b);
-        } else {
-            return a / b;
-        }
-    }
-
 }

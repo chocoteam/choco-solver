@@ -63,21 +63,17 @@ public class GraphDecision extends Decision<GraphVar> {
     }
 
     public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
-        var = variable;
+        super.set(variable);
         this.from = node;
         this.to = -1;
         assignment = graph_ass;
-        branch = 0;
-        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     public void setArc(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
-        var = variable;
+        super.set(variable);
         this.from = from;
         this.to = to;
         assignment = graph_ass;
-        branch = 0;
-        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     //***********************************************************************************

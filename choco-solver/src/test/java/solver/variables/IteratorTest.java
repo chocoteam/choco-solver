@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.nary.sum.Sum;
 import solver.constraints.ternary.Max;
+import solver.exception.ContradictionException;
 import util.iterators.DisposableRangeIterator;
 import util.iterators.DisposableValueIterator;
 
@@ -439,7 +440,12 @@ public class IteratorTest {
     public void testAbs1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-        DisposableValueIterator vit = var.getValueIterator(true);
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
+		DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
         Assert.assertTrue(vit.hasNext());
@@ -453,6 +459,11 @@ public class IteratorTest {
     public void testAbs2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -467,6 +478,11 @@ public class IteratorTest {
     public void testAbs3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -483,6 +499,11 @@ public class IteratorTest {
     public void testAbs4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
+		try {
+			solver.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+		}
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
@@ -546,153 +567,4 @@ public class IteratorTest {
         vit.previous();
         Assert.assertFalse(vit.hasPrevious());
     }
-
-    @Test
-    public void testSum1() {
-        Solver solver = new Solver();
-        IntVar var = Sum.var(VariableFactory.enumerated("a", new int[]{1, 3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
-        DisposableValueIterator vit = var.getValueIterator(true);
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(3, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(5, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(6, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(8, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(9, vit.next());
-        Assert.assertFalse(vit.hasNext());
-    }
-
-    @Test
-    public void testSum2() {
-        Solver solver = new Solver();
-        IntVar var = Sum.var(VariableFactory.enumerated("a", new int[]{1, 3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
-        DisposableValueIterator vit = var.getValueIterator(false);
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(9, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(8, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(6, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(5, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(3, vit.previous());
-        Assert.assertFalse(vit.hasPrevious());
-    }
-
-    @Test
-    public void testSum3() {
-        Solver solver = new Solver();
-        IntVar var = Sum.var(VariableFactory.enumerated("a", new int[]{1, 3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
-        DisposableRangeIterator vit = var.getRangeIterator(true);
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(3, vit.min());
-        Assert.assertEquals(3, vit.max());
-        vit.next();
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(5, vit.min());
-        Assert.assertEquals(6, vit.max());
-        vit.next();
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(8, vit.min());
-        Assert.assertEquals(9, vit.max());
-        vit.next();
-        Assert.assertFalse(vit.hasNext());
-    }
-
-    @Test
-    public void testSum4() {
-        Solver solver = new Solver();
-        IntVar var = Sum.var(VariableFactory.enumerated("a", new int[]{1, 3, 4}, solver), VariableFactory.enumerated("b", new int[]{2, 5}, solver));
-        DisposableRangeIterator vit = var.getRangeIterator(false);
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(8, vit.min());
-        Assert.assertEquals(9, vit.max());
-        vit.previous();
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(5, vit.min());
-        Assert.assertEquals(6, vit.max());
-        vit.previous();
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(3, vit.min());
-        Assert.assertEquals(3, vit.max());
-        vit.previous();
-        Assert.assertFalse(vit.hasPrevious());
-    }
-
-    @Test
-    public void testSqr1() {
-        Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
-        DisposableValueIterator vit = var.getValueIterator(true);
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(0, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(1, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(4, vit.next());
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(16, vit.next());
-        Assert.assertFalse(vit.hasNext());
-    }
-
-    @Test
-    public void testSqr2() {
-        Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
-        DisposableValueIterator vit = var.getValueIterator(false);
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(16, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(4, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(1, vit.previous());
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(0, vit.previous());
-        Assert.assertFalse(vit.hasPrevious());
-    }
-
-    @Test
-    public void testSqr3() {
-        Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
-        DisposableRangeIterator vit = var.getRangeIterator(true);
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(0, vit.min());
-        Assert.assertEquals(1, vit.max());
-        vit.next();
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(4, vit.min());
-        Assert.assertEquals(4, vit.max());
-        vit.next();
-        Assert.assertTrue(vit.hasNext());
-        Assert.assertEquals(16, vit.min());
-        Assert.assertEquals(16, vit.max());
-        vit.next();
-        Assert.assertFalse(vit.hasNext());
-    }
-
-    @Test
-    public void testSqr4() {
-        Solver solver = new Solver();
-        IntVar var = VariableFactory.sqr(VariableFactory.enumerated("b", new int[]{-2, 0, 1, 4}, solver));
-        DisposableRangeIterator vit = var.getRangeIterator(false);
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(16, vit.min());
-        Assert.assertEquals(16, vit.max());
-        vit.previous();
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(4, vit.min());
-        Assert.assertEquals(4, vit.max());
-        vit.previous();
-        Assert.assertTrue(vit.hasPrevious());
-        Assert.assertEquals(0, vit.min());
-        Assert.assertEquals(1, vit.max());
-        vit.previous();
-        Assert.assertFalse(vit.hasPrevious());
-    }
-
 }

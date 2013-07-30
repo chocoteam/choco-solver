@@ -31,11 +31,13 @@ import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.constraints.nary.sum.Sum;
 import solver.search.strategy.IntStrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import util.tools.StringUtils;
 
 import static solver.constraints.IntConstraintFactory.*;
 import static solver.constraints.LogicalConstraintFactory.ifThenElse;
@@ -76,7 +78,11 @@ public class Photo extends AbstractProblem {
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
-            dist[i] = VariableFactory.abs(Sum.var(positions[pa], VariableFactory.minus(positions[pb])));
+
+
+			IntVar k = VariableFactory.bounded(StringUtils.randomName(),-20000,20000,solver);
+			solver.post(IntConstraintFactory.sum(new IntVar[]{positions[pb], k}, positions[pa]));
+			dist[i] = VariableFactory.abs(k);
 
             solver.post(
                     ifThenElse(viols[i],

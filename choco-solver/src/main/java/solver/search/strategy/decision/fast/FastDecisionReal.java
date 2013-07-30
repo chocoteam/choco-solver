@@ -65,10 +65,8 @@ public class FastDecisionReal extends Decision<RealVar> {
     }
 
     public void set(RealVar v, double value) {
-        branch = 0;
-        this.var = v;
+        super.set(v);
         this.value = value;
-        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     @Override

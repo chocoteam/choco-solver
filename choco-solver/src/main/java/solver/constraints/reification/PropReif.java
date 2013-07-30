@@ -95,16 +95,6 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        /*if (varIdx == 0) {
-            if (bVar.getBooleanValue() == ESat.TRUE) {
-                reifCons.activate(0);
-            } else {
-                reifCons.activate(1);
-            }
-            setPassive();
-        } else {
-            forcePropagate(EventType.FULL_PROPAGATION);
-        }*/
         propagate(0);
     }
 

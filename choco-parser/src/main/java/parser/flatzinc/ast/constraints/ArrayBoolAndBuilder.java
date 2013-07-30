@@ -33,8 +33,7 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.IntConstraintFactory;
-import solver.constraints.nary.cnf.LogOp;
+import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
 import java.util.List;
@@ -54,7 +53,9 @@ public class ArrayBoolAndBuilder implements IBuilder {
         if (as.length == 0) {
             return new Constraint[]{ICF.arithm(r, "=", 1)};
         } else {
-            return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
+//            return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
+            SatFactory.addBoolAndArrayEqVar(as, r);
+            return new Constraint[0];
         }
     }
 }

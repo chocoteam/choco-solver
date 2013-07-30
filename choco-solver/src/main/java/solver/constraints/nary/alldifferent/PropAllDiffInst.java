@@ -41,8 +41,8 @@ import util.ESat;
  */
 public class PropAllDiffInst extends Propagator<IntVar> {
 
-    private final int n;
-    private TIntArrayStack toCheck = new TIntArrayStack();
+	protected final int n;
+	protected TIntArrayStack toCheck = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -87,7 +87,8 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
-    @Override
+
+	@Override
     public void propagate(int evtmask) throws ContradictionException {
         toCheck.clear();
         for (int v = 0; v < n; v++) {
@@ -105,7 +106,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         fixpoint();
     }
 
-    private void fixpoint() throws ContradictionException {
+	protected void fixpoint() throws ContradictionException {
         try {
             while (toCheck.size() > 0) {
                 int vidx = toCheck.pop();

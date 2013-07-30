@@ -91,10 +91,10 @@ public class Engine {
     private void prop_2() throws ContradictionException {
         // wone + n child
         while (!toPropagate_2.isEmpty()) {
-            int i = toPropagate_2.popLast();
+            int i = toPropagate_2.pollLast();
             prop_4n(i);
             if (!toPropagate_4n[i].isEmpty()) {
-                toPropagate_2.add(i);
+                toPropagate_2.addFirst(i);
             }
         }
     }
@@ -102,10 +102,10 @@ public class Engine {
     private void prop_3() throws ContradictionException {
         // one + no child
         if (!toPropagate_3.isEmpty()) {
-            int i = toPropagate_3.popLast();
+            int i = toPropagate_3.pollLast();
             prop_3[i].propagate(-1, -1);
             if (!toPropagate_3.isEmpty()) {
-                toPropagate_3.add(i);
+                toPropagate_3.addFirst(i);
             }
         }
     }

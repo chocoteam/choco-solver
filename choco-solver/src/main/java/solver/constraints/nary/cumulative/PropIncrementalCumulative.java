@@ -56,12 +56,12 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 	private UndirectedGraph g;
 	private ISet toCompute, tasks;
 	protected CumulFilter[] filters;
-	private boolean shy;
+	private boolean fast;
 
-	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean shy) {
+	public PropIncrementalCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast) {
 		super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.LINEAR, true);
 		this.n = s.length;
-		this.shy = shy;
+		this.fast = fast;
 		if (!(n == d.length && n == e.length && n == h.length)) {
 			throw new UnsupportedOperationException();
 		}
@@ -81,7 +81,7 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		if(idx==4*n){
 			return EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
 		}
-		if(shy)
+		if(fast)
 			return EventType.INSTANTIATE.mask;
 		return EventType.BOUND.mask + EventType.INSTANTIATE.mask;
 	}
@@ -268,20 +268,20 @@ public class PropIncrementalCumulative extends Propagator<IntVar> {
 		}
 	}
 
-	/**
-	 * Sweep-based filtering
-	 * Currently buggy
-	 */
-	private class SweepBasedFilter extends CumulFilter{
-		TTDynamicSweep sweep;
-		public void filter(ISet tasks) throws ContradictionException{
-			if(sweep == null) {
-				sweep = new TTDynamicSweep(vars,n,1,aCause);
-			}
-			sweep.set(tasks);
-			sweep.mainLoop();
-		}
-	}
+//	/**
+//	 * Sweep-based filtering
+//	 * Currently buggy
+//	 */
+//	private class SweepBasedFilter extends CumulFilter{
+//		TTDynamicSweep sweep;
+//		public void filter(ISet tasks) throws ContradictionException{
+//			if(sweep == null) {
+//				sweep = new TTDynamicSweep(vars,n,1,aCause);
+//			}
+//			sweep.set(tasks);
+//			sweep.mainLoop();
+//		}
+//	}
 
 	/**
 	 * Time-based filtering (compute the profile over every point in time)

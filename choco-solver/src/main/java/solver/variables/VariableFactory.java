@@ -28,6 +28,7 @@
 package solver.variables;
 
 import solver.Solver;
+import solver.constraints.IntConstraintFactory;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetArrayIntVarImpl;
 import solver.variables.fast.BitsetIntVarImpl;
@@ -37,6 +38,7 @@ import solver.variables.graph.DirectedGraphVar;
 import solver.variables.graph.UndirectedGraphVar;
 import solver.variables.view.*;
 import util.objects.setDataStructures.SetType;
+import util.tools.StringUtils;
 
 /**
  * A factory to create variables (boolean, integer, set, graph, task and real) and views (most of them rely on integer variable).
@@ -220,9 +222,7 @@ public class VariableFactory {
     public static IntVar[][] enumeratedMatrix(String NAME, int DIM1, int DIM2, int MIN, int MAX, Solver SOLVER) {
         IntVar[][] vars = new IntVar[DIM1][];
         for (int i = 0; i < DIM1; i++) {
-            for (int j = 0; j < DIM2; j++) {
-                vars[i][j] = enumerated(NAME + "[" + i + "][" + j + "]", MIN, MAX, SOLVER);
-            }
+            vars[i] = enumeratedArray(NAME + "[" + i + "]", DIM2, MIN, MAX, SOLVER);
         }
         return vars;
     }
@@ -709,27 +709,16 @@ public class VariableFactory {
         } else if (VAR.getUB() <= 0) {
             return minus(VAR);
         } else {
-            return new AbsView(VAR, VAR.getSolver());
+			Solver s = VAR.getSolver();
+            IntVar abs;
+            if(VAR.hasEnumeratedDomain()){
+                abs = enumerated(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }else{
+                abs = bounded(StringUtils.randomName(),0,Math.max(-VAR.getLB(),VAR.getUB()),s);
+            }
+			s.post(IntConstraintFactory.absolute(abs,VAR));
+            return abs;
         }
-    }
-
-    /**
-     * Create a view over VAR such that: VAR<sup>2</sup>.
-     * <p/>
-     * <br/>- if VAR is already instantiated, returns a fixed variable;
-     * <br/>- otherwise, returns an square view;
-     * <p/>
-     * The resulting IntVar does not have explicit domain: it relies on the domain of VAR for reading and writing operations.
-     * Any operations on this will transformed to operations on VAR following the "square" rules.
-     *
-     * @param VAR an integer variable.
-     */
-    public static IntVar sqr(IntVar VAR) {
-        if (VAR.instantiated()) {
-            int value = VAR.getValue();
-            return fixed(value * value, VAR.getSolver());
-        }
-        return new SqrView(VAR, VAR.getSolver());
     }
 
     /**

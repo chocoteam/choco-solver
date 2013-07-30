@@ -27,159 +27,22 @@
 
 package solver.constraints.nary.sum;
 
-import gnu.trove.map.hash.TObjectIntHashMap;
-import memory.IStateBitSet;
-import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import solver.variables.fast.BitsetIntVarImpl;
-import solver.variables.fast.IntervalIntVarImpl;
 import util.ESat;
-import util.iterators.DisposableRangeIterator;
-import util.tools.StringUtils;
-
-import java.util.Arrays;
+import util.tools.ArrayUtils;
 
 /**
- * <br/>
- * Bounds Consistency Techniques for Long Linear Constraint" </br>
- * W. Harvey and J. Schimpf
+ * Constraint for Sum(x_i) = y
  *
- * @author Charles Prud'homme
- * @since 18/03/11
+ * @author Jean-Guillaume Fages
+ * @since 21/07/13
  */
 public class Sum extends IntConstraint<IntVar> {
 
-    public static int BIG_SUM_SIZE = 160;
-    public static int BIG_SUM_GROUP = 20;
-
-    final int[] coeffs;
-    final int b;
-
-
-    protected Sum(IntVar[] vars, int[] coeffs, int pos, int b, Solver solver) {
-        super(vars, solver);
-        this.coeffs = coeffs.clone();
-        this.b = b;
-        if (vars.length > BIG_SUM_SIZE) {
-            setPropagators(new PropBigSum(vars, coeffs, pos, b));
-        } else {
-            setPropagators(new PropSumEq(vars, coeffs, pos, b));
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static Sum build(IntVar[] vars, int[] coeffs, Solver solver) {
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        for (int i = 0; i < vars.length; i++) {
-            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
-            if (map.get(vars[i]) == 0) {
-                map.remove(vars[i]);
-            }
-        }
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-        // to fix determinism in the construction, we iterate over the original array of variables
-        for (int i = 0; i < vars.length; i++) {
-            IntVar key = vars[i];
-            int coeff = map.get(key);
-            if (coeff > 0) {
-                tmpV[b] = key;
-                tmpC[b++] = coeff;
-            } else if (coeff < 0) {
-                tmpV[--e] = key;
-                tmpC[e] = coeff;
-            }
-            map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
-        }
-        return new Sum(tmpV, tmpC, b, 0, solver);
-    }
-
-    /**
-     * Ensures that sum{vars[i]} = b
-     *
-     * @param vars
-     * @param b
-     * @param solver
-     * @return a sum constraint
-     */
-    public static Sum buildSum(IntVar[] vars, IntVar b, Solver solver) {
-        int[] cs = new int[vars.length + 1];
-        Arrays.fill(cs, 1);
-        cs[vars.length] = -1;
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[vars.length] = b;
-        return build(x, cs, solver);
-    }
-
-    /**
-     * Ensures that sum{vars[i]*coreffs[i]} = b*c
-     *
-     * @param vars
-     * @param coeffs
-     * @param b
-     * @param c
-     * @param solver
-     * @return a scalar product constraint
-     */
-    public static Sum buildScalar(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, solver);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static IntVar var(IntVar a, IntVar b) {
-        if (a.instantiated()) {
-            if (b.instantiated()) {
-                return VariableFactory.fixed(a.getValue() + b.getValue(), a.getSolver());
-            } else {
-                return VariableFactory.offset(b, a.getValue());
-            }
-        } else if (b.instantiated()) {
-            return VariableFactory.offset(a, b.getValue());
-        } else {
-            Solver solver = a.getSolver();
-            IntVar z;
-            //TODO: add a more complex analysis of the build domain
-            if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
-                int lbA = a.getLB();
-                int ubA = a.getUB();
-                int lbB = b.getLB();
-                int ubB = b.getUB();
-                int OFFSET = lbA + lbB;
-                IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
-                DisposableRangeIterator itA = a.getRangeIterator(true);
-                DisposableRangeIterator itB = b.getRangeIterator(true);
-                while (itA.hasNext()) {
-                    itB.bottomUpInit();
-                    while (itB.hasNext()) {
-                        VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
-                        itB.next();
-                    }
-                    itB.dispose();
-                    itA.next();
-                }
-                itA.dispose();
-                z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
-            } else {
-                z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
-            }
-            solver.post(IntConstraintFactory.sum(new IntVar[]{a, b}, z));
-            return z;
-        }
+    public Sum(IntVar[] x, IntVar y) {
+        super(ArrayUtils.append(x,new IntVar[]{y}), y.getSolver());
+		setPropagators(new PropSumEq(x,y));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,46 +50,21 @@ public class Sum extends IntConstraint<IntVar> {
     @Override
     public ESat isSatisfied(int[] tuple) {
         int sum = 0;
-        for (int i = 0; i < tuple.length; i++) {
-            sum += coeffs[i] * tuple[i];
+		int n = tuple.length-1;
+        for (int i = 0; i < n; i++) {
+            sum += tuple[i];
         }
-        return ESat.eval(sum == b);
+		return ESat.eval(sum == tuple[n]);
     }
 
     @Override
     public String toString() {
-        StringBuilder linComb = new StringBuilder(20);
-        for (int i = 0; i < coeffs.length; i++) {
-            linComb.append(coeffs[i]).append('*').append(vars[i].getName()).append(coeffs[i] < coeffs.length ? " +" : " ");
+        StringBuilder sumst = new StringBuilder(20);
+        for (int i = 0; i < vars.length-1; i++) {
+            sumst.append(vars[i].getName()).append(" + ");
         }
-        linComb.append(" = ");
-        linComb.append(b);
-        return linComb.toString();
+        sumst.append(" = ");
+        sumst.append(vars[vars.length - 1]);
+        return sumst.toString();
     }
-
-    public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
-        int[] ext = new int[2];
-        for (int i = 0; i < vars.length; i++) {
-            int min = Math.min(0, vars[i].getLB() * coefs[i]);
-            min = Math.min(min, vars[i].getUB() * coefs[i]);
-            int max = Math.max(0, vars[i].getLB() * coefs[i]);
-            max = Math.max(max, vars[i].getUB() * coefs[i]);
-            ext[0] += min;
-            ext[1] += max;
-        }
-        return ext;
-    }
-
-    ;
-
-    public static int[] getSumBounds(IntVar[] vars) {
-        int[] ext = new int[2];
-        for (int i = 0; i < vars.length; i++) {
-            ext[0] += vars[i].getLB();
-            ext[1] += vars[i].getUB();
-        }
-        return ext;
-    }
-
-    ;
 }

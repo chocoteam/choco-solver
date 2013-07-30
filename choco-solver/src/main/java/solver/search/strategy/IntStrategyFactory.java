@@ -191,8 +191,8 @@ public class IntStrategyFactory {
 	 * @param VARS           collection of variables
 	 * @param SEED           the seed for random
 	 */
-	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, Solver solver, long SEED) {
-		return new ActivityBased(solver, VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
+	public static AbstractStrategy<IntVar> ActivityBased(IntVar[] VARS, long SEED) {
+		return new ActivityBased(VARS[0].getSolver(), VARS, 0.999d, 0.2d, 8, 1.1d, 1, SEED);
 	}
 
     /**

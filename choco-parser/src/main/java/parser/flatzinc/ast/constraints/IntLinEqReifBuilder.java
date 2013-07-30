@@ -33,10 +33,10 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ICF;
-import solver.constraints.nary.sum.Sum;
+import solver.constraints.nary.sum.Scalar;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.VF;
 import util.tools.StringUtils;
 
 import java.util.List;
@@ -57,10 +57,12 @@ public class IntLinEqReifBuilder implements IBuilder {
         int c = exps.get(2).intValue();
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        int[] bounds = Sum.getScalarBounds(bs, as);
-        IntVar scalarVar = VariableFactory.bounded(StringUtils.randomName(), bounds[0], bounds[1], solver);
-        // this constraint is not poster, hence not returned, because it is reified
-		ICF.arithm(scalarVar,"=",c).reifyWith(r);
-		return new Constraint[]{ICF.scalar(bs, as, scalarVar)};
+		ICF.scalar(bs, as, VF.fixed(c,solver)).reifyWith(r);
+//		int[] b = Scalar.getScalarBounds(bs, as);
+//		IntVar p = VF.bounded(StringUtils.randomName(), b[0], b[1], solver);
+//		solver.post(ICF.scalar(bs, as, p));
+//		Constraint cstr = ICF.arithm(p, "=", c);
+//      cstr.reifyWith(r);
+        return new Constraint[0];
     }
 }

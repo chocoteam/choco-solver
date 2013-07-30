@@ -47,21 +47,26 @@ public class Datas {
     final GoalConf gc;
 
     // the layout dedicated to pretty print message wrt to fzn recommendations
-    final FZNLayout mLayout;
+    FZNLayout mLayout;
 
     final THashMap<String, Object> map;
 
     final THashSet<Variable> searchVariables;
+    final THashSet<Variable> outputVariables;
 
     public Datas(GoalConf gc) {
         this.gc = gc;
         this.map = new THashMap<String, Object>();
         searchVariables = new THashSet<Variable>();
-        mLayout = new FZNLayout();
+        outputVariables = new THashSet<Variable>();
     }
 
     public Datas() {
         this(new GoalConf());
+    }
+
+    public void setmLayout(FZNLayout mLayout) {
+        this.mLayout = mLayout;
     }
 
     public void register(String name, Object o) {
@@ -82,30 +87,38 @@ public class Datas {
     }
 
     public IntVar[] getSearchVars() {
-        return searchVariables.toArray(new IntVar[0]);
+        return searchVariables.toArray(new IntVar[searchVariables.size()]);
+    }
+
+    public IntVar[] getOutputVars() {
+        return outputVariables.toArray(new IntVar[outputVariables.size()]);
     }
 
     public void declareOutput(String name, Variable variable, Declaration type) {
         mLayout.addOutputVar(name, variable, type);
+        outputVariables.add(variable);
     }
 
     public void declareOutput(String name, Variable[] variables, List<Expression> indices, Declaration type) {
         mLayout.addOutputArrays(name, variables, indices, type);
+        outputVariables.addAll(Arrays.asList(variables));
     }
 
     public void declareOutput(String name, IntVar variable, Declaration type) {
         mLayout.addOutputVar(name, variable, type);
+        outputVariables.add(variable);
     }
 
     public void declareOutput(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
         mLayout.addOutputArrays(name, variables, indices, type);
+        outputVariables.addAll(Arrays.asList(variables));
     }
 
     public void plugLayout(Solver aSolver) {
         mLayout.setSearchLoop(aSolver.getSearchLoop());
     }
 
-    public void clear(){
+    public void clear() {
         map.clear();
         searchVariables.clear();
     }

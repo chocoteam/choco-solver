@@ -47,7 +47,6 @@ import solver.variables.Variable;
 import util.PoolManager;
 import util.iterators.DisposableValueIterator;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -122,7 +121,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         }
         if (currentVar == -1 || vars[currentVar] != variable) {
             // retrieve indice of the variable in vars
-            currentVar = Arrays.binarySearch(vars, variable);
+			for(int i=0;i<vars.length;i++){
+				if(vars[i]==variable){
+					currentVar = i;
+				}
+			}
             assert vars[currentVar] == variable;
         }
         bests.clear();

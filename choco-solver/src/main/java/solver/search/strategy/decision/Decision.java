@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Identity;
-import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.Deduction;
@@ -58,11 +57,11 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
     // 0: not applied yet, 1: applied once, 2: refute once
     protected int branch;
 
-    long fails;
-
     int worldIndex; // indication on the world in which it has been selected
 
     protected Decision previous;
+
+    protected boolean once;
 
     public Decision() {
         id = _ID++;
@@ -113,6 +112,22 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
      */
     public void buildNext() {
         branch++;
+        if (once) branch++;
+    }
+
+    /**
+     * Should this decision be a one-shot decision, non refutable.
+     * @param once a boolean
+     */
+    public void once(boolean once) {
+        this.once = once;
+    }
+
+    protected void set(V var){
+        this.var = var;
+        branch = 0;
+        this.once = false;
+        this.setWorldIndex(var.getSolver().getEnvironment().getWorldIndex());
     }
 
     /**
@@ -180,18 +195,6 @@ public abstract class Decision<V extends Variable> implements Identity, ICause, 
 
     public Deduction getPositiveDeduction() {
         return var.getSolver().getExplainer().getDecision(this, true);
-    }
-
-    public final Constraint getConstraint() {
-        return null;
-    }
-
-    public final void incFail() {
-        fails++;
-    }
-
-    public final long getFails() {
-        return fails;
     }
 
     @Override

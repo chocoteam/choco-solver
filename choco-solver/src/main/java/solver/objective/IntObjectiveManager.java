@@ -44,7 +44,7 @@ import solver.variables.IntVar;
 public class IntObjectiveManager extends ObjectiveManager {
 
     final IntVar objective;
-	final boolean strict;
+    final boolean strict;
     int bestKnownUpperBound;
     int bestKnownLowerBound;
 
@@ -55,10 +55,10 @@ public class IntObjectiveManager extends ObjectiveManager {
      * @param objective variable (represent the value of a solution)
      * @param policy    SATISFACTION / MINIMIZATION / MAXIMIZATION
      * @param solver
-     * @param strict enables to find same value solutions when set to false
+     * @param strict    enables to find same value solutions when set to false
      */
     public IntObjectiveManager(final IntVar objective, ResolutionPolicy policy, Solver solver, boolean strict) {
-        super(policy,solver.getMeasures());
+        super(policy, solver.getMeasures());
         this.objective = objective;
         if (policy != ResolutionPolicy.SATISFACTION) {
             this.bestKnownLowerBound = objective.getLB();
@@ -98,6 +98,24 @@ public class IntObjectiveManager extends ObjectiveManager {
      */
     public int getBestLB() {
         return bestKnownLowerBound;
+    }
+
+    /**
+     * States that lb is a global lower bound on the problem
+     *
+     * @param lb lower bound
+     */
+    public void updateBestLB(int lb) {
+        bestKnownLowerBound = Math.max(bestKnownLowerBound, lb);
+    }
+
+    /**
+     * States that ub is a global upper bound on the problem
+     *
+     * @param ub upper bound
+     */
+    public void updateBestUB(int ub) {
+        bestKnownUpperBound = Math.min(bestKnownUpperBound, ub);
     }
 
     /**

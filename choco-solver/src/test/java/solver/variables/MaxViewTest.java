@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
 import solver.constraints.LogicalConstraintFactory;
+import solver.constraints.SatFactory;
 import solver.constraints.nary.cnf.LogOp;
 import solver.search.strategy.IntStrategyFactory;
 
@@ -50,8 +51,8 @@ public class MaxViewTest {
         solver.post(LogicalConstraintFactory.ifThenElse(bs[0], IntConstraintFactory.arithm(z, "=", x), IntConstraintFactory.arithm(z, "!=", x)));
         solver.post(LogicalConstraintFactory.ifThenElse(bs[1], IntConstraintFactory.arithm(z, "=", y), IntConstraintFactory.arithm(z, "!=", y)));
         solver.post(LogicalConstraintFactory.ifThenElse(bs[2], IntConstraintFactory.arithm(x, ">=", y), IntConstraintFactory.arithm(x, "<", y)));
-        solver.post(IntConstraintFactory.clauses(LogOp.or(LogOp.and(bs[0], bs[2]),
-                LogOp.and(bs[1], bs[2].not())), solver));
+        SatFactory.addClauses(LogOp.or(LogOp.and(bs[0], bs[2]),
+                LogOp.and(bs[1], bs[2].not())), solver);
     }
 
     public void max(Solver solver, IntVar x, IntVar y, IntVar z) {

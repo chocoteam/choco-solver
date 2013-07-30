@@ -64,7 +64,7 @@ public class PropTrue extends Propagator<BoolVar> {
 
     @Override
     public String toString() {
-        return Boolean.TRUE.toString();
+        return java.lang.Boolean.TRUE.toString();
     }
 
     @Override

@@ -38,7 +38,9 @@ import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
 import solver.ResolutionPolicy;
 import solver.Solver;
+import solver.exception.ContradictionException;
 import solver.objective.IntObjectiveManager;
+import solver.objective.ObjectiveManager;
 import solver.search.limits.ACounter;
 import solver.search.limits.FailCounter;
 import solver.search.loop.AbstractSearchLoop;
@@ -46,6 +48,7 @@ import solver.search.loop.lns.LNSFactory;
 import solver.search.loop.lns.LargeNeighborhoodSearch;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ISF;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.ActivityBased;
 import solver.search.strategy.selectors.variables.DomOverWDeg;
@@ -88,13 +91,11 @@ public class FGoal {
         // First define solving process
         AbstractSearchLoop search = aSolver.getSearchLoop();
         GoalConf gc = datas.goals();
-        switch (type) {
-            case SATISFACTION:
-                break;
-            default:
-                IntVar obj = expr.intVarValue(aSolver);
-                search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
-        }
+		IntVar obj = null;
+		if(type!=ResolutionPolicy.SATISFACTION){
+			obj = expr.intVarValue(aSolver);
+		}
+		search.setObjectivemanager(new IntObjectiveManager(obj, type, aSolver));//                solver.setRestart(true);
         if (gc.timeLimit > -1) {
             SearchMonitorFactory.limitTime(aSolver, gc.timeLimit);
         }
@@ -132,7 +133,7 @@ public class FGoal {
                         new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy, makeComplementarySearch(datas)));
 
-                System.out.println("% t:" + gc.seed);
+//                System.out.println("% t:" + gc.seed);
             }
         } else { // no strategy OR use free search
             if (gc.dec_vars) { // select same decision variables as declared in file?
@@ -206,16 +207,25 @@ public class FGoal {
         for (int i = 0; i < dvars.length; i++) {
             dvars[i] = (IntVar) ddvars[i];
         }
+		ObjectiveManager om = solver.getSearchLoop().getObjectivemanager();
         ACounter fr = gc.fastRestart ? new FailCounter(30) : null;
         switch (gc.lns) {
             case RLNS:
                 lns = LNSFactory.rlns(solver, dvars, 200, gc.seed, fr);
+				if(!om.isOptimization()){
+					lns = null;
+					solver.set(ISF.ActivityBased(dvars,0));
+				}
                 break;
             case RLNS_BB:
                 lns = LNSFactory.rlns(solver, ivars, 200, gc.seed, fr);
                 break;
             case PGLNS:
                 lns = LNSFactory.pglns(solver, dvars, 200, 100, 10, gc.seed, fr);
+				if(!om.isOptimization()){
+					lns = null;
+					solver.set(ISF.domOverWDeg_InDomainMin(dvars, 0));
+				}
                 break;
             case PGLNS_BB:
                 lns = LNSFactory.pglns(solver, ivars, 200, 100, 10, gc.seed, fr);
@@ -290,13 +300,53 @@ public class FGoal {
 
 
     private static AbstractStrategy makeComplementarySearch(Datas datas) {
-        IntVar[] ivars = datas.getSearchVars();
+//        final IntVar[] ivars = datas.getSearchVars();
+        final IntVar[] ivars = datas.getOutputVars();
         Arrays.sort(ivars, new Comparator<IntVar>() {
             @Override
             public int compare(IntVar o1, IntVar o2) {
                 return o1.getDomainSize() - o2.getDomainSize();
             }
         });
-        return ISF.inputOrder_InDomainMin(ivars);
+//        return new Once(new InputOrder(ivars), new InDomainMin());
+        return new AbstractStrategy<IntVar>(ivars) {
+            boolean created = false;
+            Decision d = new Decision<IntVar>() {
+
+                @Override
+                public void apply() throws ContradictionException {
+                    for (int i = 0; i < ivars.length; i++) {
+                        if (!ivars[i].instantiated()) {
+                            ivars[i].instantiateTo(ivars[i].getLB(), this);
+                            ivars[i].getSolver().propagate();
+                        }
+                    }
+                }
+
+                @Override
+                public Object getDecisionValue() {
+                    return null;
+                }
+
+                @Override
+                public void free() {
+                    created = false;
+                }
+            };
+
+            @Override
+            public void init() throws ContradictionException {
+            }
+
+            @Override
+            public Decision<IntVar> getDecision() {
+                if (!created) {
+                    created = true;
+                    d.once(true);
+                    return d;
+                }
+                return null;
+            }
+        };
     }
 }
