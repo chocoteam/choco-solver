@@ -253,12 +253,16 @@ public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraph
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("graph_var " + getName());
-        sb.append("\ninstantiated = " + instantiated() + "\n");
-        sb.append("\nenvelope graph \n");
-        sb.append(envelop.toString());
-        sb.append("\nkernel graph \n");
-        sb.append(kernel.toString());
-        return getName();
+		if(instantiated()){
+			sb.append("\nvalue: \n");
+			sb.append(envelop.toString());
+		}else{
+			sb.append("\nenvelope: \n");
+			sb.append(envelop.toString());
+			sb.append("\nkernel: \n");
+			sb.append(kernel.toString());
+		}
+        return sb.toString();
     }
 
     @Override

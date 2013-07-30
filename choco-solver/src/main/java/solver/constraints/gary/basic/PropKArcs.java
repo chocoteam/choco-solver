@@ -97,14 +97,16 @@ public class PropKArcs extends Propagator {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        gdm.freeze();
-        if ((mask & EventType.ENFORCEARC.mask) != 0) {
-            gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-        }
-        if ((mask & EventType.REMOVEARC.mask) != 0) {
-            gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-        }
-        gdm.unfreeze();
+		if(idxVarInProp==0){
+			gdm.freeze();
+			if ((mask & EventType.ENFORCEARC.mask) != 0) {
+				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+			}
+			if ((mask & EventType.REMOVEARC.mask) != 0) {
+				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+			}
+			gdm.unfreeze();
+		}
         filter(nbInKer.get(), nbInEnv.get());
     }
 
@@ -185,7 +187,7 @@ public class PropKArcs extends Propagator {
     private class RemArc implements PairProcedure {
         @Override
         public void execute(int i, int j) throws ContradictionException {
-            nbInEnv.add(1);
+            nbInEnv.add(-1);
         }
     }
 }
