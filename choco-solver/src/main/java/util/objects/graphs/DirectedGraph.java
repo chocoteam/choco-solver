@@ -116,7 +116,7 @@ public class DirectedGraph implements IGraph {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("nodes : \n" + nodes);
+        sb.append("nodes : \n" + nodes+"\n");
         sb.append("successors : \n");
         for (int i = nodes.getFirstElement(); i >= 0; i = nodes.getNextElement()) {
             sb.append(i + " -> {");
