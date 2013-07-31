@@ -63,7 +63,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset, boolean fast) {
-        super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, false);
         this.var = vars[0];
         this.index = vars[1];
         this.offset = offset;
@@ -78,7 +78,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         index.updateLowerBound(offset, aCause);
-        index.updateUpperBound(vars.length + offset - 2, aCause);
+        index.updateUpperBound(vars.length + offset - 3, aCause);
         int lb = index.getLB();
         int ub = index.getUB();
         int min = Integer.MAX_VALUE / 2;
