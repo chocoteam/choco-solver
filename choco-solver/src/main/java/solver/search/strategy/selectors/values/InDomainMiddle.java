@@ -31,39 +31,61 @@ import solver.search.strategy.selectors.InValueIterator;
 import solver.variables.IntVar;
 
 /**
- * Assigns the value in the variable's domain closest to the mean of its current bounds.
+ * Selects the value in the variable's domain closest to the mean of its current bounds.
  * <br/>
- * It computes the mean of the variable's domain. Then it checks if the mean is contained in the domain, otherwise
- * modify its value by adding a term of the infinite serie : 0 + 1 - 2  + 3 - 4 ... in order to find the closest
- * mean of the current domain's bounds.
+ * It computes the middle value of the domain. Then it checks if the mean is contained in the domain.
+ * If not, the closest value to the middle is chosen. It uses a policy to define whether the mean value should
+ * be floored or ceiled
  * <br/>
  *
- * @author Charles Prud'homme
+ * BEWARE: should not be used with assignment decisions over bounded variables (because the decision negation
+ * would result in no inference)
+ *
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 2 juil. 2010
  */
 public class InDomainMiddle implements InValueIterator {
+
+	// VARIABLES
+	public final static boolean FLOOR = true;
+	public final static boolean CEIL = !FLOOR;
+	protected final boolean roundingPolicy;
+
+	// CONSTRUCTORS
+	public InDomainMiddle(){
+		this(FLOOR);
+	}
+
+	/**Selects the middle value
+	 * @param roundingPolicy should be either FLOOR or CEIL
+	 */
+	public InDomainMiddle(boolean roundingPolicy){
+		this.roundingPolicy = roundingPolicy;
+	}
 
     /**
      * {@inheritDoc}
      */
     @Override
     public int selectValue(IntVar var) {
-        if (var.hasEnumeratedDomain()) {
-            int low = var.getLB();
-            int upp = var.getUB();
-            int mean = (low + upp) / 2;
-            if (!var.contains(mean)) {
-                int lb = var.previousValue(mean);
-                int ub = var.previousValue(mean);
-                if ((mean - lb) < (ub - mean)) {
-                    return lb;
-                } else {
-                    return ub;
-                }
+		int low = var.getLB();
+		int upp = var.getUB();
+		double mean = (double)(low + upp) / 2;
+		int value;
+		if(roundingPolicy==FLOOR){
+			value = (int) mean;
+		}else{
+			value = (int) Math.ceil(mean);
+		}
+		if (var.hasEnumeratedDomain()) {
+            if (!var.contains(value)) {
+				if(roundingPolicy==FLOOR){
+					value = var.previousValue(value);
+				}else{
+					value = var.nextValue(value);
+				}
             }
-            return mean;
-        } else {
-            return var.getLB();
         }
+		return value;
     }
 }
