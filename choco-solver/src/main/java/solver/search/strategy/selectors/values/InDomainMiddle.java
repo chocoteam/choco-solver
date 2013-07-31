@@ -79,10 +79,18 @@ public class InDomainMiddle implements InValueIterator {
 		}
 		if (var.hasEnumeratedDomain()) {
             if (!var.contains(value)) {
-				if(roundingPolicy==FLOOR){
-					value = var.previousValue(value);
-				}else{
-					value = var.nextValue(value);
+				double a = var.previousValue(value);
+				double b = var.nextValue(value);
+				if(mean-a < b-mean){
+					return (int) a;
+				}else if(mean-a > b-mean){
+					return (int) b;
+				}else{ //tie break
+					if(roundingPolicy==FLOOR){
+						return (int) a;
+					}else{
+						return (int) b;
+					}
 				}
             }
         }
