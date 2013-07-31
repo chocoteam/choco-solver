@@ -105,10 +105,10 @@ public class SatFactory {
         PropSat sat = solver.getMinisat().propagators[0];
         TIntList lits = new TIntArrayList(POSLITS.length + NEGLITS.length);
         for (int i = 0; i < POSLITS.length; i++) {
-            lits.add(SatSolver.negated(sat.Literal(POSLITS[i])));
+            lits.add(sat.Literal(POSLITS[i]));
         }
         for (int i = 0; i < NEGLITS.length; i++) {
-            lits.add(sat.Literal(POSLITS[i]));
+            lits.add(SatSolver.negated(sat.Literal(NEGLITS[i])));
         }
         sat.addClause(lits);
         return true;

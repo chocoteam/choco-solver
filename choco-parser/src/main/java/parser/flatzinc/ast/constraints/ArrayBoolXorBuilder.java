@@ -52,7 +52,7 @@ public class ArrayBoolXorBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
 
-        int[] values = new int[as.length / 2];
+        int[] values = new int[as.length % 2 == 0 ? as.length / 2 : (as.length + 1) / 2];
         for (int i = 0, j = 1; i < values.length; i++, j += 2) {
             values[i] = j;
         }

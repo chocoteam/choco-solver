@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.ICF;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 import java.util.List;
 
@@ -53,10 +52,12 @@ public class IntLinLeReifBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
-        int c = exps.get(2).intValue();
+        IntVar c = exps.get(2).intVarValue(solver);
         BoolVar r = exps.get(3).boolVarValue(solver);
-        Constraint cstr = ICF.scalar(bs, as, "<=", VariableFactory.fixed(c, bs[0].getSolver()));
-        cstr.reifyWith(r);
+        if (bs.length > 0) {
+            Constraint cstr = ICF.scalar(bs, as, "<=", c);
+            cstr.reifyWith(r);
+        }
         return new Constraint[0];
     }
 }
