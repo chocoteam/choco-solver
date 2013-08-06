@@ -305,6 +305,14 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      * but it can be overridden to provide better constraint negations
      */
     public Constraint makeOpposite() {
+		Variable[] vars = this.vars;
+		int i = 0;
+		while(vars == null || vars.length==0){
+			if(i==propagators.length){
+				throw new UnsupportedOperationException("Cannot reify constraint : No variables in this constraint");
+			}
+			vars = propagators[i++].getVars();
+		}
         return new DefaultOpposite(vars, solver);
     }
 }
