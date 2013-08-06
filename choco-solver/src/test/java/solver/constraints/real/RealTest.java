@@ -56,7 +56,7 @@ public class RealTest {
 
         Ibex ibex = new Ibex();
 
-        ibex.add_ctr(2, "{0}+{1}=3");
+        ibex.add_ctr(2, "{0}+{1}=3", Ibex.COMPO);
 
         double domains[] = {1.0, 10.0, 1.0, 10.0};
         System.out.println("Before contract:");
@@ -78,7 +78,7 @@ public class RealTest {
     @Test(groups = "1s")
     public void test2() {
         Ibex ibex = new Ibex();
-        ibex.add_ctr(2, "{0}^2+{1}^2<=1");
+        ibex.add_ctr(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
 
         double[] domains;
         double vv = Math.sqrt(2.) / 2.;
@@ -114,7 +114,7 @@ public class RealTest {
     @Test(groups = "1s")
     public void test3() {
         Ibex ibex = new Ibex();
-        ibex.add_ctr(2, "{0}^2+{1}^2<=1");
+        ibex.add_ctr(2, "{0}^2+{1}^2<=1",Ibex.COMPO);
 
         double[] domains;
 
