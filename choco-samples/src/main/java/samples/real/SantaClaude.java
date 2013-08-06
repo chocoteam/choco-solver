@@ -58,7 +58,6 @@ public class SantaClaude extends AbstractProblem {
     IntVar[] kid_price;
     IntVar total_cost;
     RealVar average;
-	private Ibex ibex;
 
 	@Override
     public void createSolver() {
@@ -87,7 +86,6 @@ public class SantaClaude extends AbstractProblem {
         solver.post(IntConstraintFactory.sum(kid_price, total_cost));
 
         RealConstraint ave_cons = new RealConstraint(solver);
-		ibex = ave_cons.ibex;
         StringBuilder function = new StringBuilder("(");
         for (int i = 0; i < n_kids; i++) {
             function.append("+{").append(i).append('}');
@@ -126,7 +124,7 @@ public class SantaClaude extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-		ibex.release();
+		solver.getIbex().release();
     }
 
     public static void main(String[] args) {

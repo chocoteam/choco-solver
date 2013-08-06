@@ -53,7 +53,7 @@ public class DefaultOpposite extends Constraint {
 	private class PropOpposite extends Propagator {
 
 		protected PropOpposite(Variable[] vars) {
-			super(vars, PropagatorPriority.LINEAR, true);
+			super(vars, PropagatorPriority.LINEAR, false);
 		}
 
 		@Override
