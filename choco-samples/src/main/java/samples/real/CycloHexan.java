@@ -49,7 +49,6 @@ public class CycloHexan extends AbstractProblem {
 
     RealVar[] vars;
     RealVar x, y, z;
-    Ibex ibex;
 
     @Override
     public void printDescription() {
@@ -78,7 +77,6 @@ public class CycloHexan extends AbstractProblem {
 
         vars = new RealVar[]{x, y, z};
         RealConstraint rcons = new RealConstraint(solver);
-        ibex = rcons.ibex;
         /*rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, Ibex.COMPO);
         rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, Ibex.COMPO);
         rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars);*/
@@ -111,7 +109,7 @@ public class CycloHexan extends AbstractProblem {
 			}
 		});
         solver.findAllSolutions();
-		ibex.release();
+		solver.getIbex().release();
     }
 
     @Override

@@ -51,7 +51,6 @@ public class HybridCycloHexan extends AbstractProblem {
 	RealVar[] vars;
 	RealVar x, y, z;
 	IntVar intx;
-	Ibex ibex;
 
 	@Override
 	public void printDescription() {
@@ -84,7 +83,6 @@ public class HybridCycloHexan extends AbstractProblem {
 
 		vars = new RealVar[]{x, y, z};
 		RealConstraint rcons = new RealConstraint(solver);
-		ibex = rcons.ibex;
 		rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
 				"{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
 				"{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
@@ -105,7 +103,7 @@ public class HybridCycloHexan extends AbstractProblem {
 
 	@Override
 	public void prettyOut() {
-		ibex.release();
+		solver.getIbex().release();
 	}
 
 	public static void main(String[] args) {

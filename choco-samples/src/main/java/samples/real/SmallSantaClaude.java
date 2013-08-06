@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import solver.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
-import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
 import solver.search.loop.monitors.IMonitorSolution;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -90,7 +89,6 @@ public class SmallSantaClaude {
 							 "(abs({0}-{3})+abs({1}-{3})+abs({2}-{3}))/3={4}",allRV);
         solver.post(ave_cons);
 
-		Ibex ibex = ave_cons.ibex;
 		// set search strategy (ABS)
 		solver.set(IntStrategyFactory.firstFail_InDomainMin(kid_gift));
 		// displays resolution statistics
@@ -114,6 +112,6 @@ public class SmallSantaClaude {
 		// find optimal solution (Santa Claus is stingy)
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,average_deviation);
 		// free IBEX structures from memory
-		ibex.release();
+		solver.getIbex().release();
     }
 }

@@ -59,7 +59,6 @@ public class Grocery extends AbstractProblem {
 
     IntVar[] itemCost;
     RealVar[] realitemCost;
-    private Ibex ibex;
 
     @Override
     public void createSolver() {
@@ -76,7 +75,6 @@ public class Grocery extends AbstractProblem {
 
         //		solver.post(ICF.sum(itemCost,VariableFactory.fixed(711,solver)));
         RealConstraint rcons = new RealConstraint(solver);
-        ibex = rcons.ibex;
         rcons.addFunction(
                 "{0} + {1} + {2} + {3} = 711",
                 Ibex.COMPO, realitemCost);
@@ -102,7 +100,7 @@ public class Grocery extends AbstractProblem {
     @Override
     public void solve() {
         solver.findSolution();
-        ibex.release();
+        solver.getIbex().release();
     }
 
     @Override
