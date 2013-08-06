@@ -117,11 +117,11 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
      *
      * @return an array of {@link Propagator}.
      */
-    public Propagator<V>[] getPropagators() {
+    public P[] getPropagators() {
         return propagators;
     }
 
-    public Propagator<V> getPropagator(int i) {
+    public P getPropagator(int i) {
         return propagators[i];
     }
 
