@@ -66,6 +66,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
 
     private BitSet related2cut; // a bitset indicating which decisions of the path are related to the cut
     private BitSet notFrozen;
+    private BitSet refuted;
     private BitSet unrelated;
     private boolean forceCft; // does the cut has already been explained?
     private boolean isTerminated; // if explanations do not contain decisions, then the optimality has been proven
@@ -94,6 +95,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         related2cut = new BitSet(16);
         notFrozen = new BitSet(16);
         unrelated = new BitSet(16);
+        refuted = new BitSet(16);
         // TEMPORARY DATA STRUCTURES
         tmpDeductions = new ArrayList<Deduction>(16);
         tmpValueDeductions = new HashSet<Deduction>(16);
@@ -127,14 +129,23 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             notFrozen.clear(idx);
         }
         assert mSolver.getSearchLoop().decision == RootDecision.ROOT;
-        // then build the fake decision path
+        // add the first refuted decisions
+        int first = notFrozen.nextSetBit(0);
+        for (int i = (first>-1?refuted.nextSetBit(first):first); i > -1; i = refuted.nextSetBit(i + 1)) {
+            notFrozen.clear(i);
+        }
+
+        // add unrelated
         notFrozen.or(unrelated);
+
+        // then build the fake decision path
         last = null;
 //        LOGGER.info("relax cut {}", notFrozen.cardinality());
         for (int id = notFrozen.nextSetBit(0); id >= 0 && id < path.size(); id = notFrozen.nextSetBit(id + 1)) {
 //            last = ExplanationToolbox.mimic(path.get(id)); // required because some unrelated decisions can be refuted
             if (path.get(id).hasNext()) {
                 last = path.get(id).duplicate();
+                if (refuted.get(id)) last.buildNext();
                 ExplanationToolbox.imposeDecisionPath(mSolver, last);
             }
         }
@@ -143,8 +154,8 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
     @Override
     public void restrictLess() {
         if (nbCall > limit) {
-            increaseLimit();
             nbFixedVariables = random.nextDouble() * related2cut.cardinality();
+            increaseLimit();
         }
         last = null;
     }
@@ -195,6 +206,12 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
             dec = dec.getPrevious();
         }
         Collections.reverse(path);
+        int size = path.size();
+        for (int i = 0, mid = size >> 1, j = size - 1; i < mid; i++, j--) {
+            boolean bi = refuted.get(i);
+            refuted.set(i, refuted.get(j));
+            refuted.set(j, bi);
+        }
     }
 
 
@@ -204,9 +221,11 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
      * @param dec a decision of the current decision path
      */
     private void addToPath(Decision dec) {
-        if (dec.hasNext()) {
-            Decision clone = dec.duplicate();
-            path.add(clone);
+        Decision clone = dec.duplicate();
+        path.add(clone);
+        int pos = path.size() - 1;
+        if (!dec.hasNext()) {
+            refuted.set(pos);
         }
         /*boolean forceNext = !dec.hasNext();
         if (forceNext) {
@@ -237,6 +256,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
                 d = path.get(i);
                 d.setPrevious(previous);
                 d.buildNext();
+                if (refuted.get(i)) d.buildNext();
                 d.apply();
                 mSolver.propagate();
                 previous = d;
@@ -290,6 +310,7 @@ public class ExplainingCut extends ANeighbor implements IMonitorUpBranch {
         mSolver.getEnvironment().worldPop();
         mSolver.getEngine().flush();
         unrelated.andNot(related2cut);
+        unrelated.andNot(refuted);
     }
 
 }

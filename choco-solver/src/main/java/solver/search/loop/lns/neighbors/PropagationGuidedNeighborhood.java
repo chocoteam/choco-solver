@@ -113,7 +113,7 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
 
             // 2. fix it to its solution value
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                vars[id].instantiateTo(bestSolution[id], cause);
+                impose(id, cause);
                 mSolver.propagate();
                 fragment.clear(id);
 
@@ -144,6 +144,11 @@ public class PropagationGuidedNeighborhood extends ANeighbor implements IMonitor
             }
         }
     }
+
+    protected void impose(int id, ICause cause) throws ContradictionException {
+        vars[id].instantiateTo(bestSolution[id], cause);
+    }
+
 
     protected int selectVariable() {
         int id;

@@ -236,6 +236,12 @@ public class FGoal {
             case ELNS_BB:
                 lns = LNSFactory.elns(solver, ivars, 200, gc.seed, gc.fastRestart ? new FailCounter(30) : null, fr);
                 break;
+            case PGELNS_BB:
+                lns = LNSFactory.pgelns(solver, ivars, 200, gc.seed, 200, 100, gc.fastRestart ? new FailCounter(30) : null, fr);
+                break;
+            case APGELNS_BB:
+                lns = LNSFactory.apgelns(solver, ivars, 200, gc.seed, 200, 100, gc.fastRestart ? new FailCounter(30) : null, fr);
+                break;
         }
         if (lns != null) {
             solver.getSearchLoop().plugSearchMonitor(lns);

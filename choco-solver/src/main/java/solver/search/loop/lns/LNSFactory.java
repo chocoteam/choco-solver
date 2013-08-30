@@ -29,8 +29,7 @@ package solver.search.loop.lns;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.explanations.LazyExplanationEngine;
-import solver.explanations.strategies.ExplainingCut;
-import solver.explanations.strategies.ExplainingObjective;
+import solver.explanations.strategies.*;
 import solver.search.limits.ACounter;
 import solver.search.loop.lns.neighbors.*;
 import solver.variables.IntVar;
@@ -72,7 +71,7 @@ public class LNSFactory {
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a random neighborhood
+     * @return a propagation-guided neighborhood
      */
     public static INeighbor pg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new PropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
@@ -89,7 +88,7 @@ public class LNSFactory {
      * @param listSize  size of the list
      * @param seed      a seed for the random selection
      * @param frcounter a fast restart counter (can be null)
-     * @return a random neighborhood
+     * @return a reverse propagation-guided neighborhood
      */
     public static INeighbor rpg(Solver solver, IntVar[] vars, int fgmtSize, int listSize, long seed, ACounter frcounter) {
         INeighbor neighbor = new ReversePropagationGuidedNeighborhood(solver, vars, seed, fgmtSize, listSize);
@@ -156,9 +155,78 @@ public class LNSFactory {
         neighbor1.fastRestart(fr4exp);
         INeighbor neighbor2 = new ExplainingCut(solver, level, seed);
         neighbor2.fastRestart(fr4exp);
-        INeighbor neighbor3 = random(solver, vars, level, seed, fr4rnd);
+        INeighbor neighbor3 = new RandomNeighborhood4Explanation(solver, vars, level, seed);
+        neighbor3.fastRestart(fr4rnd);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
+        return new LargeNeighborhoodSearch(solver, neighbor, true);
+    }
+
+    /**
+     * Create a combination of PGLNS and ELNS (an Explanation based LNS)
+     *
+     * @param solver   the solver
+     * @param vars     the pool of variables to choose from
+     * @param level    the number of tries for each size of fragment
+     * @param seed     a seed for the random selection
+     * @param fgmtSize fragment size (evaluated against log value)
+     * @param listSize size of the list
+     * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
+     * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
+     * @return an Explanation based LNS
+     */
+    public static LargeNeighborhoodSearch pgelns(Solver solver, IntVar[] vars, int level, long seed,
+                                                 int fgmtSize, int listSize,
+                                                 ACounter fr4exp, ACounter fr4rnd) {
+        if (!(solver.getExplainer() instanceof LazyExplanationEngine)) {
+            ExplanationFactory.LAZY.plugin(solver, true);
+        }
+        INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
+        neighbor1.fastRestart(fr4exp);
+        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
+        neighbor2.fastRestart(fr4rnd);
+        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
+        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
+        neighbor4.fastRestart(fr4exp);
+        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
+        neighbor5.fastRestart(fr4rnd);
+
+        INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
+        return new LargeNeighborhoodSearch(solver, neighbor, true);
+    }
+
+    /**
+     * Create a combination of PGLNS and ELNS (an Explanation based LNS), with adaptive neighborhood selection
+     *
+     * @param solver   the solver
+     * @param vars     the pool of variables to choose from
+     * @param level    the number of tries for each size of fragment
+     * @param seed     a seed for the random selection
+     * @param fgmtSize fragment size (evaluated against log value)
+     * @param listSize size of the list
+     * @param fr4exp   a fast restart counter (can be null) for explained neighborhoods
+     * @param fr4rnd   a fast restart counter (can be null) for random neighborhoods
+     * @return an Explanation based LNS
+     */
+    public static LargeNeighborhoodSearch apgelns(Solver solver, IntVar[] vars, int level, long seed,
+                                                  int fgmtSize, int listSize,
+                                                  ACounter fr4exp, ACounter fr4rnd) {
+        if (!(solver.getExplainer() instanceof LazyExplanationEngine)) {
+            ExplanationFactory.LAZY.plugin(solver, true);
+        }
+        INeighbor neighbor1 = new ExplainingObjective(solver, level, seed);
+        neighbor1.fastRestart(fr4exp);
+        INeighbor neighbor2 = new PGN4Explanation(solver, vars, seed, fgmtSize, listSize);
+        neighbor2.fastRestart(fr4rnd);
+        INeighbor neighbor3 = new RPGN4Explanation(solver, vars, seed, fgmtSize, listSize);
+        neighbor3.fastRestart(fr4rnd);
+        INeighbor neighbor4 = new ExplainingCut(solver, level, seed);
+        neighbor4.fastRestart(fr4exp);
+        INeighbor neighbor5 = new PGN4Explanation(solver, vars, seed, fgmtSize, 0);
+        neighbor5.fastRestart(fr4rnd);
+
+        INeighbor neighbor = new AdaptiveNeighborhood(seed, neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
         return new LargeNeighborhoodSearch(solver, neighbor, true);
     }
 
