@@ -28,8 +28,8 @@ package solver.variables;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
-import solver.constraints.nary.sum.Sum;
 import solver.constraints.ternary.Max;
 import solver.exception.ContradictionException;
 import util.iterators.DisposableRangeIterator;
@@ -440,12 +440,12 @@ public class IteratorTest {
     public void testAbs1() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-		try {
-			solver.propagate();
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-		}
-		DisposableValueIterator vit = var.getValueIterator(true);
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.next());
         Assert.assertTrue(vit.hasNext());
@@ -459,11 +459,11 @@ public class IteratorTest {
     public void testAbs2() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-		try {
-			solver.propagate();
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-		}
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.previous());
@@ -478,11 +478,11 @@ public class IteratorTest {
     public void testAbs3() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-		try {
-			solver.propagate();
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-		}
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(1, vit.min());
@@ -499,11 +499,11 @@ public class IteratorTest {
     public void testAbs4() {
         Solver solver = new Solver();
         IntVar var = VariableFactory.abs(VariableFactory.enumerated("b", new int[]{-2, 1, 4}, solver));
-		try {
-			solver.propagate();
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-		}
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(4, vit.min());
@@ -566,5 +566,33 @@ public class IteratorTest {
         Assert.assertEquals(5, vit.max());
         vit.previous();
         Assert.assertFalse(vit.hasPrevious());
+    }
+
+    @Test
+    public void JLiangWaterlooTest() throws ContradictionException {
+        Solver s = new Solver();
+        IntVar ivar = VF.enumerated("ivar", new int[]{1, 2, 3, 888, 1000, 2000}, s);
+        ivar.removeValue(1000, Cause.Null);
+
+        DisposableRangeIterator iter = ivar.getRangeIterator(true);
+        Assert.assertEquals(iter.min(), 1);
+        Assert.assertEquals(iter.max(), 3);
+        iter.next();
+        Assert.assertEquals(iter.min(), 888);
+        Assert.assertEquals(iter.max(), 888);
+        iter.next();
+        Assert.assertEquals(iter.min(), 2000);
+        Assert.assertEquals(iter.max(), 2000);
+        iter.dispose();
+
+        iter = ivar.getRangeIterator(false);
+        Assert.assertEquals(iter.min(), 2000);
+        Assert.assertEquals(iter.max(), 2000);
+        iter.previous();
+        Assert.assertEquals(iter.min(), 888);
+        Assert.assertEquals(iter.max(), 888);
+        iter.previous();
+        Assert.assertEquals(iter.min(), 1);
+        Assert.assertEquals(iter.max(), 3);
     }
 }

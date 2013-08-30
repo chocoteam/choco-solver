@@ -76,7 +76,7 @@ public class PGN4Explanation extends PropagationGuidedNeighborhood implements IM
         super.fixSomeVariables(cause);
         mSolver.getEnvironment().worldPop();
         while (!queue.isEmpty()) {
-            int id = queue.pop();
+            int id = queue.pollFirst();
             FastDecision d = (FastDecision) duplicator.duplicate();
             d.set(vars[id], bestSolution[id], DecisionOperator.int_eq);
             last = d;
@@ -87,7 +87,7 @@ public class PGN4Explanation extends PropagationGuidedNeighborhood implements IM
     @Override
     protected void impose(int id, ICause cause) throws ContradictionException {
         super.impose(id, cause);
-        queue.add(id);
+        queue.addLast(id);
     }
 
     @Override
