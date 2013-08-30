@@ -32,11 +32,9 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ICF;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VF;
 
 import java.util.List;
 
@@ -53,11 +51,12 @@ public class IntLinNeReifBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         int[] as = exps.get(0).toIntArray();
         IntVar[] bs = exps.get(1).toIntVarArray(solver);
-        int c = exps.get(2).intValue();
+        IntVar c = exps.get(2).intVarValue(solver);
         BoolVar r = exps.get(3).boolVarValue(solver);
 
-        Constraint cstr = IntConstraintFactory.scalar(bs, as, "!=", VF.fixed(c, solver));
-        cstr.reifyWith(r);
+        if (bs.length > 0) {
+            IntConstraintFactory.scalar(bs, as, "!=", c).reifyWith(r);
+        }
         return new Constraint[0];
     }
 }

@@ -11,3 +11,5 @@ parser/src/lib/*
 
 choco-parser/src/main/resources/mysql.properties
 choco-solver/src/test/resources/logback-test
+
+choco-parser/src/chocofzn/fzn_choco.sh

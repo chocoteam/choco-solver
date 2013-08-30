@@ -32,7 +32,6 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ICF;
 import solver.constraints.SatFactory;
 import solver.variables.BoolVar;
 
@@ -50,12 +49,10 @@ public class ArrayBoolAndBuilder implements IBuilder {
     public Constraint[] build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations, Datas datas) {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar r = exps.get(1).boolVarValue(solver);
-        if (as.length == 0) {
-            return new Constraint[]{ICF.arithm(r, "=", 1)};
-        } else {
-//            return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
+        if (as.length > 0) {
+//              return new Constraint[]{IntConstraintFactory.clauses(LogOp.reified(r, LogOp.and(as)), solver)};
             SatFactory.addBoolAndArrayEqVar(as, r);
-            return new Constraint[0];
         }
+        return new Constraint[0];
     }
 }

@@ -240,7 +240,7 @@ public final class FVariable {
             solver.post(IntConstraintFactory.member(iv, lb, ub));
         } else {
             int size = type.getUpp() - type.getLow() + 1;
-            if (size < 128) {
+            if (size < 256) {
                 iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
             } else {
                 iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);

@@ -35,6 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.PropFalse;
 import solver.constraints.nary.cnf.PropTrue;
 import solver.constraints.nary.cnf.SatConstraint;
+import solver.constraints.real.Ibex;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
@@ -129,8 +130,9 @@ public class Solver implements Serializable {
 
 
     protected SatConstraint minisat;
+	private Ibex ibex;
 
-    /**
+	/**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
@@ -775,4 +777,14 @@ public class Solver implements Serializable {
     public int nextId() {
         return id++;
     }
+
+	/**
+	 * Get the ibex reference
+	 * Creates one if none
+	 * @return the ibex reference
+	 */
+	public Ibex getIbex() {
+		if(ibex == null) ibex = new Ibex();
+		return ibex;
+	}
 }

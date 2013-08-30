@@ -34,18 +34,26 @@ import solver.variables.RealVar;
 import util.ESat;
 
 /**
- * A propagator for real variable.
+ * A propagator for real variables.
  * <br/>
  *
- * @author Charles Prud'homme
+ * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 18/07/12
  */
 public class RealPropagator extends Propagator<RealVar> {
+
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     final Ibex ibex;
     final String functions;
     final int option;
     final int contractorIdx;
+
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
     /**
      * Create a propagator on real variables, propagated using IBEX.
@@ -62,19 +70,21 @@ public class RealPropagator extends Propagator<RealVar> {
      * </pre>
      * </blockquote>
      *
-     * @param ibex      continuous solver
      * @param functions list of functions, separated by a semi-colon
      * @param vars      array of variables
      * @param options   list of options to give to IBEX
      */
-    public RealPropagator(Ibex ibex, int cIdx, String functions, RealVar[] vars, int options) {
-        super(vars, PropagatorPriority.LINEAR, true);
-        this.contractorIdx = cIdx;
-        this.ibex = ibex;
+    public RealPropagator(String functions, RealVar[] vars, int options) {
+        super(vars, PropagatorPriority.LINEAR, false);
+		this.ibex = solver.getIbex();
         this.functions = functions;
         this.option = options;
-        this.ibex.add_ctr(vars.length, functions, option);
+        this.contractorIdx = ibex.add_contractor(vars.length, functions, option);
     }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int vIdx) {
@@ -106,15 +116,32 @@ public class RealPropagator extends Propagator<RealVar> {
             case Ibex.NOT_SIGNIFICANT:
             default:
         }
-    }
+	}
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(EventType.FULL_PROPAGATION);
+        propagate(0);
     }
 
     @Override
     public ESat isEntailed() {
-        return ESat.TRUE; //we assume IBEX correctly contracts domains
+		double domains[] = new double[2 * vars.length];
+		for (int i = 0; i < vars.length; i++) {
+			domains[2 * i] = vars[i].getLB();
+			domains[2 * i + 1] = vars[i].getUB();
+		}
+		int result = ibex.contract(contractorIdx, domains);
+		if(result==Ibex.FAIL){
+			return ESat.FALSE;
+		}
+		if(result==Ibex.ENTAILED || isCompletelyInstantiated()){
+			for (int i = 0; i < vars.length; i++) {
+				if(vars[i].getLB()<domains[2*i] || vars[i].getUB()>domains[2*i+1]){
+					return ESat.UNDEFINED;
+				}
+			}
+			return ESat.TRUE;
+		}
+        return ESat.UNDEFINED;
     }
 }

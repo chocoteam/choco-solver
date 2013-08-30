@@ -40,8 +40,6 @@ import util.PoolManager;
  */
 public class FastDecisionReal extends Decision<RealVar> {
 
-    RealVar var;
-
     double value;
 
     final PoolManager<FastDecisionReal> poolManager;

@@ -107,11 +107,11 @@ public class IntSearch {
                 break;
             case indomain_split:
             case indomain_interval:
-                valSelector = new InDomainMiddle();
+                valSelector = new InDomainMiddle(InDomainMiddle.FLOOR);
                 assgnt = DecisionOperator.int_split;
                 break;
             case indomain_reverse_split:
-                valSelector = new InDomainMiddle();
+                valSelector = new InDomainMiddle(InDomainMiddle.CEIL);
                 assgnt = DecisionOperator.int_reverse_split;
                 break;
             default:

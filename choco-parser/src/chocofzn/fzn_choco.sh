@@ -5,7 +5,7 @@ FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
 JAVA_ARGS="-server"
-
+CHOCO_JAR=/Users/jfages07/Documents/code/Choco3/choco-parser/target/choco-parser-13.04-SNAPSHOT-jar-with-dependencies.jar
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -30,17 +30,21 @@ OPTIONS:
 
     -tl <n>
         Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
-		
+
+    -jar <j>
+        Override the jar file.  (The default is JAR.)
+
+
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
 		
 EXAMPLES:
 	
 	Basic command to solve a fzn model with choco:
-	$> fzn_choco.sh  ./alpha.fzn
+	$> fzn_choco.sh ./choco.jar ./alpha.fzn
 
 	Additionnal arguments:
-	$> fzn_choco.sh --jargs \"-Xmx128m\" --time-limit 100 ./alpha.fzn
+	$> fzn_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.fzn
 
 "
 
@@ -67,22 +71,17 @@ do
             shift
         ;;
 
-        --time-limit)
+        -tl)
             TIME_LIMIT="$2"
             shift
         ;;
 
-        -e|--engine)
-            ENGINE="$2"
+        -jar)
+            CHOCO_JAR="$2"
             shift
         ;;
 
-        --csv)
-            CSV="$2"
-            shift
-        ;;
-
-	--jargs)
+    	--jargs)
             JAVA_ARGS="$2"
             shift
         ;;
@@ -101,6 +100,7 @@ do
     shift
 done
 
+#CHOCO_JAR=$1
 FILE=$1
 
 
@@ -114,7 +114,6 @@ fi
 
 if test "$STOP_AT_FIRST" = "no"
 then
-    echo "%% STOP_AT_FIRST"
     ARGS=$ARGS" -a"
 fi
 
@@ -124,4 +123,4 @@ then
     ARGS=$ARGS" -i"
 fi
 
-java ${JAVA_ARGS} -cp .:./choco.jar parser.flatzinc.ChocoFZN ${ARGS}
+java ${JAVA_ARGS} -cp .:${CHOCO_JAR} parser.flatzinc.ChocoFZN ${ARGS}
