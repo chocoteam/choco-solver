@@ -243,9 +243,6 @@ public class FGoal {
                 lns = LNSFactory.apgelns(solver, ivars, 200, gc.seed, 200, 100, gc.fastRestart ? new FailCounter(30) : null, fr);
                 break;
         }
-        if (lns != null) {
-            solver.getSearchLoop().plugSearchMonitor(lns);
-        }
     }
 
 

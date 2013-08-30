@@ -110,7 +110,9 @@ public class LNSFactory {
      */
     public static LargeNeighborhoodSearch rlns(Solver solver, IntVar[] vars, int level, long seed, ACounter frcounter) {
         INeighbor neighbor = random(solver, vars, level, seed, frcounter);
-        return new LargeNeighborhoodSearch(solver, neighbor, true);
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
+        return lns;
     }
 
     /**
@@ -132,7 +134,9 @@ public class LNSFactory {
 //                random(solver, vars, level, seed, frcounter)
                 pg(solver, vars, fgmtSize, 0, seed, frcounter) // <= state of the art configuration
         );
-        return new LargeNeighborhoodSearch(solver, neighbor, true);
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
+        return lns;
     }
 
     /**
@@ -159,7 +163,9 @@ public class LNSFactory {
         neighbor3.fastRestart(fr4rnd);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3);
-        return new LargeNeighborhoodSearch(solver, neighbor, true);
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
+        return lns;
     }
 
     /**
@@ -193,7 +199,9 @@ public class LNSFactory {
         neighbor5.fastRestart(fr4rnd);
 
         INeighbor neighbor = new SequenceNeighborhood(neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
-        return new LargeNeighborhoodSearch(solver, neighbor, true);
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
+        return lns;
     }
 
     /**
@@ -227,7 +235,9 @@ public class LNSFactory {
         neighbor5.fastRestart(fr4rnd);
 
         INeighbor neighbor = new AdaptiveNeighborhood(seed, neighbor1, neighbor2, neighbor3, neighbor4, neighbor5);
-        return new LargeNeighborhoodSearch(solver, neighbor, true);
+        LargeNeighborhoodSearch lns = new LargeNeighborhoodSearch(solver, neighbor, true);
+        solver.getSearchLoop().plugSearchMonitor(lns);
+        return lns;
     }
 
 
