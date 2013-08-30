@@ -50,9 +50,8 @@ import solver.search.measure.MeasuresRecorder;
 import solver.search.solution.LastSolutionRecorder;
 import solver.search.solution.Solution;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.RealVar;
-import solver.variables.Variable;
+import solver.variables.*;
+import solver.variables.graph.GraphVar;
 import solver.variables.view.BoolConstantView;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
@@ -82,28 +81,40 @@ public class Solver implements Serializable {
 
     private ExplanationEngine explainer;
 
-    /** Variables of the solver */
+    /**
+     * Variables of the solver
+     */
     Variable[] vars;
     int vIdx;
 
-    /** Constraints of the solver */
+    /**
+     * Constraints of the solver
+     */
     Constraint[] cstrs;
     int cIdx;
 
     public TIntObjectHashMap<ConstantView> cachedConstants;
 
-    /** Environment, based of the search tree (trailing or copying) */
+    /**
+     * Environment, based of the search tree (trailing or copying)
+     */
     final IEnvironment environment;
 
-    /** Search loop of the solver */
+    /**
+     * Search loop of the solver
+     */
     protected AbstractSearchLoop search;
 
     protected IPropagationEngine engine;
 
-    /** Solver's measures */
+    /**
+     * Solver's measures
+     */
     protected final IMeasures measures;
 
-    /** Solver name */
+    /**
+     * Solver name
+     */
     protected String name;
 
     /**
@@ -130,9 +141,9 @@ public class Solver implements Serializable {
 
 
     protected SatConstraint minisat;
-	private Ibex ibex;
+    private Ibex ibex;
 
-	/**
+    /**
      * Create a solver object embedding a <code>environment</code>,  named <code>name</code> and with the specific set of
      * properties <code>solverProperties</code>.
      *
@@ -237,6 +248,91 @@ public class Solver implements Serializable {
      */
     public Variable getVar(int i) {
         return vars[i];
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the IntVar only (including BoolVar).
+     * It also contains FIXED variables and VIEWS, if any.
+     *
+     * @return array of IntVars of <code>this</code>
+     */
+    public IntVar[] retrieveIntVars() {
+        IntVar[] ivars = new IntVar[vIdx];
+        int k = 0;
+        for (int i = 0; i < vIdx; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.INT) != 0) {
+                ivars[k++] = (IntVar) vars[i];
+            }
+        }
+        return Arrays.copyOf(ivars, k);
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the BoolVar only.
+     * It also contains FIXED variables and VIEWS, if any.
+     *
+     * @return array of BoolVars of <code>this</code>
+     */
+    public BoolVar[] retrieveBoolVars() {
+        BoolVar[] bvars = new BoolVar[vIdx];
+        int k = 0;
+        for (int i = 0; i < vIdx; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.BOOL) != 0) {
+                bvars[k++] = (BoolVar) vars[i];
+            }
+        }
+        return Arrays.copyOf(bvars, k);
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the SetVar only.
+     * It also contains FIXED variables and VIEWS, if any.
+     *
+     * @return array of SetVars of <code>this</code>
+     */
+    public SetVar[] retrieveSetVars() {
+        SetVar[] bvars = new SetVar[vIdx];
+        int k = 0;
+        for (int i = 0; i < vIdx; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.SET) != 0) {
+                bvars[k++] = (SetVar) vars[i];
+            }
+        }
+        return Arrays.copyOf(bvars, k);
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the RealVar only.
+     * It also contains FIXED variables and VIEWS, if any.
+     *
+     * @return array of RealVars of <code>this</code>
+     */
+    public RealVar[] retrieveRealVars() {
+        RealVar[] bvars = new RealVar[vIdx];
+        int k = 0;
+        for (int i = 0; i < vIdx; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.REAL) != 0) {
+                bvars[k++] = (RealVar) vars[i];
+            }
+        }
+        return Arrays.copyOf(bvars, k);
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the GraphVar only.
+     * It also contains FIXED variables and VIEWS, if any.
+     *
+     * @return array of SetVars of <code>this</code>
+     */
+    public GraphVar[] retrieveGraphVars() {
+        GraphVar[] bvars = new GraphVar[vIdx];
+        int k = 0;
+        for (int i = 0; i < vIdx; i++) {
+            if ((vars[i].getTypeAndKind() & Variable.GRAPH) != 0) {
+                bvars[k++] = (GraphVar) vars[i];
+            }
+        }
+        return Arrays.copyOf(bvars, k);
     }
 
     /**
@@ -435,6 +531,7 @@ public class Solver implements Serializable {
      * Return a constraint embedding a minisat solver.
      * It is highly recommanded that there is only once instance of this constraint in a solver.
      * So a call to this method will create and post the constraint if it does not exist.
+     *
      * @return the minisat constraint
      */
     public SatConstraint getMinisat() {
@@ -778,13 +875,14 @@ public class Solver implements Serializable {
         return id++;
     }
 
-	/**
-	 * Get the ibex reference
-	 * Creates one if none
-	 * @return the ibex reference
-	 */
-	public Ibex getIbex() {
-		if(ibex == null) ibex = new Ibex();
-		return ibex;
-	}
+    /**
+     * Get the ibex reference
+     * Creates one if none
+     *
+     * @return the ibex reference
+     */
+    public Ibex getIbex() {
+        if (ibex == null) ibex = new Ibex();
+        return ibex;
+    }
 }
