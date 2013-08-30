@@ -168,14 +168,17 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * </ul>
      */
     public void reset() {
-        this.nextState = INIT;
-        env.worldPopUntil(rootWorldIndex);
-        this.objectivemanager = null;
-        timeStamp++;
-        rootWorldIndex = -1;
-        searchWorldIndex = -1;
-        solver.set(NoPropagationEngine.SINGLETON);
-        this.measures.reset();
+        // if a resolution has already been done
+        if(rootWorldIndex>-1){
+            this.nextState = INIT;
+            env.worldPopUntil(rootWorldIndex);
+            this.objectivemanager = null;
+            timeStamp++;
+            rootWorldIndex = -1;
+            searchWorldIndex = -1;
+            solver.set(NoPropagationEngine.SINGLETON);
+            this.measures.reset();
+        }
     }
 
     @SuppressWarnings({"unchecked"})
