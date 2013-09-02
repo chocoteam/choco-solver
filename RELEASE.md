@@ -13,5 +13,7 @@ This document reports the release process, the version number 3.1.0 should be ad
 	$ sh release.sh request	
 	$ sh release.sh perform
 
+4. Publish choco-repo/ intranet to internet
+
 ===================
 The Choco3 dev team.
