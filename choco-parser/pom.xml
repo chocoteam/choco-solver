@@ -29,7 +29,7 @@
     <parent>
         <groupId>choco</groupId>
         <artifactId>choco</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>choco-parser</artifactId>
